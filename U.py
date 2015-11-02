@@ -5,7 +5,7 @@ import  os
 #m(0, 'rtegwf', 'hi', 0)
 #print 
 
-def msgbox(s,st='title'):
+def msgbox(s='pause',st='title'):
 	u.MessageBoxA(0, s, st, 0)
 	
 def exit():
