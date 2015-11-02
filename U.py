@@ -1,15 +1,22 @@
 from ctypes import windll#.user32.MessageBoxA as m
 u=windll.user32
 msgbox=windll.user32.MessageBoxA
-import  os
+import  os,sys
 #m(0, 'rtegwf', 'hi', 0)
 #print 
 
 def msgbox(s='pause',st='title'):
 	u.MessageBoxA(0, s, st, 0)
 	
-def exit():
-	os._exit(2357)
+def p(*a):
+	print a
+	sys.stdout.flush()
+
+def x():
+	exit(235)
+	
+def exit(i=2357):
+	os._exit(i)
 
 
 def test(a='mmmmmmmmm'):
