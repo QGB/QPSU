@@ -5,13 +5,22 @@ import  os,sys
 #m(0, 'rtegwf', 'hi', 0)
 #print 
 
-def msgbox(s='pause',st='title'):
-	u.MessageBoxA(0, s, st, 0)
-	
-def p(*a):
+def msgbox(s='',st='title',*a):
+	if(a!=()):s=str(s)+ ','+str(a)[1:-2]
+	u.MessageBoxA(0, str(s), str(st), 0)
+
+def pln(*a):
 	print a
 	sys.stdout.flush()
 
+	
+def p(*a):
+	if(len(a)<1):return
+	for i in a:
+		sys.stdout.write(str(i)+' ')
+	sys.stdout.flush()
+
+	
 def x():
 	exit(235)
 	
