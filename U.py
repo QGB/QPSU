@@ -33,10 +33,10 @@ def __single(port,callback,reply):
 			 continue
 	connection.close()   
 
-def isingle(port):
+def isingle(port,ip='127.0.0.1'):
 	try:
 		sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)    
-		sock.connect(('localhost', port))
+		sock.connect((ip, port))
 		sock.send(SG_ASK)    
 		sock.close()
 		return False
@@ -68,7 +68,8 @@ def p(*a):
 	sys.stdout.flush()
 
 	
-def x():
+def x(msg=None):
+	if(msg!=None):print msg
 	exit(235)
 	
 def exit(i=2357):
