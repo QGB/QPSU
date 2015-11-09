@@ -10,6 +10,7 @@ from threading import *
 '''
 from qgb import U,T
 '''
+BDEBUG=True
 
 SG_EXIT='exit'
 SG_ASK='ask'
@@ -27,9 +28,9 @@ def __single(port,callback,reply):
 			while buf!=None:  
 				buf = connection.recv(4096) 
 				if(reply!=None):connection.send(reply+buf)
-				callback(buf)
+				Thread(target=callback,args=[buf]).start()
 		except Exception as e:  #如果建立连接后，该连接在设定的时间内无数据发来，则time out  
-			 print e  
+			 if(BDEBUG):print e  
 			 continue
 	connection.close()   
 
