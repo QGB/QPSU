@@ -26,10 +26,11 @@ def resetOut():
 	if(__stdout != None and __stdout != sys.stdout):
 		sys.stdout.close()
 		# sys.stdout=__stdout
-txthtml=('<textarea style="width:100%; height:100%;">','</textarea>')	
+
 
 def browser(url):
 	os.system('''start "" '''+str(url))
+txthtml=('<textarea style="width:100%; height:100%;">','</textarea>')		
 def shtml(file,txt,browser=True):
 	'''
 	U.setOut('BeautifulSoup.html')
