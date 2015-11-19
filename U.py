@@ -3,7 +3,7 @@ from ctypes import windll, Structure, c_ulong, byref
 u=windll.user32
 msgbox=windll.user32.MessageBoxA
 import  os,sys,socket
-
+from pprint import pprint
 from threading import *
 
 #m(0, 'rtegwf', 'hi', 0)
@@ -12,20 +12,34 @@ from threading import *
 from qgb import U,T
 # '''
 # if __calltimes=0
-BDEBUG=True
-__stdout=None
+
+# pprint(globals())
+
+def eval(s):
+	exec(s)
+
+def calltimes(): 
+	ff=calltimes
+	if ff.__dict__.has_key("count"): 
+		ff.count += 1 
+	else: 
+		ff.count = 0 #Do Not Modify
+	# print ff.count 
+	return ff.count 
 
 
+if(calltimes()<1):BDEBUG=True;__stdout=None
 
 def setOut(afileName):
+	global __stdout
 	__stdout,sys.stdout=sys.stdout,open(afileName,'w+')
 
 
 def resetOut():
-	# msgbox(__stdout)
+	global __stdout
 	if(__stdout != None and __stdout != sys.stdout):
 		sys.stdout.close()
-		# sys.stdout=__stdout
+		sys.stdout=__stdout
 
 
 def browser(url):
@@ -152,5 +166,3 @@ def x(msg=None):
 	
 def exit(i=2357):
 	os._exit(i)
-
-
