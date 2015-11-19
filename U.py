@@ -16,7 +16,11 @@ def setOut(afileName):
 	__stdout,sys.stdout=sys.stdout,open(afileName,'w+')
 
 def resetOut():
-	if(__stdout != None):sys.stdout=__stdout
+	if(__stdout != None and __stdout != sys.stdout):
+		sys.stdout.close()
+		sys.stdout=__stdout
+	
+	
 	
 def getThreads():
 	r=()
