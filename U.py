@@ -31,6 +31,12 @@ txthtml=('<textarea style="width:100%; height:100%;">','</textarea>')
 def browser(url):
 	os.system('''start "" '''+str(url))
 def shtml(file,txt,browser=True):
+	'''
+	U.setOut('BeautifulSoup.html')
+	print U.txthtml[0]
+	help(sp)
+	print U.txthtml[0]
+	U.resetOut()'''
 	f=open(file,'w+')
 	txt=txt.replace(txthtml[1],txthtml[1][:1]+'!!!qgb-padding!!!'+txthtml[1][1:])	
 	f.write(txthtml[0]+txt+txthtml[1])
