@@ -11,7 +11,13 @@ from threading import *
 from qgb import U,T
 '''
 BDEBUG=True
+__stdout=None
+def setOut(afileName):
+	__stdout,sys.stdout=sys.stdout,open(afileName,'w+')
 
+def resetOut():
+	if(__stdout != None):sys.stdout=__stdout
+	
 def getThreads():
 	r=()
 	for threadId, stack in sys._current_frames().items():
