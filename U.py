@@ -33,7 +33,7 @@ if(calltimes()<1):BDEBUG=True;__stdout=None
 def setOut(afileName):
 	global __stdout
 	__stdout,sys.stdout=sys.stdout,open(afileName,'w+')
-
+	
 
 def resetOut():
 	global __stdout
@@ -46,17 +46,24 @@ def browser(url):
 	os.system('''start "" '''+str(url))
 txthtml=('<textarea style="width:100%; height:100%;">','</textarea>')		
 def shtml(file,txt,browser=True):
-	'''
-	U.setOut('BeautifulSoup.html')
-	print U.txthtml[0]
-	help(sp)
-	print U.txthtml[0]
-	U.resetOut()'''
 	f=open(file,'w+')
 	txt=txt.replace(txthtml[1],txthtml[1][:1]+'!!!qgb-padding!!!'+txthtml[1][1:])	
 	f.write(txthtml[0]+txt+txthtml[1])
 	f.close()
-	globals()['browser'](f.name)
+	
+def helphtml(obj,file=None):
+	if(file==None):
+		try:file=obj.__name__+'.html'
+		except Exception:file='obj.html'
+	elif(file.lower()[-1]!='l'):file=file+'.html'
+	setOut(file)
+	print txthtml[0]
+	help(obj)
+	print txthtml[1]
+	sf=sys.stdout.name
+	resetOut()
+	globals()['browser'](sf)
+	
 def dicthtml(file,dict,aikeylength=10,browser=True):
 	for i in dict.keys():
 		if(len(i)>aikeylength):aikeylength=len(i)+1
@@ -72,6 +79,15 @@ def dicthtml(file,dict,aikeylength=10,browser=True):
 	# print vars()
 	# vars()['browser'](f.name)
 
+def phtml(file):
+	if(file.lower()[-1]!='l'):file=file+'.html'
+	setOut(file)
+	print txthtml[0]
+def phtmlend():
+	print txthtml[1]
+	sf=sys.stdout.name
+	resetOut()
+	globals()['browser'](sf)
 # dicthtml('uvars.html',vars())
 	
 
