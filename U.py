@@ -32,6 +32,8 @@ if(calltimes()<1):BDEBUG=True;__stdout=None
 
 def setOut(afileName):
 	global __stdout
+	if(__stdout != None):
+		resetOut()
 	__stdout,sys.stdout=sys.stdout,open(afileName,'w+')
 	
 
