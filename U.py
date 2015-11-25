@@ -15,6 +15,11 @@ from qgb import U,T
 
 # pprint(globals())
 
+def mkdir(afn):
+	if sys.platform == "win32":
+		os.system('md '+afn)
+md=mkdir
+
 def eval(s):
 	exec(s)
 
@@ -48,10 +53,13 @@ def browser(url):
 	os.system('''start "" '''+str(url))
 txthtml=('<textarea style="width:100%; height:100%;">','</textarea>')		
 def shtml(file,txt,browser=True):
-	f=open(file,'w+')
+	f=open(file,'a')
 	txt=txt.replace(txthtml[1],txthtml[1][:1]+'!!!qgb-padding!!!'+txthtml[1][1:])	
-	f.write(txthtml[0]+txt+txthtml[1])
+	f.write(txthtml[0])
+	f.write(txt)
+	f.write(txthtml[1])
 	f.close()
+	if(browser==True):globals()['browser'](f.name)
 	
 def helphtml(obj,file=None):
 	if(file==None):
@@ -77,7 +85,7 @@ def dicthtml(file,dict,aikeylength=10,browser=True):
 	f=open(file,'w+')
 	f.write(txthtml[0]+txt+txthtml[1])
 	f.close()
-	globals()['browser'](f.name)
+	if(browser==True):globals()['browser'](f.name)
 	# print vars()
 	# vars()['browser'](f.name)
 
