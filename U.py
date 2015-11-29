@@ -31,7 +31,7 @@ def calltimes():
 		ff.count = 0 #Do Not Modify
 	# print ff.count 
 	return ff.count 
-
+ct=calltimes
 
 if(calltimes()<1):BDEBUG=True;__stdout=None
 
