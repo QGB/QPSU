@@ -14,6 +14,13 @@ from qgb import U,T
 # if __calltimes=0
 
 # pprint(globals())
+def read(a):
+	f=open(a)
+	s=f.read()
+	f.close()
+	return s
+
+
 
 def mkdir(afn):
 	if sys.platform == "win32":
