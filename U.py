@@ -6,14 +6,11 @@ import  os,sys,socket
 from pprint import pprint
 from threading import *
 
-#m(0, 'rtegwf', 'hi', 0)
-#print 
-'''
-from qgb import U,T
-# '''
-# if __calltimes=0
 
-# pprint(globals())
+gsImport='''
+from qgb import U,T
+'''
+
 def read(a):
 	f=open(a)
 	s=f.read()
@@ -199,3 +196,14 @@ def x(msg=None):
 	
 def exit(i=2357):
 	os._exit(i)
+def getAllMod():
+	fp=os.path.dirname(__file__)
+	ls=[]
+	for i in os.listdir(fp):
+		if(len(i)<3):continue
+		if(i.find('__')!=-1):continue
+		if(i.lower()[-3:]!='.py'):continue
+		ls.append(i[:-3])
+	return ls
+if __name__ == '__main__':
+	print getAllMod()
