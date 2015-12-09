@@ -206,5 +206,9 @@ def getAllMod():
 		ls.append(i[:-3])
 	return ls
 if __name__ == '__main__':
-	import 
-	print getAllMod()
+	import Clipboard
+	gsImport=gsImport.replace('\n','')
+	for i in getAllMod():
+		if gsImport.find(i)==-1:gsImport+=(','+i)
+	print gsImport
+	Clipboard.set(gsImport)
