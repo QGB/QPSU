@@ -206,4 +206,5 @@ def getAllMod():
 		ls.append(i[:-3])
 	return ls
 if __name__ == '__main__':
+	import 
 	print getAllMod()
