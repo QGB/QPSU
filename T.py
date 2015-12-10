@@ -13,6 +13,20 @@ def sub(s,s1,s2=''):
 	i1+=len(s1)
 	# print i1,i2
 	return s[i1:i2]
+	
+def replacey(a,c,*yc):
+	if(a==None):raise Exception('a(string) == None')
+	else:a=str(a)
+	if(len(yc)<1):raise Exception('Target chars Null')
+	if(c==None):raise Exception('c None')
+	for i in yc:
+		a=a.replace(i,c)
+	return a
+	print yc
+	
+def varname(a):
+	return replacey(a,'_',':','.','\\','/','-','"',' ','\n','\r','\t')
+	
 		
 s='''
 "D:\Program Files\goagent_3.1.0-0\local\proxy.ini"
@@ -21,7 +35,7 @@ s='''
 "E:\software\net\tool\XX-Net-2.5.1\php_proxy\local\proxy.ini"
 "C:\Documents and Settings\Adminstrtor\Recent\proxy.ini.lnk"
 '''
-a=r'"'
+
 # print sub(s,r'"',a)
 # print s.find(a,)
 # print s[:50]

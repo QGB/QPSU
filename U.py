@@ -11,12 +11,16 @@ gsImport='''
 from qgb import U,T
 '''
 
-def read(a):
-	f=open(a)
+def read(a,mod='r'):
+	f=open(a,mod)
 	s=f.read()
 	f.close()
 	return s
 
+def write(a,data,mod='wb'):
+	f=open(a,mod)
+	f.write(data)
+	f.close()
 
 
 def mkdir(afn):
