@@ -11,6 +11,21 @@ gsImport='''
 from qgb import U,T
 '''
 
+def sortDictV(ad,des=True):
+	'''des True,,, python dict key auto sort ?'''
+	if type(ad)!=type({}):return {}
+	return sorted(ad.iteritems(),key=lambda ad:ad[1],reverse=True)
+# d={}
+# for i in range(7):
+	# d[i]=i*i-5*i
+	
+# d={'ok':1,'no':2}
+# d={0: 0, 5: 0, 6: 6, 1: -4, 2: -6, 3: -6, 4: -4}
+# print d
+# d=sortDictV(d)
+# print d ,type(d)
+# exit()
+
 def read(a,mod='r'):
 	f=open(a,mod)
 	s=f.read()
@@ -42,6 +57,7 @@ def calltimes():
 ct=calltimes
 
 if(calltimes()<1):BDEBUG=True;__stdout=None
+debug=BDEBUG
 
 def setOut(afileName):
 	global __stdout
