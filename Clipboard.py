@@ -1,6 +1,8 @@
-import win32clipboard as w
-import win32con
-
+try:
+	import win32clipboard as w
+	import win32con
+except Exception as e:
+	print e
 
 def get():
     w.OpenClipboard()
