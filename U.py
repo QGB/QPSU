@@ -74,7 +74,7 @@ def resetOut():
 
 
 def browser(url):
-	os.system('''start "" '''+str(url))
+	os.system('''start '''+str(url))
 txthtml=('<textarea style="width:100%; height:100%;">','</textarea>')		
 def shtml(file,txt,browser=True):
 	f=open(file,'a')
