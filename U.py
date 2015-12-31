@@ -230,5 +230,10 @@ if __name__ == '__main__':
 	gsImport=gsImport.replace('\n','')
 	for i in getAllMod():
 		if gsImport.find(i)==-1:gsImport+=(','+i)
+	###get coding line
+	for i in read(__file__).splitlines():
+		if i.startswith('#') and i.find('cod')!=-1:
+			gsImport=i+'\n'+gsImport
+	
 	print gsImport
 	Clipboard.set(gsImport)
