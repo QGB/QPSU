@@ -1,15 +1,37 @@
 # coding=utf-8
-from ctypes import windll, Structure, c_ulong, byref
-u=windll.user32
-msgbox=windll.user32.MessageBoxA
 import  os,sys,socket
-from pprint import pprint
 from threading import *
+
+cmd=os.system
+
+import platform
+def iswin():
+	if platform.system().startswith('Windows'):return True
+	else:return False
+def isnix():
+	if 'nix' in platform.system().lower():return True
+	else:return False
+
+
+if iswin():
+	from ctypes import windll, Structure, c_ulong, byref
+	msgbox=windll.user32.MessageBoxA
+
+	
+from pprint import pprint
 
 
 gsImport='''
 from qgb import U,T
 '''
+
+def clear():
+	if iswin():os.system('cls')
+	if isnix():os.system('clear')
+
+def chdir(ap='d:/test'):
+	os.chdir(ap)
+cd=chdir
 
 def sortDictV(ad,des=True):
 	'''des True,,, python dict key auto sort ?'''
@@ -194,7 +216,7 @@ def methods(obj):
 
 def msgbox(s='',st='title',*a):
 	if(a!=()):s=str(s)+ ','+str(a)[1:-2]
-	u.MessageBoxA(0, str(s), str(st), 0)
+	if iswin():windll.user32.MessageBoxA(0, str(s), str(st), 0)
 
 def pln(*a):
 	print a 
@@ -226,7 +248,6 @@ def getAllMod():
 		ls.append(i[:-3])
 	return ls
 if __name__ == '__main__':
-	import Clipboard
 	gsImport=gsImport.replace('\n','')
 	for i in getAllMod():
 		if gsImport.find(i)==-1:gsImport+=(','+i)
@@ -236,4 +257,7 @@ if __name__ == '__main__':
 			gsImport=i+'\n'+gsImport
 	
 	print gsImport
-	Clipboard.set(gsImport)
+	try:
+		import Clipboard
+		Clipboard.set(gsImport)
+	except:print 'Clipboard err'
