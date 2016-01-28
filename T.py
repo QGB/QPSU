@@ -1,7 +1,15 @@
 # coding=utf-8
+hex='0123456789abcdef'
 import   re
 REURL='http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\(\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+'
 REYMD="(19|20)[0-9]{2}[- /.](0[1-9]|1[012])[- /.](0[1-9]|[12][0-9]|3[01])"
+
+def ishex(a):
+	if type('')!=type(a):return False
+	if len(a)<1:return False
+	for i in a:
+		if i not in hex:return False
+	return True
 def sub(s,s1,s2=''):
 	if(s==None):return None
 	s=str(s)

@@ -20,15 +20,25 @@ if iswin():
 	
 from pprint import pprint
 
-
 gsImport='''
 from qgb import U,T
 '''
+def pyshell():
+	__import__('code').interact(banner="",local=locals())
+pys=pyshell
 
+def reload(mod):
+	__import__('imp').reload(mod)
+
+def tab():
+	import readline, rlcompleter;readline.parse_and_bind("tab: complete")
+autoc=tab
+	
 def clear():
 	if iswin():os.system('cls')
 	if isnix():os.system('clear')
-
+c=cls=clear
+	
 def chdir(ap='d:/test'):
 	os.chdir(ap)
 cd=chdir
@@ -66,16 +76,23 @@ def mkdir(afn):
 md=mkdir
 
 def eval(s):
+	'''diff between eval and exec in python'''
 	exec(s)
 
-def calltimes(): 
-	ff=calltimes
-	if ff.__dict__.has_key("count"): 
-		ff.count += 1 
-	else: 
-		ff.count = 0 #Do Not Modify
-	# print ff.count 
-	return ff.count 
+def string(a):
+	if type(a)==type(''):return a
+	try:a=str(a)
+	except:a=''
+	return a
+def calltimes(a=''): 
+	a=string(a)
+	if calltimes.__dict__.has_key("count"+a): 
+		exec('calltimes.count{0} += 1'.format(a))
+	else:
+		exec('calltimes.count{0} = 0'.format(a))
+		 #Do Not Modify
+	# print calltimes.count 
+	return eval('calltimes.count{0}'.format(a))
 ct=calltimes
 
 if(calltimes()<1):BDEBUG=True;__stdout=None
@@ -97,8 +114,16 @@ def resetOut():
 
 def browser(url):
 	os.system('''start '''+str(url))
-txthtml=('<textarea style="width:100%; height:100%;">','</textarea>')		
-def shtml(file,txt,browser=True):
+txthtml=('<textarea style="width:100%; height:100%;">','</textarea>')
+		
+def autohtml(file):
+	if file==None:
+		try:
+			file=obj.__name__+'.html'
+		except Exception:file='obj.html'
+	elif(file.lower()[-1]!='html'):file=file+'.html'
+	return file
+def shtml(txt,file='',browser=True):
 	f=open(file,'a')
 	txt=txt.replace(txthtml[1],txthtml[1][:1]+'!!!qgb-padding!!!'+txthtml[1][1:])	
 	f.write(txthtml[0])
@@ -108,17 +133,19 @@ def shtml(file,txt,browser=True):
 	if(browser==True):globals()['browser'](f.name)
 	
 def helphtml(obj,file=None):
-	if(file==None):
-		try:file=obj.__name__+'.html'
-		except Exception:file='obj.html'
-	elif(file.lower()[-1]!='l'):file=file+'.html'
-	setOut(file)
-	print txthtml[0]
-	help(obj)
-	print txthtml[1]
-	sf=sys.stdout.name
-	resetOut()
-	globals()['browser'](sf)
+	# setOut(file)
+	# print txthtml[0]
+	# help(obj)
+	# print txthtml[1]
+	# sf=sys.stdout.name
+	# resetOut()
+	import pydoc
+	txt= pydoc.render_doc(obj,'%s')
+	# txt=txt.replace(txthtml[1],txthtml[1][:1]+'!!!qgb-padding!!!'+txthtml[1][1:])
+	txt=txthtml[0]+txt+txthtml[1]
+
+	write(file,txt)
+	globals()['browser'](file)
 	
 def dicthtml(file,dict,aikeylength=10,browser=True):
 	for i in dict.keys():
@@ -247,17 +274,27 @@ def getAllMod():
 		if(i.lower()[-3:]!='.py'):continue
 		ls.append(i[:-3])
 	return ls
-if __name__ == '__main__':
-	gsImport=gsImport.replace('\n','')
-	for i in getAllMod():
-		if gsImport.find(i)==-1:gsImport+=(','+i)
-	###get coding line
-	for i in read(__file__).splitlines():
-		if i.startswith('#') and i.find('cod')!=-1:
-			gsImport=i+'\n'+gsImport
+def getModPath():
+	sp=os.path.abspath(__file__)
+	sp=os.path.dirname(sp)
+	sp=os.path.dirname(sp)
+	return sp
+	
+def main(*args):
+	# gsImport=gsImport.replace('\n','')
+	# for i in getAllMod():
+		# if gsImport.find(i)==-1:gsImport+=(','+i) 	
+	##get coding line
+	# for i in read(__file__).splitlines():
+		# if i.startswith('#') and i.find('cod')!=-1:
+			# gsImport=i+'\n'+gsImport
+	
+	gsImport='''import sys,os;sys.path.append('{0}');from qgb import *'''.format(getModPath())
 	
 	print gsImport
 	try:
 		import Clipboard
 		Clipboard.set(gsImport)
 	except:print 'Clipboard err'
+	
+if __name__ == '__main__':main()
