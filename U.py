@@ -1,7 +1,15 @@
 # coding=utf-8
-import  os,sys,socket
-from threading import *
 
+gsImport='''
+from qgb import U,T
+'''
+
+imax=2147483647
+imin=-2147483648
+
+import  os,sys,socket
+from threading import *;thread=Thread
+from multiprocessing import *;process=Process
 cmd=os.system
 
 import platform
@@ -17,18 +25,47 @@ if iswin():
 	from ctypes import windll, Structure, c_ulong, byref
 	msgbox=windll.user32.MessageBoxA
 
+def sleep(aisecond):__import__('time').sleep(aisecond)
+	
+	
+def pause():
+	if iswin():cmd('pause');return
+	
+def run(a,*args):
+	if type(a)==type(''):a=[a]
+	if type(a)!=type([]):a=list(a)
+	if len(args)>0:a.extend(args)
+	if type(a)==type([]):
+		return __import__('subprocess').Popen(a)
+	
+	
+def curl(a):
+	if type(a)!=type(''):return
+	if not a.lower().startswith('curl '):return
+	a=a.replace('""','')
+	cmd('cur')
 	
 from pprint import pprint
 
-gsImport='''
-from qgb import U,T
-'''
 def pyshell():
-	__import__('code').interact(banner="",local=locals())
-pys=pyshell
+	a=1
+	f=sys._getframe().f_back
+	try:
+		from ptpython.repl import embed
+		embed(f.f_globals, f.f_locals, vi_mode=False, history_filename=None)
+		return
+	except:pass
+	
+	try:import IPython;IPython.embed();return
+	except:pass
+	__import__('code').interact(banner="",local=f.f_locals)
+repl=pys=pyshell
 
-def reload(mod):
+def reload(mod=None):
+	if mod==None:
+		mod=sys._getframe().f_back.f_globals['U']
 	__import__('imp').reload(mod)
+r=reload
 
 def tab():
 	import readline, rlcompleter;readline.parse_and_bind("tab: complete")
@@ -76,7 +113,8 @@ def mkdir(afn):
 md=mkdir
 
 def eval(s):
-	'''diff between eval and exec in python'''
+	'''diff between eval and exec in python
+	return None'''
 	exec(s)
 
 def string(a):
@@ -85,14 +123,12 @@ def string(a):
 	except:a=''
 	return a
 def calltimes(a=''): 
-	a=string(a)
-	if calltimes.__dict__.has_key("count"+a): 
-		exec('calltimes.count{0} += 1'.format(a))
+	a='count'+string(a)
+	if calltimes.__dict__.has_key(a): 
+		calltimes.__dict__[a]+=1
 	else:
-		exec('calltimes.count{0} = 0'.format(a))
-		 #Do Not Modify
-	# print calltimes.count 
-	return eval('calltimes.count{0}'.format(a))
+		calltimes.__dict__[a]=0
+	return calltimes.__dict__[a]
 ct=calltimes
 
 if(calltimes()<1):BDEBUG=True;__stdout=None
@@ -103,17 +139,17 @@ def setOut(afileName):
 	if(__stdout != None):
 		resetOut()
 	__stdout,sys.stdout=sys.stdout,open(afileName,'w+')
-	
+setout=setOut	
 
 def resetOut():
 	global __stdout
 	if(__stdout != None and __stdout != sys.stdout):
 		sys.stdout.close()
 		sys.stdout=__stdout
-
+resetout=resetOut
 
 def browser(url):
-	os.system('''start '''+str(url))
+	if iswin():os.system('''start '''+str(url))
 txthtml=('<textarea style="width:100%; height:100%;">','</textarea>')
 		
 def autohtml(file):
@@ -122,9 +158,20 @@ def autohtml(file):
 			file=obj.__name__+'.html'
 		except Exception:file='obj.html'
 	elif(file.lower()[-1]!='html'):file=file+'.html'
-	return file
+	return file	
+
+	
 def shtml(txt,file='',browser=True):
-	f=open(file,'a')
+	if type(txt)==type({}):
+		if len(txt)==0:return
+		s=txt.keys()
+		s=T.listToStr(s)
+		pass	
+		
+		
+
+
+	f=open(autohtml(file),'a')
 	txt=txt.replace(txthtml[1],txthtml[1][:1]+'!!!qgb-padding!!!'+txthtml[1][1:])	
 	f.write(txthtml[0])
 	f.write(txt)
@@ -132,7 +179,7 @@ def shtml(txt,file='',browser=True):
 	f.close()
 	if(browser==True):globals()['browser'](f.name)
 	
-def helphtml(obj,file=None):
+def helphtml(obj,file='obj.html'):
 	# setOut(file)
 	# print txthtml[0]
 	# help(obj)
@@ -146,7 +193,8 @@ def helphtml(obj,file=None):
 
 	write(file,txt)
 	globals()['browser'](file)
-	
+h=help=helphtml
+
 def dicthtml(file,dict,aikeylength=10,browser=True):
 	for i in dict.keys():
 		if(len(i)>aikeylength):aikeylength=len(i)+1
