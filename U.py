@@ -7,11 +7,12 @@ from qgb import U,T
 imax=2147483647
 imin=-2147483648
 
-import  os,sys,socket
+import  os,sys,socket;stdin=sys.stdin;pid=os.getpid()
 from threading import *;thread=Thread
 from multiprocessing import *;process=Process
-cmd=os.system
 
+# import T
+# print T.string;exit()
 import platform
 def iswin():
 	if platform.system().startswith('Windows'):return True
@@ -19,14 +20,96 @@ def iswin():
 def isnix():
 	if 'nix' in platform.system().lower():return True
 	else:return False
-
-
+########################
 if iswin():
 	from ctypes import windll, Structure, c_ulong, byref
 	msgbox=windll.user32.MessageBoxA
+########################
 
-def sleep(aisecond):__import__('time').sleep(aisecond)
+def msgbox(s='',st='title',*a):
+	if(a!=()):s=str(s)+ ','+str(a)[1:-2]
+	if iswin():windll.user32.MessageBoxA(0, str(s), str(st), 0)
+
+def pln(*a):
+	print a 
+	sys.stdout.flush()
+
 	
+def p(*a,**ka):
+	# print len(a)
+	# print a,ka
+	# return
+	if len(a)==1:
+		sys.stdout.write(str(a[0]))
+	elif len(a)>1:
+		if 'sep' in ka.keys():sep=ka['sep']
+		else:sep=' '
+		
+		for i in a:
+			sys.stdout.write(str(i)+str(sep))
+	sys.stdout.flush()
+# p(4,2,sep='9')
+# exit()
+
+def inMuti(a,*la,**func):
+	la=flap(la)
+
+	if len(func)!=1:func=None
+	else:
+		if not func.keys()[0].startswith('f'):func=None
+		
+		func=func.values()[0]
+		if type(func)==type(''):
+			func=a.__getattribute__(func)
+		# if callable(func):
+			
+			
+	print a,func,la
+	for i in la:
+		if not callable(func):
+			if i in a:return True
+		try:
+			if a.__getattribute__(func.__name__)==func:
+				return func(i)
+		except:continue
+	return False
+# print inMuti(gsImport,'g9','77',)
+# exit()	
+	
+def flap(*a):
+	return reduce(lambda x,y:x+y, a)
+	
+	
+	
+def cmd(*a):
+	import T
+	s=''
+	if iswin():quot='"'
+	if len(a)==0:return -1
+	if len(a)==1:
+		if type(a[0])==type(''):s=a[0]
+		elif len(a[0])==1:s=T.string(a[0])
+		elif len(a[0])>1:a=a[0]
+	if len(a)>1:
+		a=list(a)
+		s=T.string(a.pop(0))+' '
+		for i in a:
+			if type(i)==type([]):
+				for j in i:	
+					s+=quot+T.string(i)+quot+' '
+			else:
+				s+=quot+T.string(i)+quot+' '
+			
+	# pys()
+	# pln(s)
+	# exit()
+	try:
+		return os.system(s)
+	except:return -2
+	# exit()
+# cmd('echo 23456|sub','3','')	
+def sleep(aisecond):
+	__import__('time').sleep(aisecond)
 	
 def pause():
 	if iswin():cmd('pause');return
@@ -41,15 +124,23 @@ def run(a,*args):
 	
 def curl(a):
 	if type(a)!=type(''):return
-	if not a.lower().startswith('curl '):return
-	a=a.replace('""','')
-	cmd('cur')
+	if a.lower().startswith('curl '):
+		a=a.replace('""','')
+	if a.startswith('http'):
+		cmd('curl',a)
 	
 from pprint import pprint
+
+
+# def isfile
 
 def pyshell():
 	a=1
 	f=sys._getframe().f_back
+	__import__('code').interact(banner="",local=f.f_locals)
+	
+	return
+	
 	try:
 		from ptpython.repl import embed
 		embed(f.f_globals, f.f_locals, vi_mode=False, history_filename=None)
@@ -58,7 +149,7 @@ def pyshell():
 	
 	try:import IPython;IPython.embed();return
 	except:pass
-	__import__('code').interact(banner="",local=f.f_locals)
+	
 repl=pys=pyshell
 
 def reload(mod=None):
@@ -94,6 +185,14 @@ def sortDictV(ad,des=True):
 # d=sortDictV(d)
 # print d ,type(d)
 # exit()
+def readStdin(size=1024):
+	'''size<0 read all,
+	help read:If the size argument is negative or omitted, read until EOF is reached.'''
+	if not stdin.isatty():
+		stdin.seek(0)
+		return stdin.read(size)
+	else: return ''
+
 
 def read(a,mod='r'):
 	f=open(a,mod)
@@ -117,13 +216,9 @@ def eval(s):
 	return None'''
 	exec(s)
 
-def string(a):
-	if type(a)==type(''):return a
-	try:a=str(a)
-	except:a=''
-	return a
-def calltimes(a=''): 
-	a='count'+string(a)
+def calltimes(a=''):
+	import T
+	a='count'+T.string(a)
 	if calltimes.__dict__.has_key(a): 
 		calltimes.__dict__[a]+=1
 	else:
@@ -167,10 +262,6 @@ def shtml(txt,file='',browser=True):
 		s=txt.keys()
 		s=T.listToStr(s)
 		pass	
-		
-		
-
-
 	f=open(autohtml(file),'a')
 	txt=txt.replace(txthtml[1],txthtml[1][:1]+'!!!qgb-padding!!!'+txthtml[1][1:])	
 	f.write(txthtml[0])
@@ -221,7 +312,10 @@ def phtmlend():
 	globals()['browser'](sf)
 # dicthtml('uvars.html',vars())
 	
-
+def getTimestamp():
+	return __import__('time').time()
+getime=getTime=timestamp=getTimestamp
+	
 	
 def getThreads():
 	r=()
@@ -289,23 +383,6 @@ def fields(obj):
 def methods(obj):
 	return dir(obj)
 
-def msgbox(s='',st='title',*a):
-	if(a!=()):s=str(s)+ ','+str(a)[1:-2]
-	if iswin():windll.user32.MessageBoxA(0, str(s), str(st), 0)
-
-def pln(*a):
-	print a 
-	sys.stdout.flush()
-
-	
-def p(*a):
-	if(len(a)<1):
-		sys.stdout.flush()
-		return
-	for i in a:
-		sys.stdout.write(str(i)+' ')
-	sys.stdout.flush()
-
 	
 def x(msg=None):
 	if(msg!=None):print msg
@@ -328,7 +405,7 @@ def getModPath():
 	sp=os.path.dirname(sp)
 	return sp
 	
-def main(*args):
+def main(display=True,*args):
 	# gsImport=gsImport.replace('\n','')
 	# for i in getAllMod():
 		# if gsImport.find(i)==-1:gsImport+=(','+i) 	
@@ -339,10 +416,10 @@ def main(*args):
 	
 	gsImport='''import sys,os;sys.path.append('{0}');from qgb import *'''.format(getModPath())
 	
-	print gsImport
+	if display:print gsImport,display
 	try:
 		import Clipboard
 		Clipboard.set(gsImport)
 	except:print 'Clipboard err'
-	
+	return gsImport
 if __name__ == '__main__':main()

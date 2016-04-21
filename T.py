@@ -1,9 +1,33 @@
 # coding=utf-8
+character='abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ'
+number='0123456789'
+a_z0_9=alphanumeric=character+number
 hex='0123456789abcdef'
-import   re
 REURL='http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\(\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+'
 REYMD="(19|20)[0-9]{2}[- /.](0[1-9]|1[012])[- /.](0[1-9]|[12][0-9]|3[01])"
 sqlite='SELECT * FROM sqlite_master;'
+asciiPrint=' !"#$%&\'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~'#0x20-0x7E ,32-126,len=95
+
+#########################################
+import   re
+
+
+def string(a):
+	if type(a)==type(''):return a
+	try:a=str(a)
+	except:a=''
+	return a
+	
+
+def stringToChars(a):
+	a=string(a)
+
+def inMutiChar(a,asc):
+	if type('')==type(a)==type(asc):
+		if len(asc)<1:return True
+		for i in asc:
+			if i in a:return True
+	return False
 def listToStr(a):
 	if type(a)!=type([]):return ''
 	sr=''
@@ -13,9 +37,7 @@ def listToStr(a):
 def ishex(a):
 	if type('')!=type(a):return False
 	if len(a)<1:return False
-	for i in a:
-		if i not in hex:return False
-	return True
+	return inMuti()
 def sub(s,s1,s2=''):
 	if(s==None):return None
 	s=str(s)
@@ -66,7 +88,11 @@ def haszh(a):
 	if match:return True
 	return False
 	
-if __name__=='__main__':	
+if __name__=='__main__':
+	import U
+	print U.inMuti('123456.9.9','18','1','',f=inMutiChar)
+	# print len(asciiPrint)
+	exit()
 	# import urllib2,re
 	# url='http://svn.kcn.cn/repos/kbs/'
 	# r=urllib2.urlopen(url)
