@@ -1,5 +1,4 @@
 # coding=utf-8
-
 gsImport='''
 from qgb import U,T
 '''
@@ -7,7 +6,7 @@ from qgb import U,T
 imax=2147483647
 imin=-2147483648
 
-import  os,sys,socket;stdin=sys.stdin;pid=os.getpid()
+import  os,sys,socket;stdin=sys.stdin;pid=os.getpid();path=os.path
 from threading import *;thread=Thread
 from multiprocessing import *;process=Process
 
@@ -61,10 +60,9 @@ def inMuti(a,*la,**func):
 		func=func.values()[0]
 		if type(func)==type(''):
 			func=a.__getattribute__(func)
-		# if callable(func):
+		# if callable(func):			
 			
-			
-	print a,func,la
+	# print a,func,la
 	for i in la:
 		if not callable(func):
 			if i in a:return True
@@ -75,11 +73,27 @@ def inMuti(a,*la,**func):
 	return False
 # print inMuti(gsImport,'g9','77',)
 # exit()	
+
+def iterable(a):
+	try:
+		for i in a:pass
+		return True
+	except:return False
+
+def flat(*a):
+	'''Breadth-First Traversal'''
+	a=list(a);r=[];i=0
+	while -1<i<len(a):
+		if hasattr(a[i], '__iter__'):a.extend(a[i])
+		else:r.append(a[i])
+		i+=1
+	return tuple(r)
 	
-def flap(*a):
-	return reduce(lambda x,y:x+y, a)
-	
-	
+# print flat([[1,2,3], [5, 2, 8], [7,8,9]])
+##(1, 2, 3, 5, 2, 8, 7, 8, 9)
+# print flat([1,2,3,[4,5,[1,2],6]],['aaa'])
+##  (1, 2, 3, 'aaa', 4, 5, 6, 1, 2)
+
 	
 def cmd(*a):
 	import T
@@ -111,15 +125,21 @@ def cmd(*a):
 def sleep(aisecond):
 	__import__('time').sleep(aisecond)
 	
-def pause():
-	if iswin():cmd('pause');return
-	
+def pause(a='Press Enter to continue...'):
+	'''a=msg'''
+	if iswin():
+		# cmd('pause');return
+		try:
+			raw_input(a)
+		except:exit()
+	return True	
 def run(a,*args):
 	if type(a)==type(''):a=[a]
 	if type(a)!=type([]):a=list(a)
 	if len(args)>0:a.extend(args)
 	if type(a)==type([]):
 		return __import__('subprocess').Popen(a)
+	
 	
 	
 def curl(a):
@@ -167,10 +187,29 @@ def clear():
 	if isnix():os.system('clear')
 c=cls=clear
 	
-def chdir(ap='d:/test'):
-	os.chdir(ap)
+gsTestPath='d:/test/'
+def chdir(ap=gsTestPath):
+	if type(ap)!=type('') or len(ap)<1:ap=gsTestPath
+	if path.isdir(ap):os.chdir(ap);return True
+	print ap
+	ap=path.dirname(ap)
+	if path.isdir(ap):os.chdir(ap);return True
+	for i in ap:
+		if i not in T.filename:raise Exception('need file path')
 cd=chdir
+# @property
+def ls(ap='.'):
+	if type(ap)!=type('') or len(ap)<1:ap='.'
+	return os.walk(ap).next()[2]
 
+def pwd(p=False):
+	if p:print os.getcwd()
+	return os.getcwd()
+	
+def ping():
+	pass
+	
+	
 def sortDictV(ad,des=True):
 	'''des True,,, python dict key auto sort ?'''
 	if type(ad)!=type({}):return {}
@@ -192,7 +231,7 @@ def readStdin(size=1024):
 		stdin.seek(0)
 		return stdin.read(size)
 	else: return ''
-
+getStdin=readStdin
 
 def read(a,mod='r'):
 	f=open(a,mod)
@@ -313,8 +352,9 @@ def phtmlend():
 # dicthtml('uvars.html',vars())
 	
 def getTimestamp():
+	'''return: float'''
 	return __import__('time').time()
-getime=getTime=timestamp=getTimestamp
+time=getime=getTime=timestamp=getTimestamp
 	
 	
 def getThreads():

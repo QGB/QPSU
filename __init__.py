@@ -1,3 +1,6 @@
 __all__=['U','T','N']
-import U
-U.tab()
+try:
+	import U
+	U.tab()
+	
+except:pass

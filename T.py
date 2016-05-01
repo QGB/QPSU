@@ -1,4 +1,6 @@
 # coding=utf-8
+filename="!#$%&'()+,-0123456789;=@ABCDEFGHIJKLMNOPQRSTUVWXYZ[]^_`abcdefghijklmnopqrstuvwxyz{}~"
+pathname=filename+'/\\:'
 character='abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ'
 number='0123456789'
 a_z0_9=alphanumeric=character+number
@@ -10,20 +12,19 @@ asciiPrint=' !"#$%&\'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`a
 
 #########################################
 import   re
-
-
+	
 def string(a):
 	if type(a)==type(''):return a
 	try:a=str(a)
 	except:a=''
 	return a
-	
 
 def stringToChars(a):
+	'''TODO:flap'''
 	a=string(a)
 
 def inMutiChar(a,asc):
-	if type('')==type(a)==type(asc):
+	if type('')==type(a) and len(a)>0:
 		if len(asc)<1:return True
 		for i in asc:
 			if i in a:return True
@@ -89,8 +90,18 @@ def haszh(a):
 	return False
 	
 if __name__=='__main__':
+	print inMutiChar('2/ewffew////',set())
+	exit()
+	import os
+	os.chdir('cd')
 	import U
-	print U.inMuti('123456.9.9','18','1','',f=inMutiChar)
+	sf=''
+	for i in filename:
+		U.write(i,'123')
+		if U.read(i)=='123':sf+=i
+	print sf==filename	
+			
+	# print U.inMuti('123456.9.9','18','1','',f=inMutiChar)
 	# print len(asciiPrint)
 	exit()
 	# import urllib2,re
