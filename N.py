@@ -10,3 +10,11 @@ def http(aurl):
 	aurl=autoUrl(aurl)
 	return urllib2.urlopen(aurl).read()
 	print 233
+	
+
+if __name__=='__main__':
+	gsurlip=['http://ip.chinaz.com/getip.aspx'][0]
+	
+	print http(gsurlip) 	
+
+	

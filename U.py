@@ -49,6 +49,47 @@ def p(*a,**ka):
 	sys.stdout.flush()
 # p(4,2,sep='9')
 # exit()
+def readStdin(size=1024):
+	'''size<0 read all,
+	help read:If the size argument is negative or omitted, read until EOF is reached.'''
+	if not stdin.isatty():
+		stdin.seek(0)
+		return stdin.read(size)
+	else: return ''
+getStdin=readStdin
+
+def read(a,mod='r'):
+	try:
+		f=open(a,mod)
+		s=f.read()
+		f.close()
+		return s
+	except:return ''
+
+def write(a,data,mod='wb'):
+	try:
+		f=open(a,mod)
+		f.write(data)
+		f.close()
+		return True
+	except:return False
+	
+
+def mkdir(afn):
+	if sys.platform == "win32":
+		os.system('md '+afn)
+md=mkdir
+
+def autof(head,ext=''):
+	if not type(ext)==type(head)==type('') or head=='':return ''
+	for i in ls():
+		if i.startswith(head) and i.endswith(ext):return i
+	
+	for i in ls():
+		if head in i and i.endswith(ext):return i
+		
+	return head
+autoFileName=autof
 
 def inMuti(a,*la,**func):
 	la=flap(la)
@@ -202,9 +243,10 @@ def ls(ap='.'):
 	if type(ap)!=type('') or len(ap)<1:ap='.'
 	return os.walk(ap).next()[2]
 
-def pwd(p=False):
-	if p:print os.getcwd()
-	return os.getcwd()
+def pwd(p=True):
+	s=os.getcwd()
+	if p:print s
+	return s
 	
 def ping():
 	pass
@@ -224,31 +266,6 @@ def sortDictV(ad,des=True):
 # d=sortDictV(d)
 # print d ,type(d)
 # exit()
-def readStdin(size=1024):
-	'''size<0 read all,
-	help read:If the size argument is negative or omitted, read until EOF is reached.'''
-	if not stdin.isatty():
-		stdin.seek(0)
-		return stdin.read(size)
-	else: return ''
-getStdin=readStdin
-
-def read(a,mod='r'):
-	f=open(a,mod)
-	s=f.read()
-	f.close()
-	return s
-
-def write(a,data,mod='wb'):
-	f=open(a,mod)
-	f.write(data)
-	f.close()
-
-
-def mkdir(afn):
-	if sys.platform == "win32":
-		os.system('md '+afn)
-md=mkdir
 
 def eval(s):
 	'''diff between eval and exec in python
