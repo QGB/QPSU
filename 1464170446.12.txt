@@ -1,0 +1,10 @@
+D:\TEST\a.txt
+C:\Program Files\Windows Media Player\eula.txt
+C:\WINDOWS\system32\eula.txt
+E:\sys_sw\ProcessMonitor\Eula.txt
+D:\Program Files\Git\usr\share\vim\vim74\doc\ft_ada.txt
+C:\Program Files\Tencent\QQGAME\GmData.txt
+D:\Program Files\Git\usr\share\vim\vim74\doc\if_lua.txt
+C:\Python27\Lib\email\test\data\msg_12a.txt
+D:\Program Files\Git\usr\share\vim\vim74\doc\os_amiga.txt
+D:\Program Files\Git\usr\share\vim\vim74\doc\uganda.txt

@@ -24,6 +24,7 @@ def stringToChars(a):
 	a=string(a)
 
 def inMutiChar(a,asc):
+	'''(1,2)False  ('13','abc1')True'''
 	if type('')==type(a) and len(a)>0:
 		if len(asc)<1:return True
 		for i in asc:

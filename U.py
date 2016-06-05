@@ -74,48 +74,8 @@ def write(a,data,mod='wb'):
 		return True
 	except:return False
 	
-
-def mkdir(afn):
-	if sys.platform == "win32":
-		os.system('md '+afn)
-md=mkdir
-
-def autof(head,ext=''):
-	if not type(ext)==type(head)==type('') or head=='':return ''
-	for i in ls():
-		if i.startswith(head) and i.endswith(ext):return i
-	
-	for i in ls():
-		if head in i and i.endswith(ext):return i
-		
-	return head
-autoFileName=autof
-
-def inMuti(a,*la,**func):
-	la=flap(la)
-
-	if len(func)!=1:func=None
-	else:
-		if not func.keys()[0].startswith('f'):func=None
-		
-		func=func.values()[0]
-		if type(func)==type(''):
-			func=a.__getattribute__(func)
-		# if callable(func):			
-			
-	# print a,func,la
-	for i in la:
-		if not callable(func):
-			if i in a:return True
-		try:
-			if a.__getattribute__(func.__name__)==func:
-				return func(i)
-		except:continue
-	return False
-# print inMuti(gsImport,'g9','77',)
-# exit()	
-
 def iterable(a):
+	'''str is True'''
 	try:
 		for i in a:pass
 		return True
@@ -134,8 +94,54 @@ def flat(*a):
 ##(1, 2, 3, 5, 2, 8, 7, 8, 9)
 # print flat([1,2,3,[4,5,[1,2],6]],['aaa'])
 ##  (1, 2, 3, 'aaa', 4, 5, 6, 1, 2)
-
 	
+	
+def mkdir(afn):
+	if sys.platform == "win32":
+		os.system('md '+afn)
+md=mkdir
+
+def autof(head,ext=''):
+	'''return str'''
+	if not type(ext)==type(head)==type('') or head=='':return ''
+	for i in ls():
+		if i.startswith(head) and i.endswith(ext):return i
+	
+	for i in ls():
+		if head in i and i.endswith(ext):return i
+		
+	return head
+autoFileName=autof
+
+
+def inMuti(a,*la,**func):
+	'''bool a.func(la[i])'''
+	la=flat(la)
+
+	if len(func)!=1:func=None
+	elif not func.keys()[0].startswith('f'):func=None
+	else:
+		func=func.values()[0]
+		if type(func)==type(''):
+			func=a.__getattribute__(func)
+		else:func=a.__getattribute__(func.__name__)
+			
+		# if callable(func):			
+	if not callable(func):
+		for i in la:
+			if i in a:return True	
+		return False
+	# print a,func,la
+	# repl()
+	for i in la:
+		if func(i):return True
+		
+	return False
+	
+# print inMuti('77','g9','77',f=''.endswith)
+# exit()	
+
+
 def cmd(*a):
 	import T
 	s=''
@@ -473,7 +479,7 @@ def main(display=True,*args):
 	
 	gsImport='''import sys,os;sys.path.append('{0}');from qgb import *'''.format(getModPath())
 	
-	if display:print gsImport,display
+	if display:print gsImport
 	try:
 		import Clipboard
 		Clipboard.set(gsImport)
