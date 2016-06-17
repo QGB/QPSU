@@ -5,7 +5,7 @@ from qgb import U,T
 
 imax=2147483647
 imin=-2147483648
-
+gst=gsTestPath='d:/test/'
 import  os,sys,socket;stdin=sys.stdin;pid=os.getpid();path=os.path
 from threading import *;thread=Thread
 from multiprocessing import *;process=Process
@@ -95,7 +95,13 @@ def flat(*a):
 # print flat([1,2,3,[4,5,[1,2],6]],['aaa'])
 ##  (1, 2, 3, 'aaa', 4, 5, 6, 1, 2)
 	
+def md5(a):
+	import hashlib   
+	md5 = hashlib.md5()   
+	md5.update(a)    
+	return md5.hexdigest()  
 	
+
 def mkdir(afn):
 	if sys.platform == "win32":
 		os.system('md '+afn)
@@ -228,13 +234,27 @@ r=reload
 def tab():
 	import readline, rlcompleter;readline.parse_and_bind("tab: complete")
 autoc=tab
+
+# class __wrapper(object):
+	# def __init__(self, wrapped):
+		# self.wrapped = wrapped
+	# def __getattr__(self, name):
+		# print name
+		
+		# try:
+			
+			# return getattr(self.wrapped, name)
+		# except AttributeError:
+			# return 'default' # Some sensible default
+# sys.modules[__name__] = __wrapper(sys.modules[__name__])
+	
 	
 def clear():
 	if iswin():os.system('cls')
 	if isnix():os.system('clear')
 c=cls=clear
-	
-gsTestPath='d:/test/'
+
+
 def chdir(ap=gsTestPath):
 	if type(ap)!=type('') or len(ap)<1:ap=gsTestPath
 	if path.isdir(ap):os.chdir(ap);return True
@@ -244,6 +264,10 @@ def chdir(ap=gsTestPath):
 	for i in ap:
 		if i not in T.filename:raise Exception('need file path')
 cd=chdir
+
+def cdTest():
+	cd(gst)
+cdt=cdTest
 # @property
 def ls(ap='.'):
 	if type(ap)!=type('') or len(ap)<1:ap='.'
@@ -467,6 +491,7 @@ def getModPath():
 	sp=os.path.dirname(sp)
 	sp=os.path.dirname(sp)
 	return sp
+
 	
 def main(display=True,*args):
 	# gsImport=gsImport.replace('\n','')
@@ -486,3 +511,5 @@ def main(display=True,*args):
 	except:print 'Clipboard err'
 	return gsImport
 if __name__ == '__main__':main()
+
+
