@@ -29,8 +29,8 @@ def msgbox(s='',st='title',*a):
 	if(a!=()):s=str(s)+ ','+str(a)[1:-2]
 	if iswin():windll.user32.MessageBoxA(0, str(s), str(st), 0)
 
-def pln(*a):
-	print a 
+def pln(*a,**ka):
+	print a,''if len(ka)<1 else ka
 	sys.stdout.flush()
 
 	

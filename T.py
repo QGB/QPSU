@@ -1,14 +1,26 @@
 # coding=utf-8
 filename="!#$%&'()+,-0123456789;=@ABCDEFGHIJKLMNOPQRSTUVWXYZ[]^_`abcdefghijklmnopqrstuvwxyz{}~"
 pathname=filename+'/\\:'
-character='abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ'
+
+a_z='abcdefghijklmnopqrstuvwxyz'
+A_Z=a_z.upper()
+
+character=a_z+A_Z
+
 number='0123456789'
-a_z0_9=alphanumeric=character+number
+
+az09=a_z0_9=alphanumeric=character+number
+
 hex='0123456789abcdef'
+HEX=hex.upper()
+
+asciiPrint=' !"#$%&\'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~'#0x20-0x7E ,32-126,len=95
+
+###############
 REURL='http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\(\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+'
 REYMD="(19|20)[0-9]{2}[- /.](0[1-9]|1[012])[- /.](0[1-9]|[12][0-9]|3[01])"
+###############
 sqlite='SELECT * FROM sqlite_master;'
-asciiPrint=' !"#$%&\'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~'#0x20-0x7E ,32-126,len=95
 
 #########################################
 import   re
