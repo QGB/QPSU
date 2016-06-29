@@ -30,7 +30,14 @@ def msgbox(s='',st='title',*a):
 	if iswin():windll.user32.MessageBoxA(0, str(s), str(st), 0)
 
 def pln(*a,**ka):
-	print a,''if len(ka)<1 else ka
+	s='print '
+	for i in range(len(a)):
+		s+='a['+str(i)+'],'
+
+	if len(ka)<1:
+		exec(s[:-1])###without (del last ,) [:-1] can't flush
+	else:
+		print a,ka
 	sys.stdout.flush()
 
 	

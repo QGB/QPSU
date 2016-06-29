@@ -12,9 +12,10 @@ import T,N,U
 su='http://www.w3school.com.cn/tiy/v.asp?code='
 for i in T.HEX:
 	for j in T.HEX:
-		# su+='%'+i+j
-		su+='%77'
-		U.pln(i,j,N.http(su)[:8])
+		url=su+'%'+i+j
+		s=N.http(url)
+		if len(s)>0:
+			U.pln(url,c=s)
 exit()
 	
 	
