@@ -1,6 +1,19 @@
-__all__=['U','T','N']
-try:
-	import U
-	U.tab()
+
+# try:
+	# import U
+	# U.tab()
+# except:pass
+
+
+#]#
+__all__=['U','T','N','F']
+
+
+# for i in F.list('./'):
+	# print i
+
+for i in __all__:
+	try:exec('import '+i)
+	except:__all__.remove(i)
 	
-except:pass
+# print __all__

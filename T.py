@@ -1,13 +1,13 @@
 # coding=utf-8
-filename="!#$%&'()+,-0123456789;=@ABCDEFGHIJKLMNOPQRSTUVWXYZ[]^_`abcdefghijklmnopqrstuvwxyz{}~"
-pathname=filename+'/\\:'
+FILE_NAME="!#$%&'()+,-0123456789;=@ABCDEFGHIJKLMNOPQRSTUVWXYZ[]^_`abcdefghijklmnopqrstuvwxyz{}~"### NO space
+PATH_NAME=FILE_NAME+'/\\:'
 
-a_z='abcdefghijklmnopqrstuvwxyz'
-A_Z=a_z.upper()
+az=a_z='abcdefghijklmnopqrstuvwxyz'
+AZ=A_Z=a_z.upper()
 
 character=a_z+A_Z
 
-number='0123456789'
+s09=i09=_09=number='0123456789'
 
 az09=a_z0_9=alphanumeric=character+number
 
@@ -23,10 +23,10 @@ REYMD="(19|20)[0-9]{2}[- /.](0[1-9]|1[012])[- /.](0[1-9]|[12][0-9]|3[01])"
 sqlite='SELECT * FROM sqlite_master;'
 
 #########################################
-import   re
+import   re	
 	
 def string(a):
-	if type(a)==type(''):return a
+	if type(a) is str:return a
 	try:a=str(a)
 	except:a=''
 	return a
@@ -94,7 +94,24 @@ def replacey(a,c,*yc):
 	print yc
 	
 def varname(a):
-	return replacey(a,'_',':','.','\\','/','-','"',' ','\n','\r','\t')
+	sv=az+'_'
+	if a[0] in sv:r=''
+	else:r='_'
+	sv+=number
+	for i in a:
+		if i.lower() in sv :r+=i
+		else:r+='_'
+	return r
+	# return replacey(a,'_',':','.','\\','/','-','"',' ','\n','\r','\t','[',']')
+# print varname(i09)
+def filename(a):
+	# if type(a) is not str:return ''
+	r=''
+	for i in range(len(a)):
+		if a[i] in FILE_NAME:r+=a[i]
+		else:r+='_'
+	return r
+# filename.__str__=FILE_NAME	
 	
 def haszh(a):
 	zhPattern = re.compile(u'[\u4e00-\u9fa5]+')
@@ -102,17 +119,53 @@ def haszh(a):
 	if match:return True
 	return False
 	
+# def har(fileName):
+
+	
+class Har():
+	def __init__(s,fileName):
+		null=None
+		true=True
+		false=False
+		import U
+		s.data=eval(U.read(fileName))['log']
+		
+	
+	def __len__(s):
+		return
+	
+def min(*a):
+	'''return min length string(a[i])'''
+	r=''
+	for i in a:
+		i=string(i)
+		if len(i)<len(r):r=i
+	return r
+	
+	
+def max(*a):
+	'''return max length string(a[i])'''
+	r=''
+	for i in a:
+		i=string(i)
+		if len(i)>len(r):r=i
+	return r
+	
+	
+	
 if __name__=='__main__':
-	print inMutiChar('2/ewffew////',set())
+	# h= Har('ping.chinaz.com.har').data.keys()
+
+	print max()
 	exit()
 	import os
 	os.chdir('cd')
 	import U
 	sf=''
-	for i in filename:
+	for i in FILE_NAME:
 		U.write(i,'123')
 		if U.read(i)=='123':sf+=i
-	print sf==filename	
+	print sf==FILE_NAME	
 			
 	# print U.inMuti('123456.9.9','18','1','',f=inMutiChar)
 	# print len(asciiPrint)

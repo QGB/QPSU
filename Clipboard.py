@@ -2,7 +2,7 @@ try:
 	import win32clipboard as w
 	import win32con
 except Exception as e:
-	print e
+	print __file__+":",e
 
 def get():
     w.OpenClipboard()

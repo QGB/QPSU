@@ -1,0 +1,98 @@
+<html>
+
+<table id="mytable"><thead>
+      <tr>
+         <th id="num">NO.</th>
+         <th id="name">name</th>
+		 <th id="detail">detail</th>
+		 <th id="len">len</th>
+		 
+      </tr>
+	  
+     </thead>
+    <tbody>
+{result}
+	</tbody>
+  </table>
+<style type="text/css">
+thead {color:red;}
+tbody {color:blue;}
+tfoot {color:red;}
+
+#n{    max-width: 115px}
+/*115 Chrome no bottom scroll bars,116 has*/
+
+table,th,td,textarea{
+padding:0px;
+margin:0px;
+border:0.1mm solid black;
+border-spacing: 0px;
+}
+
+textarea{
+border:0px solid black;
+width:800px 
+}
+
+th:hover{
+     cursor:pointer;
+    background:#AAA;
+    
+}
+</style>	 
+
+<script src="http://libs.baidu.com/jquery/1.9.0/jquery.min.js">
+</script>
+	 
+
+<script>
+function sortTable(f,n){
+	var rows = $('#mytable tbody  tr').get();
+
+	rows.sort(function(a, b) {
+
+		var A = getVal(a);
+		var B = getVal(b);
+
+		if(A < B) {
+			return -1*f;
+		}
+		if(A > B) {
+			return 1*f;
+		}
+		return 0;
+	});
+
+	function getVal(elm){
+		var v = $(elm).children('td').eq(n).text().toUpperCase();
+		if($.isNumeric(v)){
+			v = parseInt(v,10);
+		}
+		return v;
+	}
+
+	$.each(rows, function(index, row) {
+		$('#mytable').children('tbody').append(row);
+	});
+}
+var f0 = f1 = f2=-1
+
+$("#num").click(function(){
+    sortTable(f0*=-1,$(this).prevAll().length);
+});
+$("#name").click(function(){
+    sortTable(f1*=-1,$(this).prevAll().length);
+});
+$("#detail").click(function(){
+    sortTable(f2*=-1,$(this).prevAll().length);
+});
+$("#len").click(function(){
+    sortTable(f2*=-1,$(this).prevAll().length);
+});
+</script>
+
+
+
+
+
+</html>
