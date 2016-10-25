@@ -75,7 +75,7 @@ function sortTable(f,n){
 		$('#mytable').children('tbody').append(row);
 	});
 }
-var f0 = f1 = f2=-1
+var f0=f1=f2=f3=-1
 
 $("#num").click(function(){
     sortTable(f0*=-1,$(this).prevAll().length);
@@ -87,7 +87,7 @@ $("#detail").click(function(){
     sortTable(f2*=-1,$(this).prevAll().length);
 });
 $("#len").click(function(){
-    sortTable(f2*=-1,$(this).prevAll().length);
+    sortTable(f3*=-1,$(this).prevAll().length);
 });
 </script>
 
