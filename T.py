@@ -14,7 +14,7 @@ az09=a_z0_9=alphanumeric=character+number
 hex='0123456789abcdef'
 HEX=hex.upper()
 
-asciiPrint=' !"#$%&\'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~'#0x20-0x7E ,32-126,len=95
+visAscii=printAscii=asciiPrint=' !"#$%&\'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~'#0x20-0x7E ,32-126,len=95
 
 ###############
 REURL='http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\(\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+'
@@ -24,6 +24,10 @@ sqlite='SELECT * FROM sqlite_master;'
 
 #########################################
 import   re	
+try:
+	from chardet import detect
+except Exception as ei:
+	pass
 	
 def string(a):
 	if type(a) is str:return a
@@ -151,11 +155,19 @@ def max(*a):
 		if len(i)>len(r):r=i
 	return r
 	
-	
-	
+def allAscii(a):
+	if type(a) not in (str,unicode):return False
+	for i in a:
+		if ord(i)>127:return False
+		# print ord(i);break
+	return True
 if __name__=='__main__':
 	# h= Har('ping.chinaz.com.har').data.keys()
-
+	s='大多是'
+	print detect(s)
+	s=s.decode('utf-8')
+	print haszh(s),len(s)
+	exit()
 	print max()
 	exit()
 	import os
