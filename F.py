@@ -10,6 +10,8 @@ def bytesToHex(a,split=''):
 	for i in a:
 		r+=DIH[ord(i)]+split
 	return r
+b2h=bytesToHex
+	
 def hexToBytes(a,split=''):
 	it=2
 	if len(split)>0:it+=len(split)
@@ -27,29 +29,38 @@ def hexToBytes(a,split=''):
 	for i in xrange(len(a)/2):
 		r+=chr(DHI[a[i*2:i*2+2]])
 	return r
+h2b=hexToBytes
 	
-def write(a,data,mod='wb'):
+def write(a,data,mod='wb',mkdir=False):
+	if mkdir:a=autoPath(a)
+
 	try:
 		f=open(a,mod)
 		f.write(data)
 		f.close()
 		return True
-	except:return False
-	
+	except Exception as e:
+		# U.repl()
+		if 'f' in py.dir() and f:f.close()
+		return False
+		
 def append(a,data):write(a,data,mod='a')
 	
 def read(a,mod='r'):
 	try:
-		f=open(a,mod)
+		f=open(autoPath(a),mod)
 		s=f.read()
 		f.close()
 		return s
-	except:return ''
+	except:
+		if 'f' in py.dir() and f:f.close()
+		return None
+	
 	
 def exist(fileName):
 	return _p.exists(fileName)
 isExist=exists=exist
-def list(ap='.',r=False,type='',t='',d=False,dir=False,f=False,file=False):
+def list(ap='.',type='',t='',r=False,d=False,dir=False,f=False,file=False):
 	'''Parms:boll r recursion
 			 str (type,t) '(d,f,a,r)'
 	default return all'''
@@ -97,11 +108,11 @@ def list(ap='.',r=False,type='',t='',d=False,dir=False,f=False,file=False):
 	# else:return r3[1]+r3[2]
 ls=list
 
-def ll(ap='.',stime=True,type='',t='',d=False,dir=False,f=False,file=False):
+def ll(ap='.',stime=True,type='',t='',r=False,d=False,dir=False,f=False,file=False):
 	'''return {file : [size,atime,mtime,ctime,st_mode]}
 	linux struct stat: http://pubs.opengroup.org/onlinepubs/009695399/basedefs/sys/stat.h.html'''
 	dr={}
-	for i in ls(ap,type=type,t=t,d=d,dir=dir,f=f,file=file):
+	for i in ls(ap,type=type,t=t,r=r,d=d,dir=dir,f=f,file=file):
 		s=_os.stat(i)
 		dr[i]=[size(i),s.st_atime,s.st_mtime,s.st_ctime,s.st_mode]
 		if stime:
@@ -159,6 +170,8 @@ def getSplitor(ap):
 	if '/' in ap:return '/'
 	if '\\' in ap:return '\\'		
 	return '/'#default	
+getsp=getSp=getSplitor		
+		
 		
 def makeDirs(ap):
 	sp=getSplitor(ap)
@@ -200,6 +213,7 @@ isabs=isAbs
 		
 def name(a):
 	'''Anti abs'''
+	if type(a) not in (str,unicode):return ''
 	if U.inMuti(a,'/','\\',f=str.endswith):a=a[:-1]
 	if not isAbs(a):return a
 	else:

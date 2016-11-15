@@ -1,0 +1,4 @@
+built-in function insert
+
+insert(...)
+    L.insert(index, object) -- insert object before index

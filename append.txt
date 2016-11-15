@@ -1,0 +1,4 @@
+built-in function append
+
+append(...)
+    L.append(object) -- append object to end
