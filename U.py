@@ -18,9 +18,10 @@ def iswin():
 def isnix():
 	if 'nix' in platform.system().lower():return True
 	else:return False
+def iscyg():
+	return 'cygwin' in  platform.system().lower()
 ########################
 if iswin():
-	gst=gsTestPath='d:/test/'
 	gsw=gsWShell='E:/sourceCode/shell/'
 	from ctypes import windll, Structure, c_ulong, byref
 
@@ -41,6 +42,14 @@ except Exception as ei:
 	if gbPrintErr:print '#Error import F'
 	gError=ei
 #TODO: if not has ei,import error occur twice,why?
+def getTestPath():
+	if isnix():return '/test/'
+	st='d:/test/'
+	for i in T.AZ:
+		if iswin() or iscyg():
+			if F.exist(i+st[1:]):return i+st[1:]
+	if iswin() or iscyg():return st
+gst=gsTestPath=getTestPath()
 
 def pln(*a,**ka):
 	s='print '
