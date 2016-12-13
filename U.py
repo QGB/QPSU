@@ -9,8 +9,17 @@ from threading import *;thread=Thread
 from multiprocessing import *;process=Process
 import __builtin__ ;py=builtin=__builtin__
 
-# import T
-# print T.string;exit()
+gError=None;gbPrintErr=False
+
+try:
+	from F import write,read,ls,ll,md,rm
+	import F,T
+	from pprint import pprint
+	import Clipboard;clipboard=cb=Clipboard
+except Exception as ei:
+	if gbPrintErr:print '#Error import F'
+	gError=ei
+#########################
 import platform
 def iswin():
 	if platform.system().startswith('Windows'):return True
@@ -31,17 +40,6 @@ if iswin() or iscyg():
 	except Exception as ei:
 		if gbPrintErr:print ei
 ########################
-
-gError=None;gbPrintErr=False
-
-try:
-	from F import write,read,ls,ll,md,rm
-	import F,T
-	from pprint import pprint
-	import Clipboard;clipboard=cb=Clipboard
-except Exception as ei:
-	if gbPrintErr:print '#Error import F'
-	gError=ei
 #TODO: if not has ei,import error occur twice,why?
 def driverPath(a):
 	for i in T.AZ:
