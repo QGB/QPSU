@@ -1,4 +1,3 @@
-import win32gui
 from ctypes import windll
 import ctypes
 

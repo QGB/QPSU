@@ -9,6 +9,7 @@ from threading import *;thread=Thread
 from multiprocessing import *;process=Process
 import __builtin__ ;py=builtin=__builtin__
 
+gError=None;gbPrintErr=False
 # import T
 # print T.string;exit()
 import platform
@@ -32,7 +33,6 @@ if iswin() or iscyg():
 		if gbPrintErr:print ei
 ########################
 
-gError=None;gbPrintErr=False
 
 try:
 	from F import write,read,ls,ll,md,rm
