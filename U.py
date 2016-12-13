@@ -21,14 +21,15 @@ def isnix():
 def iscyg():
 	return 'cygwin' in  platform.system().lower()
 ########################
-if iswin():
-	gsw=gsWShell='E:/sourceCode/shell/'
-	from ctypes import windll, Structure, c_ulong, byref
+if iswin() or iscyg():
+	try:
+		from ctypes import windll, Structure, c_ulong, byref
 
-	def msgbox(s='',st='title',*a):
-		if(a!=()):s=str(s)+ ','+str(a)[1:-2]
-		if iswin():windll.user32.MessageBoxA(0, str(s), str(st), 0)
-
+		def msgbox(s='',st='title',*a):
+			if(a!=()):s=str(s)+ ','+str(a)[1:-2]
+			if iswin():windll.user32.MessageBoxA(0, str(s), str(st), 0)
+	except Exception as ei:
+		if gbPrintErr:print ei
 ########################
 
 gError=None;gbPrintErr=False
@@ -42,14 +43,26 @@ except Exception as ei:
 	if gbPrintErr:print '#Error import F'
 	gError=ei
 #TODO: if not has ei,import error occur twice,why?
+def driverPath(a):
+	for i in T.AZ:
+		if F.exist(i+a):return i+a
+	return ''
+
 def getTestPath():
 	if isnix():return '/test/'
-	st='d:/test/'
-	for i in T.AZ:
-		if iswin() or iscyg():
-			if F.exist(i+st[1:]):return i+st[1:]
-	if iswin() or iscyg():return st
+	if iswin() or iscyg():
+		s='d:/test/'
+		return driverPath(s[1:]) or s
 gst=gsTestPath=getTestPath()
+
+
+def getShellPath():
+	if isnix():return '/bin/qgb/'
+	if iswin() or iscyg():
+		s='E:/sourceCode/shell/'
+		return driverPath(s[1:]) or s
+gsw=gsWShell=getShellPath()
+
 
 def pln(*a,**ka):
 	s='print '
