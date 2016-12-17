@@ -26,8 +26,7 @@ sqlite='SELECT * FROM sqlite_master;'
 #########################################
 squote=quote="'"
 dquote=dQuote='"'
-
-
+import __builtin__ ;py=builtin=__builtin__
 import   re	
 try:
 	from chardet import detect
@@ -62,7 +61,7 @@ def ishex(a):
 	if len(a)<1:return False
 	for i in a.lower():
 		if i not in hex:return False
-	return True
+	return True	
 def sub(s,s1,s2=''):
 	if(s==None):return None
 	s=str(s)
@@ -168,15 +167,31 @@ def allAscii(a):
 		if ord(i)>127:return False
 		# print ord(i);break
 	return True
-
 	
 gsZI='''个、十、百、千、万、十万、百万、千万、亿、十亿、百亿、千亿 、兆、十兆、百兆、千兆、京、十京、百京、千京、垓、十垓、百垓、千垓、秭、十秭、百秭、千秭、穰、十穰、百穰、千穰、沟、十沟、百沟、千沟、涧、十涧、百涧、千涧、正、十正、百正、千正、载、十载、百载、千载、极、十极、百极、千极'''
-def readNumber(a):
+gZi=gsZI.split('、')
+
+def readNumber(a,split=4,p=True):
+	if split<1:return ''
+	zh=gZi[::split]
 	if a not in(str,unicode):a=str(a)
-	s=''
-	for i in a:
-		if i in number():s+=i
-	
+	import U
+	a=''.join(U.one_in(list(a),number))
+	while(a.startswith('0')):a=a[1:]
+
+	s='';im=py.len(a);iz=0;zh[0]=''#忽略 个
+	for i,k in enumerate(a):	
+		if i%split==0:
+			i=a[im-i-split:im-i]
+			s=i+zh[iz]+s
+			iz+=1
+			print  i,
+	s=a[0:im-((iz-1)*split)]+s
+	# U.repl()
+	# for i in zh:print i.decode('utf-8').encode(U.stdout.encoding)
+	s=s.decode('utf-8')
+	if p:print s.encode(U.stdout.encoding)		
+	return s
 
 gcszh=gZhEncodings=gcodingZh={'gb18030', 'gb2312', 'gbk', 'big5', 'big5hkscs', 'cp932', 'cp949', 'cp950', 'euc-jisx0213', 'euc-jis-2004', 'euc-jp', 'euc-kr', 'hz', 'idna', 'iso2022-jp', 'iso2022-jp-1', 'iso2022-jp-2', 'iso2022-jp-2004', 'iso2022-jp-3', 'iso2022-jp-ext', 'iso2022-kr', 'johab', 'mbcs', 'punycode', 'raw-unicode-escape', 'shift-jis','shift-jisx0213', 'shift-jis-2004', 'unicode-escape', 'unicode-internal', 'utf-16', 'utf-16-be', 'utf-16-le', 'utf-32', 'utf-32-be', 'utf-32-le', 'utf-7', 'utf-8', 'utf-8-sig'}
 	

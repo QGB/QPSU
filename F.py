@@ -75,7 +75,7 @@ def list(ap='.',type='',t='',r=False,d=False,dir=False,f=False,file=False):
 	if 'r' in type:r=True
 	
 	if d or dir or f or file:pass
-	else:d=f=True        #default return all
+	else:d=f=True		#default return all
 	
 	if py.type(ap)!=py.type('') or py.len(ap)<1:ap='.'
 	# if len(ap)==2 and ap.endswith(':'):ap+='/'	
@@ -108,21 +108,41 @@ def list(ap='.',type='',t='',r=False,d=False,dir=False,f=False,file=False):
 	# else:return r3[1]+r3[2]
 ls=list
 
-def ll(ap='.',stime=True,type='',t='',r=False,d=False,dir=False,f=False,file=False):
+def ll(ap='.',readable=True,type='',t='',r=False,d=False,dir=False,f=False,file=False):
 	'''return {file : [size,atime,mtime,ctime,st_mode]}
+	readable is True: Size,Stime,..
 	linux struct stat: http://pubs.opengroup.org/onlinepubs/009695399/basedefs/sys/stat.h.html'''
 	dr={}
-	for i in ls(ap,type=type,t=t,r=r,d=d,dir=dir,f=f,file=file):
+	for i in list(ap,type=type,t=t,r=r,d=d,dir=dir,f=f,file=file):
 		s=_os.stat(i)
 		dr[i]=[size(i),s.st_atime,s.st_mtime,s.st_ctime,s.st_mode]
-		if stime:
+		if readable:
 			# import U
 			for j in py.range(len(dr[i])):
 				if py.type(dr[i][j]) is py.float:dr[i][j]=U.stime(time=dr[i][j])
-		
+				if py.type(dr[i][j]) is py.long:dr[i][j]=readableSize(dr[i][j])
 	return dr
 
+SUFFIXES = {1000: ['KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'],
+			1024: ['KiB', 'MiB', 'GiB', 'TiB', 'PiB', 'EiB', 'ZiB', 'YiB']}
+def readableSize(size, b1024=True):
+	'''Convert a file size to human-readable form.
+	Keyword arguments:
+	size -- file size in bytes
+	b1024 -- if True (default), use multiples of 1024
+	if False, use multiples of 1000
+	Returns: string
+	test git
+	'''
+	if size < 0:
+		raise ValueError('number must be non-negative')
 
+	multiple = 1024.0 if b1024 else 1000.0 #another if statement style
+	for suffix in SUFFIXES[multiple]:
+		size /= multiple
+		if size < multiple:
+			return '{0:.3f} {1}'.format(size, suffix)
+	raise ValueError('number too large')
   
 def size(asf): 
 	'''file or path return byte count
@@ -159,10 +179,13 @@ def getSourcePath():
 	# print __file__, __name__ , __package__
 	
 def delFile(a):
-	try:
-		os.remove(a)
-		return True
-	except:return False
+	a=autoPath(a,md=False)
+	# sp=getSplitor(a)
+	# for i in a.split(ap):
+	# try:
+		# os.remove(a)
+		# return True
+	# except:return False
 	
 rm=delFile
 	
@@ -174,21 +197,21 @@ getsp=getSp=getSplitor
 		
 		
 def makeDirs(ap):
+	ap=autoPath(ap,md=False)
 	sp=getSplitor(ap)
-	if not _p.isabs(ap):
-		if ap.startswith('.'):
-			fr=U.__frame
-			U.repl()
-	else:
-		ls=ap.split(sp)
-		base=''
-		for i in ls:
-			base+=(i+sp)
-			if exist(base):continue
-			else:
-				try:
-					_os.mkdir(base)
-				except:return False
+	# if not _p.isabs(ap):
+		# if not ap.startswith('.'):
+			# if ap.startswith(sp):ap=U.gst[:-1]+ap
+			# else:ap=U.gst+ap
+	# else:
+	base=''
+	for i in ap.split(sp):
+		base+=(i+sp)
+		if exist(base):continue
+		else:
+			try:
+				_os.mkdir(base)
+			except:return False
 	return True	
 	
 	# if U.iswin():
@@ -196,15 +219,17 @@ def makeDirs(ap):
 		# _os.system('md "{0}"'.format(ap))
 md=mkdir=makeDirs		
 		
-def autoPath(filename):
+def autoPath(filename,mkdir=True,md=True):
+	if not mkdir:md=False
 	if (filename.startswith(".")):
+		if md:makeDirs(fileName)
 		return filename;
 	
 	if _p.isabs(filename):
-		makeDirs(filename);
+		if md:makeDirs(filename);
 		return filename;
 	else:
-		makeDirs(U.gst + filename);
+		if md:makeDirs(U.gst + filename);
 		return (U.gst + filename);
 
 def isAbs(a):
@@ -222,6 +247,7 @@ def name(a):
 		# U.repl()
 		if U.inMuti(a,'/','\\',f=str.startswith):return a[1:]
 		else:return a
+filename=fileName=name
 		
 def dir(a):
 	return _p.dirname(a)

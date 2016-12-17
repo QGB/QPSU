@@ -4,13 +4,16 @@ from qgb import U,T
 '''
 true=True;false=False
 gimax=IMAX=imax=2147483647;gimin=IMIN=imin=-2147483648
-import  os,sys,socket;stdin=sys.stdin;pid=os.getpid();path=os.path
-from threading import *;thread=Thread
-from multiprocessing import *;process=Process
+import  os,sys,socket;pid=os.getpid();path=os.path
+stdin=sys.stdin;stdout=sys.stdout;stderr=sys.stderr
+decoding='utf-8';encoding=stdout.encoding
+from threading import Thread;thread=Thread
+from multiprocessing import Process;process=Process
 import __builtin__ ;py=builtin=__builtin__
-
+module=type(py)
 # import T
-# print T.string;exit()
+gError=None;gbPrintErr=False
+
 import platform
 def iswin():
 	if platform.system().startswith('Windows'):return True
@@ -32,27 +35,36 @@ if iswin():
 	
 ########################
 
-gError=None;gbPrintErr=False
-
 try:
 	from F import write,read,ls,ll,md,rm
 	import F,T
 	from pprint import pprint
 	import Clipboard;clipboard=cb=Clipboard
 except Exception as ei:
-	if gbPrintErr:print '#Error import F'
+	if gbPrintErr:print '#Error import',ei
 	gError=ei
 #TODO: if not has ei,import error occur twice,why?
 
 def pln(*a,**ka):
 	s='print '
-	for i in range(len(a)):
-		s+='a['+str(i)+'],'
+	def den(k):
+		if type(k) is py.unicode:k=k.encode(encoding)
+		if type(k) is py.str:
+			rd=T.detect(k)
+			if rd.popitem()[0]>0.9:dc=rd[1]
+			else:dc=decoding
+			k=k.decode(dc).encode(encoding)
+		return k
+	
+	for k in a:
+		if type(k) in (list,set,tuple):
+			pln()
+		print k,
 
-	if len(ka)<1:
-		exec(s[:-1])###without (del last ,) [:-1] can't flush
-	else:
-		print a,ka
+	# if len(ka)<1:
+		# exec(s[:-1])###without (del last ,) [:-1] can't flush
+	# else:
+		# print a,ka
 	sys.stdout.flush()
 
 	
@@ -608,12 +620,14 @@ def printAttr(a,console=False):
 		try:
 			v=py.eval('a.{0}'.format(k))
 			vi=len(v)
-			if py.callable(v) and k.startswith('__'):
-				vv='!ErrGetV()'
-				try:vv=v()
-				except:pass
-				v='{0} == {1}'.format(v,vv)
-			
+			if py.callable(v):
+				if k.startswith('__'):
+					vv='!ErrGetV()'
+					try:vv=v()
+					except:pass
+					v='{0} == {1}'.format(v,vv)
+				v=str(v)
+				v+=getHelp(v)
 			if type(v) is not str:
 				import pprint
 				v= pprint.pformat(v)
@@ -699,7 +713,8 @@ name=getVarName
 # getVarName(1l)
 
 def isModule(a):
-	return type(a) is type(py)	
+	return type(a) is module
+ismod=ismodule=isModule
 
 def getHelp(a):
 	import pydoc,re
@@ -707,13 +722,14 @@ def getHelp(a):
 	a=re.sub('.\b', '', a)
 	originURL='docs.python.org/library/'
 	targetURL='python.usyiyi.cn/documents/python_278/library/{0}.html\n'+originURL
-	
+	msgbox(isModule(a))
 	if originURL in a:
 		a=a.replace(originURL,targetURL.format(T.sub(a,originURL,'\n')))
 	elif isModule(a):
 		a=a.replace('NAME',   targetURL.format(T.sub(a,'NAME',' - ').strip() ) )
-	repl()
+		repl()
 	return a
+gethelp=getHelp
 	
 def helphtml(obj,*aos):
 	txt=''
@@ -925,6 +941,9 @@ def dis(a):
 	from dis import dis
 	return dis (compile(a,'<str>','exec'))
 		
+def ipy(*a):
+	import IPython
+	IPython.start_IPython()
 def ipyOutLast(i=None):
 	'''use _  ,  __ ,  ___ 
 	ORZ'''
@@ -1001,12 +1020,12 @@ def main(display=True,pressKey=False,clipboard=False,escape=False,c=False,ipyOut
 	###############################
 	if c:gsImport+=';C=c=U.clear'
 	
+	if reload:gsImport+=";R=r=U.reload"
+		
 	if ipyOut:gsImport+=';O=o=U.ipyOutLast'
 	
-	if cmdPos:gsImport+=";POS=pos=U.cmdPos;npp=NPP=U.notePadPlus;ULS=Uls=uls=U.ls"
-	
-	if reload:gsImport+=";R=r=U.reload"
-	
+	if cmdPos:gsImport+=";POS=pos=U.cmdPos;npp=NPP=U.notePadPlus;ULS=Uls=uls=F.ls;ULL=Ull=ull=F.ll"
+		
 	if escape:gsImport=gsImport.replace("'",r"\'")
 	
 	if display:print gsImport
