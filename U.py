@@ -4,7 +4,7 @@ from qgb import U,T
 '''
 true=True;false=False
 gimax=IMAX=imax=2147483647;gimin=IMIN=imin=-2147483648
-import  os,sys,socket;pid=os.getpid();path=os.path
+import  os,sys;pid=os.getpid();path=os.path
 stdin=sys.stdin;stdout=sys.stdout;stderr=sys.stderr
 decoding='utf-8';encoding=stdout.encoding
 from threading import Thread;thread=Thread
@@ -14,27 +14,6 @@ module=type(py)
 # import T
 gError=None;gbPrintErr=False
 
-import platform
-def iswin():
-	if platform.system().startswith('Windows'):return True
-	else:return False
-def isnix():
-	if 'nix' in platform.system().lower():return True
-	else:return False
-########################
-if iswin():
-	gst=gsTestPath='d:/test/'
-	gsw=gsWShell='E:/sourceCode/shell/'
-	try:
-		import Win
-		from Win import setWindowPos,msgbox
-		pos=cmdPos=setWindowPos
-	except Exception as ei:
-		if gbPrintErr:print '#Error import',ei
-		gError=ei
-	
-########################
-
 try:
 	from F import write,read,ls,ll,md,rm
 	import F,T
@@ -43,7 +22,55 @@ try:
 except Exception as ei:
 	if gbPrintErr:print '#Error import',ei
 	gError=ei
+#########################
+import platform
+def iswin():
+	if platform.system().startswith('Windows'):return True
+	else:return False
+def isnix():
+	if 'nix' in platform.system().lower():return True
+	else:return False
+def iscyg():
+	return 'cygwin' in  platform.system().lower()
+########################
+if iswin() or iscyg():
+	try:
+		import Win
+		from Win import setWindowPos,msgbox
+		pos=cmdPos=setWindowPos
+	except Exception as ei:
+		def msgbox(s='',st='title',*a):
+			if(a!=()):s=str(s)+ ','+str(a)[1:-2]
+			if iswin():windll.user32.MessageBoxA(0, str(s), str(st), 0)
+		if gbPrintErr:print '#Error import',ei
+		gError=ei
+########################
 #TODO: if not has ei,import error occur twice,why?
+def driverPath(a):
+	'''a'''
+	try:AZ=T.AZ;exist=F.exist
+	except:
+		AZ=''.join([chr(i) for i in range(65,65+26)])
+		exist=os.path.exists
+	for i in AZ:
+		if exist(i+a):return i+a
+	return ''
+
+def getTestPath():
+	if isnix():return '/test/'
+	if iswin() or iscyg():
+		s='d:/test/'
+		return driverPath(s[1:]) or s
+gst=gsTestPath=getTestPath()
+
+
+def getShellPath():
+	if isnix():return '/bin/qgb/'
+	if iswin() or iscyg():
+		s='E:/sourceCode/shell/'
+		return driverPath(s[1:]) or s
+gsw=gsWShell=getShellPath()
+
 
 def pln(*a,**ka):
 	s='print '
@@ -283,15 +310,22 @@ def in_all(v,*ts):
 		except:pass
 	return [v]
 ##########################################
-def cmd(*a):
+def cmd(*a,**ka):
+	'''show=False :show command line'''
 	import T
 	s=''
-	if iswin():quot='"'
+	if iswin() or iscyg():quot='"'
+	else:quot="'"
+	
 	if len(a)==0:
-		if iswin():a=['cmd']
+		if iswin() or iscyg():a=['cmd']
 		# TODO #
 	if len(a)==1:
-		if type(a[0])==type(''):s=a[0]
+		if type(a[0])==type(''):
+			if not s.startswith(quot):
+				s=quot+a[0]+quot
+			if ':' in s and iscyg():
+				s='cmd /c start "" '+s
 		elif len(a[0])==1:s=T.string(a[0])
 		elif len(a[0])>1:a=a[0]
 	if len(a)>1:
@@ -307,6 +341,7 @@ def cmd(*a):
 	# pln(s)
 	# exit()
 	try:
+		if 'show' in ka and ka['show']:print repr(s)
 		return os.system(s)
 	except:return -2
 	# exit()
@@ -848,6 +883,7 @@ SG_EXIT='exit'
 SG_ASK='ask'
 __bsg=False
 def __single(port,callback,reply):
+	import socket
 	__bsg=True
 	sock=None
 	sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)	
@@ -873,6 +909,7 @@ def __single(port,callback,reply):
 
 def notsingle(port,ip='127.0.0.1'):
 	try: 
+		import socket
 		sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)	
 		sock.connect((ip, port))
 		sock.send(SG_ASK)	
@@ -985,7 +1022,8 @@ def ipyOutLast(i=None):
 	
 	
 def notePadPlus(a):
-	cmd('npp',str(a))
+	cmd(driverPath(r":\Program Files\Notepad++\notepad++.exe"),autof(a))
+	# cmd('npp',str(a))
 	
 # sys.argv=['display=t','pressKey=t','clipboard=f']
 def main(display=True,pressKey=False,clipboard=False,escape=False,c=False,ipyOut=False,cmdPos=False,reload=False,*args):

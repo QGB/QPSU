@@ -1,3 +1,4 @@
+
 # coding=utf-8
 FILE_NAME="!#$%&'()+,-0123456789;=@ABCDEFGHIJKLMNOPQRSTUVWXYZ[]^_`abcdefghijklmnopqrstuvwxyz{}~"### NO space
 PATH_NAME=FILE_NAME+'/\\:'
