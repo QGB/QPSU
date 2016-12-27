@@ -1,6 +1,10 @@
 : @echo off
 git config --global user.email qgbcs1@gmail.com
 git config --global user.name QGB
+
+git config --global core.filemode false
+git config --global credential.helper store
+
 git remote add q https://github.com/qgb/qpsu
 git remote add cq https://coding.net/u/qgb/p/QPSU/git
 git add -A
