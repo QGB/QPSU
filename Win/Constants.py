@@ -1,6 +1,6 @@
 ######### CreateProcess ##############
 from ctypes.wintypes import WORD, DWORD, LPSTR, HANDLE
-
+import ctypes
 NULL  = 0
 TRUE  = 1
 FALSE = 0

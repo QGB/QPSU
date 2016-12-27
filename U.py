@@ -973,7 +973,9 @@ def getModPathForImport():
 def getModPath():
 	sp=os.path.abspath(__file__)
 	sp=os.path.dirname(sp)
-	if iswin():return sp+'\\'
+	sp=os.path.join(sp,'')
+	return sp
+	
 	
 def len(a):
 	try:return py.len(a)
@@ -1088,6 +1090,14 @@ def main(display=True,pressKey=False,clipboard=False,escape=False,c=False,ipyOut
 		except:print 'Clipboard err'
 	
 	return gsImport
+def test():
+	gm=getAllMod()
+	for i in gm:
+		exec '''
+		print {0}
+		# import {0}
+		'''.format(i) in {}
+
 if __name__ == '__main__':main()
 
 
