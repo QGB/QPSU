@@ -3,15 +3,26 @@ gsImport='''
 from qgb import U,T
 '''
 true=True;false=False
-IMAX=imax=2147483647;IMIN=imin=-2147483648
-import  os,sys,socket;stdin=sys.stdin;pid=os.getpid();path=os.path
-from threading import *;thread=Thread
-from multiprocessing import *;process=Process
+gimax=IMAX=imax=2147483647;gimin=IMIN=imin=-2147483648
+import  os,sys;pid=os.getpid();path=os.path
+stdin=sys.stdin;stdout=sys.stdout;stderr=sys.stderr
+decoding='utf-8';encoding=stdout.encoding
+from threading import Thread;thread=Thread
+from multiprocessing import Process;process=Process
 import __builtin__ ;py=builtin=__builtin__
+module=type(py)
 
 gError=None;gbPrintErr=False
-# import T
-# print T.string;exit()
+
+try:
+	from F import write,read,ls,ll,md,rm
+	import F,T
+	from pprint import pprint
+	import Clipboard;clipboard=cb=Clipboard
+except Exception as ei:
+	if gbPrintErr:print '#Error import',ei
+	gError=ei
+#########################
 import platform
 def iswin():
 	if platform.system().startswith('Windows'):return True
@@ -24,16 +35,16 @@ def iscyg():
 ########################
 if iswin() or iscyg():
 	try:
-		from ctypes import windll, Structure, c_ulong, byref
-
+		import Win
+		from Win import setWindowPos,msgbox
+		pos=cmdPos=setWindowPos
+	except Exception as ei:
 		def msgbox(s='',st='title',*a):
 			if(a!=()):s=str(s)+ ','+str(a)[1:-2]
 			if iswin():windll.user32.MessageBoxA(0, str(s), str(st), 0)
-	except Exception as ei:
-		if gbPrintErr:print ei
+		if gbPrintErr:print '#Error import',ei
+		gError=ei
 ########################
-
-
 try:
 	from F import write,read,ls,ll,md,rm
 	import F,T
@@ -42,10 +53,16 @@ try:
 except Exception as ei:
 	if gbPrintErr:print '#Error import F'
 	gError=ei
+
 #TODO: if not has ei,import error occur twice,why?
 def driverPath(a):
-	for i in T.AZ:
-		if F.exist(i+a):return i+a
+	'''a'''
+	try:AZ=T.AZ;exist=F.exist
+	except:
+		AZ=''.join([chr(i) for i in range(65,65+26)])
+		exist=os.path.exists
+	for i in AZ:
+		if exist(i+a):return i+a
 	return ''
 
 def getTestPath():
@@ -66,13 +83,24 @@ gsw=gsWShell=getShellPath()
 
 def pln(*a,**ka):
 	s='print '
-	for i in range(len(a)):
-		s+='a['+str(i)+'],'
+	def den(k):
+		if type(k) is py.unicode:k=k.encode(encoding)
+		if type(k) is py.str:
+			rd=T.detect(k)
+			if rd.popitem()[0]>0.9:dc=rd[1]
+			else:dc=decoding
+			k=k.decode(dc).encode(encoding)
+		return k
+	
+	for k in a:
+		if type(k) in (list,set,tuple):
+			pln()
+		print k,
 
-	if len(ka)<1:
-		exec(s[:-1])###without (del last ,) [:-1] can't flush
-	else:
-		print a,ka
+	# if len(ka)<1:
+		# exec(s[:-1])###without (del last ,) [:-1] can't flush
+	# else:
+		# print a,ka
 	sys.stdout.flush()
 
 	
@@ -90,8 +118,8 @@ def p(*a,**ka):
 # exit()
 
 def readStdin(size=-1):
-	'''size<0 read all,
-	help read:If the size argument is negative or omitted, read until EOF is reached.'''
+	'''size<0 read all, 
+	If the size argument is negative or omitted, read until EOF is reached.'''
 	if not stdin.isatty():
 		stdin.seek(0)
 		return stdin.read(size)
@@ -159,6 +187,7 @@ def autof(head,ext=''):
 		return ''
 	
 	if len(ext)>0 and not ext.startswith('.'):ext='.'+ext
+	head.head.lower();ext=ext.lower()
 	
 	ap='.'
 	if path.isabs(head):
@@ -169,7 +198,7 @@ def autof(head,ext=''):
 
 	
 	import F
-	ls=F.ls(ap)
+	ls=[i.lower() for i in F.ls(ap)]
 	if head+ext in ls:return head+ext
 	
 	for i in ls:		
@@ -290,15 +319,22 @@ def in_all(v,*ts):
 		except:pass
 	return [v]
 ##########################################
-def cmd(*a):
+def cmd(*a,**ka):
+	'''show=False :show command line'''
 	import T
 	s=''
-	if iswin():quot='"'
+	if iswin() or iscyg():quot='"'
+	else:quot="'"
+	
 	if len(a)==0:
-		if iswin():a=['cmd']
+		if iswin() or iscyg():a=['cmd']
 		# TODO #
 	if len(a)==1:
-		if type(a[0])==type(''):s=a[0]
+		if type(a[0])==type(''):
+			if not s.startswith(quot):
+				s=quot+a[0]+quot
+			if ':' in s and iscyg():
+				s='cmd /c start "" '+s
 		elif len(a[0])==1:s=T.string(a[0])
 		elif len(a[0])>1:a=a[0]
 	if len(a)>1:
@@ -314,6 +350,7 @@ def cmd(*a):
 	# pln(s)
 	# exit()
 	try:
+		if 'show' in ka and ka['show']:print repr(s)
 		return os.system(s)
 	except:return -2
 	# exit()
@@ -349,7 +386,15 @@ def curl(a):
 	cmd(a)
 
 # def isfile
-
+# del __name__
+def this():
+	''' local dir'''
+	repl()
+	if not py.globals().has_key('__name__'):
+		__name__='233qgb.U'
+		# txt(globals())
+		print __name__
+	
 def pyshell(printCount=False):
 	# a=1
 	ic=count('__repl__')
@@ -357,7 +402,14 @@ def pyshell(printCount=False):
 	######################
 	f=sys._getframe().f_back
 	locals=f.f_locals
-	locals['U']=__frame.f_locals['U']
+	
+	locals['U']=sys.modules['qgb.U']
+	locals['T']=sys.modules['qgb.T']
+	locals['F']=sys.modules['qgb.F']
+	# try:
+		# locals['U']=__frame.f_locals['U']
+	# except:  #KeyError: 'U'  if use in qgb.U Module
+		# locals=mergeDict(locals,py.globals())
 	__import__('code').interact(banner="",local=locals)
 	return
 	
@@ -372,10 +424,12 @@ def pyshell(printCount=False):
 	
 repl=pys=pyshell
 
-def reload(mod=None):
-	if mod==None:
-		mod=sys._getframe().f_back.f_globals['U']
-	__import__('imp').reload(mod)
+def reload(*mods):
+	import imp
+	if len(mods)<1:
+		imp.reload(sys._getframe().f_back.f_globals['U'])#return module
+	for i in mods:
+		imp.reload(i)
 R=r=reload
 
 def tab():
@@ -386,7 +440,6 @@ class __wrapper(object):
 	def __init__(self, wrapped):
 		self.wrapped = wrapped
 	def __getattr__(self, name):
-		
 		try:
 			
 			return getattr(self.wrapped, name)
@@ -448,6 +501,8 @@ cds=cdws=cdWShell
 def pwd(p=False,display=False):
 	s=os.getcwd()
 	if p or display:print s
+	try:pwd.sp=F.getsp(s)
+	except:pass
 	return s
 	
 	
@@ -480,6 +535,9 @@ def calltimes(a=''):
 		calltimes.__dict__[a]=0
 	return calltimes.__dict__[a]
 ct=count=calltimes
+def _ct_clear():calltimes.__dict__={'clear':_ct_clear}
+calltimes.clear=_ct_clear
+
 
 if(calltimes()<1):BDEBUG=True;__stdout=None
 debug=BDEBUG
@@ -516,7 +574,7 @@ def browser(url,ab='chrome'):
 	# if iswin():os.system('''start '''+str(url))
 # browser('qq.com')
 
-# txthtml=('<textarea style="width:100%; height:100%;">','</textarea>')
+gshtml=htmltxt=txthtml=('<textarea style="width:100%; height:100%;">','</textarea>')
 		
 def autohtml(file=None):
 	import T
@@ -560,13 +618,29 @@ def shtml(txt,file='',browser=True):
 txt=shtml	
 
 def maxLen(*a):
-	if py.len(a)==1:a=a[0]
+	if py.len(a)==1:a=flat(a)
 	im=-1
 	for i in a:
 		i=len(i)
 		if i>im:im=i
 	return im
-
+def minLen(*a):
+	if py.len(a)==1:a=flat(a)
+	if not a:return -1
+	im=gimax
+	for i in a:
+		i=len(i)
+		if i<im:im=i
+	return im
+def avgLen(*a):
+	if py.len(a)==1:a=flat(a)
+	if not a:return -1
+	im=0
+	for i in a:
+		im+=len(i)
+	return float(im)/len(a)
+	
+	
 def printAttr(a,console=False):
 	'''aoto call __methods which is no args'''
 	d=py.dir(a)
@@ -590,16 +664,22 @@ def printAttr(a,console=False):
 		try:
 			v=py.eval('a.{0}'.format(k))
 			vi=len(v)
-			if py.callable(v) and k.startswith('__'):
-				vv='!ErrGetV()'
-				try:vv=v()
-				except:pass
-				v='{0} == {1}'.format(v,vv)
-			
+			if py.callable(v):
+				if k.startswith('__'):
+					vv='!ErrGetV()'
+					try:vv=v()
+					except:pass
+					v='{0} == {1}'.format(v,vv)
+				v=str(v)
+				v+=getHelp(v)
 			if type(v) is not str:
 				import pprint
 				v= pprint.pformat(v)
 		except Exception as e:v=py.repr(e)
+		
+		v=v.replace(txthtml[0], '*'*33)
+		v=v.replace(txthtml[1], '*'*11)
+		
 		r+=sh.format(i,k,v,vi)
 	# cdt('QPSU')
 	import T
@@ -616,9 +696,16 @@ def getObjName(a,value=False):
 		if len(a.__name__)>0:
 			return a.__name__
 	except:pass
-	if type(a) in (py.int,py.long):return 'i_'+str(a)
-	if type(a) is py.str:return 's_'+a[:7]
 	
+	try:
+		r=str(a.__class__)
+		if 'type' in r:
+			return T.sub(r,T.quote,T.quote).strip()
+	except:pass
+	
+	if type(a) in (py.int,py.long):return 'i_'+str(a)
+	if type(a) in (py.str,py.unicode):return 's_'+a[:7]
+		
 	return str(type(a))
 	# exit()
 getName=getObjName
@@ -669,22 +756,34 @@ name=getVarName
 # exit()
 # getVarName(1l)
 
+def isModule(a):
+	return type(a) is module
+ismod=ismodule=isModule
+
+def getHelp(a):
+	import pydoc,re
+	a=pydoc.render_doc(a,'%s')
+	a=re.sub('.\b', '', a)
+	originURL='docs.python.org/library/'
+	targetURL='python.usyiyi.cn/documents/python_278/library/{0}.html\n'+originURL
+	msgbox(isModule(a))
+	if originURL in a:
+		a=a.replace(originURL,targetURL.format(T.sub(a,originURL,'\n')))
+	elif isModule(a):
+		a=a.replace('NAME',   targetURL.format(T.sub(a,'NAME',' - ').strip() ) )
+		repl()
+	return a
+gethelp=getHelp
 	
 def helphtml(obj,*aos):
 	txt=''
-	import pydoc,re
 	if aos:
 		aos=flat(obj,aos,noNone=True)
 		for i in aos:
-			#TODO
-			txt+=re.sub('.\b', '', pydoc.render_doc(i,'%s'))
+			txt+=getHelp(i)
 			txt+='\n==============%s=======================\n'%ct(aos)
-	else:txt=re.sub('.\b', '', pydoc.render_doc(obj,'%s'))
-	# txt=txt.replace(txthtml[1],txthtml[1][:1]+'!!!qgb-padding!!!'+txthtml[1][1:])
-	# txt=txthtml[0]+txt+txthtml[1]
-	# msgbox(txt[txt.find(b'\x08'):])
-	# repl()
-	# exit()
+	else:txt=getHelp(obj)	
+
 	file='Uhelp_obj.txt'
 	try:
 		import T
@@ -733,6 +832,16 @@ def phtmlend():
 	resetOut()
 	globals()['browser'](sf)
 # dicthtml('uvars.html',vars())
+
+def mergeDict(*a):
+	r={}
+	for i in a:
+		if type(i) != py.dict:
+			try:i=py.dict(i)
+			except:continue
+		for k,v in i.iteritems():
+			r[k]=v
+	return r
 	
 def getTimestamp():
 	'''return: float'''
@@ -750,25 +859,24 @@ def getFloaTail(a,s=False,str=False,string=False,i=False,int=False):
 			return int(py.str(a)[2:])
 		return a	
 		
-def getStime(format='%Y-%m-%d %H.%M.%S',time=None):
+def getStime(time=None,format='%Y-%m-%d %H.%M.%S'):
 	'''http://python.usyiyi.cn/translate/python_278/library/time.html#time.strftime'''
 	import time as tMod
 	
-	if format==':':format='%Y-%m-%d %H.%M.%S'.replace('.',':')
+	if ':' in format:format='%Y-%m-%d %H.%M.%S'.replace('.',':')
 	
-	if type(time) not in (int,float):time=getTimestamp()
+	if type(time) not in (int,float,long):time=getTimestamp()
 	if format=='' or type(format) is not str:return str(time)
 	
 	if '%' in format:
 		if time:
-			if type(time) in (int,float) and time>0:
-				r=tMod.strftime(format,tMod.localtime(time))
-				if type(time) is float:
-					if not r.endswith(' '):r+=' '
-					r+=getFloaTail(time,s=True)
-				return r
+			r=tMod.strftime(format,tMod.localtime(time))
+			if type(time) is float:
+				if not r.endswith(' '):r+=' '
+				r+=getFloaTail(time,s=True)
+			return r
 		else:return tMod.strftime(format)
-stime=getStime
+stime=timeToStr=getStime
 	
 		
 		
@@ -779,19 +887,12 @@ def getThreads():
 	return r
 	
 
-def getCursorPos():
-	class POINT(Structure):
-		_fields_ = [("x", c_ulong), ("y", c_ulong)]
-	pt = POINT()
-	windll.user32.GetCursorPos(byref(pt))
-	return pt.x,pt.y
-
-
 
 SG_EXIT='exit'
 SG_ASK='ask'
 __bsg=False
 def __single(port,callback,reply):
+	import socket
 	__bsg=True
 	sock=None
 	sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)	
@@ -817,6 +918,7 @@ def __single(port,callback,reply):
 
 def notsingle(port,ip='127.0.0.1'):
 	try: 
+		import socket
 		sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)	
 		sock.connect((ip, port))
 		sock.send(SG_ASK)	
@@ -885,6 +987,9 @@ def dis(a):
 	from dis import dis
 	return dis (compile(a,'<str>','exec'))
 		
+def ipy(*a):
+	import IPython
+	IPython.start_IPython()
 def ipyOutLast(i=None):
 	'''use _  ,  __ ,  ___ 
 	ORZ'''
@@ -924,12 +1029,10 @@ def ipyOutLast(i=None):
 		except:return Out[Out.keys()[i]]
 	return Out
 	
-def cmdPos():
-	cmd(gsw+'pos')
-pos=cmdPos
 	
 def notePadPlus(a):
-	cmd('npp',str(a))
+	cmd(driverPath(r":\Program Files\Notepad++\notepad++.exe"),autof(a))
+	# cmd('npp',str(a))
 	
 # sys.argv=['display=t','pressKey=t','clipboard=f']
 def main(display=True,pressKey=False,clipboard=False,escape=False,c=False,ipyOut=False,cmdPos=False,reload=False,*args):
@@ -962,14 +1065,14 @@ def main(display=True,pressKey=False,clipboard=False,escape=False,c=False,ipyOut
 	###############################
 	'''call order Do Not Change! '''
 	###############################
-	if c:gsImport+=';C=c=U.c'
-	
-	if ipyOut:gsImport+=';O=o=U.ipyOutLast'
-	
-	if cmdPos:gsImport+=";POS=pos=U.cmdPos;npp=NPP=U.notePadPlus;ULS=Uls=uls=U.ls"
+	if c:gsImport+=';C=c=U.clear'
 	
 	if reload:gsImport+=";R=r=U.reload"
+		
+	if ipyOut:gsImport+=';O=o=U.ipyOutLast'
 	
+	if cmdPos:gsImport+=";POS=pos=U.cmdPos;npp=NPP=U.notePadPlus;ULS=Uls=uls=F.ls;ULL=Ull=ull=F.ll"
+		
 	if escape:gsImport=gsImport.replace("'",r"\'")
 	
 	if display:print gsImport
