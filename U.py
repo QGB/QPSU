@@ -61,14 +61,14 @@ def driverPath(a):
 	except:
 		AZ=''.join([chr(i) for i in range(65,65+26)])
 		exist=os.path.exists
-	for i in AZ:
+	for i in AZ[::-1]:
 		if exist(i+a):return i+a
 	return ''
 
 def getTestPath():
 	if isnix():return '/test/'
 	if iswin() or iscyg():
-		s='d:/test/'
+		s='c:/test/'
 		return driverPath(s[1:]) or s
 gst=gsTestPath=getTestPath()
 
