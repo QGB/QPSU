@@ -32,11 +32,10 @@ def hexToBytes(a,split=''):
 h2b=hexToBytes
 
 def writeIterable(a,data,end='\n',override=True):
-	if override:
-		
+	if override:_os.remove(a)		
 	f=open(a,'a')
 	for i in data:
-		f.write()
+		f.write(py.str(i)+end)
 
 def write(a,data,mod='wb',mkdir=False):
 	if mkdir:a=autoPath(a)
