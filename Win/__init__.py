@@ -1,6 +1,7 @@
 from sys import path as _p;_p.insert(0,_p[0][:-4])
-import U
+from .. import U
 import ctypes
+
 if U.iswin():
 	from ctypes import windll
 	user32=windll.user32
