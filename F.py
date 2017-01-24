@@ -5,6 +5,13 @@ import __builtin__ as py
 import os as _os;import sys as _sys;from os import path as _p
 import T,U
 
+def isPath(ast):
+	if type(ast) not in (str,unicode):ast=py.str(ast)
+	if not ast:return None
+	if not ast.replace('.','').strip():return True
+	return ('/' in ast) or ('\\' in ast)
+	# return _p.sep in ast
+
 def bytesToHex(a,split=''):
 	r=''
 	for i in a:
