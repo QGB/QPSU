@@ -1093,11 +1093,13 @@ def main(display=True,pressKey=False,clipboard=False,escape=False,c=False,ipyOut
 def test():
 	gm=getAllMod()
 	for i in gm:
-		exec '''
-		print {0}
-		# import {0}
-		'''.format(i) in {}
-
+		try:
+			exec '''
+import {0}
+print {0}
+			'''.format(i) in {}
+		except:
+			print '###import {0}'.format(i)
 if __name__ == '__main__':main()
 
 
