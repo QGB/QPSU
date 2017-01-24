@@ -37,7 +37,13 @@ def hexToBytes(a,split=''):
 		r+=chr(DHI[a[i*2:i*2+2]])
 	return r
 h2b=hexToBytes
-	
+
+def writeIterable(a,data,end='\n',override=True):
+	if override:_os.remove(a)		
+	f=open(a,'a')
+	for i in data:
+		f.write(py.str(i)+end)
+
 def write(a,data,mod='wb',mkdir=False):
 	if mkdir:a=autoPath(a)
 
@@ -51,7 +57,9 @@ def write(a,data,mod='wb',mkdir=False):
 		if 'f' in py.dir() and f:f.close()
 		return False
 		
-def append(a,data):write(a,data,mod='a')
+def append(a,data):
+	'''builtin afile.write() No breakLine'''
+	write(a,data,mod='a')
 	
 def read(a,mod='r'):
 	try:

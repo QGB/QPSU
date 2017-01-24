@@ -1,12 +1,25 @@
+from sys import path as _p;_p.insert(0,_p[0][:-4])
+from .. import U
 import ctypes
-from ctypes import windll
-user32=windll.user32
-kernel32=windll.kernel32
-advapi32=windll.advapi32
+
+if U.iswin():
+	from ctypes import windll
+	user32=windll.user32
+	kernel32=windll.kernel32
+	advapi32=windll.advapi32
+if U.iscyg():
+	from ctypes import cdll
+	user32=cdll.LoadLibrary("user32.dll")
+	kernel32=cdll.LoadLibrary("kernel32.dll")
+	advapi32=cdll.LoadLibrary("advapi32.dll")
+# print _p;print advapi32
+
+import Constants as C;c=C
+C.advapi32=advapi32
+from Constants import *
 
 try:import win32gui
 except Exception as ei:pass
-
 
 def getCmdHandle():
 	return kernel32.GetConsoleWindow()
@@ -98,13 +111,11 @@ def GetLastError(error_code=None):
 
     error_message = error_message.decode('cp1251').strip()
     return '{} - {}'.format(error_code, error_message)
-######################################################
-from Constants import *
-	
+##############################################
 def main():
 	import sys,os;sys.path.append('d:\pm');from qgb import U,T,F
 	CreateProcessWithLogonW(lpUsername='qgb',
-	lpPassword='q',
+	lpPassword='',
 	
 	lpApplicationName=r'C:\WINDOWS\system32\calc.exe')	
 	print '[%s]'%getTitle()

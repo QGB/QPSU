@@ -43,7 +43,7 @@ def testFunc():
 class testClass:
 	def testMethod(self):
 		print "eggs!"
-def
+
 """
 
 m = importCode(code,"test")

@@ -34,6 +34,11 @@ try:
 except Exception as ei:
 	pass
 	
+def matchHead(txt,regex):
+	r=re.match(regex,txt)
+	if r:return r.group()
+	else:return ''
+	
 def string(a):
 	if type(a) is str:return a
 	try:a=str(a)
