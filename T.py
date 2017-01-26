@@ -8,7 +8,7 @@ AZ=A_Z=a_z.upper()
 
 character=a_z+A_Z
 
-s09=i09=_09=number='0123456789'
+num=s09=_09=number='0123456789'
 
 az09=a_z0_9=alphanumeric=character+number
 
