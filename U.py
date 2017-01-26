@@ -957,9 +957,20 @@ def x(msg=None):
 	
 def exit(i=2357):
 	os._exit(i)
-def getAllMod():
+def getAllMod(mp=None):
 	ls=[]
-	for i in os.listdir(getModPath()):
+	if not mp:mp=getModPath()
+	if 'F' in globals():
+		for i in F.ls(mp,t='r'):
+			if not i.lower().endswith('.py'):continue
+			i=i.replace(mp,'')
+			if F.isPath(i):
+				if i.lower().endswith('__init__.py'):
+					ls.append(path.dirname(i))
+			elif '__' not in i:
+				ls.append(T.subLast(i,'','.'))
+		return ls
+	for i in os.listdir(mp):
 		if(len(i)<3):continue
 		if(i.find('__')!=-1):continue
 		if(i.lower()[-3:]!='.py'):continue
@@ -1092,14 +1103,17 @@ def main(display=True,pressKey=False,clipboard=False,escape=False,c=False,ipyOut
 	return gsImport
 def test():
 	gm=getAllMod()
+	# gm=['U','T','N','F',].extend(gm)
+	gm=set(gm)
 	for i in gm:
+		print '='*55
 		try:
 			exec '''
 import {0}
 print {0}
 			'''.format(i) in {}
-		except:
+		except Exception as ei:
 			print '###import {0}'.format(i)
+			print ei
+
 if __name__ == '__main__':main()
-
-
