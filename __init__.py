@@ -11,14 +11,14 @@ __all__=['U','T','N','F']
 
 # for i in F.list('./'):
 	# print i
-
+import sys
 for i in __all__:
+	if i in 
 	try:exec('import '+i)
 	except:__all__.remove(i)
 	
 # print __all__
 try:
-	import sys
 	f=sys._getframe()
 	while f and f.f_globals and 'get_ipython' not in f.f_globals.keys():
 		f=f.f_back

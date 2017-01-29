@@ -535,7 +535,10 @@ def calltimes(a=''):
 		calltimes.__dict__[a]=0
 	return calltimes.__dict__[a]
 ct=count=calltimes
-def _ct_clear():calltimes.__dict__={'clear':_ct_clear}
+def _ct_clear():
+	r=calltimes.__dict__
+	calltimes.__dict__={'clear':_ct_clear}
+	return {k:v for k,v in r.items() if k.startswith('_count')}
 calltimes.clear=_ct_clear
 
 
