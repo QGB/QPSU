@@ -5,6 +5,15 @@ import __builtin__ as py
 import os as _os;import sys as _sys;from os import path as _p
 import T,U
 
+def new(a):
+	'''will overwrite'''
+	try:
+		f=open(a,'w')
+		f.write('')
+		f.close()
+		return f.name
+	except:
+		return False
 def isPath(ast):
 	if type(ast) not in (str,unicode):ast=py.str(ast)
 	if not ast:return None
@@ -38,8 +47,8 @@ def hexToBytes(a,split=''):
 	return r
 h2b=hexToBytes
 
-def writeIterable(a,data,end='\n',override=True):
-	if override:_os.remove(a)		
+def writeIterable(a,data,end='\n',overwrite=True):
+	if overwrite:new(a)	
 	f=open(a,'a')
 	for i in data:
 		f.write(py.str(i)+end)
