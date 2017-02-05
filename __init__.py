@@ -5,7 +5,6 @@
 # except:pass
 
 
-#]#
 __all__=['U','T','N','F']
 
 
@@ -13,7 +12,8 @@ __all__=['U','T','N','F']
 	# print i
 import sys
 for i in __all__:
-	if i in 
+	if i in sys.modules:
+		sys.modules['_'+i]=sys.modules.pop(i)
 	try:exec('import '+i)
 	except:__all__.remove(i)
 	

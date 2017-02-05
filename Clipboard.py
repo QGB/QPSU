@@ -1,8 +1,8 @@
 try:
 	import win32clipboard as w
 	import win32con
-except Exception as e:
-	print __file__+":",e
+except Exception as err:
+	print __file__+":",err
 
 def get():
     w.OpenClipboard()
