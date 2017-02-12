@@ -32,6 +32,18 @@ def isnix():
 	else:return False
 def iscyg():
 	return 'cygwin' in  platform.system().lower()
+ipy=None
+def isipy():
+	global ipy
+	f=sys._getframe()
+	while f and f.f_globals and 'get_ipython' not in f.f_globals.keys():
+		f=f.f_back
+	try:
+		ipy=f.f_globals['get_ipython']()
+	except:
+		pass
+	return ipy
+getipy=isipy
 ########################
 if iswin() or iscyg():
 	try:
@@ -425,11 +437,23 @@ def pyshell(printCount=False):
 repl=pys=pyshell
 
 def reload(*mods):
-	import imp
+	import sys,imp
+	
 	if len(mods)<1:
-		imp.reload(sys._getframe().f_back.f_globals['U'])#return module
-	for i in mods:
-		imp.reload(i)
+		# sys.modules['qgb._U']=sys.modules['qgb.U'] #useless, _U is U
+		#if pop qgb.U,can't reload
+		if 'qgb.U' in sys.modules:imp.reload(sys.modules['qgb.U'])
+		elif 'U' in sys.modules:imp.reload(sys.modules['U'])
+		elif 'qgb._U' in sys.modules:imp.reload(sys.modules['qgb._U'])
+		# import U
+	elif len(mods)==1:
+		try:
+			imp.reload(mods[0])
+		except:
+			pass
+	else:
+		for i in mods:
+			reload(i)
 R=r=reload
 
 def tab():
