@@ -38,10 +38,10 @@ def isipy():
 	f=sys._getframe()
 	while f and f.f_globals and 'get_ipython' not in f.f_globals.keys():
 		f=f.f_back
-	try:
-		ipy=f.f_globals['get_ipython']()
-	except:
-		pass
+		try:
+			ipy=f.f_globals['get_ipython']()
+		except:
+			pass
 	return ipy
 getipy=isipy
 ########################
@@ -51,9 +51,9 @@ if iswin() or iscyg():
 		from Win import setWindowPos,msgbox
 		pos=cmdPos=setWindowPos
 	except Exception as ei:
-		def msgbox(s='',st='title',*a):
-			if(a!=()):s=str(s)+ ','+str(a)[1:-2]
-			if iswin():windll.user32.MessageBoxA(0, str(s), str(st), 0)
+		# def msgbox(s='',st='title',*a):
+			# if(a!=()):s=str(s)+ ','+str(a)[1:-2]
+			# if iswin():windll.user32.MessageBoxA(0, str(s), str(st), 0)
 		if gbPrintErr:print '#Error import',ei
 		gError=ei
 ########################
@@ -414,10 +414,14 @@ def pyshell(printCount=False):
 	######################
 	f=sys._getframe().f_back
 	locals=f.f_locals
-	
-	locals['U']=sys.modules['qgb.U']
-	locals['T']=sys.modules['qgb.T']
-	locals['F']=sys.modules['qgb.F']
+	try:
+		locals['U']=sys.modules['qgb.U']
+		locals['T']=sys.modules['qgb.T']
+		locals['F']=sys.modules['qgb.F']
+	except:
+		locals['U']=sys.modules['U']
+		locals['T']=sys.modules['T']
+		locals['F']=sys.modules['F']
 	# try:
 		# locals['U']=__frame.f_locals['U']
 	# except:  #KeyError: 'U'  if use in qgb.U Module
@@ -438,7 +442,6 @@ repl=pys=pyshell
 
 def reload(*mods):
 	import sys,imp
-	
 	if len(mods)<1:
 		# sys.modules['qgb._U']=sys.modules['qgb.U'] #useless, _U is U
 		#if pop qgb.U,can't reload
@@ -711,7 +714,8 @@ def printAttr(a,console=False):
 	# cdt('QPSU')
 	import T
 	name=gst+'QPSU/'+T.filename(getObjName(a))+'.html'
-	write(name,read(sp).replace('{result}',r))
+	print name,write(name,read(sp).replace('{result}',r))
+	
 	browser(name)
 	# cdBack()
 dir=printAttr
@@ -1027,7 +1031,7 @@ def dis(a):
 	from dis import dis
 	return dis (compile(a,'<str>','exec'))
 		
-def ipy(*a):
+def ipyStart(*a):
 	import IPython
 	IPython.start_IPython()
 def ipyOutLast(i=None):

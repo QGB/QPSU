@@ -29,9 +29,12 @@ squote=quote="'"
 dquote=dQuote='"'
 import __builtin__ ;py=builtin=__builtin__
 import   re	
+
+gError=None
 try:
 	from chardet import detect
 except Exception as ei:
+	detect='#not install chardet Module'
 	pass
 	
 def matchHead(txt,regex):
@@ -174,7 +177,11 @@ def allAscii(a):
 		# print ord(i);break
 	return True
 	
-gsZI='''个、十、百、千、万、十万、百万、千万、亿、十亿、百亿、千亿 、兆、十兆、百兆、千兆、京、十京、百京、千京、垓、十垓、百垓、千垓、秭、十秭、百秭、千秭、穰、十穰、百穰、千穰、沟、十沟、百沟、千沟、涧、十涧、百涧、千涧、正、十正、百正、千正、载、十载、百载、千载、极、十极、百极、千极'''
+gszFinancial='''零壹贰叁肆伍陆柒捌玖拾佰仟萬億'''
+#亿的后面 ，大写小写都是同一个。
+#参见https://zh.wikipedia.org/wiki/中文数字
+gsz09=gsZ09='''〇一二三四五六七八九'''
+gszi=gsZI='''个、十、百、千、万、十万、百万、千万、亿、十亿、百亿、千亿 、兆、十兆、百兆、千兆、京、十京、百京、千京、垓、十垓、百垓、千垓、秭、十秭、百秭、千秭、穰、十穰、百穰、千穰、沟、十沟、百沟、千沟、涧、十涧、百涧、千涧、正、十正、百正、千正、载、十载、百载、千载、极、十极、百极、千极'''
 gZi=gsZI.split('、')
 
 def readNumber(a,split=4,p=True):

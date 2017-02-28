@@ -4,6 +4,7 @@
 import __builtin__ as py
 import os as _os;import sys as _sys;from os import path as _p
 import T,U
+gError=None
 
 def new(a):
 	'''will overwrite'''
@@ -12,7 +13,8 @@ def new(a):
 		f.write('')
 		f.close()
 		return f.name
-	except:
+	except Exception as e:
+		globals()['gError']=e
 		return False
 def isPath(ast):
 	if type(ast) not in (str,unicode):ast=py.str(ast)
@@ -247,7 +249,13 @@ def makeDirs(ap):
 		else:
 			try:
 				_os.mkdir(base)
-			except:return False
+			
+			except Exception as e:
+
+				global gError
+				gError=e
+				if U.gbPrintErr:print e
+				return False
 	return True	
 	
 	# if U.iswin():
@@ -300,10 +308,13 @@ DHI=DHEX_INT=HEX_INT={y:x for x,y in DIH.iteritems()}
 		
 if __name__=='__main__':
 	# import T,U
-	print exist('L:\\Program Files\\Notepad++\\notepad++.exe')
+	print U.pwd()
+	
+	print exist('M:\\Program Files\\Notepad++\\notepad++.exe')
 	# l=csvAsList('process.csv')
 	# U.shtml(l)
 	# print getSourcePath()
+	U.repl()
 	exit()	
 	r=hexToBytes(T.HEX.lower())
 	# U.write('h.r',r)

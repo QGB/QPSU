@@ -1,6 +1,10 @@
-######### CreateProcess ##############
-from .. import U
-import ctypes
+import sys,ctypes
+
+try:
+	U=sys.modules['qgb.U']
+except:
+	U=sys.modules['U']
+
 if U.iswin():
 	from ctypes.wintypes import WORD, DWORD, LPSTR, HANDLE
 if U.iscyg():

@@ -1,17 +1,26 @@
-from sys import path as _p;_p.insert(0,_p[0][:-4])
-from .. import U
-import ctypes
+# from sys import path as _p;_p.insert(0,_p[0][:-4])
+import sys,ctypes
+try:
+	U=sys.modules['qgb.U']
+except:
+	U=sys.modules['U']
 
 if U.iswin():
 	from ctypes import windll
 	user32=windll.user32
 	kernel32=windll.kernel32
 	advapi32=windll.advapi32
-if U.iscyg():
-	from ctypes import cdll
-	user32=cdll.LoadLibrary("user32.dll")
-	kernel32=cdll.LoadLibrary("kernel32.dll")
-	advapi32=cdll.LoadLibrary("advapi32.dll")
+else:
+	raise NotImplementedError
+	# if U.iscyg():
+	
+	try:
+		from ctypes import cdll
+		user32=cdll.LoadLibrary("user32.dll")
+		kernel32=cdll.LoadLibrary("kernel32.dll")
+		advapi32=cdll.LoadLibrary("advapi32.dll")
+	except:
+		pass
 # print _p;print advapi32
 
 import Constants as C;c=C
@@ -81,43 +90,61 @@ getMousePos=getCursorPos
 
 def CreateProcess(appName,cmd,):pass
 
-def GetLastError(error_code=None):
-    import ctypes
-    GetLastError = kernel32.GetLastError
-    FormatMessage = kernel32.FormatMessageA
-    LocalFree = kernel32.LocalFree
+def getLastError(errCode=None,p=True):
 
-    from win32con import (
-        FORMAT_MESSAGE_FROM_SYSTEM,
-        FORMAT_MESSAGE_ALLOCATE_BUFFER,
-        FORMAT_MESSAGE_IGNORE_INSERTS)
+	from ctypes import c_void_p,create_string_buffer
+	GetLastError = kernel32.GetLastError
+	FormatMessage = kernel32.FormatMessageA
+	LocalFree = kernel32.LocalFree
+	
+	FORMAT_MESSAGE_ALLOCATE_BUFFER = 0x00000100
+	FORMAT_MESSAGE_FROM_SYSTEM = 0x00001000
+	FORMAT_MESSAGE_IGNORE_INSERTS = 0x00000200
 
-    if error_code is None:
-        error_code = GetLastError()
+	try:
+		msg = create_string_buffer(256)
+		FormatMessage(FORMAT_MESSAGE_FROM_SYSTEM,
+						c_void_p(),
+						2,
+						0,
+						msg,
+						len(msg),
+						c_void_p())
+	except Exception as e:
+		print e
+	return 233
+	# from win32con import (
+		# FORMAT_MESSAGE_FROM_SYSTEM,
+		# FORMAT_MESSAGE_ALLOCATE_BUFFER,
+		# FORMAT_MESSAGE_IGNORE_INSERTS)
 
-    message_buffer = ctypes.c_char_p()
-    FormatMessage(
-        FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_IGNORE_INSERTS,
-        None,
-        error_code,
-        0,
-        ctypes.byref(message_buffer),
-        0,
-        None
-    )
+	if errCode is None:
+		errCode = GetLastError()
+	print errCode
+	message_buffer = ctypes.c_char_p()
+	FormatMessage(
+		FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_IGNORE_INSERTS,
+		None,
+		errCode,
+		0,
+		ctypes.byref(message_buffer),
+		0,
+		None
+	)
 
-    error_message = message_buffer.value
-    LocalFree(message_buffer)
+	error_message = message_buffer.value
+	LocalFree(message_buffer)
 
-    error_message = error_message.decode('cp1251').strip()
-    return '{} - {}'.format(error_code, error_message)
+	error_message = error_message.decode('cp1251').strip()
+	return '{} - {}'.format(errCode, error_message)
+geterr=getErr=getLastErr=getLastError
 ##############################################
 def main():
 	import sys,os;sys.path.append('d:\pm');from qgb import U,T,F
-	CreateProcessWithLogonW(lpUsername='qgb',
-	lpPassword='',
-	
-	lpApplicationName=r'C:\WINDOWS\system32\calc.exe')	
+	# CreateProcessWithLogonW(lpUsername='qgb',
+	# lpPassword='q',
+
+	# lpApplicationName=r'C:\WINDOWS\system32\calc.exe')	
 	print '[%s]'%getTitle()
 	# U.repl()
 	# U.pprint(getAllWindows())

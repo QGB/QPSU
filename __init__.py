@@ -14,8 +14,15 @@ for i in __all__:
 
 
 try:
-	if U.isipy():U.ipy.autocall=2
-except:
+	if U.isipy():
+		U.ipy.autocall=2
+		import ipy
+		ipy.startRecord()
+	if U.iswin():
+		__all__.append('Win')
+	# print __all__	
+except Exception as e:
+	gError=e
 	pass
 
 # print __all__
