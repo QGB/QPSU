@@ -1,11 +1,11 @@
-# for i in T.HEX:
-	# for j in T.HEX:
-		# U.p( str(U.ct()-1)+":"+"'"+i+j+"',")
+# coding=utf-8
 import __builtin__ as py
 import os as _os;import sys as _sys;from os import path as _p
 import T,U
 gError=None
-
+# for i in T.HEX:
+	# for j in T.HEX:
+		# U.p( str(U.ct()-1)+":"+"'"+i+j+"',")
 def new(a):
 	'''will overwrite'''
 	try:
@@ -74,7 +74,7 @@ def append(a,data):
 	
 def read(a,mod='r'):
 	try:
-		f=open(autoPath(a),mod)
+		f=open(autoPath(a,mkdir=False),mod)
 		s=f.read()
 		f.close()
 		return s
@@ -87,6 +87,7 @@ def isdir(a):
 	
 def exist(fn,zero=False):
 	if _p.exists(fn):
+		if _p.isdir(fn):return True
 		if _p.getsize(fn)<1 and not zero:
 			return False
 		return True
@@ -251,7 +252,13 @@ def makeDirs(ap):
 				_os.mkdir(base)
 			
 			except Exception as e:
-
+				if U.iswin():
+					if e.winerror==5:continue#WindowsError(5, '') 拒绝访问
+					if e.winerror==183:continue#WindowsError 183 当文件已存在时，无法创建该文件。
+				
+				if 'exists' in e.args[1]:#(17, 'File exists') cygwin;
+					continue
+				# U.repl(printCount=True)
 				global gError
 				gError=e
 				if U.gbPrintErr:print e

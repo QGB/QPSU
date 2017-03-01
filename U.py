@@ -7,7 +7,9 @@ gimax=IMAX=imax=2147483647;gimin=IMIN=imin=-2147483648
 import  os,sys;pid=os.getpid();path=os.path
 stdin=sys.stdin;stdout=sys.stdout;stderr=sys.stderr
 decoding='utf-8';encoding=stdout.encoding
-from threading import Thread;thread=Thread
+from threading import Thread,enumerate as getAllThreads
+thread=Thread
+gethreads=getAllThreads
 from multiprocessing import Process;process=Process
 import __builtin__ ;py=builtin=__builtin__
 module=type(py)
@@ -877,7 +879,7 @@ def mergeDict(*a):
 def getTimestamp():
 	'''return: float'''
 	return __import__('time').time()
-time=getime=getTime=timestamp=getTimestamp
+time=getime=getTime=timestamp=getCurrentTime=getTimestamp
 	
 	
 	
@@ -1078,6 +1080,21 @@ def notePadPlus(a):
 	cmd(driverPath(r":\Program Files\Notepad++\notepad++.exe"),autof(a))
 	# cmd('npp',str(a))
 	
+def backLocals(f=None,i=0,r=[]):
+	print i+1,'='*(20+i*2)
+	
+	if f is None and i==0:f=__import__('sys')._getframe()
+	try:print f.f_locals.keys();r.append(f.f_locals)
+	except:return r
+	return backLocals(f.f_back,i+1,r)	
+printFrame=backLocals
+	
+def getDate():
+	'''return '20170301' #From os time'''
+	from datetime import date
+	t=date.today()
+	return ('%4s%2s%2s'%(t.year,t.month,t.day)).replace(' ','0')
+today=getdate=getDate
 # sys.argv=['display=t','pressKey=t','clipboard=f']
 def main(display=True,pressKey=False,clipboard=False,escape=False,c=False,ipyOut=False,cmdPos=False,reload=False,*args):
 	# print vars()

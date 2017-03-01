@@ -2,15 +2,18 @@ import sys,os,U,T,F
 
 # print U.gError
 gipy=U.ipy
+if not gipy:raise EnvironmentError
 gt=None
 
 U.cdt()
+F.md('ipy')
+# U.cd('ipy')
+print U.pwd()
 
-os.mkdir('ipy')
 
-# print 
 def recorder():
 	while True:
+		U.sleep(999)
 		gipy.user_ns['In']
 
 def startRecord():
@@ -27,8 +30,8 @@ class IPy():
 	
 # sys.modules['qgb.ipy'] = IPy()
 # U.msgbox()
-F.writeIterable('ipy/fwi.txt',sys.modules)
+# F.writeIterable('ipy/fwi.txt',sys.modules)
 
-U.repl()
+# U.repl()
 # U.thread(target=recorder).start()
-print 233
+# print 233

@@ -10,7 +10,7 @@ if U.iswin():
 	user32=windll.user32
 	kernel32=windll.kernel32
 	advapi32=windll.advapi32
-else:
+else:#Not Win
 	raise NotImplementedError
 	# if U.iscyg():
 	

@@ -22,15 +22,8 @@ def findFunc(name,root=9,depth=3,case=False):
 	exit()
 # findFunc('set*')		
 	
-def backLocals(f=None,i=0,r=[]):
-	print i+1,'='*(20+i*2)
-	
-	if f is None and i==0:f=__import__('sys')._getframe()
-	try:print f.f_locals.keys();r.append(f.f_locals)
-	except:return r
 
-	return backLocals(f.f_back,i+1,r)	
-	
+
 def getIP(type='local'):
 	import inspect
 	a = inspect.getargspec(getIP)
