@@ -7,7 +7,7 @@ gIn=gipy.user_ns['In'];gOut=gipy.user_ns['Out']
 gt=None#thread
 
 # U.cdt()
-savePath=U.gst+'ipy/'
+gsavePath=U.gst+'ipy/'
 
 # U.cd('ipy')
 # print U.pwd()
@@ -48,7 +48,7 @@ def save(file=None,lines=-1,tryExcept=False,Out=False,minSpace=70,overide=True):
 			# last.sort()#从小到大排序,ACS正序, DESC倒序  Ascending and Descending 
 			# file=[n for n,d in gdTimeName.items() if d==last[-1]][0]
 		else:
-			file='{0}{1}.py'.format(U.gst,U.stime())
+			file='{0}{1}.py'.format(gsavePath,U.stime())
 		file=open(file,'a')
 	print >>file,gshead
 	print >>file,'import sys;sys.path.append("{0}")'.format(U.getModPath(qgb=False,endSlash=False))
@@ -77,8 +77,8 @@ def save(file=None,lines=-1,tryExcept=False,Out=False,minSpace=70,overide=True):
 	gdTimeName[U.time()]=file.name
 	return '{0} {1} success!'.format(save.name,file.name)
 save.name='{0}.{1}'.format(__name__,save.__name__)
-F.md(savePath)
-print savePath
+F.md(gsavePath)
+print gsavePath
 
 gError=None
 def recorder():
