@@ -1,34 +1,150 @@
+#coding=utf-8
 import sys,os,U,T,F
-
 # print U.gError
-gipy=U.ipy
+gipy=U.isipy()#不能直接引用U.ipy,环境不确定 动态判断避免识别错误
 if not gipy:raise EnvironmentError
-gt=None
+gIn=gipy.user_ns['In'];gOut=gipy.user_ns['Out']
+gt=None#thread
 
-U.cdt()
-F.md('ipy')
+# U.cdt()
+savePath=U.gst+'ipy/'
+
 # U.cd('ipy')
-print U.pwd()
+# print U.pwd()
 
+date=U.getDate()
+gshead='#coding=utf-8'
+gsTryExcept=u'''try:{1}
+except Exception as _e{0}:print {0},_e{0}'''
+#用print >>输出会自动换行,format 的参数应该与文本标记一致，
+#否则出现IndexError: tuple index out of range
+gdTimeName={}
+def save(file=None,lines=-1,tryExcept=False,Out=False,minSpace=70,overide=True):
+	'''file is str or (mod a)
+	在没有ipython实例时，不能get_ipython()
+	当file被指定时，overide 参数无效'''
+	try:
+		if type(lines) in(int,long) and lines>0:
+			lsta,lend=0,lines
+		elif len(lines)==2:lsta,lend=lines
+		else:raise Exception
+	except:
+		lsta,lend=0,gIn.__len__()
+	if file:
+		if type(file) in (unicode,str):
+			file=open(file,'a')
+		elif type(file) is __builtin__.file:
+			if file.mode!='a':return False
+			pass
+		else:
+			raise Exception('invalid argument file')
+	else:
+		if gdTimeName and overide:
+			file=gdTimeName[gdTimeName.keys()[-1]]
+			# last=-1
+			# for t in gdTimeName:
+				# if t>last:file,last=name,d
+			# last=gdTimeName.values()
+			# last.sort()#从小到大排序,ACS正序, DESC倒序  Ascending and Descending 
+			# file=[n for n,d in gdTimeName.items() if d==last[-1]][0]
+		else:
+			file='{0}{1}.py'.format(U.gst,U.stime())
+		file=open(file,'a')
+	print >>file,gshead
+	print >>file,'import sys;sys.path.append("{0}")'.format(U.getModPath(qgb=False,endSlash=False))
+	#-4 为了去除 /qgb
+	#ipython --InteractiveShellApp.exec_lines=['%qp%'] 不会改变In[0],始终为''?
+	for i,v in enumerate(gIn):
+		if i==0:continue
+		if U.isSyntaxError(v):
+			v=u'#'+v
+		if i in gOut.keys():
+			v=u'_{0}={1}'.format(i,v)
+			if Out:
+				print >>file,'"""#{0}'.format(i)
+				print >>file,gOut[i]
+				print >>file,'"""'
+		if tryExcept:
+			v='#########################\n\t'+v
+			print >>file,gsTryExcept.format(i,v).encode('utf-8')
+		else:
+			print >>file,v.encode('utf-8'),' '*(minSpace-len(v)),'#',i
+			
+	# gipy.magic(u'save save.py 0-115')
+	# print >>file,gIn
+	# print >>file,gOut.keys()
+	
+	gdTimeName[U.time()]=file.name
+	return '{0} {1} success!'.format(save.name,file.name)
+save.name='{0}.{1}'.format(__name__,save.__name__)
 
+gError=None
 def recorder():
 	while True:
-		U.sleep(999)
-		gipy.user_ns['In']
-
+		try:
+			save(overide=True)
+			U.sleep(9)
+		except Exception as e:
+			if U.printError:print e
+			global gError
+			gError=e
+	from copy import deepcopy
+	F.md(date);U.cd(date)
+	fi=None;li=[]
+	def new():
+		print globals().keys()
+		print '*'*66
+		print dir(recorder)
+		print recorder.__dict__	
+		fi=open(U.stime()+'.In','a')
+		li=[]
+		# print fi
+	def write():
+		F.new(fi.name)
+		print >>fi,li
+	new()
+	while True:
+		print fi
+		if len(gi)>len(li):
+			li=deepcopy(gi)
+			write()
+		else:
+			if li!=gi:
+				fi.close()
+				new()
+			else:pass#Not Change
+			
+		U.sleep(9)#second
 def startRecord():
 	global gt
 	gt=U.thread(target=recorder)
+	gt.setName(save.name)
+	gt.setDaemon(True)
+#	setDaemon：主线程A启动了子线程B，调用b.setDaemaon(True)，则主线程结束时，会把子线程B也杀死，与C/C++中得默认效果是一样的。
 	gt.start()
 
 
 
 class IPy():
-
+	def __init__(s,mod=None):
+		if not mod:
+			U.getMod('qgb.ipy')
+			s._module=mod
 	def __call__(s):
-		print 233
+		return gipy
+	# def __repr__(s):
+		# return '444'
+	def __getattribute__ (*a,**ka):
+		print 'gab',a,ka
 	
-# sys.modules['qgb.ipy'] = IPy()
+	def __getattr__(s,*a,**ka):
+		print 'ga',a,ka
+	
+
+U.replaceModule('ipy',IPy(),package='qgb',backup=False)
+
+F.md(savePath)
+print savePath
 # U.msgbox()
 # F.writeIterable('ipy/fwi.txt',sys.modules)
 

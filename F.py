@@ -86,6 +86,21 @@ def isdir(a):
 	return _p.isdir(a)
 	
 def exist(fn,zero=False):
+	''': path.exist('c:')
+Out[57]: False
+
+In [58]: path.exist('o:')#这是因为当前目录下存在 'o:'，但是只能用ls完整查看
+Out[58]: True
+## 在cygwin中 只能判断 c:\ 或 c:/ ,单独 c: 总为False
+#############
+>>> path.exists('c:')
+True
+>>> path.exists('o:')
+True
+'''
+	if U.iscyg():
+		if len(fn)==2 and fn[-1]==':':fn+='/'
+		# raise NotImplementedError
 	if _p.exists(fn):
 		if _p.isdir(fn):return True
 		if _p.getsize(fn)<1 and not zero:
@@ -111,7 +126,9 @@ def list(ap='.',type='',t='',r=False,d=False,dir=False,f=False,file=False):
 	if d or dir or f or file:pass
 	else:d=f=True		#default return all
 	
-	if py.type(ap)!=py.type('') or py.len(ap)<1:ap='.'
+	if py.type(ap)!=py.type('') or py.len(ap)<1:
+		gError='F.list arguments ap error'
+		ap='.'
 	# if len(ap)==2 and ap.endswith(':'):ap+='/'	
 	if not U.inMuti(ap,'/','\\',f=str.endswith):ap+='/'
 	

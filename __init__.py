@@ -15,10 +15,12 @@ for i in __all__:
 
 try:
 	if U.isipy():
+		__all__.append('ipy')
 		U.ipy.autocall=2
 		import ipy
-		ipy.startRecord()
-	if U.iswin():
+		# ipy.startRecord()
+		# M:\Program Files\.babun\cygwin\home\qgb\.ipython\profile_default\history.sqlite
+	if U.iswin() or U.iscyg():
 		__all__.append('Win')
 	# print __all__	
 except Exception as e:
