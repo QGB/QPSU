@@ -48,7 +48,7 @@ def isnix():
 	else:return False
 def iscyg():
 	return 'cygwin' in  platform.system().lower()
-ipy=None
+ipy=None#这个不是qgb.ipy, 是否与U.F U.T 这样的风格冲突？
 def isipy():
 	global ipy
 	# ipy=False  #如果曾经有过实例，现在没有直接返回原来
@@ -477,6 +477,7 @@ repl=pys=pyshell
 def reload(*mods):
 	''' 不是一个模块时，尝试访问mod._module'''
 	import sys,imp
+	global gError
 	if len(mods)<1:#如果 mods 中含有长度为0的元素，会导致U重新加载
 		# sys.modules['qgb._U']=sys.modules['qgb.U'] #useless, _U is U
 		#if pop qgb.U,can't reload
@@ -487,16 +488,25 @@ def reload(*mods):
 		# print 233
 	elif len(mods)==1:
 		mod=mods[0]
-		if type(mod) != module:
-			if '_module' in py.dir(mod):
-				mod=mod._module
-				if mod.__name__ in modules:#'qgb.ipy'
+		if not isModule(mod):
+			# sys.a=mod
+			# return
+			try:
+				if '_module' in py.dir(mod):
+					if not isModule(mod._module):raise Exception('instance._module is not module')
+					mod=mod._module
 					modules[mod.__name__]=mod
-			else:gbPrintErr=True#在函数局域覆盖全局属性
+					reload(mod)
+					
+					# if mod.__name__ in modules:#'qgb.ipy'
+				else:raise Exception('instance._module not exists')
+			except Exception as em:
+				raise em
+			
+			# else:gbPrintErr=True#在函数局域覆盖全局属性
 		try:
 			imp.reload(mod)
 		except Exception as ei:
-			global gError
 			gError=ei
 			if gbPrintErr:print ei
 	else:
@@ -1171,13 +1181,15 @@ isyntaxError=iSyntaxError=isSyntaxError
 def replaceModule(modName,new,package='',backup=True):
 	if package:
 		if not package.endswith('.'):package+='.'
-		if package+modName in modules:
+		if package+modName in sys.modules:
 			modName=package+modName
 	if backup:
-		modules['_'+modName] = modules[modName]
+		sys.modules['_'+modName] = sys.modules[modName]
 	
-	if modName in modules:
-		modules[modName]=new	
+	# if modName in sys.modules:
+	sys.modules[modName]=new
+	return sys.modules[modName]
+	# else:return False
 	# try:
 		# sys.modules['qgb.ipy'] = IPy()
 	# except:

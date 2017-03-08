@@ -1,4 +1,4 @@
-
+#coding=utf-8
 # try:
 	# import U
 	# U.tab()
@@ -16,8 +16,11 @@ for i in __all__:
 try:
 	if U.isipy():
 		__all__.append('ipy')
-		U.ipy.autocall=2
 		import ipy
+		ipy.gipy.autocall=2
+		# ipy.gi.setModule()
+		# U.replaceModule('ipy',ipy.gi,package='qgb',backup=False)
+		# ipy=ipy.gi#少了这个，ipy在sys.modules 中虽然已经替换，但是实际使用却还是原来module ，？
 		# ipy.startRecord()
 		# M:\Program Files\.babun\cygwin\home\qgb\.ipython\profile_default\history.sqlite
 	if U.iswin() or U.iscyg():

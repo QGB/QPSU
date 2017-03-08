@@ -1,7 +1,7 @@
 #coding=utf-8
 import sys,os,U,T,F
 # print U.gError
-gipy=U.isipy()#不能直接引用U.ipy,环境不确定 动态判断避免识别错误
+g=get=gipy=U.isipy()#不能直接引用U.ipy,环境不确定 动态判断避免识别错误
 if not gipy:raise EnvironmentError
 gIn=gipy.user_ns['In'];gOut=gipy.user_ns['Out']
 gt=None#thread
@@ -77,6 +77,8 @@ def save(file=None,lines=-1,tryExcept=False,Out=False,minSpace=70,overide=True):
 	gdTimeName[U.time()]=file.name
 	return '{0} {1} success!'.format(save.name,file.name)
 save.name='{0}.{1}'.format(__name__,save.__name__)
+F.md(savePath)
+print savePath
 
 gError=None
 def recorder():
@@ -127,24 +129,53 @@ def startRecord():
 
 class IPy():
 	def __init__(s,mod=None):
+		pass
+		# if not mod:
+			# U.getMod(
+			# s._module=mod
+	def setModule(s,mod=None):
+		import sys
 		if not mod:
-			U.getMod('qgb.ipy')
+			if 'qgb.ipy' in sys.modules:
+				mod=sys.modules['qgb.ipy']
+				if mod:
+					if type(mod)!=type(sys):mod=mod._module
+					#如果是module 直接往下执行
+	
+		if type(mod)==type(sys):
 			s._module=mod
+			return True
+		else:raise Exception('need module qgb.ipy')
+	def __nonzero__(s):
+		return True
+		
+	def __dir__(s):
+		return ['_module']
+	
 	def __call__(s):
 		return gipy
 	# def __repr__(s):
 		# return '444'
 	def __getattribute__ (*a,**ka):
 		print 'gab',a,ka
-	
+		return a[0]
 	def __getattr__(s,*a,**ka):
 		print 'ga',a,ka
-	
+		if a[0].startswith('__'):
+			def ta(*at,**kat):return '%s %s %s'%(a[0],len(at),len(kat))
+			return ta
+		return a[0]
+		# if a[0] in s.__dir__():return eval('{0}'.format(a[0]))
+	def rewrite(*a,**ka):
+		print 'rewrite',type(a[0]),a[1:],ka	
 
-U.replaceModule('ipy',IPy(),package='qgb',backup=False)
+# print repr(F.md),U.getMod('qgb.ipy')
 
-F.md(savePath)
-print savePath
+gi=IPy()
+# if U.getMod('qgb.ipy'):
+	# U.replaceModule('ipy',gi,package='qgb',backup=False)
+
+
 # U.msgbox()
 # F.writeIterable('ipy/fwi.txt',sys.modules)
 
