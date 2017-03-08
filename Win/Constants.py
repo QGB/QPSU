@@ -6,14 +6,14 @@ except:
 	U=sys.modules['U']
 
 if U.iswin():
-	from ctypes.wintypes import WORD, DWORD, LPSTR, HANDLE
+	from ctypes.wintypes import WORD, DWORD, LPSTR, HANDLE,WCHAR
 if U.iscyg():
 	WORD	= ctypes.c_ushort
 	DWORD  = ctypes.c_uint
 	LPSTR  = ctypes.c_char_p
 	LPBYTE = LPSTR
 	HANDLE = DWORD
-
+	WCHAR = ctypes.c_wchar
 NULL  = 0
 TRUE  = 1
 FALSE = 0

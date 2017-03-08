@@ -4,18 +4,32 @@ from qgb import U,T
 '''
 true=True;false=False
 gimax=IMAX=imax=2147483647;gimin=IMIN=imin=-2147483648
-import  os,sys;pid=os.getpid();path=os.path
+import  os,sys;path=os.path
 stdin=sys.stdin;stdout=sys.stdout;stderr=sys.stderr
 decoding='utf-8';encoding=stdout.encoding
-from threading import Thread,enumerate as getAllThreads
+modules=sys.modules
+from threading import Thread
 thread=Thread
-gethreads=getAllThreads
 from multiprocessing import Process;process=Process
 import __builtin__ ;py=builtin=__builtin__
 module=type(py)
 
-gError=None;gbPrintErr=False
+if 'qgb.U' in modules:modules['_U']=modules['qgb.U']
+elif 'U' in modules:modules['_U']=modules['U']
 
+# if '_U' in modules:
+	
+try:
+	_U=modules['_U']
+	gError=_U.gError
+	printError=printErr=gbPrintErr=_U.gbPrintErr
+except Exception as _e:
+	# pass# 已经存在于globals 中，是否有必要重新赋值给 gError？
+# else:
+	gError=None
+	printError=printErr=gbPrintErr=False
+
+		
 try:
 	from F import write,read,ls,ll,md,rm
 	import F,T
@@ -37,28 +51,46 @@ def iscyg():
 ipy=None
 def isipy():
 	global ipy
+	# ipy=False  #如果曾经有过实例，现在没有直接返回原来
 	f=sys._getframe()
 	while f and f.f_globals and 'get_ipython' not in f.f_globals.keys():
 		f=f.f_back
 		try:
-			ipy=f.f_globals['get_ipython']()
+			ipy=f.f_globals['get_ipython']()#下个循环没有直接跳出while
 		except:
 			pass
 	return ipy
 getipy=isipy
+def isrepl():
+	i,o=sys.stdin.isatty(),sys.stdout.isatty()
+	if i==o:return i
+	else:
+		raise Exception('qgb.U isatty conflit')
+isatty=istty=isrepl
 ########################
 if iswin() or iscyg():
 	try:
 		import Win
 		from Win import setWindowPos,msgbox
 		pos=cmdPos=setWindowPos
+		pid=Win.getpid()
 	except Exception as ei:
 		# def msgbox(s='',st='title',*a):
 			# if(a!=()):s=str(s)+ ','+str(a)[1:-2]
 			# if iswin():windll.user32.MessageBoxA(0, str(s), str(st), 0)
 		if gbPrintErr:print '#Error import',ei
 		gError=ei
-########################
+	###########################
+	
+	if iscyg():
+		def getCygPath():
+			r=Win.getProcessPath()
+			if 'cygwin' in r:
+				return T.subLast(r,'','cygwin')+'cygwin\\'
+			else:
+				raise EnvironmentError(r)
+else:#Android *nix
+	pid=os.getpid()
 try:
 	from F import write,read,ls,ll,md,rm
 	import F,T
@@ -443,19 +475,30 @@ def pyshell(printCount=False):
 repl=pys=pyshell
 
 def reload(*mods):
+	''' 不是一个模块时，尝试访问mod._module'''
 	import sys,imp
-	if len(mods)<1:
+	if len(mods)<1:#如果 mods 中含有长度为0的元素，会导致U重新加载
 		# sys.modules['qgb._U']=sys.modules['qgb.U'] #useless, _U is U
 		#if pop qgb.U,can't reload
-		if 'qgb.U' in sys.modules:imp.reload(sys.modules['qgb.U'])
-		elif 'U' in sys.modules:imp.reload(sys.modules['U'])
+		if 'qgb.U' in sys.modules:   imp.reload(sys.modules['qgb.U'])
+		elif 'U' in sys.modules:     imp.reload(sys.modules['U'])
 		elif 'qgb._U' in sys.modules:imp.reload(sys.modules['qgb._U'])
-		# import U
+		else:raise EnvironmentError('not found qgb.U ?')
+		# print 233
 	elif len(mods)==1:
+		mod=mods[0]
+		if type(mod) != module:
+			if '_module' in py.dir(mod):
+				mod=mod._module
+				if mod.__name__ in modules:#'qgb.ipy'
+					modules[mod.__name__]=mod
+			else:gbPrintErr=True#在函数局域覆盖全局属性
 		try:
-			imp.reload(mods[0])
-		except:
-			pass
+			imp.reload(mod)
+		except Exception as ei:
+			global gError
+			gError=ei
+			if gbPrintErr:print ei
 	else:
 		for i in mods:
 			reload(i)
@@ -486,6 +529,7 @@ C=c=cls=clear
 
 
 def chdir(ap=gsTestPath,md=True):
+	if iscyg():md=False#cyg下可以创建带:的目录，导致切换异常
 	if type(ap)!=type('') or len(ap)<1:ap=gsTestPath
 	if md:globals()['md'](ap)
 	
@@ -912,7 +956,9 @@ def getStime(time=None,format='%Y-%m-%d %H.%M.%S'):
 stime=timeToStr=getStime
 	
 		
-		
+
+from threading import enumerate as getAllThreads
+threads=gethreads=getAllThreads
 def getThreads():
 	r=()
 	for threadId, stack in sys._current_frames().items():
@@ -989,6 +1035,7 @@ def x(msg=None):
 	exit(235)
 	
 def exit(i=2357):
+	'''not call atexit'''
 	os._exit(i)
 def getAllMod(mp=None):
 	ls=[]
@@ -1014,10 +1061,27 @@ def getModPathForImport():
 	sp=os.path.dirname(sp)
 	if iswin():return sp
 
-def getModPath():
+def getModPath(qgb=True,slash=True,backSlash=False,endSlash=True,endslash=True,trailingSlash=True):
+	'''@English The leading and trailing slash shown in the code 代码中的首尾斜杠'''
 	sp=os.path.abspath(__file__)
 	sp=os.path.dirname(sp)
 	sp=os.path.join(sp,'')
+	if iscyg():#/usr/lib/python2.7/qgb/  
+		sp=getCygPath()+sp[1+4:].replace('/','\\')
+	if not qgb:
+		sp=sp[:-4]
+		
+	if not endslash or not endSlash:trailingSlash=False
+	if trailingSlash:
+		if sp[-1] not in ('/','\\'):sp+='/'
+	else:
+		while sp[-1] in ('/','\\'):
+			sp=sp[:-1]
+			
+	if backSlash or not slash:
+		sp=sp.replace('/','\\')
+	else:sp=sp.replace('\\','/')
+
 	return sp
 	
 	
@@ -1096,6 +1160,36 @@ def getDate():
 	return ('%4s%2s%2s'%(t.year,t.month,t.day)).replace(' ','0')
 today=getdate=getDate
 # sys.argv=['display=t','pressKey=t','clipboard=f']
+def isSyntaxError(a):
+	if not sys.modules['ast']:import ast
+	try:
+		sys.modules['ast'].parse(a)
+		return False
+	except:
+		return True
+isyntaxError=iSyntaxError=isSyntaxError
+def replaceModule(modName,new,package='',backup=True):
+	if package:
+		if not package.endswith('.'):package+='.'
+		if package+modName in modules:
+			modName=package+modName
+	if backup:
+		modules['_'+modName] = modules[modName]
+	
+	if modName in modules:
+		modules[modName]=new	
+	# try:
+		# sys.modules['qgb.ipy'] = IPy()
+	# except:
+		# sys.modules['ipy'] = IPy()
+replacemod=replaceMod=replaceModule
+def getModule(modName):
+	if modName in modules:return modules[modName]
+	if modName.startswith('qgb.'):
+		modName=modName[4:]
+		return getModule(modName)
+	return None
+getmod=getMod=getModule
 def main(display=True,pressKey=False,clipboard=False,escape=False,c=False,ipyOut=False,cmdPos=False,reload=False,*args):
 	# print vars()
 	# print stime()
@@ -1163,5 +1257,5 @@ print {0}
 		except Exception as ei:
 			print '###import {0}'.format(i)
 			print ei
-
+# print 233
 if __name__ == '__main__':main()
