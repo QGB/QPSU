@@ -753,7 +753,11 @@ def printAttr(a,console=False):
 			if py.callable(v):
 				if k.startswith('__'):
 					vv='!ErrGetV()'
-					try:vv=v()
+					try:
+						if isipy():#在ipython 中存在用户名字空间自动清空的问题
+							pass
+						else:
+							vv=v()
 					except:pass
 					v='{0} == {1}'.format(v,vv)
 				v=str(v)
@@ -768,11 +772,13 @@ def printAttr(a,console=False):
 		
 		r+=sh.format(i,k,v,vi)
 	# cdt('QPSU')
-	import T
+	import T,F
 	name=gst+'QPSU/'+T.filename(getObjName(a))+'.html'
-	print name,write(name,read(sp).replace('{result}',r))
-	
+	print name
 	browser(name)
+	return F.write(name,read(sp).replace('{result}',r))
+	
+	
 	# cdBack()
 dir=printAttr
 # repl()

@@ -255,7 +255,7 @@ getsp=getSp=getSplitor
 def makeDirs(ap):
 	ap=autoPath(ap,md=False)
 	sp=getSplitor(ap)
-	# if not _p.isabs(ap):
+	# if not isabs(ap):
 		# if not ap.startswith('.'):
 			# if ap.startswith(sp):ap=U.gst[:-1]+ap
 			# else:ap=U.gst+ap
@@ -294,7 +294,7 @@ def autoPath(fn,mkdir=True,md=True):
 		if md:makeDirs(fn)
 		return fn;
 	
-	if _p.isabs(fn):
+	if isAbs(fn):
 		if md:makeDirs(fn);
 		return fn;
 	else:
@@ -305,6 +305,21 @@ def abs(a):
 	return _p.abspath(a)
 		
 def isAbs(a):
+	'''in cygwin:
+In [42]: _28
+Out[42]: 'M:/Program Files/.babun/cygwin/lib/python2.7/qgb/file/attr.html'
+
+In [43]: U.path.isabs(_28)
+Out[43]: False
+
+In [44]: a
+Out[44]: 'M:\\Program Files\\.babun\\cygwin\\lib\\python2.7\\qgb\\file\\attr.html'
+
+In [45]: U.path	.isabs(a)
+Out[45]: False
+'''	
+	if U.iscyg():
+		if ':' in a:return True
 	return _p.isabs(a)
 isabs=isAbs
 		

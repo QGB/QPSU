@@ -80,6 +80,10 @@ save.name='{0}.{1}'.format(__name__,save.__name__)
 F.md(gsavePath)
 print gsavePath
 
+def reset():
+	gipy.execution_count=0
+
+
 gError=None
 def recorder():
 	while True:
@@ -124,9 +128,9 @@ def startRecord():
 	gt.setDaemon(True)
 #	setDaemon：主线程A启动了子线程B，调用b.setDaemaon(True)，则主线程结束时，会把子线程B也杀死，与C/C++中得默认效果是一样的。
 	gt.start()
-
-
-
+#
+############以下暂时未用
+#
 class IPy():
 	def __init__(s,mod=None):
 		pass
