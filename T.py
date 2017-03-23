@@ -36,7 +36,19 @@ try:
 except Exception as ei:
 	detect='#not install chardet Module'
 	pass
-	
+def parseReMatch(rm,s):
+	'''s: iii [or use 'i'*3 ] :return int,int,int
+	short name i int,s string ,L long,f float,...
+	case insensitive
+	some different from https://docs.python.org/2/c-api/arg.html#c.Py_BuildValue'''
+	r=[]
+	for n,i in py.enumerate(s.lower()):
+		n=rm.group(n+1)
+		if i=='i':r.append(py.int(n))
+		if i=='s':r.append(py.str(n))
+		if i=='l':r.append(py.long(n))
+		if i=='f':r.append(py.float(n))
+	return py.tuple(r)
 def matchHead(txt,regex):
 	r=re.match(regex,txt)
 	if r:return r.group()
@@ -112,6 +124,11 @@ def replacey(a,c,*yc):
 	return a
 	print yc
 	
+def replaceAll(a,old,new):
+	''' S.replace(old, new[, count]) -> string'''
+	while old in a:
+		a=a.replace(old,new)
+	return a
 def varname(a):
 	sv=az+'_'
 	if a[0] in sv:r=''

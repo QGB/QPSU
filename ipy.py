@@ -6,6 +6,12 @@ if not gipy:raise EnvironmentError
 gIn=gipy.user_ns['In'];gOut=gipy.user_ns['Out']
 gt=None#thread
 
+def outlen():
+	r={}
+	for i in gOut:
+		r[i]=U.len(gOut[i])
+	return r
+
 # U.cdt()
 gsavePath=U.gst+'ipy/'
 

@@ -29,7 +29,10 @@ except Exception as _e:
 	gError=None
 	printError=printErr=gbPrintErr=False
 
-		
+class ArgumentError(Exception):
+	pass
+aError=argumentError=ArgumentException=ArgumentError
+
 try:
 	from F import write,read,ls,ll,md,rm
 	import F,T
@@ -38,6 +41,9 @@ try:
 except Exception as ei:
 	if gbPrintErr:print '#Error import',ei
 	gError=ei
+	
+	
+	
 #########################
 import platform
 def iswin():
@@ -780,10 +786,20 @@ def printAttr(a,console=False):
 	
 	
 	# cdBack()
-dir=printAttr
+pa=printattr=printAttr
 # repl()
 # printAttr(5)
-	
+def DirValue(a):
+	'''约定：只有无参数函数才用 getXX  ?'''
+	r={}
+	for i in py.dir(a):
+		try:
+			r[i]=py.eval('a.'+i)
+		except:
+			r[i]=Exception('can not get value '+i)
+	return r
+dir=dirValue=getdir=getDirValue=DirValue
+
 def getObjName(a,value=False):
 	try:
 		if len(a.__name__)>0:
@@ -937,7 +953,14 @@ def mergeDict(*a):
 	return r
 	
 def getTimestamp():
-	'''return: float'''
+	'''return: float
+--------> U.time()
+Out[304]: 1490080570.265625
+
+In [305]: U.time
+--------> U.time()
+Out[305]: 1490080571.125
+'''
 	return __import__('time').time()
 time=getime=getTime=timestamp=getCurrentTime=getTimestamp
 	
@@ -951,19 +974,25 @@ def getFloaTail(a,s=False,str=False,string=False,i=False,int=False):
 		if i or int:
 			return int(py.str(a)[2:])
 		return a	
-		
-def getStime(time=None,format='%Y-%m-%d %H.%M.%S'):
+gsTimeFormat='%Y-%m-%d %H.%M.%S'
+gsymd=gsYMD=gsTimeFormatYMD='%Y%m%d'
+#ValueError: year=1 is before 1900; the datetime strftime() methods require year >= 1900
+
+def getStime(time=None,format=gsTimeFormat):
 	'''http://python.usyiyi.cn/translate/python_278/library/time.html#time.strftime'''
 	import time as tMod
 	
-	if ':' in format:format='%Y-%m-%d %H.%M.%S'.replace('.',':')
+	if ':' in format:format=gsTimeFormat.replace('.',':')
 	
-	if type(time) not in (int,float,long):time=getTimestamp()
+	if py.type(time) not in (int,float,long):time=getTimestamp()
+	if not time:time=0.000001
+	if py.type(time) is not py.float:time=py.float(time)
 	if format=='' or type(format) is not str:return str(time)
 	
 	if '%' in format:
 		if time:
 			r=tMod.strftime(format,tMod.localtime(time))
+#localtime: time.struct_time(tm_year=1970, tm_mon=1, tm_mday=1, tm_hour=8,....
 			if type(time) is float:
 				if not r.endswith(' '):r+=' '
 				r+=getFloaTail(time,s=True)
@@ -971,7 +1000,76 @@ def getStime(time=None,format='%Y-%m-%d %H.%M.%S'):
 		else:return tMod.strftime(format)
 stime=timeToStr=getStime
 	
+def int(a,default=0,error=-1):
+	if not a:return default
+	try:return py.int(a)
+	except:return error
+def traverseTime(start,stop=None,step='day'):
+	'''range(start, stop[, step])
+	datetime.timedelta(  days=0, seconds=0, microseconds=0,
+                milliseconds=0, minutes=0, hours=0, weeks=0)
+	step default: 1(day)  [1day ,2year,....]  [-1day not supported]'''
+	import re,datetime as dt
+	sregex='([0-9]*)(micro|ms|milli|sec|minute|hour|day|month|year)'
+	timedeltaKW=('days', 'seconds', 'microseconds',
+ 'milliseconds', 'minutes', 'hours', 'weeks')
+	if py.type(step) in (py.str,py.unicode):
+		step=step.lower()
+		rm=re.match(sregex,step)
+		if not rm or not step.startswith(rm.group()):
+			raise Exception('Invalid argument step '+py.repr(step))
+		istep,step=int(rm.group(1),default=1,error=0),rm.group(2)
+		if step.startswith('year'):
+			istep,step=365*istep,'day'#没考虑闰年
+		if step.startswith('ms'):step='milliseconds'
+		astep={}
+		for i in timedeltaKW:
+			if i.startswith(step):
+				astep[i]=istep
+		tdelta=dt.timedelta(**astep)
+	elif py.type(step) in (py.int,py.long):
+		tdelta=dt.timedelta(days=step)
+	elif py.type(step) is py.type(dt.timedelta.min):
+		tdelta=step
+	# return tdelta
+	start=datetime(start)
+	if stop:stop=datetime(stop)
+	else:stop=dt.datetime.max
+	while start<=stop:
+		start+=tdelta
+		yield start
+	# return i #SyntaxError: 'return' with argument inside generator
+
+timeTraverser=timeTraversal=traverseTime	
+def datetime(a,month=0, day=0,hour=0,minute=0,second=0,microsecond=0):
+	''' a : string
+	return datetime(year, month, day[, hour[, minute[, second[, microsecond[,tzinfo]]]]])
+
+The year, month and day arguments are required. tzinfo may be None, or an
+instance of a tzinfo subclass. The remaining arguments may be ints or longs.
+	'''
+	from datetime import datetime as dt
+	import re
+	if py.type(a) is py.type(dt.min):
+		return a
+	elif py.type(a) in (py.str,py.unicode):
+		rm=re.match('([0-9]{4})-([0-9]{2})-([0-9]{2}) ([0-9]{2}).([0-9]{2}).([0-9]{2}) .([0-9]{3})',a)
+		if rm:
+			a=T.parseReMatch(rm,'i'*6)+(py.int(rm.group(7))*1000,)
+			return dt(*a)
 		
+		if re.match('[0-9]{4}-[0-9]{2}-[0-9]{2}',a) or\
+		re.match('[0-9]{4}-[0-9]{4}',a):a=a.replace('-','')
+		if re.match('[0-9]{8}',a):
+			return dt(py.int(a[:4]),
+				py.int(a[4:6]),py.int(a[6:8]))
+	elif py.type(a) in (py.float,py.int):
+		return dt.fromtimestamp(a)
+	else:
+		raise ArgumentError(a)
+		
+		
+		# if '-' in a and py.len:
 
 from threading import enumerate as getAllThreads
 threads=gethreads=getAllThreads
@@ -1073,9 +1171,10 @@ def getAllMod(mp=None):
 		ls.append(i[:-3])
 	return ls
 def getModPathForImport():
+	return getModPath()[:-4]
 	sp=os.path.dirname(getModPath())# dirname/ to dirname
 	sp=os.path.dirname(sp)
-	if iswin():return sp
+	if iswin():return sp#cygwin None
 
 def getModPath(qgb=True,slash=True,backSlash=False,endSlash=True,endslash=True,trailingSlash=True):
 	'''@English The leading and trailing slash shown in the code 代码中的首尾斜杠'''
@@ -1184,6 +1283,36 @@ def isSyntaxError(a):
 	except:
 		return True
 isyntaxError=iSyntaxError=isSyntaxError
+
+def parse(code,file):
+	from ast import parse,AST,iter_fields
+	a=parse(code)
+	annotate_fields=True
+	include_attributes=False
+	def _format(node,i=0):
+		if isinstance(node, AST):
+			fields = [(a, _format(b,i+1)) for a, b in iter_fields(node)]
+			rv = '%s\n{0}(%s'.format('\t'*i ) % (
+					node.__class__.__name__, ', '.join(
+						('%s=%s' % field for field in fields)
+						if annotate_fields else
+						(b for a, b in fields)
+					)
+				)
+			if include_attributes and node._attributes:
+				rv += fields and ', ' or ' '
+				rv += ', '.join('%s=%s' % (a, _format(getattr(node, a),i+1))
+								for a in node._attributes)
+			return rv +'\n'+'\t'*i +')'
+		elif isinstance(node, list):
+			return '\n' +'[%s]' % ', '.join(_format(x,i+1) for x in node)
+		return repr(node)
+	F.new(file.name)
+	# file.seek(0) 没用
+	print >>file,_format(a)
+	file.flush()
+	return file.tell()
+	
 def replaceModule(modName,new,package='',backup=True):
 	if package:
 		if not package.endswith('.'):package+='.'
