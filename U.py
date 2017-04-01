@@ -50,8 +50,8 @@ def iswin():
 	if platform.system().startswith('Windows'):return True
 	else:return False
 def isnix():
-	if 'nix' in platform.system().lower():return True
-	else:return False
+	return one_in('nix','linux','darwin',platform.system().lower())
+	
 def iscyg():
 	return 'cygwin' in  platform.system().lower()
 ipy=None#这个不是qgb.ipy, 是否与U.F U.T 这样的风格冲突？
