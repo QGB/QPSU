@@ -45,6 +45,22 @@ except Exception as ei:
 	
 	
 #########################
+def one_in(vs,*t):
+	'''(1,2,3,[t])	or	([vs].[t])'''
+	if not hasattr(vs, '__iter__'):vs=[vs]
+	if len(t)==1:
+		t=t[0]
+	elif len(t)>1:
+		vs.extend(t[:-1])
+		t=t[-1]
+	else:raise Exception(one_in.__doc__)
+	r=[]
+	for i in vs:
+		try:
+			if i in t:r.append(i)
+		except:pass
+	return r
+
 import platform
 def iswin():
 	if platform.system().startswith('Windows'):return True
@@ -325,23 +341,7 @@ def mutin(la,a,func=None):
 					if i:r.append(i)
 	return r	
 inMutiR=mutiIn=mutin
-# exit()	
-def one_in(vs,*t):
-	'''(1,2,3,[t])	or	([vs].[t])'''
-	if not hasattr(vs, '__iter__'):vs=[vs]
-	if len(t)==1:
-		t=t[0]
-	elif len(t)>1:
-		vs.extend(t[:-1])
-		t=t[-1]
-	else:raise Exception(all_in.__doc__)
-	r=[]
-	for i in vs:
-		try:
-			if i in t:r.append(i)
-		except:pass
-	return r
-	
+# exit()		
 def in_one(v,*ts):
 	for i in ts:
 		try:
