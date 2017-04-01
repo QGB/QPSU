@@ -111,6 +111,9 @@ if iswin() or iscyg():
 				return T.subLast(r,'','cygwin')+'cygwin\\'
 			else:
 				raise EnvironmentError(r)
+elif isnix():
+	def isroot():
+		return os.getuid()==0
 else:#Android *nix
 	pid=os.getpid()
 try:
@@ -134,7 +137,12 @@ def driverPath(a):
 	return ''
 
 def getTestPath():
-	if isnix():return '/test/'
+	if isnix():
+		s='/test/'
+		if isroot():
+			return s
+		else:
+			return os.getenv('HOME')+s
 	if iswin() or iscyg():
 		s='c:/test/'
 		return driverPath(s[1:]) or s
