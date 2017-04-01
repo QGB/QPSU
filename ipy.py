@@ -1,3 +1,4 @@
+
 #coding=utf-8
 import sys,os,U,T,F
 # print U.gError
@@ -5,6 +6,13 @@ g=get=gipy=U.isipy()#不能直接引用U.ipy,环境不确定 动态判断避免�
 if not gipy:raise EnvironmentError
 gIn=gipy.user_ns['In'];gOut=gipy.user_ns['Out']
 gt=None#thread
+
+def outType():
+	r={}
+	for i in gOut:
+		r[i]=type(gOut[i])
+	return r
+outype=outType
 
 def outlen():
 	r={}
