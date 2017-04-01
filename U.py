@@ -1290,6 +1290,7 @@ def parse(code,file):
 	annotate_fields=True
 	include_attributes=False
 	def _format(node,i=0):
+		msgbox(node,i)
 		if isinstance(node, AST):
 			fields = [(a, _format(b,i+1)) for a, b in iter_fields(node)]
 			rv = '%s\n{0}(%s'.format('\t'*i ) % (
