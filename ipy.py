@@ -7,10 +7,22 @@ if not gipy:raise EnvironmentError
 gIn=gipy.user_ns['In'];gOut=gipy.user_ns['Out']
 gt=None#thread
 
-def outType():
+def outType(t=None):
+	if t !=None:
+		if type(t) is U.instance:
+			t=t.__class__
+		if type(t) is U.classType:#没有考虑 取出Class 类型的情况
+			def m(a):return isinstance(a,t)
+		else:
+			if not isinstance(t,type):
+				t=type(t)
+			def m(a):return type(a) is t
 	r={}
 	for i in gOut:
+		if t !=None:
+			if not m(gOut[i]):continue
 		r[i]=type(gOut[i])
+		
 	return r
 outype=outType
 

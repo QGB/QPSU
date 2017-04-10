@@ -13,6 +13,9 @@ thread=Thread
 from multiprocessing import Process;process=Process
 import __builtin__ ;py=builtin=__builtin__
 module=type(py)
+class Class:pass
+instance=type(Class())
+Class=classtype=classType=type(Class)
 
 if 'qgb.U' in modules:modules['_U']=modules['qgb.U']
 elif 'U' in modules:modules['_U']=modules['U']
