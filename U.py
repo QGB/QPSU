@@ -583,7 +583,7 @@ def cdCurrentFile():
 	if '__file__' in f:
 		return cd(path.abspath(f['__file__']))
 	return False
-cdc=cdCurrent=cdcf=cdCurrentFile
+cd__file__=cdc=cdCurrent=cdcf=cdCurrentFile
 
 def cdTest(a=''):
 	return cd(gst+a)

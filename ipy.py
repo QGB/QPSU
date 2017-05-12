@@ -40,6 +40,7 @@ gsavePath=U.gst+'ipy/'
 
 date=U.getDate()
 gshead='#coding=utf-8'
+gspath=U.getModPath(qgb=False,endSlash=False)
 gsTryExcept=u'''try:{1}
 except Exception as _e{0}:print {0},_e{0}'''
 #用print >>输出会自动换行,format 的参数应该与文本标记一致，
@@ -77,12 +78,12 @@ def save(file=None,lines=-1,tryExcept=False,Out=False,minSpace=70,overide=True):
 			file='{0}{1}.py'.format(gsavePath,U.stime())
 		file=open(file,'a')
 	print >>file,gshead
-	print >>file,'import sys;sys.path.append("{0}")'.format(U.getModPath(qgb=False,endSlash=False))
+	print >>file,'import sys;sys.path.append("{0}");from qgb import *'.format(gspath)
 	#-4 为了去除 /qgb
 	#ipython --InteractiveShellApp.exec_lines=['%qp%'] 不会改变In[0],始终为''?
 	for i,v in enumerate(gIn):
 		if i==0:continue
-		if U.isSyntaxError(v):
+		if U.isSyntaxError(v) or u'from qgb import *' in v:
 			v=u'#'+v
 		if i in gOut.keys():
 			v=u'_{0}={1}'.format(i,v)
