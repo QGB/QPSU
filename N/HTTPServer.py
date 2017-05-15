@@ -3,11 +3,13 @@ import logging
 import os
 from urlparse import urlparse,parse_qs
 from mimetypes import types_map
+from qgb import *
 
 register_route = {"GET":{},"POST":{}}
 def route(path="/", method=["GET"],h=True):
 	def decorator(f):
 		for m in method:
+			m=m.upper()
 			try:
 				if h:
 					register_route[m][path] = f
@@ -27,8 +29,8 @@ def override(method=None):
 	return decorator
 
 class extended_BaseHTTPServer(BaseHTTPServer.BaseHTTPRequestHandler):
-	def log_message(self, format, *args):
-		return ""
+	# def log_message(self, format, *args):
+		# return ""
 		
 	def do_HEAD(s):
 		s.send_response(200)
@@ -67,43 +69,51 @@ class extended_BaseHTTPServer(BaseHTTPServer.BaseHTTPRequestHandler):
 				except Exception as e:
 					# Url introuvale et fichier static introuvable ==> 404
 					if "404" not in handler_method:
-						build_response(s, "404 - Not Found", 404)
+						build_error(s,e, 404, "404 - Not Found")
 					else:
 						retour = handler_method['404'](o, arguments, action)
 						build_response(s, retour, 404)
 		except Exception as eh:
 			# Gestion des erreurs
 			if "500" not in handler_method:
-				s.send_response(500)
-				s.send_header("Content-type", "text/plain")
-				s.end_headers()
-				import traceback
-				s.wfile.write("Internal Server Error \n%s"%traceback.format_exc())
+				build_error(s,eh,500,'500 not in')
+
+				
 				# build_response(s, , 500)
 			else:
 				retour = handler_method['500'](o, arguments, action)
 				build_response(s, retour, 500)
 
-
-def build_response(output, retour, code=200):
+def build_error(s,e,code,msg=''):
+	s.send_response(code)
+	s.send_header("Content-type", "text/plain")
+	s.end_headers()
+	try:raise e
+	except:
+		import traceback
+		s.wfile.write("{0} \n{1}".format(msg,traceback.format_exc())  )
+		
+def build_response(s, retour, code=200):
 	if type(retour) is dict:
-		output.send_response(retour.get("code",code))
+		s.send_response(retour.get("code",code))
 		for header in retour:
 			if header not in ["code","content"]:
-				output.send_header(header, retour[header])
-		output.end_headers()
-		output.wfile.write(retour['content'])
+				s.send_header(header, retour[header])
+		s.end_headers()
+		s.wfile.write(retour['content'])
 	else:
-		output.send_response(code)
-		output.send_header("Content-type", "text/html")
-		output.end_headers()
-		output.wfile.write(retour)
-
+		s.send_response(code)
+		s.send_header("Content-type", "text/html")
+		s.end_headers()
+		s.wfile.write(retour)
+	s.finish()
+	# U.repl(	)
+	# finish_request(s, s,s.client_address)
 
 def redirect(location=""):
 	return {"content":"","code":301,"Location":location}
 
-def serve(ip="0.0.0.0", port=80):
+def serve(ip="0.0.0.0", port=80,log=True):
 	httpd = BaseHTTPServer.HTTPServer((ip, port), extended_BaseHTTPServer)
 	try:
 		from threading import Thread

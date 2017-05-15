@@ -555,10 +555,15 @@ def clear():
 C=c=cls=clear
 
 
-def chdir(ap=gsTestPath,md=True):
-	if iscyg():md=False#cyg下可以创建带:的目录，导致切换异常
+def chdir(ap=gsTestPath,*a,**ka):
 	if type(ap)!=type('') or len(ap)<1:ap=gsTestPath
-	if md:globals()['md'](ap)
+	ap=path.join(ap,*a)
+	
+	mkdir=True
+	if 'md' in ka:mkdir=ka['md']
+	if 'mkdir' in ka:mkdir=ka['mkdir']
+	if iscyg():mkdir=False#cyg下可以创建带:的目录，导致切换异常
+	if mkdir:md(ap)
 	
 	global gscdb
 	# repl()
@@ -578,7 +583,7 @@ def cdBack():
 	return cd(gscdb)
 cdb=cdBack
 
-def cdCurrentFile():
+def cdCurrentFile(a=''):
 	f=sys._getframe().f_back.f_globals
 	if '__file__' in f:
 		return cd(path.abspath(f['__file__']))

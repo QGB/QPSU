@@ -36,6 +36,10 @@ try:
 except Exception as ei:
 	detect='#not install chardet Module'
 	pass
+def jsonToDict(a):
+	return eval(a.replace('false','False').replace('true','True'))
+js2py=jsonToDict
+	
 def parseReMatch(rm,s):
 	'''s: iii [or use 'i'*3 ] :return int,int,int
 	short name i int,s string ,L long,f float,...
@@ -55,8 +59,8 @@ def matchHead(txt,regex):
 	else:return ''
 	
 def string(a):
-	if type(a) is str:return a
-	try:a=str(a)
+	if py.type(a) is str:return a
+	try:a=py.str(a)
 	except:a=''
 	return a
 

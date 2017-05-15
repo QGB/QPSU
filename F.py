@@ -74,7 +74,7 @@ def append(a,data):
 	
 def read(a,mod='r'):
 	try:
-		f=open(autoPath(a,mkdir=False),mod)
+		f=open(autoPath(a,md=False),mod)
 		s=f.read()
 		f.close()
 		return s
