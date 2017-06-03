@@ -575,7 +575,7 @@ def chdir(ap=gsTestPath,*a,**ka):
 	ap=path.dirname(ap)
 	if path.isdir(ap):os.chdir(ap);return True
 	for i in ap:
-		if i not in T.PATH_NAME:raise Exception('need file path')
+		if i not in T.PATH_NAME:raise Exception('need file path',ap,i)
 cd=chdir
 
 gscdb=''
@@ -583,10 +583,12 @@ def cdBack():
 	return cd(gscdb)
 cdb=cdBack
 
-def cdCurrentFile(a=''):
+def cdCurrentFile(*a):
 	f=sys._getframe().f_back.f_globals
 	if '__file__' in f:
-		return cd(path.abspath(f['__file__']))
+		sp=os.path.abspath(f['__file__'])
+		sp=os.path.dirname(sp)
+		return cd(sp,*a)
 	return False
 cd__file__=cdc=cdCurrent=cdcf=cdCurrentFile
 
@@ -1422,4 +1424,14 @@ print {0}
 			print '###import {0}'.format(i)
 			print ei
 # print 233
+def explorer(path='.'):
+	if iswin():
+		os.system('explorer.exe '+path)
+exp=explorer
+
+
+def logWindow():
+	import Tkinter as tk
+	
+
 if __name__ == '__main__':main()
