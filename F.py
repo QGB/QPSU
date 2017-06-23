@@ -56,17 +56,19 @@ def writeIterable(a,data,end='\n',overwrite=True):
 		f.write(py.str(i)+end)
 
 def write(a,data,mod='wb',mkdir=False):
-	if mkdir:a=autoPath(a)
-	with open(a,mod) as f:
-		try:
-			if type(data) in (py.str,py.unicode):
+	try:
+		if mkdir:a=autoPath(a)
+		with open(a,mod) as f:
+			if type(data) is py.str:
 				f.write(data)
+			if type(data) is py.unicode:
+				f.write(data.encode(U.encoding))
 			else:
 				print >>f,data
 			return True
-		except Exception as e:
-			gError=e
-			return False
+	except Exception as e:
+		gError=e
+		return False
 
 def append(a,data):
 	'''builtin afile.write() No breakLine'''

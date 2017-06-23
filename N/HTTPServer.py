@@ -6,7 +6,15 @@ from mimetypes import types_map
 from qgb import *
 
 register_route = {"GET":{},"POST":{}}
-def route(path="/", method=["GET"],h=True):
+def route(path="/", method=["GET"],h=True,args=True):
+	if not args:h=False
+	if type(method) in (str,unicode):
+		method=method.upper()
+		if method in register_route:
+			method=[method]
+		else:raise Exception('unsupported method:'+method)
+	
+	
 	def decorator(f):
 		for m in method:
 			m=m.upper()
@@ -39,8 +47,11 @@ class extended_BaseHTTPServer(BaseHTTPServer.BaseHTTPRequestHandler):
 
 	def do_POST(s):
 		o = urlparse(s.path)
+		arguments = parse_qs(o.query)
 		length = int(s.headers['Content-Length'])
-		arguments = parse_qs(s.rfile.read(length).decode('utf-8'))
+		s.postData = s.rfile.read(length)
+		
+		# parse_qs(s.rfile.read(length).decode('utf-8'))
 		s.do_routing(o, arguments, "POST")
 
 	def do_GET(s):
@@ -113,15 +124,19 @@ def build_response(s, retour, code=200):
 def redirect(location=""):
 	return {"content":"","code":301,"Location":location}
 
-def serve(ip="0.0.0.0", port=80,log=True):
+def serve(ip="0.0.0.0", port=80,log=True,onMainThread=False):
 	httpd = BaseHTTPServer.HTTPServer((ip, port), extended_BaseHTTPServer)
-	try:
-		from threading import Thread
-		Thread(target=httpd.serve_forever).start()
-		input('{0}:{1}'.format(ip,port))
-	except:
-		pass
-	httpd.server_close()
+	if onMainThread:
+		print ip,port
+		httpd.serve_forever()
+	else:
+		try:
+			from threading import Thread
+			Thread(target=httpd.serve_forever).start()
+			input('{0}:{1}'.format(ip,port))
+		except:
+			pass
+	httpd.server_close()#TODO: muti thread
 server=serve
 
 if __name__=='__main__':

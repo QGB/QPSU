@@ -5,9 +5,11 @@ import sys,os,U,T,F
 g=get=gipy=U.isipy()#不能直接引用U.ipy,环境不确定 动态判断避免识别错误
 if not gipy:raise EnvironmentError
 gIn=gipy.user_ns['In'];gOut=gipy.user_ns['Out']
-gt=None#thread
+
+gipy.editor=U.npp()
 
 def outType(t=None):
+	'''t is type to flit'''
 	if t !=None:
 		if type(t) is U.instance:
 			t=t.__class__
@@ -148,6 +150,9 @@ def recorder():
 			else:pass#Not Change
 			
 		U.sleep(9)#second
+		
+		
+gt=None#thread
 def startRecord():
 	global gt
 	gt=U.thread(target=recorder)

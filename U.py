@@ -6,7 +6,7 @@ true=True;false=False
 gimax=IMAX=imax=2147483647;gimin=IMIN=imin=-2147483648
 import  os,sys;path=os.path
 stdin=sys.stdin;stdout=sys.stdout;stderr=sys.stderr
-decoding='utf-8';encoding=stdout.encoding
+gsdecode=decoding='utf-8';gsencode=encoding=stdout.encoding
 modules=sys.modules
 from threading import Thread
 thread=Thread
@@ -604,7 +604,12 @@ cdqp=cdqpsu=cdQPSU
 def cdWShell(a=''):
 	return cd(gsWShell+a)
 cds=cdws=cdWShell
+
+def cdpm():
+	return cd('e:/pm')
 	
+def cdbabun(a=''):
+	return cd(r'C:\QGB\babun\cygwin\home\qgb/'+a)
 def pwd(p=False,display=False):
 	s=os.getcwd()
 	if p or display:print s
@@ -807,12 +812,19 @@ def printAttr(a,console=False):
 pa=printattr=printAttr
 # repl()
 # printAttr(5)
-def DirValue(a):
+gAllValue=[]
+def DirValue(a,fliter='',r=False):
 	'''约定：只有无参数函数才用 getXX  ?'''
 	r={}
 	for i in py.dir(a):
+		
 		try:
-			r[i]=py.eval('a.'+i)
+			tmp=py.eval('a.'+i)
+			if r:
+				tmp=DirValue(tmp,fliter,r)
+			if fliter not in i:continue	
+			r[i]=tmp
+				
 		except:
 			r[i]=Exception('can not get value '+i)
 	return r
@@ -838,9 +850,16 @@ def getObjName(a,value=False):
 getName=getObjName
 
 def getVarName(a,funcName='getVarName'):
-	'''funcName :defined for recursion frame search'''
-	import inspect,re,T
+	'''funcName :defined for recursion frame search
+	
+	在python2中 str unicode 字面相同情况下， == True
+	
+	'''
+	import inspect#,re,T
 	for line in inspect.getframeinfo(inspect.currentframe().f_back)[3]:
+		return line[line.index('(')+1:line.rindex(')')].strip()
+		#2017-6-24 01:29:13   正常
+		
 		r=T.sub(line,'(',')')
 		if '(' not in r:
 			return r
@@ -878,7 +897,7 @@ def getVarName(a,funcName='getVarName'):
 	
 	# print il,i,repr(line)
 		# if inMuti():return line
-name=getVarName
+name=getArgName=getVarName
 # repl()
 # exit()
 # getVarName(1l)
@@ -1273,9 +1292,14 @@ def ipyOutLast(i=None):
 	return Out
 	
 	
-def notePadPlus(a):
-	cmd(driverPath(r":\Program Files\Notepad++\notepad++.exe"),autof(a))
+def notePadPlusPlus(a=''):
+	npath=driverPath(r":\Program Files\Notepad++\notepad++.exe")
+	if a:
+		return cmd(npath,autof(a))
+	else:
+		return npath 
 	# cmd('npp',str(a))
+npp=notePadPlus=notePadPlusPlus
 	
 def backLocals(f=None,i=0,r=[]):
 	print i+1,'='*(20+i*2)
@@ -1432,6 +1456,9 @@ exp=explorer
 
 def logWindow():
 	import Tkinter as tk
-	
+	#TODO:
+
+def set(name,value=None):
+	set.__dict__
 
 if __name__ == '__main__':main()
