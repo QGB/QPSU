@@ -37,7 +37,7 @@ class ArgumentError(Exception):
 aError=argumentError=ArgumentException=ArgumentError
 
 try:
-	from F import write,read,ls,ll,md,rm
+	from F import write,read,ls,ll,md,rm,autof
 	import F,T
 	from pprint import pprint
 	import Clipboard;clipboard=cb=Clipboard
@@ -258,42 +258,6 @@ def md5(a='',file=''):
 	md5.update(a)	
 	return md5.hexdigest()  
 	
-
-def autof(head,ext=''):
-	'''return str  
-	# TODO # ext=?ext*     '''
-	if not py.type(ext)==py.type(head)==py.str or head=='':
-		return ''
-	
-	if len(ext)>0 and not ext.startswith('.'):ext='.'+ext
-	head.head.lower();ext=ext.lower()
-	
-	ap='.'
-	if path.isabs(head):
-		ap=F.dir(head)
-		if not F.isExist(ap):
-			if head.endswith(ext):return head
-			else:return head+ext
-
-	
-	import F
-	ls=[i.lower() for i in F.ls(ap)]
-	if head+ext in ls:return head+ext
-	
-	for i in ls:		
-		if i.startswith(head) and i.endswith(ext):return i
-	
-	for i in ls:
-		if head in i and ext in i:return i
-		
-	# if inMuti(ext,'*?'):ext=ext.replace('*')
-	
-	if not head.endswith(ext):head+=ext
-	
-	return head
-autoFileName=autof
-
-
 def inMuti(a,*la,**func):
 	'''bool a.func(la[i])'''
 	r=[]
@@ -676,7 +640,7 @@ def browser(url,ab='chrome'):
 	import webbrowser
 	def chrome(url):
 		###TODO: auto Find system base everything
-		spC='''C:\Program Files\Google\Chrome\Application\chrome.exe'''	
+		spC='''C:\QGB\Chrome\Application\chrome.exe'''	
 		webbrowser.register('chrome', None, webbrowser.BackgroundBrowser(spC))
 		webbrowser.get('chrome').open_new_tab(url)
 	for i in py.dir():
@@ -813,15 +777,16 @@ pa=printattr=printAttr
 # repl()
 # printAttr(5)
 gAllValue=[]
-def DirValue(a,fliter='',r=False):
+def DirValue(a,fliter='',recursion=False,ai=0,depth=9):
 	'''约定：只有无参数函数才用 getXX  ?'''
 	r={}
 	for i in py.dir(a):
 		
 		try:
 			tmp=py.eval('a.'+i)
-			if r:
-				tmp=DirValue(tmp,fliter,r)
+			if recursion:
+				if ai>depth:return '!depth reached'
+				tmp=DirValue(tmp,fliter,recursion,ai+1,depth)
 			if fliter not in i:continue	
 			r[i]=tmp
 				
@@ -1237,7 +1202,12 @@ def getModPath(qgb=True,slash=True,backSlash=False,endSlash=True,endslash=True,t
 	return sp
 	
 	
-def len(a):
+def len(a,*other):
+	if other:
+		r=[len(a)]
+		for i in other:
+			r.append(len(i))
+		return r
 	try:return py.len(a)
 	except:
 		# if type(a) in (int,float,list,tuple,dict):
@@ -1460,5 +1430,8 @@ def logWindow():
 
 def set(name,value=None):
 	set.__dict__
-
+	#TODO
+def google(a):
+	browser('https://www.google.com.my/#q='+a)
+	
 if __name__ == '__main__':main()

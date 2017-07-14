@@ -6,7 +6,11 @@ g=get=gipy=U.isipy()#不能直接引用U.ipy,环境不确定 动态判断避免�
 if not gipy:raise EnvironmentError
 gIn=gipy.user_ns['In'];gOut=gipy.user_ns['Out']
 
-gipy.editor=U.npp()
+# gipy.editor=U.npp()
+
+def run(file):
+	file=F.autof(file,ext='py')
+	return g.magic(u'run -i '+file)
 
 def outType(t=None):
 	'''t is type to flit'''
@@ -61,6 +65,8 @@ def save(file=None,lines=-1,tryExcept=False,Out=False,minSpace=70,overide=True):
 		lsta,lend=0,gIn.__len__()
 	if file:
 		if type(file) in (unicode,str):
+			if not file.lower().endswith('.py'):
+				file+='.py'
 			file=open(file,'a')
 		elif type(file) is __builtin__.file:
 			if file.mode!='a':return False

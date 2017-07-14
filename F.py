@@ -6,6 +6,40 @@ gError=None
 # for i in T.HEX:
 	# for j in T.HEX:
 		# U.p( str(U.ct()-1)+":"+"'"+i+j+"',")
+		
+def autof(head,ext=''):
+	'''return str  
+	# TODO # ext=?ext*     '''
+	if not py.type(ext)==py.type(head)==py.str or head=='':
+		return ''
+	
+	if len(ext)>0 and not ext.startswith('.'):ext='.'+ext
+	head=head.lower();ext=ext.lower()
+	
+	ap='.'
+	if _p.isabs(head):
+		ap=dir(head)
+		if not isExist(ap):
+			if head.endswith(ext):return head
+			else:return head+ext
+	
+	# import F
+	ls=[i.lower() for i in list(ap)]
+	if head+ext in ls:return head+ext
+	
+	for i in ls:		
+		if i.startswith(head) and i.endswith(ext):return i
+	
+	for i in ls:
+		if head in i and ext in i:return i
+		
+	# if inMuti(ext,'*?'):ext=ext.replace('*')
+	
+	if not head.endswith(ext):head+=ext
+	
+	return head
+autoFileName=autof
+		
 def new(a):
 	'''will overwrite'''
 	try:
@@ -55,13 +89,20 @@ def writeIterable(a,data,end='\n',overwrite=True):
 	for i in data:
 		f.write(py.str(i)+end)
 
-def write(a,data,mod='wb',mkdir=False):
+def write(a,data,mod='wb',mkdir=False,autoArgs=True):
+	try:
+		if autoArgs:
+			if py.len(a)>py.len(data)>0:
+				a,data=data,a
+				U.warring('write fn,data')
+	except:pass		
+	
 	try:
 		if mkdir:a=autoPath(a)
 		with open(a,mod) as f:
 			if type(data) is py.str:
 				f.write(data)
-			if type(data) is py.unicode:
+			elif type(data) is py.unicode:
 				f.write(data.encode(U.encoding))
 			else:
 				print >>f,data
@@ -238,12 +279,12 @@ def getSourcePath():
 	
 def delFile(a):
 	a=autoPath(a,md=False)
-	# sp=getSplitor(a)
+	sp=getSplitor(a)
 	# for i in a.split(ap):
-	# try:
-		# os.remove(a)
-		# return True
-	# except:return False
+	try:
+		os.remove(a)
+		return True
+	except:return False
 	
 rm=delFile
 	

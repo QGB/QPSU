@@ -36,6 +36,56 @@ try:
 except Exception as ei:
 	detect='#not install chardet Module'
 	pass
+def match(a,exp):
+	'''Wildcard character'''
+	import fnmatch
+	exp=fnmatch.translate(exp)
+	exp=re.compile(exp)
+	try:
+		return exp.match(a).group()	
+	except:
+		return ''
+	
+# gsV='?'	
+def parseWildcardExp(a,wildcard='*',value='?'):
+	if py.type(a) in (py.str,py.unicode):
+		pass
+	elif py.type(a) is py.list:
+		return a
+	else:
+		raise Exception('arg need str or list')
+	
+	r=[]
+	tmp=''
+	
+	na=py.len(a)
+	nw=py.len(wildcard)
+	nv=py.len(value)
+	i=0
+	while i <na:
+		if a[i] in (wildcard[:1],value[:1]):
+			r.append(tmp)
+			tmp=''
+			if a[i:].startswith(wildcard):
+				i+=nw
+				r.append({})
+				break
+			if a[i:].startswith(value):
+				i+=nv
+				r.append([])
+				break
+		else:
+			tmp+=a[i]
+		i+=1
+	return r
+parseWildcard=parseWildcardExp	
+def matchValue(a,exp):
+	''' * wildcard
+	? value'''
+	a=parseMatchExp(a)
+	r=[]
+
+	return r	
 def jsonToDict(a):
 	return eval(a.replace('false','False').replace('true','True'))
 js2py=jsonToDict

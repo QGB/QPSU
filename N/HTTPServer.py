@@ -133,11 +133,27 @@ def serve(ip="0.0.0.0", port=80,log=True,onMainThread=False):
 		try:
 			from threading import Thread
 			Thread(target=httpd.serve_forever).start()
-			input('{0}:{1}'.format(ip,port))
+			input('{0}:{1}\n'.format(ip,port))
 		except:
 			pass
 	httpd.server_close()#TODO: muti thread
-server=serve
+http=httpd=server=serve
+
+def https(ip="0.0.0.0", port=443,key='',log=True,onMainThread=False):
+	httpd = BaseHTTPServer.HTTPServer((ip, port), extended_BaseHTTPServer)
+	
+	if not key:key=U.getModPath()+'N/.tmall.com.crt'#lk.lk.crt'
+	import ssl
+	httpd.socket=ssl.wrap_socket( httpd.socket, keyfile=key,  certfile=key)
+	
+	try:
+		from threading import Thread
+		Thread(target=httpd.serve_forever).start()
+		input('{0}:{1}\n'.format(ip,port))
+	except:
+		pass
+	httpd.server_close()
+httpsd=https
 
 if __name__=='__main__':
 	serve()
