@@ -10,8 +10,10 @@ for i in __all__:
 	if i in sys.modules:
 		sys.modules['_'+i]=sys.modules.pop(i)
 	try:exec('import '+i)
-	except:__all__.remove(i)
-
+	except Exception as ei:
+		if 'gError' in dir():gError.append(ei)
+		else:gError=[ei]
+		__all__.remove(i)
 
 try:
 	if U.isipy():
@@ -27,8 +29,8 @@ try:
 		__all__.append('Win')
 	# print __all__	
 except Exception as e:
-	gError=e
-	pass
+	if 'gError' in dir():gError.append(ei)
+	else:gError=[ei]
 
 # print __all__
 # try:

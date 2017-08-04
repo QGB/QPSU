@@ -1,9 +1,10 @@
+# coding=utf-8
 import BaseHTTPServer
 import logging
 import os
 from urlparse import urlparse,parse_qs
 from mimetypes import types_map
-from qgb import *
+# from qgb import *#循环import
 
 register_route = {"GET":{},"POST":{}}
 def route(path="/", method=["GET"],h=True,args=True):
@@ -142,7 +143,9 @@ http=httpd=server=serve
 def https(ip="0.0.0.0", port=443,key='',log=True,onMainThread=False):
 	httpd = BaseHTTPServer.HTTPServer((ip, port), extended_BaseHTTPServer)
 	
-	if not key:key=U.getModPath()+'N/.tmall.com.crt'#lk.lk.crt'
+	if not key:
+		from qgb import U
+		key=U.getModPath()+'N/.tmall.com.crt'#lk.lk.crt'
 	import ssl
 	httpd.socket=ssl.wrap_socket( httpd.socket, keyfile=key,  certfile=key)
 	

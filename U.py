@@ -30,7 +30,7 @@ except Exception as _e:
 	# pass# 已经存在于globals 中，是否有必要重新赋值给 gError？
 # else:
 	gError=None
-	printError=printErr=gbPrintErr=False
+	printError=printErr=gbPrintErr=True
 
 class ArgumentError(Exception):
 	pass
@@ -400,9 +400,43 @@ def run(a,*args):
 	if type(a)!=type([]):a=list(a)
 	if len(args)>0:a.extend(args)
 	if type(a)==type([]):
+		for i,v in enumerate(a):
+			if py.type(v) not in (py.str,py.unicode):
+				a[i]=v=str(v)
+			if iswin() and v.startswith('"') and v.endswith('"'):
+				a[i]=v[1,-1]
+			
 		return __import__('subprocess').Popen(a)
-	
-	
+	'''
+In [151]: _131.poll?
+Signature: _131.poll()
+Docstring:
+Check if child process has terminated. Set and return returncode
+attribute.
+File:      c:\qgb\anaconda2\lib\subprocess.py
+Type:      instancemethod
+
+In [152]: _131.poll
+--------> _131.poll()
+Out[152]: 0
+
+In [153]:
+
+In [153]: U.run 'calc'
+--------> U.run('calc')
+Out[153]: <subprocess.Popen at 0x24415d0>
+
+In [154]: _153.poll
+--------> _153.poll()
+
+In [155]: repr _153.poll()
+--------> repr(_153.poll())
+Out[155]: 'None'
+
+In [156]: repr _153.poll()
+--------> repr(_153.poll())
+Out[156]: '0'              #killed
+'''	
 	
 def curl(a):
 	if type(a)!=type(''):return
@@ -1171,7 +1205,8 @@ def getAllMod(mp=None):
 		if(i.find('__')!=-1):continue
 		if(i.lower()[-3:]!='.py'):continue
 		ls.append(i[:-3])
-	return ls
+	if ls:return ls
+	else:return  ['N', 'Win', 'Clipboard', 'F', 'ipy', 'T', 'U']
 def getModPathForImport():
 	return getModPath()[:-4]
 	sp=os.path.dirname(getModPath())# dirname/ to dirname
@@ -1263,9 +1298,20 @@ def ipyOutLast(i=None):
 	
 	
 def notePadPlusPlus(a=''):
+	'''
+--------> os.system('"M:\\Program Files\\Notepad++\\notepad++.exe" "IP.py"')
+'M:\Program' 不是内部或外部命令，也不是可运行的程序
+或批处理文件。
+Out[114]: 1
+
+--------> os.system('"M:\\Program Files\\Notepad++\\notepad++.exe" IP.py')
+Out[115]: 0
+
+'''
 	npath=driverPath(r":\Program Files\Notepad++\notepad++.exe")
+	# npath='"%s"'%npath
 	if a:
-		return cmd(npath,autof(a))
+		return run(npath,autof(a))
 	else:
 		return npath 
 	# cmd('npp',str(a))
@@ -1405,6 +1451,8 @@ def main(display=True,pressKey=False,clipboard=False,escape=False,c=False,ipyOut
 	return gsImport
 def test():
 	gm=getAllMod()
+	print gm
+	repl()
 	# gm=['U','T','N','F',].extend(gm)
 	gm=set(gm)
 	for i in gm:
