@@ -1477,7 +1477,11 @@ def logWindow():
 	#TODO:
 
 def set(name,value=None):
-	set.__dict__
+	if py.type(name) is not py.str and value==None:
+		set.__dict__['_']=name
+	set.__dict__[name]=value
+def get(name='_'):
+	set.__dict__[name]
 	#TODO
 def google(a):
 	browser('https://www.google.com.my/#q='+a)
