@@ -347,7 +347,8 @@ def in_all(v,*ts):
 	return [v]
 ##########################################
 def cmd(*a,**ka):
-	'''show=False :show command line'''
+	'''show=False :show command line
+	默认阻塞，直到进程结束返回'''
 	import T
 	s=''
 	if iswin() or iscyg():quot='"'
@@ -379,7 +380,7 @@ def cmd(*a,**ka):
 	try:
 		if 'show' in ka and ka['show']:print repr(s)
 		return os.system(s)
-	except:return -2
+	except Exception as e:return e
 	# exit()
 # cmd('echo 23456|sub','3','')	
 def sleep(aisecond):
@@ -396,6 +397,7 @@ def pause(a='Press Enter to continue...\n',exit=True):
 			return False
 	return True	
 def run(a,*args):
+	'''默认不阻塞'''
 	if type(a)==type(''):a=[a]
 	if type(a)!=type([]):a=list(a)
 	if len(args)>0:a.extend(args)
@@ -1313,7 +1315,9 @@ Out[115]: 0
 	if a:
 		return run(npath,autof(a))
 	else:
+		run(npath)
 		return npath 
+		
 	# cmd('npp',str(a))
 npp=notePadPlus=notePadPlusPlus
 	
@@ -1479,9 +1483,10 @@ def logWindow():
 def set(name,value=None):
 	if py.type(name) is not py.str and value==None:
 		set.__dict__['_']=name
+		return
 	set.__dict__[name]=value
 def get(name='_'):
-	set.__dict__[name]
+	return set.__dict__[name]
 	#TODO
 def google(a):
 	browser('https://www.google.com.my/#q='+a)

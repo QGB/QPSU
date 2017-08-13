@@ -30,7 +30,7 @@ def route(path="/", method=["GET"],h=True,args=True):
 		return f
 	return decorator
 router=route
-handler_method = {}
+handler_method = {}#404,500,static
 def override(method=None):
 	def decorator(f):
 		handler_method[method] = f
@@ -88,7 +88,7 @@ class extended_BaseHTTPServer(BaseHTTPServer.BaseHTTPRequestHandler):
 		except Exception as eh:
 			# Gestion des erreurs
 			if "500" not in handler_method:
-				build_error(s,eh,500,'500 not in')
+				build_error(s,eh,500,'500 [not in handler_method,use @override("500") ]')
 
 				
 				# build_response(s, , 500)
@@ -100,10 +100,10 @@ def build_error(s,e,code,msg=''):
 	s.send_response(code)
 	s.send_header("Content-type", "text/plain")
 	s.end_headers()
-	try:raise e
-	except:
-		import traceback
-		s.wfile.write("{0} \n{1}".format(msg,traceback.format_exc())  )
+	# try:raise e
+	# except:# 只追踪到raise的地方，弃用
+	import traceback
+	s.wfile.write("{0} \n{1}".format(msg,traceback.format_exc())  )
 		
 def build_response(s, retour, code=200):
 	if type(retour) is dict:
@@ -158,5 +158,28 @@ def https(ip="0.0.0.0", port=443,key='',log=True,onMainThread=False):
 	httpd.server_close()
 httpsd=https
 
+def main():
+	import sys
+	try:U=sys.modules['qgb.U']
+	except:from qgb import U
+	@route('/',['get','post'])
+	def data(h,**ka):
+		h.send_response(200)
+		h.send_header("Content-type", "text/plain")
+		h.send_header('Access-Control-Allow-Origin', '*')
+		h.end_headers()
+		
+		if 'postData' in dir(h):
+			ka=h.postData
+
+		
+		print >>h.wfile,ka
+		U.set(ka)
+			
+		h.finish()
+		U.set('h',h)
+		
+	https()
 if __name__=='__main__':
-	serve()
+	main()
+	
