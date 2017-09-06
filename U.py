@@ -16,14 +16,14 @@ gbLogErr=True
 gError=[]
 def setErr(ae):
 	global gError
-	if gbLogErr:#U
-		t=type(gError)
-		if t is list:t.append(ae)
+	if gbLogErr:# U.
+		if type(gError) is list:gError.append(ae)
 		elif gError:gError=[gError,ae]
 		else:gError=[ae]
 	else:
 		gError=ae
-	if gbPrintErr:print '#Error ',ei#U
+	if gbPrintErr:print '#Error ',ei# U.
+	
 if 'qgb.U' in modules:modules['_U']=modules['qgb.U']
 elif 'U' in modules:modules['_U']=modules['U']
 

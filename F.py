@@ -6,14 +6,13 @@ import T,U
 gError=[]
 def setErr(ae):
 	global gError
-	if U.gbLogErr:# U.
-		t=type(gError)
-		if t is list:t.append(ae)
+	if gbLogErr:# U.
+		if type(gError) is list:gError.append(ae)
 		elif gError:gError=[gError,ae]
 		else:gError=[ae]
 	else:
 		gError=ae
-	if U.gbPrintErr:print '#Error ',ae# U.
+	if gbPrintErr:print '#Error ',ei# U.
 	
 def autof(head,ext=''):
 	'''return str  
