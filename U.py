@@ -11,6 +11,19 @@ modules=sys.modules
 import __builtin__ ;py=builtin=__builtin__
 
 printError=printErr=gbPrintErr=True
+gbLogErr=True
+########
+gError=[]
+def setErr(ae):
+	global gError
+	if gbLogErr:#U
+		t=type(gError)
+		if t is list:t.append(ae)
+		elif gError:gError=[gError,ae]
+		else:gError=[ae]
+	else:
+		gError=ae
+	if gbPrintErr:print '#Error ',ei#U
 if 'qgb.U' in modules:modules['_U']=modules['qgb.U']
 elif 'U' in modules:modules['_U']=modules['U']
 
@@ -20,8 +33,9 @@ try:
 	thread=Thread
 	from multiprocessing import Process;process=Process
 except Exception as ei:
-	gError=ei
-	if gbPrintErr:print '#Error lib import',ei
+	if gbPrintErr:print '#Error lib import'
+	setErr(ei)
+	
 try:
 	_U=modules['_U']
 	gError=_U.gError
@@ -36,12 +50,13 @@ try:
 	from pprint import pprint
 	import Clipboard;clipboard=cb=Clipboard
 except Exception as ei:
-	if gbPrintErr:print '#Error import',ei
-	gError=ei
+	if gbPrintErr:print '#Error import'
+	setErr(ei)
+	# gError=ei
 	
 class ArgumentError(Exception):
 	pass
-aError=argumentError=ArgumentException=ArgumentError	
+aError=argserr=argErr=argerr=argumentError=ArgumentException=ArgumentError	
 ############
 module=type(py)
 class Class:pass
@@ -103,8 +118,8 @@ if iswin() or iscyg():
 		# def msgbox(s='',st='title',*a):
 			# if(a!=()):s=str(s)+ ','+str(a)[1:-2]
 			# if iswin():windll.user32.MessageBoxA(0, str(s), str(st), 0)
-		if gbPrintErr:print '#Error import',ei
-		gError=ei
+		if gbPrintErr:print '#Error import Win'
+		setErr(ei)
 	###########################
 	
 	if iscyg():
@@ -126,7 +141,7 @@ try:
 	import Clipboard;clipboard=cb=Clipboard
 except Exception as ei:
 	if gbPrintErr:print '#Error import F'
-	gError=ei
+	setErr(ei)
 
 #TODO: if not has ei,import error occur twice,why?
 def driverPath(a):
@@ -509,7 +524,6 @@ repl=pys=pyshell
 def reload(*mods):
 	''' 不是一个模块时，尝试访问mod._module'''
 	import sys,imp
-	global gError
 	if len(mods)<1:#如果 mods 中含有长度为0的元素，会导致U重新加载
 		# sys.modules['qgb._U']=sys.modules['qgb.U'] #useless, _U is U
 		#if pop qgb.U,can't reload
@@ -539,8 +553,7 @@ def reload(*mods):
 		try:
 			imp.reload(mod)
 		except Exception as ei:
-			gError=ei
-			if gbPrintErr:print ei
+			setErr(ei)
 	else:
 		for i in mods:
 			reload(i)
@@ -725,7 +738,7 @@ def resetStd(name=''):
 		sm=globals()[name]
 		stdm=getattr(sys,std)
 	except Exception as e:
-		gError=e
+		setErr(e)
 		return False
 	if(sm and sm != stdm):
 		stdm.close()#以前设置的std

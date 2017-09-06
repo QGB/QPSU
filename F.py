@@ -2,11 +2,19 @@
 import __builtin__ as py
 import os as _os;import sys as _sys;from os import path as _p
 import T,U
-gError=None
-# for i in T.HEX:
-	# for j in T.HEX:
-		# U.p( str(U.ct()-1)+":"+"'"+i+j+"',")
-		
+
+gError=[]
+def setErr(ae):
+	global gError
+	if U.gbLogErr:# U.
+		t=type(gError)
+		if t is list:t.append(ae)
+		elif gError:gError=[gError,ae]
+		else:gError=[ae]
+	else:
+		gError=ae
+	if U.gbPrintErr:print '#Error ',ae# U.
+	
 def autof(head,ext=''):
 	'''return str  
 	# TODO # ext=?ext*     '''
@@ -48,7 +56,7 @@ def new(a):
 		f.close()
 		return f.name
 	except Exception as e:
-		globals()['gError']=e
+		setErr(e)
 		return False
 def isPath(ast):
 	if type(ast) not in (str,unicode):ast=py.str(ast)
@@ -108,7 +116,7 @@ def write(a,data,mod='wb',mkdir=False,autoArgs=True):
 				print >>f,data
 			return True
 	except Exception as e:
-		gError=e
+		setErr(e)
 		return False
 
 def append(a,data):
@@ -170,7 +178,7 @@ def list(ap='.',type='',t='',r=False,d=False,dir=False,f=False,file=False):
 	else:d=f=True		#default return all
 	
 	if py.type(ap)!=py.type('') or py.len(ap)<1:
-		gError='F.list arguments ap error'
+		setErr('F.list arguments ap error')
 		ap='.'
 	# if len(ap)==2 and ap.endswith(':'):ap+='/'	
 	if not U.inMuti(ap,'/','\\',f=str.endswith):ap+='/'
@@ -282,10 +290,10 @@ def delFile(a):
 	sp=getSplitor(a)
 	# for i in a.split(ap):
 	try:
-		os.remove(a)
+		_os.remove(a)
 		return True
 	except Exception as e:
-		gError=e
+		setErr({a:e})
 		return False
 	
 rm=delFile
@@ -321,8 +329,7 @@ def makeDirs(ap):
 				if 'exists' in e.args[1]:#(17, 'File exists') cygwin;
 					continue
 				# U.repl(printCount=True)
-				global gError
-				gError=e
+				setErr(e)
 				if U.gbPrintErr:print e
 				return False
 	return True	
