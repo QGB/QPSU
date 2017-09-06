@@ -17,27 +17,30 @@ def findFunc(name,root=9,depth=3,case=False):
 	
 
 
-def getIP(type='local'):
-	import inspect
-	a = inspect.getargspec(getIP)
-	print a.defaults
+def getLAN_IP():
+	# import inspect
+	# a = inspect.getargspec(getIP)
+	# print a.defaults
 	# for i 
+	
 
 def getAllAdapter():
 	
 	return r
 	
 def setIP(ip='',source='dhcp',adapter='',mask=''):
-	if not adapter:adapter=u'"\u672c\u5730\u8fde\u63a5 2"'.encode('gb2312')
+	if not adapter:adapter=u'"\u672c\u5730\u8fde\u63a5"'.encode('gb2312')#本地连接
 	if ip:
 		source='static'
 		if not ip.startswith('addr='):
 			ip='addr='+ip
 		if not mask:mask='mask='+'255.255.255.0'
-		elif not mask.startswith('mask'):mask='mask='+mask
 		
+		if not mask.startswith('mask'):mask='mask='+mask
+	r='netsh interface ip  set address name={0} source={1} {2} {3}'.format(adapter,source,ip,mask)
 	import os
-	os.system('netsh interface ip  set address name={0} source={1} {2} {3}'.format(adapter,source,ip,mask))
+	os.system(r)
+	return r
 setip=setIP
 		
 if __name__=='__main__':

@@ -160,8 +160,12 @@ httpsd=https
 
 def main():
 	import sys
+	
 	try:U=sys.modules['qgb.U']
-	except:from qgb import U
+	except:
+		sys.path[0]=sys.path[0][:-5]
+		print sys.path
+		from qgb import U
 	@route('/',['get','post'])
 	def data(h,**ka):
 		h.send_response(200)
@@ -179,7 +183,8 @@ def main():
 		h.finish()
 		U.set('h',h)
 		
-	https()
+	ca=U.pwd()+'/qgb/n/ca.crt'
+	https(key=ca)
 if __name__=='__main__':
 	main()
 	

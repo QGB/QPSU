@@ -284,7 +284,9 @@ def delFile(a):
 	try:
 		os.remove(a)
 		return True
-	except:return False
+	except Exception as e:
+		gError=e
+		return False
 	
 rm=delFile
 	
@@ -329,8 +331,10 @@ def makeDirs(ap):
 		
 		# _os.system('md "{0}"'.format(ap))
 md=mkdir=makeDirs		
-		
+
+gbAutoPath=True
 def autoPath(fn,mkdir=True,md=True):
+	if not gbAutoPath:return fn
 	fn=str(fn)
 	if not mkdir:md=False
 	if (fn.startswith(".")):

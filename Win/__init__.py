@@ -3,8 +3,11 @@ import sys,ctypes
 if 'qgb.U' in sys.modules:U=sys.modules['qgb.U']
 elif 'U' in sys.modules:  U=sys.modules['U']
 else:
-	from sys import path as _p;_p.insert(0,_p[0][:-4-4])
-	# print u'高贵'
+	from sys import path as _p;_p.insert(-1,_p[0][:-4-4])
+	# for i,v in enumerate(_p):  #这会导致 ImportError: No module named Constants
+		# if 'qgb' in v and 'Win' in v:
+			# _p.pop(i)
+	# print _p
 	from qgb import U
 
 class WinDLL(ctypes.CDLL):
@@ -37,6 +40,77 @@ from Constants import *
 
 try:import win32gui
 except Exception as ei:pass
+
+
+gdAddressType={1: ['MIB_IPADDR_PRIMARY', 'Primary IP address', '主IP地址'],
+ 4: ['MIB_IPADDR_DYNAMIC', 'Dynamic IP address', '动态IP地址'],
+ 8: ['MIB_IPADDR_DISCONNECTED', 'Address is on disconnected interface', '断开连接的接口对应的IP地址'],
+ 64: ['MIB_IPADDR_DELETED', 'Address is being deleted', '删除的IP地址'],
+ 128: ['MIB_IPADDR_TRANSIENT', 'Transient address', '临时IP地址']}
+
+def getAllNetworkInterfaces():
+	'''['dwIndex','dwAddr', 'dwBCastAddr',  'dwMask', 'dwReasmSize', 'wType', 'unused1']
+dwAddr
+Type: DWORD
+The IPv4 address in network byte order.
+dwIndex
+Type: DWORD
+The index of the interface associated with this IPv4 address.
+dwMask
+Type: DWORD
+The subnet mask for the IPv4 address in network byte order.
+dwBCastAddr
+Type: DWORD
+The broadcast address in network byte order. A broadcast address is typically the IPv4 address with the host portion set to either all zeros or all ones.
+The proper value for this member is not returned by the GetIpAddrTable function.
+dwReasmSize
+Type: DWORD
+The maximum re-assembly size for received datagrams.
+unused1
+Type: unsigned short
+This member is reserved.
+wType
+Type: unsigned short
+The address type or state. This member can be a combination of the following values.
+	适配器（Interface Card  ,  Adapter）
+	网络接口控制器（英语：network interface controller，NIC），又称网络接口控制器，网络适配器（network adapter），网卡（network interface card）
+	http://www.cnblogs.com/leftshine/p/5698732.html'''
+	GetIpAddrTable = windll.iphlpapi.GetIpAddrTable
+	GetIpAddrTable.argtypes = [
+		ctypes.POINTER(MIB_IPADDRTABLE),
+		ctypes.POINTER(ctypes.c_ulong),
+		ctypes.wintypes.BOOL,
+		]
+	GetIpAddrTable.restype = DWORD
+	table = MIB_IPADDRTABLE()
+	size = ctypes.wintypes.ULONG(ctypes.sizeof(table))
+	table.dwNumEntries = 0
+	rk=['dwIndex','dwAddr', 'dwMask','wType', 'dwBCastAddr',   'dwReasmSize', 'unused1']
+	GetIpAddrTable(ctypes.byref(table), ctypes.byref(size), 0)
+	r=[]
+	for i in rk:print i
+	print table.dwNumEntries
+	for n in range(table.dwNumEntries):
+		row = table.table[n]
+		rn=[]
+		for i in rk:
+			if i in('dwIndex','dwReasmSize'):
+				rn.append(getattr(row,i))
+			elif i=='wType':
+				i=getattr(row,i)
+				t=[]
+				for j in sorted(gdAddressType.keys(),reverse=True):
+					if j<=i:
+						t.append(gdAddressType[j][0])
+				rn.append(t)
+			else:
+				rn.append(str(getattr(row,i)))
+		r.append(rn)
+		
+	# raise IndexError("interface index out of range")
+		U.repl()
+	return tuple(r)
+getAllNetwork=getAllNetworkInterfaces
 
 def getCmdHandle():
 	return kernel32.GetConsoleWindow()
@@ -236,6 +310,8 @@ def getAllDisk():
 		# if U.F.exist(i):r.append(i)
 	return r
 def main():
+	print getAllNetwork()
+	exit()
 	import sys,os;sys.path.append('d:\pm');from qgb import U,T,F
 	
 	o=getVersionInfo()

@@ -18,7 +18,26 @@ NULL  = 0
 TRUE  = 1
 FALSE = 0
 INVALID_HANDLE_VALUE = -1
+##################################
+MAX_INTERFACES = 10
+class IPAddr(ctypes.Structure):
+	_fields_ = [("S_addr", ctypes.c_ulong)]
 
+	def __str__(self):
+		import socket,struct
+		return socket.inet_ntoa(struct.pack("L", self.S_addr))
+class MIB_IPADDRROW(ctypes.Structure):
+	_fields_ = [("dwAddr", IPAddr),
+				("dwIndex", DWORD),
+				("dwMask", DWORD),
+				("dwBCastAddr", IPAddr),
+				("dwReasmSize", DWORD),
+				("unused1", ctypes.c_ushort),
+				("wType", ctypes.c_ushort),
+				]
+class MIB_IPADDRTABLE(ctypes.Structure):
+	_fields_ = [("dwNumEntries", DWORD),
+				("table", MIB_IPADDRROW * MAX_INTERFACES)]
 
 # typedef struct _PROCESS_INFORMATION {
 #	 HANDLE hProcess;

@@ -1,8 +1,9 @@
 cd..\..
 
 set py=C:\QGB\Anaconda2\python.exe
-%py% .\qgb\N\HTTPServer.py
 
+set t=%py% .\qgb\N\HTTPServer.py
+
+%T%
 
 cmd
-pause

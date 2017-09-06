@@ -4,38 +4,32 @@ from qgb import U,T
 '''
 true=True;false=False
 gimax=IMAX=imax=2147483647;gimin=IMIN=imin=-2147483648
-import  os,sys;path=os.path
+import sys
 stdin=sys.stdin;stdout=sys.stdout;stderr=sys.stderr
 gsdecode=decoding='utf-8';gsencode=encoding=stdout.encoding
 modules=sys.modules
-from threading import Thread
-thread=Thread
-from multiprocessing import Process;process=Process
 import __builtin__ ;py=builtin=__builtin__
-module=type(py)
-class Class:pass
-instance=type(Class())
-Class=classtype=classType=type(Class)
 
+printError=printErr=gbPrintErr=True
 if 'qgb.U' in modules:modules['_U']=modules['qgb.U']
 elif 'U' in modules:modules['_U']=modules['U']
 
-# if '_U' in modules:
-	
+try:
+	import os;path=os.path
+	from threading import Thread
+	thread=Thread
+	from multiprocessing import Process;process=Process
+except Exception as ei:
+	gError=ei
+	if gbPrintErr:print '#Error lib import',ei
 try:
 	_U=modules['_U']
 	gError=_U.gError
 	printError=printErr=gbPrintErr=_U.gbPrintErr
-except Exception as _e:
+except Exception as _e:pass
 	# pass# 已经存在于globals 中，是否有必要重新赋值给 gError？
 # else:
-	gError=None
-	printError=printErr=gbPrintErr=True
-
-class ArgumentError(Exception):
-	pass
-aError=argumentError=ArgumentException=ArgumentError
-
+	
 try:
 	from F import write,read,ls,ll,md,rm,autof
 	import F,T
@@ -45,8 +39,14 @@ except Exception as ei:
 	if gbPrintErr:print '#Error import',ei
 	gError=ei
 	
-	
-	
+class ArgumentError(Exception):
+	pass
+aError=argumentError=ArgumentException=ArgumentError	
+############
+module=type(py)
+class Class:pass
+instance=type(Class())
+Class=classtype=classType=type(Class)
 #########################
 def one_in(vs,*t):
 	'''(1,2,3,[t])	or	([vs].[t])'''
@@ -185,7 +185,12 @@ def pln(*a,**ka):
 	
 def p(*a,**ka):
 	if len(a)==1:
-		sys.stdout.write(str(a[0]))
+		a=a[0]
+		at=type(a)
+		if at is py.unicode:a=a.encode(encoding)
+		# elif at is 
+		else:a=py.str(a)
+		sys.stdout.write(a)
 	elif len(a)>1:
 		if 'sep' in ka.keys():sep=ka['sep']
 		else:sep=' '
@@ -450,6 +455,16 @@ def curl(a):
 
 # def isfile
 # del __name__
+
+def delMuti(a):
+	r=[]
+	rt= type(a)
+	for i in a:
+		if i not in r:r.append(i)
+	if rt in (py.str,py.unicode):
+		return ''.join([rt(i) for i in r])
+	return r
+delmuti=delMuti
 def this():
 	''' local dir'''
 	repl()
@@ -568,7 +583,7 @@ def chdir(ap=gsTestPath,*a,**ka):
 	global gscdb
 	# repl()
 	# if path.abspath(gscdb) != pwd():
-	gscdb=pwd()
+	gscdb.append(pwd())
 	
 	if path.isdir(ap):os.chdir(ap);return True
 
@@ -578,9 +593,13 @@ def chdir(ap=gsTestPath,*a,**ka):
 		if i not in T.PATH_NAME:raise Exception('need file path',ap,i)
 cd=chdir
 
-gscdb=''
-def cdBack():
-	return cd(gscdb)
+gscdb=[]
+def cdBack(index=-1):
+	'''False: cd path list []'''
+	if gscdb:
+		return cd(gscdb[index])
+	else:
+		return False
 cdb=cdBack
 
 def cdCurrentFile(*a):
@@ -617,7 +636,15 @@ def pwd(p=False,display=False):
 	except:pass
 	return s
 	
-	
+def sort(a, cmp=None, key=None, reverse=False):
+	'''sorted _5,cmp=lambda a,b:len(a)-len(b)  按长度从小到大排序
+	在python2.x中cmp参数指定的函数用来进行元素间的比较。此函数需要2个参数，然后返回负数表示小于，0表示等于，正数表示大于。'''
+	t=py.type(a)
+	a=py.sorted(a,cmp,key,reverse)
+	if t in (py.str,py.unicode):
+		return ''.join([t(i) for i in a])
+	else:
+		return a
 def sortDictV(ad,des=True):
 	'''des True,,, python dict key auto sort ?'''
 	if type(ad) is not dict:return {}
@@ -633,10 +660,15 @@ def sortDictV(ad,des=True):
 
 # exit()
 
-def eval(s):
+def execHelp(s):
 	'''diff between eval and exec in python
-	return None'''
-	exec(s)
+	exec not return 
+	    a=exec('1')
+         ^
+		SyntaxError: invalid syntax
+'''
+	return py.help('exec')
+	# exec(s)
 
 def calltimes(a=''):
 	import T
@@ -654,23 +686,52 @@ def _ct_clear():
 calltimes.clear=_ct_clear
 
 
-if(calltimes()<1):BDEBUG=True;__stdout=None
+if(calltimes()<1):BDEBUG=True
 debug=BDEBUG
 
-def setOut(afileName):
-	global __stdout
-	if(__stdout != None):
-		resetOut()
-	__stdout,sys.stdout=sys.stdout,open(afileName,'w+')
-setout=setOut	
+def setStd(name,file):
+	'''name=[std]out err in'''
+	t=py.type(file)
+	name=name.lower()
+	if t in (py.str,py.unicode):
+		file=open(file,'w+')
+	if t is py.file:
+		if file.closed:raise ArgumentError('need an opened mode=w+ file')
+	if py.len(name)<4:name='std'+name
+	d=py.globals()
+	if d.has_key('__'+name) and d['__'+name]:
+		old=getattr(sys,name)
+		old.close()
+		exec('''sys.{0}=file'''.format(name))
+	else:
+		
+		exec("d['__{0}'],sys.{0}=sys.{0},file".format(name))
+	return True
+setstd=setStd	
 
-def resetOut():
-	global __stdout
-	if(__stdout != None and __stdout != sys.stdout):
-		sys.stdout.close()
-		sys.stdout=__stdout
-resetout=resetOut
-
+def resetStd(name=''):
+	name=name.lower()
+	if py.len(name)<4:
+		std='std'+name
+		name='__std'+name
+	elif not name.startswith('__'):
+		if name.startswith('std'):
+			std=name
+		name='__'+name
+	else:
+		raise ArgumentError('stdxxx')
+		
+	try:
+		sm=globals()[name]
+		stdm=getattr(sys,std)
+	except Exception as e:
+		gError=e
+		return False
+	if(sm and sm != stdm):
+		stdm.close()#以前设置的std
+		exec('sys.{0}=sm'.format(std))
+	return True
+resetstd=resetStd#=resetStream
 
 def browser(url,ab='chrome'):
 	import webbrowser
@@ -970,13 +1031,15 @@ def dicthtml(file,dict,aikeylength=10,browser=True):
 	# vars()['browser'](f.name)
 
 def phtml(file):
+	raise Exception('#TODO')
 	if(file.lower()[-1]!='l'):file=file+'.html'
-	setOut(file)
+	# setOut0(file)
 	print txthtml[0]
 def phtmlend():
+	raise Exception('#TODO')
 	print txthtml[1]
 	sf=sys.stdout.name
-	resetOut()
+	# resetOut0()
 	globals()['browser'](sf)
 # dicthtml('uvars.html',vars())
 
@@ -1426,33 +1489,33 @@ def main(display=True,pressKey=False,clipboard=False,escape=False,c=False,ipyOut
 			# gsImport=i+'\n'+gsImport
 	# print vars()
 	# exit()
-	gsImport='''import sys,os;sys.path.append('{0}');from qgb import *'''.format(getModPathForImport())
 	###############################
 	'''call order Do Not Change! '''
 	###############################
-	if c:gsImport+=';C=c=U.clear'
+	sImport=gsImport
+	if c:sImport+=';C=c=U.clear'
 	
-	if reload:gsImport+=";R=r=U.reload"
+	if reload:sImport+=";R=r=U.reload"
 		
-	if ipyOut:gsImport+=';O=o=U.ipyOutLast'
+	if ipyOut:sImport+=';O=o=U.ipyOutLast'
 	
-	if cmdPos:gsImport+=";POS=pos=U.cmdPos;npp=NPP=U.notePadPlus;ULS=Uls=uls=F.ls;ULL=Ull=ull=F.ll"
+	if cmdPos:sImport+=";POS=pos=U.cmdPos;npp=NPP=U.notePadPlus;ULS=Uls=uls=F.ls;ULL=Ull=ull=F.ll"
 		
-	if escape:gsImport=gsImport.replace("'",r"\'")
+	if escape:sImport=sImport.replace("'",r"\'")
 	
-	if display:print gsImport
+	if display:print sImport
 	
 	if pressKey:
 		try:
 			import win32api
-			win32api.ShellExecute(0, 'open', gsw+'exe/key.exe', gsImport+'\n','',0)
+			win32api.ShellExecute(0, 'open', gsw+'exe/key.exe', sImport+'\n','',0)
 		except:print 'pressKey err'
 	if clipboard:
 		try:
-			Clipboard.set(gsImport)
+			Clipboard.set(sImport)
 		except:print 'Clipboard err'
 	
-	return gsImport
+	return sImport
 def test():
 	gm=getAllMod()
 	print gm
@@ -1475,6 +1538,8 @@ def explorer(path='.'):
 		os.system('explorer.exe '+path)
 exp=explorer
 
+def log(*a):
+	pln(a)
 
 def logWindow():
 	import Tkinter as tk
@@ -1491,4 +1556,6 @@ def get(name='_'):
 def google(a):
 	browser('https://www.google.com.my/#q='+a)
 	
+#def 	#把一个数分解成2的次方之和。
+gsImport='''import sys,os;sys.path.append('{0}');from qgb import *'''.format(getModPathForImport())
 if __name__ == '__main__':main()

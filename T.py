@@ -10,14 +10,15 @@ character=a_z+A_Z
 
 num=s09=_09=number='0123456789'
 
-az09=a_z0_9=alphanumeric=character+number
+aZ09=a_Z0_9=alphanumeric=character+number#azAZ09, not gs09AZ
+Az09=A_z0_9=A_Z+a_z+number
 
 hex='0123456789abcdef'
 HEX=hex.upper()
 
 #0x20-0x7E ,32-126,len=95
 visAscii=printAscii=asciiPrint=' !"#$%&\'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~'
-
+char256=''.join([chr(i) for i in range(256)])
 ###############
 REURL='http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\(\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+'
 REYMD="(19|20)[0-9]{2}[- /.](0[1-9]|1[012])[- /.](0[1-9]|[12][0-9]|3[01])"
@@ -86,6 +87,65 @@ def matchValue(a,exp):
 	r=[]
 
 	return r	
+
+def strToHex(a,split=''):
+	return split.join(py.hex(py.ord(x))[2:] for x in a).upper()
+s2h=strToHex
+###################
+gdBaseN={
+64:Az09+'+/',#注意 不是alphanumeric+'+/',即 azAZ09
+94:printAscii[1:],
+256:char256
+}
+gs09AZ=number+AZ
+for i in range(2,37):
+	gdBaseN[i]=gs09AZ[:i]
+###################
+def strToBaseN(a,base=64,symbols=None):
+	if not symbols:symbols=gdBaseN[base]
+	r=parseInt(a,256)
+	return intToStr(r,base,symbols)
+base64=baseN=baseN_encode=s2baseN=strToBaseN
+
+def baseNToStr(a,base=64,symbols=None):
+	'''TODO: '''
+	if not symbols:symbols=gdBaseN[base]#先传入符号表，baseN的符号表可以由用户指定
+	r=parseInt(a,base,symbols)
+	return intToStr(r,256)#这里使用  默认字节符号表
+base64decode=baseN_decode=baseN2s=baseNToStr
+	
+def intToStr(n,base=16,symbols=None):
+	if n<0 or base < 2:raise Exception(n,base,'(n,base) invild')
+	if not symbols:symbols=gdBaseN[base]
+	r=''
+	while n>=base:
+		r=symbols[n%base]+r
+		n=n/base
+	return symbols[n]+r	
+radix=i2s=intToStr
+
+def parseInt(a,base=16,symbols=None):
+	# if base==256:#字节流，这样效率更高？
+		# r=0
+		# for i,v in enumerate(a[::-1]):
+			# r+=ord(v)*pow(256,i)
+		# return r
+		
+	if base<2:raise Exception(base,'base invild')
+	if not symbols:symbols=gdBaseN[base]
+	
+	if base<36:return py.int(a,base)#int() base must be >= 2 and <= 36
+	else:
+		r=0
+		for i,v in enumerate(a[::-1]):
+			try:
+				r+=symbols.index(v)*pow(base,i)
+			except:print symbols,[v]
+		return r
+		#TODO
+		
+		
+	
 def jsonToDict(a):
 	return eval(a.replace('false','False').replace('true','True'))
 js2py=jsonToDict
@@ -281,6 +341,7 @@ gcszh=gZhEncodings=gcodingZh={'gb18030', 'gb2312', 'gbk', 'big5', 'big5hkscs', '
 	
 gcscp={'cp819', 'cp1026', 'cp1252', 'cp1140', 'cp1006', 'cp1361', 'cp932', 'cp424', 'cp154', 'cp720', 'cp936', 'cp500', 'cp869', 'cp860', 'cp861', 'cp862', 'cp863', 'cp864', 'cp865', 'cp866', 'cp1255', 'cp1254', 'cp1257', 'cp1256', 'cp1251','cp1250', 'cp1253', 'cp858', 'cp437', 'cp949', 'cp1258', 'cp737', 'cp367', 'cp850', 'cp852', 'cp855', 'cp857', 'cp856', 'cp775', 'cp875','cp874', 'cp950'}
 gcharset=charset=gcs=gencodings=gcoding={'ascii', 'base64-codec', 'big5', 'big5hkscs', 'bz2-codec', 'charmap', 'cp037', 'cp1006', 'cp1026', 'cp1140', 'cp1250', 'cp1251', 'cp1252', 'cp1253', 'cp1254', 'cp1255', 'cp1256', 'cp1257', 'cp1258', 'cp1361', 'cp367', 'cp424', 'cp437', 'cp500', 'cp720', 'cp737', 'cp775', 'cp819', 'cp850', 'cp852', 'cp855', 'cp856', 'cp857', 'cp858', 'cp860', 'cp861', 'cp862', 'cp863', 'cp864', 'cp865', 'cp866', 'cp869', 'cp874', 'cp875', 'cp932', 'cp936', 'cp949', 'cp950', 'euc-jis-2004', 'euc-jisx0213', 'euc-jp', 'euc-kr', 'gb18030', 'gb2312', 'gbk', 'hex-codec', 'hp-roman8', 'hz', 'idna', 'iso2022-jp', 'iso2022-jp-1', 'iso2022-jp-2', 'iso2022-jp-2004', 'iso2022-jp-3', 'iso2022-jp-ext', 'iso2022-kr', 'iso8859-1', 'iso8859-10', 'iso8859-11', 'iso8859-13', 'iso8859-14', 'iso8859-15', 'iso8859-16', 'iso8859-2', 'iso8859-3', 'iso8859-4', 'iso8859-5', 'iso8859-6', 'iso8859-7', 'iso8859-8', 'iso8859-9', 'johab', 'koi8-r', 'koi8-u', 'latin-1', 'mac-arabic', 'mac-centeuro', 'mac-croatian', 'mac-cyrillic', 'mac-farsi', 'mac-greek', 'mac-iceland', 'mac-latin2', 'mac-roman', 'mac-romanian', 'mac-turkish', 'mbcs', 'palmos', 'ptcp154', 'punycode', 'quopri-codec', 'raw-unicode-escape', 'rot-13', 'shift-jis', 'shift-jis-2004', 'shift-jisx0213', 'tis-620', 'unicode-escape', 'unicode-internal', 'utf-16', 'utf-16-be', 'utf-16-le', 'utf-32', 'utf-32-be', 'utf-32-le', 'utf-7', 'utf-8', 'utf-8-sig', 'uu-codec', 'zlib-codec'}	
+
 if __name__=='__main__':
 	import sys,os;sys.path.append('E:\sourceCode\shell\py');from qgb import *
 	print U
