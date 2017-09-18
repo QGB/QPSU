@@ -2,17 +2,16 @@
 import __builtin__ as py
 import os as _os;import sys as _sys;from os import path as _p
 import T,U
-
 gError=[]
 def setErr(ae):
 	global gError
-	if gbLogErr:# U.
+	if U.gbLogErr:# U.
 		if type(gError) is list:gError.append(ae)
 		elif gError:gError=[gError,ae]
 		else:gError=[ae]
 	else:
 		gError=ae
-	if gbPrintErr:print '#Error ',ei# U.
+	if U.gbPrintErr:print '#Error ',ae# U.
 	
 def autof(head,ext=''):
 	'''return str  

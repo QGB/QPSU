@@ -1,6 +1,25 @@
 #coding=utf-8
 # __all__=['N','HTTPServer']
-
+import sys
+if 'qgb.U' in sys.modules:U=sys.modules['qgb.U']
+elif 'U' in sys.modules:  U=sys.modules['U']
+else:
+	from sys import path as _p
+	_p.insert(-1,_p[0][:-1-1-3-1]) # python2.7\\qgb\\N
+	from qgb import U
+	if U.iswin():from qgb import Win
+gError=[]
+def setErr(ae):
+	global gError
+	if U.gbLogErr:# U.
+		if type(gError) is list:gError.append(ae)
+		elif gError:gError=[gError,ae]
+		else:gError=[ae]
+	else:
+		gError=ae
+	if U.gbPrintErr:print '#Error ',ae# U.
+	
+	
 import HTTPServer
 import HTTP
 	
@@ -18,15 +37,13 @@ def findFunc(name,root=9,depth=3,case=False):
 
 
 def getLAN_IP():
-	# import inspect
-	# a = inspect.getargspec(getIP)
-	# print a.defaults
-	# for i 
-	
+	r=getAllAdapter()
+	return r
 
 def getAllAdapter():
-	
-	return r
+	if U.iswin():
+		from qgb import Win
+		return Win.getAllNetworkInterfaces()
 	
 def setIP(ip='',source='dhcp',adapter='',mask=''):
 	if not adapter:adapter=u'"\u672c\u5730\u8fde\u63a5"'.encode('gb2312')#本地连接
@@ -44,7 +61,7 @@ def setIP(ip='',source='dhcp',adapter='',mask=''):
 setip=setIP
 		
 if __name__=='__main__':
-	print getIP()
+	print getLAN_IP()
 	exit()
 	gsurlip=['http://ip.chinaz.com/getip.aspx'][0]
 	

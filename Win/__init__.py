@@ -3,11 +3,11 @@ import sys,ctypes
 if 'qgb.U' in sys.modules:U=sys.modules['qgb.U']
 elif 'U' in sys.modules:  U=sys.modules['U']
 else:
-	from sys import path as _p;_p.insert(-1,_p[0][:-4-4])
+	from sys import path as _p;_p.insert(-1,_p[0][:-3-1-3-1])#python2.7\\qgb\\Win
 	# for i,v in enumerate(_p):  #这会导致 ImportError: No module named Constants
 		# if 'qgb' in v and 'Win' in v:
 			# _p.pop(i)
-	# print _p
+	print _p
 	from qgb import U
 
 class WinDLL(ctypes.CDLL):

@@ -2,7 +2,7 @@ from HTTPServer import *
 # print dir()
 
 @route()
-def a():
+def a(h):
 	print dir()
 	return [1,2,3]
 	
