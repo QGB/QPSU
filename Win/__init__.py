@@ -108,7 +108,7 @@ The address type or state. This member can be a combination of the following val
 		r.append(rn)
 		
 	# raise IndexError("interface index out of range")
-		U.repl()
+		# U.repl()
 	return tuple(r)
 getAllNetwork=getAllNetworkInterfaces
 

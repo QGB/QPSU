@@ -879,7 +879,7 @@ def printAttr(a,console=False):
 	name=gst+'QPSU/'+T.filename(getObjName(a))+'.html'
 	print name
 	browser(name)
-	return F.write(name,read(sp).replace('{result}',r))
+	return F.write(name,read(sp).replace('{result}',r),mkdir=True)
 	
 	
 	# cdBack()

@@ -104,7 +104,9 @@ def write(a,data,mod='wb',mkdir=False,autoArgs=True):
 	except:pass		
 	
 	try:
-		if mkdir:a=autoPath(a)
+		a=autoPath(a)
+		if mkdir:makeDirs(a,isFile=True)
+		
 		with open(a,mod) as f:
 			if type(data) is py.str:
 				f.write(data)
@@ -123,7 +125,7 @@ def append(a,data):
 	
 def read(a,mod='r'):
 	try:
-		f=open(autoPath(a,md=False),mod)
+		f=open(autoPath(a),mod)
 		s=f.read()
 		f.close()
 		return s
@@ -284,7 +286,7 @@ def getSourcePath():
 	# print __file__, __name__ , __package__
 	
 def delFile(a):
-	a=autoPath(a,md=False)
+	a=autoPath(a)
 	sp=getSplitor(a)
 	# for i in a.split(ap):
 	try:
@@ -303,16 +305,19 @@ def getSplitor(ap):
 getsp=getSp=getSplitor		
 		
 		
-def makeDirs(ap):
-	ap=autoPath(ap,md=False)
+def makeDirs(ap,isFile=False):
+	ap=autoPath(ap)
 	sp=getSplitor(ap)
+	ap=ap.split(sp)
+	if isFile:ap=ap[:-1]
 	# if not isabs(ap):
 		# if not ap.startswith('.'):
 			# if ap.startswith(sp):ap=U.gst[:-1]+ap
 			# else:ap=U.gst+ap
 	# else:
 	base=''
-	for i in ap.split(sp):
+	
+	for i in ap:
 		base+=(i+sp)
 		if exist(base):continue
 		else:
@@ -338,20 +343,16 @@ def makeDirs(ap):
 md=mkdir=makeDirs		
 
 gbAutoPath=True
-def autoPath(fn,mkdir=True,md=True):
+def autoPath(fn):
 	if not gbAutoPath:return fn
 	fn=str(fn)
-	if not mkdir:md=False
 	if (fn.startswith(".")):
-		if md:makeDirs(fn)
 		return fn;
 	
 	if isAbs(fn):
-		if md:makeDirs(fn);
 		return fn;
 	else:
 		if _p.exists(fn):return abs(fn)
-		if md:makeDirs(U.gst + fn);
 		return (U.gst + fn);
 def abs(a):
 	return _p.abspath(a)
