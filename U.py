@@ -57,6 +57,8 @@ except Exception as ei:
 class ArgumentError(Exception):
 	pass
 aError=argserr=argErr=argerr=argumentError=ArgumentException=ArgumentError	
+class ArgumentUnsupported(ArgumentError):
+	pass
 ############
 module=type(py)
 class Class:pass
@@ -78,6 +80,25 @@ def one_in(vs,*t):
 			if i in t:r.append(i)
 		except:pass
 	return r
+#########################
+def is2():
+	'''
+'2.7.13 |Anaconda 4.3.1 (32-bit)| (default, Dec 19 2016, 13:36:02) [MSC v.1500 32 bit (Intel)]
+'''
+	return sys.version[0]=='2'
+def is3():
+	'''
+'3.5.2 (default, Nov 17 2016, 17:05:23) \n[GCC 5.4.0 20160609]'
+'''
+	return sys.version[0]=='3'
+def getPyVersion():
+	'''return float 2.713
+	'''
+	r=T.sub(sys.version,'',' ')
+	r=r.replace('.','')
+	r=r[0]+'.'+r[1:]
+	return float(r)
+	
 
 import platform
 def iswin():
@@ -144,13 +165,15 @@ except Exception as ei:
 	setErr(ei)
 
 #TODO: if not has ei,import error occur twice,why?
-def driverPath(a):
-	'''a'''
+def driverPath(a,reverse=True):
+	'''from Z to C'''
+	if not a.startswith(':'):a=':'+a
 	try:AZ=T.AZ;exist=F.exist
 	except:
 		AZ=''.join([chr(i) for i in range(65,65+26)])
 		exist=os.path.exists
-	for i in AZ[::-1]:
+	if reverse:AZ=AZ[::-1]
+	for i in AZ:
 		if exist(i+a):return i+a
 	return ''
 
@@ -417,7 +440,13 @@ def pause(a='Press Enter to continue...\n',exit=True):
 			return False
 	return True	
 def run(a,*args):
-	'''默认不阻塞'''
+	'''默认不阻塞
+
+If you're using Pyhton 3, command.args is the easiest way:
+	from subprocess import Popen
+	command = Popen(['ls', '-l'])
+print command.args #['ls', '-l']
+'''
 	if type(a)==type(''):a=[a]
 	if type(a)!=type([]):a=list(a)
 	if len(args)>0:a.extend(args)
@@ -428,7 +457,9 @@ def run(a,*args):
 			if iswin() and v.startswith('"') and v.endswith('"'):
 				a[i]=v[1,-1]
 			
-		return __import__('subprocess').Popen(a)
+		r= __import__('subprocess').Popen(a)
+		if getPyVersion()<3.3:r.args=a
+		return r
 	'''
 In [151]: _131.poll?
 Signature: _131.poll()
@@ -641,7 +672,9 @@ def cdpm():
 	return cd('e:/pm')
 	
 def cdbabun(a=''):
-	return cd(r'C:\QGB\babun\cygwin\home\qgb/'+a)
+	s=r'C:\QGB\babun\cygwin\home\qgb/'
+	s=driverPath(s[1:])
+	return cd(+a)
 def pwd(p=False,display=False):
 	s=os.getcwd()
 	if p or display:print s
@@ -746,7 +779,7 @@ def resetStd(name=''):
 	return True
 resetstd=resetStd#=resetStream
 
-def browser(url,ab='chrome'):
+def browser(url,ab=''):
 	import webbrowser
 	def chrome(url):
 		###TODO: auto Find system base everything
@@ -754,6 +787,8 @@ def browser(url,ab='chrome'):
 		webbrowser.register('chrome', None, webbrowser.BackgroundBrowser(spC))
 		webbrowser.get('chrome').open_new_tab(url)
 	for i in py.dir():
+		if not ab:
+			webbrowser.open(url)
 		if py.eval('callable({0})'.format(i)):
 			if ab.lower()== i:
 				exec '{0}(url)'.format(i) in globals(),locals()
@@ -1373,8 +1408,33 @@ def ipyOutLast(i=None):
 			return Out[i]
 		except:return Out[Out.keys()[i]]
 	return Out
-	
-	
+def kill(a,caseSensitive=True,confirm=True):
+	'''TODO:use text Match if any
+	'''
+	import psutil         
+	ta=py.type(a)
+	r=[]
+	if ta in (py.str,py.unicode):
+		for i in psutil.process_iter():
+			if caseSensitive:
+				if i.name() == a:r.append(i)
+			else:
+				if i.name().lower() == a.lower():r.append(i)
+	elif ta is type(0):
+		if not psutil.pid_exists(a):
+			raise ArgumentError('pid not exist!')
+		r=[psutil.Process(a)]
+	else:
+		raise ArgumentUnsupported()
+	if confirm:
+		pprint(r)
+		c=raw_input('kill Process？(n cancel)')
+		if c.lower().startswith('n'):return
+	for i in r:
+		i.kill()
+def getTasklist():
+	''''''
+	return
 def notePadPlusPlus(a=''):
 	'''
 --------> os.system('"M:\\Program Files\\Notepad++\\notepad++.exe" "IP.py"')
@@ -1386,7 +1446,20 @@ Out[114]: 1
 Out[115]: 0
 
 '''
-	npath=driverPath(r":\Program Files\Notepad++\notepad++.exe")
+	if py.type(a) in (py.str,py.unicode):
+		pass
+	elif isModule(a):
+		a=a.__file__
+	elif py.getattr(a,'func_globals'):
+		a=getMod(a.func_globals['__package__']).__file__
+	else:
+		raise ArgumentUnsupported()
+	if a.endswith('.pyc'):
+		a=a[:-3]+'py'
+	npath=getModPath()[:3]+r'QGB\Notepad++\notepad++.exe'
+	if not os.path.exists(npath):
+		npath=driverPath(r":\Program Files\Notepad++\notepad++.exe")
+
 	# npath='"%s"'%npath
 	if a:
 		return run(npath,autof(a))

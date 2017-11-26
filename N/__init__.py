@@ -46,7 +46,9 @@ def getAllAdapter():
 		return Win.getAllNetworkInterfaces()
 	
 def setIP(ip='',source='dhcp',adapter='',mask=''):
-	if not adapter:adapter=u'"\u672c\u5730\u8fde\u63a5"'.encode('gb2312')#本地连接
+	if not adapter:
+		#adapter=u'"\u672c\u5730\u8fde\u63a5"'.encode('gb2312')#本地连接
+		adapter='1'
 	if ip:
 		source='static'
 		if not ip.startswith('addr='):

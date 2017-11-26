@@ -37,7 +37,8 @@ def override(method=None):
 		return f
 	return decorator
 
-class extended_BaseHTTPServer(BaseHTTPServer.BaseHTTPRequestHandler):
+class Handler(BaseHTTPServer.BaseHTTPRequestHandler):
+	server_version = __name__#'qgb.N.HTTPServer'
 	# def log_message(self, format, *args):
 		# return ""
 		
@@ -56,6 +57,7 @@ class extended_BaseHTTPServer(BaseHTTPServer.BaseHTTPRequestHandler):
 		s.do_routing(o, arguments, "POST")
 
 	def do_GET(s):
+		raise Exception(233333)
 		o = urlparse(s.path)
 		arguments = parse_qs(o.query)
 		s.do_routing(o, arguments, "GET")
@@ -125,8 +127,8 @@ def build_response(s, retour, code=200):
 def redirect(location=""):
 	return {"content":"","code":301,"Location":location}
 
-def serve(ip="0.0.0.0", port=80,log=True,onMainThread=False):
-	httpd = BaseHTTPServer.HTTPServer((ip, port), extended_BaseHTTPServer)
+def http(ip="0.0.0.0", port=80,log=True,onMainThread=False):
+	httpd = BaseHTTPServer.HTTPServer((ip, port), Handler)
 	if onMainThread:
 		print ip,port
 		httpd.serve_forever()
@@ -138,10 +140,10 @@ def serve(ip="0.0.0.0", port=80,log=True,onMainThread=False):
 		except:
 			pass
 	httpd.server_close()#TODO: muti thread
-http=httpd=server=serve
+serve=httpd=server=http
 
 def https(ip="0.0.0.0", port=443,key='',log=True,onMainThread=False):
-	httpd = BaseHTTPServer.HTTPServer((ip, port), extended_BaseHTTPServer)
+	httpd = BaseHTTPServer.HTTPServer((ip, port), Handler)
 	
 	if not key:
 		from qgb import U
@@ -183,7 +185,7 @@ def main():
 		h.finish()
 		U.set('h',h)
 		
-	ca=U.pwd()+'/qgb/n/ca.crt'
+	ca=U.getModPath()+'N/CA.crt'
 	https(key=ca)
 if __name__=='__main__':
 	main()
