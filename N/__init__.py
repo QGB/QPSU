@@ -62,6 +62,55 @@ def setIP(ip='',source='dhcp',adapter='',mask=''):
 	return r
 setip=setIP
 		
+def scanPorts(host,from_port=1,to_port=65535,threadsMax=33,callback=None):
+	'''return [opens,closes,errors]
+	callback(*scanReturns)
+	if callback and ports> threadsMax: 剩下结果将异步执行完成
+	'''
+	from threading import Thread
+	import socket
+	# host = raw_input('host > ')
+	# from_port = input('start scan from port > ')
+	# to_port = input('finish scan to port > ')   
+	counting_open = []
+	counting_close = []
+	errors=[]
+	threads = []
+
+	def scan(port):
+		try:
+			s = socket.socket()
+			result = s.connect_ex((host,port))
+			# print('working on port > '+(str(port)))      
+			if result == 0:
+				counting_open.append(port)
+				#print((str(port))+' -> open') 
+				s.close()
+			else:
+				counting_close.append(port)
+				#print((str(port))+' -> close') 
+				s.close()
+		except Exception as e:
+			errors.append({port:e})
+	def newThread(port):
+		t = Thread(target=scan, args=(i,))		
+		threads.append(t)
+		t.start()
+			
+	for i in range(from_port, to_port+1):
+		if len(threads)<=threadsMax:
+			newThread(i)
+		else:
+			for x in threads:
+				if x.isAlive():
+					x.join()
+					newThread(i)
+					break
+	# if callback:
+		# return callback
+	[x.join() for x in threads]
+	return [counting_open,counting_close,errors]
+	
 if __name__=='__main__':
 	print getLAN_IP()
 	exit()

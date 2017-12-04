@@ -57,7 +57,7 @@ class Handler(BaseHTTPServer.BaseHTTPRequestHandler):
 		s.do_routing(o, arguments, "POST")
 
 	def do_GET(s):
-		raise Exception(233333)
+		# raise Exception(233333)
 		o = urlparse(s.path)
 		arguments = parse_qs(o.query)
 		s.do_routing(o, arguments, "GET")
@@ -177,14 +177,15 @@ def main():
 		
 		if 'postData' in dir(h):
 			ka=h.postData
-
-		
-		print >>h.wfile,ka
+		else:
+			# print >>h.wfile,ka
+			ka=list(ka)
+			ka.append(h.wfile)
 		U.set(ka)
 			
 		h.finish()
 		U.set('h',h)
-		
+		return  ka
 	ca=U.getModPath()+'N/CA.crt'
 	https(key=ca)
 if __name__=='__main__':

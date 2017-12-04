@@ -519,7 +519,7 @@ def this():
 		# txt(globals())
 		print __name__
 	
-def pyshell(printCount=False):
+def repl(printCount=False):
 	# a=1
 	ic=count('__repl__')
 	if printCount:print ic
@@ -550,7 +550,7 @@ def pyshell(printCount=False):
 	# try:import IPython;IPython.embed();return
 	# except:pass
 	
-repl=pys=pyshell
+repl=pys=pyshell=repl
 
 def reload(*mods):
 	''' 不是一个模块时，尝试访问mod._module'''
@@ -674,7 +674,7 @@ def cdpm():
 def cdbabun(a=''):
 	s=r'C:\QGB\babun\cygwin\home\qgb/'
 	s=driverPath(s[1:])
-	return cd(+a)
+	return cd(s+a)
 def pwd(p=False,display=False):
 	s=os.getcwd()
 	if p or display:print s
@@ -922,13 +922,22 @@ pa=printattr=printAttr
 # repl()
 # printAttr(5)
 gAllValue=[]
-def DirValue(a,fliter='',recursion=False,ai=0,depth=9):
-	'''约定：只有无参数函数才用 getXX  ?'''
+def DirValue(a=None,fliter='',recursion=False,ai=0,depth=9):
+	'''a=None is dir()
+	约定：只有无参数函数才用 getXX  ?'''
 	r={}
-	for i in py.dir(a):
-		
+	if a==None:
+		import inspect
+		f=inspect.currentframe().f_back
+		dr=f.f_locals
+	else:	
+		dr=py.dir(a)
+	for i in dr:		
 		try:
-			tmp=py.eval('a.'+i)
+			if a==None:
+				tmp=dr[i]
+			else:
+				tmp=py.eval('a.'+i)
 			if recursion:
 				if ai>depth:return '!depth reached'
 				tmp=DirValue(tmp,fliter,recursion,ai+1,depth)
@@ -1115,13 +1124,21 @@ time=getime=getTime=timestamp=getCurrentTime=getTimestamp
 	
 	
 	
-def getFloaTail(a,s=False,str=False,string=False,i=False,int=False):
+def getFloaTail(a,ndigits=20,s=False,str=False,string=False,i=False,int=False):
+	''' see help round()
+ 0.1**5
+ 1.0000000000000003e-05
+
+ 0.1**4
+ 0.00010000000000000002 小数位数20
+ '''
+ 
 	if type(a) is float:
-		a=round(a-py.int(a),3)
+		a=round(a-py.int(a),ndigits)#This always returns a floating point number.
 		if s or str or string:
 			return py.str(a)[1:]
 		if i or int:
-			return int(py.str(a)[2:])
+			return py.int(py.str(a)[2:])#
 		return a	
 gsTimeFormat='%Y-%m-%d %H.%M.%S'
 gsymd=gsYMD=gsTimeFormatYMD='%Y%m%d'
@@ -1144,7 +1161,7 @@ def getStime(time=None,format=gsTimeFormat):
 #localtime: time.struct_time(tm_year=1970, tm_mon=1, tm_mday=1, tm_hour=8,....
 			if type(time) is float:
 				if not r.endswith(' '):r+=' '
-				r+=getFloaTail(time,s=True)
+				r+=getFloaTail(time,ndigits=3,s=True)
 			return r
 		else:return tMod.strftime(format)
 stime=timeToStr=getStime
@@ -1300,25 +1317,26 @@ def x(msg=None):
 def exit(i=2357):
 	'''not call atexit'''
 	os._exit(i)
-def getAllMod(mp=None):
+def getAllMod(modPath=None):
 	ls=[]
-	if not mp:mp=getModPath()
+	if not modPath:modPath=getModPath()
 	if 'F' in globals():
-		for i in F.ls(mp,t='r'):
+		for i in F.ls(modPath,t='r'):
 			if not i.lower().endswith('.py'):continue
-			i=i.replace(mp,'')
-			if F.isPath(i):
-				if i.lower().endswith('__init__.py'):
-					ls.append(path.dirname(i))
+			i=i.replace(modPath,'')
+			# if F.isPath(i):
+			if i.lower().endswith('__init__.py'):
+				if i.startswith('__init__.py'):continue#/qgb/*  去除qgb
+				ls.append(path.dirname(i))
 			elif '__' not in i:
 				ls.append(T.subLast(i,'','.'))
-		return ls
-	for i in os.listdir(mp):
+		# return ls
+	for i in os.listdir(modPath):
 		if(len(i)<3):continue
 		if(i.find('__')!=-1):continue
 		if(i.lower()[-3:]!='.py'):continue
 		ls.append(i[:-3])
-	if ls:return ls
+	if ls:return [i.replace('/','.') for i in ls]
 	else:return  ['N', 'Win', 'Clipboard', 'F', 'ipy', 'T', 'U']
 def getModPathForImport():
 	return getModPath()[:-4]
@@ -1351,6 +1369,7 @@ def getModPath(qgb=True,slash=True,backSlash=False,endSlash=True,endslash=True,t
 	
 	
 def len(a,*other):
+	'''Exception return -1'''
 	if other:
 		r=[len(a)]
 		for i in other:
@@ -1447,6 +1466,10 @@ Out[115]: 0
 
 '''
 	if py.type(a) in (py.str,py.unicode):
+		gsm=[['qgb.ipy.save ',' success!']]
+		for i in gsm:
+			a=T.sub(a,i[0],i[1]) or a
+			
 		pass
 	elif isModule(a):
 		a=a.__file__
@@ -1604,10 +1627,12 @@ def main(display=True,pressKey=False,clipboard=False,escape=False,c=False,ipyOut
 	return sImport
 def test():
 	gm=getAllMod()
+	
+	# repl()
+	gm.extend(['U','T','N','F',])
+	gm=py.set(gm)
+	
 	print gm
-	repl()
-	# gm=['U','T','N','F',].extend(gm)
-	gm=set(gm)
 	for i in gm:
 		print '='*55
 		try:
@@ -1642,6 +1667,61 @@ def get(name='_'):
 def google(a):
 	browser('https://www.google.com.my/#q='+a)
 	
+def sub(a,len='default return len 9',start=0,step=1):
+	'''sub dict,list,tuple....iterable
+	like a[start:start+len:step]
+			postive stands for left>right
+	minus	negative stands for right<left
+	text sub use T.sub
+	无法处理子元素过大的输出情况
+	'''
+	m=py.len(a)
+	ta=py.type(a)
+	# if py.max(py.abs(start),py.abs(step))>m or len==0:
+		# raise ArgumentError(len,start,step)
+	if step==0:return ta()
+	if ta is py.dict:r={}
+	else:r=[]
+	
+	if start<0:start=m+start
+	
+	if step<0:reverse=True;step=-step
+	else:reverse=False
+	
+	if py.type(len) is py.str:
+		# if m/step>9:len=
+		len=py.min(9*step,m/step)
+	len=py.int(len)#int(9999999999999999999999999999999)=9999999999999999999999999999999L
+	
+	n=-1
+	ns=0
+	for i in a:
+		n+=1
+		if len>0:
+			if not start<=n<start+len:continue
+		else:
+			if not start+len<n<=start:continue
+		
+				
+		# if step>0:
+		ns+=1
+		if ns<step:continue
+		else:ns=0
+		# else:
+			# if 
+		if ta is py.dict:#所有不能用for in一次取出的类型
+			r[i]=a[i]
+		else:
+			if reverse:r.insert(0,i)
+			else:r.append(i)
+	return r
+def j(a,b):
+	'''intersection 交集
+	'''
+	return py.set(a).intersection(py.set(b))
+	
 #def 	#把一个数分解成2的次方之和。
 gsImport='''import sys,os;sys.path.append('{0}');from qgb import *'''.format(getModPathForImport())
-if __name__ == '__main__':main()
+if __name__ == '__main__':
+	# print __name__
+	main()

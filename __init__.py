@@ -32,6 +32,11 @@ except Exception as e:
 	if 'gError' in dir():gError.append(ei)
 	else:gError=[ei]
 
+# print __name__
+# sys.argv==['-c']
+# U.repl()
+if __name__=='__main__': #此句在 python -m qgb中不会执行，始终为'qgb',  why? #TODO #TOKNOW
+	U.main()
 # print __all__
 # try:
 	# f=sys._getframe()

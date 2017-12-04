@@ -57,11 +57,19 @@ def new(a):
 		setErr(e)
 		return False
 def isPath(ast):
+	'''#TODO:
+	
+	'''	
 	if type(ast) not in (str,unicode):ast=py.str(ast)
-	if not ast:return None
-	if not ast.replace('.','').strip():return True
-	return ('/' in ast) or ('\\' in ast)
+	if not ast:return False
+	
+	
+	
+	# if not ast.replace('.','').strip():return True # （不是 点和空格 返回 T） 
+	# return ('/' in ast) or ('\\' in ast)
 	# return _p.sep in ast
+# def is	
+	
 
 def bytesToHex(a,split=''):
 	r=''
@@ -98,7 +106,7 @@ def writeIterable(a,data,end='\n',overwrite=True):
 def write(a,data,mod='wb',mkdir=False,autoArgs=True):
 	try:
 		if autoArgs:
-			if py.len(a)>py.len(data)>0:
+			if  py.len(a)>py.len(data)>0:
 				a,data=data,a
 				U.warring('write fn,data')
 	except:pass		
@@ -377,7 +385,9 @@ Out[45]: False
 isabs=isAbs
 		
 def name(a):
-	'''Anti abs'''
+	'''Anti abs
+	得到 单独文件（夹）名字
+	'''
 	if type(a) not in (str,unicode):return ''
 	if U.inMuti(a,'/','\\',f=str.endswith):a=a[:-1]
 	if not isAbs(a):return a

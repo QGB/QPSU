@@ -32,10 +32,16 @@ def outType(t=None):
 	return r
 outype=outType
 
-def outlen():
+def outlen(min=-1,max='infinity'):
 	r={}
 	for i in gOut:
-		r[i]=U.len(gOut[i])
+		n=U.len(gOut[i])
+		if type(max) is str:
+			pass
+		else:
+			if n>max:continue
+		if n<min:continue
+		r[i]=n
 	return r
 
 # U.cdt()
@@ -76,6 +82,7 @@ def save(file=None,lines=-1,tryExcept=False,Out=False,minSpace=70,overide=True):
 	else:
 		if gdTimeName and overide:
 			file=gdTimeName[gdTimeName.keys()[-1]]
+			file=open(file,'w')
 			# last=-1
 			# for t in gdTimeName:
 				# if t>last:file,last=name,d
@@ -84,7 +91,7 @@ def save(file=None,lines=-1,tryExcept=False,Out=False,minSpace=70,overide=True):
 			# file=[n for n,d in gdTimeName.items() if d==last[-1]][0]
 		else:
 			file='{0}{1}.py'.format(gsavePath,U.stime())
-		file=open(file,'a')
+			file=open(file,'a')
 	print >>file,gshead
 	print >>file,'import sys;sys.path.append("{0}");from qgb import *'.format(gspath)
 	#-4 为了去除 /qgb
