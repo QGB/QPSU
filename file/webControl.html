@@ -1,0 +1,149 @@
+<html>
+    <head>
+        <title>qgb webControl</title>
+		<style>
+*{margin:0; padding:0;}
+#mousepad {
+    width: 100%;
+    height: 100%;
+    background-color: black;
+}
+		</style>
+        <script type="text/javascript" >
+xhr=new XMLHttpRequest()
+function move(x,y){
+xhr.open('get','/0?x='+x+'&y='+y)
+xhr.send()
+}
+function event(t){
+xhr.open('get','/0?t='+t)
+xhr.send()
+}
+function z(t){
+xhr.open('get','/'+t)
+xhr.send()
+}
+
+
+
+ABSOLUTE = 0x8000
+HWHEEL = 0x01000
+LEFTDOWN = 0x0002
+LEFTUP = 0x0004
+MIDDLEDOWN = 0x0020
+MIDDLEUP = 0x0040
+MOVE = 0x0001
+MOVE_NOCOALESCE = 0x2000
+RIGHTDOWN = 0x0008
+RIGHTUP = 0x0010
+VIRTUALDESK = 0x4000
+WHEEL = 0x0800
+XDOWN = 0x0080
+XUP = 0x0100
+
+WDOWN=0x200
+WUP=0x400
+
+RC=RIGHTDOWN|RIGHTUP
+LC=LEFTDOWN|LEFTUP
+
+r=1
+window.onload=function(){
+m = document.querySelector('#mousepad');
+m.oncontextmenu = function(){return false};
+m.onmousemove=function(e){
+	if(r){
+	move( e.pageX+75, e.pageY+73)//1366 768
+	r=0
+	setTimeout(function(){r=9},99)
+	}
+};
+
+m.oncontextmenu=function(){
+	event(RC)
+	return	false
+}
+
+m.onclick=function(){event(LC)}
+
+
+m.onkeydown=function(e){event( e.keyCode)}
+
+m.ontouchmove=function(e){
+	x=e.touches[0].clientX
+	y= e.touches[0].clientY
+    x=Math.round(x)
+    y=Math.round(y)
+	<!-- z( x)// 790/2.4  Out[11]: 329.1666666666667 -->
+	if(y>340){
+		if(x<222)event(WDOWN)
+		else{ event(WUP)}
+	
+	}else{
+		if(r){//¶àµã´¥Ãþ todo touches
+		x=e.touches[0].clientX*2.6-59
+		y= e.touches[0].clientY*2.4-22
+		x=Math.round(x)
+		y=Math.round(y)
+		move( x,y)//1366 768
+		r=0
+		setTimeout(function(){r=9},44)
+		}
+	}
+	
+
+};
+
+m.ontouchstart=function(e){
+	x=e.touches[0].clientX
+	y= e.touches[0].clientY
+    x=Math.round(x)
+    y=Math.round(y)
+	<!-- move(x,y) -->
+	
+}
+	
+	
+};
+<!-- window.addEvent('domready', function() { -->
+    <!-- var  -->
+
+    <!-- // Setup timer for delaying mouse movement updates. -->
+    <!-- var updateMouse = true; -->
+    <!-- function updateMouseTimer() { updateMouse = true; } -->
+
+    <!-- // Disable context menu on m. -->
+
+    <!-- /** -->
+     <!-- * Event handlers for relaying updates to server. -->
+     <!-- */ -->
+    <!-- m.addEvent('mousemove', function(e) { -->
+        <!-- if (updateMouse == false) return; -->
+
+        <!-- // Calculate position of mouse relative to the pad. -->
+        <!-- var pos = this.getPosition(); -->
+        <!-- var x = e.client.x - pos.x; -->
+        <!-- var y = e.client.y - pos.y; -->
+
+        <!-- new Request({ -->
+            <!-- url: '/mouse/moved', -->
+            <!-- data: Hash.toQueryString({x: x, y: y}), -->
+            <!-- method: 'post' -->
+        <!-- }).send(); -->
+
+        <!-- // Start refresh timer to trigger next update. -->
+        <!-- // We do this so not to flood the server with updates. -->
+        <!-- updateMouse = false; -->
+        <!-- updateMouseTimer.delay(500); -->
+    <!-- }); -->
+<!-- } -->
+		
+		</script>
+    </head>
+
+    <body>
+        <div id="container">
+            <div id="mousepad"></div>
+        </div>
+    </body>
+</html>

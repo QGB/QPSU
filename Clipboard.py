@@ -3,7 +3,6 @@ try:
 	import win32con
 except Exception as err:
 	gError=err
-	# print __file__+":",err
 
 def get():
     w.OpenClipboard()
@@ -20,8 +19,6 @@ def set(aString):
 #set(get()[0:5])	
 
 
-
-#print '123'[0:9]
 #import T
 
 

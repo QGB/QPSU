@@ -1,3 +1,4 @@
+
 #coding=utf-8
 import urllib2
 
@@ -7,7 +8,10 @@ def post(url,data):
 
 def get(url):
 	url=autoUrl(url)
-	return urllib2.urlopen(url).read()
+	try:
+		return urllib2.urlopen(url).read()
+	except Exception as e:
+		return url,e
 	
 def head(url):
 	return method(url,'head').info().items()

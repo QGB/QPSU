@@ -1,4 +1,6 @@
 set pyexe=C:\python27\python.exe
 
-%pyexe% U.py clipboard=True
+set py=G:\QGB\Anaconda2\python.exe
+
+%py% U.py clipboard=True
 pause

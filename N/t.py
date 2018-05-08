@@ -1,9 +1,9 @@
-from HTTPServer import *
-# print dir()
+from HTTPServer import *#include   U  
+# U.pln(dir()) 
 
 @route()
 def a(h):
-	print dir()
+	U.pln(dir()) 
 	return [1,2,3]
 def main():
 	from threading import Thread

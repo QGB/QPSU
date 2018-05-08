@@ -1,14 +1,30 @@
 #coding=utf-8
 import sys,ctypes
-if 'qgb.U' in sys.modules:U=sys.modules['qgb.U']
-elif 'U' in sys.modules:  U=sys.modules['U']
-else:
-	from sys import path as _p;_p.insert(-1,_p[0][:-3-1-3-1])#python2.7\\qgb\\Win
-	# for i,v in enumerate(_p):  #这会导致 ImportError: No module named Constants
-		# if 'qgb' in v and 'Win' in v:
-			# _p.pop(i)
-	print _p
-	from qgb import U
+if __name__.endswith('qgb.Win'):
+	from .. import py
+	# py.pdb()
+	# from . import Constants
+else:import py
+import Constants
+globals().update(Constants.__dict__)	
+c=C=Constants
+
+
+
+
+	# from Constants import *
+#if 'qgb.U' in sys.modules:U=sys.modules['qgb.U']
+#elif 'U' in sys.modules:  U=sys.modules['U']
+#else:
+#	from sys import path as _p
+#	# 'G:/QGB/babun/cygwin/lib/python2.7/qgb'
+#	_p.insert(-1,_p[0][:-3-1])#-3-1  插入变倒数第二
+#	# for i,v in enumerate(_p):  #这会导致 ImportError: No module named Constants
+#		# if 'qgb' in v and 'Win' in v:
+#			# _p.pop(i)
+#	# U.pln( _p
+#	try:from qgb import U
+#	except:'#Err import U'
 
 class WinDLL(ctypes.CDLL):
 	"""This class represents a dll exporting functions using the
@@ -18,10 +34,12 @@ class WinDLL(ctypes.CDLL):
 	
 windll = ctypes.LibraryLoader(WinDLL)
 	
-if U.iswin() or U.iscyg():
-	user32=windll.user32
-	kernel32=windll.kernel32
-	advapi32=windll.advapi32
+if py.iswin() or py.iscyg():
+	DWORD,WCHAR,LPSTR=C.DWORD,C.WCHAR,C.LPSTR
+	User32=user32=windll.user32
+	Kernel32= kernel32=windll.kernel32
+	Advapi32= advapi32=windll.advapi32
+	C.advapi32=advapi32
 # elif U.iscyg():#Not Win
 	# try:
 		# from ctypes import cdll
@@ -32,15 +50,48 @@ if U.iswin() or U.iscyg():
 		# pass
 else:
 	raise NotImplementedError
-# print _p;print advapi32
+# U.pln( _p;U.pln( advapi32
 
-import Constants as C;c=C
-C.advapi32=advapi32
-from Constants import *
 
-try:import win32gui
+try:
+	from ctypes import wintypes
+	import win32gui
 except Exception as ei:pass
 
+#######################################################################
+class SYSTEM_POWER_STATUS(ctypes.Structure):
+    _fields_ = [
+        ('ACLineStatus', wintypes.BYTE),
+        ('BatteryFlag', wintypes.BYTE),
+        ('BatteryLifePercent', wintypes.BYTE),
+        ('Reserved1', wintypes.BYTE),
+        ('BatteryLifeTime', wintypes.DWORD),
+        ('BatteryFullLifeTime', wintypes.DWORD),
+    ]
+
+SYSTEM_POWER_STATUS_P = ctypes.POINTER(SYSTEM_POWER_STATUS)
+
+GetSystemPowerStatus = ctypes.windll.kernel32.GetSystemPowerStatus
+GetSystemPowerStatus.argtypes = [SYSTEM_POWER_STATUS_P]
+GetSystemPowerStatus.restype = wintypes.BOOL
+
+systemPowerStatus = SYSTEM_POWER_STATUS()
+
+def batteryIsOn():
+    if not GetSystemPowerStatus(ctypes.pointer(systemPowerStatus)):
+        raise ctypes.WinError()
+    return systemPowerStatus.ACLineStatus == 0
+    
+def batteryPercent():
+    if not GetSystemPowerStatus(ctypes.pointer(systemPowerStatus)):
+        raise ctypes.WinError()
+    return systemPowerStatus.BatteryLifePercent
+
+def batteryFlag():
+    if not GetSystemPowerStatus(ctypes.pointer(systemPowerStatus)):
+        raise ctypes.WinError()
+    return systemPowerStatus.BatteryFlag
+#########################################################################
 
 gdAddressType={1: ['MIB_IPADDR_PRIMARY', 'Primary IP address', '主IP地址'],
  4: ['MIB_IPADDR_DYNAMIC', 'Dynamic IP address', '动态IP地址'],
@@ -75,6 +126,7 @@ The address type or state. This member can be a combination of the following val
 	适配器（Interface Card  ,  Adapter）
 	网络接口控制器（英语：network interface controller，NIC），又称网络接口控制器，网络适配器（network adapter），网卡（network interface card）
 	http://www.cnblogs.com/leftshine/p/5698732.html'''
+	py.importU()
 	GetIpAddrTable = windll.iphlpapi.GetIpAddrTable
 	GetIpAddrTable.argtypes = [
 		ctypes.POINTER(MIB_IPADDRTABLE),
@@ -88,8 +140,8 @@ The address type or state. This member can be a combination of the following val
 	rk=['dwIndex','dwAddr', 'dwMask','wType', 'dwBCastAddr',   'dwReasmSize', 'unused1']
 	GetIpAddrTable(ctypes.byref(table), ctypes.byref(size), 0)
 	r=[]
-	for i in rk:print i
-	print table.dwNumEntries
+	for i in rk:U.pln( i)
+	U.pln( table.dwNumEntries)
 	for n in range(table.dwNumEntries):
 		row = table.table[n]
 		rn=[]
@@ -116,6 +168,14 @@ def getCmdHandle():
 	return kernel32.GetConsoleWindow()
 getcmdw=getCmdHandle
 	
+def getCmdLine():
+	'''------> k.GetCommandLineW()
+Out[9]: 'G'
+	'''
+	kernel32.GetCommandLineA.restype=LPSTR
+	return kernel32.GetCommandLineA()
+getCmd=getCmdLine
+	
 def getTitle(h=0,size=1024):
 	'''h:window Handle'''
 	if not h:h=getCmdHandle()
@@ -140,7 +200,7 @@ def getAllWindows():
 	# for handle in handles:
 		# mlst.append(handle)
 	return mlst
-EnumWindows=getAllWindows
+EnumWindows=getAllWindow=getAllWindows
 	
 def setWindowPos(h=0,x=199,y=-21,width=999,height=786,top=None,flags=None):
 	if not h:h=getCmdHandle()
@@ -158,8 +218,15 @@ def setOskPos(w=333,h=255,x=522,y=-21):
 		if k=='\xc6\xc1\xc4\xbb\xbc\xfc\xc5\xcc':
 			setPos(i,width=w,height=h,x=x,y=y,flags=flags)
 	
+	
 def msgbox(s='',st='title',*a):
-	if(a!=()):s=str(s)+ ','+str(a)[1:-2]
+	if(a):
+		a=list(a)
+		a.insert(0,s)
+		a.insert(1,st)
+		st='length %s'%len(a)
+		s=str(a)
+	# s=str(s)+ ','+str(a)#[1:-2]
 	return user32.MessageBoxA(0, str(s), str(st), 0)		
 
 def getCursorPos():
@@ -169,12 +236,101 @@ def getCursorPos():
 	pt = POINT()
 	user32.GetCursorPos(byref(pt))
 	return pt.x,pt.y		
-getMousePos=getCursorPos
+getMousePos=GetCursorPos=getCurPos=getCursorPos
 
+setMousePos=setCursorPos=SetCursorPos=setCurPos=user32.SetCursorPos
+######################
+def mouse_event(x,y,event=0,abs=True,move=True):
+	'''
+	x,y int :depand abs (Don't input base 65535)
+	x,y float 0-1.0:  rel screen x
+	
+	abs False:从上一次鼠标位置移动
+	Win.mouse_event(0,0)  没有反应？
+	Return value
+
+	This function has no return value.
+	Remarks
+
+	dwData>0 scroll up
+	<0  down
+
+If the mouse has moved, indicated by MOUSEEVENTF_MOVE being set, dx and dy hold information about that motion. The information is specified as absolute or relative integer values.
+If MOUSEEVENTF_ABSOLUTE value is specified, dx and dy contain normalized absolute coordinates between 0 and 65,535. The event procedure maps these coordinates onto the display surface. Coordinate (0,0) maps onto the upper-left corner of the display surface, (65535,65535) maps onto the lower-right corner.
+
+If the MOUSEEVENTF_ABSOLUTE value is not specified, dx and dy specify relative motions from when the last mouse event was generated (the last reported position). Positive values mean the mouse moved right (or down); negative values mean the mouse moved left (or up).	
+=======================================
+	MOUSEEVENTF_ABSOLUTE
+0x8000
+The dx and dy parameters contain normalized absolute coordinates. If not set, those parameters contain relative data: the change in position since the last reported position. This flag can be set, or not set, regardless of what kind of mouse or mouse-like device, if any, is connected to the system. For further information about relative mouse motion, see the following Remarks section.
+MOUSEEVENTF_LEFTDOWN
+0x0002
+The left button is down.
+
+x,y useless?  |MOUSE_MOVE
+Win.mouse_event(90,90,2|1,False)#x,y 无用
+Win.mouse_event(90,90,2|1,True)#有用，并立即返回
+
+Win.mouse_event(65536,65536,0)
+-------> Win.getCursorPos()
+Out[76]: (1365L, 767L)
+
+	'''
+	
+	
+	W,H=getScreenSize()
+	
+	if type(x) is float :
+		if abs:x=int(65535*x);y=int(65535*y)
+		else:x=int(W*x);y=int(H*y)
+	else:
+		if abs:
+			x=float(x)/W;	y=float(y)/H
+			x=int(65535*x);y=int(65535*y)
+	dwData=0
+		
+	if abs:	event=event|mouse_event.ABSOLUTE
+	if move:event=event|mouse_event.MOVE  #2|1|1|1== 3
+	# if WHEEL&event:
+	if mouse_event.WDOWN&event:dwData=-9;event|=mouse_event.WHEEL
+	if mouse_event.WUP&event:dwData=9;event|=mouse_event.WHEEL
+	
+	
+	User32.mouse_event.argtypes=[DWORD,
+                                 DWORD,
+                                 DWORD,
+                                 DWORD,
+                                 ctypes.wintypes.c_void_p]#ULONG_PTR	
+	py.importU()
+	if U.debug():U.pln(event,x,y,dwData,None)
+	User32.mouse_event(event,x,y,dwData,None)
+mouse_event.ABSOLUTE = 0x8000
+mouse_event.HWHEEL = 0x01000
+mouse_event.LEFTDOWN = 0x0002
+mouse_event.LEFTUP = 0x0004
+mouse_event.MIDDLEDOWN = 0x0020
+mouse_event.MIDDLEUP = 0x0040
+mouse_event.MOVE = 0x0001
+mouse_event.MOVE_NOCOALESCE = 0x2000
+mouse_event.RIGHTDOWN = 0x0008
+mouse_event.RIGHTUP = 0x0010
+mouse_event.VIRTUALDESK = 0x4000
+mouse_event.WHEEL = 0x0800
+mouse_event.XDOWN = 0x0080
+mouse_event.XUP = 0x0100
+mouse_event.WDOWN=0x200
+mouse_event.WUP=0x400
+mouse_event.RC=mouse_event.RIGHTDOWN|mouse_event.RIGHTUP
+mouse_event.LC=mouse_event.LEFTDOWN|mouse_event.LEFTUP
+	
+def getScreenSize():
+	return user32.GetSystemMetrics(0), user32.GetSystemMetrics(1)
+	
 def CreateProcess(appName,cmd,):pass
 # aa= 233
 def getLastError(errCode=None,p=True):
 	'''  need .decode('gb18030') '''
+	py.importU()
 	from ctypes import c_void_p,create_string_buffer
 	GetLastError = kernel32.GetLastError
 	FormatMessage = kernel32.FormatMessageA
@@ -194,7 +350,7 @@ def getLastError(errCode=None,p=True):
 						len(msg),
 						c_void_p())
 	except Exception as e:
-		print e
+		U.pln( e)
 	# return 233
 	# from win32con import (
 		# FORMAT_MESSAGE_FROM_SYSTEM,
@@ -203,7 +359,7 @@ def getLastError(errCode=None,p=True):
 
 	if errCode is None:
 		errCode = GetLastError()
-	print errCode
+	U.pln( errCode)
 	message_buffer = ctypes.c_char_p()
 	FormatMessage(
 		FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_IGNORE_INSERTS,
@@ -220,13 +376,13 @@ def getLastError(errCode=None,p=True):
 
 	r= '{} - {}'.format(errCode, error_message).decode('gb18030')#unicode
 	# error_message = error_message.decode('cp1251').strip()
-	if U.isipy():
-		print r
+	if U.isipy() and not U.DEBUG:#TODO  如果修改了repr 方式  可以去除这个
+		U.pln( r)
 	else:
 		return r
 geterr=getErr=getLastErr=getLastError
 ##############################################
-gdWinVerNum={'10': 10.0,
+gdWinVerNum={'10':10.0,# 6.2,#使用 GetVersionExW
 			 '2000': 5.0,
 			 '2003': 5.2,
 			 '2008': 6.0,
@@ -240,8 +396,8 @@ gdWinVerNum={'10': 10.0,
 			 'vista': 6.0,
 			 'xp': 5.1}
 for w,i in gdWinVerNum.items():
-	exec '''def is{0}():return getVersionNumber()=={1}'''.format(
-		w.replace('.','_'),i)			 
+	exec ('''def is{0}():return getVersionNumberCmdVer()=={1}'''.format(
+		w.replace('.','_'),i)    )			 
 			 
 def getWinName():
 	for w,i in gdWinVerNum.items():
@@ -251,9 +407,12 @@ def getWinName():
 
 name=systemName=getSysName=getWinName
 def GetProcessImageFileName(pid=None):
-	'''Windows XP or later
+	'''if pid ignore Process name
+	Windows XP or later
 	Windows Server 2003 and Windows XP:  The handle must have the PROCESS_QUERY_INFORMATION access right.'''
-	if not pid:pid=U.pid
+	if not pid:
+		py.importU()
+		pid=U.pid
 	PROCESS_ALL_ACCESS = 0x001F0FFF
 	# bInheritHandle [in]
 # If this value is TRUE, processes created by this process will inherit the handle. Otherwise, the processes do not inherit this handle.
@@ -275,7 +434,7 @@ gversionInfo=gVersionInfo=None
 def getVersionInfo():
 	global gVersionInfo
 	if gVersionInfo:return gVersionInfo
-	from Constants import DWORD,WCHAR
+	# from Constants import DWORD,WCHAR
 	class OSVersionInfo(ctypes.Structure):
 		_fields_ = (('dwOSVersionInfoSize', DWORD),
 					('dwMajorVersion', DWORD),
@@ -290,8 +449,38 @@ def getVersionInfo():
 			kernel32.GetVersionExW(ctypes.byref(self))
 	gVersionInfo=OSVersionInfo()
 	return gVersionInfo
+def getVersionNumberCmdVer():
+	'''
+Microsoft Windows [版本 10.0.16299.125]
+Microsoft Windows [版本 6.1.7601]
+Microsoft Windows XP [版本 5.1.2600]
+	'''
+	py.importU()
+	import subprocess as sb
+	T=U.T
+	r=sb.Popen('cmd.exe /c ver',stdout=sb.PIPE)
+	r=r.stdout.read(-1)
+	r=T.subLast(r,' ',']')
+	r=r.split('.')
+	if len(r)<3:raise Exception('cmd ver ',r)
+	major,minor,build=r[:3]
+	return float('{0}.{1}'.format(major,minor))
+	
 def getVersionNumber():
-	v=getVersionInfo()
+	'''TODO 实现有问题  在win10下为 6.2
+	
+	
+In [3]: Win.getVersionNumber
+------> Win.getVersionNumber()
+Out[3]: 6.1
+
+In [4]: Win.is7
+------> Win.is7()
+Out[4]: True
+	
+	'''	
+	# return getVersionNumberCmdVer()
+	v=getVersionInfo()	
 	return float('{0}.{1}'.format(v.dwMajorVersion,v.dwMinorVersion))
 def getpid():
 	return kernel32.GetCurrentProcessId()
@@ -310,20 +499,21 @@ def getAllDisk():
 		# if U.F.exist(i):r.append(i)
 	return r
 def main():
-	print getAllNetwork()
+	py.importU()
+	U.pln( getAllNetwork())
 	exit()
 	import sys,os;sys.path.append('d:\pm');from qgb import U,T,F
 	
 	o=getVersionInfo()
-	print o.dwMajorVersion,o.dwMinorVersion
+	U.pln( o.dwMajorVersion,o.dwMinorVersion)
 	
 	# CreateProcessWithLogonW(
 	# lpUsername='qgb',
 	# lpPassword='q',
 
 	# lpApplicationName=r'C:\WINDOWS\system32\calc.exe')	
-	print '[%s]'%getTitle(),getProcessPath(),U.getModPath()
+	U.pln( '[%s]'%getTitle(),getProcessPath(),U.getModPath())
 	# U.msgbox()
 	# U.repl()
-# print 233
+# U.pln( 233
 if __name__ == '__main__':main()

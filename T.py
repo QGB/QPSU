@@ -1,16 +1,21 @@
-
 # coding=utf-8
-FILE_NAME="!#$%&'()+,-0123456789;=@ABCDEFGHIJKLMNOPQRSTUVWXYZ[]^_`abcdefghijklmnopqrstuvwxyz{}~"### NO space
-PATH_NAME=FILE_NAME+'/\\:'
+#考虑qgb 位于另一个包内的情况
+if __name__.endswith('qgb.T'):from . import py
+else:#['T','__main__']
+	import py
+FILE_NAME=fileChars=FILE_CHARS="!#$%&'()+,-0123456789;=@ABCDEFGHIJKLMNOPQRSTUVWXYZ[]^_`abcdefghijklmnopqrstuvwxyz{}~"+' .'
+PATH_NAME=pathChars=PATH_CHARS='/\\:'+FILE_NAME# include space, dot
 
 az=a_z='abcdefghijklmnopqrstuvwxyz'
 AZ=A_Z=a_z.upper()
 
-character=a_z+A_Z
+azAZ=aZ=a_Z=a_z+A_Z
+AZaz=Az=A_z=a_z+A_Z
+character=azAZ###Do not Change
 
 num=s09=_09=number='0123456789'
 
-aZ09=a_Z0_9=alphanumeric=character+number#azAZ09, not gs09AZ
+azAZ09=aZ09=a_Z0_9=alphanumeric=character+number#azAZ09, not gs09AZ
 Az09=A_z0_9=A_Z+a_z+number
 
 hex='0123456789abcdef'
@@ -28,7 +33,7 @@ sqlite='SELECT * FROM sqlite_master;'
 #########################################
 squote=quote="'"
 dquote=dQuote='"'
-import __builtin__ ;py=builtin=__builtin__
+
 import   re	
 
 gError=None
@@ -37,6 +42,16 @@ try:
 except Exception as ei:
 	detect='#not install chardet Module'
 	pass
+################################################
+def strValue(a):
+	try:return int(a)
+	except:pass
+	# try:return py.list(a)
+	# try:return py.dict(a)
+	# try:return py.tuple(a)
+	try:return py.tuple(a)
+	except:pass
+
 def match(a,exp):
 	'''Wildcard character'''
 	import fnmatch
@@ -49,7 +64,7 @@ def match(a,exp):
 	
 # gsV='?'	
 def parseWildcardExp(a,wildcard='*',value='?'):
-	if py.type(a) in (py.str,py.unicode):
+	if py.istr(a):
 		pass
 	elif py.type(a) is py.list:
 		return a
@@ -130,7 +145,7 @@ def parseInt(a,base=16,symbols=None):
 		# for i,v in enumerate(a[::-1]):
 			# r+=ord(v)*pow(256,i)
 		# return r
-		
+	py.importU()	
 	if base<2:raise Exception(base,'base invild')
 	if not symbols:symbols=gdBaseN[base]
 	
@@ -140,7 +155,7 @@ def parseInt(a,base=16,symbols=None):
 		for i,v in enumerate(a[::-1]):
 			try:
 				r+=symbols.index(v)*pow(base,i)
-			except:print symbols,[v]
+			except:U.pln((symbols,[v])  )
 		return r
 		#TODO
 		
@@ -168,12 +183,18 @@ def matchHead(txt,regex):
 	if r:return r.group()
 	else:return ''
 	
-def string(a):
-	if py.type(a) is str:return a
-	try:a=py.str(a)
-	except:a=''
-	return a
-
+def string(a,decode=''):
+	'''return unicode'''
+	if py.is2():
+		if py.type(a) is py.str and decode:return a.decode(decode)
+		py.importU()
+		if py.type(a) is py.unicode:return a#.encode(U.encoding)
+		try:return py.str(a)
+		except:return ''
+	else:
+		if isinstance(a,py.bytes) and decode:return a.decode(decode)
+		try:return py.str(a)
+		except:return ''
 def stringToChars(a):
 	'''TODO:flap'''
 	a=string(a)
@@ -189,7 +210,7 @@ def listToStr(a):
 	if type(a)!=type([]):return ''
 	sr=''
 	for i in a:
-		sr=sr+str(i)+','
+		sr=sr+py.str(i)+','
 	return '['+sr+']'
 def ishex(a):
 	if type('')!=type(a):return False
@@ -197,9 +218,14 @@ def ishex(a):
 	for i in a.lower():
 		if i not in hex:return False
 	return True	
+def isString(a):
+	if py.is2():return isinstance(a,basestring)#py.type(a) in (py.str,py.unicode)
+	else:return isinstance(a,str)
+istr=isStr=isString	
+
 def sub(s,s1,s2=''):
-	if(s==None):return None
-	s=str(s)
+	if(s==None):return ()
+	if not istr(s):s=str(s)
 	i1=s.find(s1)
 	if(s2==''):
 		i2=s.__len__()
@@ -208,12 +234,12 @@ def sub(s,s1,s2=''):
 	if(-1==i1 or -1==i2):
 		return ''
 	i1+=len(s1)
-	# print i1,i2
+	# U.pln( i1,i2
 	return s[i1:i2]
 subLeft=subl=sub
 
 def subRight(s,s1,s2=''):
-	if(s==None):return None
+	if(s==None):return ()
 	s=str(s)
 	i1=0
 	if s1!='':i1=s.rfind(s1)
@@ -224,7 +250,7 @@ def subRight(s,s1,s2=''):
 	if(-1==i1 or -1==i2):
 		return ''
 	i1+=len(s1)
-	# print i1,i2
+	# U.pln( i1,i2
 	return s[i1:i2]
 subLast=subr=subRight
 	
@@ -236,7 +262,7 @@ def replacey(a,c,*yc):
 	for i in yc:
 		a=a.replace(i,c)
 	return a
-	print yc
+	
 	
 def replaceAll(a,old,new):
 	''' S.replace(old, new[, count]) -> string'''
@@ -253,11 +279,11 @@ def varname(a):
 		else:r+='_'
 	return r
 	# return replacey(a,'_',':','.','\\','/','-','"',' ','\n','\r','\t','[',']')
-# print varname(i09)
+# U.pln( varname(i09)
 def filename(a):
 	# if type(a) is not str:return ''
 	r=''
-	for i in range(len(a)):
+	for i in range(len(a.strip() )  ):
 		if a[i] in FILE_NAME:r+=a[i]
 		else:r+='_'
 	return r
@@ -277,8 +303,8 @@ class Har():
 		null=None
 		true=True
 		false=False
-		import U
-		s.data=eval(U.read(fileName))['log']
+		py.importU(),F
+		s.data=eval(F.read(fileName))['log']
 		
 	
 	def __len__(s):
@@ -305,7 +331,7 @@ def allAscii(a):
 	if type(a) not in (str,unicode):return False
 	for i in a:
 		if ord(i)>127:return False
-		# print ord(i);break
+		# U.pln( ord(i);break
 	return True
 	
 gszFinancial='''零壹贰叁肆伍陆柒捌玖拾佰仟萬億'''
@@ -319,7 +345,7 @@ def readNumber(a,split=4,p=True):
 	if split<1:return ''
 	zh=gZi[::split]
 	if a not in(str,unicode):a=str(a)
-	import U
+	py.importU()
 	a=''.join(U.one_in(list(a),number))
 	while(a.startswith('0')):a=a[1:]
 
@@ -329,12 +355,12 @@ def readNumber(a,split=4,p=True):
 			i=a[im-i-split:im-i]
 			s=i+zh[iz]+s
 			iz+=1
-			print  i,
+			# U.pln(  i,
 	s=a[0:im-((iz-1)*split)]+s
 	# U.repl()
-	# for i in zh:print i.decode('utf-8').encode(U.stdout.encoding)
+	# for i in zh:U.pln( i.decode('utf-8').encode(U.stdout.encoding) )
 	s=s.decode('utf-8')
-	if p:print s.encode(U.stdout.encoding)		
+	if p:U.pln(s.encode(U.stdout.encoding)	)	
 	return s
 
 gcszh=gZhEncodings=gcodingZh={'gb18030', 'gb2312', 'gbk', 'big5', 'big5hkscs', 'cp932', 'cp949', 'cp950', 'euc-jisx0213', 'euc-jis-2004', 'euc-jp', 'euc-kr', 'hz', 'idna', 'iso2022-jp', 'iso2022-jp-1', 'iso2022-jp-2', 'iso2022-jp-2004', 'iso2022-jp-3', 'iso2022-jp-ext', 'iso2022-kr', 'johab', 'mbcs', 'punycode', 'raw-unicode-escape', 'shift-jis','shift-jisx0213', 'shift-jis-2004', 'unicode-escape', 'unicode-internal', 'utf-16', 'utf-16-be', 'utf-16-le', 'utf-32', 'utf-32-be', 'utf-32-le', 'utf-7', 'utf-8', 'utf-8-sig'}
@@ -344,7 +370,6 @@ gcharset=charset=gcs=gencodings=gcoding={'ascii', 'base64-codec', 'big5', 'big5h
 
 if __name__=='__main__':
 	from qgb import *
-	print U
 	U.repl()
 	exit()
 	# h= Har('ping.chinaz.com.har').data.keys()
@@ -361,9 +386,9 @@ if __name__=='__main__':
 			# if i in f:continue
 			c.add(i)
 			i='%-6s [%-6s] %s'%(i,r,F.b2h(r))
-			print i
+			# U.pln( i
 		except:pass
-	# print c
+	# U.pln( c
 	exit()
 	
 	gcs=sorted(gcs)
@@ -372,47 +397,36 @@ if __name__=='__main__':
 	exit()
 	f=U.read(__file__)
 
-	for i in gsZI.split('、'):
-		print '%-2s %s'%(U.ct(),i.decode('utf-8').encode('gb18030'))
-	exit()
+	# for i in gsZI.split('、'):
+		# U.pln( '%-2s %s'%(U.ct(),i.decode('utf-8').encode('gb18030'))
+	# exit()
 	
-	print detect(s)
-	s=s.decode('utf-8')
-	print haszh(s),len(s)
-	exit()
-	print max()
-	exit()
-	import os
-	os.chdir('cd')
-	sf=''
-	for i in FILE_NAME:
-		U.write(i,'123')
-		if U.read(i)=='123':sf+=i
-	print sf==FILE_NAME	
+	# U.pln( detect(s)
+	# s=s.decode('utf-8')
+	# U.pln( haszh(s),len(s)
+	# exit()
+	# U.pln( max()
+	# exit()
+	# import os
+	# os.chdir('cd')
+	# sf=''
+	# for i in FILE_NAME:
+		# U.write(i,'123')
+		# if U.read(i)=='123':sf+=i
+	# U.pln( sf==FILE_NAME	
 			
-	# print U.inMuti('123456.9.9','18','1','',f=inMutiChar)
-	# print len(asciiPrint)
+	# U.pln( U.inMuti('123456.9.9','18','1','',f=inMutiChar)
+	# U.pln( len(asciiPrint)
 	exit()
 	# import urllib2,re
 	# url='http://svn.kcn.cn/repos/kbs/'
 	# r=urllib2.urlopen(url)
 	# s=r.read()
-	s='''<html><head><title>kbs - Revision 11899: /</title></head>
-	<body>
-	 <h2>kbs - Revision 11899: /</h2>
-	 <ul>
-	  <li><a href="branches/">branches/</a></li>
-	  <li><a href="tags/">tags/</a></li>
-	  <li><a href="trunk/">trunk/</a></li>
-	 </ul>
-	 <hr noshade><em>Powered by <a href="http://subversion.tigris.org/">Subversion</a> version 1.6.11 (r934486).</em>
-	</body></html>'''
-	# print "s='''{0}'''".format(s)
-	print sub(s,'h','r')
 
-	# print haszh(s)
+
+	# U.pln( haszh(s)
 	# s='44444.py.py'
-	# print subr(s,'','.py')
-	# print s.find(a,)
-	# print s[:50]
-	# print s.find('1')
+	# U.pln( subr(s,'','.py')
+	# U.pln( s.find(a,)
+	# U.pln( s[:50]
+	# U.pln( s.find('1')

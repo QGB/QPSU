@@ -1,4 +1,11 @@
 # Importing a dynamically generated module
+print (23333333)
+if __name__=='__main__':import py
+else:from . import py
+
+print(py)
+
+
 
 def importCode(code,name,addToSys=True,sys=True,sysModule=True):
 	"""
@@ -25,9 +32,9 @@ def importCode(code,name,addToSys=True,sys=True,sysModule=True):
 	module = imp.new_module(name)
 
 	try:
-		exec code in module.__dict__
+		exec (code) in module.__dict__
 	except Exception as e:
-		print e,233
+		U.pln( e,233)
 		exit()
 	if addToSys and sys and sysModule:
 		sys.modules[name] = module
@@ -38,14 +45,14 @@ def importCode(code,name,addToSys=True,sys=True,sysModule=True):
 code = \
 """
 def testFunc():
-	print "spam!"
+	U.pln( "spam!")
 
 class testClass:
 	def testMethod(self):
-		print "eggs!"
+		U.pln( "eggs!")
 
 """
 
 m = importCode(code,"test")
-m.testFunc()
-m.testClass().testMethod()
+# m.testFunc()#is3 AttributeError: module 'test' has no attribute 'testFunc'
+# m.testClass().testMethod()

@@ -1,1 +1,1 @@
-cyg&cmd
+ws&cmd

@@ -8,13 +8,31 @@ import sys
 stdin=sys.stdin;stdout=sys.stdout;stderr=sys.stderr
 gsdecode=decoding='utf-8';gsencode=encoding=stdout.encoding
 modules=sys.modules
-import __builtin__ ;py=builtin=__builtin__
-
-printError=printErr=gbPrintErr=True
+def isMain():return __name__=='__main__'
+if isMain():import py
+else:from . import py
+'''TODO：应该设计一个配置类，__getattr__ on a module 属性拦截,这样可以同步多个变量名， 在python2中没有很好的方法,  在Python 3.7+中，你只需要做一个明显的方法。
+# my_module.py
+def __getattr__(name: str) -> Any:
+	return attr
+目前使用单变量名	
+'''
+gbPrintErr=True
 gbLogErr=True
+
+gbDebug=DEBUG=sys.flags.debug or False#gbDebug只在这里出现一次
+def debug(a=False):
+	if 'debug' in os.environ:
+		e=os.getenv('debug').strip()#not .trim()
+		if e and e!='0':a=True
+		else:a=False
+	globals()['DEBUG']=a;return DEBUG
+
+# if(calltimes()<1):DEBUG=True #ct not defined
+
 ########
 gError=[]
-def setErr(ae):
+def setErr(ae,msg='#Error '):
 	global gError
 	if gbLogErr:# U.
 		if type(gError) is list:gError.append(ae)
@@ -22,41 +40,42 @@ def setErr(ae):
 		else:gError=[ae]
 	else:
 		gError=ae
-	if gbPrintErr:print '#Error ',ei# U.
+	if gbPrintErr:print (msg,ae)# U.
 	
 if 'qgb.U' in modules:modules['_U']=modules['qgb.U']
 elif 'U' in modules:modules['_U']=modules['U']
-
+################  import python lib  #######################
 try:
 	import os;path=os.path
 	from threading import Thread
 	thread=Thread
 	from multiprocessing import Process;process=Process
+	from collections import OrderedDict
 except Exception as ei:
-	if gbPrintErr:print '#Error lib import'
-	setErr(ei)
+	setErr(ei,msg='#Error py lib import')
 	
 try:
 	_U=modules['_U']
 	gError=_U.gError
-	printError=printErr=gbPrintErr=_U.gbPrintErr
+	gbPrintErr=_U.gbPrintErr
 except Exception as _e:pass
 	# pass# 已经存在于globals 中，是否有必要重新赋值给 gError？
 # else:
-	
 try:
-	from F import write,read,ls,ll,md,rm,autof
-	import F,T
+	if isMain():import F,T
+	else:from . import F,T
+	write,read,ls,ll,md,rm=F.write,F.read,F.ls,F.ll,F.md,F.rm
 	from pprint import pprint
-	import Clipboard;clipboard=cb=Clipboard
+	if __name__.endswith('qgb.U'):from . import Clipboard
+	else:import Clipboard
+
+	import Clipboard;clipboard=cb=Clipboard#  
 except Exception as ei:
-	if gbPrintErr:print '#Error import'
-	setErr(ei)
-	# gError=ei
+	setErr(ei,msg='#Error import '+str(ei))
 	
 class ArgumentError(Exception):
 	pass
-aError=argserr=argErr=argerr=argumentError=ArgumentException=ArgumentError	
+aError=ArgsErr=argserr=argErr=argerr=argumentError=ArgumentException=ArgumentError	
 class ArgumentUnsupported(ArgumentError):
 	pass
 ############
@@ -67,7 +86,7 @@ Class=classtype=classType=type(Class)
 #########################
 def one_in(vs,*t):
 	'''(1,2,3,[t])	or	([vs].[t])'''
-	if not hasattr(vs, '__iter__'):vs=[vs]
+	if not hasattr(vs, '__iter__'):vs=[vs]#  is3 str has __iter__  while  is2 not
 	if len(t)==1:
 		t=t[0]
 	elif len(t)>1:
@@ -81,16 +100,6 @@ def one_in(vs,*t):
 		except:pass
 	return r
 #########################
-def is2():
-	'''
-'2.7.13 |Anaconda 4.3.1 (32-bit)| (default, Dec 19 2016, 13:36:02) [MSC v.1500 32 bit (Intel)]
-'''
-	return sys.version[0]=='2'
-def is3():
-	'''
-'3.5.2 (default, Nov 17 2016, 17:05:23) \n[GCC 5.4.0 20160609]'
-'''
-	return sys.version[0]=='3'
 def getPyVersion():
 	'''return float 2.713
 	'''
@@ -104,8 +113,10 @@ import platform
 def iswin():
 	if platform.system().startswith('Windows'):return True
 	else:return False
+glnix=['nix','linux','darwin']
 def isnix():
-	return one_in('nix','linux','darwin',platform.system().lower())
+	return [i for i in glnix if i in platform.system().lower()]
+	# return one_in('nix','linux','darwin',platform.system().lower())
 	
 def iscyg():
 	return 'cygwin' in  platform.system().lower()
@@ -126,52 +137,49 @@ def isrepl():
 	i,o=sys.stdin.isatty(),sys.stdout.isatty()
 	if i==o:return i
 	else:
-		raise Exception('qgb.U isatty conflit')
+		raise Exception('std(in,out) isatty conflit')
 isatty=istty=isrepl
 ########################
 if iswin() or iscyg():
 	try:
-		import Win
-		from Win import setWindowPos,msgbox
+		if isMain():import Win
+		else:from . import Win
+		setWindowPos,msgbox=Win.setWindowPos,Win.msgbox
 		pos=cmdPos=setWindowPos
 		pid=Win.getpid()
 	except Exception as ei:
 		# def msgbox(s='',st='title',*a):
 			# if(a!=()):s=str(s)+ ','+str(a)[1:-2]
 			# if iswin():windll.user32.MessageBoxA(0, str(s), str(st), 0)
-		if gbPrintErr:print '#Error import Win'
-		setErr(ei)
-	###########################
-	
+		setErr(ei,msg='#Error import Win'  )
+#'G:\\QGB\\babun\\cygwin\\lib\\python2.7\\qgb'   ValueError('Attempted relative import beyond toplevel package',)
+		py.pdb()
+		# {0} {1}'.format(__name__,isMain() )
+		
+###########################
 	if iscyg():
 		def getCygPath():
-			r=Win.getProcessPath()
+			r=getProcessPath()
 			if 'cygwin' in r:
 				return T.subLast(r,'','cygwin')+'cygwin\\'
 			else:
 				raise EnvironmentError(r)
-elif isnix():
+else:# *nix etc..， #TODO:isAndroid
+	pid=os.getpid()				
+				
+if isnix():
 	def isroot():
 		return os.getuid()==0
-else:#Android *nix
-	pid=os.getpid()
-try:
-	from F import write,read,ls,ll,md,rm
-	import F,T
-	from pprint import pprint
-	import Clipboard;clipboard=cb=Clipboard
-except Exception as ei:
-	if gbPrintErr:print '#Error import F'
-	setErr(ei)
+
 
 #TODO: if not has ei,import error occur twice,why?
 def driverPath(a,reverse=True):
 	'''from Z to C'''
 	if not a.startswith(':'):a=':'+a
-	try:AZ=T.AZ;exist=F.exist
-	except:
-		AZ=''.join([chr(i) for i in range(65,65+26)])
-		exist=os.path.exists
+	# try:AZ=T.AZ;exist=F.exist
+	# except:
+	AZ=''.join([chr(i) for i in range(65,65+26)])
+	exist=os.path.exists
 	if reverse:AZ=AZ[::-1]
 	for i in AZ:
 		if exist(i+a):return i+a
@@ -191,51 +199,105 @@ gst=gsTestPath=getTestPath()
 
 
 def getShellPath():
-	if isnix():return '/bin/qgb/'
+	'''wsPath=G:\QGB\babun\cygwin\home\qgb\wshell\
+	'''
+	if isnix():s='/bin/qgb/'
 	if iswin() or iscyg():
-		s='E:/sourceCode/shell/'
-		return driverPath(s[1:]) or s
+		if 'wsPath' in os.environ:
+			s=os.environ['wsPath']
+		s='G:/QGB/babun/cygwin/home/qgb/wshell/'#如果开头多一个空格，在Pycharm 下返回False，其他环境下为True
+		if path.exists(s):
+			pass
+		else:
+			s='E:/sourceCode/shell/'
+		s=driverPath(s[1:]) or s
+	return s.replace('\\','/')
 gsw=gsWShell=getShellPath()
 
 
 def pln(*a,**ka):
-	s='print '
-	def den(k):
-		if type(k) is py.unicode:k=k.encode(encoding)
-		if type(k) is py.str:
-			rd=T.detect(k)
-			if rd.popitem()[0]>0.9:dc=rd[1]
-			else:dc=decoding
-			k=k.decode(dc).encode(encoding)
-		return k
-	
-	for k in a:
-		if type(k) in (list,set,tuple):
+	'''pln *data,  [en]cod[ing]='gb18030' ,r=False
+	if r 应该返回参数  [U.pln(i) for i in _211]
+	应该正确处理 中文 list dict ...'''
+	# def den(k):
+		# if py.type(k) is py.unicode:k=k.encode(encoding)
+		# if py.type(k) is py.str:
+			# rd=T.detect(k)
+			# if rd.popitem()[0]>0.9:dc=rd[1]
+			# else:dc=decoding
+			# k=k.decode(dc).encode(encoding)
+		# return k
+	if 	'end' not in ka:ka['end']='\n'
+	return p(*a,**ka)	
+		
+	encoding=encoding
+	r=False
+	for k in ka:
+		k=k.lower()
+		if 'cod' in k:encoding=ka[k];continue#  没有找到就使用 全局默认encoding解码
+		if 'r'   in k:r       =ka[k];continue
+		
+	for i in a:
+		if iterable(i):
 			pln()
-		print k,
-
-	# if len(ka)<1:
+			# if len(ka)<1:
 		# exec(s[:-1])###without (del last ,) [:-1] can't flush
-	# else:
-		# print a,ka
-	sys.stdout.flush()
+	
+	file.flush()
 
 	
 def p(*a,**ka):
-	if len(a)==1:
+	'''
+ # in  py 3.6
+	print(value, ..., sep=' ', end='\n', file=sys.stdout, flush=False)
+	----> 1 sys.stdout.write(_21)
+	TypeError: write() argument must be str, not bytes
+	sys.stdout.write('[\u9999')#[香
+
+	in 2.7
+	# print(k,end='')#SyntaxError: invalid syntax in 2.7 ;use from __future__ import print_function
+	U.p(123,456,file=file ,end='\n')#  输出多个参数没有正确换行
+iterable 的元素,没有特殊处理
+	'''
+	cod=''
+	r=False
+	sep=' '
+	end=''
+	file=sys.stdout
+	flush=True#default
+	for k in ka:
+		k=k.lower()
+		if 'sep'   in k:sep  =ka[k];continue
+		if 'end'   in k:end  =ka[k];continue
+		if 'file'  in k:file =ka[k];continue
+		if 'flush' in k:flush=ka[k];continue
+		if 'cod'   in k:cod  =ka[k];continue# 解码
+		if 'r'     in k:r    =ka[k];continue#  放最后，防止名字冲突
+	#if py.len(a)==0:#print (end='233')待测试
+	if py.len(a)==1:
 		a=a[0]
-		at=type(a)
-		if at is py.unicode:a=a.encode(encoding)
-		# elif at is 
-		else:a=py.str(a)
-		sys.stdout.write(a)
-	elif len(a)>1:
-		if 'sep' in ka.keys():sep=ka['sep']
-		else:sep=' '
-		
+		at=py.type(a)
+		# if a=='':file.write(a)#no effect;	#u''==''#True
+		if cod:a=a.decode(cod)
+		if py.is2():
+			if at is py.unicode:a=a.encode(encoding)#编码
+			# elif not py.istr(a):
+		a=py.str(a)	
+		file.write(a)
+		file.write(end)
+		if flush:file.flush()
+		if r:return a
+		else:return
+	elif py.len(a)>1:
+		# if 'sep' in ka.keys():sep=ka['sep']
+		# else:sep=' '
 		for i in a:
-			sys.stdout.write(str(i)+str(sep))
-	sys.stdout.flush()
+			p(i,sep='no useful',r='no useful',end='',file=file,flush=flush,cod=cod)
+			p(sep,sep='no useful',r='no useful',end='',file=file,flush=flush,cod=cod)
+			#只能使用一个参数位置，不然死循环,最后结尾sep
+		p(end,sep='no useful',r='no useful',end='',file=file,flush=flush,cod=cod)
+	if r:return a
+	else:return
 # p(4,2,sep='9')
 # exit()
 
@@ -274,9 +336,9 @@ def flat(*a,**options):
 	# repl()
 	return tuple(r)
 	
-# print flat([[1,2,3], [5, 2, 8], [7,8,9]])
+# pln flat([[1,2,3], [5, 2, 8], [7,8,9]])
 ##(1, 2, 3, 5, 2, 8, 7, 8, 9)
-# print flat([1,2,3,[4,5,[1,2],6]],['aaa'])
+# pln flat([1,2,3,[4,5,[1,2],6]],['aaa'])
 ##  (1, 2, 3, 'aaa', 4, 5, 6, 1, 2)
 	
 def md5(a='',file=''):
@@ -330,9 +392,66 @@ def inMuti(a,*la,**func):
 		
 	return r
 inmuti=inMuti
-	
-	
+
+def getMethod(a,func):
+	if callable(func):
+		func=py.getattr(func,'__name__',None)
+	if T.istr(func):
+		fs=[]
+		for i in py.dir(a):
+			if i.startswith(func):
+				i=py.getattr(a,i,None)
+				if py.callable(i):fs.append(i)
+		if py.len(fs) >1:raise ArgumentError('need unique func(Name) for a')
+		return fs[0]
+	return func
+getmethod=getMethod
+
+def inMulti(target,elements,*functions):
+	if not functions:functions=[None]
+	functions=py.set(flat(functions))
+	r=[]
+	for f in functions:
+		for e in elements:
+			if f==None:
+				if target in e:r.append(e);continue
+				continue
+			method=getMethod(target,f)		
+			if method(target):r.append(e);continue		
+			elif py.callable(f):
+				if f(target,e):r.append(e);continue
+			#else: # 参数函数 无效
+	return r
+def multin(elements,target,*functions):
+	'''函数为None时：element in target 
+	element.f(target) #  target.f(element) : py.map
+	or f(element,target)
+	只要element满足一个函数 ：就会作为结果添加。
+		要想得到所有 函数结果，怎么办？
+		要想 element满足所有函数，怎么办？ '''
+	if not functions:functions=[None]
+	functions=py.set(flat(functions))
+	if DEBUG:pln(functions)   #set(['startswith', None])=={None, 'startswith'}
+	r=[]
+	for f in functions:
+		for e in elements:
+			if f==None:
+				if e in target:r.append(e);continue
+				continue
+			method=getMethod(e,f)
+ # '123'.startswith
+ # <function startswith>
+ # _('1')
+ # True			
+			if method: 
+				if method(target):r.append(e);continue
+#当 混用 inMulti 和 multin 时，注意调用参数应该交换，否则 --> 376 TypeError: startswith first arg must be str, unicode, or tuple, not list				
+			elif py.callable(f):
+				if f(e,target):r.append(e);continue
+			#else: # 参数函数 无效
+	return r
 def mutin(la,a,func=None):
+	'''#TODO : 重写 multin ,同时支持多个函数，方法，func=None 代表 xs[i] in a: '''
 	if len(la)<1:return False
 	r=[]
 	if type(func) not in (str,) and not callable(func) :
@@ -361,13 +480,21 @@ def mutin(la,a,func=None):
 inMutiR=mutiIn=mutin
 # exit()		
 def in_one(v,*ts):
+	'''if v in i:return [v]
+U.in_one('p',*Out.values())
+Out[142]: ['p']
+	'''
 	for i in ts:
 		try:
 			if v in i:return [v]
 		except:pass
 	return []	
+inOne=in_one
 def all_in(vs,*t):
-	'''(1,2,3,[t])	or	([vs].[t])'''
+	'''for i in vs:i all_in t 
+	U.all_in(list(string),T.PATH_NAME)  
+	
+	(1,2,3,[t])	or	([vs].[t])'''
 	if not hasattr(vs, '__iter__'):vs=[vs]
 	if len(t)==1:
 		t=t[0]
@@ -376,22 +503,28 @@ def all_in(vs,*t):
 		t=t[-1]
 	else:raise Exception(all_in.__doc__)
 	# U.pln(vs,t)
+	if DEBUG:pprint((vs,'*t:',t)  )
 	for i in vs:
 		try:
 			if i not in t:return []
 		except:return []
 	return vs
-	
+allIn=all_in	
 def in_all(v,*ts):
 	for i in ts:
 		try:
 			if v not in i:return []
 		except:pass
 	return [v]
+inAll=in_all
 ##########################################
 def cmd(*a,**ka):
 	'''show=False :show command line
-	默认阻塞，直到进程结束返回'''
+	默认阻塞，直到进程结束返回
+	subprocess
+	sb.stdin.close() 才返回  stdout stderr
+	
+	'''
 	import T
 	s=''
 	if iswin() or iscyg():quot='"'
@@ -421,7 +554,10 @@ def cmd(*a,**ka):
 	# pln(s)
 	# exit()
 	try:
-		if 'show' in ka and ka['show']:print repr(s)
+		if 'show' in ka and ka['show']:pln (repr(s))
+		import subprocess as sb
+		r=sb.Popen(s,stdin=sb.PIPE,stdout=sb.PIPE,stderr=sb.PIPE)
+		return r.stdout.read(-1)
 		return os.system(s)
 	except Exception as e:return e
 	# exit()
@@ -435,7 +571,7 @@ def pause(a='Press Enter to continue...\n',exit=True):
 		# cmd('pause');return
 		try:
 			raw_input(a)
-		except:
+		except BaseException:#SystemExit is BaseException
 			if exit:x()
 			return False
 	return True	
@@ -445,16 +581,18 @@ def run(a,*args):
 If you're using Pyhton 3, command.args is the easiest way:
 	from subprocess import Popen
 	command = Popen(['ls', '-l'])
-print command.args #['ls', '-l']
+pln command.args #['ls', '-l']
 '''
+	if DEBUG:pln (a,args)
+		
 	if type(a)==type(''):a=[a]
 	if type(a)!=type([]):a=list(a)
 	if len(args)>0:a.extend(args)
 	if type(a)==type([]):
 		for i,v in enumerate(a):
-			if py.type(v) not in (py.str,py.unicode):
+			if not py.istr(v):
 				a[i]=v=str(v)
-			if iswin() and v.startswith('"') and v.endswith('"'):
+			if py.iswin() and v.startswith('"') and v.endswith('"'):
 				a[i]=v[1,-1]
 			
 		r= __import__('subprocess').Popen(a)
@@ -517,12 +655,13 @@ def this():
 	if not py.globals().has_key('__name__'):
 		__name__='233qgb.U'
 		# txt(globals())
-		print __name__
+		pln (__name__)
 	
-def repl(printCount=False):
+def repl(_=None,printCount=False,msg=''):
 	# a=1
 	ic=count('__repl__')
-	if printCount:print ic
+	if printCount:pln (ic)
+	if msg:pln (msg)
 	######################
 	f=sys._getframe().f_back
 	locals=f.f_locals
@@ -538,6 +677,11 @@ def repl(printCount=False):
 		# locals['U']=__frame.f_locals['U']
 	# except:  #KeyError: 'U'  if use in qgb.U Module
 		# locals=mergeDict(locals,py.globals())
+	if _!=None:
+		if '_' in locals:
+			locals['_qgb']=_
+		else:
+			locals['_']=_
 	__import__('code').interact(banner="",local=locals)
 	return
 	
@@ -562,18 +706,20 @@ def reload(*mods):
 		elif 'U' in sys.modules:     imp.reload(sys.modules['U'])
 		elif 'qgb._U' in sys.modules:imp.reload(sys.modules['qgb._U'])
 		else:raise EnvironmentError('not found qgb.U ?')
-		# print 233
+		# pln 233
 	elif len(mods)==1:
 		mod=mods[0]
 		if not isModule(mod):
 			# sys.a=mod
 			# return
 			try:
-				if '_module' in py.dir(mod):
+				if py.type(mod) is py.str:
+					return reload(sys.modules[mod])
+				elif '_module' in py.dir(mod):
 					if not isModule(mod._module):raise Exception('instance._module is not module')
 					mod=mod._module
 					modules[mod.__name__]=mod
-					reload(mod)
+					return reload(mod)
 					
 					# if mod.__name__ in modules:#'qgb.ipy'
 				else:raise Exception('instance._module not exists')
@@ -614,15 +760,15 @@ def clear():
 C=c=cls=clear
 
 
-def chdir(ap=gsTestPath,*a,**ka):
-	if type(ap)!=type('') or len(ap)<1:ap=gsTestPath
+def chdir(ap=gst,*a,**ka):
+	if type(ap)!=type('') or len(ap)<1:ap=gst
 	ap=path.join(ap,*a)
 	
 	mkdir=True
 	if 'md' in ka:mkdir=ka['md']
 	if 'mkdir' in ka:mkdir=ka['mkdir']
 	if iscyg():mkdir=False#cyg下可以创建带:的目录，导致切换异常
-	if mkdir:md(ap)
+	if mkdir:F.mkdir(ap)
 	
 	global gscdb
 	# repl()
@@ -677,10 +823,15 @@ def cdbabun(a=''):
 	return cd(s+a)
 def pwd(p=False,display=False):
 	s=os.getcwd()
-	if p or display:print s
-	try:pwd.sp=F.getsp(s)
-	except:pass
-	return s
+	if p or display:pln (s)
+	# try:pwd.sp=F.getsp(s)
+	# except:pass
+	if not py.getattr(pwd,'sp',''):
+		pwd.sp='/'
+	s=s.replace('\\','/')
+	
+	return s+pwd.sp#带sp方便使用者拼接路径
+getCurrentPath=pwd
 	
 def sort(a, cmp=None, key=None, reverse=False):
 	'''sorted _5,cmp=lambda a,b:len(a)-len(b)  按长度从小到大排序
@@ -732,8 +883,7 @@ def _ct_clear():
 calltimes.clear=_ct_clear
 
 
-if(calltimes()<1):BDEBUG=True
-debug=BDEBUG
+
 
 def setStd(name,file):
 	'''name=[std]out err in'''
@@ -778,27 +928,40 @@ def resetStd(name=''):
 		exec('sys.{0}=sm'.format(std))
 	return True
 resetstd=resetStd#=resetStream
-
-def browser(url,ab=''):
+gsBrowser=''
+def browser(url,browser=gsBrowser,b=''):
+	'''b,browser='yandex'
+	'''
 	import webbrowser
+	if gsBrowser:browser=gsBrowser
+	if b:browser=b
+	sp=''
+	def _open(asp,url):
+		b=sys._getframe().f_back.f_code.co_names[-1]#get caller function name 
+		webbrowser.register(b, None, webbrowser.BackgroundBrowser(asp))
+		return webbrowser.get(b).open_new_tab(url)
 	def chrome(url):
 		###TODO: auto Find system base everything
-		spC='''C:\QGB\Chrome\Application\chrome.exe'''	
-		webbrowser.register('chrome', None, webbrowser.BackgroundBrowser(spC))
-		webbrowser.get('chrome').open_new_tab(url)
+		try:sp=getProcessList(name='chrome.exe')[-1].cmdline()[0]
+		except:sp='''C:\QGB\Chrome\Application\chrome.exe'''
+		_open(sp,url)		
+	def yandex(url):
+		sp=getProcessList(name='browser.exe')[-1].cmdline()[0]
+		_open(sp,url)
 	for i in py.dir():
-		if not ab:
+		if not browser:
 			webbrowser.open(url)
+			break
 		if py.eval('callable({0})'.format(i)):
-			if ab.lower()== i:
-				exec '{0}(url)'.format(i) in globals(),locals()
+			if browser.lower()== i:
+				exec ('{0}(url)'.format(i) ) in globals(),locals()  
 		
 	 
 	# webbrowser.open_new_tab(url)
 	# if iswin():os.system('''start '''+str(url))
 # browser('qq.com')
 
-gshtml=htmltxt=txthtml=('<textarea style="width:100%; height:100%;">','</textarea>')
+gsHtmlTextarea=('<textarea style="width:100%; height:100%;">','</textarea>')
 		
 def autohtml(file=None):
 	import T
@@ -814,7 +977,7 @@ def autohtml(file=None):
 	return file	
 
 	
-def shtml(txt,file='',browser=True):
+def shtml(txt,file='',browser=True,b=''):
 	import T,pprint,F
 	if file=='' and type(txt) is not str:
 		try:file=T.filename(T.max(txt.__str__(),txt.__repr__(),txt.__name__)[:19])
@@ -830,17 +993,31 @@ def shtml(txt,file='',browser=True):
 		# 
 	if len(file)<1:file=T.filename(getObjName(txt)+stime())[:19]
 	if not file.lower().endswith('.txt'):file+='.txt'
-	F.write(file,txt)
+	file=F.write(file,txt)
 	# f=open(file+'.txt','a')
 	# rm(f.name)
-	# txt=txt.replace(txthtml[1],txthtml[1][:1]+'!!!qgb-padding!!!'+txthtml[1][1:])	
-	# f.write(txthtml[0])
+	# txt=txt.replace(gsHtmlTextarea[1],gsHtmlTextarea[1][:1]+'!!!qgb-padding!!!'+gsHtmlTextarea[1][1:])	
+	# f.write(gsHtmlTextarea[0])
 	# f.write(txt)
-	# f.write(txthtml[1])
+	# f.write(gsHtmlTextarea[1])
 	# f.close()
-	if(browser==True):globals()['browser'](path.abspath(file))
+	if b:browser=b 
+	if(browser):
+		if T.istr(browser):
+			globals()['browser'](file,browser=browser)
+		else:globals()['browser'](file)
+	return file
 txt=shtml	
 
+def add(*a):
+	a=flat(a)
+	r=0
+	for i in a:
+		if py.isnum(i):
+			r+=i
+		else:
+			raise NotImplementedError('not num type')
+	return r		
 def maxLen(*a):
 	if py.len(a)==1:a=flat(a)
 	im=-1
@@ -865,7 +1042,7 @@ def avgLen(*a):
 	return float(im)/len(a)
 	
 	
-def printAttr(a,console=False):
+def printAttr(a,b='chrome',console=False):
 	'''aoto call __methods which is no args'''
 	d=py.dir(a)
 	
@@ -873,7 +1050,7 @@ def printAttr(a,console=False):
 		sk='%-{0}s'.format(maxLen(d))
 		si='%-{0}s'.format(len(py.len(  d  )))
 		for i,k in py.enumerate(d):
-			print si%i,sk%k,py.eval('a.{0}'.format(k))
+			pln (si%i,sk%k,py.eval('a.{0}'.format(k)))
 		return
 		
 	sh='''<tr>
@@ -886,34 +1063,40 @@ def printAttr(a,console=False):
 	r='';v='';vi=-1
 	for i,k in py.enumerate(d):
 		try:
-			v=py.eval('a.{0}'.format(k))
+			v=getattr(a,k,None)#py.eval('a.{0}'.format(k))			
 			vi=len(v)
-			if py.callable(v):
-				if k.startswith('__'):
-					vv='!ErrGetV()'
-					try:
-						if isipy():#在ipython 中存在用户名字空间自动清空的问题
-							pass
-						else:
-							vv=v()
-					except:pass
-					v='{0} == {1}'.format(v,vv)
-				v=str(v)
-				v+=getHelp(v)
+			# import pdb;pdb.set_trace()
+			# if py.callable(v):
+				# if k.startswith('__'):
+					# vv='# ErrCall {0}()'.format(k)
+					# try:
+						# if isipy():#在ipython 中存在用户名字空间自动清空的问题
+							# pass
+						# else:
+							# vv=v()
+					# except:pass
+					# v='{0} == {1}'.format(v,vv)
+				
+				# v=str(v)
+				# v+=getHelp(v)
 			if type(v) is not str:
-				import pprint
-				v= pprint.pformat(v)
+				import pprint				
+				try:#  调用非内置函数可能会造成严重的副作用
+					if py.callable(v) and k.startswith('__'):vv=v()
+					else:vv=''
+				except Exception as ev:vv='#call Err:'+py.repr(ev)
+				v='{0} {1} \n{2}'.format(pprint.pformat(v),vv,getHelp(v))
 		except Exception as e:v=py.repr(e)
 		
-		v=v.replace(txthtml[0], '*'*33)
-		v=v.replace(txthtml[1], '*'*11)
+		v=v.replace(gsHtmlTextarea[0], '*'*33)
+		v=v.replace(gsHtmlTextarea[1], '*'*11)
 		
 		r+=sh.format(i,k,v,vi)
 	# cdt('QPSU')
 	import T,F
 	name=gst+'QPSU/'+T.filename(getObjName(a))+'.html'
-	print name
-	browser(name)
+	pln (name)
+	browser(name,b)
 	return F.write(name,read(sp).replace('{result}',r),mkdir=True)
 	
 	
@@ -922,32 +1105,66 @@ pa=printattr=printAttr
 # repl()
 # printAttr(5)
 gAllValue=[]
-def DirValue(a=None,fliter='',recursion=False,ai=0,depth=9):
+def dirValue(a=None,fliter='',type=None,recursion=False,depth=2,timeout=6,__ai=0):
 	'''a=None is dir()
 	约定：只有无参数函数才用 getXX  ?'''
+	if not __ai:dirValue.start=getTime();dirValue.cache=[]
 	r={}
+	if getTime()-dirValue.start>timeout:return 'timeout'#r[i]='!timeout %s s'%timeout;break
+	
 	if a==None:
 		import inspect
 		f=inspect.currentframe().f_back
 		dr=f.f_locals
 	else:	
 		dr=py.dir(a)
-	for i in dr:		
+	for i in dr:
+		
 		try:
 			if a==None:
 				tmp=dr[i]
 			else:
-				tmp=py.eval('a.'+i)
+				tmp=getattr(a,i,'!Error getattr')#py.eval('a.'+i)
+			if tmp in dirValue.cache:r[i]=('!cache',tmp);continue
+			else:dirValue.cache.append(tmp)
 			if recursion:
-				if ai>depth:return '!depth reached'
-				tmp=DirValue(tmp,fliter,recursion,ai+1,depth)
+				if __ai>depth:return '!depth reached'
+				tmp=dirValue(tmp,fliter,type,recursion,__ai=__ai+1,depth=depth,timeout=timeout)
 			if fliter not in i:continue	
+			if type!=None:
+				if T.istr(type):type=type.lower()
+				if type==py.callable or type=='callable':
+					if py.callable(tmp):
+						r[i]=tmp
+						continue
+				if py.type(i)==type or isinstance(i,type):pass
+				else:continue	
 			r[i]=tmp
 				
-		except:
+		except Exception as e:
 			r[i]=Exception('can not get value '+i)
+			r[i]=e
 	return r
-dir=dirValue=getdir=getDirValue=DirValue
+dir=DirValue=getdir=getDirValue=dirValue
+
+def searchIterable(a,fliter='',type=None,deepth=2,ai=0):
+	'''iterable'''
+	if ai>deepth:return
+	r=[]
+	for i in a:
+		try:
+			if fliter in i:r.append(i)
+			i=searchIterable(a,fliter,type,depth,ai+1)
+			if i:r.append(i)		
+		except:pass
+	return r	
+searchIterable.r=[]
+findIterable=iterableSearch=searchIterable
+def isinstance(obj,Class):
+	try:
+		return py.isinstance(obj,Class)
+	except:
+		return False
 
 def getObjName(a,value=False):
 	try:
@@ -990,7 +1207,7 @@ def getVarName(a,funcName='getVarName'):
 		# else:
 		
 		
-		print repr(line)
+		pln (repr(line))
 		arr = []
 		i=-1
 		# repl()
@@ -1002,41 +1219,42 @@ def getVarName(a,funcName='getVarName'):
 				if arr and arr[-1][1] == '(':
 					il=arr.pop()[0]+1
 					# ir is i
-					print il,i,repr(line[il:i])
+					pln (il,i,repr(line[il:i])   )
 					if line.find(funcName,il,i)!=-1:
 						il=il+line[il:i].find('(')+1 
 						i =il+line[il:i].rfind(')')
 						
-						print repr(line[il:i].strip())
+						pln (repr(line[il:i].strip())  )
 					else:
 						pass
 					# ra(i,c)
 				else:
 					return False
 	
-	# print il,i,repr(line)
+	# pln il,i,repr(line)
 		# if inMuti():return line
-name=getArgName=getVarName
+name=getargs=getarg=getArgName=getVarName
 # repl()
 # exit()
 # getVarName(1l)
 
 def isModule(a):
 	return type(a) is module
-ismod=ismodule=isModule
+isMod=ismod=ismodule=isModule
 
 def getHelp(a):
 	import pydoc,re
-	a=pydoc.render_doc(a,'%s')
+	try:a=pydoc.render_doc(a,'%s')
+	except:a='#getHelp Err'
 	a=re.sub('.\b', '', a)
 	originURL='docs.python.org/library/'
 	targetURL='python.usyiyi.cn/documents/python_278/library/{0}.html\n'+originURL
-	msgbox(isModule(a))
+	# msgbox(isModule(a))
 	if originURL in a:
 		a=a.replace(originURL,targetURL.format(T.sub(a,originURL,'\n')))
 	elif isModule(a):
 		a=a.replace('NAME',   targetURL.format(T.sub(a,'NAME',' - ').strip() ) )
-		repl()
+		# repl()
 	return a
 gethelp=getHelp
 	
@@ -1079,22 +1297,22 @@ def dicthtml(file,dict,aikeylength=10,browser=True):
 	txt=''
 	for i in dict.keys():
 		txt+= (sformat%i)+str(dict[i])+'\n'
-	txt=txt.replace(txthtml[1],txthtml[1][:1]+'!!!qgb-padding!!!'+txthtml[1][1:])	
+	txt=txt.replace(gsHtmlTextarea[1],gsHtmlTextarea[1][:1]+'!!!qgb-padding!!!'+gsHtmlTextarea[1][1:])	
 	f=open(file,'w+')
-	f.write(txthtml[0]+txt+txthtml[1])
+	f.write(gsHtmlTextarea[0]+txt+gsHtmlTextarea[1])
 	f.close()
 	if(browser==True):globals()['browser'](f.name)
-	# print vars()
+	# pln vars()
 	# vars()['browser'](f.name)
 
 def phtml(file):
 	raise Exception('#TODO')
 	if(file.lower()[-1]!='l'):file=file+'.html'
 	# setOut0(file)
-	print txthtml[0]
+	pln (gsHtmlTextarea[0])
 def phtmlend():
 	raise Exception('#TODO')
-	print txthtml[1]
+	pln (gsHtmlTextarea[1])
 	sf=sys.stdout.name
 	# resetOut0()
 	globals()['browser'](sf)
@@ -1140,11 +1358,11 @@ def getFloaTail(a,ndigits=20,s=False,str=False,string=False,i=False,int=False):
 		if i or int:
 			return py.int(py.str(a)[2:])#
 		return a	
-gsTimeFormat='%Y-%m-%d %H.%M.%S'
+gsTimeFormat='%Y-%m-%d__%H.%M.%S'
 gsymd=gsYMD=gsTimeFormatYMD='%Y%m%d'
 #ValueError: year=1 is before 1900; the datetime strftime() methods require year >= 1900
 
-def getStime(time=None,format=gsTimeFormat):
+def getStime(time=None,format=gsTimeFormat,ms=True):
 	'''http://python.usyiyi.cn/translate/python_278/library/time.html#time.strftime'''
 	import time as tMod
 	
@@ -1159,12 +1377,12 @@ def getStime(time=None,format=gsTimeFormat):
 		if time:
 			r=tMod.strftime(format,tMod.localtime(time))
 #localtime: time.struct_time(tm_year=1970, tm_mon=1, tm_mday=1, tm_hour=8,....
-			if type(time) is float:
-				if not r.endswith(' '):r+=' '
+			if type(time) is float and ms:
+				if not r.endswith('__'):r+='__'
 				r+=getFloaTail(time,ndigits=3,s=True)
 			return r
 		else:return tMod.strftime(format)
-stime=timeToStr=getStime
+stime=getCurrentTimeStr=timeToStr=getStime
 	
 def int(a,default=0,error=-1):
 	if not a:return default
@@ -1271,7 +1489,7 @@ def __single(port,callback,reply):
 				# msgbox(buf)
 		except Exception as e:  #如果建立连接后，该连接在设定的时间内无数据发来，则time out  
 			# if(str(e)!='[Errno 10053] '):
-			if(BDEBUG):print e ,'#%s#'%str(e) 
+			if(DEBUG):pln (e ,'#%s#'%str(e)  )
 			continue
 	connection.close()   
 
@@ -1308,16 +1526,19 @@ def methods(obj):
 	return list(y())
 	
 	# exit()
-# print methods([])	
+# pln methods([])	
 	
 def x(msg=None):
-	if(msg!=None):print msg
-	exit(235)
+	'''sys.exit'''
+	if(msg!=None):pln (msg)
+	sys.exit(235)
 	
 def exit(i=2357):
-	'''not call atexit'''
+	'''terminate process,not call atexit'''
 	os._exit(i)
-def getAllMod(modPath=None):
+
+	
+def getAllMods(modPath=None):
 	ls=[]
 	if not modPath:modPath=getModPath()
 	if 'F' in globals():
@@ -1338,15 +1559,20 @@ def getAllMod(modPath=None):
 		ls.append(i[:-3])
 	if ls:return [i.replace('/','.') for i in ls]
 	else:return  ['N', 'Win', 'Clipboard', 'F', 'ipy', 'T', 'U']
+getAllMod=getAllModules=getAllMods
 def getModPathForImport():
-	return getModPath()[:-4]
+	return getModPath(qgb=False)
 	sp=os.path.dirname(getModPath())# dirname/ to dirname
 	sp=os.path.dirname(sp)
 	if iswin():return sp#cygwin None
-
-def getModPath(qgb=True,slash=True,backSlash=False,endSlash=True,endslash=True,trailingSlash=True):
-	'''@English The leading and trailing slash shown in the code 代码中的首尾斜杠'''
-	sp=os.path.abspath(__file__)
+	else:raise NotImplementedError('todo: cyg  nix')
+def getModPath(mod=None,qgb=True,slash=True,backSlash=False,endSlash=True,endslash=True,trailingSlash=True):
+	'''不返回模块文件，返回模块目录
+	@English The leading and trailing slash shown in the code 代码中的首尾斜杠'''
+	# if mod:
+		# sp=os.path.abspath(mod.__file__)
+	if mod:sp=os.path.abspath(getMod(mod).__file__)
+	else:sp=__file__
 	sp=os.path.dirname(sp)
 	sp=os.path.join(sp,'')
 	if iscyg():#/usr/lib/python2.7/qgb/  
@@ -1385,54 +1611,56 @@ def len(a,*other):
 def dis(a):
 	from dis import dis
 	return dis (compile(a,'<str>','exec'))
-		
-def ipyStart(*a):
-	import IPython
-	IPython.start_IPython()
-def ipyOutLast(i=None):
-	'''use _  ,  __ ,  ___ 
-	ORZ'''
-	f=sys._getframe()
-	while f and f.f_globals and 'get_ipython' not in f.f_globals.keys():
-		f=f.f_back
-	Out=f.f_globals['Out']
-	
-	# globals()['gipy']=5
-	
-	def length():return len(Out)
 
-	ipyOutLast.size=ipyOutLast.len=ipyOutLast.__len__=length
-	# print ipyOutLast.size
-	if i is None:
-		if Out:
-			# p("Out.keys ")
-			im=len(Out.keys())
-			if im<10:return Out.keys()
-			elif 9<im<21:return [(k,ct(Out)) for k in Out.keys()] 
-			else:
-				# repl()
-				r=[[]]
-				for i,k in py.enumerate(Out):#index ,key
-					# print i
-					r[-1].append((k,i))
-					if i%5==0:
-						r.append([])
-				return r
-		else:
-			print "##### IPy No Out #####"
-			return
+def getProcessList(name='',cmd='',pid=0):
+	'''if err return [r, {i:err}  ]
+_62.name()#'fontdrvhost.exe'
+_62.cmdline()#AccessDenied: psutil.AccessDenied (pid=8, name='fontdrvhost.exe')
+pid=0, name='System Idle Process', cmdline=[]
 	
-	if Out:
+'''
+	import psutil
+	r=[]
+	err=py.dict()
+	for i in psutil.process_iter():
 		try:
-			return Out[i]
-		except:return Out[Out.keys()[i]]
-	return Out
+			if pid:
+				if pid==i.pid:r.append(i)
+				else:continue
+			if cmd:
+				if cmd in ' '.join(i.cmdline()):
+					r.append(i)
+				else:continue
+			if name in i.name():
+				r.append(i)
+				
+		except Exception as e:err[i]=e
+	if err:return r,err
+	else:  return r
+getProcess=getProcessList	
+def getProcessPath(name='',pid=0):
+	if not (name or pid):pid=globals()['pid']
+	r=getProcessList(name=name,pid=pid)
+	rs=[]
+	if r:
+		for i,p in enumerate(r):
+			i=p.cmdline()
+			if i:i=i[0]
+			else:continue# 'System Idle Process', cmdline=[]
+			if i not in rs:rs.append(i)
+		if py.len(rs)!=1:raise Exception('multi path',rs)
+		return rs[0].replace('\\','/')
+	else:
+		return ()
 def kill(a,caseSensitive=True,confirm=True):
 	'''TODO:use text Match if any
 	'''
-	import psutil         
+	import psutil,subprocess
+	if py.isinstance(a,subprocess.Popen):a=a.pid
+		
 	ta=py.type(a)
 	r=[]
+	
 	if ta in (py.str,py.unicode):
 		for i in psutil.process_iter():
 			if caseSensitive:
@@ -1441,7 +1669,7 @@ def kill(a,caseSensitive=True,confirm=True):
 				if i.name().lower() == a.lower():r.append(i)
 	elif ta is type(0):
 		if not psutil.pid_exists(a):
-			raise ArgumentError('pid not exist!')
+			raise ArgumentError('pid %s not exist!'%a)
 		r=[psutil.Process(a)]
 	else:
 		raise ArgumentUnsupported()
@@ -1454,7 +1682,7 @@ def kill(a,caseSensitive=True,confirm=True):
 def getTasklist():
 	''''''
 	return
-def notePadPlusPlus(a=''):
+def notePadPlusPlus(a='',line=0,autof=True):
 	'''
 --------> os.system('"M:\\Program Files\\Notepad++\\notepad++.exe" "IP.py"')
 'M:\Program' 不是内部或外部命令，也不是可运行的程序
@@ -1465,27 +1693,50 @@ Out[114]: 1
 Out[115]: 0
 
 '''
-	if py.type(a) in (py.str,py.unicode):
-		gsm=[['qgb.ipy.save ',' success!']]
+	if isModule(a):
+		a=a.__file__
+		autof=False
+	if py.getattr(a,'func_code',None):
+		a=a.func_code
+	if py.getattr(a,'co_filename',None): 	
+		if not line:line=a.co_firstlineno#先获取line,再改变 a
+		a=a.co_filename
+		autof=False
+	if py.type(a) in (py.list,py.tuple):
+	#,py.set TypeError: 'set' object does not support indexing
+		if not line and py.len(a)>1:line=a[1]
+		a=a[0]
+	if py.isinstance(a,py.file):a=a.name	
+	#########################多个 elif 只会执行第一个匹配到的
+	if py.istr(a):
+		gsm=[['qgb.ipy.save ',' success!'],
+				]
 		for i in gsm:
 			a=T.sub(a,i[0],i[1]) or a
-			
 		pass
-	elif isModule(a):
-		a=a.__file__
-	elif py.getattr(a,'func_globals'):
-		a=getMod(a.func_globals['__package__']).__file__
 	else:
-		raise ArgumentUnsupported()
-	if a.endswith('.pyc'):
+		if py.getattr(a,'__module__',None):
+			a=getModule(a)#python无法获取class行数？https://docs.python.org/2/library/inspect.html
+			return notePadPlusPlus(a)
+		raise ArgumentUnsupported(a)
+		
+		
+	if a.endswith('.pyc'):#AttributeError: 'code' object has no attribute 'endswith'
 		a=a[:-3]+'py'
-	npath=getModPath()[:3]+r'QGB\Notepad++\notepad++.exe'
+	nppexe='/Notepad++/notepad++.exe'
+	if Win.getVersionNumber()>=6.1:#win7
+		npath=os.getenv('appdata').replace('\\','/')+nppexe
+	if not os.path.exists(npath):	
+		npath=getModPath()[:3]+r'QGB'+nppexe
 	if not os.path.exists(npath):
-		npath=driverPath(r":\Program Files\Notepad++\notepad++.exe")
-
+		npath=driverPath(r":\Program Files"+nppexe)#如果最后没有匹配到，则为 空.....
+	if DEBUG:pln (repr(npath),nppexe)
 	# npath='"%s"'%npath
 	if a:
-		return run(npath,autof(a))
+		if autof:
+			return run(npath,F.autof(a),'-n {0}'.format(line))
+		else:
+			return run(npath,a,'-n {0}'.format(line))
 	else:
 		run(npath)
 		return npath 
@@ -1494,10 +1745,10 @@ Out[115]: 0
 npp=notePadPlus=notePadPlusPlus
 	
 def backLocals(f=None,i=0,r=[]):
-	print i+1,'='*(20+i*2)
+	pln (i+1,'='*(20+i*2)  )
 	
 	if f is None and i==0:f=__import__('sys')._getframe()
-	try:print f.f_locals.keys();r.append(f.f_locals)
+	try:pln (f.f_locals.keys()  );r.append(f.f_locals)
 	except:return r
 	return backLocals(f.f_back,i+1,r)	
 printFrame=backLocals
@@ -1510,9 +1761,9 @@ def getDate():
 today=getdate=getDate
 # sys.argv=['display=t','pressKey=t','clipboard=f']
 def isSyntaxError(a):
-	if not sys.modules['ast']:import ast
+	import ast
 	try:
-		sys.modules['ast'].parse(a)
+		ast.parse(a)
 		return False
 	except:
 		return True
@@ -1544,7 +1795,8 @@ def parse(code,file):
 		return repr(node)
 	F.new(file.name)
 	# file.seek(0) 没用
-	print >>file,_format(a)
+	# print >>file,_format(a)
+	pln(a,file=file)
 	file.flush()
 	return file.tell()
 	
@@ -1565,85 +1817,47 @@ def replaceModule(modName,new,package='',backup=True):
 	# except:
 		# sys.modules['ipy'] = IPy()
 replacemod=replaceMod=replaceModule
-def getModule(modName):
-	if modName in modules:return modules[modName]
+def getModule(modName=None,surfixMatch=True):
+	'''no Arg return U'''
+	if not modName:modName='qgb.U'
+	
+	if isModule(modName):return modName
+	modName=getattr(modName,'__module__',0) or modName
+	if debug():pln(modName,type(modName))
+	
+	if not py.istr(modName):
+		raise ArgumentUnsupported(modName)
+	for i in sys.modules:
+		if surfixMatch:
+			if modName ==i:return sys.modules[i]
+		else:
+			if i.endswith(modName):return sys.modules[i]
 	if modName.startswith('qgb.'):
 		modName=modName[4:]
 		return getModule(modName)
-	return None
+	return ()
 getmod=getMod=getModule
-def main(display=True,pressKey=False,clipboard=False,escape=False,c=False,ipyOut=False,cmdPos=False,reload=False,*args):
-	# print vars()
-	# print stime()
-	# exit()
-	# shtml(vars(),file='vars0')
-	anames=py.tuple([i for i in py.dir() if not i .startswith('args')])
-	import T
-	if not args:args=sys.argv
-	
-	for i in args:
-		for j in anames:
-			if i.lower().startswith(j.lower()+'='):
-				# args.remove(i)
-				i=T.sub(i,'=','').lower()
-				if i.startswith('t'):exec j+'=True';break
-				if i.startswith('f'):exec j+'=False';break
-				
-	# gsImport=gsImport.replace('\n','')
-	# for i in getAllMod():
-		# if gsImport.find(i)==-1:gsImport+=(','+i) 	
-	##get coding line
-	# for i in read(__file__).splitlines():
-		# if i.startswith('#') and i.find('cod')!=-1:
-			# gsImport=i+'\n'+gsImport
-	# print vars()
-	# exit()
-	###############################
-	'''call order Do Not Change! '''
-	###############################
-	sImport=gsImport
-	if c:sImport+=';C=c=U.clear'
-	
-	if reload:sImport+=";R=r=U.reload"
-		
-	if ipyOut:sImport+=';O=o=U.ipyOutLast'
-	
-	if cmdPos:sImport+=";POS=pos=U.cmdPos;npp=NPP=U.notePadPlus;ULS=Uls=uls=F.ls;ULL=Ull=ull=F.ll"
-		
-	if escape:sImport=sImport.replace("'",r"\'")
-	
-	if display:print sImport
-	
-	if pressKey:
-		try:
-			import win32api
-			win32api.ShellExecute(0, 'open', gsw+'exe/key.exe', sImport+'\n','',0)
-		except:print 'pressKey err'
-	if clipboard:
-		try:
-			Clipboard.set(sImport)
-		except:print 'Clipboard err'
-	
-	return sImport
+
 def test():
-	gm=getAllMod()
+	pln('sys.path *U* :',[i for i in sys.modules if 'U' in i])
+	
+	gm=getAllMods()
 	
 	# repl()
 	gm.extend(['U','T','N','F',])
 	gm=py.set(gm)
 	
-	print gm
+	pln(gm)
 	for i in gm:
-		print '='*55
+		pln('='*55)
 		try:
-			exec '''
+			exec ('''
 import {0}
-print {0}
-			'''.format(i) in {}
+pln({0})
+			'''.format(i) in {}    )
 		except Exception as ei:
-			print '###import {0}'.format(i)
-			print ei
-# print 233
+			pln('###import {0}'.format(i))
+			pln(ei)
 def explorer(path='.'):
 	if iswin():
 		os.system('explorer.exe '+path)
@@ -1667,6 +1881,10 @@ def get(name='_'):
 def google(a):
 	browser('https://www.google.com.my/#q='+a)
 	
+def subprocess(cmd):
+	from subprocess import PIPE,Popen
+	return Popen(cmd,stdin=PIPE,stdout=PIPE,stderr=PIPE)
+	
 def sub(a,len='default return len 9',start=0,step=1):
 	'''sub dict,list,tuple....iterable
 	like a[start:start+len:step]
@@ -1676,11 +1894,10 @@ def sub(a,len='default return len 9',start=0,step=1):
 	无法处理子元素过大的输出情况
 	'''
 	m=py.len(a)
-	ta=py.type(a)
 	# if py.max(py.abs(start),py.abs(step))>m or len==0:
 		# raise ArgumentError(len,start,step)
-	if step==0:return ta()
-	if ta is py.dict:r={}
+	if step==0:return py.type(a)()
+	if py.isinstance(a,py.dict):r={}
 	else:r=[]
 	
 	if start<0:start=m+start
@@ -1691,37 +1908,213 @@ def sub(a,len='default return len 9',start=0,step=1):
 	if py.type(len) is py.str:
 		# if m/step>9:len=
 		len=py.min(9*step,m/step)
-	len=py.int(len)#int(9999999999999999999999999999999)=9999999999999999999999999999999L
+	len=py.int(len)#int(9999999999999999999999999999999)=9999999999999999999999999999999L			
 	
 	n=-1
-	ns=0
+	ns=-1
+	end=start+len*step
 	for i in a:
 		n+=1
 		if len>0:
-			if not start<=n<start+len:continue
+			if not start<=n<end:continue
 		else:
-			if not start+len<n<=start:continue
+			if not end<n<=start:continue
 		
+		ns+=1
+		if ns<step and ns>0:continue
+		else:ns=0
 				
 		# if step>0:
-		ns+=1
-		if ns<step:continue
-		else:ns=0
+		
 		# else:
 			# if 
-		if ta is py.dict:#所有不能用for in一次取出的类型
+		if py.isinstance(a,py.dict):#所有不能用for in一次取出的类型
 			r[i]=a[i]
 		else:
 			if reverse:r.insert(0,i)
 			else:r.append(i)
 	return r
+def subLast(a,len='default',step=1):
+	return sub(reversed(a),len=len,step=step)
+subr=subLast
+def reversed(a):
+	if py.isinstance(a,py.dict):return reversedDict(a)
+	r=[]
+	for i in py.reversed(a):
+		r.append(r)
+	return r
+def reversedDict(d):
+	r=OrderedDict()
+	for i in py.reversed(OrderedDict(d)):
+		r[i]=d[i]
+	return r
+	
+def difference(a,b):
+	'''差集 a-b'''
+	return py.set(a)-py.set(b)
+cj=diff=difference	
+	
 def j(a,b):
 	'''intersection 交集
-	'''
-	return py.set(a).intersection(py.set(b))
 	
+	TypeError: unhashable type: 'dictproxy' #TODO
+	'''
+	isdict=py.isinstance(a,py.dict) and py.isinstance(b,py.dict)
+	r=[]
+	for i in a:
+		if i in b:
+			if isdict:
+				if a[i]==b[i]:r.append((i,a[i]))
+				else:		  r.append((i,a[i],b[i]))
+				continue
+			r.append(i)
+			
+			
+	return r
+	# return py.set(a).intersection(py.set(b))
+
+def jDictValue(a,b):
+	'''
+	'''
+	r={}
+	vb=b.values()
+	for i in a.items():
+		if i[1] in vb:
+			r[i[0]]=i[1]
+	return	r
+jdv=jDictValue
+def getLastException():
+	'''a callable
+	return Exception'''
+	import traceback as tb
+	r=tb.extract_tb( sys.last_traceback)
+	r.append(sys.last_value)
+	return r
+	
+	if py.callable(a):
+		try:a()
+		except Exception as e:return e
+		return 'No Exception found'
+	else:
+		return	getException.__doc__
+lastErr=err=geterr=getErr=error=getException=getLastException
+
+def print_tb():
+	import traceback
+	ex_type, ex, tb_obj = sys.exc_info()
+	traceback.print_tb(tb_obj)
+
+def getClassHierarchy(obj):
+	'''In [68]: inspect.getmro?
+Signature: inspect.getmro(cls)
+Docstring: Return tuple of base classes (including cls) in method resolution order.
+File:      g:\qgb\anaconda2\lib\inspect.py
+Type:      function
+'''
+	import inspect
+	if py.getattr(obj,'__base__',None) or py.getattr(obj,'__mor__',None):
+		return inspect.getmro(obj)
+
+	if py.getattr(obj,'__class__',None):
+		return inspect.getmro(obj.__class__)
+	return ()
+getclassInherit=getClassHierarchy
+
+def getFile(a):
+	import inspect
+	try:
+		inspect.getfile(a)
+	except Exception as e:
+		if 'is not a module' in e.message:
+			return getFile(py.type(a))
+		if 'built-in' in e.message:
+			return e.message
+getfile=getFile
+
 #def 	#把一个数分解成2的次方之和。
-gsImport='''import sys,os;sys.path.append('{0}');from qgb import *'''.format(getModPathForImport())
+
+def selectBox(*a):
+	if py.is2():
+		import Tkinter as tk
+	else:
+		import tkinter as tk
+	top=tk.Tk()
+	tk.mainloop()
+
+def getCmd():
+	if iswin() or iscyg():
+		return Win.getCmd()
+
+def save(a,name=0):
+	global gst;gst='g:/qgb/'
+	return F.write(name,a)
+	# if name:
+	# else:#TODO 写入一个新文件并保证 别进程 load 可以读到最新的save；可以保存到网络？？
+def load(name=0,returnFile=False):
+	global gst;gst='g:/qgb/'
+	return F.read(name,returnFile=returnFile)
+	# if name:#TODO 配合 save 并正确转换到相应类型，使用对象序列化？ 
+
+	
+def	renameDictKey(d,new,old={}):
+	if not old:
+		for i in d:
+			old=i
+			break
+	if isinstance(d, OrderedDict):
+		d.rename(old,new)
+	else:
+		d[new] = d.pop(old)
+	return d
+		# del d[old]#这个可以删除item,py27
+def beep(ms=1000,hz=2357):
+	if iswin():
+		try:
+			import winsound
+			winsound.Beep(hz,ms)
+			return
+		except:
+			pass
+	p('\a')
+def main(display=True,pressKey=False,clipboard=False,escape=False,c=False,ipyOut=False,cmdPos=False,reload=False,*args):
+	anames=py.tuple([i for i in py.dir() if not i .startswith('args')])
+	import T
+	if not args:args=sys.argv
+	
+	for i in args:
+		for j in anames:
+			if i.lower().startswith(j.lower()+'='):
+				# args.remove(i)
+				i=T.sub(i,'=','').lower()
+				if i.startswith('t'):exec (j+'=True' );break
+				if i.startswith('f'):exec (j+'=False');break
+	###############################
+	'''call order Do Not Change! '''
+	###############################
+	sImport=gsImport
+	if c:sImport+=';C=c=U.clear'
+	
+	if reload:sImport+=";R=r=U.reload"
+		
+	if ipyOut:sImport+=';O=o=U.ipyOutLast'
+	
+	if cmdPos:sImport+=";POS=pos=U.cmdPos;npp=NPP=U.notePadPlus;ULS=Uls=uls=F.ls;ll=ULL=Ull=ull=F.ll"
+		
+	if escape:sImport=sImport.replace("'",r"\'")
+	
+	if display:pln(sImport)
+	
+	if pressKey:
+		try:
+			import win32api
+			win32api.ShellExecute(0, 'open', gsw+'exe/key.exe', sImport+'\n','',0)
+		except:pln('PressKey err')
+	if clipboard:
+		try:
+			Clipboard.set(sImport)
+		except:pln('Clipboard err')
+	
+	return sImport
+gsImport='''import sys;'qgb.U' in sys.modules or sys.path.append('{0}');from qgb import *'''.format(getModPathForImport())	
 if __name__ == '__main__':
-	# print __name__
 	main()

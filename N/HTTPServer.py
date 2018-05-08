@@ -1,10 +1,20 @@
 # coding=utf-8
 import BaseHTTPServer
 import logging
-import os
+import os,sys
 from urlparse import urlparse,parse_qs
 from mimetypes import types_map
 # from qgb import *#循环import
+if 'qgb.U' in sys.modules:
+	U=sys.modules['qgb.U']
+
+def forwardReq(a):
+	url_path = urlparse(a.path).path
+	if url_path == '/0':
+		import webControl
+		webControl.forwardReq(a)
+	
+	return a.send_not_found()
 
 register_route = {"GET":{},"POST":{}}
 def route(path="/", method=["GET"],h=True,args=True):
@@ -57,7 +67,7 @@ class Handler(BaseHTTPServer.BaseHTTPRequestHandler):
 		s.do_routing(o, arguments, "POST")
 
 	def do_GET(s):
-		# raise Exception(233333)
+		# raise Exception(233333)             
 		o = urlparse(s.path)
 		arguments = parse_qs(o.query)
 		s.do_routing(o, arguments, "GET")
@@ -82,10 +92,10 @@ class Handler(BaseHTTPServer.BaseHTTPRequestHandler):
 							build_response(s, {'Content-type':ctype,"content":f.read()}, 200)
 				except Exception as e:
 					# Url introuvale et fichier static introuvable ==> 404
-					if "404" not in handler_method:
-						build_error(s,e, 404, "404 - Not Found")
+					if 404 not in handler_method:
+						build_error(s,e, 404)
 					else:
-						retour = handler_method['404'](o, arguments, action)
+						retour = handler_method[404](o, arguments, action)
 						build_response(s, retour, 404)
 		except Exception as eh:
 			# Gestion des erreurs
@@ -95,17 +105,24 @@ class Handler(BaseHTTPServer.BaseHTTPRequestHandler):
 				
 				# build_response(s, , 500)
 			else:
-				retour = handler_method['500'](o, arguments, action)
+				retour = handler_method[500](o, arguments, action)
 				build_response(s, retour, 500)
 
 def build_error(s,e,code,msg=''):
+	# if not U.count():U.repl()
 	s.send_response(code)
 	s.send_header("Content-type", "text/plain")
 	s.end_headers()
+	if not msg:
+		msg="HTTP Status:{2}\n{0} \n{1}".format(msg,traceback.format_exc(),code)  	
+	s.wfile.write(msg)
+	return s.finish()	
+		
+	s.send_response(code,msg)
 	# try:raise e
 	# except:# 只追踪到raise的地方，弃用
-	import traceback
-	s.wfile.write("{0} \n{1}".format(msg,traceback.format_exc())  )
+	# import traceback
+	# s.wfile.write("{0} \n{1}".format(msg,traceback.format_exc())  )
 		
 def build_response(s, retour, code=200):
 	if type(retour) is dict:
@@ -126,11 +143,11 @@ def build_response(s, retour, code=200):
 
 def redirect(location=""):
 	return {"content":"","code":301,"Location":location}
-
+#error: [Errno 10053]  浏览器关闭 了这个连接
 def http(ip="0.0.0.0", port=80,log=True,onMainThread=False):
 	httpd = BaseHTTPServer.HTTPServer((ip, port), Handler)
 	if onMainThread:
-		print ip,port
+		U.pln( ip,port)
 		httpd.serve_forever()
 	else:
 		try:
@@ -143,8 +160,10 @@ def http(ip="0.0.0.0", port=80,log=True,onMainThread=False):
 serve=httpd=server=http
 
 def https(ip="0.0.0.0", port=443,key='',log=True,onMainThread=False):
-	httpd = BaseHTTPServer.HTTPServer((ip, port), Handler)
-	
+	try:
+		httpd = BaseHTTPServer.HTTPServer((ip, port), Handler)
+	except Exception as e:
+		return (ip,port,e)
 	if not key:
 		from qgb import U
 		key=U.getModPath()+'N/.tmall.com.crt'#lk.lk.crt'
@@ -160,13 +179,13 @@ def https(ip="0.0.0.0", port=443,key='',log=True,onMainThread=False):
 	httpd.server_close()
 httpsd=https
 
-def main():
+def main(port=443):
 	import sys
 	
 	try:U=sys.modules['qgb.U']
 	except:
 		sys.path[0]=sys.path[0][:-5]
-		print sys.path
+		U.pln( sys.path)
 		from qgb import U
 	@route('/',['get','post'])
 	def data(h,**ka):
@@ -178,16 +197,25 @@ def main():
 		if 'postData' in dir(h):
 			ka=h.postData
 		else:
-			# print >>h.wfile,ka
-			ka=list(ka)
-			ka.append(h.wfile)
+			# U.pln(ka,file=h.wfile) #>>h.wfile,ka
+			# ka=list(ka)
+			ka['h.wfile']=h.wfile
 		U.set(ka)
 			
 		h.finish()
 		U.set('h',h)
 		return  ka
 	ca=U.getModPath()+'N/CA.crt'
-	https(key=ca)
+	return https(key=ca,port=port)
+__doc__='''
+@route()
+def h(h):
+    U.set(h)
+
+'user-agent' in h.headers.dict 
+
+
+'''
 if __name__=='__main__':
 	main()
 	

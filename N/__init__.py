@@ -1,15 +1,14 @@
 #coding=utf-8
 # __all__=['N','HTTPServer']
 import sys
-if 'qgb.U' in sys.modules:U=sys.modules['qgb.U']
-elif 'U' in sys.modules:  U=sys.modules['U']
-else:
-	from sys import path as _p
-	_p.insert(-1,_p[0][:-1-1-3-1]) # python2.7\\qgb\\N
-	from qgb import U
-	if U.iswin():from qgb import Win
+# from .. import py#ValueError: Attempted relative import in non-package
+if __name__.endswith('qgb.N'):from .. import py
+else:import py
+
+
 gError=[]
 def setErr(ae):
+	py.importU()
 	global gError
 	if U.gbLogErr:# U.
 		if type(gError) is list:gError.append(ae)
@@ -17,25 +16,57 @@ def setErr(ae):
 		else:gError=[ae]
 	else:
 		gError=ae
-	if U.gbPrintErr:print '#Error ',ae# U.
-	
-	
+	if U.gbPrintErr:U.pln('#Error ',ae) # U.
+
+#if 'qgb.U' in sys.modules:U=sys.modules['qgb.U']
+#elif 'U' in sys.modules:  U=sys.modules['U']
+#else:
+#	try:
+#		# from sys import path as _p
+#		# _p.insert(-1,_p[0][:-1-1-3-1]) # python2.7\\qgb\\N
+#		# from qgb import U
+#		# if U.iswin():from qgb import Win
+#		sys.path.insert(0,'..')
+#		import py
+#		import U,Win
+#	except Exception as e:
+#		U.pln( e)
+#		Win=py.Class()
+#		Win.isxp=lambda:0		
+#		gError.append(e)
+#try:py=U.py
+#except Exception as e:gError.append(e)
+		
 import HTTPServer
 import HTTP
 	
 def findFunc(name,root=9,depth=3,case=False):
-	print dir(root)
-	print '='*44
-	print globals().keys()
-	print '='*44
-	print locals().keys()
-	print '='*44
-	print vars().keys()
+	U.pln( dir(root)       )
+	U.pln( '='*44          )
+	U.pln( globals().keys())
+	U.pln( '='*44          )
+	U.pln( locals().keys() )
+	U.pln( '='*44          )
+	U.pln( vars().keys()   )
 	exit()
 # findFunc('set*')		
 	
-
-
+def get(url,protocol='http',file=''):
+	py.importU()
+	T=U.T
+	if '://' in url:
+		p=T.sub(url,'',':')
+		if p:protocol=p
+		else:raise U.ArgsErr(url)
+	else:url=protocol+'://'+url
+	if url.startswith('http'):
+		import HTTP
+		return HTTP.get(url)
+		
+		
+	raise U.NotImplementedError
+	return U.getAllMods()
+	
 def getLAN_IP():
 	r=getAllAdapter()
 	return r
@@ -45,24 +76,33 @@ def getAllAdapter():
 		from qgb import Win
 		return Win.getAllNetworkInterfaces()
 	
-def setIP(ip='',source='dhcp',adapter='',mask=''):
+#setip 192.168  ,  2.2	
+def setIP(ip='',source='dhcp',adapter='',mask='',ip2=192.168):
 	if not adapter:
 		#adapter=u'"\u672c\u5730\u8fde\u63a5"'.encode('gb2312')#本地连接
+		if Win.isxp():
+			adapter="\xb1\xbe\xb5\xd8\xc1\xac\xbd\xd3"
 		adapter='1'
 	if ip:
+		if type(ip) is py.int:
+			ip='{0}.2.{1}'.format(ip2,ip)
+		if type(ip) is py.float:
+			ip='{0}.{1}'.format(ip2,ip)
 		source='static'
 		if not ip.startswith('addr='):
 			ip='addr='+ip
 		if not mask:mask='mask='+'255.255.255.0'
 		
 		if not mask.startswith('mask'):mask='mask='+mask
-	r='netsh interface ip  set address name={0} source={1} {2} {3}'.format(adapter,source,ip,mask)
+	else:
+		ip=''
+	r='netsh interface ip  set address source={1} {2} {3} name={0}'.format(adapter,source,ip,mask)
 	import os
 	os.system(r)
 	return r
 setip=setIP
 		
-def scanPorts(host,from_port=1,to_port=65535,threadsMax=33,callback=None):
+def scanPorts(host,threadsMax=33,from_port=1,to_port=65535,callback=None):
 	'''return [opens,closes,errors]
 	callback(*scanReturns)
 	if callback and ports> threadsMax: 剩下结果将异步执行完成
@@ -78,26 +118,35 @@ def scanPorts(host,from_port=1,to_port=65535,threadsMax=33,callback=None):
 	threads = []
 
 	def scan(port):
+		U.count(1)
 		try:
 			s = socket.socket()
 			result = s.connect_ex((host,port))
-			# print('working on port > '+(str(port)))      
+			# U.pln('working on port > '+(str(port)))      
 			if result == 0:
 				counting_open.append(port)
-				#print((str(port))+' -> open') 
+				#U.pln((str(port))+' -> open') 
 				s.close()
 			else:
 				counting_close.append(port)
-				#print((str(port))+' -> close') 
+				#U.pln((str(port))+' -> close') 
 				s.close()
 		except Exception as e:
 			errors.append({port:e})
 	def newThread(port):
 		t = Thread(target=scan, args=(i,))		
 		threads.append(t)
-		t.start()
-			
+		try:
+			t.start()
+		except:
+			"can't start new thread"
+	im=py.float(to_port-from_port+1)
+	percent=0.0
 	for i in range(from_port, to_port+1):
+		if (i/im>percent):
+			U.pln( 'Scanning  %.0f%%' % (percent*100), len(threads)     )
+			percent+=0.01
+			
 		if len(threads)<=threadsMax:
 			newThread(i)
 		else:
@@ -105,14 +154,17 @@ def scanPorts(host,from_port=1,to_port=65535,threadsMax=33,callback=None):
 				if x.isAlive():
 					x.join()
 					newThread(i)
-					break
+				else:
+					threads.remove(x)
+				break
 	# if callback:
 		# return callback
 	[x.join() for x in threads]
 	return [counting_open,counting_close,errors]
 	
+
 if __name__=='__main__':
-	print getLAN_IP()
+	U.pln( getLAN_IP())
 	exit()
 	gsurlip=['http://ip.chinaz.com/getip.aspx'][0]
 	
@@ -120,7 +172,7 @@ if __name__=='__main__':
 	s=http(gsurlip)#.encode('utf8').decode('mbcs')
 		 
 		 
-	print s.decode('utf8').encode('mbcs')
+	U.pln( s.decode('utf8').encode('mbcs'))
 	# import chardet
-	# print chardet.detect(s)
+	# U.pln( chardet.detect(s)
 	
