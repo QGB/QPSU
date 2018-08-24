@@ -1,28 +1,31 @@
 #coding=utf-8
-import sys,os
-if __name__=='__main__':import U,T,F,py
-else:from . import U,T,F,py#from .   Attempted relative import in non-package
+import sys,os,IPython
+if __name__.endswith('.ipy'):from . import U,T,F,py#from .   Attempted relative import in non-package
+else:import U,T,F,py
 gError=None
 # U.pln U.gError
-g=get=gipy=U.isipy()#不能直接引用U.ipy,环境不确定 动态判断避免识别错误
-if not gipy:raise EnvironmentError
-gipy.autocall=2
+if not U.isipy():raise EnvironmentError
+U.isipy().autocall=2
+g=get=gipy=U.isipy()#不能直接引用U.ipy,环境不确定 动态判断避免识别错误 g.
 gIn=gipy.user_ns['In'];gOut=gipy.user_ns['Out']
-
+# version='.'.join([str(i) for i in IPython.version_info if py.isnum(i)])  #(5, 1, 0, '') 5.1.0
+version=py.float('{0}.{1}{2}\n{3}'.format(*IPython.version_info).splitlines()[0])
 # gipy.editor=U.npp()
 def sycn():
 	''' '''
 	
 def run(file):
 	file=F.autof(file,ext='py')
-	return g.magic(u'run -i '+file)
+	return gipy.magic(u'run -i '+file)
 
 def input(fliter='',lenMin=-1,lenMax=U.IMAX):
 	r=[i for i in  enumerate(gIn) if fliter in i[1]]
 	return [i for i in  r if lenMin<=len(i[1])<=lenMax]
 	
-def outType(t=None):
-	'''t is type to flit'''
+def outType(t=None,start=0,stop=U.IMAX):
+	'''t is type to flit
+	is3:range(start, stop[, step]) -> range object
+	'''
 	if t !=None:
 		if type(t) is U.instance:
 			t=t.__class__
@@ -33,7 +36,8 @@ def outType(t=None):
 				t=type(t)
 			def m(a):return type(a) is t
 	r={}
-	for i in gOut:
+	for index,i in enumerate(gOut):
+		if index<start or index>stop:continue
 		if t !=None:
 			if not m(gOut[i]):continue
 		r[i]=type(gOut[i]),U.len(gOut[i])
@@ -57,12 +61,6 @@ def outlen(min=-1,max='infinity',start=0,stop=U.IMAX,end=U.IMAX):
 		r[k]=n
 	return r
 
-# U.cdt()
-gsavePath=U.gst+'ipy/'
-
-# U.cd('ipy')
-# U.pln U.pwd()
-
 date=U.getDate()
 gshead='#coding=utf-8'
 gspath=U.getModPath(qgb=False,endSlash=False)
@@ -72,6 +70,16 @@ except Exception as _e{0}:U.pln {0},_e{0}'''
 #否则出现IndexError: tuple index out of range
 gdTimeName={}
 gIgnoreIn=[ u'from qgb import *',u'ipy.',u'get_ipython()']
+# U.cdt()
+gsavePath=U.gst+'ipy/'
+# U.cd('ipy')
+# U.pln U.pwd()
+F.md(gsavePath)
+U.pln('py:{0} ipy:{1} at[{2}] {3}'.format(
+	U.getPyVersion(),version,U.stime(format='%Y-%m-%d %H:%M:%S'),gsavePath
+	))
+#is2 py:2.713 ipy:5.1 at[2018-05-13 10:26:35.049] G:/test/ipy/   #len 57
+#is3 py:3.63 ipy:6.1 at[2018-05-13 10:32:01.078] G:/test/ipy/    #56
 
 def save(file=None,lines=-1,tryExcept=False,out=False,columns=70,overide=True):
 	'''file is str or (mod a)
@@ -86,19 +94,22 @@ def save(file=None,lines=-1,tryExcept=False,out=False,columns=70,overide=True):
 		lsta,lend=0,gIn.__len__()
 	if file:#当指定file 名时，总是 overide
 		if T.istr(file):
+			file=F.autoPath(file,gsavePath)
 			if not file.lower().endswith('.py'):
 				file+='.py'
 			F.new(file)
-			file=open(file,'a')
-		elif type(file) is py.file:
-			if file.mode!='a':return False
-			pass
+			if py.is2():file=open(file,'a')
+			else:file=open(file,'a',encoding="utf8")
+		elif py.isfile(file):
+			if file.mode!='a':raise Exception('file mode should be "a" ')
 		else:
 			raise Exception('invalid argument file')
 	else:
 		if gdTimeName and overide:
-			file=gdTimeName[gdTimeName.keys()[-1]]
-			file=open(file,'w')
+			file=gdTimeName[py.list(gdTimeName.keys() )[-1]]#is3:TypeError: 'dict_keys' object does not support indexing
+			file=F.autoPath(file,gsavePath)
+			if py.is2():file=open(file,'w')
+			else:file=open(file,'w',encoding="utf8")
 			# last=-1
 			# for t in gdTimeName:
 				# if t>last:file,last=name,d
@@ -107,15 +118,28 @@ def save(file=None,lines=-1,tryExcept=False,out=False,columns=70,overide=True):
 			# file=[n for n,d in gdTimeName.items() if d==last[-1]][0]
 		else:
 			file='{0}{1}.py'.format(gsavePath,U.stime())
-			file=open(file,'a')
+			if py.is2():file=open(file,'a')
+			else:file=open(file,'a',encoding="utf8")
 	U.pln(gshead,file=file)
-	U.pln(U.main(display=False),file=file  )
+	#######  get exec_lines to gsqgb
+	gsqgb=U.main(display=False)
+#join(  <traitlets.config.loader.LazyConfigValue at 0x20066295400>  )  ###  TypeError: can only join an iterable
+	gsexec_lines=U.getNestedValue(gipy.config,'InteractiveShellApp','exec_lines') #_class%20'traitlets.config.loader.LazyConfigValue'_.html
+	if not py.iterable(gsexec_lines):
+		gsexec_lines=[]
+	gsexec_lines='	;'.join(gsexec_lines)
+	if gsexec_lines:
+		if not 'from qgb import' in gsexec_lines:
+			gsqgb='{0}\n{1}'.format(gsqgb,gsexec_lines)
+		else:gsqgb=gsexec_lines
+	U.pln(gsqgb,file=file  )
 	# print >>file,'import sys;sys.path.append('{0}');from qgb import *'.format(gspath)
 	#using single quote for cmd line
 	#-4 为了去除 /qgb
-	#ipython --InteractiveShellApp.exec_lines=['%qp%'] 不会改变In[0],始终为''?
+	#ipython --InteractiveShellApp.exec_lines=['%qp%'] 不会改变In[0],始终为''
 	for i,v in enumerate(gIn):
 		if i==0:continue
+		v=v.strip()
 		if i in gOut.keys():
 			v=u'_{0}={1}'.format(i,v)
 			if out:
@@ -128,9 +152,13 @@ def save(file=None,lines=-1,tryExcept=False,out=False,columns=70,overide=True):
 				
 		if tryExcept:
 			v='#########################\n\t'+v
-			U.pln(gsTryExcept.format(i,v).encode('utf-8'),file=file )
+			if py.is2():v=gsTryExcept.format(i,v).encode('utf-8')
+			else:v=gsTryExcept.format(i,v)
+			U.pln(v,file=file )
 		else:
-			U.pln(v.encode('utf-8'),' '*(columns-len(v.splitlines()[-1])),'#',i,file=file )
+			if py.is2():v=v.encode('utf-8')
+			else:pass
+			U.pln(v,' '*(columns-len(v.splitlines()[-1])),'#',i,file=file )
 		# if i in [14]:import pdb;pdb.set_trace()#U.repl()	
 	# gipy.magic(u'save save.py 0-115')
 	# U.pln(gIn
@@ -139,8 +167,6 @@ def save(file=None,lines=-1,tryExcept=False,out=False,columns=70,overide=True):
 	gdTimeName[U.time()]=file.name
 	return '{0} {1} success!'.format(save.name,file.name)
 save.name='{0}.{1}'.format(__name__,save.__name__)
-F.md(gsavePath)
-U.pln(gsavePath)
 
 def reset():
 	gipy.execution_count=0
@@ -283,7 +309,7 @@ class IPy():
 
 # U.pln( repr(F.md),U.getMod('qgb.ipy')
 
-gi=IPy()
+# gi=IPy()
 # if U.getMod('qgb.ipy'):
 	# U.replaceModule('ipy',gi,package='qgb',backup=False)
 

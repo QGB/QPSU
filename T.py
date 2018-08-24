@@ -25,10 +25,10 @@ HEX=hex.upper()
 visAscii=printAscii=asciiPrint=' !"#$%&\'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~'
 char256=''.join([chr(i) for i in range(256)])
 ###############
-REURL='http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\(\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+'
-REYMD="(19|20)[0-9]{2}[- /.](0[1-9]|1[012])[- /.](0[1-9]|[12][0-9]|3[01])"
+RE_URL='http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\(\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+'
+RE_YMD="(19|20)[0-9]{2}[- /.](0[1-9]|1[012])[- /.](0[1-9]|[12][0-9]|3[01])"
 ###############
-sqlite='SELECT * FROM sqlite_master;'
+SQLITE='SELECT * FROM sqlite_master;'
 
 #########################################
 squote=quote="'"
@@ -43,6 +43,50 @@ except Exception as ei:
 	detect='#not install chardet Module'
 	pass
 ################################################
+def strFormDataToDict(a):
+	'''true value can not convert
+in js:
+	{1:2}  >   "{"1":2}"
+	'''
+	py.importU()
+	r={}
+	for i in a.splitlines():
+		i=i.strip()
+		if not i:continue
+		if ':' not in i:raise ValueError('unexpected chrome DevTools Form Data:',i)
+		key=sub(i,'',':')
+		v=sub(i,':','')
+		if v==str( U.eval(v) ):
+			r[key]=v
+		else:
+			r[key]=py.repr(v)
+	return r
+def urlEncode(a):
+	''' a : str_or_bytes
+	#todo 	convert Non-string objects
+	'''
+	
+	if py.is3():
+		import urllib
+		return urllib.parse.quote(a)
+	raise NotImplementedError()
+def urlDecode(a):
+	''' a : str_or_bytes
+	'''
+	if py.is3():
+		import urllib
+		if isinstance(a, py.bytes):a=a.decode()
+		# if not py.istr():
+		return urllib.parse.unquote(a)
+	raise NotImplementedError()
+def startsEnds(a,chars):
+	'''S.strip([chars]) -> str
+'1234'.strip('1') # '234'
+	'''
+	if a.startswith(chars) and a.endswith(chars):return True
+	else:return False
+startsends=startsEnds
+
 def strValue(a):
 	try:return int(a)
 	except:pass
@@ -52,7 +96,7 @@ def strValue(a):
 	try:return py.tuple(a)
 	except:pass
 
-def match(a,exp):
+def matchWildcard(a,exp):
 	'''Wildcard character'''
 	import fnmatch
 	exp=fnmatch.translate(exp)
@@ -62,7 +106,38 @@ def match(a,exp):
 	except:
 		return ''
 	
-# gsV='?'	
+def match_groups(a,regex):
+	''' return [list of re.search group [s]]
+re.search(pattern, string, flags=0)
+pattern	匹配的正则表达式
+string	要匹配的字符串。
+flags	标志位，用于控制正则表达式的匹配方式，如：是否区分大小写，多行匹配等等。
+	'''
+	r= re.search(regex,a)
+	if r:
+		if r.groups():#返回一个包含所有小组字符串的元组，从 1 到 所含的小组号。
+			r=[r.group()]+py.list(r.groups())
+		else:r=[r.group()]
+		return r
+	else:
+		return []
+matchGroups=match_groups
+
+def match(a,regex):
+	''' return :str  match_groups first
+	'''
+	r=match_groups(a,regex)
+	if r:return r[0]
+	else:return ''
+matchRegex=match
+
+def re_search(regex,a):
+	'''不是 research 研究 ！,跟 match()  只有参数顺序不同，方便 re.search 改写'''
+	return match(a,regex)
+reSearch=re_search
+
+
+# gsV='?'	#todo and test
 def parseWildcardExp(a,wildcard='*',value='?'):
 	if py.istr(a):
 		pass
@@ -102,6 +177,24 @@ def matchValue(a,exp):
 	r=[]
 
 	return r	
+
+def parseReMatch(rm,s):
+	'''s: iii [or use 'i'*3 ] :return int,int,int
+	short name i int,s string ,L long,f float,...
+	case insensitive
+	some different from https://docs.python.org/2/c-api/arg.html#c.Py_BuildValue'''
+	r=[]
+	for n,i in py.enumerate(s.lower()):
+		n=rm.group(n+1)
+		if i=='i':r.append(py.int(n))
+		if i=='s':r.append(py.str(n))
+		if i=='l':r.append(py.long(n))
+		if i=='f':r.append(py.float(n))
+	return py.tuple(r)
+def matchHead(txt,regex):
+	r=re.match(regex,txt)
+	if r:return r.group()
+	else:return ''
 
 def strToHex(a,split=''):
 	return split.join(py.hex(py.ord(x))[2:] for x in a).upper()
@@ -162,26 +255,13 @@ def parseInt(a,base=16,symbols=None):
 		
 	
 def jsonToDict(a):
+	'''is2: 不同于 json_loads ，不会自动转换 到unicode'''
 	return eval(a.replace('false','False').replace('true','True'))
 js2py=jsonToDict
 	
-def parseReMatch(rm,s):
-	'''s: iii [or use 'i'*3 ] :return int,int,int
-	short name i int,s string ,L long,f float,...
-	case insensitive
-	some different from https://docs.python.org/2/c-api/arg.html#c.Py_BuildValue'''
-	r=[]
-	for n,i in py.enumerate(s.lower()):
-		n=rm.group(n+1)
-		if i=='i':r.append(py.int(n))
-		if i=='s':r.append(py.str(n))
-		if i=='l':r.append(py.long(n))
-		if i=='f':r.append(py.float(n))
-	return py.tuple(r)
-def matchHead(txt,regex):
-	r=re.match(regex,txt)
-	if r:return r.group()
-	else:return ''
+def json_loads(astr):
+	import json
+	return json.loads(astr)
 	
 def string(a,decode=''):
 	'''return unicode'''
@@ -280,13 +360,14 @@ def varname(a):
 	return r
 	# return replacey(a,'_',':','.','\\','/','-','"',' ','\n','\r','\t','[',']')
 # U.pln( varname(i09)
-def filename(a):
-	# if type(a) is not str:return ''
+def fileNameLegalized(a):
+	if not py.istr(a):a=string(a)
 	r=''
 	for i in range(len(a.strip() )  ):
 		if a[i] in FILE_NAME:r+=a[i]
 		else:r+='_'
 	return r
+fileName=filename=fileNameLegalized
 # filename.__str__=FILE_NAME	
 	
 def haszh(a):
@@ -328,7 +409,7 @@ def max(*a):
 	return r
 	
 def allAscii(a):
-	if type(a) not in (str,unicode):return False
+	if not py.istr(a):return False
 	for i in a:
 		if ord(i)>127:return False
 		# U.pln( ord(i);break
@@ -344,7 +425,8 @@ gZi=gsZI.split('、')
 def readNumber(a,split=4,p=True):
 	if split<1:return ''
 	zh=gZi[::split]
-	if a not in(str,unicode):a=str(a)
+	if py.isnum(a):a=py.int(a)#py2 ok
+	if not py.istr(a):a=str(a)
 	py.importU()
 	a=''.join(U.one_in(list(a),number))
 	while(a.startswith('0')):a=a[1:]
@@ -359,17 +441,17 @@ def readNumber(a,split=4,p=True):
 	s=a[0:im-((iz-1)*split)]+s
 	# U.repl()
 	# for i in zh:U.pln( i.decode('utf-8').encode(U.stdout.encoding) )
-	s=s.decode('utf-8')
-	if p:U.pln(s.encode(U.stdout.encoding)	)	
+	if py.is2():s=s.decode('utf-8').encode(U.stdout.encoding)
+	if p:U.pln(s)	
 	return s
 
 gcszh=gZhEncodings=gcodingZh={'gb18030', 'gb2312', 'gbk', 'big5', 'big5hkscs', 'cp932', 'cp949', 'cp950', 'euc-jisx0213', 'euc-jis-2004', 'euc-jp', 'euc-kr', 'hz', 'idna', 'iso2022-jp', 'iso2022-jp-1', 'iso2022-jp-2', 'iso2022-jp-2004', 'iso2022-jp-3', 'iso2022-jp-ext', 'iso2022-kr', 'johab', 'mbcs', 'punycode', 'raw-unicode-escape', 'shift-jis','shift-jisx0213', 'shift-jis-2004', 'unicode-escape', 'unicode-internal', 'utf-16', 'utf-16-be', 'utf-16-le', 'utf-32', 'utf-32-be', 'utf-32-le', 'utf-7', 'utf-8', 'utf-8-sig'}
 	
 gcscp={'cp819', 'cp1026', 'cp1252', 'cp1140', 'cp1006', 'cp1361', 'cp932', 'cp424', 'cp154', 'cp720', 'cp936', 'cp500', 'cp869', 'cp860', 'cp861', 'cp862', 'cp863', 'cp864', 'cp865', 'cp866', 'cp1255', 'cp1254', 'cp1257', 'cp1256', 'cp1251','cp1250', 'cp1253', 'cp858', 'cp437', 'cp949', 'cp1258', 'cp737', 'cp367', 'cp850', 'cp852', 'cp855', 'cp857', 'cp856', 'cp775', 'cp875','cp874', 'cp950'}
 gcharset=charset=gcs=gencodings=gcoding={'ascii', 'base64-codec', 'big5', 'big5hkscs', 'bz2-codec', 'charmap', 'cp037', 'cp1006', 'cp1026', 'cp1140', 'cp1250', 'cp1251', 'cp1252', 'cp1253', 'cp1254', 'cp1255', 'cp1256', 'cp1257', 'cp1258', 'cp1361', 'cp367', 'cp424', 'cp437', 'cp500', 'cp720', 'cp737', 'cp775', 'cp819', 'cp850', 'cp852', 'cp855', 'cp856', 'cp857', 'cp858', 'cp860', 'cp861', 'cp862', 'cp863', 'cp864', 'cp865', 'cp866', 'cp869', 'cp874', 'cp875', 'cp932', 'cp936', 'cp949', 'cp950', 'euc-jis-2004', 'euc-jisx0213', 'euc-jp', 'euc-kr', 'gb18030', 'gb2312', 'gbk', 'hex-codec', 'hp-roman8', 'hz', 'idna', 'iso2022-jp', 'iso2022-jp-1', 'iso2022-jp-2', 'iso2022-jp-2004', 'iso2022-jp-3', 'iso2022-jp-ext', 'iso2022-kr', 'iso8859-1', 'iso8859-10', 'iso8859-11', 'iso8859-13', 'iso8859-14', 'iso8859-15', 'iso8859-16', 'iso8859-2', 'iso8859-3', 'iso8859-4', 'iso8859-5', 'iso8859-6', 'iso8859-7', 'iso8859-8', 'iso8859-9', 'johab', 'koi8-r', 'koi8-u', 'latin-1', 'mac-arabic', 'mac-centeuro', 'mac-croatian', 'mac-cyrillic', 'mac-farsi', 'mac-greek', 'mac-iceland', 'mac-latin2', 'mac-roman', 'mac-romanian', 'mac-turkish', 'mbcs', 'palmos', 'ptcp154', 'punycode', 'quopri-codec', 'raw-unicode-escape', 'rot-13', 'shift-jis', 'shift-jis-2004', 'shift-jisx0213', 'tis-620', 'unicode-escape', 'unicode-internal', 'utf-16', 'utf-16-be', 'utf-16-le', 'utf-32', 'utf-32-be', 'utf-32-le', 'utf-7', 'utf-8', 'utf-8-sig', 'uu-codec', 'zlib-codec'}	
-
+#https://docs.python.org/2/library/codecs.html#standard-encodings        https://docs.python.org/3/library/codecs.html#standard-encodings
 if __name__=='__main__':
-	from qgb import *
+	py.importU()	
 	U.repl()
 	exit()
 	# h= Har('ping.chinaz.com.har').data.keys()

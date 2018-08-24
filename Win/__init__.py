@@ -1,12 +1,30 @@
 #coding=utf-8
+__all__=['KeyCode','Constants']
 import sys,ctypes
-if __name__.endswith('qgb.Win'):
-	from .. import py
+try:
+	if __name__.endswith('qgb.Win'):
+		from .. import py
+	else:
+		import py
+except Exception as ei:
+	sys.path.append(sys.path[0][:-1-3])
+	try:import py
+	except:import pdb;pdb.set_trace()
+	
+try:from . import Constants
+except:
+	try:import Constants
+	except Exception as ei:
+		import pdb;pdb.set_trace()	
+#python G:\QGB\babun\cygwin\lib\python2.7\qgb\Win/__init__.py 	
+#sys.path ['G:\\QGB\\babun\\cygwin\\lib\\python2.7\\qgb\\Win',
+#sys.path ['G:\\QGB\\babun\\cygwin\\lib\\python2.7\\qgb'   can import py
+# 
 	# py.pdb()
 	# from . import Constants
-else:import py
-import Constants
-globals().update(Constants.__dict__)	
+
+
+globals().update([i for i in Constants.__dict__.items() if not i[0].startswith('__')])	
 c=C=Constants
 
 
@@ -140,8 +158,8 @@ The address type or state. This member can be a combination of the following val
 	rk=['dwIndex','dwAddr', 'dwMask','wType', 'dwBCastAddr',   'dwReasmSize', 'unused1']
 	GetIpAddrTable(ctypes.byref(table), ctypes.byref(size), 0)
 	r=[]
-	for i in rk:U.pln( i)
-	U.pln( table.dwNumEntries)
+	# for i in rk:U.pln( i)
+	U.pln('Interface count:', table.dwNumEntries)
 	for n in range(table.dwNumEntries):
 		row = table.table[n]
 		rn=[]
@@ -185,6 +203,8 @@ def getTitle(h=0,size=1024):
 getitle=getTitle
 	
 def setTitle(st,h=0):
+	'''在python内设置的，退出后 会还原  
+'''
 	if type(st)!=str:st=str(st)
 	if not h:h=getCmdHandle()
 	return user32.SetWindowTextA(h,st)
@@ -199,7 +219,7 @@ def getAllWindows():
 	win32gui.EnumWindows(EnumWindowsProc, mlst)
 	# for handle in handles:
 		# mlst.append(handle)
-	return mlst
+	return [(i[0],i[1].decode('mbcs')) for i in mlst]
 EnumWindows=getAllWindow=getAllWindows
 	
 def setWindowPos(h=0,x=199,y=-21,width=999,height=786,top=None,flags=None):
@@ -220,6 +240,7 @@ def setOskPos(w=333,h=255,x=522,y=-21):
 	
 	
 def msgbox(s='',st='title',*a):
+	''' st title'''
 	if(a):
 		a=list(a)
 		a.insert(0,s)
@@ -227,7 +248,10 @@ def msgbox(s='',st='title',*a):
 		st='length %s'%len(a)
 		s=str(a)
 	# s=str(s)+ ','+str(a)#[1:-2]
-	return user32.MessageBoxA(0, str(s), str(st), 0)		
+	if py.is2():
+		return user32.MessageBoxA(0, str(s), str(st), 0)		
+	else:
+		return user32.MessageBoxW(0, str(s), str(st), 0)		
 
 def getCursorPos():
 	from ctypes import Structure,c_ulong,byref
@@ -396,7 +420,7 @@ gdWinVerNum={'10':10.0,# 6.2,#使用 GetVersionExW
 			 'vista': 6.0,
 			 'xp': 5.1}
 for w,i in gdWinVerNum.items():
-	exec ('''def is{0}():return getVersionNumberCmdVer()=={1}'''.format(
+	py.execute('''def is{0}():return getVersionNumberCmdVer()=={1}'''.format(
 		w.replace('.','_'),i)    )			 
 			 
 def getWinName():
@@ -500,6 +524,10 @@ def getAllDisk():
 	return r
 def main():
 	py.importU()
+	py.importU()
+	py.pdb()
+	# U=globals()['U']#  为何在此不能自动引用 globals
+	import U
 	U.pln( getAllNetwork())
 	exit()
 	import sys,os;sys.path.append('d:\pm');from qgb import U,T,F

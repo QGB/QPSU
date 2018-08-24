@@ -36,9 +36,20 @@ def setErr(ae):
 #		gError.append(e)
 #try:py=U.py
 #except Exception as e:gError.append(e)
-		
-import HTTPServer
-import HTTP
+try:
+	if __name__.endswith('qgb.N'):
+		from . import HTTP
+		from . import HTTPServer
+	else:
+		import HTTP
+		import HTTPServer
+except Exception as ei:
+	py.traceback(ei)
+	# py.importU().repl()
+	# py.pdb()
+	# raise ei
+# import HTTPServer
+# import HTTP
 	
 def findFunc(name,root=9,depth=3,case=False):
 	U.pln( dir(root)       )
@@ -60,13 +71,14 @@ def get(url,protocol='http',file=''):
 		else:raise U.ArgsErr(url)
 	else:url=protocol+'://'+url
 	if url.startswith('http'):
-		import HTTP
-		return HTTP.get(url)
-		
-		
+		# import HTTP
+		return HTTP.get(url)	
 	raise U.NotImplementedError
 	return U.getAllMods()
-	
+
+def http(url,method='get',*args):
+	return HTTP.method(url,method,*args)
+
 def getLAN_IP():
 	r=getAllAdapter()
 	return r
@@ -102,11 +114,12 @@ def setIP(ip='',source='dhcp',adapter='',mask='',ip2=192.168):
 	return r
 setip=setIP
 		
-def scanPorts(host,threadsMax=33,from_port=1,to_port=65535,callback=None):
+def scanPorts(host,threadsMax=33,from_port=1,to_port=65535,callback=None,ip2=192.168):
 	'''return [opens,closes,errors]
 	callback(*scanReturns)
 	if callback and ports> threadsMax: 剩下结果将异步执行完成
 	'''
+	py.importU()
 	from threading import Thread
 	import socket
 	# host = raw_input('host > ')
@@ -116,9 +129,10 @@ def scanPorts(host,threadsMax=33,from_port=1,to_port=65535,callback=None):
 	counting_close = []
 	errors=[]
 	threads = []
-
+	if isinstance(host,py.float):host='{0}.{1}'.format(ip2,host)
+	
 	def scan(port):
-		U.count(1)
+		# U.count(1)
 		try:
 			s = socket.socket()
 			result = s.connect_ex((host,port))

@@ -2,36 +2,39 @@
 
 <table id="mytable"><thead>
       <tr>
-         <th id="num">NO.</th>
-         <th id="name">name</th>
-		 <th id="detail">detail</th>
-		 <th id="len">len</th>
+		<th id="num">NO.</th>
+		<th id=name>
+			<textarea id=control style="margin: 1px; width: 166px; height: 22px;">name</textarea>
+		</th>
+		<th id="detail">detail</th>
+		<th id="len">len</th>
 		 
-      </tr>
+      </tr> 
 	  
      </thead>
     <tbody>
 {result}
 	</tbody>
   </table>
+  
 <style type="text/css">
 thead {color:red;}
 tbody {color:blue;}
 tfoot {color:red;}
 
-#n{    max-width: 99px}
+#name{    max-width: 166px} /*不能使用//注释,  name 宽度 */
 /*115 Chrome no bottom scroll bars,116 has*/
 
 table,th,td,textarea{
 padding:0px;
 margin:0px;
-border:0.1mm solid black;
+border:1px solid black;/*修复调整 textarea大小导致下分割线消失的问题*/
 border-spacing: 0px;
 }
 
 textarea{
 border:0px solid black;
-width:800px;
+width:930px;               /*detail宽度*/
 text-align:center;
 }
 
@@ -57,11 +60,16 @@ th:hover{
 }
 </style>	 
 
-<script src="http://libs.baidu.com/jquery/1.9.0/jquery.min.js">
-</script>
+<script src="http://libs.baidu.com/jquery/1.9.0/jquery.min.js"></script>
+<!-- <script src="https://cdn.jsdelivr.net/npm/qgb/qgb.js"> -->
+<script src="file:///G:/QGB/babun/cygwin/home/qgb/js/qgb.js"></script>
+
+
 	 
 
 <script>
+<!-- alert(qgb) -->
+U.log()
 function sortTable(f,n){
 	var rows = $('#mytable tbody  tr').get();
 
@@ -105,6 +113,16 @@ $("#detail").click(function(){
 $("#len").click(function(){
     sortTable(f3*=-1,$(this).prevAll().length);
 });
+
+
+
+<!-- $("#control").dblclick(); -->
+
+$("#control").click(function (event){
+	event.stopPropagation();
+  $('textarea').css('height',$("#control").height())
+});
+
 </script>
 
 

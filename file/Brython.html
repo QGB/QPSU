@@ -1,0 +1,34 @@
+<html>
+<head>
+<!-- http://www.bootcdn.cn/brython/ -->
+  <script src="https://cdn.bootcss.com/brython/3.5.1/brython.js"></script>
+  <script src="https://cdn.bootcss.com/brython/3.5.1/brython_stdlib.js"></script>
+</head>
+<body onload="brython()">
+
+
+<script type="text/python">
+from browser import document, alert
+import pprint
+import time
+# bind event 'click' on button to function echo
+
+def echo(ev):
+	time.sleep(6)
+	alert(document["zone"].value)
+def print(*a):
+	document["out"].value+=str(a)+'\n'
+	
+document["mybutton"].bind("click", echo)
+
+print(dir())
+print(globals())
+print(locals())
+
+</script>
+<input id="zone">
+<button id="mybutton">click !</button>
+<br>
+<textarea cols=80 rows=33 id=out></textarea>
+</body>
+</html>

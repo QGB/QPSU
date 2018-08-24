@@ -1,13 +1,21 @@
-# coding=utf-8
-import BaseHTTPServer
-import logging
+#coding=utf-8
 import os,sys
-from urlparse import urlparse,parse_qs
-from mimetypes import types_map
-# from qgb import *#循环import
-if 'qgb.U' in sys.modules:
-	U=sys.modules['qgb.U']
+if __name__.endswith('N.HTTPServer'):from .. import py
+else:import py
 
+# if 'qgb.U' in sys.modules:
+	# U=sys.modules['qgb.U']
+	# py=U.py
+
+	
+if py.is2():
+	from BaseHTTPServer import BaseHTTPRequestHandler,HTTPServer
+	from urlparse import urlparse,parse_qs
+else:
+	from http.server import BaseHTTPRequestHandler,HTTPServer
+	from urllib.parse import urlparse,parse_qs
+import logging
+# from qgb import *#循环import
 def forwardReq(a):
 	url_path = urlparse(a.path).path
 	if url_path == '/0':
@@ -19,7 +27,7 @@ def forwardReq(a):
 register_route = {"GET":{},"POST":{}}
 def route(path="/", method=["GET"],h=True,args=True):
 	if not args:h=False
-	if type(method) in (str,unicode):
+	if py.istr(method):
 		method=method.upper()
 		if method in register_route:
 			method=[method]
@@ -47,7 +55,7 @@ def override(method=None):
 		return f
 	return decorator
 
-class Handler(BaseHTTPServer.BaseHTTPRequestHandler):
+class Handler(BaseHTTPRequestHandler):
 	server_version = __name__#'qgb.N.HTTPServer'
 	# def log_message(self, format, *args):
 		# return ""
@@ -99,6 +107,7 @@ class Handler(BaseHTTPServer.BaseHTTPRequestHandler):
 						build_response(s, retour, 404)
 		except Exception as eh:
 			# Gestion des erreurs
+			py.traceback(eh)
 			if "500" not in handler_method:
 				build_error(s,eh,500,'500 [not in handler_method,use @override("500") ]')
 
@@ -114,7 +123,9 @@ def build_error(s,e,code,msg=''):
 	s.send_header("Content-type", "text/plain")
 	s.end_headers()
 	if not msg:
-		msg="HTTP Status:{2}\n{0} \n{1}".format(msg,traceback.format_exc(),code)  	
+		msg="HTTP Status:{2}\n{0} \n{1}".format(e,'traceback.format_exc()',code)  	
+	if py.is3():#\lib\socketserver.py", line 775, in write  TypeError: a bytes-like object is required, not 'str'
+		msg=msg.encode(U.encoding)
 	s.wfile.write(msg)
 	return s.finish()	
 		
@@ -131,12 +142,14 @@ def build_response(s, retour, code=200):
 			if header not in ["code","content"]:
 				s.send_header(header, retour[header])
 		s.end_headers()
-		s.wfile.write(retour['content'])
+		r=retour['content']
 	else:
 		s.send_response(code)
 		s.send_header("Content-type", "text/html")
 		s.end_headers()
-		s.wfile.write(retour)
+		r=retour
+	if py.is3():r=r.encode(U.encoding)
+	s.wfile.write(r)
 	s.finish()
 	# U.repl(	)
 	# finish_request(s, s,s.client_address)
@@ -145,48 +158,54 @@ def redirect(location=""):
 	return {"content":"","code":301,"Location":location}
 #error: [Errno 10053]  浏览器关闭 了这个连接
 def http(ip="0.0.0.0", port=80,log=True,onMainThread=False):
-	httpd = BaseHTTPServer.HTTPServer((ip, port), Handler)
-	if onMainThread:
-		U.pln( ip,port)
-		httpd.serve_forever()
-	else:
-		try:
+	httpd = HTTPServer((ip, port), Handler)
+	try:
+		if onMainThread:
+			print('{0}:{1}\n'.format(ip,port))
+			httpd.serve_forever()
+		else:
 			from threading import Thread
 			Thread(target=httpd.serve_forever).start()
 			input('{0}:{1}\n'.format(ip,port))
-		except:
-			pass
+	except:
+		pass
 	httpd.server_close()#TODO: muti thread
 serve=httpd=server=http
 
 def https(ip="0.0.0.0", port=443,key='',log=True,onMainThread=False):
 	try:
-		httpd = BaseHTTPServer.HTTPServer((ip, port), Handler)
+		httpd = HTTPServer((ip, port), Handler)
 	except Exception as e:
 		return (ip,port,e)
 	if not key:
-		from qgb import U
+		py.importU()
 		key=U.getModPath()+'N/.tmall.com.crt'#lk.lk.crt'
 	import ssl
 	httpd.socket=ssl.wrap_socket( httpd.socket, keyfile=key,  certfile=key)
 	
 	try:
-		from threading import Thread
-		Thread(target=httpd.serve_forever).start()
-		input('{0}:{1}\n'.format(ip,port))
-	except:
-		pass
+		if onMainThread:
+			print('{0}:{1}\n'.format(ip,port))
+			httpd.serve_forever()
+		else:
+			from threading import Thread
+			Thread(target=httpd.serve_forever).start()
+			input('{0}:{1}\n'.format(ip,port))
+	except BaseException as e:
+		py.traceback(e)
+		# py.pdb()
 	httpd.server_close()
 httpsd=https
 
-def main(port=443):
+def main(port=443,crt='N/CA.crt' ,onMainThread=True):
 	import sys
 	
-	try:U=sys.modules['qgb.U']
-	except:
-		sys.path[0]=sys.path[0][:-5]
-		U.pln( sys.path)
-		from qgb import U
+	# try:U=sys.modules['qgb.U']
+	# except:
+		# sys.path[0]=sys.path[0][:-5]
+		# U.pln( sys.path)
+		# from qgb import U
+	py.importU()	
 	@route('/',['get','post'])
 	def data(h,**ka):
 		h.send_response(200)
@@ -205,8 +224,8 @@ def main(port=443):
 		h.finish()
 		U.set('h',h)
 		return  ka
-	ca=U.getModPath()+'N/CA.crt'
-	return https(key=ca,port=port)
+	ca=U.getModPath()+crt
+	return https(key=ca,port=port,onMainThread=onMainThread)
 __doc__='''
 @route()
 def h(h):
@@ -219,3 +238,24 @@ def h(h):
 if __name__=='__main__':
 	main()
 	
+'''127.0.0.1 - - [11/May/2018 03:56:40] "GET /323 HTTP/1.1" 404 -
+127.0.0.1 - - [11/May/2018 03:56:40] "GET /323 HTTP/1.1" 500 -
+----------------------------------------
+Exception happened during processing of request from ('127.0.0.1', 55009)
+Traceback (most recent call last):
+  File "G:\QGB\Anaconda2\lib\SocketServer.py", line 290, in _handle_request_noblock
+    self.process_request(request, client_address)
+  File "G:\QGB\Anaconda2\lib\SocketServer.py", line 318, in process_request
+    self.finish_request(request, client_address)
+  File "G:\QGB\Anaconda2\lib\SocketServer.py", line 331, in finish_request
+    self.RequestHandlerClass(request, client_address, self)
+  File "G:\QGB\Anaconda2\lib\SocketServer.py", line 654, in __init__
+    self.finish()
+  File "G:\QGB\Anaconda2\lib\SocketServer.py", line 713, in finish
+    self.wfile.close()
+  File "G:\QGB\Anaconda2\lib\socket.py", line 286, in close
+    self._sock.close()
+AttributeError: 'NoneType' object has no attribute 'close'
+
+
+'''

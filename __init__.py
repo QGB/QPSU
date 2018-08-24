@@ -16,7 +16,8 @@ __all__=['U','T','N','F']
 		# __all__.remove(i)
 
 try:
-	import py
+	try:from . import py
+	except:import py
 	py.importU()
 	if U.isipy():
 		__all__.append('ipy')

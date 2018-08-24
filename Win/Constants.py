@@ -1,9 +1,16 @@
 import sys,ctypes
-
-try:
-	py=sys.modules['qgb.py']
+try:from .. import py
 except:
-	py=sys.modules['py']
+	try:import py
+	except Exception as ei:
+		import pdb;pdb.set_trace()
+	
+# try:
+	# if __name__.endswith('Constants'):
+		# from .. import py
+	# else:import py
+# except Exception as ei:
+	# import pdb;pdb.set_trace()
 
 if py.iswin():
 	from ctypes.wintypes import WORD, DWORD, LPSTR, HANDLE,WCHAR

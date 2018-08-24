@@ -1,4 +1,11 @@
 # -*- coding:utf-8 -*-
+# print __file__#G:\QGB\babun\cygwin\lib\python2.7\qgb\Win\KeyCode.py 
+# import sys
+# sys.path.append(sys.path[0][:-1-3])
+# import py
+# py.importU()
+# py.pdb()
+
 
 #Virtual Key Code
 VK_LBUTTON = 1
