@@ -203,7 +203,10 @@ def getTestPath():
 		if isroot():
 			return s
 		else:
-			return os.getenv('HOME')+s
+			home=os.getenv('HOME')
+			if home.startswith('/home/coding'):
+				home+='/workspace'
+			return home+s
 	if iswin() or iscyg():
 		s='c:/test/'
 		return driverPath(s[1:]) or s
