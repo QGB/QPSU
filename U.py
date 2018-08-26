@@ -2098,6 +2098,7 @@ def get(name='_'):
 	return set.__dict__[name]
 	#TODO
 def google(a):
+	a=T.urlEncode(a)
 	return browser('https://init.pw/search?q='+a)
 	browser('https://www.google.com.my/#q='+a)
 	
