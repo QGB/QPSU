@@ -972,6 +972,7 @@ gsBrowser=''
 def browser(url,browser=gsBrowser,b=''):
 	'''b,browser='yandex'
 	'''
+	if istermux():return run('termux-open-url',url) 
 	import webbrowser
 	if gsBrowser:browser=gsBrowser
 	if b:browser=b
@@ -2097,6 +2098,7 @@ def get(name='_'):
 	return set.__dict__[name]
 	#TODO
 def google(a):
+	return browser('https://init.pw/search?q='+a)
 	browser('https://www.google.com.my/#q='+a)
 	
 def subprocess(cmd):
