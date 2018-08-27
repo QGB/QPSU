@@ -1,13 +1,12 @@
-: @echo off
-git config --global user.email qgbcs1@gmail.com
-git config --global user.name QGB
-
-git config --global core.filemode false
-git config --global credential.helper store
-
-git remote add q https://github.com/qgb/qpsu
-git remote add cq https://coding.net/u/qgb/p/QPSU/git
-git add -A
-git commit -m %*
-git push cq master 
-git push q master 
+git.exe config --global user.email qgbcs1@gmail.com
+git.exe config --global user.name QGB
+   
+git.exe config --global core.filemode false
+git.exe config --global credential.helper store
+   
+git.exe remote add q https://github.com/qgb/qpsu
+git.exe remote add cq https://coding.net/u/qgb/p/QPSU/git
+git.exe add -A
+git.exe commit -m %*
+git.exe push cq master 
+git.exe push q master 

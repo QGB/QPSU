@@ -200,13 +200,10 @@ def driverPath(a,reverse=True):
 def getTestPath():
 	if isnix():
 		s='/test/'
-		if isroot():
-			return s
-		else:
-			home=os.getenv('HOME')
-			if home.startswith('/home/coding'):
-				home+='/workspace'
-			return home+s
+		home=os.getenv('HOME')
+		if home.startswith('/home/coding'):
+			home+='/workspace'
+		return home+s
 	if iswin() or iscyg():
 		s='c:/test/'
 		return driverPath(s[1:]) or s
