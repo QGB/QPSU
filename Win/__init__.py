@@ -19,7 +19,7 @@ except:
 #python G:\QGB\babun\cygwin\lib\python2.7\qgb\Win/__init__.py 	
 #sys.path ['G:\\QGB\\babun\\cygwin\\lib\\python2.7\\qgb\\Win',
 #sys.path ['G:\\QGB\\babun\\cygwin\\lib\\python2.7\\qgb'   can import py
-# 
+# 	
 	# py.pdb()
 	# from . import Constants
 

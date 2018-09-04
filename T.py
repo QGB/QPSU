@@ -43,6 +43,8 @@ except Exception as ei:
 	detect='#not install chardet Module'
 	pass
 ################################################
+def print_unicode_escape(a):
+	print(	a.encode('unicode-escape').decode('ascii')  )
 def strFormDataToDict(a):
 	'''true value can not convert
 in js:

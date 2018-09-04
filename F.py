@@ -302,6 +302,12 @@ def readBytes(file):
 	file=autoPath(file)
 	return open(file,'rb').read()
 	
+def readJSON(file):
+	''' '''
+	file=autoPath(file)
+	
+	
+	
 def isDir(file):
 	return _p.isdir(file)
 isFolder=isdir=isDir
@@ -562,6 +568,14 @@ FileNotFoundError: [Errno 2] No such file or directory: '.
 	fn=fn.replace('\\','/')
 	if fn.startswith("."):
 		return fn;
+	if fn.startswith("~/"):
+		import os
+		if U.isnix():
+			home=os.getenv('HOME')
+		else:
+			home=os.getenv('USERPROFILE')# 'C:/Users/Administrator'  not  cyg home os.getenv('HOME')
+		# else:		home=os.getenv('HOMEPATH')#  HOMEPATH=\Users\Administrator
+		return home+fn[1:];
 	
 	if isAbs(fn):
 		return fn

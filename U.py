@@ -123,7 +123,7 @@ def isnix():
 	# return one_in('nix','linux','darwin',platform.system().lower())
 def istermux():
 	return 'com.termux' in os.getenv('PATH')
-	
+
 def iscyg():
 	return 'cygwin' in  platform.system().lower()
 # gipy=None#这个不是qgb.ipy, 是否与U.F U.T 这样的风格冲突？
@@ -154,6 +154,7 @@ isatty=istty=isrepl
 ########################
 if iswin() or iscyg():
 	try:
+		from ctypes import wintypes#TODO cygwin ValueError: _type_ 'v' not supported
 		if __name__.endswith('qgb.U'):from . import Win
 		else:import Win
 		setWindowPos,msgbox=Win.setWindowPos,Win.msgbox
@@ -165,17 +166,20 @@ if iswin() or iscyg():
 			# if iswin():windll.user32.MessageBoxA(0, str(s), str(st), 0)
 		setErr(ei,msg='#Error import Win'  )
 #'G:\\QGB\\babun\\cygwin\\lib\\python2.7\\qgb'   ValueError('Attempted relative import beyond toplevel package',)
-		py.pdb()
+		# py.pdb()
 		# {0} {1}'.format(__name__,isMain() )
 		
 ###########################
 	if iscyg():
 		def getCygPath():
-			r=getProcessPath()
+			try:r=getProcessPath()
+			except:r='G:/QGB/babun/cygwin/'
 			if 'cygwin' in r:
 				return T.subLast(r,'','cygwin')+'cygwin\\'
 			else:
 				raise EnvironmentError(r)
+elif iscyg():# #TODO this is not windows read pid , only in cyg ps, use Win.getpid
+	pid=os.getpid()
 else:# *nix etc..， #TODO:isAndroid
 	pid=os.getpid()
 				
@@ -845,12 +849,18 @@ def pwd(p=False,display=False):
 getCurrentPath=pwd
 	
 def sort(a, cmp=None, key=None, reverse=False):
-	'''sorted _5,cmp=lambda a,b:len(a)-len(b)  按长度从小到大排序
-	在python2.x中cmp参数指定的函数用来进行元素间的比较。此函数需要2个参数，然后返回负数表示小于，0表示等于，正数表示大于。'''
-	t=py.type(a)
-	a=py.sorted(a,cmp,key,reverse)
-	if py.istr(py):
-		return ''.join([t(i) for i in a])
+	''' py2&py3  sorted _3 ,key=lambda i:len(i)        按长度从小到大排序
+	在python2.x  sorted _5,cmp=lambda a,b:len(a)-len(b) 实现同上功能， 一般不用cmp 参数
+	sorted中cmp参数指定的函数用来进行元素间的比较。此函数需要2个参数，然后返回负数表示小于，0表示等于，正数表示大于。'''
+	if py.is2():
+		a=py.sorted(a,cmp,key=key, reverse=reverse)
+	else:
+		if cmp and  not key:
+			import functools
+			key=functools.cmp_to_key(cmp)
+		a=py.sorted(a,key=key, reverse=reverse)
+	if py.istr(a):
+		return ''.join([i for i in a])
 	else:
 		return a
 def sortDictV(ad,des=True):
@@ -1658,8 +1668,9 @@ def x(msg=None):
 	if(msg!=None):pln (msg)
 	sys.exit(235)
 	
-def exit(i=2357,msg='\n{} pid {} exit!'.format('#'*22,pid)):
+def exit(i=2357,msg=None):
 	'''terminate process,will not call atexit'''
+	if msg==None:msg='\n{} pid {} exit!'.format('#'*22,pid)
 	print(msg)
 	os._exit(i)
 

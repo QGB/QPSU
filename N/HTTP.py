@@ -26,6 +26,14 @@ def get(url):
 	# return method(url,'get')#<http.client.HTTPResponse at 0x203a16a74a8>
 	url=autoUrl(url)
 	try:
+		import requests
+		r=requests.get(url)
+		return r.text
+	except ModuleNotFoundError:pass
+	except Exception as e:
+		raise e
+		
+	try:
 		return grequest.urlopen(url).read()
 	except Exception as e:
 		return url,e

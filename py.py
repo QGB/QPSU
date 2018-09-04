@@ -117,7 +117,7 @@ def importU():
 		return U
 		# if U.debug():pdb()
 	else:
-		pdb()
+		# pdb()
 		import U
 		raise Exception('#Error import U in qgb.py')
 
