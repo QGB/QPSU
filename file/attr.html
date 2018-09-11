@@ -1,0 +1,132 @@
+<html>
+
+<table id="mytable"><thead>
+      <tr>
+		<th id="num">NO.</th>
+		<th id=name>
+			<textarea id=control style="margin: 1px; width: 166px; height: 22px;">name</textarea>
+		</th>
+		<th id="detail">detail</th>
+		<th id="len">len</th>
+		 
+      </tr> 
+	  
+     </thead>
+    <tbody>
+{result}
+	</tbody>
+  </table>
+  
+<style type="text/css">
+thead {color:red;}
+tbody {color:blue;}
+tfoot {color:red;}
+
+#name{    max-width: 166px} /*不能使用//注释,  name 宽度 */
+/*115 Chrome no bottom scroll bars,116 has*/
+
+table,th,td,textarea{
+padding:0px;
+margin:0px;
+border:1px solid black;/*修复调整 textarea大小导致下分割线消失的问题*/
+border-spacing: 0px;
+}
+
+textarea{
+border:0px solid black;
+width:930px;               /*detail宽度*/
+text-align:center;
+}
+
+th:hover{
+     cursor:pointer;
+    background:#AAA;
+    
+}
+
+::-webkit-scrollbar {
+    width: 9px;
+    height:9px;
+}
+
+::-webkit-scrollbar-thumb {
+    border-radius: 10px;
+    -webkit-box-shadow: inset 0 0 6px  rgb(0, 255, 0);
+}
+
+::-webkit-scrollbar-track {
+    -webkit-box-shadow: inset 0 0 6px #FFFFFF;
+
+}
+</style>	 
+
+<script src="http://libs.baidu.com/jquery/1.9.0/jquery.min.js"></script>
+<!-- <script src="https://cdn.jsdelivr.net/npm/qgb/qgb.js"> -->
+<script src="file:///G:/QGB/babun/cygwin/home/qgb/js/qgb.js"></script>
+
+
+	 
+
+<script>
+<!-- alert(qgb) -->
+U.log()
+function sortTable(f,n){
+	var rows = $('#mytable tbody  tr').get();
+
+	rows.sort(function(a, b) {
+
+		var A = getVal(a);
+		var B = getVal(b);
+
+		if(A < B) {
+			return -1*f;
+		}
+		if(A > B) {
+			return 1*f;
+		}
+		return 0;
+	});
+
+	function getVal(elm){
+		var v = $(elm).children('td').eq(n).text().toUpperCase();
+		if($.isNumeric(v)){
+			v = parseInt(v,10);
+		}
+		return v;
+	}
+
+	$.each(rows, function(index, row) {
+		$('#mytable').children('tbody').append(row);
+	});
+}
+var f0=f1=f2=f3=-1
+
+$("#num").click(function(){
+    sortTable(f0*=-1,$(this).prevAll().length);
+});
+$("#name").click(function(){
+    sortTable(f1*=-1,$(this).prevAll().length);
+});
+$("#detail").click(function(){
+    sortTable(f2*=-1,$(this).prevAll().length);
+});
+$("#len").click(function(){
+    sortTable(f3*=-1,$(this).prevAll().length);
+});
+
+
+
+<!-- $("#control").dblclick(); -->
+
+$("#control").click(function (event){
+	event.stopPropagation();
+  $('textarea').css('height',$("#control").height())
+});
+
+</script>
+
+
+
+
+
+</html>

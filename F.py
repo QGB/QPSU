@@ -228,32 +228,40 @@ def writeIterable(file,data,end='\n',overwrite=True):
 	for i in data:
 		f.write(py.str(i)+end)
 
-def write(file,data,mod='w',mkdir=False,autoArgs=True):
+def write(file,data,mod='w',encoding='',mkdir=False,autoArgs=True):
+	'''py3  open(file, mode='r', buffering=-1, encoding=None, errors=None, newline=None, closefd=True, opener=None)
+	   py2  open(name[, mode[, buffering]])
+	'''
 	py.importU()
 	try:
 		if autoArgs:
-			if py.istr(data) and py.len(file)>py.len(data)>0:				
+			if py.istr(data) and py.len(file)>py.len(data)>0:
 				if '.' in data and '.' not in file   and  isFileName(data):
 					file,data=data,file
 					U.warring('F.write fn,data but seems data,fn auto corrected（v 纠正')
-	except:pass		
+	except:pass
 	
 	# try:
 	file=autoPath(file)
+	if not encoding:encoding=U.encoding
+	
 	if mkdir:makeDirs(file,isFile=True)
 	if py.is3() and isinstance(data,py.bytes) and 'b' not in mod:
 		mod+='b'
-		
-	with open(file,mod) as f:
-		if py.istr(data) or (py.is3() and isinstance(data,py.bytes) )	:
-			f.write(data)
-		elif py.is2() and type(data) is py.unicode:
-			f.write(data.encode(U.encoding))
-		else:
-			# if py.is2():print >>f,data
-			# else:
-			U.pln(data,file=f)
-		return f.name
+		f=open(file,mod)
+	else:
+		if py.is2():f=open(file,mod)
+		else:       f=open(file,mod,encoding=encoding)
+	# with open(file,mod) as f:
+	if py.istr(data) or (py.is3() and isinstance(data,py.bytes) )	:
+		f.write(data)
+	elif py.is2() and type(data) is py.unicode:
+		f.write(data.encode(encoding))
+	else:
+		# if py.is2():print >>f,data
+		# else:
+		U.pln(data,file=f)
+	return f.name
 	# except Exception as e:
 		# setErr(e)
 		# return False

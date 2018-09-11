@@ -1,5 +1,5 @@
 #coding=utf-8
-__all__=['KeyCode','Constants']
+__all__=['KeyCode','Constants','reg']
 import sys,ctypes
 try:
 	if __name__.endswith('qgb.Win'):
@@ -204,11 +204,15 @@ getitle=getTitle
 	
 def setTitle(st,h=0):
 	'''在python内设置的，退出后 会还原  
+	py3 : SetWindowTextW
 '''
 	if type(st)!=str:st=str(st)
 	if not h:h=getCmdHandle()
-	return user32.SetWindowTextA(h,st)
-setitle=setTitle
+	if py.is3():
+		return user32.SetWindowTextW(h,st)
+	else:
+		return user32.SetWindowTextA(h,st)
+setitle=settitle=setTitle
 
 def EnumWindowsProc(hwnd, resultList):
 	if win32gui.IsWindowVisible(hwnd) and getitle(hwnd) != '':

@@ -75,9 +75,12 @@ gsavePath=U.gst+'ipy/'
 # U.cd('ipy')
 # U.pln U.pwd()
 F.md(gsavePath)
-U.pln('py:{0} ipy:{1} at[{2}] {3}'.format(
+gstitle='ipy:{1} py:{0} at[{2}] {3}'.format(
 	U.getPyVersion(),version,U.stime(format='%Y-%m-%d %H:%M:%S'),gsavePath
-	))
+	)
+U.pln(gstitle)
+if getattr(U,'Win',0):
+	U.Win.setitle(gstitle)
 #is2 py:2.713 ipy:5.1 at[2018-05-13 10:26:35.049] G:/test/ipy/   #len 57
 #is3 py:3.63 ipy:6.1 at[2018-05-13 10:32:01.078] G:/test/ipy/    #56
 

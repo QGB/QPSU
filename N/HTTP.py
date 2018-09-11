@@ -22,22 +22,24 @@ def post(url,data):
 
 	return
 
-def get(url):
+def get(url,file=''):
 	# return method(url,'get')#<http.client.HTTPResponse at 0x203a16a74a8>
 	url=autoUrl(url)
 	try:
 		import requests
 		r=requests.get(url)
-		return r.text
-	except ModuleNotFoundError:pass
+	except ModuleNotFoundError:
+		try:
+			r=grequest.urlopen(url).read()
+		except Exception as e:
+			return url,e
+		#####################
 	except Exception as e:
 		raise e
-		
-	try:
-		return grequest.urlopen(url).read()
-	except Exception as e:
-		return url,e
-	
+	if file:
+		U=py.importU()
+		return U.F.write(file,r.content)
+	return r.text
 def head(url):
 	return method(url,'head').info().items()
 	

@@ -31,7 +31,7 @@ class ArgumentError(Exception):
 class ArgumentUnsupported(ArgumentError):#an unsupported argument# 为了能快速找到Arg 开头的异常
 	pass
 
-class No:
+class No:	
 	def __init__(s,msg='is a None object with msg',*a):
 		
 		s.msg='{0}'.format(msg)
@@ -53,9 +53,13 @@ def iterable(a):
 		return True
 	except:return False
 	
+def isbyte(a):
+	if is2():return type(a) in (str,bytearray,bytes)
+	else    :return type(a) in (bytearray,bytes)
+	
 def istr(a):
-	if is2():return isinstance(a,basestring)#py.type(a) in (py.str,py.unicode)
-	else:    return isinstance(a,str)
+	if is2():return isinstance(a,basestring)#type(a) in (str,unicode,bytes)
+	else    :return isinstance(a,str)       #bytes is not str
 
 def isnum(a):
 	'''
@@ -67,14 +71,24 @@ def isnum(a):
 		5 复数   complex()==0j
 		6 其他类型'''
 	if is2():return type(a) in (int,long,float,complex)#isinstance better?
-	else:    return type(a) in (int,float)
+	else    :return type(a) in (int,float,complex)
 
+def isint(a):
+	if is2():return type(a) in (int,long)
+	else    :return type(a) in (int,)
+	
 def isfile(a):
 	if is2():return isinstance(a, file)
 	else:
 		from io import IOBase
 		return isinstance(a, IOBase)
 
+def isbasic(a,recursive=False):
+	'''  not file
+		#todo recursive
+	'''
+	return istr(a) or isnum(a) or type(a) in (dict,tuple,list,set,bytes,bytearray) 
+		
 def modules(modName):
 	return [i[1] for i in sys.modules.items() if modName in i[0] and i[1]] 
 

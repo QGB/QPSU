@@ -72,7 +72,7 @@ def get(url,protocol='http',file=''):
 	else:url=protocol+'://'+url
 	if url.startswith('http'):
 		# import HTTP
-		return HTTP.get(url)	
+		return HTTP.get(url,file=file)	
 	raise U.NotImplementedError
 	return U.getAllMods()
 
