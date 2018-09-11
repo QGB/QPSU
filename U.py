@@ -2298,9 +2298,12 @@ getCmdline=getCmd
 
 def save(a,name=0):
 	name=F.autoPath(name,default='g:/qgb/') 
-	if py.istr(a) or py.isb
-	pickle.dump(_61,open('f0','wb'),0)
-	return F.write(name,a)
+	if  py.isbyte(a) or py.istr(a):
+		return F.write(name,a)
+	elif py.isbasic():
+		return pickle.dump(a,open(name,'wb'),0)#0 ascii mode
+	else:
+		raise NotImplementedError('序列化非基本类型')
 	# if name:
 	# else:#TODO 写入一个新文件并保证 别进程 load 可以读到最新的save；可以保存到网络？？
 def load(name=0,returnFile=False):
