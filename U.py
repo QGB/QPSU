@@ -205,6 +205,12 @@ def getTestPath():
 	if isnix():
 		s='/test/'
 		home=os.getenv('HOME')
+		if not home:
+			if istermux():
+				home='/data/data/com.termux/files/home'
+			#elif 添加其他情况
+			else:
+				home=''
 		if home.startswith('/home/coding'):
 			home+='/workspace'
 		return home+s
@@ -2291,7 +2297,9 @@ def getCmd():
 getCmdline=getCmd
 
 def save(a,name=0):
-	global gst;gst='g:/qgb/'
+	name=F.autoPath(name,default='g:/qgb/') 
+	if py.istr(a) or py.isb
+	pickle.dump(_61,open('f0','wb'),0)
 	return F.write(name,a)
 	# if name:
 	# else:#TODO 写入一个新文件并保证 别进程 load 可以读到最新的save；可以保存到网络？？
