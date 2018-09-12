@@ -14,6 +14,33 @@ def setErr(ae):
 		gError=ae
 	if U.gbPrintErr:U.pln('#Error ',ae)
 	
+def deserialize(a=None,fileName=None):
+	'''The protocol version of the pickle is detected automatically, so no
+protocol argument is needed.  Bytes past the pickled object's
+representation are ignored.
+'''
+	if not py.isbyte(a) and not fileName:raise ArgumentError('need bytes or fileName=str ')
+	import pickle
+	if py.isbyte(a):
+		return pickle.loads(a)
+	else:
+		fileName=autoPath(fileName)
+		with open(fileName,'rb') as f:
+			return pickle.load(f)
+unSerialize=unserialize=deserialize
+			
+def serialize(a,fileName=None,protocol=0):
+	'''if not fileName: Return the pickled representation of the object as a bytes object.
+	'''
+	import pickle
+	if fileName:
+		fileName=autoPath(fileName)
+		with open(fileName,'wb') as f:
+			pickle.dump(obj=a,file=f,protocol=protocol)
+		return fileName
+	else:
+		return pickle.dumps(obj=a,protocol=protocol)	
+		
 def copy(src,dst):
 	r''' src : sFilePath , list ,or \n strs
 dst:sPath
