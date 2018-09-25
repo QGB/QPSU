@@ -1,13 +1,12 @@
 <html>
 <head>
 <!-- http://www.bootcdn.cn/brython/ -->
-  <script src="https://cdn.bootcss.com/brython/3.5.1/brython.js"></script>
-  <script src="https://cdn.bootcss.com/brython/3.5.1/brython_stdlib.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/brython/brython.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/brython/brython_stdlib.js"></script>
 </head>
 <body onload="brython()">
-
-
 <script type="text/python">
+
 from browser import document, alert
 import pprint
 import time
@@ -17,13 +16,28 @@ def echo(ev):
 	time.sleep(6)
 	alert(document["zone"].value)
 def print(*a):
-	document["out"].value+=str(a)+'\n'
+	from pprint import pformat
+	document["out"].value+=pformat(a)+'\n'
+	#pformat will log in console
 	
 document["mybutton"].bind("click", echo)
 
-print(dir())
-print(globals())
-print(locals())
+import time,os
+# print(dir(os) )
+sb=b'\x80\x03ctime\nstruct_time\nq\x00(M\xe2\x07K\tK\rK\x10K\x17K7K\x03M\x00\x01K\x00tq\x01}q\x02(X\x07\x00\x00\x00tm_zoneq\x03X\x1e\x00\x00\x00?D1\xc2\xa8\xc2\xb2\xc2\xa1\xc3\x80\xc2\xa8\xc2\xba\xc2\xa1\xc3\x81?\xc2\xa8\xc2\xba\xc2\xa1\xc3\x80??q\x04X\t\x00\x00\x00tm_gmtoffq\x05M\x80pu\x86q\x06Rq\x07.'
+import pickle
+print(pickle.loads(sb))
+
+#print(time.localtime()  )
+# exit()
+
+# print(pickle.dumps( dir(os) ) )
+# print(pickle.dumps(time.localtime() ) )
+
+# print(dir())
+# print(globals())
+# print(locals())
+
 
 </script>
 <input id="zone">

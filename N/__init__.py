@@ -79,6 +79,33 @@ def get(url,protocol='http',file=''):
 def http(url,method='get',*args):
 	return HTTP.method(url,method,*args)
 
+def rpcServer(port=1212,ip='0.0.0.0',currentThread=False):
+	if py.is3():
+		from xmlrpc.server import SimpleXMLRPCServer as RPCServer
+	U=py.importU()
+	with RPCServer((ip, port),allow_none=True,use_builtin_types=True ) as server:
+		server.register_function(eval)
+		server.register_function(U.execResult, 'execute')
+		server.register_instance(U, allow_dotted_names=True)
+		if currentThread:
+			server.serve_forever()
+		else:
+			from threading import Thread
+			t=Thread(target=server.serve_forever)
+			t.start()
+			return t
+
+def rpcClient(url_or_port='http://127.0.0.1:1212'):
+	if py.isint(url_or_port):
+		url='http://127.0.0.1:'+str(url_or_port)
+	else:
+		url=str(url_or_port)
+	
+	if py.is3():
+		from xmlrpc.client import ServerProxy,MultiCall
+	server = ServerProxy(url)
+	return server
+	
 def getLAN_IP():
 	r=getAllAdapter()
 	return r

@@ -24,7 +24,7 @@ def get(skey,name,root=HKEY_CURRENT_USER,returnType=True):
 	'''
 	r = OpenKey(root,skey)
 	r = QueryValueEx(r,name)
-	if returnType:return r[0],'  {}:{}  '.format(REG_TYPE[r[1]],r[1])
+	if returnType:return r[0],'{} : {}'.format(REG_TYPE[r[1]],r[1])
 	else         :return r[0]        
 	
 def set(skey,name,value,root=HKEY_CURRENT_USER,type='auto,or REG_TYPE int',returnType=True):

@@ -5,7 +5,7 @@ else:import py,T
 gError=[]
 def setErr(ae):
 	global gError
-	py.importU()
+	U=py.importU()
 	if U.gbLogErr:# U.
 		if type(gError) is list:gError.append(ae)
 		elif gError:gError=[gError,ae]
@@ -14,6 +14,20 @@ def setErr(ae):
 		gError=ae
 	if U.gbPrintErr:U.pln('#Error ',ae)
 	
+def stat(path, dir_fd=None, follow_symlinks=True):
+	U=py.importU()
+	s=_os.stat(path=path, dir_fd=dir_fd, follow_symlinks=follow_symlinks)	
+	r={}
+	for i in py.dir(s):
+		if not i.startswith('st_'):continue
+		v=getattr(s,i,py.No('Error getattr') )
+		if i=='st_size':r[i]=readableSize(v);continue
+		if i=='st_mode':r[i]=py.oct(v)      ;continue
+		if i.endswith('time'):
+			r[i]=U.stime(v)
+			continue
+		r[i]=v
+	return r
 def deserialize(a=None,fileName=None):
 	'''The protocol version of the pickle is detected automatically, so no
 protocol argument is needed.  Bytes past the pickled object's

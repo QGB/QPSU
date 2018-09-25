@@ -899,6 +899,21 @@ def evalSafely(source, globals=None, locals=None,noErr=False):
 			return e
 eval=evalSafely
 
+def execResult(source, globals=None, locals=None):
+	'''exec('r=xx') ;return r # this has been tested in 2&3
+	'''
+	if globals==None and locals==None:
+		globals={}#防止 参数不变问题
+		locals ={}
+		# f=sys._getframe().f_back
+		# globals=f.f_globals
+		# locals =f.f_locals	
+
+	exec(source, globals, locals)
+	if 'r' in locals:
+		return locals['r']
+	else:
+		raise Exception(locals,'can not found "r" variable after exec locals')
 def execHelp():
 	'''use py.execute(s,{g:},{l:})
 	is2 ： exec_stmt ::=  "exec" or_expr ["in" expression ["," expression]]
@@ -1577,7 +1592,7 @@ instance of a tzinfo subclass. The remaining arguments may be ints or longs.
 	import re
 	if py.type(a) is py.type(dt.min):
 		return a
-	elif py.type(a) in (py.str,py.unicode):
+	elif py.istr(a):
 		rm=re.match('([0-9]{4})-([0-9]{2})-([0-9]{2}) ([0-9]{2}).([0-9]{2}).([0-9]{2}) .([0-9]{3})',a)
 		if rm:
 			a=T.parseReMatch(rm,'i'*6)+(py.int(rm.group(7))*1000,)
