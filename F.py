@@ -28,30 +28,30 @@ def stat(path, dir_fd=None, follow_symlinks=True):
 			continue
 		r[i]=v
 	return r
-def deserialize(a=None,fileName=None):
+def deserialize(a=None,file=None):
 	'''The protocol version of the pickle is detected automatically, so no
 protocol argument is needed.  Bytes past the pickled object's
 representation are ignored.
 '''
-	if not py.isbyte(a) and not fileName:raise ArgumentError('need bytes or fileName=str ')
+	if not py.isbyte(a) and not file:raise ArgumentError('need bytes or file=str ')
 	import pickle
 	if py.isbyte(a):
 		return pickle.loads(a)
 	else:
-		fileName=autoPath(fileName)
-		with open(fileName,'rb') as f:
+		file=autoPath(file)
+		with open(file,'rb') as f:
 			return pickle.load(f)
 unSerialize=unserialize=deserialize
 			
-def serialize(a,fileName=None,protocol=0):
-	'''if not fileName: Return the pickled representation of the object as a bytes object.
+def serialize(a,file=None,protocol=0):
+	'''if not file: Return the pickled representation of the object as a bytes object.
 	'''
 	import pickle
-	if fileName:
-		fileName=autoPath(fileName)
-		with open(fileName,'wb') as f:
+	if file:
+		file=autoPath(file)
+		with open(file,'wb') as f:
 			pickle.dump(obj=a,file=f,protocol=protocol)
-		return fileName
+		return file
 	else:
 		return pickle.dumps(obj=a,protocol=protocol)	
 		
@@ -258,7 +258,7 @@ def hexToBytes(a,split=''):
 			r+=chr(DHI[ i ])
 		return r
 		
-	for i in xrange(len(a)/2):
+	for i in range(py.int(py.len(a)/2 )):
 		r+=chr(DHI[a[i*2:i*2+2]])
 	return r
 h2b=hexToBytes

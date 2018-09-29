@@ -1477,8 +1477,12 @@ In [305]: U.time
 Out[305]: 1490080571.125
 '''
 	return __import__('time').time()
-time=getime=getTime=timestamp=getCurrentTime=getTimestamp
-	
+timestamp=getTimestamp
+
+def getTime():
+	from datetime import datetime
+	return datetime.now()
+time=getime=getCurrentTime=getTime	
 	
 	
 def getFloaTail(a,ndigits=20,s=False,str=False,string=False,i=False,int=False):
