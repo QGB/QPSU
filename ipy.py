@@ -61,7 +61,7 @@ def outlen(min=-1,max='infinity',start=0,stop=U.IMAX,end=U.IMAX):
 		r[k]=n
 	return r
 
-date=U.getDate()
+date=U.getDateStr()
 gshead='#coding=utf-8'
 gspath=U.getModPath(qgb=False,endSlash=False)
 gsTryExcept=u'''try:{1}

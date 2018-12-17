@@ -201,6 +201,23 @@ def matchHead(txt,regex):
 def strToHex(a,split=''):
 	return split.join(py.hex(py.ord(x))[2:] for x in a).upper()
 s2h=strToHex
+####################
+def bytesToStr(a,coding='ISO-8859-1'):
+	if not py.isbyte(a):
+		return py.No('a is not bytes!',a)
+	if py.is3():
+		return a.decode(coding)
+	else:
+		return a
+		
+def StrToBytes(a,coding='ISO-8859-1'):
+	if not py.istr(a):
+		return py.No('a is not str!',a)
+	if py.is3():
+		return a.encode(coding)
+	else:
+		return a
+		
 ###################
 gdBaseN={
 64:Az09+'+/',#注意 不是alphanumeric+'+/',即 azAZ09
@@ -211,6 +228,14 @@ gs09AZ=number+AZ
 for i in range(2,37):
 	gdBaseN[i]=gs09AZ[:i]
 ###################
+def bytesToBase64(a):
+	'''return str'''
+	import base64
+	if py.is3():
+		return base64.b64encode(a).decode('ascii')
+	else:
+		return base64.b64encode(a)
+
 def strToBaseN(a,base=64,symbols=None):
 	if not symbols:symbols=gdBaseN[base]
 	r=parseInt(a,256)
@@ -229,8 +254,8 @@ def intToStr(n,base=16,symbols=None):
 	if not symbols:symbols=gdBaseN[base]
 	r=''
 	while n>=base:
-		r=symbols[n%base]+r
-		n=n/base
+		r=symbols[py.int(n%base)]+r
+		n=py.int(n/base)
 	return symbols[n]+r	
 radix=i2s=intToStr
 
@@ -246,11 +271,23 @@ def parseInt(a,base=16,symbols=None):
 	
 	if base<36:return py.int(a,base)#int() base must be >= 2 and <= 36
 	else:
+		is_py3_bytes=py.isbyte(a) and py.is3()
 		r=0
 		for i,v in enumerate(a[::-1]):
-			try:
-				r+=symbols.index(v)*pow(base,i)
-			except:U.pln((symbols,[v])  )
+			# try:
+			''' str.index(b'1')  #TypeError: must be str, not bytes
+			2:  In [1]: for i,v in enumerate(b'MzJyNDIz'):print(i,v)
+				(0, 'M')
+				(1, 'z')
+			3:  In [3]: for i,v in enumerate(b'MzJyNDIz'):print(1,v)
+				1 77
+				1 122
+			'''
+			if not is_py3_bytes:
+				v=symbols.index(v)	
+			r+=v*pow(base,i)
+			# except Exception as e:
+				# U.pln((symbols,[v])  )# 
 		return r
 		#TODO
 		
@@ -300,6 +337,16 @@ def ishex(a):
 	for i in a.lower():
 		if i not in hex:return False
 	return True	
+	
+def isUpper(a):
+	for i in az:
+		if i in a:return False
+	return True
+def isLower(a):
+	for i in az:
+		if i in a:return False
+	return True
+	
 def isString(a):
 	if py.is2():return isinstance(a,basestring)#py.type(a) in (py.str,py.unicode)
 	else:return isinstance(a,str)

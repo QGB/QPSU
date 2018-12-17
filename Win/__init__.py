@@ -22,15 +22,10 @@ except:
 # 	
 	# py.pdb()
 	# from . import Constants
-
-
 globals().update([i for i in Constants.__dict__.items() if not i[0].startswith('__')])	
 c=C=Constants
 
-
-
-
-	# from Constants import *
+# from Constants import *
 #if 'qgb.U' in sys.modules:U=sys.modules['qgb.U']
 #elif 'U' in sys.modules:  U=sys.modules['U']
 #else:
@@ -219,19 +214,75 @@ def EnumWindowsProc(hwnd, resultList):
 		resultList.append((hwnd, getitle(hwnd)))
 
 def getAllWindows():
+	'''  return [ [h,title,pid] ,...]
+	'''
 	mlst=[]
 	win32gui.EnumWindows(EnumWindowsProc, mlst)
 	# for handle in handles:
 		# mlst.append(handle)
-	return [(i[0],i[1].decode('mbcs')) for i in mlst]
+	return [(i[0],i[1].decode('mbcs'),get_pid_by_hwnd(i[0])) for i in mlst]
 EnumWindows=getAllWindow=getAllWindows
+
+def get_pid_by_hwnd(hwnd):
+	try:
+		import win32process
+		threadid,pid = win32process.GetWindowThreadProcessId(hwnd)
+	except Exception as e:
+		pid=py.No(e)
+	return pid
+getPidByHandle=get_pid_by_handle=get_pid_by_hwnd
 	
-def setWindowPos(h=0,x=199,y=-21,width=999,height=786,top=None,flags=None):
-	if not h:h=getCmdHandle()
-	if not top:top=HWND_TOP
+def getWindowHandleByTitle(title):
+	for i in getAllWindows():
+		if title in i[1]:
+			return i[0]
+	return py.No('not found window title',title)
+getw=getWindow=getWindowHandleByTitle
+
+def getWindowByProcessName(name):
+	'''  return [ [h,title,pid] ,...]
+	'''
+	U=py.importU()
+	r=[]
+	ws=getAllWindows()
+	for p in U.ps(name=name):
+		for i in ws:
+			if i[2]==p.pid:
+				r.append(i)
+	return r
+
+def getWindowPos(h=0):
+	'''rect : x,y,right,bottom '''
+	if not h:h=getCmdHandle()#TODO current on top window
+	import win32gui
+	return win32gui.GetWindowRect(h)
+getPos=getpos=getWPos=getWindowPos	
+
+def getWindowSize(h):
+	import win32gui
+	r=win32gui.GetWindowRect(h)
+	return (r[2]-r[0],r[3]-r[1])
+getwh=getsize=getSize=getWSize=getWindowSize
+
+def setWindowPos(hwnd=0,x=0,y=0,w=0,h=0,rect=(),top=None,flags=None):
+	if not hwnd:
+		hwnd=getCmdHandle()
+		if x==y==w==h==0 and not rect:
+			x,y,w,h=(199,-21,999,786)
+	if not rect:
+		rect=getWindowPos(hwnd)
+	if not x:x=rect[0]
+	if not y:y=rect[1]
+	if not w:w=rect[2]-rect[0]
+	if not h:h=rect[3]-rect[1]
+		
+	if top:top=HWND_TOPMOST
+	else:  top=HWND_TOP
 	if not flags:flags=SWP_SHOWWINDOW
-	if top is True:top=HWND_TOPMOST
-	return user32.SetWindowPos(h,top,x,y,width,height,flags)
+		
+	if user32.SetWindowPos(hwnd,top,x,y,w,h,flags):#1
+		return hwnd
+	else:return py.No(getLastError())
 setPos=setpos=setWPos=setWindowPos
 	
 def setOskPos(w=333,h=255,x=522,y=-21):
@@ -329,7 +380,7 @@ Out[76]: (1365L, 767L)
                                  DWORD,
                                  DWORD,
                                  ctypes.wintypes.c_void_p]#ULONG_PTR	
-	py.importU()
+	U=py.importU()
 	if U.debug():U.pln(event,x,y,dwData,None)
 	User32.mouse_event(event,x,y,dwData,None)
 mouse_event.ABSOLUTE = 0x8000
@@ -401,28 +452,30 @@ def getLastError(errCode=None,p=True):
 
 	error_message = message_buffer.value
 	LocalFree(message_buffer)
-
-	r= '{} - {}'.format(errCode, error_message).decode('gb18030')#unicode
+	
+	r= '{} - {}'.format(errCode, error_message.decode('mbcs'))#unicode
+	# if py.is2():
+	# else:       r= '{} - {}'.format(errCode, error_message)
 	# error_message = error_message.decode('cp1251').strip()
 	if U.isipy() and not U.DEBUG:#TODO  如果修改了repr 方式  可以去除这个
 		U.pln( r)
 	else:
 		return r
-geterr=getErr=getLastErr=getLastError
+lastError=geterr=getErr=getLastErr=getLastError
 ##############################################
-gdWinVerNum={'10':10.0,# 6.2,#使用 GetVersionExW
+gdWinVerNum={'10':10.0,
+			 '7': 6.1,
+			 '8': 6.2,
+			 '8.1': 6.3,
+			 'vista': 6.0,
+			 'xp': 5.1,# 6.2,#使用 GetVersionExW  # 桌面系统优先
 			 '2000': 5.0,
 			 '2003': 5.2,
 			 '2008': 6.0,
 			 '2008R2': 6.1,
 			 '2012': 6.2,
 			 '2012R2': 6.3,
-			 '2016': 10.0,
-			 '7': 6.1,
-			 '8': 6.2,
-			 '8.1': 6.3,
-			 'vista': 6.0,
-			 'xp': 5.1}
+			 '2016': 10.0}
 for w,i in gdWinVerNum.items():
 	py.execute('''def is{0}():return getVersionNumberCmdVer()=={1}'''.format(
 		w.replace('.','_'),i)    )			 

@@ -106,11 +106,27 @@ def rpcClient(url_or_port='http://127.0.0.1:1212'):
 	server = ServerProxy(url)
 	return server
 	
+def get_ip_from_mac(mac):
+	'''mac=='' return all ip
+	'''
+	U=py.importU()
+	T=U.T
+	r=U.cmd('arp','-a').splitlines() 
+	r=[T.sub(i,'  ', '   ') for i in r if mac in i]
+	r=[i for i in r if i]
+	if py.len(r)==0:
+		return py.No('no ip match mac:{} in arp table!'.format(mac))
+	if py.len(r)>1:
+		return py.No('more then 1 ip matched mac:{} in arp table!'.format(mac),r)
+	if py.len(r)==1:
+		return r[0]
+
 def getLAN_IP():
 	r=getAllAdapter()
 	return r
 
 def getAllAdapter():
+	U=py.importU()
 	if U.iswin():
 		from qgb import Win
 		return Win.getAllNetworkInterfaces()
@@ -119,6 +135,7 @@ def getAllAdapter():
 def setIP(ip='',source='dhcp',adapter='',mask='',ip2=192.168):
 	if not adapter:
 		#adapter=u'"\u672c\u5730\u8fde\u63a5"'.encode('gb2312')#本地连接
+		from qgb import Win
 		if Win.isxp():
 			adapter="\xb1\xbe\xb5\xd8\xc1\xac\xbd\xd3"
 		adapter='1'
@@ -140,6 +157,14 @@ def setIP(ip='',source='dhcp',adapter='',mask='',ip2=192.168):
 	os.system(r)
 	return r
 setip=setIP
+def getComputerName():
+	import socket
+	return socket.gethostname()
+gethostname=getHostName=getComputerName
+
+def getArpTable():
+	U=py.importU()
+	return U.cmd('arp -a')
 		
 def scanPorts(host,threadsMax=33,from_port=1,to_port=65535,callback=None,ip2=192.168):
 	'''return [opens,closes,errors]

@@ -14,6 +14,13 @@ def setErr(ae):
 		gError=ae
 	if U.gbPrintErr:U.pln('#Error ',ae)
 	
+def include(file,keyword):
+	if py.isbyte(keyword):mod='rb'
+	else:mod='r'
+	with open(file,mod) as f:
+		for i in f:
+			if keyword in i:return True
+	return False
 def stat(path, dir_fd=None, follow_symlinks=True):
 	U=py.importU()
 	s=_os.stat(path=path, dir_fd=dir_fd, follow_symlinks=follow_symlinks)	
@@ -28,32 +35,56 @@ def stat(path, dir_fd=None, follow_symlinks=True):
 			continue
 		r[i]=v
 	return r
-def deserialize(a=None,file=None):
+def deserialize(obj=None,file=None):
 	'''The protocol version of the pickle is detected automatically, so no
 protocol argument is needed.  Bytes past the pickled object's
 representation are ignored.
 '''
-	if not py.isbyte(a) and not file:raise ArgumentError('need bytes or file=str ')
+	if not py.isbyte(obj) and not file:raise py.ArgumentError('need bytes or file=str ')
 	import pickle
-	if py.isbyte(a):
-		return pickle.loads(a)
+	if py.isbyte(obj):
+		return pickle.loads(obj)
 	else:
 		file=autoPath(file)
 		with open(file,'rb') as f:
 			return pickle.load(f)
-unSerialize=unserialize=deserialize
+ds=unSerialize=unserialize=deserialize
+
 			
-def serialize(a,file=None,protocol=0):
+def serialize(obj,file=None,protocol=0):
 	'''if not file: Return the pickled representation of the object as a bytes object.
 	'''
 	import pickle
 	if file:
 		file=autoPath(file)
 		with open(file,'wb') as f:
-			pickle.dump(obj=a,file=f,protocol=protocol)
+			pickle.dump(obj=obj,file=f,protocol=protocol)
 		return file
 	else:
-		return pickle.dumps(obj=a,protocol=protocol)	
+		return pickle.dumps(obj=obj,protocol=protocol)	
+s=serialize
+
+def dill_load(file):
+	import dill
+	# if not file.lower().endswith('.dill'):
+		# file+='.dill'
+	with open(file,'rb') as f:
+		return dill.load(f)
+
+def dill_dump(obj,file=None,protocol=0):
+	'''
+	dill.dump(obj, file, protocol=None, byref=None, fmode=None, recurse=None)
+	dill.dumps(obj, protocol=None, byref=None, fmode=None, recurse=None)
+	'''
+	import dill
+	if file:
+		if not file.lower().endswith('.dill'):
+			file+='.dill'
+		with open(file,'wb') as f:
+			dill.dump(obj=obj,file=f,protocol=protocol)		
+		return file
+	else:
+		return dill.dumps(obj=obj,protocol=protocol)
 		
 def copy(src,dst):
 	r''' src : sFilePath , list ,or \n strs
@@ -151,7 +182,8 @@ def getNameFromPath(a):
 	else:
 		# import T
 		return T.subr(a,'/','')
-filename=fileName=getname=getName=name=getNameFromPath
+getNameFromPath
+# filename=fileName=getname=getName=name
 		
 def getNameWithoutExt(a):
 	''' see getNameFromPath
@@ -244,30 +276,39 @@ def bytesToHex(a,split=''):
 	return r
 b2h=bytesToHex
 	
-def hexToBytes(a,split=''):
+def hexToBytes(a,split='',ignoreNonHex=True):
+	a=a.upper();r=b''
+	if ignoreNonHex:a=''.join([i for i in a if i in '0123456789ABCDEF'])
 	it=2
 	if len(split)>0:it+=len(split)
 	if it==2 and len(a) % it!=0:return ()
-	
-	a=a.upper();r=''
-	
+
 	if it>2:
 		a=a.split(split)
 		if len(a[-1]) == 0:a=a[:-1]
 		for i in a:
-			r+=chr(DHI[ i ])
+			r+=py.byte(DHI[ i ])
 		return r
 		
 	for i in range(py.int(py.len(a)/2 )):
-		r+=chr(DHI[a[i*2:i*2+2]])
+		r+=py.byte(DHI[a[i*2:i*2+2]])
 	return r
 h2b=hexToBytes
 
-def writeIterable(file,data,end='\n',overwrite=True):
-	if overwrite:new(file)	
-	f=open(file,'a')
+def writeIterable(file,data,end='\n',overwrite=True,encoding=None):
+	py.importU()
+	if not encoding:encoding=U.encoding
+	
+	file=autoPath(file)
+	if overwrite:new(file)
+	
+	if py.is2():f=open(file,'a')
+	else:       f=open(file,'a',encoding=encoding)
+	
 	for i in data:
 		f.write(py.str(i)+end)
+	f.close()
+	return f.name
 
 def write(file,data,mod='w',encoding='',mkdir=False,autoArgs=True):
 	'''py3  open(file, mode='r', buffering=-1, encoding=None, errors=None, newline=None, closefd=True, opener=None)
@@ -302,6 +343,7 @@ def write(file,data,mod='w',encoding='',mkdir=False,autoArgs=True):
 		# if py.is2():print >>f,data
 		# else:
 		U.pln(data,file=f)
+	f.close()
 	return f.name
 	# except Exception as e:
 		# setErr(e)
@@ -355,8 +397,22 @@ def readJSON(file):
 	''' '''
 	file=autoPath(file)
 	
-	
-	
+def read_csv(file,encoding=None):
+	file=autoPath(file)
+	import pandas as pd
+	df = pd.read_csv(file, delimiter=',',encoding=detectEncoding(file))
+	r=[]
+	if py.len(df.columns)==1:is1=True
+	for i in df.values:
+		if is1:
+			r.append(i[0])
+		else:
+			r.append(tuple(i))
+	return r
+	# or export it as a list of dicts
+	# dicts = df.to_dict().values()
+readCSV=read_csv
+
 def isDir(file):
 	return _p.isdir(file)
 isFolder=isdir=isDir

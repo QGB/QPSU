@@ -1,7 +1,7 @@
 # coding=utf-8
 import sys
 version=sys.version_info
-version=float(version.major) + float('0.{}{}'.format(version.minor,version.micro))
+ver=version=float(version.major) + float('0.{}{}'.format(version.minor,version.micro))
 def is2():
 	'''
 '2.7.13 |Anaconda 4.3.1 (32-bit)| (default, Dec 19 2016, 13:36:02) [MSC v.1500 32 bit (Intel)]
@@ -31,11 +31,11 @@ class ArgumentError(Exception):
 class ArgumentUnsupported(ArgumentError):#an unsupported argument# 为了能快速找到Arg 开头的异常
 	pass
 
+
 class No:	
 	def __init__(s,msg='is a None object with msg',*a):
-		
 		s.msg='{0}'.format(msg)
-		
+		s.a=a[0] if len(a)==1 else a
 	def __str__(s):return ''
 	def __repr__(s):
 		r=s.msg if s.msg.startswith('#') else '###<py.No {0}>'.format(s.msg)
@@ -43,6 +43,14 @@ class No:
 		return r
 	def __len__(s):return 0
 	def __getitem__(s, key):return None
+	
+	def __lt__(self, other):return 0 <	other#Todo:  user defined Constant 0
+	def __le__(self, other):return 0 <=	other
+	def __eq__(self, other):return 0 ==	other
+	def __ne__(self, other):return 0 !=	other
+	def __ge__(self, other):return 0 >=	other
+	def __gt__(self, other):return 0 >	other
+	
 	# @staticmethod #obj.__len__()==-1
 	# def __len__():return -1
 no=No() #instance
@@ -56,6 +64,7 @@ def iterable(a):
 def isbyte(a):
 	if is2():return type(a) in (str,bytearray,bytes)
 	else    :return type(a) in (bytearray,bytes)
+isbytes=isbyte
 	
 def istr(a):
 	if is2():return isinstance(a,basestring)#type(a) in (str,unicode,bytes)
@@ -89,6 +98,14 @@ def isbasic(a,recursive=False):
 	'''
 	return istr(a) or isnum(a) or type(a) in (dict,tuple,list,set,bytes,bytearray) 
 		
+def islist(a):
+	return isinstance(a,list)
+	
+def byte(aInt):
+	'''0 <= aInt < 256.'''
+	if is2():return chr(aInt)
+	else    :return bytes([aInt])
+	
 def modules(modName):
 	return [i[1] for i in sys.modules.items() if modName in i[0] and i[1]] 
 
@@ -101,7 +118,8 @@ def execute(source, globals=None, locals=None):
 	
 gpdb=True	
 def pdb(frame=sys._getframe().f_back):
-	'''call pdb in pdb is useless
+	'''import pdb;pdb.set_trace()
+	call pdb in pdb is useless
 	
 	'''
 	if not gpdb:return

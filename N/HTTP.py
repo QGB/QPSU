@@ -38,7 +38,11 @@ def get(url,file=''):
 		raise e
 	if file:
 		U=py.importU()
-		return U.F.write(file,r.content)
+		content=r.content
+		if content:
+			return U.F.write(file,content)
+		else:
+			return py.No('response.content is Null!')
 	return r.text
 def head(url):
 	return method(url,'head').info().items()

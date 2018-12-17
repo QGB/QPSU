@@ -26,11 +26,14 @@ gbLogErr=True
 
 gbDebug=DEBUG=sys.flags.debug or False#gbDebug只在这里出现一次
 def debug(a=False):
-	if 'debug' in os.environ:
+	# global gbDebug,DEBUG
+	if 'debug' in os.environ:#优先环境变量开关
 		e=os.getenv('debug').strip()#not .trim()
 		if e and e!='0':a=True
 		else:a=False
-	globals()['DEBUG']=a;return DEBUG
+	globals()['DEBUG']=a
+	globals()['gbDebug']=a
+	return DEBUG
 
 # if(calltimes()<1):DEBUG=True #ct not defined
 
@@ -71,7 +74,7 @@ try:
 	# if isMain():import F,T
 	# else:from . import F,T
 	write,read,ls,ll,md,rm=F.write,F.read,F.ls,F.ll,F.md,F.rm
-	from pprint import pprint
+	from pprint import pprint,pformat
 	if __name__.endswith('qgb.U'):from . import Clipboard
 	else:import Clipboard
 
@@ -311,6 +314,11 @@ iterable 的元素,没有特殊处理
 	else:return
 # p(4,2,sep='9')
 # exit()
+def input(msg=''):
+	if py.is2():
+		return raw_input(msg)
+	else:
+		return input(msg)
 
 def readStdin(size=-1):
 	'''size<0 read all, 
@@ -543,7 +551,7 @@ def cmd(*a,**ka):
 		if iswin() or iscyg():a=['cmd']
 		# TODO #
 	if len(a)==1:
-		if type(a[0])==type(''):
+		if py.istr(a[0]):
 			if not s.startswith(quot):
 				s=quot+a[0]+quot
 			if ':' in s and iscyg():
@@ -667,7 +675,23 @@ def this():
 		__name__='233qgb.U'
 		# txt(globals())
 		pln (__name__)
-		
+'''
+try:
+	sys._path=sys.path[:]                 #  list.copy() method (available since python 3.3):
+	# from IPython import embed                       #NOTICE 在 qpsu中不要修改 sys.path 
+	# 如果 导入ipython时出错，可能出现 sys._path 是原来，sys.path 被修改的情况
+	sys.path,sys._path=sys._path,sys.path
+	ipy=ipyEmbed=ipy_embed=embed#IPython.embed
+	
+	# 'G:\\QGB\\Anaconda2\\lib\\site-packages\\IPython\\extensions',
+	# '/usr/local/lib/python3.5/dist-packages/IPython/extensions',
+except:
+	sys.path,sys._path=sys._path,sys.path
+print( [sys.path.remove(i) for i in sys.path 
+		if ('IPython' in i and i.endswith('extensions')  ) or i.endswith('.ipython')]	)
+'''
+#不能保证sys.path 不被修改，暂时放弃
+
 def repl(_=None,printCount=False,msg=''):
 	# a=1
 	ic=count('__repl__')
@@ -701,10 +725,6 @@ def repl(_=None,printCount=False,msg=''):
 		# embed(f.f_globals, f.f_locals, vi_mode=False, history_filename=None)
 		# return
 	# except:pass
-	
-	# try:import IPython;IPython.embed();return
-	# except:pass
-	
 repl=pys=pyshell=repl
 
 def reload(*mods):
@@ -997,7 +1017,7 @@ def resetStd(name=''):
 	return True
 resetstd=resetStd#=resetStream
 gsBrowser=''
-def browser(url,browser=gsBrowser,b=''):
+def browser(url,browser=gsBrowser,b='yandex'):
 	'''b,browser='yandex'
 	'''
 	if istermux():return run('termux-open-url',url) 
@@ -1483,7 +1503,11 @@ def getTime():
 	from datetime import datetime
 	return datetime.now()
 time=getime=getCurrentTime=getTime	
-	
+
+def getDate():
+	from datetime import datetime
+	return datetime.now().date()
+date=getdate=getDate
 	
 def getFloaTail(a,ndigits=20,s=False,str=False,string=False,i=False,int=False):
 	''' see help round()
@@ -1815,7 +1839,12 @@ def getParentCmdLine():
 	import psutil
 	return psutil.Process(getppid()).cmdline()
 getpargv=getParentCmdLine	
-	
+
+def getProcessByPid(pid):
+	'''process_name = process.name()'''
+	import psutil
+	return psutil.Process(pid)			 
+									
 def getProcessList(name='',cmd='',pid=0):
 	'''if err return [r, {i:err}  ]
 _62.name()#'fontdrvhost.exe'
@@ -1905,8 +1934,12 @@ Out[114]: 1
 --------> os.system('"M:\\Program Files\\Notepad++\\notepad++.exe" IP.py')
 Out[115]: 0
 
+in ipy , npp() not autoReload when U.r(), But U.npp()
 '''
 	nppexe='/Notepad++/notepad++.exe'.lower()
+	npath=''	
+	# print(233333333333)  # add this work?
+	# msgbox(npath,py.dir())  #U.r not work ?
 	args=py.getattr(a,'args',None)
 	if args and py.iterable(args):
 		args=py.list(args)
@@ -1948,7 +1981,8 @@ Out[115]: 0
 	if a.endswith('.pyc'):#AttributeError: 'code' object has no attribute 'endswith'
 		a=a[:-3]+'py'
 	if Win.getVersionNumber()>=6.1:#win7
-		npath=os.getenv('appdata').replace('\\','/')+nppexe
+		appdata=os.getenv('appdata') or ''#win10 not have appdata  ?
+		npath=appdata.replace('\\','/')+nppexe
 	if not os.path.exists(npath):	
 		npath=getModPath()[:3]+r'QGB'+nppexe
 	if not os.path.exists(npath):	
@@ -1985,12 +2019,11 @@ def backLocals(f=None,i=0,r=[]):
 	return backLocals(f.f_back,i+1,r)	
 printFrame=backLocals
 	
-def getDate():
+def getDateStr():
 	'''return '20170301' #From os time'''
-	from datetime import date
-	t=date.today()
+	t=getDate()
 	return ('%4s%2s%2s'%(t.year,t.month,t.day)).replace(' ','0')
-today=getdate=getDate
+sdate=stoday=getdatestr=getDateStr
 # sys.argv=['display=t','pressKey=t','clipboard=f']
 def getAST(mod):
 	import ast,inspect
@@ -2111,13 +2144,36 @@ pln({0})
 def explorer(path='.'):
 	''' exp can not open g:/qgb '''
 	path=path.replace('/','\\')
+	ps=r'''C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe -Command ii {}.'''.format(path)
 	if iswin():
-		os.system('explorer.exe '+path)
+		if Win.getVersionNumber()>6.0:#vista
+			os.system(ps)
+		else:
+			os.system('explorer.exe '+path)
 exp=explorer
 
 def log(*a):
+	''' rewrite bellow 
+BASIC_FORMAT %(levelname)s:%(name)s:%(message)s
+CRITICAL 50
+DEBUG 10
+ERROR 40
+FATAL 50
+INFO 20
+NOTSET 0
+WARN 30
+WARNING 30
+_STYLES {'%': (<class 'logging.PercentStyle'>,......}
+'''
 	pln(a)
-
+try:	
+	import logging
+	logging.basicConfig(format='%(asctime)s,%(msecs)d %(levelname)-8s [%(filename)s:%(lineno)d] %(message)s',
+		datefmt='%Y-%m-%d:%H:%M:%S',
+		level=logging.INFO)
+	log=logging.getLogger(__name__).info
+except:pass
+	
 def logWindow():
 	import Tkinter as tk
 	#TODO:
@@ -2319,9 +2375,15 @@ def save(a,name=0):
 	name=F.autoPath(name,default='g:/qgb/') 
 	if  py.isbyte(a) or py.istr(a):
 		return F.write(name,a)
-	elif py.isbasic():
-		return pickle.dump(a,open(name,'wb'),0)#0 ascii mode
+	elif py.isbasic(a):
+		return F.serialize(obj=a,file=name)#0 ascii mode
 	else:
+		try:
+			return F.dill_dump(obj=a,file=name)
+		# except ImportError as e:
+		except Exception as e:
+			log(e)
+			
 		raise NotImplementedError('序列化非基本类型')
 	# if name:
 	# else:#TODO 写入一个新文件并保证 别进程 load 可以读到最新的save；可以保存到网络？？
@@ -2357,6 +2419,11 @@ def unique(iterable):
 		if i not in r:r.append(i)
 	return r
 
+def pipInstall(modName):
+	from pip.__main__ import _main as pip
+	return pip(['install',modName])
+pip_install=pipInstall
+	
 def main(display=True,pressKey=False,clipboard=False,escape=False,c=False,ipyOut=False,cmdPos=False,reload=False,*args):
 	anames=py.tuple([i for i in py.dir() if not i .startswith('args')])
 	if not args:args=sys.argv
