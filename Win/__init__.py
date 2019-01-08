@@ -71,6 +71,20 @@ try:
 	import win32gui
 except Exception as ei:pass
 
+
+	
+def ntHash(a):
+	'''pip3 install passlib
+	case sensitive'''
+	from passlib.hash import nthash
+	return nthash.hash(a).upper()
+	
+def lmHash(a):
+	'''case Insensitive'''
+	import hashlib,binascii
+	hash = hashlib.new('md4', "1".encode('utf-16le')).digest()
+	return binascii.hexlify(hash).decode('ascii').upper()
+	
 #######################################################################
 class SYSTEM_POWER_STATUS(ctypes.Structure):
     _fields_ = [
@@ -81,13 +95,10 @@ class SYSTEM_POWER_STATUS(ctypes.Structure):
         ('BatteryLifeTime', wintypes.DWORD),
         ('BatteryFullLifeTime', wintypes.DWORD),
     ]
-
 SYSTEM_POWER_STATUS_P = ctypes.POINTER(SYSTEM_POWER_STATUS)
-
 GetSystemPowerStatus = ctypes.windll.kernel32.GetSystemPowerStatus
 GetSystemPowerStatus.argtypes = [SYSTEM_POWER_STATUS_P]
 GetSystemPowerStatus.restype = wintypes.BOOL
-
 systemPowerStatus = SYSTEM_POWER_STATUS()
 
 def batteryIsOn():

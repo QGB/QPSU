@@ -29,6 +29,10 @@ def set(aString):
 	finally:
 		w.CloseClipboard()
 
+def set_repr(a):
+	return set(repr(a))
+setr=setRepr=set_repr
+
 def close():
 	w.CloseClipboard()
 	

@@ -61,6 +61,10 @@ def iterable(a):
 		return True
 	except:return False
 	
+def isunicode(a):
+	if is2():return isinstance(a,unicode)
+	else    :return isinstance(a,str)
+	
 def isbyte(a):
 	if is2():return type(a) in (str,bytearray,bytes)
 	else    :return type(a) in (bytearray,bytes)
@@ -153,6 +157,11 @@ def importU():
 		import U
 		raise Exception('#Error import U in qgb.py')
 
+def importT():
+	return importU().T
+	
+	
+	
 def traceback(ae=None):
 	import traceback
 	if not ae:return traceback.print_last()

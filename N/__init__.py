@@ -132,27 +132,32 @@ def getAllAdapter():
 		return Win.getAllNetworkInterfaces()
 	
 #setip 192.168  ,  2.2	
-def setIP(ip='',source='dhcp',adapter='',mask='',ip2=192.168):
+def setIP(ip='',adapter='',gateway='',source='dhcp',mask='',ip2=192.168):
 	if not adapter:
 		#adapter=u'"\u672c\u5730\u8fde\u63a5"'.encode('gb2312')#本地连接
-		from qgb import Win
-		if Win.isxp():
-			adapter="\xb1\xbe\xb5\xd8\xc1\xac\xbd\xd3"
-		adapter='1'
+		try:
+			adapter=getAllAdapter()[0][0]	#   ( [11,'192.168.1.111',..] , [..] , ..]
+		except:	
+			if py.is2():adapter="\xb1\xbe\xb5\xd8\xc1\xac\xbd\xd3"
+			else:		adapter="本地连接"
+		# from qgb import Win
+		# if Win.isxp():
+			
 	if ip:
+		source='static'
 		if type(ip) is py.int:
 			ip='{0}.2.{1}'.format(ip2,ip)
 		if type(ip) is py.float:
 			ip='{0}.{1}'.format(ip2,ip)
-		source='static'
-		if not ip.startswith('addr='):
-			ip='addr='+ip
-		if not mask:mask='mask='+'255.255.255.0'
-		
-		if not mask.startswith('mask'):mask='mask='+mask
+		# if not ip.startswith('addr='):ip='addr='+ip
+		if not mask:mask='255.255.255.0'
+		# if not mask.startswith('mask'):mask='mask='+mask
+		if not gateway:
+			T=py.importT()
+			gateway=T.subLast(ip,'','.')+'.1'
 	else:
 		ip=''
-	r='netsh interface ip  set address source={1} {2} {3} name={0}'.format(adapter,source,ip,mask)
+	r='netsh interface ip  set address name={0} source={1} address={2} mask={3} gateway={4} '.format(adapter,source,ip,mask,gateway)
 	import os
 	os.system(r)
 	return r

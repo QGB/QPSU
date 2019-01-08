@@ -383,12 +383,18 @@ def subRight(s,s1,s2=''):
 	return s[i1:i2]
 subLast=subr=subRight
 	
-def replacey(a,c,*yc):
+def removeAllSpace(a):
+	'''in char256 {' ', '\x0b', '\x1c', '\x1d', '\t', '\x0c', '\x1e', '\x85', '\xa0', '\x1f', '\r', '\n'}  removed'''
+	import re
+	return re.sub(r"\s+", "", a, flags=re.UNICODE)
+delAllSpace=removeAllSpaces=removeAllSpace
+
+def replacey(a,new,*olds):
 	if(a==None):raise Exception('a(string) == None')
 	else:a=str(a)
-	if(len(yc)<1):raise Exception('Target chars Null')
+	if(len(olds)<1):raise Exception('Target chars Null')
 	if(c==None):raise Exception('c None')
-	for i in yc:
+	for i in olds:
 		a=a.replace(i,c)
 	return a
 	

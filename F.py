@@ -17,10 +17,14 @@ def setErr(ae):
 def include(file,keyword):
 	if py.isbyte(keyword):mod='rb'
 	else:mod='r'
-	with open(file,mod) as f:
-		for i in f:
-			if keyword in i:return True
+	try:
+		with open(file,mod) as f:
+			for i in f:
+				if keyword in i:return True
+	except Exception as e:
+		return py.No(e)
 	return False
+	
 def stat(path, dir_fd=None, follow_symlinks=True):
 	U=py.importU()
 	s=_os.stat(path=path, dir_fd=dir_fd, follow_symlinks=follow_symlinks)	
@@ -264,7 +268,7 @@ isPath=isdir=isDir
 	# return _p.sep in ast
 # def is	
 def intToBytes(a):
-	import T
+	T=py.importU().T
 	a=T.intToStr(a)
 	return hexToBytes(a)
 i2b=intToBytes
@@ -283,6 +287,8 @@ def hexToBytes(a,split='',ignoreNonHex=True):
 	if len(split)>0:it+=len(split)
 	if it==2 and len(a) % it!=0:return ()
 
+				  
+ 
 	if it>2:
 		a=a.split(split)
 		if len(a[-1]) == 0:a=a[:-1]
@@ -294,6 +300,7 @@ def hexToBytes(a,split='',ignoreNonHex=True):
 		r+=py.byte(DHI[a[i*2:i*2+2]])
 	return r
 h2b=hexToBytes
+
 
 def writeIterable(file,data,end='\n',overwrite=True,encoding=None):
 	py.importU()
@@ -310,9 +317,10 @@ def writeIterable(file,data,end='\n',overwrite=True,encoding=None):
 	f.close()
 	return f.name
 
-def write(file,data,mod='w',encoding='',mkdir=False,autoArgs=True):
+def write(file,data,mod='w',encoding='',mkdir=False,autoArgs=True,pretty=True):
 	'''py3  open(file, mode='r', buffering=-1, encoding=None, errors=None, newline=None, closefd=True, opener=None)
 	   py2  open(name[, mode[, buffering]])
+pretty=True        Format a Python object into a pretty-printed representation.
 	'''
 	py.importU()
 	try:
@@ -342,6 +350,8 @@ def write(file,data,mod='w',encoding='',mkdir=False,autoArgs=True):
 	else:
 		# if py.is2():print >>f,data
 		# else:
+		if pretty:
+			data=U.pformat(data)
 		U.pln(data,file=f)
 	f.close()
 	return f.name
@@ -395,7 +405,9 @@ def readBytes(file):
 	
 def readJSON(file):
 	''' '''
-	file=autoPath(file)
+	s=read(file)
+	import json
+	return json.loads(s)
 	
 def read_csv(file,encoding=None):
 	file=autoPath(file)
@@ -517,11 +529,14 @@ def ll(ap='.',readable=True,type='',t='',r=False,d=False,dir=False,f=False,file=
 		s=_os.stat(i)
 		dr[i]=[size(i),s.st_atime,s.st_mtime,s.st_ctime,s.st_mode]
 		if readable:
-			py.importU()
+			# py.importU()
+			
 			for j in py.range(len(dr[i])):
 				# U.pln i,j,repr(dr[i][j])
+				# if py.type(dr[i][j]) is py.long:
+				if j==0: dr[i][j]=readableSize(dr[i][j])
 				if py.type(dr[i][j]) is py.float:dr[i][j]=U.stime(time=dr[i][j])
-				if py.type(dr[i][j]) is py.long:dr[i][j]=readableSize(dr[i][j])
+				
 	return dr
 
 SUFFIXES = {1000: ['KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'],
@@ -552,6 +567,8 @@ readableSize=numToSize
 def size(asf): 
 	'''file or path return byte count
 	not exist return -1'''
+	asf=nt_path(asf)
+	# asf=autoPath(asf)#in there,can't use gst
 	size =0 #0L  SyntaxError in 3
 	if not _p.exists(asf):
 		return -1#-1L
@@ -597,6 +614,10 @@ def delFile(file):
 	
 	
 	try:
+		if isDir(file):
+			import shutil
+			shutil.rmtree(file, ignore_errors=True)
+			return True	
 		_os.remove(file)
 		return True
 	except Error():
@@ -606,8 +627,8 @@ def delFile(file):
 	# Docstring: MS-Windows OS system call failed.  
 	#*nix NameError: name 'WindowsError' is not defined  '''
 	except Exception as e:
-		setErr({file:e})
-		return False
+		# setErr({file:e})
+		return py.No(file,e)
 	
 rm=delete=delFile
 	
@@ -662,17 +683,18 @@ if fn.startswith("."): 如果路径中所有文件夹存在，则可以写入读
 FileNotFoundError: [Errno 2] No such file or directory: '.
 
 	'''
+	U=py.importU()
 	if not gbAutoPath:return fn
 	if default:
 		default=default.replace('\\','/')
 		if not default.endswith('/'):default+='/'
 	else:
-		py.importU()
 		default=U.gst
 	fn=str(fn)
 	fn=fn.replace('\\','/')
-	if fn.startswith("."):
+	if fn.startswith("."):#TODO to avoid dos max_path ,  must \ full path
 		return fn;
+		
 	if fn.startswith("~/"):
 		import os
 		if U.isnix():
@@ -680,15 +702,41 @@ FileNotFoundError: [Errno 2] No such file or directory: '.
 		else:
 			home=os.getenv('USERPROFILE')# 'C:/Users/Administrator'  not  cyg home os.getenv('HOME')
 		# else:		home=os.getenv('HOMEPATH')#  HOMEPATH=\Users\Administrator
-		return home+fn[1:];
+		fn= home+fn[1:];
 	
-	if isAbs(fn):
-		return fn
-	else:
-		# if _p.exists(fn):return abs(fn)
+	if not isAbs(fn):
 		while fn.startswith('/'):fn=fn[1:]
-		return (default + fn);
+		fn= default + fn
+	
+	if py.len(fn)>=260 and U.iswin():
+		fn=nt_path(fn)
+	return fn
+	
+def nt_path(fn):
+	U=py.importU()
+	fn=_p.abspath(fn)
+	if  U.iswin():#or cyg?
+		if not py.isunicode(fn):fn=fn.decode(U.T.detect(fn)['encoding'] )#暂时没想到更好方法，头晕
+		fn=fn.replace(u'/',u'\\')
+		if fn.startswith(u"\\\\"):
+			fn=u"\\\\?\\UNC\\" + fn[2:]
+		else:
+			fn=u"\\\\?\\" + fn    
+	return fn
+	
 def abs(file):
+	'''In [165]: gs ###notice Users/Admin
+Out[165]: '\\\\?\\C:\\Users/Administrator\\.gradle\\caches\\3.3\\scripts-remappe
+d\\sync_local_repo10406_a5s4kku7mncoj5pzsbgck2y4v\\6oxfw7eb7mpz692y3xnywccj1\\in
+it1efd45104ffa2d33563b85b9edda76e3\\classes\\sync_local_repo10406_a5s4kku7mncoj5
+pzsbgck2y4v$_run_closure1$_closure2$_closure4$_closure5.class'
+
+In [166]: F._p.abspath gs
+--------> F._p.abspath(gs)
+Out[166]: '\\\\?\\C:\\Users\\Administrator\\.gradle\\caches\\3.3\\scripts-remapp
+ed\\sync_local_repo10406_a5s4kku7mncoj5pzsbgck2y4v\\6oxfw7eb7mpz692y3xnywccj1\\i
+nit1efd45104ffa2d33563b85b9edda76e3\\classes\\sync_local_repo10406_a5s4kku7mncoj
+5pzsbgck2y4v$_run_closure1$_closure2$_closure4$_closure5.class'''
 	return _p.abspath(file)
 		
 def isAbs(file):
@@ -704,7 +752,7 @@ Out[45]: False
 --------> F.isabs('/babun/cygwin/lib/python2.7\\qgb\\F.py')# True
 #TODO 更加精细判断，文件名不合法 return None?
 '''	
-	py.importU()
+	U=py.importU()
 	if U.iscyg() or U.iswin():
 		if ':' in file:return True
 		else:return False
@@ -715,7 +763,7 @@ def name(a):
 	'''Anti abs
 	得到 单独文件（夹）名字
 	'''
-	py.importU()
+	U=py.importU()
 	if not U.T.istr(a):return ''
 	if U.inMuti(a,'/','\\',f=str.endswith):a=a[:-1]
 	if not isAbs(a):return a
@@ -740,7 +788,7 @@ def readlines(a):
 def isFileName(a):
 	'''a:str'''
 	# from . import U #ValueError: Attempted relative import in non-package
-	py.importU()
+	U=py.importU()
 	for i in a:
 		if i not in T.PATH_NAME:return py.No(i,a)
 		

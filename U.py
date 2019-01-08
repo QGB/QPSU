@@ -125,7 +125,7 @@ def isnix():
 	return [i for i in glnix if i in platform.system().lower()]
 	# return one_in('nix','linux','darwin',platform.system().lower())
 def istermux():
-	return 'com.termux' in os.getenv('PATH')
+	return '/com.termux' in sys.executable
 
 def iscyg():
 	return 'cygwin' in  platform.system().lower()
@@ -380,6 +380,7 @@ def md5(a='',file=''):
 	md5 = hashlib.md5()   
 	md5.update(a)	
 	return md5.hexdigest()  
+
 	
 def inMuti(a,*la,**func):
 	'''bool a.func(la[i])'''
@@ -2260,8 +2261,13 @@ def reversedDict(d):
 	return r
 	
 def difference(a,b):
-	'''差集 a-b'''
-	return py.set(a)-py.set(b)
+	'''差集 a-b
+	 U.diff([1,2,4],[1,2,5]) # {4}
+	'''
+	a=py.set(a)
+	b=py.set(b)
+	if py.len(a)<py.len(b):a,b=b,a
+	return a-b
 cj=diff=difference	
 	
 def j(a,b):
