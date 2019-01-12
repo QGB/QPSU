@@ -676,6 +676,19 @@ def this():
 		__name__='233qgb.U'
 		# txt(globals())
 		pln (__name__)
+
+def ipyEmbed():
+	global ipyEmbed
+	from IPython import embed
+	ipyEmbed=embed
+	ka={'InteractiveShellApp': {'exec_lines': ["from qgb import *"]},
+		'TerminalIPythonApp': {'display_banner': False},
+		'TerminalInteractiveShell': {'autocall': 2}
+	}
+	import functools
+	return functools.partial(ipyEmbed,**ka)
+	return embed
+ipy=ipy_embed=embed=ipyEmbed
 '''
 try:
 	sys._path=sys.path[:]                 #  list.copy() method (available since python 3.3):
@@ -875,12 +888,22 @@ def pwd(p=False,display=False):
 	return s+pwd.sp#带sp方便使用者拼接路径
 getCurrentPath=pwd
 	
-def sort(a, cmp=None, key=None, reverse=False):
+def randomInt(min=0,max=IMAX):
+	'''random.randint(a, b)
+Return a random integer N such that a <= N <= b.'''
+	import random
+	return random.randint(min, max)
+randint=ramdomInt=randomInt
+
+def sort(a,column=0, cmp=None, key=None, reverse=False):
 	''' py2&py3  sorted _3 ,key=lambda i:len(i)        按长度从小到大排序
 	在python2.x  sorted _5,cmp=lambda a,b:len(a)-len(b) 实现同上功能， 一般不用cmp 参数
 	sorted中cmp参数指定的函数用来进行元素间的比较。此函数需要2个参数，然后返回负数表示小于，0表示等于，正数表示大于。'''
+	if column>0:
+		def key(*a):
+			ipyEmbed()()
 	if py.is2():
-		a=py.sorted(a,cmp,key=key, reverse=reverse)
+		a=py.sorted(a,cmp=cmp,key=key, reverse=reverse)
 	else:
 		if cmp and  not key:
 			import functools
@@ -893,7 +916,7 @@ def sort(a, cmp=None, key=None, reverse=False):
 def sortDictV(ad,des=True):
 	'''des True,,, python dict key auto sort ?'''
 	if type(ad) is not dict:return {}
-	return sorted(ad.iteritems(),key=lambda ad:ad[1],reverse=True)
+	return sorted(ad.items(),key=lambda ad:ad[1],reverse=True)
 # d={}
 # for i in range(7):
 	# d[i]=i*i-5*i

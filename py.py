@@ -43,6 +43,7 @@ class No:
 		return r
 	def __len__(s):return 0
 	def __getitem__(s, key):return None
+	def __hash__(s):return 0
 	
 	def __lt__(self, other):return 0 <	other#Todo:  user defined Constant 0
 	def __le__(self, other):return 0 <=	other

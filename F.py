@@ -52,7 +52,7 @@ representation are ignored.
 		file=autoPath(file)
 		with open(file,'rb') as f:
 			return pickle.load(f)
-ds=unSerialize=unserialize=deserialize
+ds=pickle_load=unSerialize=unserialize=deserialize
 
 			
 def serialize(obj,file=None,protocol=0):
@@ -66,7 +66,7 @@ def serialize(obj,file=None,protocol=0):
 		return file
 	else:
 		return pickle.dumps(obj=obj,protocol=protocol)	
-s=serialize
+s=pickle_dump=serialize
 
 def dill_load(file):
 	import dill
@@ -89,7 +89,20 @@ def dill_dump(obj,file=None,protocol=0):
 		return file
 	else:
 		return dill.dumps(obj=obj,protocol=protocol)
-		
+
+def chmod777(file,mode):
+	import os
+	os.chmod(file, 0o777) 
+def getMode(file):
+	import os
+	try:
+		r= oct(os.stat(file).st_mode)
+		if r[:5]!='0o100':raise Exception('不是100代表什么？',r)
+		return r[-3:]
+	except Exception as e:
+		return py.No(e)
+getmode=	getMode
+	
 def copy(src,dst):
 	r''' src : sFilePath , list ,or \n strs
 dst:sPath
@@ -425,6 +438,23 @@ def read_csv(file,encoding=None):
 	# dicts = df.to_dict().values()
 readCSV=read_csv
 
+def read_sqlite(file,table=''):
+	import sqlite3
+	with sqlite3.connect(file) as con:
+		cursor = con.cursor()
+		cursor.execute("SELECT name FROM sqlite_master WHERE type='table';")
+		#[('sessions',), ('sqlite_sequence',), ('history',), ('output_history',)]
+		tables=[i[0] for i in cursor.fetchall()]
+		if table:
+			if not (table in tables):return py.No('no table',table,'found in',file)
+			cursor.execute("SELECT * FROM {};".format(table) )
+			return cursor.fetchall()
+		else:
+			r={}
+			for i in tables:
+				r[i]=read_sqlite(file=file,table=i)
+			return r
+	
 def isDir(file):
 	return _p.isdir(file)
 isFolder=isdir=isDir
@@ -567,7 +597,7 @@ readableSize=numToSize
 def size(asf): 
 	'''file or path return byte count
 	not exist return -1'''
-	asf=nt_path(asf)
+	asf=nt_path(asf)#if linux etc ,will auto ignored
 	# asf=autoPath(asf)#in there,can't use gst
 	size =0 #0L  SyntaxError in 3
 	if not _p.exists(asf):
@@ -713,6 +743,8 @@ FileNotFoundError: [Errno 2] No such file or directory: '.
 	return fn
 	
 def nt_path(fn):
+	'''if linux etc ,will auto ignored
+	'''
 	U=py.importU()
 	fn=_p.abspath(fn)
 	if  U.iswin():#or cyg?
