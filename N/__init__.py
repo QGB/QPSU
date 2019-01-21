@@ -148,16 +148,19 @@ def setIP(ip='',adapter='',gateway='',source='dhcp',mask='',ip2=192.168):
 		if type(ip) is py.int:
 			ip='{0}.2.{1}'.format(ip2,ip)
 		if type(ip) is py.float:
-			ip='{0}.{1}'.format(ip2,ip)
-		# if not ip.startswith('addr='):ip='addr='+ip
+			ip='{0}.{1}'.format(ip2,ip)		
+		
 		if not mask:mask='255.255.255.0'
-		# if not mask.startswith('mask'):mask='mask='+mask
+		if not mask.startswith('mask'):mask='mask='+mask
+		
 		if not gateway:
 			T=py.importT()
 			gateway=T.subLast(ip,'','.')+'.1'
+		if not gateway.startswith('gateway'):gateway='gateway='+gateway
+		if not ip.startswith('addr='):ip='addr='+ip
 	else:
 		ip=''
-	r='netsh interface ip  set address name={0} source={1} address={2} mask={3} gateway={4} '.format(adapter,source,ip,mask,gateway)
+	r='netsh interface ip set address name={0} source={1} {2} {3} {4} '.format(adapter,source,ip,mask,gateway)
 	import os
 	os.system(r)
 	return r

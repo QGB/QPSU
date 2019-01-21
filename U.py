@@ -678,15 +678,15 @@ def this():
 		pln (__name__)
 
 def ipyEmbed():
-	global ipyEmbed
+	# global ipyEmbed
 	from IPython import embed
-	ipyEmbed=embed
+	# ipyEmbed=embed
 	ka={'InteractiveShellApp': {'exec_lines': ["from qgb import *"]},
 		'TerminalIPythonApp': {'display_banner': False},
 		'TerminalInteractiveShell': {'autocall': 2}
 	}
 	import functools
-	return functools.partial(ipyEmbed,**ka)
+	return functools.partial(embed,**ka)# useless ?   ka不对？
 	return embed
 ipy=ipy_embed=embed=ipyEmbed
 '''
@@ -900,8 +900,9 @@ def sort(a,column=0, cmp=None, key=None, reverse=False):
 	在python2.x  sorted _5,cmp=lambda a,b:len(a)-len(b) 实现同上功能， 一般不用cmp 参数
 	sorted中cmp参数指定的函数用来进行元素间的比较。此函数需要2个参数，然后返回负数表示小于，0表示等于，正数表示大于。'''
 	if column>0:
-		def key(*a):
-			ipyEmbed()()
+		def key(a):#a:item of sort list   |  *a: (item,)
+			return a[column]
+			#TypeError: '<' not supported between instances of 'int' and 'str'
 	if py.is2():
 		a=py.sorted(a,cmp=cmp,key=key, reverse=reverse)
 	else:
@@ -925,8 +926,9 @@ def sortDictV(ad,des=True):
 # d={0: 0, 5: 0, 6: 6, 1: -4, 2: -6, 3: -6, 4: -4}
 
 # d=sortDictV(d)
-
 # exit()
+def dictToList(a):
+	return py.list(a.items())
 
 def evalSafely(source, globals=None, locals=None,noErr=False):
 	''' '''
@@ -1068,14 +1070,15 @@ def browser(url,browser=gsBrowser,b='yandex'):
 		if py.eval('callable({0})'.format(i)):
 			if browser.lower()== i:
 				py.execute('{0}(url)'.format(i) ) in globals(),locals()  
-		
-	 
 	# webbrowser.open_new_tab(url)
 	# if iswin():os.system('''start '''+str(url))
 # browser('qq.com')
+def browser_obj(obj,b='yandex'):
+	#pformat(obj,indent=3)
+	browser(F.write(data=obj,file='browser_obj.txt' )    ,b=b)
+browserObj=browser_obj
 
 gsHtmlTextarea=('<textarea style="width:100%; height:100%;">','</textarea>')
-		
 def autohtml(file=None):
 	import T
 	if not py.istr(file):
@@ -1153,11 +1156,13 @@ def avgLen(*a):
 	im=0
 	for i in a:
 		im+=len(i)
-	return float(im)/len(a)
-	
+	return float(im)/len(a)	
 	
 def printAttr(a,b='chrome',console=False,call=False):
-	'''if call: aoto call __methods which is no args'''
+	'''if call: aoto call __methods which is no args
+	
+	py.dir  request  'werkzeug.local.LocalProxy'  ==   []
+	'''
 	d=py.dir(a)
 	
 	if console:
@@ -1179,7 +1184,7 @@ def printAttr(a,b='chrome',console=False,call=False):
 		try:
 			v=getattr(a,k,'Error getattr')#py.eval('a.{0}'.format(k))			
 			vi=len(v)
-			# import pdb;pdb.set_trace()
+			import pdb;pdb.set_trace()
 			# if py.callable(v):
 				# if k.startswith('__'):
 					# vv='# ErrCall {0}()'.format(k)
@@ -1216,7 +1221,7 @@ def printAttr(a,b='chrome',console=False,call=False):
 	name=gst+'QPSU/'+T.filename(getObjName(a))+'.html'
 	# pln (name)
 	browser(name,b)
-	if not r.strip():py.pdb()
+	# if not r.strip():py.pdb()
 	return F.write(name,F.read(sp).replace('{result}',r),mkdir=True)
 	
 	
@@ -1582,10 +1587,10 @@ def getStime(time=None,format=gsTimeFormatFile,ms=True):
 		else:return tMod.strftime(format)
 stime=getCurrentTimeStr=timeToStr=getStime
 	
-def int(a,default=0,error=-1):
+def int(a,default=0):
 	if not a:return default
 	try:return py.int(a)
-	except:return error
+	except Exception as e:return py.No(e)
 	
 def primes(n):
 	''' 
@@ -2290,7 +2295,7 @@ def difference(a,b):
 	a=py.set(a)
 	b=py.set(b)
 	if py.len(a)<py.len(b):a,b=b,a
-	return a-b
+	return py.list(a-b)
 cj=diff=difference	
 	
 def j(a,b):

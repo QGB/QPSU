@@ -143,8 +143,13 @@ def save(file=None,lines=-1,tryExcept=False,out=False,columns=70,overide=True):
 	for i,v in enumerate(gIn):
 		if i==0:continue
 		v=v.strip()
+			# U.isSyntaxError(u'_{0}={1}'.format(i,v) ) :
+				# pass
 		if i in gOut.keys():
-			v=u'_{0}={1}'.format(i,v)
+			if i==1 and gOut[1].endswith(':/QGB/babun/cygwin/lib/python2.7/'):
+				pass
+			else:
+				v=u'_{0}={1}'.format(i,v)
 			if out:
 				U.pln('"""#{0}'.format(i),file=file )
 				U.pln(gOut[i],file=file )

@@ -22,6 +22,14 @@ def post(url,data):
 
 	return
 
+def getBytes(url):
+	url=autoUrl(url)
+	import requests
+	try:
+		return requests.get(url).content
+	except Exception as e:
+		return py.No(e)
+	
 def get(url,file=''):
 	# return method(url,'get')#<http.client.HTTPResponse at 0x203a16a74a8>
 	url=autoUrl(url)

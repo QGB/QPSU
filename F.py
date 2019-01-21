@@ -27,7 +27,14 @@ def include(file,keyword):
 	
 def stat(path, dir_fd=None, follow_symlinks=True):
 	U=py.importU()
-	s=_os.stat(path=path, dir_fd=dir_fd, follow_symlinks=follow_symlinks)	
+	import os
+	try:
+		if isinstance(path,os.stat_result):
+			s=path
+		else:
+			s=os.stat(path=path, dir_fd=dir_fd, follow_symlinks=follow_symlinks)
+	except Exception as e:
+		return py.No(e)
 	r={}
 	for i in py.dir(s):
 		if not i.startswith('st_'):continue
@@ -39,7 +46,7 @@ def stat(path, dir_fd=None, follow_symlinks=True):
 			continue
 		r[i]=v
 	return r
-def deserialize(obj=None,file=None):
+def deSerialize(obj=None,file=None):
 	'''The protocol version of the pickle is detected automatically, so no
 protocol argument is needed.  Bytes past the pickled object's
 representation are ignored.
@@ -52,8 +59,7 @@ representation are ignored.
 		file=autoPath(file)
 		with open(file,'rb') as f:
 			return pickle.load(f)
-ds=pickle_load=unSerialize=unserialize=deserialize
-
+ds=pickle_load=unSerialize=unserialize=deserialize=deSerialize
 			
 def serialize(obj,file=None,protocol=0):
 	'''if not file: Return the pickled representation of the object as a bytes object.
@@ -485,6 +491,12 @@ True
 		return False
 isExist=exists=exist
 
+def glob(path, pattern='**/*'):
+	'''pattern='**/*'   : all files
+	'**/*.txt'   : all txt files'''
+	import pathlib
+	return py.list(pathlib.Path('./').glob(pattern))
+
 def walk(top):
 	'''2&3 : os.walk(top, topdown=True, onerror=None, followlinks=False)
 	'''
@@ -566,7 +578,6 @@ def ll(ap='.',readable=True,type='',t='',r=False,d=False,dir=False,f=False,file=
 				# if py.type(dr[i][j]) is py.long:
 				if j==0: dr[i][j]=readableSize(dr[i][j])
 				if py.type(dr[i][j]) is py.float:dr[i][j]=U.stime(time=dr[i][j])
-				
 	return dr
 
 SUFFIXES = {1000: ['KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'],
@@ -670,8 +681,21 @@ getsp=getSp=getSplitor
 		
 		
 def makeDirs(ap,isFile=False):
-	py.importU()
 	ap=autoPath(ap)
+	if py.is3():
+		from pathlib import Path
+		p=Path(ap)
+		if p.is_file():return py.No(ap,'is a file')
+		try:
+			p.mkdir()
+		except FileExistsError:
+			pass
+		if p.exists():
+			return py.str(p)
+		else:
+			return py.No('unexpected dir not exists',p)
+			
+	py.importU()
 	sp=getSplitor(ap)
 	ap=ap.split(sp)
 	if isFile:ap=ap[:-1]
@@ -684,6 +708,7 @@ def makeDirs(ap,isFile=False):
 	
 	for i in ap:
 		base+=(i+sp)
+		#TODO 2019-1-19  未处理存在的是文件  而不是 文件夹的情况
 		if exist(base):continue
 		else:
 			try:
@@ -693,7 +718,6 @@ def makeDirs(ap,isFile=False):
 				if U.iswin():
 					if e.winerror==5:continue#WindowsError(5, '') 拒绝访问
 					if e.winerror==183:continue#WindowsError 183 当文件已存在时，无法创建该文件。
-				
 				if 'exists' in e.args[1]:#(17, 'File exists') cygwin;
 					continue
 				# U.repl(printCount=True)
