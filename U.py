@@ -555,8 +555,10 @@ def cmd(*a,**ka):
 		# TODO #
 	if len(a)==1:
 		if py.istr(a[0]):
-			if not s.startswith(quot):
-				s=quot+a[0]+quot
+			if (' ' in s) and not s.startswith(quot):
+				# in linux,can't U.cmd("'ls'") ?
+				if iswin():
+					s=quot+a[0]+quot
 			if ':' in s and iscyg():
 				s='cmd /c start "" '+s
 		elif len(a[0])==1:s=T.string(a[0])
