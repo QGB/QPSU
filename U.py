@@ -555,12 +555,15 @@ def cmd(*a,**ka):
 		# TODO #
 	if len(a)==1:
 		if py.istr(a[0]):
-			if (' ' in s) and not s.startswith(quot):
+			if (' ' in a[0]) and not a[0].startswith(quot):
 				# in linux,can't U.cmd("'ls'") ?
-				if iswin():
-					s=quot+a[0]+quot
-			if ':' in s and iscyg():
-				s='cmd /c start "" '+s
+				# if iswin():
+				s=quot+a[0]+quot
+			elif ':' in a[0] and iscyg():
+				s='cmd /c start "" '+ a[0]
+			else:
+				s=a[0]
+				
 		elif len(a[0])==1:s=T.string(a[0])
 		elif len(a[0])>1:a=a[0]
 	if len(a)>1:
