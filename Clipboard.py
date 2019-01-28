@@ -1,4 +1,7 @@
 #coding=utf-8
+try:from . import py
+except:import py
+U=py.importU()
 try:
 	import win32clipboard as w
 	import win32con
@@ -15,12 +18,15 @@ CF_UNICODETEXT ', 13],
 	
 	in py3 win32con.CF_TEXT return b' '
 	'''
+	if U.istermux():return U.cmd('termux-clipboard-get') 
+	
 	w.OpenClipboard()
 	d = w.GetClipboardData(win32con.CF_UNICODETEXT)
 	w.CloseClipboard()
 	return d
 
 def set(aString):
+	if U.istermux():return U.cmd('termux-clipboard-set',stdin=aString) 
 	try:
 		w.OpenClipboard()
 		w.EmptyClipboard()

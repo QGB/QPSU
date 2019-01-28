@@ -6,14 +6,16 @@ true=True;false=False
 gimax=IMAX=imax=2147483647;gimin=IMIN=imin=-2147483648
 import sys
 stdin=sys.stdin;stdout=sys.stdout;stderr=sys.stderr
-gsdecode=decoding='utf-8';gsencode=encoding=stdout.encoding
+gsdecode=decoding='utf-8';gsencode=gsencoding=encoding=stdout.encoding
 modules=sys.modules
 try:
 	import py
 	if not py.istr:raise Exception('not qgb.py')
 except Exception as eipy:
 	try:from . import py
-	except Exception as ei:import pdb;pdb.set_trace()
+	except Exception as ei:
+		print(ei)
+		import pdb;pdb.set_trace()
 	
 '''TODO：应该设计一个配置类，__getattr__ on a module 属性拦截,这样可以同步多个变量名， 在python2中没有很好的方法,  在Python 3.7+中，你只需要做一个明显的方法。
 # my_module.py
@@ -575,11 +577,20 @@ def cmd(*a,**ka):
 		if 'show' in ka and ka['show']:pln (repr(s))
 		import subprocess as sb
 		r=sb.Popen(s,stdin=sb.PIPE,stdout=sb.PIPE,stderr=sb.PIPE)
-		r= r.stdout.read(-1)
-		if py.is3():r=r.decode('mbcs')
+		
+		if 'stdin' in ka and ka['stdin']:
+			stdin=ka['stdin']
+			if py.is3() and py.istr(stdin):
+				stdin=stdin.encode(gsencoding)
+			if not py.isbyte(stdin):
+				raise ArgumentUnsupported('stdin type',py.type(stdin)  )
+			r.stdin.write(stdin)
+			
+		r= r.stdout.read(-1)# 添加超时处理
+		if py.is3() and iswin():r=r.decode('mbcs')
 		return r
 		# return os.system(s)
-	except Exception as e:return e
+	except Exception as e:return py.No(e)
 	# exit()
 # cmd('echo 23456|sub','3','')	
 def sleep(aisecond):
@@ -1230,14 +1241,14 @@ pa=printattr=printAttr
 # repl()
 # printAttr(5)
 
-def dir(a,fliter='',type=py.no):
+def dir(a,fliter='',type=py.No):
 	r=[i for i in py.dir(a) if fliter in i]
 	rv=[]
 	err=py.No("#can't getattr ")
 	for i in r:
 		ok=True
 		v=py.getattr(a,i,err)
-		if type!=py.no:#只要满足以下一条 就ok
+		if type!=py.No:#type!=py.no写的什么玩意？没看懂 2019-1-25 13:29:03         只要满足以下一条 就ok
 			ok=False
 			if py.istr(type):type=type.lower()
 			
@@ -1849,11 +1860,12 @@ def len(a,*other):
 			r.append(len(i))
 		return r
 	try:return py.len(a)
-	except:
+	except Exception as e:
+		return py.No(e)
 		# if type(a) in (int,float,list,tuple,dict):
 			# return py.len(str(a))
-		try:return py.len(str(a))
-		except:return -1
+		# try:return py.len(str(a))
+		# except:return -1
 		
 def dis(a):
 	from dis import dis

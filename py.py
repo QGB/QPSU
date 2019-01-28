@@ -32,13 +32,28 @@ class ArgumentUnsupported(ArgumentError):#an unsupported argument# 为了能快�
 	pass
 
 
-class No:	
-	def __init__(s,msg='is a None object with msg',*a):
-		s.msg='{0}'.format(msg)
+class No:
+	''''is a None object with msg and raw args
+	'''
+	def __init__(s,msg=None,*a):
+		if msg and istr(msg):s.msg=msg
+		else:
+			r=''
+			if isException(msg):
+				r+=repr(msg)
+			if a and  isException(a[0]):
+				r+=repr(a[0])
+			import time as tMod
+			time=tMod.time()
+			r+=tMod.strftime(' %Y-%m-%d__%H.%M.%S__',tMod.localtime(time )  )
+			if isfloat(time):
+				r+=str(round(time-int(time),3)  )[1:]
+			s.msg=r
+			a=(msg,)+a
 		s.a=a[0] if len(a)==1 else a
 	def __str__(s):return ''
 	def __repr__(s):
-		r=s.msg if s.msg.startswith('#') else '###<py.No {0}>'.format(s.msg)
+		r=s.msg if s.msg.startswith('#') else '###<py.No| {0}>'.format(s.msg)
 		r='\t\t'+r
 		return r
 	def __len__(s):return 0
@@ -53,9 +68,12 @@ class No:
 	def __ge__(self, other):return 0 >=	other
 	def __gt__(self, other):return 0 >	other
 	
+	# def __call__(s,*a,**ka):#不要定义这个，否则在ipy中不显示 repr
+		#乱来吗？  谁说一定返回 str
+		# return s.__str__()
+		
 	# @staticmethod #obj.__len__()==-1
-	# def __len__():return -1
-no=No() #instance
+# no=No() #instance
 	
 def iterable(a):
 	try:
@@ -91,6 +109,9 @@ def isnum(a):
 def isint(a):
 	if is2():return type(a) in (int,long)
 	else    :return type(a) in (int,)
+
+def isfloat(a):
+	return isinstance(a,float)
 	
 def isfile(a):
 	if is2():return isinstance(a, file)
@@ -106,6 +127,10 @@ def isbasic(a,recursive=False):
 		
 def islist(a):
 	return isinstance(a,list)
+	
+def isException(a):
+	'''isinstance(Exception,BaseException)==False'''
+	return isinstance(a, (Exception,BaseException))
 	
 def byte(aInt):
 	'''0 <= aInt < 256.'''

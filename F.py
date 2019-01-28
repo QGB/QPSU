@@ -3,6 +3,10 @@ import os as _os;import sys as _sys;from os import path as _p
 if __name__.endswith('qgb.F'):from . import py,T
 else:import py,T
 gError=[]
+
+try:from pathlib import Path
+except:pass
+
 def setErr(ae):
 	global gError
 	U=py.importU()
@@ -382,17 +386,12 @@ def append(file,data):
 	'''builtin afile.write() No breakLine'''
 	write(file,data,mod='a')
 	
-def detectEncoding(file,confidence=0.7,default=''):
+def detectEncoding(file,confidence=0.7,default=py.No('not have default encoding')):
 	if py.istr(file):
 		file=open(file,'rb')
 	if py.isfile(file):
-		r=T.detect(file.read())
-		if r['confidence']>confidence:return r['encoding']
-		else:
-			if default:return default
-			raise Exception(
-			'{0} encoding {1} confidence {2} less then {3}'.format(
-			file,r['encoding'],r['confidence'],confidence)  )
+		return T.detect(file.read(),confidence=confidence,default=default)
+		
 	else:raise py.ArgumentError('need str or file')
 detect=detectEncoding
 	
@@ -772,7 +771,7 @@ def nt_path(fn):
 	U=py.importU()
 	fn=_p.abspath(fn)
 	if  U.iswin():#or cyg?
-		if not py.isunicode(fn):fn=fn.decode(U.T.detect(fn)['encoding'] )#暂时没想到更好方法，头晕
+		if not py.isunicode(fn):fn=fn.decode(U.T.detect(fn))#暂时没想到更好方法，头晕
 		fn=fn.replace(u'/',u'\\')
 		if fn.startswith(u"\\\\"):
 			fn=u"\\\\?\\UNC\\" + fn[2:]

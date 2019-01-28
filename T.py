@@ -38,9 +38,17 @@ import   re
 
 gError=None
 try:
-	from chardet import detect
+	from chardet import detect as _detect
+	def detect(abytes,confidence=0.7,default=py.No('default encoding "" ')  ):
+		r=_detect(abytes)
+		if r['confidence']>confidence:return r['encoding']
+		else:
+			if default:return default
+			raise Exception(
+			'{0} encoding {1} confidence {2} less then {3}'.format(
+			file,r['encoding'],r['confidence'],confidence)  )
 except Exception as ei:
-	detect='#not install chardet Module'
+	detect=py.No('#not install chardet Module')  # <no> is not callable ,see the source
 	pass
 ################################################
 def print_unicode_escape(a):
