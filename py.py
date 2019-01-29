@@ -34,6 +34,9 @@ class ArgumentUnsupported(ArgumentError):#an unsupported argument# 为了能快�
 
 class No:
 	''''is a None object with msg and raw args
+#TODO
+	TypeError: unsupported operand type(s) for +: 'float' and 'No'
+	
 	'''
 	def __init__(s,msg=None,*a):
 		if msg and istr(msg):s.msg=msg
@@ -127,6 +130,9 @@ def isbasic(a,recursive=False):
 		
 def islist(a):
 	return isinstance(a,list)
+
+def isdict(a):
+	return isinstance(a,dict)
 	
 def isException(a):
 	'''isinstance(Exception,BaseException)==False'''

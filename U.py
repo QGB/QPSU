@@ -542,16 +542,20 @@ inAll=in_all
 def cmd(*a,**ka):
 	'''show=False :show command line
 	默认阻塞，直到进程结束返回
-	subprocess
-	sb.stdin.close() 才返回  stdout stderr
-	
+
+	if 'timeout' not in ka:ka['timeout']=9     ## default timeout
 	'''
 	s=''
 	if iswin() or iscyg():quot='"'
 	else:quot="'"
 	
 	if len(a)==0:
-		if iswin() or iscyg():a=['cmd']
+		if iswin() or iscyg():
+			a=['cmd']
+			if 'timeout' not in ka:ka['timeout']=9
+			U.log('wait cmd.exe 9 sec ...')
+		else:
+			raise ArgumentError('commands not null',a,ka)
 		# TODO #
 	if len(a)==1:
 		if py.istr(a[0]):
@@ -579,25 +583,64 @@ def cmd(*a,**ka):
 	# pln(s)
 	# exit()
 	try:
-		if 'show' in ka and ka['show']:pln (repr(s))
-		import subprocess as sb
-		r=sb.Popen(s,stdin=sb.PIPE,stdout=sb.PIPE,stderr=sb.PIPE)
+		import subprocess as sb	
 		
-		if 'stdin' in ka and ka['stdin']:
-			stdin=ka['stdin']
+		show   =get_duplicated_kargs(ka,'show')
+		stdin  =get_duplicated_kargs(ka,'stdin','input')
+		# timeout=get_duplicated_kargs(ka,'timeout')
+		
+		if show:pln (repr(s))
+		if stdin:
 			if py.is3() and py.istr(stdin):
 				stdin=stdin.encode(gsencoding)
 			if not py.isbyte(stdin):
-				raise ArgumentUnsupported('stdin type',py.type(stdin)  )
-			r.stdin.write(stdin)
+				raise ArgumentUnsupported('stdin type',py.type(stdin),stdin  )
+			if 'timeout' not in ka:ka['timeout']=9     ## default timeout
+			ka['input']=stdin
+			# r.stdin.write(stdin)
+		
+		
+		# if timeout:
+		r=sb.check_output(s,**ka)
+		
+		# r=sb.Popen(s,stdin=sb.PIPE,stdout=sb.PIPE,stderr=sb.PIPE)
 			
-		r= r.stdout.read(-1)# 添加超时处理
-		if py.is3() and iswin():r=r.decode('mbcs')
-		return r
+		# r= r.stdout.read(-1)# 添加超时处理  see subprocess.py  406
+		# if py.is3() and iswin():r=r.decode('mbcs')
+		return T.autoDecode(r)
 		# return os.system(s)
 	except Exception as e:return py.No(e)
 	# exit()
 # cmd('echo 23456|sub','3','')	
+
+def get_duplicated_kargs(ka,*keys):
+	'''
+def pop(d,k):
+	d.pop(k)
+pop(_63,25)  #_63 has change
+
+'''
+	if not py.isdict(ka):raise ArgumentError('ka should be a dict,but get',ka)
+	r=[]
+	for i in keys:
+		if not py.istr(i):raise ArgumentError('keys should be a list of str,but get',i)
+		if i in ka:
+			r.append(ka[i])
+			ka.pop(i)
+	if py.len(r)==0:return py.No('Not found matched kargs',ka,keys)
+	if py.len(r)>1:
+		rTrue=[i for i in r if i]  
+		if not rTrue:
+			rTrue=py.list( py.set(r) )
+		if py.len(rTrue)>1:
+			raise Exception('kargs 存在多个 重复的 key',ka,keys)
+		r=rTrue
+
+	if py.len(r)==1:return r[0]
+	else:raise Exception('kargs matched keys len <> 1',ka,keys)
+
+getKargsDuplicated=getKArgsDuplicated=get_kargs_duplicated=get_duplicated_kargs
+
 def sleep(aisecond):
 	__import__('time').sleep(aisecond)
 	
@@ -2238,6 +2281,10 @@ def google(a):
 	browser('https://www.google.com.my/#q='+a)
 	
 def subprocess(cmd):
+	'''
+	subprocess
+	sb.stdin.close() 才返回  stdout stderr
+	'''
 	from subprocess import PIPE,Popen
 	return Popen(cmd,stdin=PIPE,stdout=PIPE,stderr=PIPE)
 	
@@ -2354,11 +2401,13 @@ setErr( gError 还是要保留，像这种 出错 是正常流程的一部分，
 	if py.len(key)==0:raise ArgumentError('need at least one key')
 	if py.len(key)==1:
 		try:return a[key[0]]
-		except:return ()
+		except Exception as e:return py.No(e)
 	else:
 		try:return getNestedValue(a[key[0]],*key[1:]) 
-		except:return ()	
+		except Exception as e:return py.No(e)
 getDictNestedValue=getNestedValue
+
+
 def getLastException():
 	'''a callable
 	return Exception'''

@@ -51,6 +51,13 @@ except Exception as ei:
 	detect=py.No('#not install chardet Module')  # <no> is not callable ,see the source
 	pass
 ################################################
+def autoDecode(abytes,confidence=0.7,default=py.No('default encoding "" ')  ):
+	if py.isunicode(abytes):return abytes
+	if not py.isbyte(abytes):
+		raise py.ArgumentError('is not bytes',abytes)
+	return abytes.decode( detect(abytes=abytes,confidence=confidence,default=default) )
+detectAndDecode=autoDecode
+		
 def print_unicode_escape(a):
 	print(	a.encode('unicode-escape').decode('ascii')  )
 def strFormDataToDict(a):

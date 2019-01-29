@@ -26,7 +26,7 @@ CF_UNICODETEXT ', 13],
 	return d
 
 def set(aString):
-	if U.istermux():return U.cmd('termux-clipboard-set',stdin=aString) 
+	if U.istermux():return U.cmd('termux-clipboard-set',input=aString) 
 	try:
 		w.OpenClipboard()
 		w.EmptyClipboard()
