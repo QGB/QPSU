@@ -31,7 +31,7 @@ class ArgumentError(Exception):
 class ArgumentUnsupported(ArgumentError):#an unsupported argument# 为了能快速找到Arg 开头的异常
 	pass
 
-
+gno2e=False
 class No:
 	''''is a None object with msg and raw args
 #TODO
@@ -39,6 +39,8 @@ class No:
 	
 	'''
 	def __init__(s,msg=None,*a):
+		if gno2e:raise Exception(msg,*a)
+		
 		if msg and istr(msg):s.msg=msg
 		else:
 			r=''
