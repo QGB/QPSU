@@ -16,6 +16,10 @@ def is3():
 	
 if is2():
 	from __builtin__ import *
+	try:
+		from io import open
+	except Exception as e:
+		pass
 	
 if is3():
 	from builtins import *

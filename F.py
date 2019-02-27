@@ -22,7 +22,7 @@ def include(file,keyword):
 	if py.isbyte(keyword):mod='rb'
 	else:mod='r'
 	try:
-		with open(file,mod) as f:
+		with py.open(file,mod) as f:
 			for i in f:
 				if keyword in i:return True
 	except Exception as e:
@@ -50,6 +50,13 @@ def stat(path, dir_fd=None, follow_symlinks=True):
 			continue
 		r[i]=v
 	return r
+	
+def basic_dump():
+	repr
+
+def basic_load():
+	eval
+	
 def deSerialize(obj=None,file=None):
 	'''The protocol version of the pickle is detected automatically, so no
 protocol argument is needed.  Bytes past the pickled object's
@@ -61,7 +68,7 @@ representation are ignored.
 		return pickle.loads(obj)
 	else:
 		file=autoPath(file)
-		with open(file,'rb') as f:
+		with py.open(file,'rb') as f:
 			return pickle.load(f)
 ds=pickle_load=unSerialize=unserialize=deserialize=deSerialize
 			
@@ -71,7 +78,7 @@ def serialize(obj,file=None,protocol=0):
 	import pickle
 	if file:
 		file=autoPath(file)
-		with open(file,'wb') as f:
+		with py.open(file,'wb') as f:
 			pickle.dump(obj=obj,file=f,protocol=protocol)
 		return file
 	else:
@@ -82,7 +89,7 @@ def dill_load(file):
 	import dill
 	# if not file.lower().endswith('.dill'):
 		# file+='.dill'
-	with open(file,'rb') as f:
+	with py.open(file,'rb') as f:
 		return dill.load(f)
 
 def dill_dump(obj,file=None,protocol=0):
@@ -94,7 +101,7 @@ def dill_dump(obj,file=None,protocol=0):
 	if file:
 		if not file.lower().endswith('.dill'):
 			file+='.dill'
-		with open(file,'wb') as f:
+		with py.open(file,'wb') as f:
 			dill.dump(obj=obj,file=f,protocol=protocol)		
 		return file
 	else:
@@ -157,7 +164,7 @@ def lineCount(a):
 			if not b: break
 			yield b
 
-	with open(a, "r") as f:
+	with py.open(a, "r") as f:
 		return sum(bl.count("\n") for bl in blocks(f))
 		
 def getPath(asp):
@@ -266,7 +273,7 @@ autoFileName=autof
 def new(a):
 	'''will overwrite'''
 	try:
-		f=open(a,'w')
+		f=py.open(a,'w')
 		f.write('')
 		f.close()
 		return f.name
@@ -309,9 +316,6 @@ def hexToBytes(a,split='',ignoreNonHex=True):
 	it=2
 	if len(split)>0:it+=len(split)
 	if it==2 and len(a) % it!=0:return ()
-
-				  
- 
 	if it>2:
 		a=a.split(split)
 		if len(a[-1]) == 0:a=a[:-1]
@@ -332,8 +336,8 @@ def writeIterable(file,data,end='\n',overwrite=True,encoding=None):
 	file=autoPath(file)
 	if overwrite:new(file)
 	
-	if py.is2():f=open(file,'a')
-	else:       f=open(file,'a',encoding=encoding)
+	if py.is2():f=py.open(file,'a')
+	else:       f=py.open(file,'a',encoding=encoding)
 	
 	for i in data:
 		f.write(py.str(i)+end)
@@ -361,10 +365,10 @@ pretty=True        Format a Python object into a pretty-printed representation.
 	if mkdir:makeDirs(file,isFile=True)
 	if py.is3() and isinstance(data,py.bytes) and 'b' not in mod:
 		mod+='b'
-		f=open(file,mod)
+		f=py.open(file,mod)
 	else:
-		if py.is2():f=open(file,mod)
-		else:       f=open(file,mod,encoding=encoding)
+		if py.is2():f=py.open(file,mod)
+		else:       f=py.open(file,mod,encoding=encoding)
 	# with open(file,mod) as f:
 	if py.istr(data) or (py.is3() and isinstance(data,py.bytes) )	:
 		f.write(data)
@@ -388,7 +392,7 @@ def append(file,data):
 	
 def detectEncoding(file,confidence=0.7,default=py.No('not have default encoding')):
 	if py.istr(file):
-		file=open(file,'rb')
+		file=py.open(file,'rb')
 	if py.isfile(file):
 		return T.detect(file.read(),confidence=confidence,default=default)
 		
@@ -401,11 +405,11 @@ def read(file,mod='r',returnFile=False,encoding=''):
 			'''
 	# try:
 	file=autoPath(file)
-	if py.is2():f=open(file,mod)
+	if py.is2():f=py.open(file,mod)
 	else:
 		encoding=encoding or detectEncoding(file,confidence=0.9,default='utf-8')
 		#utf-8 /site-packages/astropy/coordinates/builtin_frames/__init__.py  {'confidence': 0.73, 'encoding': 'Windows-1252'
-		f=open(file,mod,encoding=encoding)
+		f=py.open(file,mod,encoding=encoding)
 	s=f.read()
 	f.close()
 	if returnFile:
@@ -419,13 +423,15 @@ def read(file,mod='r',returnFile=False,encoding=''):
 def readBytes(file):
 	'''is2 rb return str'''
 	file=autoPath(file)
-	return open(file,'rb').read()
+	return py.open(file,'rb').read()
 	
-def readJSON(file):
+def readJSON(file,encoding=None):
 	''' '''
-	s=read(file)
 	import json
-	return json.loads(s)
+	file=autoPath(file)
+	if not encoding:encoding=detectEncoding(file)
+	with py.open(file,encoding=encoding) as f:
+		return json.load(f)
 	
 def read_csv(file,encoding=None):
 	file=autoPath(file)
@@ -627,7 +633,7 @@ def size(asf):
 	
 def csvAsList(fn):
 	import csv
-	with open(fn, 'rb') as f:
+	with py.open(fn, 'rb') as f:
 		reader = csv.reader(f)
 		return py.list(reader)
 		
@@ -643,7 +649,7 @@ def getSourcePath():
 	# U.pln globals().keys()
 	# U.pln __file__, __name__ , __package__
 	
-def delFile(file):
+def deleteFile(file):
 	file=autoPath(file)
 	sp=getSplitor(file)
 	# for i in a.split(ap):
@@ -657,20 +663,21 @@ def delFile(file):
 		if isDir(file):
 			import shutil
 			shutil.rmtree(file, ignore_errors=True)
-			return True	
+			return file	
 		_os.remove(file)
-		return True
-	except Error():
+		return file
+	except Error() as e:
 		if isDir(file):
-			U.pln('#TODO')
+			raise Exception('#TODO')
+		return py.No(file,e,'Not exists?')
 	#Error  {'G:\\test\\npp': WindowsError(5, '')}
 	# Docstring: MS-Windows OS system call failed.  
 	#*nix NameError: name 'WindowsError' is not defined  '''
 	except Exception as e:
 		# setErr({file:e})
 		return py.No(file,e)
-	
-rm=delete=delFile
+	return False
+rm=delete=deleteFile
 	
 def getSplitor(ap):
 	if '/' in ap:return '/'
@@ -834,10 +841,26 @@ def dir(a):
 	return _p.dirname(a)
 	# exit()
 
-def readlines(a):
+# def open(file, mode='r', buffering=-1, encoding=None, errors=None, newline=None, closefd=True, opener=None):
+	'''py2 from io import open
+----> 1 open(file, mode='r', buffering=-1, encoding=None, errors=None, newline=None, closefd=True, opener=None)
+
+TypeError: open() takes at most 7 arguments (8 given)
+	TypeError: 'opener' is an invalid keyword argument for this function
+	
+'''
+
+
+def readlines(a,encoding=None):
+	a=autoPath(a)
+	if not encoding:
+		encoding=detectEncoding(a)
 	r=[]
-	for i in py.open(autoPath(a)):r.append(i)
-	return r
+	try:
+		for i in py.open(a,encoding=encoding):r.append(i)
+		return r
+	except Exception as e:
+		return py.No(e)
 # F.isFileName('g:/a')
 # []
 def isFileName(a):

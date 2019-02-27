@@ -5,8 +5,10 @@ else:import U,T,F,py
 gError=None
 # U.pln U.gError
 if not U.isipy():raise EnvironmentError
-U.isipy().autocall=2
 g=get=gipy=U.isipy()#不能直接引用U.ipy,环境不确定 动态判断避免识别错误 g.
+gipy.autocall=2
+if U.iswin():
+	gipy.editor='cmd /k %s' % U.npp(getExePath=True)
 gIn=gipy.user_ns['In'];gOut=gipy.user_ns['Out']
 # version='.'.join([str(i) for i in IPython.version_info if py.isnum(i)])  #(5, 1, 0, '') 5.1.0
 version=py.float('{0}.{1}{2}\n{3}'.format(*IPython.version_info).splitlines()[0])
@@ -45,7 +47,7 @@ def outType(t=None,start=0,stop=U.IMAX):
 	return r
 outype=outType
 
-def outlen(min=-1,max='infinity',start=0,stop=U.IMAX,end=U.IMAX):
+def outLen(min=-1,max='infinity',start=0,stop=U.IMAX,end=U.IMAX):
 	'''min<=out[i].len<=max
 	'''
 	if end!=U.IMAX:stop=end
@@ -60,6 +62,7 @@ def outlen(min=-1,max='infinity',start=0,stop=U.IMAX,end=U.IMAX):
 		if n<min:continue
 		r[k]=n
 	return r
+outlen=outLen
 
 date=U.getDateStr()
 gshead='#coding=utf-8'
@@ -146,7 +149,7 @@ def save(file=None,lines=-1,tryExcept=False,out=False,columns=70,overide=True):
 			# U.isSyntaxError(u'_{0}={1}'.format(i,v) ) :
 				# pass
 		if i in gOut.keys():
-			if i==1 and gOut[1].endswith(':/QGB/babun/cygwin/lib/python2.7/'):
+			if i==1 and py.istr(gOut[1]) and gOut[1].endswith(':/QGB/babun/cygwin/lib/python2.7/'):
 				pass
 			else:
 				v=u'_{0}={1}'.format(i,v)

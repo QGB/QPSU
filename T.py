@@ -41,14 +41,21 @@ try:
 	from chardet import detect as _detect
 	def detect(abytes,confidence=0.7,default=py.No('default encoding "" ')  ):
 		r=_detect(abytes)
+		if r['encoding'] in ['Windows-1254' ]:
+			try:
+				if abytes.decode('utf-8').encode('utf-8')==abytes:
+					return 'utf-8'
+			except Exception as e:
+				pass
 		if r['confidence']>confidence:return r['encoding']
 		else:
 			if default:return default
 			raise Exception(
 			'{0} encoding {1} confidence {2} less then {3}'.format(
-			file,r['encoding'],r['confidence'],confidence)  )
+			abytes[:99],r['encoding'],r['confidence'],confidence)  )
 except Exception as ei:
-	detect=py.No('#not install chardet Module')  # <no> is not callable ,see the source
+	def detect(*a):
+		raise Exception('#not install chardet Module')  # <no> is not callable ,see the source
 	pass
 ################################################
 def autoDecode(abytes,confidence=0.7,default=py.No('default encoding "" ')  ):

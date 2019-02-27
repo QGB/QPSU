@@ -276,6 +276,8 @@ def getWindowSize(h):
 getwh=getsize=getSize=getWSize=getWindowSize
 
 def setWindowPos(hwnd=0,x=0,y=0,w=0,h=0,rect=(),top=None,flags=None):
+	'''if not flags:flags=SWP_SHOWWINDOW  # 无论是否top，是否拥有焦点，默认显示此窗口
+	'''
 	if not hwnd:
 		hwnd=getCmdHandle()
 		if x==y==w==h==0 and not rect:
@@ -286,10 +288,10 @@ def setWindowPos(hwnd=0,x=0,y=0,w=0,h=0,rect=(),top=None,flags=None):
 	if not y:y=rect[1]
 	if not w:w=rect[2]-rect[0]
 	if not h:h=rect[3]-rect[1]
-		
-	if top:top=HWND_TOPMOST
-	else:  top=HWND_TOP
-	if not flags:flags=SWP_SHOWWINDOW
+	if top!=None:	
+		if top:top=HWND_TOPMOST
+		else:  top=HWND_NOTOPMOST  #-2
+	if not flags:flags=SWP_SHOWWINDOW  # 无论是否top，是否拥有焦点，默认显示此窗口
 		
 	if user32.SetWindowPos(hwnd,top,x,y,w,h,flags):#1
 		return hwnd

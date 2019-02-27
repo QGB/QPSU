@@ -336,7 +336,7 @@ def rindex(a,sub,start=0,end=-1):
 		 _14[::-1]
 		 '))(rid(tnirp' 
  '''
-	return len(a)-a[::-1].index(sub)
+	return py.len(a)-a[::-1].index(sub)
 def flat(*a,**options):
 	'''Breadth-First Traversal'''
 	noNone=False
@@ -346,7 +346,8 @@ def flat(*a,**options):
 		# repl()
 		
 	a=list(a);r=[];i=0
-	while i<len(a):
+	while i<py.len(a):
+		# str has __iter__ in py3
 		if hasattr(a[i], '__iter__'):a.extend(a[i])
 		else:
 			if noNone and not a[i]:pass
@@ -1129,12 +1130,15 @@ def browser(url,browser=gsBrowser,b='yandex'):
 		if py.eval('callable({0})'.format(i)):
 			if browser.lower()== i:
 				py.execute('{0}(url)'.format(i) ) in globals(),locals()  
+	return url
 	# webbrowser.open_new_tab(url)
 	# if iswin():os.system('''start '''+str(url))
 # browser('qq.com')
-def browser_obj(obj,b='yandex'):
+def browser_obj(obj,file='',b='yandex'):
 	#pformat(obj,indent=3)
-	browser(F.write(data=obj,file='browser_obj.txt' )    ,b=b)
+	if not file:
+		file=stime()+'browser_obj.txt'
+	return browser(F.write(data=obj,file=file )    ,b=b)
 browserObj=browser_obj
 
 gsHtmlTextarea=('<textarea style="width:100%; height:100%;">','</textarea>')
@@ -1811,6 +1815,10 @@ def exit(i=2357,msg=None):
 	print(msg)
 	os._exit(i)
 
+def getModulesByFile(fileName):
+	return [i for i in sys.modules.items() if fileName in getattr(i[1],'__file__','')]
+modulesByFile=getModsByFile=getModulesByFile
+	
 def getModsBy__all__(modPath=None):
 	r=[]
 	if modPath==None:modPath=getModPath()
@@ -2013,7 +2021,7 @@ def kill(a,caseSensitive=True,confirm=True):
 def getTasklist():
 	''''''
 	return
-def notePadPlusPlus(a='',line=0,autof=True):
+def notePadPlusPlus(a='',line=0,autof=True,getExePath=False):
 	'''
 --------> os.system('"M:\\Program Files\\Notepad++\\notepad++.exe" "IP.py"')
 'M:\Program' 不是内部或外部命令，也不是可运行的程序
@@ -2080,6 +2088,7 @@ in ipy , npp() not autoReload when U.r(), But U.npp()
 		npath=driverPath(r":\Program Files"+nppexe)#如果最后没有匹配到，则为 空.....
 	if DEBUG:pln (repr(npath),nppexe)
 	# npath='"%s"'%npath
+	if getExePath:return npath
 	if a:
 		if autof:
 			return run(npath,F.autof(a),'-n {0}'.format(line))

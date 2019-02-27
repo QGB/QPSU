@@ -18,10 +18,12 @@ else:
 def get(skey,name,root=HKEY_CURRENT_USER,returnType=True):
 	'''	from qgb.Win import reg
 		reg.get(r'Software\Microsoft\Windows\CurrentVersion\Internet Settings','ProxyEnable')
-	
+	reg.get(r'HKLM\SYSTEM\CurrentControlSet\Services\LanmanServer\Parameters\Size' 	)
 	There are seven predefined root keys, traditionally named according to their constant handles defined in the Win32 API
 	skey不能包含 name，否则 FileNotFoundError: [WinError 2] 系统找不到指定的文件。
 	'''
+	
+	
 	r = OpenKey(root,skey)
 	r = QueryValueEx(r,name)
 	if returnType:return r[0],'{} : {}'.format(REG_TYPE[r[1]],r[1])
