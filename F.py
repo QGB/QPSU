@@ -363,12 +363,14 @@ pretty=True        Format a Python object into a pretty-printed representation.
 	if not encoding:encoding=U.encoding
 	
 	if mkdir:makeDirs(file,isFile=True)
-	if py.is3() and isinstance(data,py.bytes) and 'b' not in mod:
-		mod+='b'
+	
+	if 'b' not in mod and isinstance(data,py.bytes):mod+='b'# 自动检测 data与 mod 是否匹配
+	
+	if 'b' in mod:
 		f=py.open(file,mod)
 	else:
-		if py.is2():f=py.open(file,mod)
-		else:       f=py.open(file,mod,encoding=encoding)
+		f=py.open(file,mod,encoding=encoding)
+		#f.write(强制unicode) 本来只适用 py.is3() ，但 py2 中 有 from io import open
 	# with open(file,mod) as f:
 	if py.istr(data) or (py.is3() and isinstance(data,py.bytes) )	:
 		f.write(data)
@@ -691,9 +693,15 @@ def makeDirs(ap,isFile=False):
 	if py.is3():
 		from pathlib import Path
 		p=Path(ap)
-		if p.is_file():return py.No(ap,'is a file')
+		
+		if p.is_file():#if not exists, is_dir() is_file() both return False
+			if isFile:
+				return makeDirs(p.parent,isFile=False)
+			return py.No(ap,'exists , and it is a file')
 		try:
 			p.mkdir()
+		except FileNotFoundError:
+			makeDirs(p.parent,isFile=False)
 		except FileExistsError:
 			pass
 		if p.exists():

@@ -72,7 +72,7 @@ def strFormDataToDict(a):
 in js:
 	{1:2}  >   "{"1":2}"
 	'''
-	py.importU()
+	U=py.importU()
 	r={}
 	for i in a.splitlines():
 		i=i.strip()
@@ -287,7 +287,7 @@ def parseInt(a,base=16,symbols=None):
 		# for i,v in enumerate(a[::-1]):
 			# r+=ord(v)*pow(256,i)
 		# return r
-	py.importU()	
+	U=py.importU()	
 	if base<2:raise Exception(base,'base invild')
 	if not symbols:symbols=gdBaseN[base]
 	
@@ -328,7 +328,7 @@ def string(a,decode=''):
 	'''return unicode'''
 	if py.is2():
 		if py.type(a) is py.str and decode:return a.decode(decode)
-		py.importU()
+		U=py.importU()
 		if py.type(a) is py.unicode:return a#.encode(U.encoding)
 		try:return py.str(a)
 		except:return ''
@@ -411,13 +411,12 @@ def removeAllSpace(a):
 	return re.sub(r"\s+", "", a, flags=re.UNICODE)
 delAllSpace=removeAllSpaces=removeAllSpace
 
-def replacey(a,new,*olds):
-	if(a==None):raise Exception('a(string) == None')
+def replacey(a,olds,new):
+	if not a:raise py.No('not a',a)
 	else:a=str(a)
 	if(len(olds)<1):raise Exception('Target chars Null')
-	if(c==None):raise Exception('c None')
 	for i in olds:
-		a=a.replace(i,c)
+		a=a.replace(i,new)
 	return a
 	
 	
@@ -461,7 +460,8 @@ class Har():
 		null=None
 		true=True
 		false=False
-		py.importU(),F
+		U=py.importU()
+		F=U.F
 		s.data=eval(F.read(fileName))['log']
 		
 	
@@ -504,7 +504,7 @@ def readNumber(a,split=4,p=True):
 	zh=gZi[::split]
 	if py.isnum(a):a=py.int(a)#py2 ok
 	if not py.istr(a):a=str(a)
-	py.importU()
+	U=py.importU()
 	a=''.join(U.one_in(list(a),number))
 	while(a.startswith('0')):a=a[1:]
 
@@ -528,7 +528,7 @@ gcscp={'cp819', 'cp1026', 'cp1252', 'cp1140', 'cp1006', 'cp1361', 'cp932', 'cp42
 gcharset=charset=gcs=gencodings=gcoding={'ascii', 'base64-codec', 'big5', 'big5hkscs', 'bz2-codec', 'charmap', 'cp037', 'cp1006', 'cp1026', 'cp1140', 'cp1250', 'cp1251', 'cp1252', 'cp1253', 'cp1254', 'cp1255', 'cp1256', 'cp1257', 'cp1258', 'cp1361', 'cp367', 'cp424', 'cp437', 'cp500', 'cp720', 'cp737', 'cp775', 'cp819', 'cp850', 'cp852', 'cp855', 'cp856', 'cp857', 'cp858', 'cp860', 'cp861', 'cp862', 'cp863', 'cp864', 'cp865', 'cp866', 'cp869', 'cp874', 'cp875', 'cp932', 'cp936', 'cp949', 'cp950', 'euc-jis-2004', 'euc-jisx0213', 'euc-jp', 'euc-kr', 'gb18030', 'gb2312', 'gbk', 'hex-codec', 'hp-roman8', 'hz', 'idna', 'iso2022-jp', 'iso2022-jp-1', 'iso2022-jp-2', 'iso2022-jp-2004', 'iso2022-jp-3', 'iso2022-jp-ext', 'iso2022-kr', 'iso8859-1', 'iso8859-10', 'iso8859-11', 'iso8859-13', 'iso8859-14', 'iso8859-15', 'iso8859-16', 'iso8859-2', 'iso8859-3', 'iso8859-4', 'iso8859-5', 'iso8859-6', 'iso8859-7', 'iso8859-8', 'iso8859-9', 'johab', 'koi8-r', 'koi8-u', 'latin-1', 'mac-arabic', 'mac-centeuro', 'mac-croatian', 'mac-cyrillic', 'mac-farsi', 'mac-greek', 'mac-iceland', 'mac-latin2', 'mac-roman', 'mac-romanian', 'mac-turkish', 'mbcs', 'palmos', 'ptcp154', 'punycode', 'quopri-codec', 'raw-unicode-escape', 'rot-13', 'shift-jis', 'shift-jis-2004', 'shift-jisx0213', 'tis-620', 'unicode-escape', 'unicode-internal', 'utf-16', 'utf-16-be', 'utf-16-le', 'utf-32', 'utf-32-be', 'utf-32-le', 'utf-7', 'utf-8', 'utf-8-sig', 'uu-codec', 'zlib-codec'}	
 #https://docs.python.org/2/library/codecs.html#standard-encodings        https://docs.python.org/3/library/codecs.html#standard-encodings
 if __name__=='__main__':
-	py.importU()	
+	U=py.importU()	
 	U.repl()
 	exit()
 	# h= Har('ping.chinaz.com.har').data.keys()
