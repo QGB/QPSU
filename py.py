@@ -61,6 +61,10 @@ class No:
 			a=(msg,)+a
 		s.a=a[0] if len(a)==1 else a
 	def __str__(s):return ''
+	def encode(s,encoding):
+		return b''
+	def decode(s,encoding):
+		return u''
 	def __repr__(s):
 		r=s.msg if s.msg.startswith('#') else '###<py.No| {0}>'.format(s.msg)
 		r='\t\t'+r

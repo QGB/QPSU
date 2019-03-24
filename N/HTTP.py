@@ -1,8 +1,11 @@
-
 #coding=utf-8
-from __future__ import absolute_import
-if __name__.endswith('HTTP'):from . import py
-else:import py
+import sys
+if __name__.endswith('qgb.N.HTTP'):from qgb import py
+else:
+	from pathlib import Path
+	gsqp=Path(__file__).parent.parent.parent.absolute().__str__()
+	if gsqp not in sys.path:sys.path.append(gsqp)#py3 works
+	from qgb import py
 
 if py.is2():
 	import urllib2 as urllib
@@ -19,9 +22,23 @@ else:
 		py.importU().repl()
 
 def post(url,data):
+	'''
+Signature: requests.post(url, data=None, json=None, **kwargs)
+Docstring:
+Sends a POST request.
 
-	return
-
+:param url: URL for the new :class:`Request` object.
+:param data: (optional) Dictionary (will be form-encoded), bytes, or file-like object to send in the body of the :class:`Request`.
+:param json: (optional) json data to send in the body of the :class:`Request`.
+:param \*\*kwargs: Optional arguments that ``request`` takes.
+:return: :class:`Response <Response>` object
+:rtype: requests.Response
+File:      e:\qgb\anaconda3\lib\site-packages\requests\api.py
+Type:      function
+'''
+	import requests
+	return requests.post(url,data=data)
+	
 def getBytes(url):
 	url=autoUrl(url)
 	import requests

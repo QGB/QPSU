@@ -306,7 +306,7 @@ i2b=intToBytes
 def bytesToHex(a,split=''):
 	r=''
 	for i in a:
-		r+=DIH[ord(i)]+split
+		r+=DIH[ord(i) ]+split
 	return r
 b2h=bytesToHex
 	

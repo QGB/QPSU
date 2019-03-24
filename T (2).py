@@ -24,7 +24,6 @@ HEX=hex.upper()
 #0x20-0x7E ,32-126,len=95
 visAscii=printAscii=asciiPrint=' !"#$%&\'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~'
 char256=''.join([chr(i) for i in range(256)])
-bytes256=byte256=b''.join( [py.byte(i) for i in range(256)  ] )
 ###############
 RE_URL='http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\(\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+'
 RE_YMD="(19|20)[0-9]{2}[- /.](0[1-9]|1[012])[- /.](0[1-9]|[12][0-9]|3[01])"
@@ -58,38 +57,7 @@ except Exception as ei:
 	def detect(*a):
 		raise Exception('#not install chardet Module')  # <no> is not callable ,see the source
 	pass
-try:
-	from pprint import pprint,pformat
-except:pass
 ################################################
-def readableSizeText(txt,p=True):
-	''' if not p :return txt'''
-	U=py.importU()
-	F=U.F
-	def fr(a):
-		i0,i=a.span()
-		a=py.int(txt[i0:i] )
-		a=F.readableSize(a)
-		return a
-	r=regexReplace(txt,r'\d{5,}',fr)
-	if p:U.pln(r)
-	else:return r
-
-def regexReplace(a,regex,str_or_func):
-	''' func(sre_match)
-	
-	'''
-	if py.istr(str_or_func):
-		def func(_a):
-			#   <_sre.SRE_Match object; span=(2388, 2396), match='21758465'>
-			return str_or_func
-	else:
-		func=str_or_func
-	if not py.callable(func):raise py.ArgumentError('str_or_func',str_or_func)
-	
-	p=re.compile(regex)
-	return p.sub(func,a)
-
 def autoDecode(abytes,confidence=0.7,default=py.No('default encoding "" ')  ):
 	if py.isunicode(abytes):return abytes
 	if not py.isbyte(abytes):
@@ -444,8 +412,8 @@ def removeAllSpace(a):
 delAllSpace=removeAllSpaces=removeAllSpace
 
 def replacey(a,olds,new):
-	if not py.istr(a):return py.No('a is not str',a)
-	# else:a=str(a)
+	if not a:raise py.No('not a',a)
+	else:a=str(a)
 	if(len(olds)<1):raise Exception('Target chars Null')
 	for i in olds:
 		a=a.replace(i,new)

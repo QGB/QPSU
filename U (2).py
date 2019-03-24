@@ -1019,7 +1019,7 @@ def execResult(source, globals=None, locals=None):
 	if 'r' in locals:
 		return locals['r']
 	else:
-		return py.No('can not found "r" variable after exec locals',locals)
+		raise Exception(locals,'can not found "r" variable after exec locals')
 def execHelp():
 	'''use py.execute(s,{g:},{l:})
 	is2 ： exec_stmt ::=  "exec" or_expr ["in" expression ["," expression]]
@@ -1247,7 +1247,7 @@ def printAttr(a,b='chrome',console=False,call=False):
 		try:
 			v=getattr(a,k,'Error getattr')#py.eval('a.{0}'.format(k))			
 			vi=len(v)
-			# import pdb;pdb.set_trace()
+			import pdb;pdb.set_trace()
 			# if py.callable(v):
 				# if k.startswith('__'):
 					# vv='# ErrCall {0}()'.format(k)
@@ -1261,7 +1261,7 @@ def printAttr(a,b='chrome',console=False,call=False):
 				
 				# v=str(v)
 				# v+=getHelp(v)
-			if not py.istr(v):
+			if type(v) is not str:
 				import pprint				
 				try:#  调用非内置函数可能会造成严重的副作用
 					if call and py.callable(v) and k.startswith('__'):vv=v()
@@ -1665,9 +1665,7 @@ def primes(n):
   
   
 def traverseTime(start,stop=None,step='day'):
-	'''
-	#TODO ipy 自动化测试框架 ， 解决 ipy3 兼容问题
-	range(start, stop[, step])
+	'''range(start, stop[, step])
 	datetime.timedelta(  days=0, seconds=0, microseconds=0,
                 milliseconds=0, minutes=0, hours=0, weeks=0)
 	step default: 1(day)  [1day ,2year,....]  [-1day not supported]'''
@@ -1675,7 +1673,7 @@ def traverseTime(start,stop=None,step='day'):
 	sregex='([0-9]*)(micro|ms|milli|sec|minute|hour|day|month|year)'
 	timedeltaKW=('days', 'seconds', 'microseconds',
  'milliseconds', 'minutes', 'hours', 'weeks')
-	if py.istr(step):
+	if py.type(step) in (py.str,py.unicode):
 		step=step.lower()
 		rm=re.match(sregex,step)
 		if not rm or not step.startswith(rm.group()):
@@ -1701,8 +1699,8 @@ def traverseTime(start,stop=None,step='day'):
 		start+=tdelta
 		yield start
 	# return i #SyntaxError: 'return' with argument inside generator
-rangeTime=timeRange=timeTraverser=timeTraversal=traverseTime	
 
+timeTraverser=timeTraversal=traverseTime	
 def datetime(a,month=0, day=0,hour=0,minute=0,second=0,microsecond=0):
 	''' a : string
 	return datetime(year, month, day[, hour[, minute[, second[, microsecond[,tzinfo]]]]])
@@ -1734,8 +1732,8 @@ instance of a tzinfo subclass. The remaining arguments may be ints or longs.
 		# if '-' in a and py.len:
 
 from threading import enumerate as getAllThreads
-threads=gethreads=getThreads=getAllThreads
-def get_all_tid():
+threads=gethreads=getAllThreads
+def getThreads():
 	r=()
 	for threadId, stack in sys._current_frames().items():
 		r+=(threadId,)
@@ -2142,55 +2140,13 @@ def isSyntaxError(a):
 	import ast
 	try:
 		ast.parse(a)
-		return F
+		return False
 	except:
 		return True
 isyntaxError=iSyntaxError=isSyntaxError
 
-def setattr_not_exists(a,name,value):
-	if not py.hasattr(a,name):
-		py.setattr(a,name,value)
-
-def compile(a):
-	'''The source code may represent a Python module, statement or expression. '''
-	import ast
-	if isinstance(a,ast.stmt):
-		setattr_not_exists(a,'col_offset',0)
-		setattr_not_exists(a,'lineno',1)
-		a=[a]
-		a=ast.Module(body=a)
-	# if isinstance()
-	return py.compile(a,'<str>','exec')
-
-def parseDump(code,ident=2):
-	import ast
-	from ast import parse,dump
-	r='' ; rm='' ;  rd=''
-	if py.istr(code):
-		a=parse(code)
-	if isinstance(a,ast.stmt):
-		a=[a]
-	if isinstance(a,ast.Module):
-		a=a.body
-		r='Module(body=[\n'
-		rm=',\n'
-		rd=']'
-	
-	for i in a:
-		i=dump(parse(i) ) 
-		lines=[]
-		for line in i.splitlines():
-			lines.append(' '*ident + line)
-		r+='\n'.join(lines) + rm
-	r+=rd
-	print(r)
-
-def parse(code,file='U.parse.file'):
+def parse(code,file):
 	from ast import parse,AST,iter_fields
-	body=parse(code).body
-	if py.len(body)==1:return body[0]
-	else:return body
-	
 	a=parse(code)
 	annotate_fields=True
 	include_attributes=False
@@ -2219,12 +2175,6 @@ def parse(code,file='U.parse.file'):
 	pln(a,file=file)
 	file.flush()
 	return file.tell()
-	
-def ast_to_code(a):
-	import astor
-	return astor.to_source(a)
-
-	
 	
 def replaceModule(modName,new,package='',backup=True):
 	if package:
@@ -2464,7 +2414,7 @@ setErr( gError 还是要保留，像这种 出错 是正常流程的一部分，
 	else:
 		try:return getNestedValue(a[key[0]],*key[1:]) 
 		except Exception as e:return py.No(e)
-getDictV=getDictNestedValue=getNestedValue
+getDictNestedValue=getNestedValue
 
 
 def getLastException():

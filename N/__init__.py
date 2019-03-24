@@ -1,10 +1,21 @@
 #coding=utf-8
-# __all__=['N','HTTPServer']
 import sys
-# from .. import py#ValueError: Attempted relative import in non-package
-if __name__.endswith('qgb.N'):from .. import py
-else:import py
+print()
+# try:
+	# from qgb import U
+# except:
+	# from .. import U
 
+# from .. import py#ValueError: Attempted relative import in non-package
+if __name__.endswith('qgb.N'):from qgb import py
+else:
+	from pathlib import Path
+	gsqp=Path(__file__).parent.parent.parent.absolute().__str__()
+	if gsqp not in sys.path:sys.path.append(gsqp)#py3 works
+	from qgb import py
+	# import py  #'py': <module 'py' from '..\\py.py'>,
+
+# __all__=['N','HTTPServer']
 
 gError=[]
 def setErr(ae):
@@ -18,24 +29,6 @@ def setErr(ae):
 		gError=ae
 	if U.gbPrintErr:U.pln('#Error ',ae) # U.
 
-#if 'qgb.U' in sys.modules:U=sys.modules['qgb.U']
-#elif 'U' in sys.modules:  U=sys.modules['U']
-#else:
-#	try:
-#		# from sys import path as _p
-#		# _p.insert(-1,_p[0][:-1-1-3-1]) # python2.7\\qgb\\N
-#		# from qgb import U
-#		# if U.iswin():from qgb import Win
-#		sys.path.insert(0,'..')
-#		import py
-#		import U,Win
-#	except Exception as e:
-#		U.pln( e)
-#		Win=py.Class()
-#		Win.isxp=lambda:0		
-#		gError.append(e)
-#try:py=U.py
-#except Exception as e:gError.append(e)
 try:
 	if __name__.endswith('qgb.N'):
 		from . import HTTP
@@ -45,11 +38,134 @@ try:
 		import HTTPServer
 except Exception as ei:
 	py.traceback(ei)
-	# py.importU().repl()
-	# py.pdb()
-	# raise ei
-# import HTTPServer
-# import HTTP
+
+	
+if py.is3():
+	from http.server import SimpleHTTPRequestHandler,HTTPServer as _HTTPServer
+else:
+	from SimpleHTTPServer import SimpleHTTPRequestHandler
+	from BaseHTTPServer import HTTPServer as _HTTPServer
+
+def rpcServer(port=23571,thread=True,ip='0.0.0.0',currentThread=False):
+	from threading import Thread
+	from http.server import BaseHTTPRequestHandler as h
+	import ast
+	U=py.importU()
+	T=py.importT()
+	def execResult(source, globals=None, locals=None,qpsu=True):
+		'''exec('r=xx') ;return r # this has been tested in 2&3
+		当没有定义 r 变量时，自动使用 最后一次 出现的 r
+		当定义了 r ，但不是最后一行，这可能是因为 还有一些收尾工作
+		'''
+		if globals==None and locals==None:#因为参数不是 不可变对象，且在接下来会改变
+			globals={}
+			locals ={}
+		if qpsu:
+			def importFromU(modName):
+				mod = getattr(locals['U'],modName,None)
+				if mod:locals[modName]=mod
+			
+			locals['U']=py.importU()
+			importFromU('T')
+			importFromU('N')
+			importFromU('F')
+			importFromU('py')
+			
+		# body=ast.parse(code).body
+		# r_lineno=0
+		# for i,b in py.reversed(py.list( enumerate(body) )  ): # 从最后一条语句开始解析，序号还是原来的
+			# if isinstance(b, ast.Assign):
+				# if b.targets[0].id=='r':
+					# r_lineno=i
+					# break# r之前的就不管了
+			# ''' [ 可能在r 之后 还有表达式 或者 根本没有出现 r ，Expr 都看成 r '''
+			# if isinstance(b, ast.Expr):
+				# Assign
+				
+		try:
+			exec(source, globals, locals)
+		except Exception as e:
+			return py.repr(e)
+			
+		if 'r' in locals:
+			return py.repr(  locals['r']  )
+		else:
+			return 'can not found "r" variable after exec locals'+T.pformat(locals)
+	
+	from flask import Flask,request
+	app=Flask('rpcServer')
+	@app.errorhandler(404)
+	def flaskEval(e):
+		code=T.urlDecode(request.url)
+		code=T.sub(code,':{}/'.format(port) )
+		U.log( ('\n'+code) if '\n' in code else code	)
+		# U.ipyEmbed()()
+		return execResult(code)
+	
+	app.run(host=ip,port=port,debug=0,threaded=True)	
+	
+	
+	class H(SimpleHTTPRequestHandler):
+		def do_GET(s):
+			code=s.path[1:]
+			try:
+				
+			
+				r=execResult(code)
+			
+				s.send_response(200)
+			except Exception as e:
+				s.send_response(500)
+				
+			s.send_header("Content-type", "text/plain")
+			s.end_headers()
+			
+			
+			
+			
+			if not py.istr(r):
+				r=repr(r)
+			if py.is3():
+				r=r.encode('utf8')
+			s.wfile.write(r)
+	
+
+		
+	# with _HTTPServer((ip,port), H) as httpd:
+		# sa = httpd.socket.getsockname()
+		# serve_message = "Serving HTTP on {host} port {port} (http://{host}:{port}/) ..."
+		# print(serve_message.format(host=sa[0], port=sa[1]))
+		# try:
+			# if currentThread or not thread:httpd.serve_forever()
+			# else:
+				# t= Thread(target=httpd.serve_forever,name='qgb.rpcServer '+U.stime() )
+				# t.start()
+				# return t
+				
+		# except KeyboardInterrupt:
+			# print("\nKeyboard interrupt received, exiting.")
+	
+# class rpcServer(HTTPHandler):
+	# def __init__
+		# super()
+		
+	
+def rpcClient(url_or_port='http://127.0.0.1:23571',code=''):
+	if py.isint(url_or_port):
+		url='http://127.0.0.1:'+str(url_or_port)
+	else:
+		url=str(url_or_port)
+	if not url.endswith('/'):url+='/'
+	T=py.importT()
+	code=T.urlEncode(code)
+	return get(url+code)
+	# if py.is3():
+		# from xmlrpc.client import ServerProxy,MultiCall
+	# server = ServerProxy(url)
+	# return server
+	
+
+
 	
 def findFunc(name,root=9,depth=3,case=False):
 	U.pln( dir(root)       )
@@ -61,6 +177,7 @@ def findFunc(name,root=9,depth=3,case=False):
 	U.pln( vars().keys()   )
 	exit()
 # findFunc('set*')		
+
 	
 def get(url,protocol='http',file=''):
 	py.importU()
@@ -79,33 +196,7 @@ def get(url,protocol='http',file=''):
 def http(url,method='get',*args):
 	return HTTP.method(url,method,*args)
 
-def rpcServer(port=1212,ip='0.0.0.0',currentThread=False):
-	if py.is3():
-		from xmlrpc.server import SimpleXMLRPCServer as RPCServer
-	U=py.importU()
-	with RPCServer((ip, port),allow_none=True,use_builtin_types=True ) as server:
-		server.register_function(eval)
-		server.register_function(U.execResult, 'execute')
-		server.register_instance(U, allow_dotted_names=True)
-		if currentThread:
-			server.serve_forever()
-		else:
-			from threading import Thread
-			t=Thread(target=server.serve_forever)
-			t.start()
-			return t
 
-def rpcClient(url_or_port='http://127.0.0.1:1212'):
-	if py.isint(url_or_port):
-		url='http://127.0.0.1:'+str(url_or_port)
-	else:
-		url=str(url_or_port)
-	
-	if py.is3():
-		from xmlrpc.client import ServerProxy,MultiCall
-	server = ServerProxy(url)
-	return server
-	
 def get_ip_from_mac(mac):
 	'''mac=='' return all ip
 	'''
@@ -132,7 +223,8 @@ def getAllAdapter():
 		return Win.getAllNetworkInterfaces()
 	
 #setip 192.168  ,  2.2	
-def setIP(ip='',adapter='',gateway='',source='dhcp',mask='',ip2=192.168):
+def setIP(ip='',adapter='',gateway='',source='dhcp',mask='',ip2=192.168,dns=py.No('gateway') ):
+	'''配置的 DNS 服务器不正确或不存在。   # 其实已经设置好了，可以正常使用'''
 	if not adapter:
 		#adapter=u'"\u672c\u5730\u8fde\u63a5"'.encode('gb2312')#本地连接
 		try:
@@ -156,13 +248,21 @@ def setIP(ip='',adapter='',gateway='',source='dhcp',mask='',ip2=192.168):
 		if not gateway:
 			T=py.importT()
 			gateway=T.subLast(ip,'','.')+'.1'
-		if not gateway.startswith('gateway'):gateway='gateway='+gateway
-		if not ip.startswith('addr='):ip='addr='+ip
+		if not gateway.startswith('gateway'):
+			if not dns:
+				dns=gateway
+			dns='address={}  register=primary'.format(dns)
+			gateway='gateway='+gateway
+			
+		if not ip.startswith('addr'):ip='address='+ip
 	else:
 		ip=''
-	r='netsh interface ip set address name={0} source={1} {2} {3} {4} '.format(adapter,source,ip,mask,gateway)
+	r=[ 'netsh interface ip set address name={0} source={1} {2} {3} {4} '.format(adapter,source,ip,mask,gateway),
+		'netsh interface ip set dnsservers name={0} source={1} {2}'.format(adapter,source,dns)
+		]
 	import os
-	os.system(r)
+	for i in r:
+		os.system(i)
 	return r
 setip=setIP
 def getComputerName():
@@ -238,6 +338,10 @@ def scanPorts(host,threadsMax=33,from_port=1,to_port=65535,callback=None,ip2=192
 	
 
 if __name__=='__main__':
+	
+	
+	rpcServer()
+	exit()
 	U.pln( getLAN_IP())
 	exit()
 	gsurlip=['http://ip.chinaz.com/getip.aspx'][0]
