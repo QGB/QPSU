@@ -4,9 +4,13 @@ gsqp=Path(__file__).parent.parent.absolute().__str__()
 if gsqp not in sys.path:sys.path.append(gsqp)#py3 works
 
 if len(sys.argv )>1:
-	if sys.argv[1].lower() in ['eval','rpc','oncall']:
+	cmd=sys.argv[1].lower()
+	if cmd in ['eval','oncall','rpc','rpcserver']:
 		from qgb import N
 		N.rpcServer()
+	if cmd in ['up','upload','upserver','uploadserver']:
+		from qgb import N
+		N.uploadServer()
 
 if len(sys.argv )==1:
 	from qgb import U

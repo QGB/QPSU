@@ -78,9 +78,10 @@ try:
 	write,read,ls,ll,md,rm=F.write,F.read,F.ls,F.ll,F.md,F.rm
 	from pprint import pprint,pformat
 	if __name__.endswith('qgb.U'):from . import Clipboard
-	else:import Clipboard
-
+	else:                         import Clipboard
 	clipboard=cb=Clipboard#  
+	cbs=Clipboard.set
+	cbg=Clipboard.get
 except Exception as ei:
 	setErr(ei,msg='#Error import '+str(ei))
 	
@@ -1579,6 +1580,10 @@ def mergeDict(*a):
 			r[k]=v
 	return r
 	
+def strTimeStamp():
+	return py.str(getTimestamp())
+stimestamp=strTimeStamp	
+	
 def getTimestamp():
 	'''return: float
 --------> U.time()
@@ -1589,7 +1594,7 @@ In [305]: U.time
 Out[305]: 1490080571.125
 '''
 	return __import__('time').time()
-timestamp=getTimestamp
+timestamp=getTimeStamp=getTimestamp
 
 def getTime():
 	from datetime import datetime
@@ -1617,6 +1622,11 @@ def getFloaTail(a,ndigits=20,s=False,str=False,string=False,i=False,int=False):
 		if i or int:
 			return py.int(py.str(a)[2:])#
 		return a	
+				
+def stime_(time=None,ms=True):
+	r=getStime(time=time,ms=ms)
+	return T.regexReplace(r,'[^0-9_]','_')
+	
 gsTimeFormatFile='%Y-%m-%d__%H.%M.%S__'
 gsymd=gsYMD=gsTimeFormatYMD='%Y%m%d'
 gsTimeFormat='%Y-%m-%d %H:%M:%S'

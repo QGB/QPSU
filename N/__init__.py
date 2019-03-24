@@ -1,12 +1,5 @@
 #coding=utf-8
 import sys
-print()
-# try:
-	# from qgb import U
-# except:
-	# from .. import U
-
-# from .. import py#ValueError: Attempted relative import in non-package
 if __name__.endswith('qgb.N'):from qgb import py
 else:
 	from pathlib import Path
@@ -45,32 +38,45 @@ if py.is3():
 else:
 	from SimpleHTTPServer import SimpleHTTPRequestHandler
 	from BaseHTTPServer import HTTPServer as _HTTPServer
-
+	
+def uploadServer(port=1122,host='0.0.0.0',dir='./',url='/up'):
+	'''curl  http://127.0.0.1:1122/up -F file=@./U.py
+	'''
+	U=py.importU()	
+	
+	from flask import Flask,request,make_response, send_from_directory
+	app= Flask('uploadServer'+U.stime_() )
+	@app.route(url,methods=['POST','GET'])
+	def upload_file():
+		file = request.files['file']
+		if file:
+			filename = U.path.join(dir, file.filename)
+			file.save(filename)			
+			r= make_response(filename)
+			r.headers['Content-Type'] = 'text/plain;charset=utf-8'
+			return r
+	app.run(host=host,port=port,debug=0,threaded=True)	
+		
 def rpcServer(port=23571,thread=True,ip='0.0.0.0',currentThread=False):
 	from threading import Thread
 	from http.server import BaseHTTPRequestHandler as h
 	import ast
 	U=py.importU()
 	T=py.importT()
-	def execResult(source, globals=None, locals=None,qpsu=True):
+	def execResult(source, globals=None, locals=None,importMods='sys,os',qpsu=True):
 		'''exec('r=xx') ;return r # this has been tested in 2&3
-		当没有定义 r 变量时，自动使用 最后一次 出现的 r
+		当没有定义 r 变量时，自动使用 最后一次 出现的值 作为r
 		当定义了 r ，但不是最后一行，这可能是因为 还有一些收尾工作
 		'''
 		if globals==None and locals==None:#因为参数不是 不可变对象，且在接下来会改变
 			globals={}
 			locals ={}
+		for modName in importMods.split(','):
+			locals[modName]=U.getMod(modName)
 		if qpsu:
-			def importFromU(modName):
-				mod = getattr(locals['U'],modName,None)
-				if mod:locals[modName]=mod
-			
-			locals['U']=py.importU()
-			importFromU('T')
-			importFromU('N')
-			importFromU('F')
-			importFromU('py')
-			
+			for modName in 'py,U,T,N,F'.split(','):
+				locals[modName]=U.getMod('qgb.'+modName)
+		# U.log(locals)
 		# body=ast.parse(code).body
 		# r_lineno=0
 		# for i,b in py.reversed(py.list( enumerate(body) )  ): # 从最后一条语句开始解析，序号还是原来的
@@ -92,36 +98,32 @@ def rpcServer(port=23571,thread=True,ip='0.0.0.0',currentThread=False):
 		else:
 			return 'can not found "r" variable after exec locals'+T.pformat(locals)
 	
-	from flask import Flask,request
-	app=Flask('rpcServer')
+	from flask import Flask,request,make_response
+	app=Flask('rpcServer'+U.stime_()   )
 	@app.errorhandler(404)
 	def flaskEval(e):
 		code=T.urlDecode(request.url)
 		code=T.sub(code,':{}/'.format(port) )
 		U.log( ('\n'+code) if '\n' in code else code	)
 		# U.ipyEmbed()()
-		return execResult(code)
+		r=make_response( execResult(code) )
+		r.headers['Access-Control-Allow-Origin'] = '*'
+		r.headers['Content-Type'] = 'text/plain;charset=utf-8'
+		return r
 	
 	app.run(host=ip,port=port,debug=0,threaded=True)	
-	
-	
+		
 	class H(SimpleHTTPRequestHandler):
 		def do_GET(s):
 			code=s.path[1:]
 			try:
-				
-			
 				r=execResult(code)
-			
 				s.send_response(200)
 			except Exception as e:
 				s.send_response(500)
 				
 			s.send_header("Content-type", "text/plain")
-			s.end_headers()
-			
-			
-			
+			s.end_headers()		
 			
 			if not py.istr(r):
 				r=repr(r)
@@ -152,9 +154,9 @@ def rpcServer(port=23571,thread=True,ip='0.0.0.0',currentThread=False):
 	
 def rpcClient(url_or_port='http://127.0.0.1:23571',code=''):
 	if py.isint(url_or_port):
-		url='http://127.0.0.1:'+str(url_or_port)
+		url='http://127.0.0.1:'+py.str(url_or_port)
 	else:
-		url=str(url_or_port)
+		url=py.str(url_or_port)
 	if not url.endswith('/'):url+='/'
 	T=py.importT()
 	code=T.urlEncode(code)
