@@ -62,13 +62,28 @@ try:
 	from pprint import pprint,pformat
 except:pass
 ################################################
-def readableSizeText(txt,p=True):
+def readableTimeText(txt,browser=True):
+	U=py.importU()
+	def ref(a):
+		a=a.group()
+		it=py.int(a)
+		if py.len(a)==13:
+			it=it/1000
+		return U.stime(a)
+
+	r= regexReplace(_4 , r'\d{10,}',ref)
+	if browser:
+		U.browserObj(r)
+	else:return r
+
+def readableSizeText(txt,size=1,p=True):
 	''' if not p :return txt'''
 	U=py.importU()
 	F=U.F
 	def fr(a):
-		i0,i=a.span()
-		a=py.int(txt[i0:i] )
+		# i0,i=a.span()
+		# a=py.int(txt[i0:i] )
+		a=py.int(a.group())*size
 		a=F.readableSize(a)
 		return a
 	r=regexReplace(txt,r'\d{5,}',fr)
@@ -76,8 +91,14 @@ def readableSizeText(txt,p=True):
 	else:return r
 
 def regexReplace(a,regex,str_or_func):
-	''' func(sre_match)
+	''' 
+func( a: <_sre.SRE_Match object; span=(2388, 2396), match='21758465'>  ):
+	match==a.group()	
 	
+	
+\QGB\Anaconda3\Lib\site-packages\jedi\evaluate\compiled\fake\_sre.pym
+    class SRE_Match():
+            yield SRE_Match(self)	
 	'''
 	if py.istr(str_or_func):
 		def func(_a):
