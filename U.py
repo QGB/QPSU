@@ -175,7 +175,6 @@ if iswin() or iscyg():
 		# py.pdb()
 		# {0} {1}'.format(__name__,isMain() )
 		
-###########################
 	if iscyg():
 		def getCygPath():
 			try:r=getProcessPath()
@@ -192,6 +191,48 @@ else:# *nix etc..， #TODO:isAndroid
 if isnix():
 	def isroot():
 		return os.getuid()==0
+########################## end init #############################################
+def retry( exceptions,times=3):
+
+
+	"""
+	Retry Decorator
+
+	Retries the wrapped function/method `times` times if the exceptions listed
+	in ``exceptions`` are thrown
+
+	:param times: The number of times to repeat the wrapped function/method
+	:type times: Int
+	:param Exceptions: Lists of exceptions that trigger a retry attempt
+	:type Exceptions: Tuple of Exceptions
+	"""
+
+	if not py.iterable(exceptions):exceptions=[exceptions]
+	
+	def decorator(func):
+		def newfn(*args, **kwargs):
+			attempt = 0
+			while attempt < times:
+				try:
+					return func(*args, **kwargs)
+				except Exception as e:
+					for i in exceptions:
+						if isinstance(e,i):
+							log(
+								'Exception thrown when attempting to run %s, attempt '
+								'%d of %d' % (func, attempt, times),
+								exc_info=True
+							)
+							attempt += 1
+							break
+					else:#when no break
+						raise e
+			return func(*args, **kwargs)
+			
+		return newfn
+		
+		
+	return decorator
 		
 		
 #TODO: if not has ei,import error occur twice,why?
