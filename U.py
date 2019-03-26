@@ -1282,11 +1282,13 @@ def printAttr(a,b='chrome',console=False,call=False):
 		r+=sh.format(i,k,v,vi)
 	# cdt('QPSU')
 	# import T,F
-	name=gst+'QPSU/'+T.filename(getObjName(a))+'.html'
+	name=gst+'QPSU/'
+	F.mkdir(name)
+	name+=T.filename(getObjName(a))+'.html'
 	# pln (name)
 	browser(name,b)
 	# if not r.strip():py.pdb()
-	return F.write(name,F.read(sp).replace('{result}',r),mkdir=True)
+	return F.write(name,F.read(sp).replace('{result}',r),mkdir=False)
 	
 	
 	# cdBack()

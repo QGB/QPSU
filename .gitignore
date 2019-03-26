@@ -1,5 +1,7 @@
-*.txt
+.idea
 .DS_Store
+venv
 Thumbs.db
 __pycache__
 *.pyc
+*.txt
