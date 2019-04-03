@@ -62,6 +62,19 @@ try:
 	from pprint import pprint,pformat
 except:pass
 ################################################
+RE_ZH_PATTERN = re.compile(u'[\u4e00-\u9fa5]+')
+
+def hasZh(word):
+    '''
+    判断传入字符串是否包含中文
+    :param word: 待判断字符串
+    :return: True:包含中文  False:不包含中文
+    '''
+    global RE_ZH_PATTERN
+    match = RE_ZH_PATTERN.search(word)
+    return match
+contain_zh=has_zh=hasZh	
+	
 def readableTimeText(txt,browser=True):
 	U=py.importU()
 	def ref(a):

@@ -15,6 +15,7 @@ def log(on=True):
 		es_log.setLevel(logging.CRITICAL) #50
 
 es=Elasticsearch(['http://149.129.54.62:9200'])
+es=Elasticsearch(['http://58.20.137.43:9200'])
 # log(False)
 
 
@@ -34,8 +35,20 @@ def getAllIndicesCount():
 def deleteIndex(index):
 	return es.indices.delete(index)
 	
+@U.retry(ConnectionTimeout)
+def getIndexAllData(index):
+	''' Not return  
+	'_version': 2,
+ 'found': True '''
+	dsl={
+		"query" : {
+			"match_all" : {}
+		}
+	}
+	return es.search(index=index,body=dsl)
+	
 @U.retry(ConnectionTimeout)	
-def insert(source,id=''):
+def insert(source,id='',**ka):
 	source= {
 		'column_classify': get_classify(article_origin),
 		'channel': article_origin,
@@ -52,3 +65,63 @@ def insert(source,id=''):
 	
 	return
 
+def hash(a):
+	a=T.regexReplace(a,r'\W','')
+	
+
+	
+def initIndex(indexName='w'):
+	from elasticsearch_dsl import DocType, Date, Completion, Keyword, Text, Integer
+	from elasticsearch_dsl.analysis import CustomAnalyzer as _CustomAnalyzer
+	from elasticsearch_dsl.connections import connections
+	
+	connections.create_connection(hosts=['58.20.137.43'])#default 9200
+	
+# class CustomAnalyzer(_CustomAnalyzer):
+    # def get_analysis_definition(self):
+        # return {}
+# ik_analyzer = CustomAnalyzer("ik_max_word", filter=["lowercase"])
+
+	class Type(DocType):
+		url= Keyword()
+		title = Text(analyzer="ik_smart")
+		content = Text(analyzer="ik_smart")
+		description = Text(analyzer="ik_smart")
+		err = Keyword()
+		class Meta: # 不加这个 出现 KeyError: '*'
+			index = indexName
+			doc_type = "doc"	
+		
+		
+	Type.init(index=indexName)
+	
+gsIndex='w'
+gsDocType='doc'
+
+def insertOne(url,title='',content='',description='',err=None):
+	source= locals()
+	
+	es=globals()['es']
+	return es.index(index=gsIndex,doc_type=gsDocType,body=source,id=url)
+	
+	
+	import elasticsearch
+	actions=[]
+	actions.append(
+			{
+				'_id':url,
+				'_op_type': 'index',
+				'_index': "w",  
+				'_type': "doc",
+				'_source': source
+			}
+		)
+	es=elasticsearch.Elasticsearch(['http://58.20.137.43:9200'])
+	return elasticsearch.helpers.bulk( es, actions )  
+	
+	return insertMutil()
+
+def insertMulti(data):
+	return
+	
+	
