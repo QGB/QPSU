@@ -2632,9 +2632,47 @@ def unique(iterable):
 	return r
 
 def pipInstall(modName):
+	''' 
+In [79]: U.pipInstall('dill')
+Requirement already satisfied: dill in /usr/local/lib/python3.6/site-packages (0.2.9)
+Out[79]: 0
+#######################
+In [80]: U.pipInstall('dill-')
+Invalid requirement: 'dill-'
+
+Out[80]: 1
+#######################
+In [81]: U.pipInstall('flask')
+Collecting flask
+  Downloading https://files.pythonhosted.org/packages/7f/e7/08578774ed4536d3242b14dacb4696386634607af824ea997202cd0edb4b/Flask-1.0.2-py2.py3-none-any.whl (91kB)
+    100% |████████████████████████████████| 92kB 169kB/s
+Could not install packages due to an EnvironmentError: [Errno 2] No such file or directory: '/tmp/pip-req-tracker-04_vcnlz/b0a3f228a91008c9937cc5e1a2c648e5759a1339d8b8d5b2ce88693f'
+
+Out[81]: 1
+#######################
+'''
 	from pip.__main__ import _main as pip
 	return pip(['install',modName])
 pip_install=pipInstall
+	
+def pip_install_qpsu_required(
+	mods='chardet dill requests flask progressbar2 pymysql elasticsearch elasticsearch_dsl '
+	):
+	if py.istr(mods):
+		mods=mods.split(' ')
+	rd={'installed':[],
+		'installing':[]
+	}
+	for i in mods:
+		if not i:continue
+		r=pipInstall(i)
+		if r==0:rd['installed'].append(i)
+		if r==1:rd['installing'].append(i)
+	return rd
+	
+def progressbar(iterable):
+	import progressbar
+	return progressbar.progressbar(iterable)
 	
 def main(display=True,pressKey=False,clipboard=False,escape=False,c=False,ipyOut=False,cmdPos=False,reload=False,*args):
 	anames=py.tuple([i for i in py.dir() if not i .startswith('args')])

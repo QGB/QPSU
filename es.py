@@ -1,3 +1,4 @@
+#coding=utf-8   #only for python3
 import elasticsearch
 import elasticsearch.helpers
 from elasticsearch import Elasticsearch
@@ -6,6 +7,12 @@ from elasticsearch.exceptions import ConnectionTimeout
 from . import py
 U=py.importU()
 
+es=Elasticsearch(['http://149.129.54.62:9200'])
+es=Elasticsearch(['http://58.20.137.43:9200'])
+gsIndex='w'
+gsDocType='doc'
+
+
 def log(on=True):
 	import logging
 	es_log=logging.getLogger('elasticsearch')
@@ -13,12 +20,7 @@ def log(on=True):
 		es_log.setLevel(logging.NOTSET) #0
 	else:
 		es_log.setLevel(logging.CRITICAL) #50
-
-es=Elasticsearch(['http://149.129.54.62:9200'])
-es=Elasticsearch(['http://58.20.137.43:9200'])
 # log(False)
-
-
 @U.retry(ConnectionTimeout)
 def analyze(text,analyzer='ik_smart'):
 	return es.indices.analyze(body={'text':text,'analyzer':analyzer})
@@ -32,11 +34,11 @@ def getAllIndicesCount():
 	return r
 
 @U.retry(ConnectionTimeout)
-def deleteIndex(index):
+def deleteIndex(index):#必须提供名字参数，防止误删除
 	return es.indices.delete(index)
 	
 @U.retry(ConnectionTimeout)
-def getIndexAllData(index):
+def getIndexAllData(index=gsIndex):
 	''' Not return  
 	'_version': 2,
  'found': True '''
@@ -70,8 +72,8 @@ def hash(a):
 	
 
 	
-def initIndex(indexName='w'):
-	from elasticsearch_dsl import DocType, Date, Completion, Keyword, Text, Integer
+def initIndex(indexName=gsIndex):
+	from elasticsearch_dsl import DocType, Date, Completion, Keyword, Text, Integer,Binary
 	from elasticsearch_dsl.analysis import CustomAnalyzer as _CustomAnalyzer
 	from elasticsearch_dsl.connections import connections
 	
@@ -87,21 +89,23 @@ def initIndex(indexName='w'):
 		title = Text(analyzer="ik_smart")
 		content = Text(analyzer="ik_smart")
 		description = Text(analyzer="ik_smart")
-		err = Keyword()
-		class Meta: # 不加这个 出现 KeyError: '*'
-			index = indexName
-			doc_type = "doc"	
+		err = Binary()
+		# class Meta: 
+			# index = indexName
+			# doc_type = "doc"	
 		
 		
-	Type.init(index=indexName)
+	Type.init(index=indexName)# 不加这个 出现 KeyError: '*'
 	
-gsIndex='w'
-gsDocType='doc'
 
 def insertOne(url,title='',content='',description='',err=None):
 	source= locals()
-	
+	for i in source:
+		v=source[i]
+		if i=='err' and not py.isbytes(v) :
+			source[i]=U.F.dill_dump(v)
 	es=globals()['es']
+	
 	return es.index(index=gsIndex,doc_type=gsDocType,body=source,id=url)
 	
 	
@@ -122,6 +126,9 @@ def insertOne(url,title='',content='',description='',err=None):
 	return insertMutil()
 
 def insertMulti(data):
+	es=globals()['es']
+	
+	
 	return
 	
 	

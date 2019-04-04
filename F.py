@@ -51,11 +51,22 @@ def stat(path, dir_fd=None, follow_symlinks=True):
 		r[i]=v
 	return r
 	
+def repr_dill_load(obj):
+	'''	不用考虑文件问题，以后要统一 序列化系列函数,
+	但是这个函数序列化后是字符串，不能 autoArgs 是否是file参数
+'''
+	
+def repr_dill_dump(obj):
+	'''#TODO not dill basic type :  number,bytes,str,  ... (all ast.literal_eval) 
+	'''
+	
+	return
+	
 def basic_dump():
 	repr
 
 def basic_load():
-	eval
+	ast.literal_eval 
 	
 def deSerialize(obj=None,file=None):
 	'''The protocol version of the pickle is detected automatically, so no
@@ -64,6 +75,10 @@ representation are ignored.
 '''
 	if not py.isbyte(obj) and not file:raise py.ArgumentError('need bytes or file=str ')
 	import pickle
+	if py.istr(obj):
+		file=obj
+		obj=None
+		U.log('autoArgs file=%s'%file)
 	if py.isbyte(obj):
 		return pickle.loads(obj)
 	else:
