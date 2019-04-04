@@ -120,13 +120,65 @@ def getPyVersion():
 	
 
 import platform
-def iswin():
-	if platform.system().startswith('Windows'):return True
-	else:return False
 glnix=['nix','linux','darwin']
 def isnix():
+	'''
+### Linux (64bit) + WSL
+os.name                     posix
+sys.platform                linux
+platform.system()           Linux
+sysconfig.get_platform()    linux-x86_64
+platform.machine()          x86_64
+platform.architecture()     ('64bit', '')
+
+### WINDOWS official python installer                 32bit
+-------------------------   -----                     -----
+os.name                     nt                        nt
+sys.platform                win32                     win32
+platform.system()           Windows                   Windows
+sysconfig.get_platform()    win-amd64                 win32
+platform.machine()          AMD64                     AMD64
+platform.architecture()     ('64bit', 'WindowsPE')    ('64bit', 'WindowsPE')
+
+msys2                       64bit                     32bit
+-----                       -----                     -----
+os.name                     posix                     posix
+sys.platform                msys                      msys
+platform.system()           MSYS_NT-10.0              MSYS_NT-10.0-WOW
+sysconfig.get_platform()    msys-2.11.2-x86_64        msys-2.11.2-i686
+platform.machine()          x86_64                    i686
+platform.architecture()     ('64bit', 'WindowsPE')    ('32bit', 'WindowsPE')
+
+msys2                       mingw-w64-x86_64-python3  mingw-w64-i686-python3
+-----                       ------------------------  ----------------------
+os.name                     nt                        nt
+sys.platform                win32                     win32
+platform.system()           Windows                   Windows
+sysconfig.get_platform()    mingw                     mingw
+platform.machine()          AMD64                     AMD64
+platform.architecture()     ('64bit', 'WindowsPE')    ('32bit', 'WindowsPE')
+
+cygwin                      64bit                     32bit
+------                      -----                     -----
+os.name                     posix                     posix
+sys.platform                cygwin                    cygwin
+platform.system()           CYGWIN_NT-10.0            CYGWIN_NT-10.0-WOW
+sysconfig.get_platform()    cygwin-3.0.1-x86_64       cygwin-3.0.1-i686
+platform.machine()          x86_64                    i686
+platform.architecture()     ('64bit', 'WindowsPE')    ('32bit', 'WindowsPE')
+
+'''
 	return [i for i in glnix if i in platform.system().lower()]
-	# return one_in('nix','linux','darwin',platform.system().lower())
+	
+def isWin():
+	if platform.system().startswith('Windows'):return True
+	else:return False
+iswin=isWin
+
+def isLinux():return platform.system()=='Linux'
+def isMacOS():return platform.system()=='darwin'
+isOSX=isMacOS
+	
 def istermux():
 	return '/com.termux' in sys.executable
 
@@ -2655,11 +2707,17 @@ Out[81]: 1
 	return pip(['install',modName])
 pip_install=pipInstall
 	
+def pip_clean_cache():
+	if isnix():  cachePath=r'~/.cache/pip'  # and it respects the XDG_CACHE_HOME directory.
+	if isMacOS():cachePath=r'~/Library/Caches/pip'
+	if isWin():  cachePath=os.getenv('LocalAppData')+r'\pip\Cache'
+	return F.delete(cachePath)
+	
 def pip_install_qpsu_required(
 	mods='chardet dill requests flask progressbar2 pymysql elasticsearch elasticsearch_dsl '
 	):
-	if py.istr(mods):
-		mods=mods.split(' ')
+	if py.istr(mods):  mods=mods.split(' ')
+	
 	rd={'installed':[],
 		'installing':[]
 	}
