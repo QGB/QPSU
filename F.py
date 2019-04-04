@@ -672,9 +672,9 @@ def deleteFile(file):
 	# for i in a.split(ap):
 	py.importU()
 	def Error():
-		if U.iswin():
-			return WindowsError
-	
+		if U.iswin():	return WindowsError
+		# if U.isnix():	return 
+		return py.Exception
 	
 	try:
 		if isDir(file):
@@ -684,6 +684,8 @@ def deleteFile(file):
 		_os.remove(file)
 		return file
 	except Error() as e:
+		#Error() 未定义相应操作系统 返回None时   
+		#TypeError: catching classes that do not inherit from BaseException is not allowed
 		if isDir(file):
 			raise Exception('#TODO')
 		return py.No(file,e,'Not exists?')

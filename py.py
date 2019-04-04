@@ -176,6 +176,7 @@ def pdb(frame=sys._getframe().f_back):
 	# if msg:print(msg)
 	import pdb
 	pdb.Pdb().set_trace(frame)
+debug=pdb
 	
 def importU():
 	# try:import U
