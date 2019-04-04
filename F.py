@@ -673,7 +673,7 @@ def deleteFile(file):
 	py.importU()
 	def Error():
 		if U.iswin():	return WindowsError
-		# if U.isnix():	return 
+		if U.isnix():	return FileNotFoundError
 		return py.Exception
 	
 	try:
@@ -684,7 +684,7 @@ def deleteFile(file):
 		_os.remove(file)
 		return file
 	except Error() as e:
-		#Error() 未定义相应操作系统 返回None时   
+		#Error()  返回None时   
 		#TypeError: catching classes that do not inherit from BaseException is not allowed
 		if isDir(file):
 			raise Exception('#TODO')
