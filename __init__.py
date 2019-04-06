@@ -18,7 +18,7 @@ __all__=['U','T','N','F']
 try:
 	try:from . import py
 	except:import py
-	py.importU()
+	U=py.importU()
 	if U.isipy():
 		__all__.append('ipy')
 		# import ipy
@@ -28,7 +28,7 @@ try:
 		# ipy=ipy.gi#少了这个，ipy在sys.modules 中虽然已经替换，但是实际使用却还是原来module ，？
 		# ipy.startRecord()
 		# M:\Program Files\.babun\cygwin\home\qgb\.ipython\profile_default\history.sqlite
-	if U.iswin() or U.iscyg():
+	if U.iswin() or (py.is2() and U.iscyg() ):
 		__all__.append('Win')
 	# U.pln( __all__	
 except Exception as e:
