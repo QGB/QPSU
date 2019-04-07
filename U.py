@@ -2184,9 +2184,9 @@ in ipy , npp() not autoReload when U.r(), But U.npp()
 		
 	if a.endswith('.pyc'):#AttributeError: 'code' object has no attribute 'endswith'
 		a=a[:-3]+'py'
-	if Win.getVersionNumber()>=6.1:#win7
-		appdata=os.getenv('appdata') or ''#win10 not have appdata  ?
-		npath=appdata.replace('\\','/')+nppexe
+	# if Win.getVersionNumber()>=6.1:#win7
+		# appdata=os.getenv('appdata') or ''#win10 not have appdata  ?
+		# npath=appdata.replace('\\','/')+nppexe
 	if not os.path.exists(npath):	
 		npath=getModPath()[:3]+r'QGB'+nppexe
 	if not os.path.exists(npath):	
@@ -2714,7 +2714,7 @@ def pip_clean_cache():
 	return F.delete(cachePath)
 	
 def pip_install_qpsu_required(
-	mods='chardet dill requests flask progressbar2 pymysql elasticsearch elasticsearch_dsl '
+	mods='chardet dill psutil requests flask progressbar2 pymysql elasticsearch elasticsearch_dsl '
 	):
 	if py.istr(mods):  mods=mods.split(' ')
 	

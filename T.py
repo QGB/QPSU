@@ -28,6 +28,7 @@ bytes256=byte256=b''.join( [py.byte(i) for i in range(256)  ] )
 ###############
 RE_URL='http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\(\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+'
 RE_YMD="(19|20)[0-9]{2}[- /.](0[1-9]|1[012])[- /.](0[1-9]|[12][0-9]|3[01])"
+RE_WhiteSpace=r'\s'
 ###############
 SQLITE='SELECT * FROM sqlite_master;'
 
