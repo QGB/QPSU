@@ -207,11 +207,10 @@ def insertMulti_mifeng(data):
 					'_source': source
 				}
 			)
-	if U.isLinux():
-		es=elasticsearch.Elasticsearch(['http://127.0.0.1:9200'])
-	else:
-		es=elasticsearch.Elasticsearch(['http://58.20.137.43:9200'])
-	
-	
+	# if U.isLinux():
+		# es=elasticsearch.Elasticsearch(['http://127.0.0.1:9200'])
+	# else:
+	es=elasticsearch.Elasticsearch(['http://58.20.137.43:9200'])
+
 	return elasticsearch.helpers.bulk( es, actions )  
 	
