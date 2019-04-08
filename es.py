@@ -120,15 +120,45 @@ def insertOne(url,title='',content='',description='',err=None):
 				'_source': source
 			}
 		)
-	es=elasticsearch.Elasticsearch(['http://58.20.137.43:9200'])
+	if U.isLinux():
+		es=elasticsearch.Elasticsearch(['http://127.0.0.1:9200'])
+	else:
+		es=elasticsearch.Elasticsearch(['http://58.20.137.43:9200'])
+	
+	
 	return elasticsearch.helpers.bulk( es, actions )  
 	
 	return insertMutil()
 
 def insertMulti(data):
 	es=globals()['es']
-	
-	
+
 	return
+	
+def spider(threads=99,TIMEOUT = 9):
+	U=py.importU()
+	F=U.F
+	
+	dr={}
+	de={}
+	ru=F.pickle_load(file='./10201')
+	
+	import concurrent.futures,requests
+	
+	def load_url(domain):
+		try:
+			dr[domain]=requests.get('http://'+domain,timeout=TIMEOUT)
+		except Exception as e:
+			de[domain]=e
+	
+	with concurrent.futures.ThreadPoolExecutor(max_workers=threads) as executor:
+		future_to_url = (executor.submit(load_url, url) for url in ru)
+		future_to_url=U.progressbar(future_to_url)
+		for future in concurrent.futures.as_completed(future_to_url):
+			try:
+				data = future.result()
+				if data:U.log(data)
+			except Exception as exc:
+				U.log(exc)
 	
 	

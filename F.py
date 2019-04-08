@@ -672,20 +672,20 @@ def deleteFile(file):
 	# for i in a.split(ap):
 	py.importU()
 	def Error():
-		if U.iswin():	return WindowsError
-		if U.isnix():	return FileNotFoundError
-		return py.Exception
+		#Error()  返回None时   
+		#TypeError: catching classes that do not inherit from BaseException is not allowed
+		return FileNotFoundError
+		#issubclass(FileNotFoundError,WindowsError) == True
+		if U.iswin():	return WindowsError 
 	
 	try:
 		if isDir(file):
 			import shutil
-			shutil.rmtree(file, ignore_errors=True)
+			shutil.rmtree(file, ignore_errors=True)#这里不发出 异常 
 			return file	
-		_os.remove(file)
+		_os.remove(file)#异常 是从这里产生的
 		return file
-	except Error() as e:
-		#Error()  返回None时   
-		#TypeError: catching classes that do not inherit from BaseException is not allowed
+	except FileNotFoundError as e:
 		if isDir(file):
 			raise Exception('#TODO')
 		return py.No(file,e,'Not exists?')
