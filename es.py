@@ -70,7 +70,6 @@ def insert(source,id='',**ka):
 def hash(a):
 	a=T.regexReplace(a,r'\W','')
 	
-
 	
 def initIndex(indexName=gsIndex):
 	from elasticsearch_dsl import DocType, Date, Completion, Keyword, Text, Integer,Binary
@@ -134,10 +133,10 @@ def insertMulti(data):
 	es=globals()['es']
 
 	return
-	
-def spider(threads=99,TIMEOUT = 9):
 	U=py.importU()
-	F=U.F
+	F=U.F	
+def spider(threads=99,TIMEOUT = 9):
+	threads=99;TIMEOUT = 9
 	
 	dr={}
 	de={}
@@ -155,10 +154,64 @@ def spider(threads=99,TIMEOUT = 9):
 		future_to_url = (executor.submit(load_url, url) for url in ru)
 		future_to_url=U.progressbar(future_to_url)
 		for future in concurrent.futures.as_completed(future_to_url):
+			pr
 			try:
 				data = future.result()
 				if data:U.log(data)
 			except Exception as exc:
 				U.log(exc)
 	
+	
+
+	
+def initIndex_mifeng(indexName='mifeng_search'):
+	from elasticsearch_dsl import DocType, Date, Completion, Keyword, Text, Integer,Binary
+	from elasticsearch_dsl.analysis import CustomAnalyzer as _CustomAnalyzer
+	from elasticsearch_dsl.connections import connections
+	connections.create_connection(hosts=['58.20.137.43'])
+	
+	class Type(DocType):
+		column_classify= Keyword()
+		channel= Keyword()#
+		datetime= Date()
+		source = Keyword()
+		url= Keyword()
+		title = Text(analyzer="ik_smart")
+		content = Text(analyzer="ik_smart")
+		description = Text(analyzer="ik_smart")
+		err = Binary()
+		# class Meta: 
+			# index = indexName
+			# doc_type = "doc"	
+		
+		
+	Type.init(index=indexName)# 不加这个 出现 KeyError: '*'
+	
+	
+def insertMulti_mifeng(data):
+	import elasticsearch
+	actions=[]
+	for i in data:
+		source={}
+		source['url']=i[0]
+		source['title']=i[1]
+		source['content']=i[2]
+		source['column_classify']='网站'
+		source['datetime']=U.time()
+		actions.append(
+				{
+					'_id':source['url'],
+					'_op_type': 'index',
+					'_index': "mifeng_search",  
+					'_type': "doc",
+					'_source': source
+				}
+			)
+	if U.isLinux():
+		es=elasticsearch.Elasticsearch(['http://127.0.0.1:9200'])
+	else:
+		es=elasticsearch.Elasticsearch(['http://58.20.137.43:9200'])
+	
+	
+	return elasticsearch.helpers.bulk( es, actions )  
 	
