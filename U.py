@@ -2727,6 +2727,7 @@ def pip_install_qpsu_required(
 		if r==0:rd['installed'].append(i)
 		if r==1:rd['installing'].append(i)
 	return rd
+pipqp=pip_install_qpsu_required
 	
 def progressbar(iterable):
 	import progressbar
