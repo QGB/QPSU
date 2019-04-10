@@ -111,7 +111,13 @@ def rpcServer(port=23571,thread=True,ip='0.0.0.0',currentThread=False):
 		r.headers['Content-Type'] = 'text/plain;charset=utf-8'
 		return r
 	
-	app.run(host=ip,port=port,debug=0,threaded=True)	
+	flaskArgs=py.dict(host=ip,port=port,debug=0,threaded=True)
+	if currentThread or not thread:
+		return app.run(**flaskArgs)
+	else:
+		t= Thread(target=app.run,name='qgb.rpcServer '+U.stime(),kwargs=flaskArgs)
+		t.start()
+		return t
 		
 	class H(SimpleHTTPRequestHandler):
 		def do_GET(s):
