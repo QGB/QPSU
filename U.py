@@ -2684,7 +2684,7 @@ def unique(iterable):
 	return r
 
 def pipInstall(modName):
-	''' 
+	''' #TODO 在同一个进程内 pipInstall 只能运行一次
 In [79]: U.pipInstall('dill')
 Requirement already satisfied: dill in /usr/local/lib/python3.6/site-packages (0.2.9)
 Out[79]: 0

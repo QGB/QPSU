@@ -47,12 +47,14 @@ def getBytes(url):
 	except Exception as e:
 		return py.No(e)
 	
-def get(url,file=''):
+def get(url,file='',
+	headers = {'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/59.0.2171.95 Safari/537.36'},
+	):
 	# return method(url,'get')#<http.client.HTTPResponse at 0x203a16a74a8>
 	url=autoUrl(url)
 	try:
 		import requests
-		r=requests.get(url)
+		r=requests.get(url，)
 	except ModuleNotFoundError:
 		try:
 			r=grequest.urlopen(url).read()
