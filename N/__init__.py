@@ -57,7 +57,7 @@ def uploadServer(port=1122,host='0.0.0.0',dir='./',url='/up'):
 			return r
 	app.run(host=host,port=port,debug=0,threaded=True)	
 		
-def rpcServer(port=23571,thread=True,ip='0.0.0.0',currentThread=False):
+def rpcServer(port=23571,thread=True,ip='0.0.0.0',currentThread=False,qpsu=True):
 	from threading import Thread
 	from http.server import BaseHTTPRequestHandler as h
 	import ast
@@ -106,7 +106,7 @@ def rpcServer(port=23571,thread=True,ip='0.0.0.0',currentThread=False):
 		code=T.sub(code,':{}/'.format(port) )
 		U.log( ('\n'+code) if '\n' in code else code	)
 		# U.ipyEmbed()()
-		r=make_response( execResult(code) )
+		r=make_response( execResult(code,qpsu=qpsu) )
 		r.headers['Access-Control-Allow-Origin'] = '*'
 		r.headers['Content-Type'] = 'text/plain;charset=utf-8'
 		return r
@@ -115,7 +115,7 @@ def rpcServer(port=23571,thread=True,ip='0.0.0.0',currentThread=False):
 	if currentThread or not thread:
 		return app.run(**flaskArgs)
 	else:
-		t= Thread(target=app.run,name='qgb.rpcServer '+U.stime(),kwargs=flaskArgs)
+		t= Thread(target=app.run,name='qgb thread '+app.name,kwargs=flaskArgs)
 		t.start()
 		return t
 		
