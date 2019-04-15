@@ -452,9 +452,11 @@ def readJSON(file,encoding=None):
 	
 def read_csv(file,encoding=None):
 	file=autoPath(file)
+	if not encoding:encoding=detectEncoding(file)
 	import pandas as pd
-	df = pd.read_csv(file, delimiter=',',encoding=detectEncoding(file))
+	df = pd.read_csv(file, delimiter=',',encoding=encoding)
 	r=[]
+	is1=False
 	if py.len(df.columns)==1:is1=True
 	for i in df.values:
 		if is1:

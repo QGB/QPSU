@@ -196,6 +196,7 @@ def insertMulti_mifeng(data):
 		source['url']=i[0]
 		source['title']=i[1]
 		source['content']=i[2]
+		source['channel']=i[3]
 		source['column_classify']='网站'
 		source['datetime']=U.time()
 		actions.append(
