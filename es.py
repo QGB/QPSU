@@ -49,6 +49,14 @@ def getIndexAllData(index=gsIndex):
 	}
 	return es.search(index=index,body=dsl)
 	
+@U.retry(ConnectionTimeout)
+def getIndexAllData(index=gsIndex):
+	''' Not return  '''
+	resp = es.search(index=gsIndex, body={"query": {"match_all": {}}})
+	for row in resp["hits"]["hits"]:
+		yield row
+		
+	
 @U.retry(ConnectionTimeout)	
 def insert(source,id='',**ka):
 	source= {
