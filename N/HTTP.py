@@ -60,7 +60,7 @@ def get(url,file='',
 			try:return r.content.decode('gb18030')
 			except:pass
 			return r.text
-		else
+		else:
 			return r.content
 	except ModuleNotFoundError:
 		try:
