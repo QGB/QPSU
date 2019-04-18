@@ -452,9 +452,11 @@ def readJSON(file,encoding=None):
 	
 def read_csv(file,encoding=None):
 	file=autoPath(file)
+	if not encoding:encoding=detectEncoding(file)
 	import pandas as pd
-	df = pd.read_csv(file, delimiter=',',encoding=detectEncoding(file))
+	df = pd.read_csv(file, delimiter=',',encoding=encoding)
 	r=[]
+	is1=False
 	if py.len(df.columns)==1:is1=True
 	for i in df.values:
 		if is1:
@@ -876,14 +878,17 @@ TypeError: open() takes at most 7 arguments (8 given)
 '''
 
 
-def readlines(a,encoding=None):
+def readlines(a,EOL=True,encoding=None):
 	a=autoPath(a)
 	if not encoding:
 		encoding=detectEncoding(a)
 	r=[]
 	try:
-		for i in py.open(a,encoding=encoding):r.append(i)
-		return r
+		if EOL:
+			for i in py.open(a,encoding=encoding):r.append(i)
+			return r
+		else:
+			return read(a,encoding=encoding).splitlines()
 	except Exception as e:
 		return py.No(e)
 # F.isFileName('g:/a')

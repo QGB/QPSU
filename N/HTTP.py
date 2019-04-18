@@ -54,7 +54,14 @@ def get(url,file='',
 	url=autoUrl(url)
 	try:
 		import requests
-		r=requests.get(url,headers=headers)
+		r=requests.get(url,headers=headers,verify=False)
+		
+		if 'text' in U.getDictV(r.headers,'Content-Type'):
+			try:return r.content.decode('gb18030')
+			except:pass
+			return r.text
+		else
+			return r.content
 	except ModuleNotFoundError:
 		try:
 			r=grequest.urlopen(url).read()
@@ -70,7 +77,9 @@ def get(url,file='',
 			return U.F.write(file,content)
 		else:
 			return py.No('response.content is Null!')
-	return r.text
+			
+	
+
 def head(url):
 	return method(url,'head').info().items()
 	

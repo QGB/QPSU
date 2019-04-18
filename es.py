@@ -49,6 +49,14 @@ def getIndexAllData(index=gsIndex):
 	}
 	return es.search(index=index,body=dsl)
 	
+@U.retry(ConnectionTimeout)
+def iterIndex(index=gsIndex):
+	''' Not return  '''
+	resp = es.search(index=gsIndex, body={"query": {"match_all": {}}})
+	for row in resp["hits"]["hits"]:
+		yield row
+		
+	
 @U.retry(ConnectionTimeout)	
 def insert(source,id='',**ka):
 	source= {
@@ -196,6 +204,7 @@ def insertMulti_mifeng(data):
 		source['url']=i[0]
 		source['title']=i[1]
 		source['content']=i[2]
+		source['channel']=i[3]
 		source['column_classify']='网站'
 		source['datetime']=U.time()
 		actions.append(

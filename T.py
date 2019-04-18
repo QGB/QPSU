@@ -65,6 +65,9 @@ except:pass
 ################################################
 RE_ZH_PATTERN = re.compile(u'[\u4e00-\u9fa5]+')
 
+def filter_zh(a,splitor=' '):
+	return splitor.join(RE_ZH_PATTERN.findall(a ) )
+	
 def hasZh(word):
     '''
     判断传入字符串是否包含中文
@@ -103,6 +106,9 @@ def readableSizeText(txt,size=1,p=True):
 	r=regexReplace(txt,r'\d{5,}',fr)
 	if p:U.pln(r)
 	else:return r
+
+def regexCount(a,regex):
+	return py.len(re.findall(regex, a))
 
 def regexReplace(a,regex,str_or_func):
 	''' 
