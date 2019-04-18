@@ -52,10 +52,10 @@ def get(url,file='',
 	):
 	# return method(url,'get')#<http.client.HTTPResponse at 0x203a16a74a8>
 	url=autoUrl(url)
+	U=py.importU()
 	try:
 		import requests
 		r=requests.get(url,headers=headers,verify=False)
-		
 		if 'text' in U.getDictV(r.headers,'Content-Type'):
 			try:return r.content.decode('gb18030')
 			except:pass
