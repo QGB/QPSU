@@ -65,8 +65,9 @@ def repr_dill_dump(obj):
 def basic_dump():
 	repr
 
-def basic_load():
-	ast.literal_eval 
+def basic_load(sobj):
+	import ast
+	return ast.literal_eval(sobj)
 	
 def deSerialize(obj=None,file=None):
 	'''The protocol version of the pickle is detected automatically, so no
@@ -468,6 +469,20 @@ def read_csv(file,encoding=None):
 	# dicts = df.to_dict().values()
 readCSV=read_csv
 
+def read_xls(file,sheetIndex=0):
+	''' return [ [colValue...]  .. ]  #No type description
+	'''
+	import xlrd                         
+	w=xlrd.open_workbook(f)           
+	sh=w.sheets()[sheetIndex]
+	return sh._cell_values
+	
+def read_xls_sheets_name(file):
+	import xlrd                         
+	w=xlrd.open_workbook(f)           
+	return py.list(py.enumerate( w.sheet_names() )  )
+	
+	
 def read_sqlite(file,table=''):
 	import sqlite3
 	with sqlite3.connect(file) as con:

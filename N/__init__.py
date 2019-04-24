@@ -117,7 +117,7 @@ def rpcServer(port=23571,thread=True,ip='0.0.0.0',currentThread=False,qpsu=True)
 	else:
 		t= Thread(target=app.run,name='qgb thread '+app.name,kwargs=flaskArgs)
 		t.start()
-		return t
+		return (t,app)
 		
 	class H(SimpleHTTPRequestHandler):
 		def do_GET(s):

@@ -439,7 +439,7 @@ def flat(*a,**options):
 		if one_in('isnone','hasnone', o.lower()):noNone=not options[o]
 		# repl()
 		
-	a=list(a);r=[];i=0
+	a=py.list(a);r=[];i=0
 	while i<py.len(a):
 		# str has __iter__ in py3
 		if hasattr(a[i], '__iter__'):a.extend(a[i])
@@ -608,7 +608,7 @@ Out[142]: ['p']
 inOne=in_one
 def all_in(vs,*t):
 	'''for i in vs:i all_in t 
-	U.all_in(list(string),T.PATH_NAME)  
+	U.all_in(py.list(string),T.PATH_NAME)  
 	
 	(1,2,3,[t])	or	([vs].[t])'''
 	if not hasattr(vs, '__iter__'):vs=[vs]
@@ -666,7 +666,7 @@ def cmd(*a,**ka):
 		elif len(a[0])==1:s=T.string(a[0])
 		elif len(a[0])>1:a=a[0]
 	if len(a)>1:
-		a=list(a)
+		a=py.list(a)
 		s=T.string(a.pop(0))+' '
 		for i in a:
 			if type(i)==type([]):
@@ -760,7 +760,7 @@ pln command.args #['ls', '-l']
 	if DEBUG:pln (a,args)
 		
 	if type(a)==type(''):a=[a]
-	if type(a)!=type([]):a=list(a)
+	if type(a)!=type([]):a=py.list(a)
 	if len(args)>0:a.extend(args)
 	if type(a)==type([]):
 		for i,v in enumerate(a):
@@ -1138,10 +1138,13 @@ As a side effect, an implementation may insert additional keys into the dictiona
 	# exec(s)
 
 def calltimes(a=''):
-	a='_count'+T.string(a)
+	'''U.ct.clear.__dict__
+	'''
+	a='_count_%s' % T.string(a).__hash__()
 	if a in calltimes.__dict__: 
 		calltimes.__dict__[a]+=1
 	else:
+		_ct_clear.__dict__[a]=stime() # 记录首次 初始化的时间，并且只更新不删除？
 		calltimes.__dict__[a]=0
 	return calltimes.__dict__[a]
 ct=count=counter=calltimes
@@ -1906,7 +1909,7 @@ def methods(obj):
 	# printAttr(y)
 	
 	# printAttr([])
-	return list(y())
+	return py.list(y())
 	
 	# exit()
 # pln methods([])	

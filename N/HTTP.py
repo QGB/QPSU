@@ -53,6 +53,16 @@ def get(url,file='',
 	# return method(url,'get')#<http.client.HTTPResponse at 0x203a16a74a8>
 	url=autoUrl(url)
 	U=py.importU()
+	def writeFile():
+		if file:
+			U=py.importU()
+			content=r.content
+			if content:
+				return U.F.write(file,content)
+			else:
+				return py.No('response.content is Null!')
+			
+	
 	try:
 		import requests
 		r=requests.get(url,headers=headers,verify=False)
@@ -66,19 +76,11 @@ def get(url,file='',
 		try:
 			r=grequest.urlopen(url).read()
 		except Exception as e:
-			return url,e
+			return py.No(url,e)
 		#####################
 	except Exception as e:
-		raise e
-	if file:
-		U=py.importU()
-		content=r.content
-		if content:
-			return U.F.write(file,content)
-		else:
-			return py.No('response.content is Null!')
-			
-	
+		return py.No(e)
+
 
 def head(url):
 	return method(url,'head').info().items()

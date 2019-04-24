@@ -109,7 +109,8 @@ def readableSizeText(txt,size=1,p=True):
 
 def regexCount(a,regex):
 	return py.len(re.findall(regex, a))
-
+countRegex=regexCount
+	
 def regexReplace(a,regex,str_or_func):
 	''' 
 func( a: <_sre.SRE_Match object; span=(2388, 2396), match='21758465'>  ):
@@ -578,7 +579,7 @@ def readNumber(a,split=4,p=True):
 	if py.isnum(a):a=py.int(a)#py2 ok
 	if not py.istr(a):a=str(a)
 	U=py.importU()
-	a=''.join(U.one_in(list(a),number))
+	a=''.join(U.one_in(py.list(a),number))
 	while(a.startswith('0')):a=a[1:]
 
 	s='';im=py.len(a);iz=0;zh[0]=''#忽略 个

@@ -310,7 +310,7 @@ def setOskPos(w=333,h=255,x=522,y=-21):
 def msgbox(s='',st='title',*a):
 	''' st title'''
 	if(a):
-		a=list(a)
+		a=py.list(a)
 		a.insert(0,s)
 		a.insert(1,st)
 		st='length %s'%len(a)
