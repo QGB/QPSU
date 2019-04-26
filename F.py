@@ -721,7 +721,9 @@ def getSplitor(ap):
 	return '/'#default	
 getsp=getSp=getSplitor		
 		
-		
+def mdcd(ap):
+	return py.importU().cd(makeDirs(ap))
+	
 def makeDirs(ap,isFile=False):
 	ap=autoPath(ap)
 	if py.is3():

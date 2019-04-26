@@ -233,6 +233,13 @@ def getAllAdapter():
 #setip 192.168  ,  2.2	
 def setIP(ip='',adapter='',gateway='',source='dhcp',mask='',ip2=192.168,dns=py.No('gateway') ):
 	'''配置的 DNS 服务器不正确或不存在。   # 其实已经设置好了，可以正常使用'''
+	U=py.importU()
+	if U.islinux():
+		import socket,struct
+		bin_ip = socket.inet_aton(ip)
+		ifreq = struct.pack('16sH2s4s8s', adapter, socket.AF_INET, '\x00' * 2, bin_ip, '\x00' * 8)
+		return fcntl.ioctl(sock, SIOCSIFADDR, ifreq)
+	
 	if not adapter:
 		#adapter=u'"\u672c\u5730\u8fde\u63a5"'.encode('gb2312')#本地连接
 		try:
