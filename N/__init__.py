@@ -235,7 +235,7 @@ def setIP(ip='',adapter='',gateway='',source='dhcp',mask='',ip2=192.168,dns=py.N
 	'''配置的 DNS 服务器不正确或不存在。   # 其实已经设置好了，可以正常使用'''
 	U=py.importU()
 	if U.islinux():
-		import socket,struct
+		import socket,struct,fcntl
 		bin_ip = socket.inet_aton(ip)
 		ifreq = struct.pack('16sH2s4s8s', adapter, socket.AF_INET, '\x00' * 2, bin_ip, '\x00' * 8)
 		return fcntl.ioctl(sock, SIOCSIFADDR, ifreq)
