@@ -57,25 +57,33 @@ def uploadServer(port=1122,host='0.0.0.0',dir='./',url='/up'):
 			return r
 	app.run(host=host,port=port,debug=0,threaded=True)	
 		
-def rpcServer(port=23571,thread=True,ip='0.0.0.0',currentThread=False,qpsu=True):
+def rpcServer(port=23571,thread=True,ip='0.0.0.0',currentThread=False,
+	execLocals=None,qpsu=True,importMods='sys,os',request=True):
+	
 	from threading import Thread
 	from http.server import BaseHTTPRequestHandler as h
 	import ast
 	U=py.importU()
 	T=py.importT()
-	def execResult(source, globals=None, locals=None,importMods='sys,os',qpsu=True):
+	
+	if not execLocals:execLocals={}
+		
+	for modName in importMods.split(','):
+		execLocals[modName]=U.getMod(modName)
+	if qpsu:
+		for modName in 'py,U,T,N,F'.split(','):
+			execLocals[modName]=U.getMod('qgb.'+modName)	
+	
+	
+	def execResult(source, globals=None, locals=None):
 		'''exec('r=xx') ;return r # this has been tested in 2&3
 		当没有定义 r 变量时，自动使用 最后一次 出现的值 作为r
 		当定义了 r ，但不是最后一行，这可能是因为 还有一些收尾工作
 		'''
-		if globals==None and locals==None:#因为参数不是 不可变对象，且在接下来会改变
+		if globals==None:
 			globals={}
+		if locals==None:#因为参数不是 不可变对象，且在接下来会改变
 			locals ={}
-		for modName in importMods.split(','):
-			locals[modName]=U.getMod(modName)
-		if qpsu:
-			for modName in 'py,U,T,N,F'.split(','):
-				locals[modName]=U.getMod('qgb.'+modName)
 		# U.log(locals)
 		# body=ast.parse(code).body
 		# r_lineno=0
@@ -98,15 +106,19 @@ def rpcServer(port=23571,thread=True,ip='0.0.0.0',currentThread=False,qpsu=True)
 		else:
 			return 'can not found "r" variable after exec locals'+T.pformat(locals)
 	
-	from flask import Flask,request,make_response
+	from flask import Flask,make_response
+	from flask import request as _request
+	
 	app=Flask('rpcServer'+U.stime_()   )
 	@app.errorhandler(404)
 	def flaskEval(e):
-		code=T.urlDecode(request.url)
+		code=T.urlDecode(_request.url)
 		code=T.sub(code,':{}/'.format(port) )
 		U.log( ('\n'+code) if '\n' in code else code	)
 		# U.ipyEmbed()()
-		r=make_response( execResult(code,qpsu=qpsu) )
+		if request:
+			execLocals['request']=_request
+		r=make_response( execResult(code,locals=execLocals) )
 		r.headers['Access-Control-Allow-Origin'] = '*'
 		r.headers['Content-Type'] = 'text/plain;charset=utf-8'
 		return r
@@ -220,7 +232,13 @@ def get_ip_from_mac(mac):
 	if py.len(r)==1:
 		return r[0]
 
-def getLAN_IP():
+def getLAN_IP_HOSTS(ip='192.168.1.{}',count=256):
+	import socket
+	for i in range(count):
+		with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as s:
+			s.connect((ip.format(i), 9))
+			my_ip = s.getsockname()[0]
+			print(my_ip, flush=True)	
 	r=getAllAdapter()
 	return r
 
@@ -229,7 +247,7 @@ def getAllAdapter():
 	if U.iswin():
 		from qgb import Win
 		return Win.getAllNetworkInterfaces()
-	
+
 #setip 192.168  ,  2.2	
 def setIP(ip='',adapter='',gateway='',source='dhcp',mask='',ip2=192.168,dns=py.No('gateway') ):
 	'''配置的 DNS 服务器不正确或不存在。   # 其实已经设置好了，可以正常使用'''
