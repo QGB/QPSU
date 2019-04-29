@@ -736,10 +736,10 @@ def makeDirs(ap,isFile=False):
 			return py.No(ap,'exists , and it is a file')
 		try:
 			p.mkdir()
-		except FileNotFoundError:
-			makeDirs(p.parent,isFile=False)
-		except FileExistsError:
-			pass
+		except (FileNotFoundError,FileExistsError,OSError):
+			return makeDirs(p.parent,isFile=False)
+		# except FileExistsError:
+			# pass
 		if p.exists():
 			return py.str(p)
 		else:

@@ -254,6 +254,9 @@ def setIP(ip='',adapter='',gateway='',source='dhcp',mask='',ip2=192.168,dns=py.N
 	U=py.importU()
 	if U.islinux():
 		import socket,struct,fcntl
+		if not py.isbytes(adapter):
+			adapter=adapter.encode('ascii')
+			
 		SIOCSIFADDR = 0x8916
 		sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 		bin_ip = socket.inet_aton(ip)
