@@ -737,7 +737,7 @@ def makeDirs(ap,isFile=False):
 		try:
 			p.mkdir()
 		except (FileNotFoundError,FileExistsError,OSError):
-			return makeDirs(p.parent,isFile=False)
+			makeDirs(p.parent,isFile=False)
 		# except FileExistsError:
 			# pass
 		if p.exists():
