@@ -124,12 +124,16 @@ func( a: <_sre.SRE_Match object; span=(2388, 2396), match='21758465'>  ):
 	if py.istr(str_or_func):
 		def func(_a):
 			#   <_sre.SRE_Match object; span=(2388, 2396), match='21758465'>
+			# match==a.group()	
 			return str_or_func
 	else:
 		func=str_or_func
 	if not py.callable(func):raise py.ArgumentError('str_or_func',str_or_func)
 	
-	p=re.compile(regex)
+	if py.istr(regex):
+		p=re.compile(regex)
+	else:
+		p=regex
 	return p.sub(func,a)
 
 def autoDecode(abytes,confidence=0.7,default=py.No('default encoding "" ')  ):
@@ -137,7 +141,7 @@ def autoDecode(abytes,confidence=0.7,default=py.No('default encoding "" ')  ):
 	if not py.isbyte(abytes):
 		raise py.ArgumentError('is not bytes',abytes)
 	return abytes.decode( detect(abytes=abytes,confidence=confidence,default=default) )
-detectAndDecode=autoDecode
+detectDecode=detectAndDecode=autoDecode
 		
 def print_unicode_escape(a):
 	print(	a.encode('unicode-escape').decode('ascii')  )

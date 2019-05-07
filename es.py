@@ -6,6 +6,7 @@ from elasticsearch.exceptions import ConnectionTimeout
 
 from . import py
 U=py.importU()
+T=U.T
 
 es=Elasticsearch(['http://149.129.54.62:9200'])
 es=Elasticsearch(['http://58.20.137.43:9200'])
@@ -222,4 +223,9 @@ def insertMulti_mifeng(data):
 	es=elasticsearch.Elasticsearch(['http://58.20.137.43:9200'])
 
 	return elasticsearch.helpers.bulk( es, actions )  
+	
+def decode(b):
+	try:return b.decode('gb18030')
+	except:return T.detectAndDecode(b)
+	
 	

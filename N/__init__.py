@@ -254,17 +254,16 @@ def setIP(ip='',adapter='',gateway='',source='dhcp',mask='',ip2=192.168,dns=py.N
 	U=py.importU()
 	if U.islinux():
 		import socket,struct,fcntl
-		if not py.isbytes(adapter):
-			adapter=adapter.encode('ascii')
-		if not py.isbytes(gateway):
-			gateway=gateway.encode('ascii')
+		if not py.isbytes(adapter):adapter=adapter.encode('ascii')
+		if not py.isbytes(gateway):gateway=gateway.encode('ascii')
+		if not py.isbytes(mask)   :mask=mask.encode('ascii')
 			
 		SIOCSIFADDR = 0x8916
 		SIOCSIFNETMASK = 0x891C
 		sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-		if gateway:
+		if mask:
 			ifreq = struct.pack('16sH2s4s8s', adapter, socket.AF_INET, b'\x00' * 2, 
-			socket.inet_aton(gateway), b'\x00' * 8)
+			socket.inet_aton(mask), b'\x00' * 8)
 			fcntl.ioctl(sock, SIOCSIFNETMASK, ifreq)
 			
 		bin_ip = socket.inet_aton(ip)

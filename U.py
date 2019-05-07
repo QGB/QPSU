@@ -465,7 +465,7 @@ def md5(a='',file=''):
 	
 	if file:
 		myhash = hashlib.md5()
-		f = py.file(file,'rb')
+		f = py.open(file,'rb')
 		while True:
 			b = f.read(8096)
 			if not b :
