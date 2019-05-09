@@ -209,10 +209,7 @@ def matchWildcard(a,exp):
 		return ''
 
 def regexMatchAll(a,regex):
-	r=[]
-	for i in re.finditer(a,regex):
-		r.append(i.group())
-	return r
+	return [i.group() for i in re.finditer(regex,a)]
 		
 def regexMatchGroups(a,regex):
 	''' return [list of re.search group [s]]
