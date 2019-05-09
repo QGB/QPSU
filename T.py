@@ -207,8 +207,14 @@ def matchWildcard(a,exp):
 		return exp.match(a).group()	
 	except:
 		return ''
-	
-def match_groups(a,regex):
+
+def regexMatchAll(a,regex):
+	r=[]
+	for i in re.finditer(a,regex):
+		r.append(i.group())
+	return r
+		
+def regexMatchGroups(a,regex):
 	''' return [list of re.search group [s]]
 re.search(pattern, string, flags=0)
 pattern	匹配的正则表达式
@@ -223,21 +229,20 @@ flags	标志位，用于控制正则表达式的匹配方式，如：是否区�
 		return r
 	else:
 		return []
-matchGroups=match_groups
+match_groups=matchGroups=regexMatchGroups
 
-def match(a,regex):
+def regexMatch(a,regex):
 	''' return :str  match_groups first
 	'''
-	r=match_groups(a,regex)
+	r=regexMatchGroups(a,regex)
 	if r:return r[0]
 	else:return ''
-matchRegex=match
+matchRegex=regexMatch
 
 def re_search(regex,a):
 	'''不是 research 研究 ！,跟 match()  只有参数顺序不同，方便 re.search 改写'''
 	return match(a,regex)
-reSearch=re_search
-
+regexSearch=reSearch=re_search
 
 # gsV='?'	#todo and test
 def parseWildcardExp(a,wildcard='*',value='?'):

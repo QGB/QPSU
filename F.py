@@ -103,6 +103,7 @@ s=pickle_dump=serialize
 
 def dill_load(file):
 	import dill
+	dill.settings['ignore']=False #KeyError: 'ignore'
 	# if not file.lower().endswith('.dill'):
 		# file+='.dill'
 	with py.open(file,'rb') as f:
