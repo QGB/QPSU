@@ -49,6 +49,7 @@ def getBytes(url):
 	
 def get(url,file='',
 		headers = {'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/59.0.2171.95 Safari/537.36'},
+		timeout=9
 	):
 	# return method(url,'get')#<http.client.HTTPResponse at 0x203a16a74a8>
 	url=autoUrl(url)
@@ -65,7 +66,7 @@ def get(url,file='',
 	
 	try:
 		import requests
-		r=requests.get(url,headers=headers,verify=False)
+		r=requests.get(url,headers=headers,verify=False,timeout=timeout)
 		if 'text' in U.getDictV(r.headers,'Content-Type'):
 			try:return r.content.decode('gb18030')
 			except:pass
