@@ -85,6 +85,9 @@ try:
 except Exception as ei:
 	setErr(ei,msg='#Error import '+str(ei))
 	
+try:
+	from pympler.asizeof import asizeof as sizeof
+except:pass
 aError=ArgsErr=argserr=argErr=argerr=argumentError=ArgumentException=py.ArgumentError	
 ArgumentUnsupported=py.ArgumentUnsupported
 ############
