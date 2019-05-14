@@ -225,17 +225,17 @@ def initIndex_mifeng(indexName='mifeng_search'):
         }
       }
     },
-    "settings" : {
+     "settings" : {
       "index" : {
-	    'max_result_window':654321,
-        "creation_date" : "1557847177882",
         "number_of_shards" : "5",
+        "provided_name" : "mifeng_search",
+        "max_result_window" : "654321",
+        "creation_date" : "1557847595604",
         "number_of_replicas" : "1",
-        "uuid" : "i_b8CQ5ARw2Hpw3q0yFBGQ",
+        "uuid" : "i0wiPZEKRJSqqQR1y-OyNA",
         "version" : {
           "created" : "6050099"
-        },
-        "provided_name" : "mifeng_search"
+        }
       }
     }
   }
