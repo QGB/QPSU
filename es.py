@@ -275,7 +275,7 @@ def insertMulti_mifeng(data):
 	for i in data:
 		source={}
 		source['url']='http://'+i[0]
-		source['title']=i[1]
+		source['title']=i[1] or i[2][:11]
 		source['content']=i[2]
 		source['channel']=i[3]
 		source['column_classify']='网站'
