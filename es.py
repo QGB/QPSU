@@ -26,6 +26,10 @@ def log(on=True):
 def analyze(text,analyzer='ik_smart'):
 	return es.indices.analyze(body={'text':text,'analyzer':analyzer})
 	
+@U.retry(ConnectionTimeout)
+def count(index=gsIndex):
+	return es.count(index=index)['count']
+	
 @U.retry(ConnectionTimeout)	
 def getAllIndicesCount(_shards=False):
 	r=[]
@@ -229,12 +233,13 @@ def insertMulti_mifeng(data):
 def decode(b):
 	try:return b.decode('gb18030')
 	except:return T.detectAndDecode(b)
+
+def setResultWindow(index=gsIndex,size=654321):
+	return es.indices.put_settings(index=index,body={ "index" : { "max_result_window" : size}}   ) 
 	
-def iterAll(index=gsIndex):
+def getAll(index=gsIndex):
 	''' 
 TransportError: TransportError(500, 'search_phase_execution_exception', 'Result window is too large, from + size must be less than or equal to: [10000] but was [20000]. See the scroll api for a more efficient way to request large data sets. This limit can be set by changing the [index.max_result_window] index level setting.')
 
 '''
-	
-def count():
-	return es.count(index='mifeng_search',body={"query": {"match_all": {} }   }  )
+	return es.search(index,body={"query": {"match_all": {}},'from':0,'size':count(index)+1 }  )['hits']['hits']
