@@ -285,7 +285,7 @@ def insertMulti_mifeng(data):
 					'_id':source['url'],
 					'_op_type': 'index',
 					'_index': "mifeng_search",  
-					'_type': "doc",
+					'_type': "_doc",
 					'_source': source
 				}
 			)
