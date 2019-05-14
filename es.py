@@ -10,7 +10,12 @@ T=U.T
 
 es=Elasticsearch(['http://149.129.54.62:9200'])
 es=Elasticsearch(['http://58.20.137.43:9200'])
-import sys;sys.gsIndex='w'
+import sys
+if not getattr(sys,'gsIndex',''):
+	sys.gsIndex='w'
+if getattr(sys,'gsIndex',''):
+	gsIndex=sys.gsIndex
+
 gsDocType='doc'
 
 
@@ -27,7 +32,7 @@ def analyze(text,analyzer='ik_smart'):
 	return es.indices.analyze(body={'text':text,'analyzer':analyzer})
 	
 @U.retry(ConnectionTimeout)
-def count(index=sys.gsIndex):
+def count(index=gsIndex):
 	return es.count(index=index)['count']
 	
 @U.retry(ConnectionTimeout)	
@@ -45,7 +50,7 @@ def deleteIndex(index):#必须提供名字参数，防止误删除
 	return es.indices.delete(index)
 	
 @U.retry(ConnectionTimeout)
-def getIndexAllData(index=sys.gsIndex):
+def getIndexAllData(index=gsIndex):
 	''' Not return  
 	'_version': 2,
  'found': True '''
@@ -57,9 +62,9 @@ def getIndexAllData(index=sys.gsIndex):
 	return es.search(index=index,body=dsl)
 	
 @U.retry(ConnectionTimeout)
-def iterIndex(index=sys.gsIndex):
+def iterIndex(index=gsIndex):
 	''' Not return  '''
-	resp = es.search(index=sys.gsIndex, body={"query": {"match_all": {}}})
+	resp = es.search(index=gsIndex, body={"query": {"match_all": {}}})
 	for row in resp["hits"]["hits"]:
 		yield row
 		
@@ -86,7 +91,7 @@ def hash(a):
 	a=T.regexReplace(a,r'\W','')
 	
 	
-def initIndex(indexName=sys.gsIndex):
+def initIndex(indexName=gsIndex):
 	from elasticsearch_dsl import DocType, Date, Completion, Keyword, Text, Integer,Binary
 	from elasticsearch_dsl.analysis import CustomAnalyzer as _CustomAnalyzer
 	from elasticsearch_dsl.connections import connections
@@ -120,7 +125,7 @@ def insertOne(url,title='',content='',description='',err=None):
 			source[i]=U.F.dill_dump(v)
 	es=globals()['es']
 	
-	return es.index(index=sys.gsIndex,doc_type=gsDocType,body=source,id=url)
+	return es.index(index=gsIndex,doc_type=gsDocType,body=source,id=url)
 	
 	
 	import elasticsearch
@@ -234,10 +239,10 @@ def decode(b):
 	try:return b.decode('gb18030')
 	except:return T.detectAndDecode(b)
 
-def setResultWindow(index=sys.gsIndex,size=654321):
+def setResultWindow(index=gsIndex,size=654321):
 	return es.indices.put_settings(index=index,body={ "index" : { "max_result_window" : size}}   ) 
 	
-def getAll(index=sys.gsIndex):
+def getAll(index=gsIndex):
 	''' 
 TransportError: TransportError(500, 'search_phase_execution_exception', 'Result window is too large, from + size must be less than or equal to: [10000] but was [20000]. See the scroll api for a more efficient way to request large data sets. This limit can be set by changing the [index.max_result_window] index level setting.')
 
