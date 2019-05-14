@@ -274,7 +274,7 @@ def insertMulti_mifeng(data):
 	actions=[]
 	for i in data:
 		source={}
-		source['url']=i[0]
+		source['url']='http://'+i[0]
 		source['title']=i[1]
 		source['content']=i[2]
 		source['channel']=i[3]
@@ -282,7 +282,7 @@ def insertMulti_mifeng(data):
 		source['datetime']=U.time()
 		actions.append(
 				{
-					'_id':source['url'],
+					'_id':i[0],
 					'_op_type': 'index',
 					'_index': "mifeng_search",  
 					'_type': "_doc",
