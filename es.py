@@ -186,12 +186,13 @@ def spider(threads=99,TIMEOUT = 9):
 
 	
 def initIndex_mifeng(indexName='mifeng_search'):
-	body= {
-  "mifeng_search" : {
-    "aliases" : { },
-    "mappings" : {
-      "_doc" : {
-        "properties" : {
+	'''body= {
+  # "mifeng_search" : {
+    # "aliases" : { },
+    # "mappings" : {
+      # "_doc" : {
+		### 根据原始PUT 请求 从这里开始才对
+        "properties" : { 
           "channel" : {
             "type" : "keyword"
           },
@@ -223,26 +224,27 @@ def initIndex_mifeng(indexName='mifeng_search'):
             "type" : "keyword"
           }
         }
-      }
-    },
-    "settings" : {
-      "index" : {
-	    'max_result_window':654321,
-        "creation_date" : "1557847177882",
-        "number_of_shards" : "5",
-        "number_of_replicas" : "1",
-        "uuid" : "i_b8CQ5ARw2Hpw3q0yFBGQ",
-        "version" : {
-          "created" : "6050099"
-        },
-        "provided_name" : "mifeng_search"
-      }
-    }
-  }
-}
+      # }
+    # },
+    # "settings" : {
+      # "index" : {
+	    # 'max_result_window':"654321",
+        # "creation_date" : "1557847177882",
+        # "number_of_shards" : "5",
+        # "number_of_replicas" : "1",
+        # "uuid" : "i_b8CQ5ARw2Hpw3q0yFBGQ",
+        # "version" : {
+          # "created" : "6050099"
+        # },
+        # "provided_name" : "mifeng_search"
+      # }
+    # }
+  # }
+# }
 
 	return es.indices.create(index=indexName,body=body)
- 
+'''
+	
 	from elasticsearch_dsl import DocType, Date, Completion, Keyword, Text, Integer,Binary
 	from elasticsearch_dsl.analysis import CustomAnalyzer as _CustomAnalyzer
 	from elasticsearch_dsl.connections import connections
@@ -258,6 +260,7 @@ def initIndex_mifeng(indexName='mifeng_search'):
 		content = Text(analyzer="ik_smart")
 		description = Text(analyzer="ik_smart")
 		err = Binary()
+		main= Text(analyzer="ik_smart")
 		class Meta: 
 			index = indexName
 			doc_type = "_doc"	
