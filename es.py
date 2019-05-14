@@ -27,10 +27,12 @@ def analyze(text,analyzer='ik_smart'):
 	return es.indices.analyze(body={'text':text,'analyzer':analyzer})
 	
 @U.retry(ConnectionTimeout)	
-def getAllIndicesCount():
+def getAllIndicesCount(_shards=False):
 	r=[]
 	for i in es.indices.get_mapping():
-		r.append( [i,es.count(index=i) ] )     
+		c=es.count(index=i) 
+		if not _shards:c.pop('_shards')
+		r.append( [i,c] )     
 		# yield  [i,es.count(i) ] 
 	return r
 
