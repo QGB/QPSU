@@ -2578,7 +2578,19 @@ setErr( gError 还是要保留，像这种 出错 是正常流程的一部分，
 		except Exception as e:return py.No(e)
 getDictV=getDictNestedValue=getNestedValue
 
+def getDictItem(a):
+	return a.items().__iter__().__next__()
 
+def getDictItems(a,count=9):
+	r=[]
+	iter=a.items().__iter__()
+	for i in py.range(count):
+		try:
+			r.append(iter.__next__())
+		except py.StopIteration:
+			break
+	return e
+	
 def getLastException():
 	'''a callable
 	return Exception'''
