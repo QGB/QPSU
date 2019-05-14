@@ -63,7 +63,16 @@ except Exception as ei:
 try:
 	from pprint import pprint,pformat
 except:pass
-################################################
+####################################################
+def getFLD(url_or_domain):
+	"""Extract the first level domain.
+	
+	"""
+	import tld
+	return tld.get_fld(fix_protocol=True,url=url_or_domain)
+get_fld=getFLD
+
+################### zh #############################
 RE_ZH_PATTERN = re.compile(u'[\u4e00-\u9fa5]+')
 
 def filter_zh(a,splitor=' '):

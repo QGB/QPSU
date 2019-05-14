@@ -184,20 +184,6 @@ def rpcClient(url_or_port='http://127.0.0.1:23571',code=''):
 	# server = ServerProxy(url)
 	# return server
 	
-
-
-	
-def findFunc(name,root=9,depth=3,case=False):
-	U.pln( dir(root)       )
-	U.pln( '='*44          )
-	U.pln( globals().keys())
-	U.pln( '='*44          )
-	U.pln( locals().keys() )
-	U.pln( '='*44          )
-	U.pln( vars().keys()   )
-	exit()
-# findFunc('set*')		
-
 	
 def get(url,protocol='http',file=''):
 	py.importU()
