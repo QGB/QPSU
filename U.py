@@ -2589,7 +2589,7 @@ def getDictItems(a,count=9):
 			r.append(iter.__next__())
 		except py.StopIteration:
 			break
-	return e
+	return r
 	
 def getLastException():
 	'''a callable
