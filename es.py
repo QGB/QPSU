@@ -30,7 +30,7 @@ def analyze(text,analyzer='ik_smart'):
 def getAllIndicesCount():
 	r=[]
 	for i in es.indices.get_mapping():
-		r.append( [i,es.count(i) ] )     
+		r.append( [i,es.count(index=i) ] )     
 		# yield  [i,es.count(i) ] 
 	return r
 
@@ -228,4 +228,11 @@ def decode(b):
 	try:return b.decode('gb18030')
 	except:return T.detectAndDecode(b)
 	
+def iterAll(index=gsIndex):
+	''' 
+TransportError: TransportError(500, 'search_phase_execution_exception', 'Result window is too large, from + size must be less than or equal to: [10000] but was [20000]. See the scroll api for a more efficient way to request large data sets. This limit can be set by changing the [index.max_result_window] index level setting.')
+
+'''
 	
+def count():
+	return es.count(index='mifeng_search',body={"query": {"match_all": {} }   }  )
