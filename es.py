@@ -186,6 +186,64 @@ def spider(threads=99,TIMEOUT = 9):
 
 	
 def initIndex_mifeng(indexName='mifeng_search'):
+	body= {
+  "mifeng_search" : {
+    "aliases" : { },
+    "mappings" : {
+      "_doc" : {
+        "properties" : {
+          "channel" : {
+            "type" : "keyword"
+          },
+          "column_classify" : {
+            "type" : "keyword"
+          },
+          "content" : {
+            "type" : "text",
+            "analyzer" : "ik_smart"
+          },
+          "datetime" : {
+            "type" : "date"
+          },
+          "description" : {
+            "type" : "text",
+            "analyzer" : "ik_smart"
+          },
+          "err" : {
+            "type" : "binary"
+          },
+          "source" : {
+            "type" : "keyword"
+          },
+          "title" : {
+            "type" : "text",
+            "analyzer" : "ik_smart"
+          },
+          "url" : {
+            "type" : "keyword"
+          }
+        }
+      }
+    },
+    "settings" : {
+      "index" : {
+	    'max_result_window':654321,
+        "creation_date" : "1557847177882",
+        "number_of_shards" : "5",
+        "number_of_replicas" : "1",
+        "uuid" : "i_b8CQ5ARw2Hpw3q0yFBGQ",
+        "version" : {
+          "created" : "6050099"
+        },
+        "provided_name" : "mifeng_search"
+      }
+    }
+  }
+}
+
+	return es.indices.create(index=indexName,body=body)
+
+	
 	from elasticsearch_dsl import DocType, Date, Completion, Keyword, Text, Integer,Binary
 	from elasticsearch_dsl.analysis import CustomAnalyzer as _CustomAnalyzer
 	from elasticsearch_dsl.connections import connections
