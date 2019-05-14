@@ -10,7 +10,8 @@ T=U.T
 
 es=Elasticsearch(['http://149.129.54.62:9200'])
 es=Elasticsearch(['http://58.20.137.43:9200'])
-import sys
+import sys 
+#TODO: git sync tools  ,save config to github | config level module,current python env(sys),current system(test file),global(github)
 if not getattr(sys,'gsIndex',''):
 	sys.gsIndex='w'
 if getattr(sys,'gsIndex',''):
@@ -109,9 +110,9 @@ def initIndex(indexName=gsIndex):
 		content = Text(analyzer="ik_smart")
 		description = Text(analyzer="ik_smart")
 		err = Binary()
-		# class Meta: 
-			# index = indexName
-			# doc_type = "doc"	
+		class Meta: 
+			index = indexName
+			doc_type = "_doc"	
 		
 		
 	Type.init(index=indexName)# 不加这个 出现 KeyError: '*'
@@ -200,9 +201,9 @@ def initIndex_mifeng(indexName='mifeng_search'):
 		content = Text(analyzer="ik_smart")
 		description = Text(analyzer="ik_smart")
 		err = Binary()
-		# class Meta: 
-			# index = indexName
-			# doc_type = "doc"	
+		class Meta: 
+			index = indexName
+			doc_type = "_doc"	
 		
 		
 	Type.init(index=indexName)# 不加这个 出现 KeyError: '*'
