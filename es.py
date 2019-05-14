@@ -227,7 +227,7 @@ def initIndex_mifeng(indexName='mifeng_search'):
     },
     "settings" : {
       "index" : {
-	    'max_result_window':"654321",
+	    'max_result_window':654321,
         "creation_date" : "1557847177882",
         "number_of_shards" : "5",
         "number_of_replicas" : "1",
@@ -242,8 +242,7 @@ def initIndex_mifeng(indexName='mifeng_search'):
 }
 
 	return es.indices.create(index=indexName,body=body)
-
-	
+ 
 	from elasticsearch_dsl import DocType, Date, Completion, Keyword, Text, Integer,Binary
 	from elasticsearch_dsl.analysis import CustomAnalyzer as _CustomAnalyzer
 	from elasticsearch_dsl.connections import connections
