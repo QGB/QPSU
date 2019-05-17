@@ -1930,7 +1930,7 @@ def exit(i=2357,msg=None):
 	os._exit(i)
 
 def getModulesByFile(fileName):
-	 '''
+	'''
 ('google', <module 'google' (namespace)>) argument of type 'NoneType' is not iterable             
 ('zope', <module 'zope' (namespace)>) argument of type 'NoneType' is not iterable                 
 ('mpl_toolkits', <module 'mpl_toolkits' (namespace)>) argument of type 'NoneType' is not iterable 
