@@ -102,8 +102,10 @@ def rpcServer(port=23571,thread=True,ip='0.0.0.0',currentThread=False,
 			return py.repr(e)
 			
 		if 'r' in locals:
-			try:return U.pformat(locals['r'] )
-			except:return py.repr(  locals['r']  )
+			r=locals['r']
+			if py.istr(r):return r
+			try:return U.pformat( r)
+			except:return py.repr(r)
 		else:
 			return 'can not found "r" variable after exec locals'+T.pformat(locals)
 	
