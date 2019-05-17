@@ -1930,7 +1930,21 @@ def exit(i=2357,msg=None):
 	os._exit(i)
 
 def getModulesByFile(fileName):
-	return [i for i in sys.modules.items() if fileName in getattr(i[1],'__file__','')]
+	 '''
+('google', <module 'google' (namespace)>) argument of type 'NoneType' is not iterable             
+('zope', <module 'zope' (namespace)>) argument of type 'NoneType' is not iterable                 
+('mpl_toolkits', <module 'mpl_toolkits' (namespace)>) argument of type 'NoneType' is not iterable 
+
+ <module 'mpl_toolkits' (namespace)> .
+'''
+	r=[]
+	for i in sys.modules.items():
+		file = getattr(i[1],'__file__','') or ''
+		if fileName in file:
+			r.append(i[1])
+	if py.len(r)==1:return r[0]
+	return r
+	
 modulesByFile=getModsByFile=getModulesByFile
 	
 def getModsBy__all__(modPath=None):
