@@ -28,6 +28,32 @@ def log(on=True):
 	else:
 		es_log.setLevel(logging.CRITICAL) #50
 # log(False)
+
+def setResultWindow(size=654321,index=gsIndex):
+	return es.indices.put_settings(index=index,body={ "index" : { "max_result_window" : size}}   ) 
+
+@U.retry(ConnectionTimeout)
+def getAll(index=gsIndex):
+	''' 
+TransportError: TransportError(500, 'search_phase_execution_exception', 'Result window is too large, from + size must be less than or equal to: [10000] but was [20000]. See the scroll api for a more efficient way to request large data sets. This limit can be set by changing the [index.max_result_window] index level setting.')
+
+'''
+	return es.search(index,body={"query": {"match_all": {}},'from':0,'size':count(index)+1 }  )['hits']['hits']
+
+@U.retry(ConnectionTimeout)	
+def simpleQuery(a,fields=["title"],index=gsIndex):
+	'''  a='长沙 + 的 '
+	'''
+	return es.es.search(index=index,body={
+		"query": {
+		 "simple_query_string" : {
+			 "query": a,
+			 "fields": fields,
+			 "default_operator": "and"
+		 }
+		}
+	} )
+
 @U.retry(ConnectionTimeout)
 def analyze(text,analyzer='ik_smart'):
 	return es.indices.analyze(body={'text':text,'analyzer':analyzer})
@@ -299,13 +325,3 @@ def insertMulti_mifeng(data):
 def decode(b):
 	try:return b.decode('gb18030')
 	except:return T.detectAndDecode(b)
-
-def setResultWindow(index=gsIndex,size=654321):
-	return es.indices.put_settings(index=index,body={ "index" : { "max_result_window" : size}}   ) 
-	
-def getAll(index=gsIndex):
-	''' 
-TransportError: TransportError(500, 'search_phase_execution_exception', 'Result window is too large, from + size must be less than or equal to: [10000] but was [20000]. See the scroll api for a more efficient way to request large data sets. This limit can be set by changing the [index.max_result_window] index level setting.')
-
-'''
-	return es.search(index,body={"query": {"match_all": {}},'from':0,'size':count(index)+1 }  )['hits']['hits']

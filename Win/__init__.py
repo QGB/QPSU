@@ -71,8 +71,18 @@ try:
 	import win32gui
 except Exception as ei:pass
 
+def runAsAdmin():
+	import subprocess as sp
+	p = sp.Popen(['runas', '/noprofile', '/user:Administrator', r"notepad.exe C:\Windows\System32\drivers\etc\hosts"],stdin=sp.PIPE)
+	p.stdin.write(b'0') #password
+	p.communicate()
 
-	
+def test():
+	import subprocess as sp
+	p = sp.Popen([r'E:\QGB\Anaconda3\python.exe'],stdin=sp.PIPE)
+	p.stdin.write(b'print(2333)') #password
+	p.communicate()
+	return p.pid
 def ntHash(a):
 	'''pip3 install passlib
 	case sensitive'''
