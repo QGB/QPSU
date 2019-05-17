@@ -119,12 +119,15 @@ def rpcServer(port=23571,thread=True,ip='0.0.0.0',currentThread=False,
 		code=T.sub(code,':{}/'.format(port) )
 		U.log( ('\n'+code) if '\n' in code else code	)
 		# U.ipyEmbed()()
-		if request:
+		_response=make_response( execResult(code,locals=execLocals) )
+		_response.headers['Access-Control-Allow-Origin'] = '*'
+		_response.headers['Content-Type'] = 'text/plain;charset=utf-8'
+		
+		if request:#rpcServer config
 			execLocals['request']=_request
-		r=make_response( execResult(code,locals=execLocals) )
-		r.headers['Access-Control-Allow-Origin'] = '*'
-		r.headers['Content-Type'] = 'text/plain;charset=utf-8'
-		return r
+			execLocals['response']=_response
+		
+		return _response
 	
 	flaskArgs=py.dict(host=ip,port=port,debug=0,threaded=True)
 	if currentThread or not thread:
