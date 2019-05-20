@@ -67,6 +67,16 @@ try:
 	from pprint import pprint,pformat
 except:pass
 ####################################################
+def urlToFileName(url):
+	if py.istr(url):url=url.encode('utf-8')
+	url=py.list(urlEncode(url) )
+	for i,c in enumerate(url):
+		if c not in FILE_NAME:
+			url[i]='%{0:02X}'.format( py.ord(c) ) 
+	return ''.join(url)
+url2fn=url2file=url2fileName=url_to_filename=urlToFileName
+
+
 def getFLD(url_or_domain):
 	"""Extract the first level domain.
 	
@@ -148,7 +158,7 @@ func( a: <_sre.SRE_Match object; span=(2388, 2396), match='21758465'>  ):
 	else:
 		p=regex
 	return p.sub(func,a)
-
+##################  regex end  ############################
 def autoDecode(abytes,confidence=0.7,default=py.No('default encoding "" ')  ):
 	if py.isunicode(abytes):return abytes
 	if not py.isbyte(abytes):

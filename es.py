@@ -8,26 +8,39 @@ from . import py
 U=py.importU()
 T=U.T
 
-es=Elasticsearch(['http://149.129.54.62:9200'])
-es=Elasticsearch(['http://58.20.137.43:9200'])
-import sys 
+import sys
+
+# es=Elasticsearch([b'\x88\xa3\xa3\x97zaa\xf1\xf4\xf9K\xf1\xf2\xf9K\xf5\xf4K\xf6\xf2z\xf9\xf2\xf0\xf0'.decode('cp424')]) # sg
+es=Elasticsearch([  b'\x88\xa3\xa3\x97zaa\xf5\xf8K\xf2\xf0K\xf1\xf3\xf7K\xf4\xf3z\xf9\xf2\xf0\xf0'.decode('cp424')]) # 58...43
+
+
 #TODO: git sync tools  ,save config to github | config level module,current python env(sys),current system(test file),global(github)
-if not getattr(sys,'gsIndex',''):
-	sys.gsIndex='w'
-if getattr(sys,'gsIndex',''):
-	gsIndex=sys.gsIndex
+gsIndex=''
+def setIndex(indexName):
+	'''#始终加载在此进程中第一次设置（或手动 sys.gsIndex=''）
+	'''
+	if not py.istr(indexName):raise py.ArgumentError('must str')
+	import sys
+	if not getattr(sys,'gsIndex',''):
+		sys.gsIndex=indexName
+	if getattr(sys,'gsIndex',''):
+		globals()['gsIndex']=sys.gsIndex
+setIndex(b'\x94\x89\x86\x85\x95\x87m\xa2\x85\x81\x99\x83\x88'.decode('cp424') ) # mf_s
+		
+		
+gsDocType='_doc'
 
-gsDocType='doc'
 
-
-def log(on=True):
+def setLog(on=True):
 	import logging
 	es_log=logging.getLogger('elasticsearch')
 	if on:
 		es_log.setLevel(logging.NOTSET) #0
 	else:
 		es_log.setLevel(logging.CRITICAL) #50
+log=setLog
 # log(False)
+
 
 def setResultWindow(size=654321,index=gsIndex):
 	return es.indices.put_settings(index=index,body={ "index" : { "max_result_window" : size}}   ) 
@@ -325,3 +338,7 @@ def insertMulti_mifeng(data):
 def decode(b):
 	try:return b.decode('gb18030')
 	except:return T.detectAndDecode(b)
+
+class StrV:
+	def __init__():
+		

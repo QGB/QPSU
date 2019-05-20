@@ -119,14 +119,15 @@ def rpcServer(port=23571,thread=True,ip='0.0.0.0',currentThread=False,
 		code=T.sub(code,':{}/'.format(port) )
 		U.log( ('\n'+code) if '\n' in code else code	)
 		# U.ipyEmbed()()
-		_response=make_response( execResult(code,locals=execLocals) )
+		_response=make_response()
+		_response.headers['X-XSS-Protection']=0
 		_response.headers['Access-Control-Allow-Origin'] = '*'
 		_response.headers['Content-Type'] = 'text/plain;charset=utf-8'
 		
 		if request:#rpcServer config
 			execLocals['request']=_request
 			execLocals['response']=_response
-		
+		_response.set_data(execResult(code,locals=execLocals) )
 		return _response
 	
 	flaskArgs=py.dict(host=ip,port=port,debug=0,threaded=True)
