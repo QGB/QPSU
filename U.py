@@ -2595,17 +2595,34 @@ getDictV=getDictNestedValue=getNestedValue
 def getDictItem(a):
 	return a.items().__iter__().__next__()
 
-def getDictItems(a,*range):
+def getDictItems(a,*range,index=False):
 	'''
 *range= (stop) 
 *range= (start, stop[, step])
+
+#TODO
+Init signature: slice(self, /, *args, **kwargs)
+Docstring:
+slice(stop)
+slice(start, stop[, step])
+
+Create a slice object.  This is used for extended slicing (e.g. a[0:10:2]).
 '''
 
 	r=[]
 	iter=a.items().__iter__()
-	for i in py.range(*range):
+	range=py.list(py.range(*range) )
+	i=-1
+	while True:
 		try:
-			r.append(iter.__next__())
+			item=iter.__next__()
+			i+=1
+			if i>range[-1]:break
+			if i in range:
+				if index:
+					r.append([i, item] )
+				else:
+					r.append(item)
 		except py.StopIteration:
 			break
 	return r

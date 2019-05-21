@@ -67,7 +67,7 @@ try:
 	from pprint import pprint,pformat
 except:pass
 ####################################################
-def intToHex(number,uppercase=True)
+def intToHex(number,uppercase=True):
 	'''
 '{:02X}'.format(257)=='101'
 
