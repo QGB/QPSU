@@ -49,6 +49,10 @@ def getBytes(url):
 
 gheaders=headers={'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/59.0.2171.95 Safari/537.36'}
 
+def random_headers():
+	import fake_headers
+	return fake_headers.Headers( headers=fake_headers.make_header() ).generate()
+	
 def get(url,file='',
 		headers = gheaders,
 		timeout=9
