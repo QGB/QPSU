@@ -46,9 +46,11 @@ def getBytes(url):
 		return requests.get(url).content
 	except Exception as e:
 		return py.No(e)
-	
+
+gheaders=headers={'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/59.0.2171.95 Safari/537.36'}
+
 def get(url,file='',
-		headers = {'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/59.0.2171.95 Safari/537.36'},
+		headers = gheaders,
 		timeout=9
 	):
 	# return method(url,'get')#<http.client.HTTPResponse at 0x203a16a74a8>
