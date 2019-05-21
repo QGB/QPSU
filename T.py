@@ -18,8 +18,8 @@ num=s09=_09=number='0123456789'
 azAZ09=aZ09=a_Z0_9=alphanumeric=character+number#azAZ09, not gs09AZ
 Az09=A_z0_9=A_Z+a_z+number
 
-hex='0123456789abcdef'
-HEX=hex.upper()
+Hex=gshex='0123456789abcdef'
+HEX=gshex.upper()
 
 #0x20-0x7E ,32-126,len=95
 visAscii=printAscii=asciiPrint=' !"#$%&\'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~'
@@ -67,6 +67,16 @@ try:
 	from pprint import pprint,pformat
 except:pass
 ####################################################
+def intToHex(number,uppercase=True)
+	'''
+'{:02X}'.format(257)=='101'
+
+'''
+	sf='{:02{}}'
+	if uppercase:sf=sf.format('X')
+	else:sf=sf.format('x')
+	return sf.format(number)
+	
 def urlToFileName(url):
 	if py.istr(url):url=url.encode('utf-8')
 	url=py.list(urlEncode(url) )

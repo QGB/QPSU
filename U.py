@@ -2595,10 +2595,15 @@ getDictV=getDictNestedValue=getNestedValue
 def getDictItem(a):
 	return a.items().__iter__().__next__()
 
-def getDictItems(a,count=9):
+def getDictItems(a,*range):
+	'''
+*range= (stop) 
+*range= (start, stop[, step])
+'''
+
 	r=[]
 	iter=a.items().__iter__()
-	for i in py.range(count):
+	for i in py.range(*range):
 		try:
 			r.append(iter.__next__())
 		except py.StopIteration:

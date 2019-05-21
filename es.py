@@ -341,4 +341,4 @@ def decode(b):
 
 class StrV:
 	def __init__():
-		
+		pass
