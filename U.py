@@ -2609,6 +2609,7 @@ def getDictItems(a,*range):
 		except py.StopIteration:
 			break
 	return r
+getDict=getDictItems
 	
 def getLastException():
 	'''a callable
