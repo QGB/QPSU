@@ -102,7 +102,10 @@ def FileNameToURL(a):
 	return a # always return str
 fn2url=FileNameToURL
 
-def urlToFileName(url_or_bytes):
+def urlToFileName(url):
+	'''
+	args : url_or_bytes
+	'''
 	if py.istr(url):url=url.encode('utf-8')
 	url=py.list(urlEncode(url) )
 	
