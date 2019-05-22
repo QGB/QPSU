@@ -4,7 +4,7 @@ import elasticsearch.helpers
 from elasticsearch import Elasticsearch
 from elasticsearch.exceptions import ConnectionTimeout
 
-from . import py
+from . import py # 如果在 ipy 中执行 %edit es，会导入 <ApiModule 'py' >
 U=py.importU()
 T=U.T
 
@@ -45,12 +45,13 @@ log=setLog
 def setResultWindow(size=654321,index=gsIndex):
 	return es.indices.put_settings(index=index,body={ "index" : { "max_result_window" : size}}   ) 
 
-@U.retry(ConnectionTimeout)
-def getAll(index=gsIndex):
+# @U.retry(ConnectionTimeout)
+def getAll(index=gsIndex,*range):
 	''' 
 TransportError: TransportError(500, 'search_phase_execution_exception', 'Result window is too large, from + size must be less than or equal to: [10000] but was [20000]. See the scroll api for a more efficient way to request large data sets. This limit can be set by changing the [index.max_result_window] index level setting.')
 
 '''
+	
 	return es.search(index,body={"query": {"match_all": {}},'from':0,'size':count(index)+1 }  )['hits']['hits']
 
 @U.retry(ConnectionTimeout)	

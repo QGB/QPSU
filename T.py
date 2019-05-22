@@ -76,14 +76,42 @@ def intToHex(number,uppercase=True):
 	if uppercase:sf=sf.format('X')
 	else:sf=sf.format('x')
 	return sf.format(number)
-	
-def urlToFileName(url):
+
+gURL_unreserved_mark=('-','_','.','!','~','*',"'",'(',')')
+gURL_reserved=(';','/','?',':','@','&','=','+','$',',')
+gsURL_not_escaped=gURL_not_escaped='-0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ_abcdefghijklmnopqrstuvwxyz.'
+
+def FileNameToURL(a):
+	'''
+	urllib.parse.unquote(string, encoding='utf-8', errors='replace')
+	'''
+	# r=[]
+	# skip=0
+	# rskip=''
+	# for i,c in enumerate(a):
+		# if skip>0:
+			# skip-=1
+			# continue
+		# if c=='-'
+			# skip=2
+			
+		# r.append() 
+	import urllib
+	a=a.replace('-','%')
+	a=urllib.parse.unquote(a)
+	return a # always return str
+fn2url=FileNameToURL
+
+def urlToFileName(url_or_bytes):
 	if py.istr(url):url=url.encode('utf-8')
 	url=py.list(urlEncode(url) )
+	
 	for i,c in enumerate(url):
-		if c not in FILE_NAME:
+		if c not in '%'+gsURL_not_escaped[1:] :
 			url[i]='%{0:02X}'.format( py.ord(c) ) 
-	return ''.join(url)
+	
+	return ''.join(url).replace('%','-')
+	
 url2fn=url2file=url2fileName=url_to_filename=urlToFileName
 
 
