@@ -57,7 +57,7 @@ def uploadServer(port=1122,host='0.0.0.0',dir='./',url='/up'):
 			return r
 	app.run(host=host,port=port,debug=0,threaded=True)	
 		
-def rpcServer(port=23571,thread=True,ip='0.0.0.0',currentThread=False,
+def rpcServer(port=23571,thread=True,ip='0.0.0.0',ssl_context=(),currentThread=False,
 	execLocals=None,qpsu=True,importMods='sys,os',request=True):
 	
 	from threading import Thread
@@ -131,6 +131,8 @@ def rpcServer(port=23571,thread=True,ip='0.0.0.0',currentThread=False,
 		return _response
 	
 	flaskArgs=py.dict(host=ip,port=port,debug=0,threaded=True)
+	if ssl_context:
+		flaskArgs['ssl_context']=ssl_context
 	if currentThread or not thread:
 		return app.run(**flaskArgs)
 	else:

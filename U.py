@@ -1729,7 +1729,7 @@ def stime_(time=None,ms=True):
 	r=getStime(time=time,ms=ms)
 	return T.regexReplace(r,'[^0-9_]','_')
 	
-gsTimeFormatFile='%Y-%m-%d__%H.%M.%S__'
+gsTimeFormatFile='%Y-%m-%d__%H.%M.%S'
 gsymd=gsYMD=gsTimeFormatYMD='%Y%m%d'
 gsTimeFormat='%Y-%m-%d %H:%M:%S'
 #ValueError: year=1 is before 1900; the datetime strftime() methods require year >= 1900
@@ -1753,11 +1753,11 @@ def getStime(time=None,format=gsTimeFormatFile,ms=True):
 			r=tMod.strftime(format,tMod.localtime(time))
 #localtime: time.struct_time(tm_year=1970, tm_mon=1, tm_mday=1, tm_hour=8,....
 			if type(time) is float and ms:
-				# if '__' in format:
-					# if not r.endswith('__'):r+='__'
+				if '__' in format:
+					if not r.endswith('__'):r+='__'
 				# else:#r endswith '.' 
 					# pass
-				r+=getFloaTail(time,ndigits=3,s=True)
+				r+=getFloaTail(time,ndigits=3,s=True)#include dot .
 			return r
 		else:return tMod.strftime(format)
 stime=getCurrentTimeStr=timeToStr=getStime
@@ -2692,7 +2692,8 @@ def getCmd():
 getCmdline=getCmd
 
 def save(a,name=0):
-	name=F.autoPath(name,default='g:/qgb/') 
+	if not iswin():raise NotImplementedError()
+	name=F.autoPath(name,default=sys.executable[0]+':/qgb/') 
 	if  py.isbyte(a) or py.istr(a):
 		return F.write(name,a)
 	elif py.isbasic(a):
