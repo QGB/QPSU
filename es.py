@@ -58,7 +58,7 @@ TransportError: TransportError(500, 'search_phase_execution_exception', 'Result 
 def simpleQuery(a,fields=["title"],index=gsIndex):
 	'''  a='长沙 + 的 '
 	'''
-	return es.es.search(index=index,body={
+	return es.search(index=index,body={
 		"query": {
 		 "simple_query_string" : {
 			 "query": a,
@@ -68,6 +68,11 @@ def simpleQuery(a,fields=["title"],index=gsIndex):
 		}
 	} )
 
+		
+@U.retry(ConnectionTimeout)
+def index(**kw):
+	return es.index(**kw)
+	
 @U.retry(ConnectionTimeout)
 def analyze(text,analyzer='ik_smart'):
 	return es.indices.analyze(body={'text':text,'analyzer':analyzer})
@@ -136,9 +141,8 @@ def initIndex(indexName=gsIndex):
 	from elasticsearch_dsl import DocType, Date, Completion, Keyword, Text, Integer,Binary
 	from elasticsearch_dsl.analysis import CustomAnalyzer as _CustomAnalyzer
 	from elasticsearch_dsl.connections import connections
-	
-	connections.create_connection(hosts=['58.20.137.43'])#default 9200
-	
+	# connections.create_connection(hosts=['58.20.137.43'])#default 9200
+	connections._conns['default']=globals()['es']
 # class CustomAnalyzer(_CustomAnalyzer):
     # def get_analysis_definition(self):
         # return {}
@@ -288,8 +292,8 @@ def initIndex_mifeng(indexName='mifeng_search'):
 	from elasticsearch_dsl import DocType, Date, Completion, Keyword, Text, Integer,Binary
 	from elasticsearch_dsl.analysis import CustomAnalyzer as _CustomAnalyzer
 	from elasticsearch_dsl.connections import connections
-	connections.create_connection(hosts=['58.20.137.43'])
-	
+	# connections.create_connection(hosts=['58.20.137.43'])
+	connections._conns['default']=globals()['es']
 	class Type(DocType):
 		column_classify= Keyword()
 		channel= Keyword()#

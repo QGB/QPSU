@@ -1402,7 +1402,7 @@ def dir(a,fliter='',type=py.No):
 	err=py.No("#can't getattr ")
 	for i in r:
 		ok=True
-		v=py.getattr(a,i,err)
+		v=getattr(a,i) # py.getattr(a,i,err)
 		if type!=py.No:#type!=py.no写的什么玩意？没看懂 2019-1-25 13:29:03         只要满足以下一条 就ok
 			ok=False
 			if py.istr(type):type=type.lower()
@@ -1571,6 +1571,16 @@ def getArgs(a):
 	except Exception as e:
 		return py.No(e)
 getargspec=getargs=getarg=getArgs
+
+def getattr(object, name,default=None):
+	try:
+		return py.getattr(object, name)
+	except Exception as e:
+		if default==None:
+			return py.No(e)
+		else:
+			return default
+			
 #npp funcList 不索引注释
 def enumerate(a,start=0,ignoreNull=False,n=False):#todo 设计一个 indexList类，返回 repr 中带有index，用下标访问与普通list一样
 	'''enumerate(iterable[, start]) -> iterator for index, value of iterable

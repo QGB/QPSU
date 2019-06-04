@@ -474,13 +474,13 @@ def read_xls(file,sheetIndex=0):
 	''' return [ [colValue...]  .. ]  #No type description
 	'''
 	import xlrd                         
-	w=xlrd.open_workbook(f)           
+	w=xlrd.open_workbook(file)           
 	sh=w.sheets()[sheetIndex]
 	return sh._cell_values
 	
 def read_xls_sheets_name(file):
 	import xlrd                         
-	w=xlrd.open_workbook(f)           
+	w=xlrd.open_workbook(file)           
 	return py.list(py.enumerate( w.sheet_names() )  )
 	
 	
