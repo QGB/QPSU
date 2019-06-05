@@ -206,9 +206,19 @@ def autoDecode(abytes,confidence=0.7,default=py.No('default encoding "" ')  ):
 		raise py.ArgumentError('is not bytes',abytes)
 	return abytes.decode( detect(abytes=abytes,confidence=confidence,default=default) )
 detectDecode=detectAndDecode=autoDecode
+
+def decode(abytes,codecs=['gb18030','utf-8','auto','latin' ])
+	for i in codecs:
+		i=i.lower()
+		try:
+			if i=='auto':return detectAndDecode(abytes)
+			return abytes.decode(i)
+		except Exception as e:
+			pass
 		
 def print_unicode_escape(a):
 	print(	a.encode('unicode-escape').decode('ascii')  )
+	
 def strFormDataToDict(a):
 	'''true value can not convert
 in js:
