@@ -57,11 +57,15 @@ def getTopWords(text, n=11):
 			ws[w] += 1
 		else:
 			ws[w] = 1
+	
+	if not ws:return Py.No('no CN_WORD result',text,a)
+	
 	ws = U.getDict(ws, len(ws))
 	ws = U.sort(ws, 1, reverse=True)
 	for i, v in enumerate(ws):
 		if v[1] == 1:
 			break
+	
 	ws = ws[:i] + U.sort(ws[i:], key=lambda i: 0 - len(i[0]))
 	return ws[:n]                                      
 	
