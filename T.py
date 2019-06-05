@@ -207,7 +207,7 @@ def autoDecode(abytes,confidence=0.7,default=py.No('default encoding "" ')  ):
 	return abytes.decode( detect(abytes=abytes,confidence=confidence,default=default) )
 detectDecode=detectAndDecode=autoDecode
 
-def decode(abytes,codecs=['gb18030','utf-8','auto','latin' ])
+def decode(abytes,codecs=('gb18030','utf-8','auto','latin' ) ):
 	for i in codecs:
 		i=i.lower()
 		try:
