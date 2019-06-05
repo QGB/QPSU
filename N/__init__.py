@@ -211,6 +211,25 @@ def get(url,protocol='http',file=''):
 def http(url,method='get',*args):
 	return HTTP.method(url,method,*args)
 
+def netplan_add_routes(ip,gateway=py.No('auto use first'),
+	adapter=py.No('auto use first who has routes'),
+	yamlFile=r'/etc/netplan/50-cloud-init.yaml' ):
+	''' '''
+	U=py.importU()
+	F=U.F
+	n=F.readYaml(yamlFile)
+	for adapterName,v in n['network']['ethernets'].items():
+		if ( (not gateway) or (not adapter) ) and 'routes' in v:
+			for dipg in v['routes']:
+				gateway=dipg['via'] if not gateway else gateway
+				adapter=adapterName if not adapter else adapter
+				break
+	if (not gateway) or (not adapter):
+		raise py.ArgumentError('please specify gateway and adapter',gateway,adapter)
+	n['network']['ethernets'][adapter]['routes'].insert(0,{'to':ip,'via':gateway } )
+	
+	return (ip,gateway,adapter,F.writeYaml(yamlFile,n) )
+	
 
 def get_ip_from_mac(mac):
 	'''mac=='' return all ip
