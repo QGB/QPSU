@@ -247,6 +247,14 @@ else:# *nix etc..， #TODO:isAndroid
 if isnix():
 	def isroot():
 		return os.getuid()==0
+	
+	def sudo(cmd,password):
+		'''cmd can use pipe 'id|cut -c 2-22'
+		'''		
+		from subprocess import call
+		return call("echo {} | sudo -S {}".format(password, cmd), shell=True)
+		#  0
+	
 ########################## end init #############################################
 def retry( exceptions,times=3):
 
