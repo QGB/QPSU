@@ -2364,11 +2364,6 @@ def parse(code,file='U.parse.file'):
 	file.flush()
 	return file.tell()
 	
-def ast_to_code(a):
-	import astor
-	return astor.to_source(a)
-
-	
 	
 def replaceModule(modName,new,package='',backup=True):
 	if package:
@@ -2807,7 +2802,19 @@ pipqp=pip_install_qpsu_required
 def progressbar(iterable):
 	import progressbar
 	return progressbar.progressbar(iterable)
+
+def formatCode(code, indent_with='\t'):
+	import ast,astor
+	p=ast.parse(code)
+	return astor.to_source(p,indent_with=indent_with)
 	
+def ast_to_code(a):
+	import astor
+	return astor.to_source(a)
+	
+	
+	
+#############################
 def main(display=True,pressKey=False,clipboard=False,escape=False,c=False,ipyOut=False,cmdPos=False,reload=False,*args):
 	anames=py.tuple([i for i in py.dir() if not i .startswith('args')])
 	if not args:args=sys.argv

@@ -45,6 +45,26 @@ log=setLog
 def setResultWindow(size=654321,index=gsIndex):
 	return es.indices.put_settings(index=index,body={ "index" : { "max_result_window" : size}}   ) 
 
+def getTopWords(text, n=11):
+	# from qgb import U, es
+	U=py.importU()
+	ws = {}
+	for i in analyze(text)['tokens']:
+		if i['type'] != 'CN_WORD':
+			continue
+		w = i['token']
+		if w in ws:
+			ws[w] += 1
+		else:
+			ws[w] = 1
+	ws = U.getDict(ws, len(ws))
+	ws = U.sort(ws, 1, reverse=True)
+	for i, v in enumerate(ws):
+		if v[1] == 1:
+			break
+	ws = ws[:i] + U.sort(ws[i:], key=lambda i: 0 - len(i[0]))
+	return ws[:n]                                      
+	
 # @U.retry(ConnectionTimeout)
 def getAll(index=gsIndex,*range):
 	''' 
