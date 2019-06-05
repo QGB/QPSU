@@ -45,7 +45,7 @@ log=setLog
 def setResultWindow(size=654321,index=gsIndex):
 	return es.indices.put_settings(index=index,body={ "index" : { "max_result_window" : size}}   ) 
 
-def getTopWords(text, n=11):
+def getTopWords(text, n=11,keyword_length_priority=True):
 	# from qgb import U, es
 	U=py.importU()
 	ws = {}
@@ -59,15 +59,14 @@ def getTopWords(text, n=11):
 			ws[w] = 1
 	
 	if not ws:return py.No('no CN_WORD result',text,n)
-	
 	ws = U.getDict(ws, len(ws))
-	# ws = U.sort(ws, key=lambda i:  len(i[0])  , reverse=True)
-	ws.sort(key=lambda i: float('%s.%03i'% (i[1], len(i[0]) )  )   , reverse=True)
-	# for i, v in enumerate(ws):
-		# if v[1] == 1:
-			# break
+	if keyword_length_priority:
+		#按次数 ，关键词长度  从大到小  倒序
+		ws.sort(key=lambda i: float('%s.%03i'% (i[1], len(i[0]) )  )   , reverse=True)
+	else:
+		ws.sort(key=lambda i: i[1] , reverse=True)
 	
-	# ws = ws[:i] + U.sort(ws[i:], key=lambda i: 0 - len(i[0]))
+	
 	return ws[:n]                                      
 	
 # @U.retry(ConnectionTimeout)
