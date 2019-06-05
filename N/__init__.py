@@ -229,7 +229,7 @@ def netplan_add_routes(ip,gateway=py.No('auto use first'),
 	adapterV=n['network']['ethernets'][adapter]
 	if 'routes' not in adapterV:
 		adapterV['routes']=[]
-	routes= adapter['routes']
+	routes= adapterV['routes']
 			
 	for i in routes:
 		if ip==i['to']:
