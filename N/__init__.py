@@ -226,9 +226,16 @@ def netplan_add_routes(ip,gateway=py.No('auto use first'),
 				break
 	if ('.' in ip ) or (not gateway) or (not adapter):
 		raise py.ArgumentError('please specify gateway and adapter',gateway,adapter)
-	n['network']['ethernets'][adapter]['routes'].insert(0,{'to':ip,'via':gateway } )
-	import os
-	os.system('sudo netplan apply')
+	routes= n['network']['ethernets'][adapter]['routes']
+	for i in routes:
+		if ip==i['to']:
+			i['via']=gateway
+			break
+	else:
+		routes.insert(0,{'to':ip,'via':gateway } )
+		
+	import os;os.system('sudo netplan apply')
+	
 	return (ip,gateway,adapter,F.writeYaml(yamlFile,n) )
 	
 
