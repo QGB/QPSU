@@ -500,7 +500,22 @@ def read_sqlite(file,table=''):
 			for i in tables:
 				r[i]=read_sqlite(file=file,table=i)
 			return r
-	
+readSqlite=read_sqlite
+
+def readYaml(file):
+	import yaml
+	with py.open(file) as f:
+		return yaml.safe_load(f)
+
+def writeYaml(file,obj):
+	import yaml
+	try:
+		with py.open(file,'w') as f:
+			yaml.dump(obj,f,default_flow_style=False)#default_flow_style=False parameter is necessary to produce the format you want (flow style), otherwise for nested collections it produces block style:
+			return f
+	except Exception as e:
+		return py.No(e,file,obj)
+		
 def isDir(file):
 	return _p.isdir(file)
 isFolder=isdir=isDir
