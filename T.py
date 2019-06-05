@@ -215,7 +215,8 @@ def decode(abytes,codecs=('gb18030','utf-8','auto','latin' ) ):
 			return abytes.decode(i)
 		except Exception as e:
 			pass
-		
+	return py.No('can not decode',codecs,e,abytes)#large var in last	
+
 def print_unicode_escape(a):
 	print(	a.encode('unicode-escape').decode('ascii')  )
 	
