@@ -224,8 +224,8 @@ def netplan_add_routes(ip,gateway=py.No('auto use first'),
 				gateway=dipg['via'] if not gateway else gateway
 				adapter=adapterName if not adapter else adapter
 				break
-	if ('.' in ip ) or (not gateway) or (not adapter):
-		raise py.ArgumentError('please specify gateway and adapter',gateway,adapter)
+	if ('.' not in ip ) or (not gateway) or (not adapter):
+		raise py.ArgumentError('please specify ip gateway adapter',ip,gateway,adapter)
 	routes= n['network']['ethernets'][adapter]['routes']
 	for i in routes:
 		if ip==i['to']:
