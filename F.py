@@ -512,7 +512,7 @@ def writeYaml(file,obj):
 	try:
 		with py.open(file,'w') as f:
 			yaml.dump(obj,f,default_flow_style=False)#default_flow_style=False parameter is necessary to produce the format you want (flow style), otherwise for nested collections it produces block style:
-			return f
+			return file
 	except Exception as e:
 		return py.No(e,file,obj)
 		
