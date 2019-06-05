@@ -61,12 +61,13 @@ def getTopWords(text, n=11):
 	if not ws:return py.No('no CN_WORD result',text,n)
 	
 	ws = U.getDict(ws, len(ws))
-	ws = U.sort(ws, 1, reverse=True)
-	for i, v in enumerate(ws):
-		if v[1] == 1:
-			break
+	# ws = U.sort(ws, key=lambda i:  len(i[0])  , reverse=True)
+	ws.sort(key=lambda i: float('%s.%03i'% (i[1], len(i[0]) )  )   , reverse=True)
+	# for i, v in enumerate(ws):
+		# if v[1] == 1:
+			# break
 	
-	ws = ws[:i] + U.sort(ws[i:], key=lambda i: 0 - len(i[0]))
+	# ws = ws[:i] + U.sort(ws[i:], key=lambda i: 0 - len(i[0]))
 	return ws[:n]                                      
 	
 # @U.retry(ConnectionTimeout)
