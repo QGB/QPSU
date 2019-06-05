@@ -58,7 +58,7 @@ def getTopWords(text, n=11):
 		else:
 			ws[w] = 1
 	
-	if not ws:return py.No('no CN_WORD result',text,a)
+	if not ws:return py.No('no CN_WORD result',text,n)
 	
 	ws = U.getDict(ws, len(ws))
 	ws = U.sort(ws, 1, reverse=True)
