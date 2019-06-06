@@ -127,7 +127,9 @@ def rpcServer(port=23571,thread=True,ip='0.0.0.0',ssl_context=(),currentThread=F
 		if request:#rpcServer config
 			execLocals['request']=_request
 			execLocals['response']=_response
-		_response.set_data(execResult(code,locals=execLocals) )
+		r=execResult(code,locals=execLocals) 
+		if not _response.get_data():
+			_response.set_data(r)
 		return _response
 	
 	flaskArgs=py.dict(host=ip,port=port,debug=0,threaded=True)
