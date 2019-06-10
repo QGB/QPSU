@@ -58,7 +58,7 @@ def uploadServer(port=1122,host='0.0.0.0',dir='./',url='/up'):
 	app.run(host=host,port=port,debug=0,threaded=True)	
 		
 def rpcServer(port=23571,thread=True,ip='0.0.0.0',ssl_context=(),currentThread=False,
-	execLocals=None,qpsu=True,importMods='sys,os',request=True):
+	execLocals=None,qpsu=True,importMods='sys,os',request=True,app=None,route=None):
 	
 	from threading import Thread
 	from http.server import BaseHTTPRequestHandler as h
@@ -112,12 +112,12 @@ def rpcServer(port=23571,thread=True,ip='0.0.0.0',ssl_context=(),currentThread=F
 	from flask import Flask,make_response
 	from flask import request as _request
 	
-	app=Flask('rpcServer'+U.stime_()   )
-	@app.errorhandler(404)
-	def flaskEval(e):
+	app=app or Flask('rpcServer'+U.stime_()   )
+	
+	def flaskEval():
 		code=T.urlDecode(_request.url)
 		code=T.sub(code,':{}/'.format(port) )
-		U.log( ('\n'+code) if '\n' in code else code	)
+		U.log( (('\n'+code) if '\n' in code else code)[:99]	)
 		# U.ipyEmbed()()
 		_response=make_response()
 		_response.headers['X-XSS-Protection']=0
@@ -131,6 +131,16 @@ def rpcServer(port=23571,thread=True,ip='0.0.0.0',ssl_context=(),currentThread=F
 		if not _response.get_data():
 			_response.set_data(r)
 		return _response
+	
+	if py.istr(route):
+		@app.route(route)
+		def flaskEval(*a):return _flaskEval()
+	else:
+		@app.errorhandler(404)
+		def flaskEval(*a):return _flaskEval()
+		
+	if not app.name.startswith('rpcServer'):
+		return (py.No('caller provide app,so no thread start'),app)
 	
 	flaskArgs=py.dict(host=ip,port=port,debug=0,threaded=True)
 	if ssl_context:

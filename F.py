@@ -106,9 +106,13 @@ def dill_load(file):
 	dill.settings['ignore']=False #KeyError: 'ignore'
 	# if not file.lower().endswith('.dill'):
 		# file+='.dill'
-	with py.open(file,'rb') as f:
-		return dill.load(f)
-
+	try:
+		with py.open(file,'rb') as f:
+			return dill.load(f)
+	except Exception as e:#TODO all  load save py.No
+		return py.No(file,e)
+		
+		
 def dill_dump(obj,file=None,protocol=0):
 	'''
 	dill.dump(obj, file, protocol=None, byref=None, fmode=None, recurse=None)
