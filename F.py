@@ -101,11 +101,12 @@ def serialize(obj,file=None,protocol=0):
 		return pickle.dumps(obj=obj,protocol=protocol)	
 s=pickle_dump=serialize
 
-def dill_load(file):
+def dill_load(file,dill_ext='.dill'):
 	import dill
 	dill.settings['ignore']=False #KeyError: 'ignore'
-	# if not file.lower().endswith('.dill'):
-		# file+='.dill'
+	
+	if not file.lower().endswith(dill_ext):
+		file+=dill_ext
 	try:
 		with py.open(file,'rb') as f:
 			return dill.load(f)

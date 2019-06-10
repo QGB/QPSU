@@ -82,7 +82,7 @@ TransportError: TransportError(500, 'search_phase_execution_exception', 'Result 
 def simpleQuery(a,fields=["title"],index=gsIndex):
 	'''  a='长沙 + 的 '
 	'''
-	return es.search(index=index,body={
+	r= es.search(index=index,body={
 		"query": {
 		 "simple_query_string" : {
 			 "query": a,
@@ -91,6 +91,8 @@ def simpleQuery(a,fields=["title"],index=gsIndex):
 		 }
 		}
 	} )
+	
+	return r['hits']['hits']
 
 		
 @U.retry(ConnectionTimeout)
