@@ -58,7 +58,7 @@ def uploadServer(port=1122,host='0.0.0.0',dir='./',url='/up'):
 	app.run(host=host,port=port,debug=0,threaded=True)	
 		
 def rpcServer(port=23571,thread=True,ip='0.0.0.0',ssl_context=(),currentThread=False,
-	execLocals=None,qpsu=True,importMods='sys,os',request=True,app=None,route=None):
+	execLocals=None,qpsu=True,importMods='sys,os',request=True,app=None,key=None):
 	
 	from threading import Thread
 	from http.server import BaseHTTPRequestHandler as h
@@ -114,7 +114,7 @@ def rpcServer(port=23571,thread=True,ip='0.0.0.0',ssl_context=(),currentThread=F
 	
 	app=app or Flask('rpcServer'+U.stime_()   )
 	
-	def flaskEval():
+	def _flaskEval():
 		code=T.urlDecode(_request.url)
 		code=T.sub(code,':{}/'.format(port) )
 		U.log( (('\n'+code) if '\n' in code else code)[:99]	)
@@ -132,12 +132,16 @@ def rpcServer(port=23571,thread=True,ip='0.0.0.0',ssl_context=(),currentThread=F
 			_response.set_data(r)
 		return _response
 	
-	if py.istr(route):
-		@app.route(route)
-		def flaskEval(*a):return _flaskEval()
+	if py.istr(key):
+		for i in key:
+			if i not in 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789':
+				return py.No('key char must in T.alphanumeric',key)
+		@app.route('/#'+key+'\n<path:text>',
+			methods=['GET', 'POST', 'OPTIONS', 'PUT', 'DELETE', 'HEAD', 'PATCH'])
+		def flaskEval(*a,**ka):return _flaskEval()
 	else:
 		@app.errorhandler(404)
-		def flaskEval(*a):return _flaskEval()
+		def flaskEval(*a,**ka):return _flaskEval()
 		
 	if not app.name.startswith('rpcServer'):
 		return (py.No('caller provide app,so no thread start'),app)
