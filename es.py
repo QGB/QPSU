@@ -6,7 +6,7 @@ from elasticsearch.exceptions import ConnectionTimeout
 
 from . import py # 如果在 ipy 中执行 %edit es，会导入 <ApiModule 'py' >
 U=py.importU()
-T=U.T
+T=U.T;F=U.F
 
 import sys
 
@@ -44,6 +44,24 @@ log=setLog
 
 def setResultWindow(size=654321,index=gsIndex):
 	return es.indices.put_settings(index=index,body={ "index" : { "max_result_window" : size}}   ) 
+
+def search2xls(body,index=gsIndex,fields=('url', 'title', 'channel', 'column_classify', 'datetime'),max_str_len=555 ):
+	''' Exception: String longer than 32767 characters '''
+	zh=T.filter_zh(py.repr(body))
+	es_data=es.search(index=index,body=body)['hits']['hits']
+	r=[]
+	for i in es_data:
+		# if py.islist(i):
+		# 	U.log(i)
+		# 	continue
+		s=i['_source']
+		row=[]
+		for c in fields:
+			c=s[c]
+			if py.istr(c):c=c[:max_str_len]
+			row.append(c )
+		r.append(row)
+	return F.write_xls('qgb-es-{}-{}.xls'.format(zh,py.len(r)) ,r)
 
 def getTopWords(text, n=11,keyword_length_priority=True):
 	# from qgb import U, es

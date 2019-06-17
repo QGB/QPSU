@@ -203,7 +203,10 @@ def importU():
 
 def importT():
 	return importU().T
-	
+def importN():
+	return importU().N
+def importF():
+	return importU().F
 	
 	
 def traceback(ae=None):

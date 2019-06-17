@@ -58,8 +58,10 @@ def uploadServer(port=1122,host='0.0.0.0',dir='./',url='/up'):
 	app.run(host=host,port=port,debug=0,threaded=True)	
 		
 def rpcServer(port=23571,thread=True,ip='0.0.0.0',ssl_context=(),currentThread=False,
-	execLocals=None,qpsu=True,importMods='sys,os',request=True,app=None,key=None):
-	
+	execLocals=None,qpsu='py,U,T,N,F',importMods='sys,os',request=True,app=None,key=None):
+	''' if app : port useless
+	key char must in T.alphanumeric
+	'''
 	from threading import Thread
 	from http.server import BaseHTTPRequestHandler as h
 	import ast
@@ -71,7 +73,7 @@ def rpcServer(port=23571,thread=True,ip='0.0.0.0',ssl_context=(),currentThread=F
 	for modName in importMods.split(','):
 		execLocals[modName]=U.getMod(modName)
 	if qpsu:
-		for modName in 'py,U,T,N,F'.split(','):
+		for modName in qpsu.split(','):
 			execLocals[modName]=U.getMod('qgb.'+modName)	
 	
 	
@@ -80,7 +82,7 @@ def rpcServer(port=23571,thread=True,ip='0.0.0.0',ssl_context=(),currentThread=F
 		当没有定义 r 变量时，自动使用 最后一次 出现的值 作为r
 		当定义了 r ，但不是最后一行，这可能是因为 还有一些收尾工作
 		'''
-		if globals==None:
+		if globals==None:# /r=globals();r['_']=233  ,在下个请求中，globals重置了，为啥locals不会被重置？？？#看调用execResult时。
 			globals={}
 		if locals==None:#因为参数不是 不可变对象，且在接下来会改变
 			locals ={}
@@ -107,7 +109,7 @@ def rpcServer(port=23571,thread=True,ip='0.0.0.0',ssl_context=(),currentThread=F
 			try:return U.pformat( r)
 			except:return py.repr(r)
 		else:
-			return 'can not found "r" variable after exec locals'+T.pformat(locals)
+			return 'can not found "r" variable after exec locals'+U.pformat(locals.keys())
 	
 	from flask import Flask,make_response
 	from flask import request as _request
@@ -127,14 +129,15 @@ def rpcServer(port=23571,thread=True,ip='0.0.0.0',ssl_context=(),currentThread=F
 		if request:#rpcServer config
 			execLocals['request']=_request
 			execLocals['response']=_response
-		r=execResult(code,locals=execLocals) 
+		r=execResult(code,locals=execLocals) #因为在这里指定了locals，所以在每个请求中可以共享
 		if not _response.get_data():
 			_response.set_data(r)
 		return _response
 	
 	if py.istr(key):
+		if py.len(key)<1:return py.No('key length < 1',key)
 		for i in key:
-			if i not in 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789':
+			if i not in T.alphanumeric:
 				return py.No('key char must in T.alphanumeric',key)
 		@app.route('/#'+key+'\n<path:text>',
 			methods=['GET', 'POST', 'OPTIONS', 'PUT', 'DELETE', 'HEAD', 'PATCH'])
@@ -226,6 +229,74 @@ def get(url,protocol='http',file=''):
 
 def http(url,method='get',*args):
 	return HTTP.method(url,method,*args)
+
+def bulk_whois(a):
+	import requests,json,logging
+	bulkwhois_base_url = 'https://www.whoisxmlapi.com/BulkWhoisLookup/bulkServices/'
+	session = requests.session()
+	data = {
+		"domains": a,
+		"password": args.password,
+		"username": args.username,
+		"outputFormat": 'json'
+	}
+	header = {'Content-Type': 'application/json'}
+	# Posting task to API
+	response = session.post(bulkwhois_base_url + 'bulkWhois',
+							 data=json.dumps(data),
+							 headers=header,
+							 timeout=5)
+	if response.status_code != 200:
+		logging.error("wrong response code: %i" % response.status_code)
+		return response
+	response_data = json.loads(response.text)
+	if response_data['messageCode'] == 200:
+		logging.debug('Response: ' + response.text)
+		del data['domains']
+		data.update({
+			'requestId': response_data['requestId'],
+			'searchType': 'all',
+			'maxRecords': 1,
+			'startIndex': 1
+		})
+	else:
+		logging.error('Response: ' + response.text)
+		return response
+
+	# waiting for job complete
+	logging.debug("data:" + str(data))
+	recordsLeft = len(args.domains)
+	while recordsLeft > 0:
+		time.sleep(args.interval)
+		response = session.post(bulkwhois_base_url + 'getRecords',
+								headers=header,
+								data=json.dumps(data))
+		if response.status_code != 200:
+			logging.error("wrong response code: %i" % response.status_code)
+			exit(1)
+		recordsLeft = json.loads(response.text)['recordsLeft']
+		logging.debug('Response: ' + response.text)
+
+	data.update({'maxRecords': len(args.domains)})
+	# dump json data
+	time.sleep(args.interval)
+	response = session.post(bulkwhois_base_url + 'getRecords',
+							headers=header,
+							data=json.dumps(data))
+	with open(args.output + '.json','w') as json_file:
+		json.dump(json.loads(response.text),json_file)
+
+	# download csv data
+	time.sleep(args.interval)
+	with open(args.output + '.csv', 'wt') as csv_file:
+		response = session.post(bulkwhois_base_url + 'download',
+								headers=header,
+								data=json.dumps(data))
+		for line in response.text.split('\n'):
+			clear_line = line.strip()
+			# remove blank lines
+			if clear_line != '':
+				csv_file.write(clear_line + '\n')
 
 def netplan_add_routes(ip,gateway=py.No('auto use first'),
 	adapter=py.No('auto use first who has routes'),

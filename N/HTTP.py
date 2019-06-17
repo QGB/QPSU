@@ -55,7 +55,8 @@ def random_headers():
 	
 def get(url,file='',
 		headers = gheaders,
-		timeout=9
+		timeout=9,
+		
 	):
 	# return method(url,'get')#<http.client.HTTPResponse at 0x203a16a74a8>
 	url=autoUrl(url)

@@ -472,7 +472,8 @@ def parseInt(a,base=16,symbols=None):
 	
 def jsonToDict(a):
 	'''is2: 不同于 json_loads ，不会自动转换 到unicode'''
-	return eval(a.replace('false','False').replace('true','True'))
+	import ast
+	return ast.literal_eval(a.replace('false','False').replace('true','True'))
 js2py=jsonToDict
 	
 def json_loads(astr):

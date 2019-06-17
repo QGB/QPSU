@@ -17,6 +17,36 @@ def setErr(ae):
 	else:
 		gError=ae
 	if U.gbPrintErr:U.pln('#Error ',ae)
+
+def replaceOnce(a,old,new):
+	return a.replace(old, new,1) #count=1 #TypeError: replace() takes no keyword arguments 
+	
+def expandUser(file='',user=''):
+	'''always return endswith / 
+	
+import os, pwd
+pwd.getpwuid(os.getuid()).pw_dir	
+	'''
+	import os
+	h=os.path.expanduser('~'+user)
+	h=autoPath(h)
+	# if not r.endswith('/'):r=r+'/'
+	return replaceOnce(file,'~',h)
+expand_user=expanduser=expandUser
+	
+def getHomeFromEnv():
+	import os
+	U=py.importU()
+	if U.isLinux():
+		name='HOME'
+	elif U.isWin():
+		name='USERPROFILE'
+	else:
+		raise EnvironmentError('#TODO system case')
+	r=U.getEnv(name)
+	r=autoPath(r)
+	if not r.endswith('/'):r=r+'/'
+	return r
 	
 def include(file,keyword):
 	if py.isbyte(keyword):mod='rb'
@@ -456,7 +486,8 @@ def readJSON(file,encoding=None):
 	if not encoding:encoding=detectEncoding(file)
 	with py.open(file,encoding=encoding) as f:
 		return json.load(f)
-	
+read_json=readJSON
+
 def read_csv(file,encoding=None):
 	file=autoPath(file)
 	if not encoding:encoding=detectEncoding(file)
@@ -475,6 +506,17 @@ def read_csv(file,encoding=None):
 	# dicts = df.to_dict().values()
 readCSV=read_csv
 
+def write_xls(file,a):
+	file=autoPath(file)
+	import xlwt
+	xldoc = xlwt.Workbook()
+	sheet = xldoc.add_sheet("Sheet1", cell_overwrite_ok=True)
+	for i, row in py.enumerate(a):
+		for j, col in py.enumerate(row):
+			sheet.write(i, j, col)
+	xldoc.save(file)
+	return file
+	
 def read_xls(file,sheetIndex=0):
 	''' return [ [colValue...]  .. ]  #No type description
 	'''
@@ -691,7 +733,7 @@ def csvAsList(fn):
 	with py.open(fn, 'rb') as f:
 		reader = csv.reader(f)
 		return py.list(reader)
-		
+
 def getSourcePath():
 	f=_sys._getframe().f_back
 	def back(af,ai=0):

@@ -960,8 +960,6 @@ class __wrapper(object):
 			return getattr(self.wrapped, name)
 		except AttributeError:
 			return 'default' # Some sensible default
-
-__frame=sys._getframe().f_back
 	
 	
 def clear():
@@ -1404,8 +1402,8 @@ pa=printattr=printAttr
 # repl()
 # printAttr(5)
 
-def dir(a,fliter='',type=py.No):
-	r=[i for i in py.dir(a) if fliter in i]
+def dir(a,filter='',type=py.No):
+	r=[i for i in py.dir(a) if filter in i]
 	rv=[]
 	err=py.No("#can't getattr ")
 	for i in r:
@@ -1427,7 +1425,7 @@ def dir(a,fliter='',type=py.No):
 	return rv
 
 gAllValue=[]
-def dirValue(a=None,fliter='',type=None,recursion=False,depth=2,timeout=6,__ai=0):
+def dirValue(a=None,filter='',type=None,recursion=False,depth=2,timeout=6,__ai=0):
 	'''a=None is dir()
 	约定：只有无参数函数才用 getXX  ?'''
 	if not __ai:dirValue.start=getTime();dirValue.cache=[]
@@ -1451,8 +1449,8 @@ def dirValue(a=None,fliter='',type=None,recursion=False,depth=2,timeout=6,__ai=0
 			else:dirValue.cache.append(tmp)
 			if recursion:
 				if __ai>depth:return '!depth reached'
-				tmp=dirValue(tmp,fliter,type,recursion,__ai=__ai+1,depth=depth,timeout=timeout)
-			if fliter not in i:continue	
+				tmp=dirValue(tmp,filter,type,recursion,__ai=__ai+1,depth=depth,timeout=timeout)
+			if filter not in i:continue	
 			if type!=None:
 				if T.istr(type):type=type.lower()
 				if type==py.callable or type=='callable':
@@ -1469,7 +1467,7 @@ def dirValue(a=None,fliter='',type=None,recursion=False,depth=2,timeout=6,__ai=0
 	return r
 DirValue=getdir=getDirValue=dirValue
 
-def searchIterable(a,fliter='',type=None,depth=2,ai=0):
+def searchIterable(a,filter='',type=None,depth=2,ai=0):
 	'''iterable
 	# typo deepth
 	'''
@@ -1477,7 +1475,7 @@ def searchIterable(a,fliter='',type=None,depth=2,ai=0):
 	r=[]
 	for i in a:
 		try:
-			if fliter in i or searchIterable(i,fliter,type,depth,ai+1):
+			if filter in i or searchIterable(i,filter,type,depth,ai+1):
 				r.append(i)
 				if ai==0:continue
 				else:break
@@ -1580,12 +1578,17 @@ def getArgs(a):
 		return py.No(e)
 getargspec=getargs=getarg=getArgs
 
-def getattr(object, name,default=None):
+def getattr(object, *names,default=None):
+	# U=py.importU()
 	try:
-		return py.getattr(object, name)
+		r = py.getattr(object, names[0])
+		if py.len(names)<=1:
+			return r
+		else:
+			return getattr(r, *names[1:],default=None) # 多重取值，保留出错信息
 	except Exception as e:
 		if default==None:
-			return py.No(e)
+			return py.No(e,object,names)
 		else:
 			return default
 			
@@ -1789,7 +1792,7 @@ def primes(n):
 	''' 
 
 	'''
-	#in py3 fliter return	<filter at 0x169a9704e80>
+	#in py3 filter return	<filter at 0x169a9704e80>
 	r=filter(lambda x: not [x%i for i in range(2, int(x**0.5)+1) if x%i ==0], range(2,n+1))	
 	return py.list(r)
   
@@ -1862,6 +1865,8 @@ instance of a tzinfo subclass. The remaining arguments may be ints or longs.
 		
 		
 		# if '-' in a and py.len:
+from threading import current_thread
+getCurrentThread=currentThread=current_thread
 
 from threading import enumerate as getAllThreads
 threads=gethreads=getThreads=getAllThreads
@@ -2070,9 +2075,38 @@ def len(a,*other):
 		# except:return -1
 		
 def dis(a):
-	from dis import dis
-	return dis (compile(a,'<str>','exec'))
+	import dis
+	if py.istr(a):
+		a=compile(a,'<str>','exec')
+	return dis.dis(a)
 
+def getCallExpression(*a,**ka):
+	co=sys._getframe().f_back.f_code
+	ast=getAST(co)
+	r=ast_to_code(ast)
+	if r.endswith('\n'):
+		r
+	return r
+getCallExpr=getCallExpression
+	
+def getEnviron(name='PATH'):
+	'''
+linux:
+	os.getenv('path')==None                
+	os.getenv('PATH')=='/root/qshell/:/usr
+
+'''	
+	import os
+	r=os.getenv(name)
+	if r:return r
+	
+	name_upper=name.upper()
+	for i in  os.environ:
+		if i.upper()==name_upper:
+			return os.environ(i)
+	return py.No('not found in os.environ',name)
+get_environ=get_env=getenv=getEnv=getEnviron
+	
 def getParentPid():
 	import psutil
 	return psutil.Process(os.getpid()).ppid()
@@ -2295,7 +2329,7 @@ def setattr_not_exists(a,name,value):
 	if not py.hasattr(a,name):
 		py.setattr(a,name,value)
 
-def compile(a):
+def compile(a,filename='<str>', mode='exec'):
 	'''The source code may represent a Python module, statement or expression. '''
 	import ast
 	if isinstance(a,ast.stmt):
@@ -2304,7 +2338,7 @@ def compile(a):
 		a=[a]
 		a=ast.Module(body=a)
 	# if isinstance()
-	return py.compile(a,'<str>','exec')
+	return py.compile(a,filename,mode)
 
 def parseDump(code,ident=2):
 	import ast
@@ -2808,12 +2842,33 @@ def formatCode(code, indent_with='\t'):
 	p=ast.parse(code)
 	return astor.to_source(p,indent_with=indent_with)
 	
-def ast_to_code(a):
+def ast_to_code(a,EOL=True):
 	import astor
-	return astor.to_source(a)
+	r= astor.to_source(a)
+	if not EOL:
+		while r.endswith('\n'):
+			r=r[:-1]
+	return r
+astToSourceCode=ast_to_code
 	
-	
-	
+def cache(f,*a,**ka):
+	'''
+	#todo
+	'''
+	print(a,ka)
+	# print(a,ka)
+	cache.__dict__[f]={'a':a,'ka':ka}
+	return {a:ka}
+
+def filterWarning(category=DeprecationWarning):
+	import warnings
+	return warnings.filterwarnings("ignore", category=category)	
+filterwarnings=filterWarning
+
+def filterWarningList():
+	import warnings
+	return warnings.filters
+
 #############################
 def main(display=True,pressKey=False,clipboard=False,escape=False,c=False,ipyOut=False,cmdPos=False,reload=False,*args):
 	anames=py.tuple([i for i in py.dir() if not i .startswith('args')])

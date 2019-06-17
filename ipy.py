@@ -15,6 +15,48 @@ version=py.float('{0}.{1}{2}\n{3}'.format(*IPython.version_info).splitlines()[0]
 # gipy.editor=U.npp()
 def sycn():
 	''' '''
+# __frame=sys._getframe().f_back	
+
+def getIpyHistory(file='~/.ipython/profile_default/history.sqlite'):
+	F=py.importF()
+	file=F.expanduser(file)
+	his=F.read_sqlite(file)
+	his=his['history'] 
+#    (44, 614, 'U.unique(_)', 'U.unique _')  
+# session,line,  autocall ,    raw_input
+	return [ i[2] for i in his ]
+	
+def dill_dump(*vars):
+	'''	'''
+	F=py.importF()
+	import ast
+	co=sys._getframe().f_back.f_code
+	dvars={}
+	for index_a,e in  enumerate(ast.walk(U.getAST(co) )  ):
+		da={i:getattr(e,i) for i in dir(e) if not i.startswith('_') } 
+		
+		# if index==1:break
+		if ('value' in da) and py.isinstance( e.value,ast.Call):
+			#ipy.*dump*()
+			if U.getattr(e.value,'func','value','id')=='ipy' and \
+				('dump' in U.getattr(e.value,'func','attr').lower() ):
+				# print(index_a, da,'\n================\n')
+				# U.set(e.value.args)
+				for i,var in py.enumerate(e.value.args):
+					# if py.isinstance( var,(ast.Name,ast.Subscript) ):# var : Name(lineno=1, col_offset=12, id='In', ctx=Load()),
+					dvars[U.ast_to_code(var,EOL=False) ]=vars[i]
+	r=[]
+	for n,i in py.enumerate(dvars):
+		il=U.len(dvars[i])
+		if il:
+			il='%-2s(%-4s)'%(n,il)
+		else:
+			il='%-2s'%n
+		r.append( [ i, il ] )
+	f='[%s]    [%s]'% ( ','.join([i[0] for i in r]) ,','.join([i[1] for i in r]))
+	return F.dill_dump(obj=vars,file=f)
+	
+dump=dill_dump
 	
 def run(file):
 	file=F.autof(file,ext='py')
