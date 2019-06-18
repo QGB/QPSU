@@ -2642,11 +2642,19 @@ getDictV=getDictNestedValue=getNestedValue
 def getDictItem(a):
 	return a.items().__iter__().__next__()
 
-def setDict_list(adict,key,value):
+def setDictListValue(adict,key,value):
 	if key in adict:
 		adict[key].append(value)
 	else:
 		adict[key]=[value]
+set_dict_value_list=set_dict_list=setDictList=setDictListValue
+
+def set_dict_plus_1(adict,key):
+	if key in adict:
+		adict[key]+=1
+	else:
+		adict[key]=1
+		
 
 def dict_value_len_count(adict):
 	d={}
