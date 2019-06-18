@@ -2651,7 +2651,7 @@ def setDict_list(adict,key,value):
 def dict_value_len_count(adict):
 	d={}
 	for k,v in adict.items():
-		l=U.len(v)
+		l=len(v)#U.len
 		if l in d:
 			d[l]+=1
 		else:
