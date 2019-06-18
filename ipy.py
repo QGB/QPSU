@@ -53,7 +53,7 @@ def dill_dump(*vars):
 		else:
 			il='%-2s'%n
 		r.append( [ i, il ] )
-	f='[%s]    [%s]'% ( ','.join([i[0] for i in r]) ,','.join([i[1] for i in r]))
+	f='(%s) = [%s]'% ( ','.join([i[0] for i in r]) ,','.join([i[1] for i in r]))
 	return F.dill_dump(obj=vars,file=f)
 	
 dump=dill_dump

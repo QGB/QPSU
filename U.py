@@ -2642,6 +2642,12 @@ getDictV=getDictNestedValue=getNestedValue
 def getDictItem(a):
 	return a.items().__iter__().__next__()
 
+def setDict_list(adict,key,value):
+	if key in adict:
+		adict[key].append(value)
+	else:
+		adict[key]=[value]
+		
 def getDictItems(a,*range,index=False):
 	'''
 *range= (stop) 
