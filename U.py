@@ -2647,7 +2647,17 @@ def setDict_list(adict,key,value):
 		adict[key].append(value)
 	else:
 		adict[key]=[value]
-		
+
+def dict_value_len_count(adict):
+	d={}
+	for k,v in adict.items():
+		l=U.len(v)
+		if l in d:
+			d[l]+=1
+		else:
+			d[l]=1
+	return d
+	
 def getDictItems(a,*range,index=False):
 	'''
 *range= (stop) 
