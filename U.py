@@ -2666,7 +2666,7 @@ def dict_value_len_count(adict,show_key_min=INT_MAX,show_key_max=INT_MIN):
 			d[l]=1
 		if l:
 			if show_key_min <= l <= show_key_max:
-				U.setDictListValue(d,'%s-len'%l,k)
+				setDictListValue(d,'%s-len'%l,k)
 								
 	return d
 	
