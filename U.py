@@ -2656,7 +2656,7 @@ def set_dict_plus_1(adict,key):
 		adict[key]=1
 		
 
-def dict_value_len_count(adict):
+def dict_value_len_count(adict,show_key_count_Lower_than=-1):
 	d={}
 	for k,v in adict.items():
 		l=len(v)#U.len
@@ -2664,6 +2664,10 @@ def dict_value_len_count(adict):
 			d[l]+=1
 		else:
 			d[l]=1
+		if l:
+			if l <= show_key_count_Lower_than:
+				U.setDictListValue(d,'%s-len'%l,k)
+								
 	return d
 	
 def getDictItems(a,*range,index=False):

@@ -1,13 +1,14 @@
-import uvloop
+#coding=utf-8
+import sys
+if __name__.endswith('qgb.N'):from qgb import py
+else:
+	from pathlib import Path
+	gsqp=Path(__file__).parent.parent.parent.absolute().__str__()
+	if gsqp not in sys.path:sys.path.append(gsqp)#py3 works
+	from qgb import py
+U=py.importU()
+
 import asyncio
-
-MAX_SEMAPHORE_NUM = 9999 #2048
-
-
-asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
-loop = asyncio.get_event_loop()
-
-semaphore = asyncio.Semaphore(MAX_SEMAPHORE_NUM)
 
 gde_count={}
 
@@ -29,7 +30,18 @@ async def check_port(target_ip, port, semaphore,timeout=1,loopm=None):
 	except Exception as e:
 		U.set_dict_plus_1(gde_count,e)
 
-def scan_ip(target_ip)
+def scan_ip(target_ip,ports=range(1,65536)):
+	if U.isLinux():
+		import uvloop
+		asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
+		MAX_SEMAPHORE_NUM = 9999 #2048
+	if U.isWin():
+		MAX_SEMAPHORE_NUM = 999 #2048
+
+	semaphore = asyncio.Semaphore(MAX_SEMAPHORE_NUM)
+	asyncio.set_event_loop(asyncio.new_event_loop())
+	loop = asyncio.get_event_loop()
+	
 	tasks = []
 	for p in ports:
 		tasks.append(asyncio.ensure_future(
@@ -45,3 +57,9 @@ def scan_ip(target_ip)
 	finally:
 		loop.close()
 
+
+from tqdm import tqdm
+
+async def wait_with_progress(coroutines):
+    for f in coroutines:#tqdm(asyncio.as_completed(coroutines),total=len(coroutines)):
+        await f
