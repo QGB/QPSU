@@ -3,7 +3,7 @@ gsImport='''
 from qgb import U,T
 '''
 true=True;false=False
-gimax=IMAX=imax=2147483647;gimin=IMIN=imin=-2147483648
+INT_MAX=gimax=IMAX=imax=2147483647;INT_MIN=gimin=IMIN=imin=-2147483648
 import sys
 stdin=sys.stdin;stdout=sys.stdout;stderr=sys.stderr
 gsdecode=decoding='utf-8';gsencode=gsencoding=encoding=stdout.encoding
@@ -2656,7 +2656,7 @@ def set_dict_plus_1(adict,key):
 		adict[key]=1
 		
 
-def dict_value_len_count(adict,show_key_count_Lower_than=-1):
+def dict_value_len_count(adict,show_key_min=INT_MAX,show_key_max=INT_MIN):
 	d={}
 	for k,v in adict.items():
 		l=len(v)#U.len
@@ -2665,7 +2665,7 @@ def dict_value_len_count(adict,show_key_count_Lower_than=-1):
 		else:
 			d[l]=1
 		if l:
-			if l <= show_key_count_Lower_than:
+			if show_key_min <= l <= show_key_max:
 				U.setDictListValue(d,'%s-len'%l,k)
 								
 	return d
