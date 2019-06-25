@@ -66,7 +66,7 @@ def input(fliter='',lenMin=-1,lenMax=U.IMAX):
 	r=[i for i in  enumerate(gIn) if fliter in i[1]]
 	return [i for i in  r if lenMin<=len(i[1])<=lenMax]
 	
-def outType(t=None,start=0,stop=U.IMAX):
+def outType(t=None,start=0,stop=U.IMAX,len=py.range(U.IMAX)):
 	'''t is type to flit
 	is3:range(start, stop[, step]) -> range object
 	'''

@@ -432,7 +432,9 @@ def readStdin(size=-1):
 	'''size<0 read all, 
 	If the size argument is negative or omitted, read until EOF is reached.'''
 	if not stdin.isatty():
-		stdin.seek(0)
+		#linux  io.UnsupportedOperation: underlying stream is not seekable
+		if iswin():
+			stdin.seek(0)
 		return stdin.read(size)
 	else: return ''
 getStdin=readStdin
@@ -2057,7 +2059,9 @@ def getModPath(mod=None,qgb=True,slash=True,backSlash=False,endSlash=True,endsla
 	else:sp=sp.replace('\\','/')
 
 	return sp
-	
+
+def slen(a,*other):
+	return py.repr(len(a,*other) )
 	
 def len(a,*other):
 	'''Exception return -1'''
@@ -2656,7 +2660,10 @@ def set_dict_plus_1(adict,key):
 		adict[key]=1
 		
 
-def dict_value_len_count(adict,show_key_min=INT_MAX,show_key_max=INT_MIN):
+def dict_value_len_count(adict,show_key_len_range=py.range(-1,-1) ):
+	'''
+	range(-1) = range(0, -1)
+	'''
 	d={}
 	for k,v in adict.items():
 		l=len(v)#U.len
@@ -2664,8 +2671,7 @@ def dict_value_len_count(adict,show_key_min=INT_MAX,show_key_max=INT_MIN):
 			d[l]+=1
 		else:
 			d[l]=1
-		if l:
-			if show_key_min <= l <= show_key_max:
+		if l and (l in show_key_len_range):
 				setDictListValue(d,'%s-len'%l,k)
 								
 	return d

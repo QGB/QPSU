@@ -67,6 +67,9 @@ try:
 	from pprint import pprint,pformat
 except:pass
 ####################################################
+def join(iterable,separator=','):
+	if py.istr(iterable):return iterable
+	return separator.join([string(i) for i in iterable] )
 def intToHex(number,uppercase=True):
 	'''
 '{:02X}'.format(257)=='101'
@@ -123,7 +126,11 @@ def getFLD(url_or_domain):
 	
 	"""
 	import tld
-	return tld.get_fld(fix_protocol=True,url=url_or_domain)
+	try:
+		return tld.get_fld(fix_protocol=True,url=url_or_domain)
+	except Exception as e:
+		return py.No(e)
+		#TldDomainNotFound: Domain 网站域名 didn't match any existing TLD name!
 get_fld=getFLD
 
 ################### zh #############################
@@ -592,12 +599,13 @@ def varname(a):
 	return r
 	# return replacey(a,'_',':','.','\\','/','-','"',' ','\n','\r','\t','[',']')
 # U.pln( varname(i09)
-def fileNameLegalized(a):
+def fileNameLegalized(a,default='_'):
 	if not py.istr(a):a=string(a)
 	r=''
 	for i in range(len(a.strip() )  ):
-		if a[i] in FILE_NAME:r+=a[i]
-		else:r+='_'
+		if (a[i] in FILE_NAME) or hasZh(a[i] ):
+			r+=a[i]
+		else:r+=default
 	return r
 fileName=filename=fileNameLegalized
 # filename.__str__=FILE_NAME	
