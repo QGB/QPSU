@@ -61,6 +61,7 @@ def rpcServer(port=23571,thread=True,ip='0.0.0.0',ssl_context=(),currentThread=F
 	execLocals=None,qpsu='py,U,T,N,F',importMods='sys,os',request=True,app=None,key=None):
 	''' if app : port useless
 	key char must in T.alphanumeric
+	ssl_context default use https port=443 
 	'''
 	from threading import Thread
 	from http.server import BaseHTTPRequestHandler as h
@@ -152,6 +153,9 @@ def rpcServer(port=23571,thread=True,ip='0.0.0.0',ssl_context=(),currentThread=F
 	flaskArgs=py.dict(host=ip,port=port,debug=0,threaded=True)
 	if ssl_context:
 		flaskArgs['ssl_context']=ssl_context
+		if port==23571:
+			port=443
+		
 	if currentThread or not thread:
 		return app.run(**flaskArgs)
 	else:
@@ -230,6 +234,32 @@ def get(url,protocol='http',file=''):
 def http(url,method='get',*args):
 	return HTTP.method(url,method,*args)
 
+def ipLocation(ip):
+	return ' '.join(ip_location_qqwry(ip))
+sip_location=ip_location=ipLocation
+	
+def ip_location_qqwry(ip,dat_path=py.importU().gst+'qqwry.dat'):
+	'''return ('地区' , '运营商')
+warnning: NOT thread safe !!!
+	'''
+	# U=py.importU()
+	F=py.importF()
+	import qqwry
+	
+	if not dat_path:
+		if U.isWin():
+			qqwry_path=r'C:\Program Files (x86)\cz88.net\ip\qqwry.dat'
+			if F.exist(qqwry_path):
+				dat_path=qqwry_path
+	if not F.exist(dat_path):
+		U.log(['updateQQwry length:', qqwry.cz88update.updateQQwry(dat_path)] )
+		
+	if ('q' not in ip_location_qqwry.__dict__):
+		ip_location_qqwry.q = qqwry.QQwry()
+		ip_location_qqwry.q.load_file(dat_path)
+	
+	return ip_location_qqwry.q.lookup(ip)  #('北京市', '联通')
+	
 def bulk_whois(a):
 	import requests,json,logging
 	bulkwhois_base_url = 'https://www.whoisxmlapi.com/BulkWhoisLookup/bulkServices/'

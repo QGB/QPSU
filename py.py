@@ -178,20 +178,32 @@ def pdb(frame=sys._getframe().f_back):
 	pdb.Pdb().set_trace(frame)
 debug=pdb
 	
-def importU():
+def from_qgb_import(mod='U'):
 	# try:import U
 	import sys
-	if 'qgb.U' in sys.modules:U=sys.modules['qgb.U']
-	elif 'U' in sys.modules:  U=sys.modules['U']
-	else:
-		try:from qgb import U
-		except:pass
-		try:from . import U
-		except:pass
-		try:import U
-		except Exception as ei3:pass
+	if not mod.startswith('qgb.'):
+		if 'qgb.'+mod in sys.modules: 
+			return sys.modules['qgb.'+mod]
+	if mod in sys.modules: 
+		return sys.modules[mod]
+		# else:
+			# return from_qgb_import('qgb.'+mod)
+			
+		# else:
+	s='''
+try:from qgb import {0}
+except:pass
+try:from . import {0}
+except:pass
+try:import {0}
+except Exception as ei3:pass
+
+'''
+	s=s.format(modName)
+	_locals=_globals={}
+	exec(s,_locals,_globals)
 	
-	if 'U' in locals():
+	if mod in _locals:
 		g=sys._getframe().f_back.f_globals
 		if 'U' not in g:g['U']=U
 		return U
@@ -201,12 +213,18 @@ def importU():
 		import U
 		raise Exception('#Error import U in qgb.py')
 
+		
+		
+	
+
+importU=from_qgb_import
+
 def importT():
-	return importU().T
+	return from_qgb_import('T')
 def importN():
-	return importU().N
+	return from_qgb_import('N')
 def importF():
-	return importU().F
+	return from_qgb_import('F')
 	
 	
 def traceback(ae=None):

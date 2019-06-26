@@ -163,18 +163,43 @@ def readableTimeText(txt,browser=True):
 	if browser:
 		U.browserObj(r)
 	else:return r
-
-def readableSizeText(txt,size=1,p=True):
-	''' if not p :return txt'''
+	
+RE_IP= re.compile('''(?:(?:2(?:[0-4][0-9]|5[0-5])|[0-1]?[0-9]?[0-9])\.){3}(?:(?:2([0-4][0-9]|5[0-5])|[0-1]?[0-9]?[0-9]))''')
+def ipLocationText(text,location_format=' [{0}] ',reverse_ip=True,lan=False,p=True):
+	U=py.importU()
+	N=py.importN()
+	
+	def fr(a):
+		# i0,i=a.span()
+		# a=py.int(text[i0:i] )
+		a=a.group()
+		location=N.ipLocation(a)
+		if not lan:
+			if '局域网 IP' in location:
+				return a
+		
+		location=location_format.format(location)
+		
+		if reverse_ip:
+			a=a+location
+		else:
+			a = location
+		return a
+	r=regexReplace(text,RE_IP,fr)
+	if p:U.pln(r)
+	else:return r
+	
+def readableSizeText(text,sizeMultiple=1,p=True):
+	''' if not p :return text'''
 	U=py.importU()
 	F=U.F
 	def fr(a):
 		# i0,i=a.span()
-		# a=py.int(txt[i0:i] )
-		a=py.int(a.group())*size
+		# a=py.int(text[i0:i] )
+		a=py.int(a.group())*sizeMultiple
 		a=F.readableSize(a)
 		return a
-	r=regexReplace(txt,r'\d{5,}',fr)
+	r=regexReplace(text,r'\d{5,}',fr)
 	if p:U.pln(r)
 	else:return r
 

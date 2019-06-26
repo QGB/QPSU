@@ -432,9 +432,9 @@ def readStdin(size=-1):
 	'''size<0 read all, 
 	If the size argument is negative or omitted, read until EOF is reached.'''
 	if not stdin.isatty():
-		#linux  io.UnsupportedOperation: underlying stream is not seekable
 		if iswin():
 			stdin.seek(0)
+		#linux  io.UnsupportedOperation: underlying stream is not seekable
 		return stdin.read(size)
 	else: return ''
 getStdin=readStdin
