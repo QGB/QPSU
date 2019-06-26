@@ -241,6 +241,10 @@ sip_location=ip_location=ipLocation
 def ip_location_qqwry(ip,dat_path=py.importU().gst+'qqwry.dat'):
 	'''return ('地区' , '运营商')
 warnning: NOT thread safe !!!
+
+pip install qqwry-py3
+
+pip install qqwry  # Not have cz88update
 	'''
 	U=py.importU()
 	F=py.importF()
@@ -252,7 +256,7 @@ warnning: NOT thread safe !!!
 			if F.exist(qqwry_path):
 				dat_path=qqwry_path
 	if not F.exist(dat_path):
-		U.log(['updateQQwry length:', qqwry.cz88update.updateQQwry(dat_path)] )
+		U.log(['updateQQwry length:', qqwry.updateQQwry(dat_path)] )
 		
 	if ('q' not in ip_location_qqwry.__dict__):
 		ip_location_qqwry.q = qqwry.QQwry()
