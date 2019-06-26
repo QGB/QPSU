@@ -199,7 +199,7 @@ try:import {0}
 except Exception as ei3:pass
 
 '''
-	s=s.format(modName)
+	s=s.format(mod)  # NO startswith qgb.
 	_locals=_globals={}
 	exec(s,_locals,_globals)
 	
