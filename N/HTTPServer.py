@@ -178,7 +178,7 @@ def https(ip="0.0.0.0", port=443,key='',log=True,onMainThread=False):
 	except Exception as e:
 		return (ip,port,e)
 	if not key:
-		py.importU()
+		U=py.importU()
 		key=U.getModPath()+'N/.tmall.com.crt'#lk.lk.crt'
 	import ssl
 	httpd.socket=ssl.wrap_socket( httpd.socket, keyfile=key,  certfile=key)
@@ -205,7 +205,7 @@ def main(port=443,crt='N/CA.crt' ,onMainThread=True):
 		# sys.path[0]=sys.path[0][:-5]
 		# U.pln( sys.path)
 		# from qgb import U
-	py.importU()	
+	U=py.importU()	
 	@route('/',['get','post'])
 	def data(h,**ka):
 		h.send_response(200)

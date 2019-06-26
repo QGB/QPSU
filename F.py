@@ -231,7 +231,7 @@ def getPath(asp):
 def getPaths(a):
 	r''' a:str 
 	'''
-	py.importU()
+	U=py.importU()
 	if U.iswin():
 		sp=a.replace('\\','/').split('/')
 		rlist=[]
@@ -382,7 +382,7 @@ h2b=hexToBytes
 
 
 def writeIterable(file,data,end='\n',overwrite=True,encoding=None):
-	py.importU()
+	U=py.importU()
 	if not encoding:encoding=U.encoding
 	
 	file=autoPath(file)
@@ -401,7 +401,7 @@ def write(file,data,mod='w',encoding='',mkdir=False,autoArgs=True,pretty=True):
 	   py2  open(name[, mode[, buffering]])
 pretty=True        Format a Python object into a pretty-printed representation.
 	'''
-	py.importU()
+	U=py.importU()
 	try:
 		if autoArgs:
 			if py.istr(data) and py.len(file)>py.len(data)>0:
@@ -580,7 +580,7 @@ True
 >>> path.exists('o:')
 True
 '''
-	py.importU()
+	U=py.importU()
 	if U.iscyg():
 		if len(fn)==2 and fn[-1]==':':fn+='/'
 		# raise NotImplementedError
@@ -611,7 +611,7 @@ def list(ap='.',type='',t='',r=False,d=False,dir=False,f=False,file=False):
 	'''Parms:bool r recursion
 			 str (type,t) '(d,f,a,r)'
 	default return all'''
-	py.importU()
+	U=py.importU()
 	if dir:d=True
 	if file:f=True
 	if t and not type:type=t
@@ -750,7 +750,7 @@ def deleteFile(file):
 	file=autoPath(file)
 	sp=getSplitor(file)
 	# for i in a.split(ap):
-	py.importU()
+	U=py.importU()
 	def Error():
 		#Error()  返回None时   
 		#TypeError: catching classes that do not inherit from BaseException is not allowed
@@ -808,7 +808,7 @@ def makeDirs(ap,isFile=False):
 		else:
 			return py.No('unexpected dir not exists',p)
 			
-	py.importU()
+	U=py.importU()
 	sp=getSplitor(ap)
 	ap=ap.split(sp)
 	if isFile:ap=ap[:-1]
