@@ -12,7 +12,7 @@ else:
 
 gError=[]
 def setErr(ae):
-	py.importU()
+	U=py.importU()
 	global gError
 	if U.gbLogErr:# U.
 		if type(gError) is list:gError.append(ae)
@@ -218,7 +218,7 @@ def rpcClient(url_or_port='http://127.0.0.1:23571',code=''):
 	
 	
 def get(url,protocol='http',file=''):
-	py.importU()
+	U=py.importU()
 	T=U.T
 	if '://' in url:
 		p=T.sub(url,'',':')
@@ -242,7 +242,7 @@ def ip_location_qqwry(ip,dat_path=py.importU().gst+'qqwry.dat'):
 	'''return ('地区' , '运营商')
 warnning: NOT thread safe !!!
 	'''
-	# U=py.importU()
+	U=py.importU()
 	F=py.importF()
 	import qqwry
 	
@@ -467,7 +467,7 @@ def scanPorts(host,threadsMax=33,from_port=1,to_port=65535,callback=None,ip2=192
 	callback(*scanReturns)
 	if callback and ports> threadsMax: 剩下结果将异步执行完成
 	'''
-	py.importU()
+	U=py.importU()
 	from threading import Thread
 	import socket
 	# host = raw_input('host > ')
