@@ -205,8 +205,9 @@ except Exception as ei3:pass
 	
 	if mod in _locals:
 		g=sys._getframe().f_back.f_globals
-		if 'U' not in g:g['U']=U
-		return U
+		if mod not in g:
+			g[mod]=_locals[mod]
+		return g[mod]
 		# if U.debug():pdb()
 	else:
 		# pdb()
