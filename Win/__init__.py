@@ -160,7 +160,7 @@ The address type or state. This member can be a combination of the following val
 	适配器（Interface Card  ,  Adapter）
 	网络接口控制器（英语：network interface controller，NIC），又称网络接口控制器，网络适配器（network adapter），网卡（network interface card）
 	http://www.cnblogs.com/leftshine/p/5698732.html'''
-	py.importU()
+	U=py.importU()
 	GetIpAddrTable = windll.iphlpapi.GetIpAddrTable
 	GetIpAddrTable.argtypes = [
 		ctypes.POINTER(MIB_IPADDRTABLE),
@@ -432,7 +432,7 @@ def CreateProcess(appName,cmd,):pass
 # aa= 233
 def getLastError(errCode=None,p=True):
 	'''  need .decode('gb18030') '''
-	py.importU()
+	U=py.importU()
 	from ctypes import c_void_p,create_string_buffer
 	GetLastError = kernel32.GetLastError
 	FormatMessage = kernel32.FormatMessageA
@@ -515,7 +515,7 @@ def GetProcessImageFileName(pid=None):
 	Windows XP or later
 	Windows Server 2003 and Windows XP:  The handle must have the PROCESS_QUERY_INFORMATION access right.'''
 	if not pid:
-		py.importU()
+		U=py.importU()
 		pid=U.pid
 	PROCESS_ALL_ACCESS = 0x001F0FFF
 	# bInheritHandle [in]
@@ -559,7 +559,7 @@ Microsoft Windows [版本 10.0.16299.125]
 Microsoft Windows [版本 6.1.7601]
 Microsoft Windows XP [版本 5.1.2600]
 	'''
-	py.importU()
+	U=py.importU()
 	import subprocess as sb
 	T=U.T
 	r=sb.Popen('cmd.exe /c ver',stdout=sb.PIPE)
@@ -603,8 +603,7 @@ def getAllDisk():
 		# if U.F.exist(i):r.append(i)
 	return r
 def main():
-	py.importU()
-	py.importU()
+	U=py.importU()
 	py.pdb()
 	# U=globals()['U']#  为何在此不能自动引用 globals
 	import U
