@@ -797,16 +797,20 @@ def makeDirs(ap,isFile=False):
 			if isFile:
 				return makeDirs(p.parent,isFile=False)
 			return py.No(ap,'exists , and it is a file')
+		e=py.No('None unexpected Exception')
 		try:
 			p.mkdir()
 		except (FileNotFoundError,):
-			return makeDirs(p.parent,isFile=False)
+			makeDirs(p.parent,isFile=False)
+			p.mkdir() # 建立父目录后，再次尝试创建本目录
 		except FileExistsError:
+			pass
+		except Exception as e:
 			pass
 		if p.exists():
 			return py.str(p)
 		else:
-			return py.No('unexpected dir not exists',p)
+			return py.No('unexpected dir not exists',p,e)
 			
 	U=py.importU()
 	sp=getSplitor(ap)
