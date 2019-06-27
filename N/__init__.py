@@ -234,8 +234,17 @@ def get(url,protocol='http',file=''):
 def http(url,method='get',*args):
 	return HTTP.method(url,method,*args)
 
-def ipLocation(ip):
-	return ' '.join(ip_location_qqwry(ip))
+def ipLocation(ip,show_ip=False,
+junk=['本机地址  CZ88.NET','IANA 保留地址','局域网 IP','局域网 对方和您在同一内部网'] ):
+	location=' '.join(ip_location_qqwry(ip))
+	if location in junk:
+		return ip
+		
+	if show_ip:
+		return '{0} [{1}] '.format(ip,location)
+	else:
+		return location
+		
 sip_location=ip_location=ipLocation
 	
 def ip_location_qqwry(ip,dat_path=py.importU().gst+'qqwry.dat'):

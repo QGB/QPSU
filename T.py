@@ -165,8 +165,7 @@ def readableTimeText(txt,browser=True):
 	else:return r
 	
 RE_IP= re.compile('''(?:(?:2(?:[0-4][0-9]|5[0-5])|[0-1]?[0-9]?[0-9])\.){3}(?:(?:2([0-4][0-9]|5[0-5])|[0-1]?[0-9]?[0-9]))''')
-def ipLocationText(text,location_format=' [{0}] ',reverse_ip=True,p=True,
-junk=['本机地址  CZ88.NET','IANA 保留地址','局域网 IP','局域网 对方和您在同一内部网']):
+def ipLocationText(text,location_format=' [{0}] ',reverse_ip=True,p=True):
 	U=py.importU()
 	N=py.importN()
 	
@@ -176,9 +175,9 @@ junk=['本机地址  CZ88.NET','IANA 保留地址','局域网 IP','局域网 对
 		a=a.group()
 		location=N.ipLocation(a)
 
-		for i in junk:
-			if i in location:
-				return a
+		# for i in junk:
+			# if i in location:
+				# return a
 		
 		location=location_format.format(location)
 		
