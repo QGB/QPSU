@@ -249,25 +249,29 @@ sip_location=ip_location=ipLocation
 	
 def ip_location_qqwry(ip,dat_path=py.importU().gst+'qqwry.dat'):
 	'''return ('地区' , '运营商')
+if want update qqwry.dat , reloa N module,and call this with dat_path !!!
 warnning: NOT thread safe !!!
 
 pip install qqwry-py3
 
 pip install qqwry  # Not have cz88update
-	'''
-	U=py.importU()
-	F=py.importF()
-	import qqwry
-	
-	if not dat_path:
-		if U.isWin():
-			qqwry_path=r'C:\Program Files (x86)\cz88.net\ip\qqwry.dat'
-			if F.exist(qqwry_path):
-				dat_path=qqwry_path
-	if not F.exist(dat_path):
-		U.log(['updateQQwry length:', qqwry.updateQQwry(dat_path)] )
-		
+	'''	
 	if ('q' not in ip_location_qqwry.__dict__):
+		U=py.importU()
+		F=py.importF()
+		import qqwry
+		
+		if not dat_path:
+			if U.isWin():
+				qqwry_path=r'C:\Program Files (x86)\cz88.net\ip\qqwry.dat'
+				if F.exist(qqwry_path):
+					dat_path=qqwry_path
+			if not dat_path:
+				dat_path=U.gst+'qqwry.dat'
+				
+		if not F.exist(dat_path):
+			U.log(['updateQQwry length:', qqwry.updateQQwry(dat_path)] )
+			
 		ip_location_qqwry.q = qqwry.QQwry()
 		ip_location_qqwry.q.load_file(dat_path)
 	
