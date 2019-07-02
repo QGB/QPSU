@@ -1054,6 +1054,10 @@ def pwd(p=False,display=False):
 	return s+pwd.sp#带sp方便使用者拼接路径
 getCurrentPath=pwd
 	
+def random_choice(*a,**ka):
+	import random
+	return random.choice(*a,**ka)
+	
 def randomInt(min=0,max=IMAX):
 	'''random.randint(a, b)
 Return a random integer N such that a <= N <= b.'''
@@ -2902,7 +2906,79 @@ filterwarnings=filterWarning
 def filterWarningList():
 	import warnings
 	return warnings.filters
+#####################################
 
+# class MutableStringMeta(type):
+	# def __new__(mcls, classname, bases, classdict):
+		# wrapped_classname = '_%s_%s' % ('Wrapped', type(obj).__name__)
+		# return type.__new__(mcls, wrapped_classname, (type(obj),)+bases, classdict)
+	# def __instancecheck__(self, other):
+		# return True
+		# return py.isinstance(instance, (py.str,MutableString) )
+
+# class MutableString(metaclass=MutableStringMeta):
+	# #__metaclass__ = MutableStringMeta
+	# def set(self, data):
+		# self.last = MutableString(data)
+		# self.data = py.list(data)
+		
+	# def __init__(self, data):
+		# self.data = py.list(data)
+		
+	# def __repr__(self):
+		# return "".join(self.data)
+	# def __setitem__(self, index, value):
+		# self.data[index] = value
+	# def __getitem__(self, index):
+		# if type(index) == slice:
+			# return "".join(self.data[index])
+		# return self.data[index]
+	# def __delitem__(self, index):
+		# del self.data[index]
+	# def __add__(self, other):
+		# self.data.extend(py.list(other))
+	# def __len__(self):
+		# return len(self.data)
+	# @classmethod
+	# def __instancecheck__(cls, instance):
+		# return True
+
+def mutableString(obj):
+	class MetaClass(type):
+		def __new__(mcls, classname, bases, classdict):
+			wrapped_classname = '_%s_%s' % ('Wrapped', type(obj).__name__)
+			return type.__new__(mcls, wrapped_classname, (type(obj),)+bases, classdict)
+
+	class MutableString(metaclass=MetaClass):
+		def set(self, data):
+			self.last = mutableString("".join(self.data) )
+			self.data = py.list(data)
+			
+		def __init__(self, data):
+			self.data = py.list(data)
+			self.last = mutableString("".join(self.data) )
+			
+		def __repr__(self):
+			return py.repr(self.__str__())
+			
+		def __str__(self):
+			return "".join(self.data)
+			
+		def __setitem__(self, index, value):
+			self.data[index] = value
+		def __getitem__(self, index):
+			if type(index) == slice:
+				return "".join(self.data[index])
+			return self.data[index]
+		def __delitem__(self, index):
+			del self.data[index]
+		def __add__(self, other):
+			self.data.extend(py.list(other))
+		def __len__(self):
+			return len(self.data)
+
+	return MutableString(obj)		
+	
 #############################
 def main(display=True,pressKey=False,clipboard=False,escape=False,c=False,ipyOut=False,cmdPos=False,reload=False,*args):
 	anames=py.tuple([i for i in py.dir() if not i .startswith('args')])

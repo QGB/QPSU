@@ -511,7 +511,10 @@ js2py=jsonToDict
 	
 def json_loads(astr):
 	import json
-	return json.loads(astr)
+	try:
+		return json.loads(astr)
+	except Exception as e:
+		return py.No(e)
 	
 def string(a,decode=''):
 	'''return unicode'''
