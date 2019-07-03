@@ -2956,8 +2956,7 @@ def mutableString(obj):
 			
 		def __init__(self, data):
 			self.data = py.list(data)
-			self.last = mutableString("".join(self.data) )
-			
+						
 		def __repr__(self):
 			return py.repr(self.__str__())
 			
