@@ -27,7 +27,7 @@ class Log:
 			'url': url,
 			'ua': request.environ['HTTP_USER_AGENT'],
 			'data':request.body,
-			'ip':ip,d
+			'ip':ip,
 			'port':port,
 			}
 			self.s=log_obj
