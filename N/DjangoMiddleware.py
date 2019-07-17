@@ -20,7 +20,11 @@ class Log:
 		q=('?'+q) if q else ''
 		url=request.path+q
 		try:
-			ip,port=request._stream.stream.raw._sock.getpeername()
+			if U.isWin():
+				ip,port=request._stream.stream.raw._sock.getpeername()
+			if U.isLinux():
+				ip,port=request._stream.stream.stream.raw._sock.getpeername()
+				
 			ip=N.ip_location(ip,show_ip=True)
 			
 			log_obj={
