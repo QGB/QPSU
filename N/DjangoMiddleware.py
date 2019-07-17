@@ -20,6 +20,7 @@ class Log:
 		q=('?'+q) if q else ''
 		url=request.path+q
 		try:
+			if not U.DEBUG:raise Exception(request._stream.stream.raw._sock)
 			if U.isWin():
 				ip,port=request._stream.stream.raw._sock.getpeername()
 			if U.isLinux():
