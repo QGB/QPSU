@@ -27,12 +27,13 @@ class Log:
 			'url': url,
 			'ua': request.environ['HTTP_USER_AGENT'],
 			'data':request.body,
-			'ip':ip,
+			'ip':ip,d
 			'port':port,
 			}
 			self.s=log_obj
 		except Exception as e:
-			F
+			self.e=e
+			
 		if url.startswith('/#rpc\n'):
 			self.g['self']=self #test?
 			
