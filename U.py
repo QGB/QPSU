@@ -382,6 +382,17 @@ iterable 的元素,没有特殊处理
 	sep=' '
 	end=''
 	file=sys.stdout
+	def write(data,default_encoding='utf-8'):
+		b='b' in py.getattr(file,'mode','')
+		if py.istr(data):
+			if b:file.write(data.encode(encoding))
+			else:file.write(data)
+		elif py.isbyte(data):
+			if b:file.write(data)
+			else:file.write(data.decode(encoding))
+		else:
+			raise ArgumentError('write bytes or str')
+			
 	flush=True#default
 	for k in ka:
 		k=k.lower()
@@ -392,7 +403,7 @@ iterable 的元素,没有特殊处理
 		if 'cod'   in k:cod  =ka[k];continue# 解码
 		if 'r'     in k:r    =ka[k];continue#  放最后，防止名字冲突
 	if py.len(a)==0:#print (end='233') #233
-		file.write(end)
+		write(end)
 		if flush:
 			if getattr(file,'flush',None):file.flush()
 # in npp pythonScript :  AttributeError: 'Console' object has no attribute 'flush' 
@@ -406,7 +417,7 @@ iterable 的元素,没有特殊处理
 			if at is py.unicode:a=a.encode(encoding)#编码
 			# elif not py.istr(a):
 		a=py.str(a)	
-		file.write(a)
+		write(a)
 		p(end=end,file=file,flush=flush)
 		if r:return a
 		else:return
@@ -1115,21 +1126,23 @@ def evalSafely(source, globals=None, locals=None,noErr=False):
 			return e
 eval=evalSafely
 
-def execResult(source, globals=None, locals=None):
-	'''exec('r=xx') ;return r # this has been tested in 2&3
-	'''
-	if globals==None and locals==None:
-		globals={}#防止 参数不变问题
-		locals ={}
-		# f=sys._getframe().f_back
-		# globals=f.f_globals
-		# locals =f.f_locals	
-
-	exec(source, globals, locals)
+def execStrResult(source, globals=None, locals=None):
+	if globals==None:globals={}
+	if locals==None :locals ={}
+	try:
+		exec(source, globals, locals)
+	except Exception as e:
+		return py.repr(e)
+		
 	if 'r' in locals:
-		return locals['r']
+		r=locals['r']
+		if py.istr(r):return r
+		try:return pformat(r)# in U
+		except:return py.repr(r)
 	else:
-		return py.No('can not found "r" variable after exec locals',locals)
+		return 'can not found "r" variable after exec locals'+pformat(locals.keys())
+execReturnStr=execResult=execStrResult
+
 def execHelp():
 	'''use py.execute(s,{g:},{l:})
 	is2 ： exec_stmt ::=  "exec" or_expr ["in" expression ["," expression]]
@@ -2067,20 +2080,27 @@ def getModPath(mod=None,qgb=True,slash=True,backSlash=False,endSlash=True,endsla
 def slen(a,*other):
 	return py.repr(len(a,*other) )
 	
-def len(a,*other):
-	'''Exception return -1'''
-	if other:
-		r=[len(a)]
-		for i in other:
-			r.append(len(i))
-		return r
-	try:return py.len(a)
+def len(obj,*other):
+	'''Exception return py.No or [no...]'''
+	return builtinFuncWrapForMultiArgs(builtinFunc=py.len,args=(obj,other))
+def hash(obj,*other):
+	'''Exception return py.No or [no...]'''
+	return builtinFuncWrapForMultiArgs(builtinFunc=py.hash,args=(obj,other))
+
+def builtinFuncWrapForMultiArgs(builtinFunc,args):
+	'''Exception return py.No'''
+	obj,other=args ########## other is tuple
+	try:
+		r1=builtinFunc(obj)
 	except Exception as e:
-		return py.No(e)
-		# if type(a) in (int,float,list,tuple,dict):
-			# return py.len(str(a))
-		# try:return py.len(str(a))
-		# except:return -1
+		r1=py.No(e)
+	if not other:
+		return r1
+	else:
+		r=[r1]
+		for i in other:
+			r.append(builtinFunc(i))
+		return r
 		
 def dis(a):
 	import dis
@@ -2657,12 +2677,12 @@ def setDictListValue(adict,key,value):
 		adict[key]=[value]
 set_dict_value_list=set_dict_list=setDictList=setDictListValue
 
-def set_dict_plus_1(adict,key):
+def setDictValuePlusOne(adict,key):
 	if key in adict:
 		adict[key]+=1
 	else:
 		adict[key]=1
-		
+set_dict_plus_1=set_dict_value_plus_1=setDictPlusOne=setDictValuePlusOne		
 
 def dict_value_len_count(adict,show_key_len_range=py.range(-1,-1) ):
 	'''
@@ -2671,13 +2691,21 @@ def dict_value_len_count(adict,show_key_len_range=py.range(-1,-1) ):
 	d={}
 	for k,v in adict.items():
 		l=len(v)#U.len
-		if l in d:
-			d[l]+=1
-		else:
-			d[l]=1
+		setDictValuePlusOne(d,l)
 		if l and (l in show_key_len_range):
-				setDictListValue(d,'%s-len'%l,k)
-								
+				setDictListValue(d,'%s-len'%l,k)							
+	return d
+	
+def dict_value_hash_count(adict,):
+	'''
+	return {v_hash:count}
+	'''
+	d={}
+	for k,v in adict.items():
+		l=hash(v)#U.hash
+		setDictValuePlusOne(d,l)
+		# if l and (l in show_key_len_range):
+				# setDictListValue(d,'%s-len'%l,k)							
 	return d
 	
 def getDictItems(a,*range,index=False):

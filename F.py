@@ -418,15 +418,14 @@ pretty=True        Format a Python object into a pretty-printed representation.
 	
 	if 'b' not in mod and isinstance(data,py.bytes):mod+='b'# 自动检测 data与 mod 是否匹配
 	
-	if 'b' in mod:
-		f=py.open(file,mod)
-	else:
-		f=py.open(file,mod,encoding=encoding)
+	if 'b' not in mod:
+		mod+='b'
+	f=py.open(file,mod)
 		#f.write(强制unicode) 本来只适用 py.is3() ，但 py2 中 有 from io import open
 	# with open(file,mod) as f:
-	if py.istr(data) or (py.is3() and isinstance(data,py.bytes) )	:
+	if py.isbyte(data):#istr(data) or (py.is3() and py.isinstance(data,py.bytes) )	:
 		f.write(data)
-	elif py.is2() and type(data) is py.unicode:
+	elif (py.is2() and py.isinstance(data,py.unicode)) or (py.is3() and py.istr(data)):
 		f.write(data.encode(encoding))
 	else:
 		# if py.is2():print >>f,data

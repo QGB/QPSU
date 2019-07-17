@@ -67,6 +67,10 @@ try:
 	from pprint import pprint,pformat
 except:pass
 ####################################################
+def encode(s,encoding):
+	'''
+	'''
+	
 def join(iterable,separator=','):
 	if py.istr(iterable):return iterable
 	return separator.join([string(i) for i in iterable] )
@@ -446,6 +450,13 @@ def bytesToBase64(a):
 	else:
 		return base64.b64encode(a)
 
+def base64decode(a):
+	import base64
+	if py.istr(a):
+		return detectAndDecode(base64.b64decode(a))
+	if py.isbyte(a):
+		return base64.b64decode(a) #type bytes
+		
 def strToBaseN(a,base=64,symbols=None):
 	if not symbols:symbols=gdBaseN[base]
 	r=parseInt(a,256)
@@ -457,7 +468,7 @@ def baseNToStr(a,base=64,symbols=None):
 	if not symbols:symbols=gdBaseN[base]#先传入符号表，baseN的符号表可以由用户指定
 	r=parseInt(a,base,symbols)
 	return intToStr(r,256)#这里使用  默认字节符号表
-base64decode=baseN_decode=baseN2s=baseNToStr
+baseN_decode=baseN2s=baseNToStr
 	
 def intToStr(n,base=16,symbols=None):
 	if n<0 or base < 2:raise Exception(n,base,'(n,base) invild')

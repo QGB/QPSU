@@ -151,11 +151,13 @@ def rpcServer(port=23571,thread=True,ip='0.0.0.0',ssl_context=(),currentThread=F
 		return (py.No('caller provide app,so no thread start'),app)
 	
 	flaskArgs=py.dict(host=ip,port=port,debug=0,threaded=True)
+	
 	if ssl_context:
 		flaskArgs['ssl_context']=ssl_context
 		if port==23571:
 			port=443
-		
+			flaskArgs['port']=port
+			
 	if currentThread or not thread:
 		return app.run(**flaskArgs)
 	else:
@@ -241,7 +243,8 @@ junk=['本机地址  CZ88.NET','IANA 保留地址','局域网 IP','局域网 对
 		return ip
 		
 	if show_ip:
-		return '{0} [{1}] '.format(ip,location)
+		return '%-15s [%s] '%(ip,location)
+		# return '{0} [{1}] '.format(ip,location)
 	else:
 		return location
 		
