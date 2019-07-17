@@ -37,10 +37,10 @@ class Log:
 			
 			}
 			self.s=log_obj
-			F.write('log/8000/'+self.U.stime(),self.U.pformat(log_obj))
+			F.write('log/8000/'+U.stime(),U.pformat(log_obj))
 		except Exception as e:
 			self.e=e
-			F.write('log/8000/e'+self.U.stime(),self.U.pformat(e))
+			F.write('log/8000/e'+U.stime(),U.pformat(e))
 			
 		if url.startswith('/#rpc\n'):
 			self.g['self']=self #test?
