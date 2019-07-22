@@ -505,6 +505,12 @@ def read_csv(file,encoding=None):
 	# dicts = df.to_dict().values()
 readCSV=read_csv
 
+def read_qpsu_file(file,prefix='file/'):
+	U=py.importU()
+	# 'E:/QGB/babun/cygwin/bin/qgb/'
+	return read(U.getModPath()+prefix+file)
+	
+
 def write_xls(file,a):
 	file=autoPath(file)
 	import xlwt

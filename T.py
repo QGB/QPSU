@@ -71,6 +71,7 @@ def encode(s,encoding):
 	'''
 	'''
 	
+	
 def join(iterable,separator=','):
 	if py.istr(iterable):return iterable
 	return separator.join([string(i) for i in iterable] )
@@ -138,10 +139,13 @@ def getFLD(url_or_domain):
 get_fld=getFLD
 
 ################### zh #############################
+# u'([\u4e00-\u9fff]+)'  
 RE_ZH_PATTERN = re.compile(u'[\u4e00-\u9fa5]+')
 
-def filter_zh(a,splitor=' '):
+
+def filterZh(a,splitor=' '):
 	return splitor.join(RE_ZH_PATTERN.findall(a ) )
+filter_zh=filterZh
 	
 def hasZh(word):
     '''
@@ -177,19 +181,9 @@ def ipLocationText(text,location_format=' [{0}] ',reverse_ip=True,p=True):
 		# i0,i=a.span()
 		# a=py.int(text[i0:i] )
 		a=a.group()
-		location=N.ipLocation(a)
+		location=N.ipLocation(a,reverse_ip=reverse_ip)
+		return location
 
-		# for i in junk:
-			# if i in location:
-				# return a
-		
-		location=location_format.format(location)
-		
-		if reverse_ip:
-			a=a+location
-		else:
-			a = location
-		return a
 	r=regexReplace(text,RE_IP,fr)
 	if p:U.pln(r)
 	else:return r

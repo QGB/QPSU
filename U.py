@@ -1184,8 +1184,17 @@ def _ct_clear():
 calltimes.clear=_ct_clear
 
 
-
-
+def setLogLevel(level=50):
+	''' logging.CRITICAL #50
+	'''
+	import logging
+	#Disable all logging calls of severity 'level' and below.
+	logging.disable(level)
+	
+	# log.setLevel(logging.NOTSET) #0
+	# log.setLevel(logging.CRITICAL) #50
+disableLog=setLogLevel
+	
 def setStd(name,file):
 	'''name=[std]out err in'''
 	name=name.lower()
