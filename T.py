@@ -521,6 +521,13 @@ def json_loads(astr):
 	except Exception as e:
 		return py.No(e)
 	
+def json_dumps(obj):
+	import json
+	try:
+		return json.dumps(obj)
+	except Exception as e:
+		return py.No(e)
+	
 def string(a,decode=''):
 	'''return unicode'''
 	if py.is2():
