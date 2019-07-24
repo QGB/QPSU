@@ -50,6 +50,8 @@ class Log:
 			
 			response = HttpResponse()
 			response['content-type'] = 'text/plain; charset=utf-8'
+			response['X-XSS-Protection']='0'
+			response['Access-Control-Allow-Origin'] = '*'
 			self.g['p']=response
 			
 			r=U.execStrResult(url[1:],globals=self.g)
