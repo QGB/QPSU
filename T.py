@@ -528,7 +528,8 @@ def json_loads(astr):
 def json_dumps(obj):
 	U=py.importU()
 	def default(obj):# not json basic class
-		return {'obj-%s'%U.count(obj):py.repr(obj)}
+		return py.repr(obj)
+		# return {'obj-%s'%U.count(obj):py.repr(obj)}
 
 	import json
 	try:
