@@ -507,7 +507,11 @@ def parseInt(a,base=16,symbols=None):
 		#TODO
 		
 		
-	
+def literal_eval(str):
+	import ast
+	return ast.literal_eval(str)
+unrepr=ast_literal_eval=literal_eval
+
 def jsonToDict(a):
 	'''is2: 不同于 json_loads ，不会自动转换 到unicode'''
 	import ast
@@ -522,9 +526,13 @@ def json_loads(astr):
 		return py.No(e)
 	
 def json_dumps(obj):
+	U=py.importU()
+	def default(obj):# not json basic class
+		return {'obj-%s'%U.count(obj):py.repr(obj)}
+
 	import json
 	try:
-		return json.dumps(obj)
+		return json.dumps(obj ,default=default )
 	except Exception as e:
 		return py.No(e)
 	

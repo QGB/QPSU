@@ -92,12 +92,12 @@ def repr_dill_dump(obj):
 	
 	return
 	
-def basic_dump():
-	repr
+def basic_dump(obj):
+	return py.repr(obj)
 
 def basic_load(sobj):
-	import ast
-	return ast.literal_eval(sobj)
+	T=py.importT()
+	return T.unrepr(sobj)
 	
 def deSerialize(obj=None,file=None):
 	'''The protocol version of the pickle is detected automatically, so no
