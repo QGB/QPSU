@@ -537,6 +537,7 @@ def read_xls_sheets_name(file):
 	
 	
 def read_sqlite(file,table=''):
+	file=autoPath(file)
 	import sqlite3
 	with sqlite3.connect(file) as con:
 		cursor = con.cursor()

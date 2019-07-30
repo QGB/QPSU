@@ -1095,10 +1095,10 @@ def sort(a,column=0, cmp=None, key=None, reverse=False):
 		return ''.join([i for i in a])
 	else:
 		return a
-def sortDictV(ad,des=True):
+def sortDictV(ad,key=lambda items:items[1],des=True):
 	'''des True,,, python dict key auto sort ?'''
 	if type(ad) is not dict:return {}
-	return sorted(ad.items(),key=lambda ad:ad[1],reverse=True)
+	return sorted(ad.items(),key=key,reverse=True)
 # d={}
 # for i in range(7):
 	# d[i]=i*i-5*i
@@ -1184,9 +1184,13 @@ def _ct_clear():
 calltimes.clear=_ct_clear
 
 
-def setLogLevel(level=50):
+def setLogLevel(level=False):
 	''' logging.CRITICAL #50
 	'''
+	if level==True:level=0
+	if level==False:level=50
+		
+	
 	import logging
 	#Disable all logging calls of severity 'level' and below.
 	logging.disable(level)
