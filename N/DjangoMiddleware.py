@@ -26,7 +26,7 @@ class Log:
 			if U.isLinux():
 				ip,port=request._stream.stream.stream.raw._sock.getpeername()
 				
-			ip=N.ip_location(ip,show_ip=True)
+			ip=N.ip_location(ip,reverse_ip=True)
 			
 			log_obj={
 			'url': url,

@@ -1095,7 +1095,7 @@ def sort(a,column=0, cmp=None, key=None, reverse=False):
 		return ''.join([i for i in a])
 	else:
 		return a
-def sortDictV(ad,key=lambda items:items[1],des=True):
+def sortDictV(ad,key=lambda item:item[1],des=True):
 	'''des True,,, python dict key auto sort ?'''
 	if type(ad) is not dict:return {}
 	return sorted(ad.items(),key=key,reverse=True)
@@ -1611,6 +1611,12 @@ def getArgs(a):
 getargspec=getargs=getarg=getArgs
 
 def getattr(object, *names,default=None):
+	''' py2.7 
+  File "qgb/U.py", line 1613
+    def getattr(object, *names,default=None):                                                        
+SyntaxError: invalid syntax  
+
+	'''
 	# U=py.importU()
 	try:
 		r = py.getattr(object, names[0])
