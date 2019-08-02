@@ -151,6 +151,8 @@ def filterInt(a,digits=py.range(1,999)):
 			if py.len(si) in digits:
 				r.append(si)
 			si=''
+	if py.len(si) in digits:
+		r.append(si)
 	return r
 filter_sint_list=filter_sint=filter_int=filterInt
 
