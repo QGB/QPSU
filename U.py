@@ -946,7 +946,8 @@ def reload(*mods):
 					return reload(mod)
 					
 					# if mod.__name__ in modules:#'qgb.ipy'
-				else:raise Exception('instance._module not exists')
+				else:
+					return py.No('instance._module not exists, It is not a module ?')
 			except Exception as em:
 				raise em
 			
@@ -1821,10 +1822,14 @@ def getStime(time=None,format=gsTimeFormatFile,ms=True):
 		else:return tMod.strftime(format)
 stime=getCurrentTimeStr=timeToStr=getStime
 	
-def int(a,default=0):
-	if not a:return default
-	try:return py.int(a)
-	except Exception as e:return py.No(e)
+def int(a,default=None):
+	# if not a:return default
+	try:
+		return py.int(a)
+	except Exception as e:
+		if default!=None:
+			return default
+		return py.No(e)
 	
 def primes(n):
 	''' 
@@ -2101,17 +2106,19 @@ def slen(a,*other):
 	
 def len(obj,*other):
 	'''Exception return py.No or [no...]'''
-	return builtinFuncWrapForMultiArgs(builtinFunc=py.len,args=(obj,other))
+	return builtinFuncWrapForMultiArgs(builtinFunc=py.len,args=(obj,other) )# ,default=default
 def hash(obj,*other):
 	'''Exception return py.No or [no...]'''
 	return builtinFuncWrapForMultiArgs(builtinFunc=py.hash,args=(obj,other))
 
-def builtinFuncWrapForMultiArgs(builtinFunc,args):
+def builtinFuncWrapForMultiArgs(builtinFunc,args,default=None):
 	'''Exception return py.No'''
 	obj,other=args ########## other is tuple
 	try:
 		r1=builtinFunc(obj)
 	except Exception as e:
+		if default!=None:
+			return default
 		r1=py.No(e)
 	if not other:
 		return r1

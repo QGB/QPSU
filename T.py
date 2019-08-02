@@ -138,10 +138,25 @@ def getFLD(url_or_domain):
 		#TldDomainNotFound: Domain 网站域名 didn't match any existing TLD name!
 get_fld=getFLD
 
+
+def filterInt(a,digits=py.range(1,999)):
+	digits=py.list(digits)
+	r=[]
+	# pint=False
+	si=''
+	for i in a:
+		if i in number:
+			si+=i
+		else:
+			if py.len(si) in digits:
+				r.append(si)
+			si=''
+	return r
+filter_sint_list=filter_sint=filter_int=filterInt
+
 ################### zh #############################
 # u'([\u4e00-\u9fff]+)'  
 RE_ZH_PATTERN = re.compile(u'[\u4e00-\u9fa5]+')
-
 
 def filterZh(a,splitor=' '):
 	return splitor.join(RE_ZH_PATTERN.findall(a ) )

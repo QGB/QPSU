@@ -1,0 +1,46 @@
+<!--
+<tr>
+	<td>{like}</td>
+	<td>{time}</td>
+	<td>
+		<a target="_blank" href="{url}">
+			<img width="24" height="24" src="{img}" >
+			{name}
+		</a>
+	</td>
+	<td>{txt}</td>
+</tr>
+-->
+
+  
+<style>
+table,th,td,textarea{
+	padding:0px;
+	margin:0px;
+	border:1px solid black;/*修复调整 textarea大小导致下分割线消失的问题*/
+	border-spacing: 0px;
+}
+
+body {
+	position:relative;
+	font-family:"Microsoft Yahei", Arial, sans-serif;
+	background:rgb(15, 3, 53) url("bg.png") 0 0 / 100% 100% no-repeat;
+	color: white;
+}
+
+</style>
+
+<table id="mytable"><thead>
+      <tr>
+		<th id="like">like </th>
+		<th >  time </th>
+		<th >user</th>
+		<th id="txt">txt</th>
+      </tr> 
+	  
+     </thead>
+    <tbody>	
+%s
+	</tbody>
+  </table>
+  

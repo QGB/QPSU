@@ -75,6 +75,7 @@ def get(url,file='',
 		import requests
 		r=requests.get(url,headers=headers,verify=False,timeout=timeout)
 		if 'text' in U.getDictV(r.headers,'Content-Type'):
+			return T.autoDetect(r.content)
 			try:return r.content.decode('gb18030')
 			except:pass
 			return r.text

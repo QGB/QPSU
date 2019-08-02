@@ -21,20 +21,22 @@ class Log:
 		url=request.path+q
 		try:
 			# if not U.DEBUG:raise Exception(request._stream.stream)
-			if U.isWin():
-				ip,port=request._stream.stream.raw._sock.getpeername()
-			if U.isLinux():
-				ip,port=request._stream.stream.stream.raw._sock.getpeername()
+			ip=''
+			try:
+				if U.isLinux():ip,port=request._stream.stream.stream.raw._sock.getpeername()
+				else          :ip,port=request._stream.stream.raw._sock.getpeername()
+			except:
+				ip=request.META[ 'REMOTE_ADDR']
+				port=py.No("can't access stream.raw._sock.getpeername() ")
 				
 			ip=N.ip_location(ip,reverse_ip=True)
 			
 			log_obj={
-			'url': url,
-			'ua': request.environ['HTTP_USER_AGENT'],
-			'data':request.body,
-			'ip':ip,
-			'port':port,
-			
+				'url': url,
+				'ua': request.environ['HTTP_USER_AGENT'],
+				'data':request.body,
+				'ip':ip,
+				'port':port,
 			}
 			self.s=log_obj
 			F.write('log/8000/'+U.stime(),U.pformat(log_obj))
