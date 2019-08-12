@@ -163,7 +163,7 @@ RE_ZH_PATTERN = re.compile(u'[\u4e00-\u9fa5]+')
 def filterZh(a,splitor=' '):
 	return splitor.join(RE_ZH_PATTERN.findall(a ) )
 filter_zh=filterZh
-	
+
 def hasZh(word):
     '''
     判断传入字符串是否包含中文

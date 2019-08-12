@@ -1,11 +1,9 @@
 #coding=utf-8
-import sys
-if __name__.endswith('qgb.N'):from qgb import py
-else:
-	from pathlib import Path
-	gsqp=Path(__file__).parent.parent.parent.absolute().__str__()
-	if gsqp not in sys.path:sys.path.append(gsqp)#py3 works
-	from qgb import py
+import sys,pathlib
+#                     *.py /N     /qgb    /[gsqp]  # 如果要修改路径，框选两行，一起删除
+gsqp=pathlib.Path(__file__).parent.parent.parent.absolute().__str__()
+if gsqp not in sys.path:sys.path.append(gsqp)#py3 works
+from qgb import py
 U=py.importU()
 
 import asyncio

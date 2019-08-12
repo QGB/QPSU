@@ -4,7 +4,12 @@ import elasticsearch.helpers
 from elasticsearch import Elasticsearch
 from elasticsearch.exceptions import ConnectionTimeout
 
-from . import py # 如果在 ipy 中执行 %edit es，会导入 <ApiModule 'py' >
+import sys,pathlib
+#                     *.py /qgb    /[gsqp]
+gsqp=pathlib.Path(__file__).parent.parent.absolute().__str__()
+if gsqp not in sys.path:sys.path.append(gsqp)#py3 works
+from qgb import py
+# from . import py # 如果在 ipy 中执行 %edit es，会导入 <ApiModule 'py' >
 U=py.importU()
 T=U.T;F=U.F
 

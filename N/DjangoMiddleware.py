@@ -67,3 +67,19 @@ class Log:
 		# Code to be executed for each request/response after
 		# the view is called.
 		return response
+		
+from django import template
+register = template.Library()
+
+@register.tag(name='eval')
+def do_eval(parser, token):
+	"Usage: {% eval %}1 + 1{% endeval %}"
+
+	nodelist = parser.parse(('endeval',))
+
+	class EvalNode(template.Node):
+		def render(self, context):
+			return eval(nodelist.render(context))
+
+	parser.delete_first_token()
+	return EvalNode()

@@ -1127,7 +1127,9 @@ def evalSafely(source, globals=None, locals=None,noErr=False):
 			return e
 eval=evalSafely
 
-def execStrResult(source, globals=None, locals=None):
+def execStrResult(source, globals=None, locals=None,pformat_kw={}):
+	'''.pformat(object, indent=1, width=80, depth=None, *, compact=False)
+'''
 	if globals==None:globals={}
 	if locals==None :locals ={}
 	try:
@@ -1138,7 +1140,7 @@ def execStrResult(source, globals=None, locals=None):
 	if 'r' in locals:
 		r=locals['r']
 		if py.istr(r):return r
-		try:return pformat(r)# in U
+		try:return pformat(r,**pformat_kw)# in U
 		except:return py.repr(r)
 	else:
 		return 'can not found "r" variable after exec locals'+pformat(locals.keys())
