@@ -1,5 +1,7 @@
 #coding=utf8
-import sys;'qgb.U' in sys.modules or sys.path.append('E:/QGB/babun/cygwin/bin/');from qgb import *
+import sys;'qgb.U' in sys.modules or sys.path.append('E:/QGB/babun/cygwin/bin/')
+import sys;'qgb.U' in sys.modules or sys.path.append('./');
+from qgb import *
 
 from wdom.tag import H1
 from wdom.document import set_app
