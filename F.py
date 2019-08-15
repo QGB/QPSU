@@ -47,6 +47,7 @@ def getHomeFromEnv():
 	r=autoPath(r)
 	if not r.endswith('/'):r=r+'/'
 	return r
+home=gethome=get_home=getHome=getHomeFromEnv	
 	
 def include(file,keyword):
 	if py.isbyte(keyword):mod='rb'

@@ -333,6 +333,7 @@ def matchWildcard(a,exp):
 
 def regexMatchAll(a,regex):
 	return [i.group() for i in re.finditer(regex,a)]
+matchRegex=matchRegexAll=regexMatchAll
 		
 def regexMatchGroups(a,regex):
 	''' return [list of re.search group [s]]
@@ -355,9 +356,9 @@ def regexMatch(a,regex):
 	''' return :str  match_groups first
 	'''
 	r=regexMatchGroups(a,regex)
-	if r:return r[0]
+	if r:return r
 	else:return ''
-matchRegex=regexMatch
+matchRegexOne=regexMatch
 
 def re_search(regex,a):
 	'''不是 research 研究 ！,跟 match()  只有参数顺序不同，方便 re.search 改写'''
