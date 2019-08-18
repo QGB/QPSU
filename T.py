@@ -71,10 +71,23 @@ def encode(s,encoding):
 	'''
 	'''
 	
+def diff(expected, actual):
+	"""
+	Helper function. Returns a string containing the unified diff of two multiline strings.
+	"""
+
+	import difflib
+	expected=expected.splitlines(1)
+	actual=actual.splitlines(1)
+
+	diff=difflib.unified_diff(expected, actual)
+
+	return ''.join(diff)
 	
 def join(iterable,separator=','):
 	if py.istr(iterable):return iterable
 	return separator.join([string(i) for i in iterable] )
+	
 def intToHex(number,uppercase=True):
 	'''
 '{:02X}'.format(257)=='101'
@@ -160,8 +173,10 @@ filter_sint_list=filter_sint=filter_int=filterInt
 # u'([\u4e00-\u9fff]+)'  
 RE_ZH_PATTERN = re.compile(u'[\u4e00-\u9fa5]+')
 
-def filterZh(a,splitor=' '):
-	return splitor.join(RE_ZH_PATTERN.findall(a ) )
+def filterZh(a,max_not_zh=0,splitor=' '):
+	if not max_not_zh:
+		return splitor.join(RE_ZH_PATTERN.findall(a ) )
+	return regexReplace(a,r'[^\u4e00-\u9fa5]{%s,}'%max_not_zh,'')
 filter_zh=filterZh
 
 def hasZh(word):

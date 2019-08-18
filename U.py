@@ -2712,6 +2712,18 @@ def setDictValuePlusOne(adict,key):
 		adict[key]=1
 set_dict_plus_1=set_dict_value_plus_1=setDictPlusOne=setDictValuePlusOne		
 
+def dict_value_len(adict):
+	'''
+	range(-1) = range(0, -1)
+	'''
+	d={}
+	for k,v in adict.items():
+		l=len(v)#U.len
+		setDictValuePlusOne(d,l)
+		if l and (l in show_key_len_range):
+				setDictListValue(d,'%s-len'%l,k)							
+	return d
+
 def dict_value_len_count(adict,show_key_len_range=py.range(-1,-1) ):
 	'''
 	range(-1) = range(0, -1)
@@ -2962,42 +2974,51 @@ filterwarnings=filterWarning
 def filterWarningList():
 	import warnings
 	return warnings.filters
-#####################################
 
-# class MutableStringMeta(type):
-	# def __new__(mcls, classname, bases, classdict):
-		# wrapped_classname = '_%s_%s' % ('Wrapped', type(obj).__name__)
-		# return type.__new__(mcls, wrapped_classname, (type(obj),)+bases, classdict)
-	# def __instancecheck__(self, other):
-		# return True
-		# return py.isinstance(instance, (py.str,MutableString) )
-
-# class MutableString(metaclass=MutableStringMeta):
-	# #__metaclass__ = MutableStringMeta
-	# def set(self, data):
-		# self.last = MutableString(data)
-		# self.data = py.list(data)
-		
-	# def __init__(self, data):
-		# self.data = py.list(data)
-		
-	# def __repr__(self):
-		# return "".join(self.data)
-	# def __setitem__(self, index, value):
-		# self.data[index] = value
-	# def __getitem__(self, index):
-		# if type(index) == slice:
-			# return "".join(self.data[index])
-		# return self.data[index]
-	# def __delitem__(self, index):
-		# del self.data[index]
-	# def __add__(self, other):
-		# self.data.extend(py.list(other))
-	# def __len__(self):
-		# return len(self.data)
-	# @classmethod
-	# def __instancecheck__(cls, instance):
-		# return True
+def parseArgs(config=[],argv=sys.argv):
+	import argparse
+	parser = argparse.ArgumentParser()
+	parser.add_argument(
+		'--int','-i','-int',# -int 6 ok # -int6 error
+		type=int,
+		default=0,
+		help='get int.'
+	)
+	parser.add_argument(
+		'--str','--string','-s','-str',# -int 6 
+		type=str,
+		default='',
+	)
+	parser.add_argument(
+		'--float','-float','-f',
+		type=float,
+		default=0.0,
+	)	
+<<<<<<< HEAD
+	parser.add_argument(
+		'--dict','-dict','-d',
+		type=eval,  # dict       # -c: error: argument --dict/-dict/-d: invalid dict value: '{6:9}'
+		default={},
+	)	
+	parser.add_argument(
+		'--list','-list','-l',
+		type=eval,  #list list=['[', '1', ',', '2', ']']
+		default=[],
+	)	
+	parser.add_argument(
+		'--tuple','-tuple','-t',
+		type=eval,  #
+		default=(),
+	)	
+	
+=======
+>>>>>>> d76b82d... =args_parse
+	FLAGS, unparsed = parser.parse_known_args()
+	# print(FLAGS.int)
+	##ipyEmbed()()
+	# print(unparsed)
+	return FLAGS
+parse_args=argsParse=argparse=argsParser=args_parse=args_parser=parseArgs	
 
 def mutableString(obj):
 	class MetaClass(type):
