@@ -2962,42 +2962,32 @@ filterwarnings=filterWarning
 def filterWarningList():
 	import warnings
 	return warnings.filters
-#####################################
 
-# class MutableStringMeta(type):
-	# def __new__(mcls, classname, bases, classdict):
-		# wrapped_classname = '_%s_%s' % ('Wrapped', type(obj).__name__)
-		# return type.__new__(mcls, wrapped_classname, (type(obj),)+bases, classdict)
-	# def __instancecheck__(self, other):
-		# return True
-		# return py.isinstance(instance, (py.str,MutableString) )
-
-# class MutableString(metaclass=MutableStringMeta):
-	# #__metaclass__ = MutableStringMeta
-	# def set(self, data):
-		# self.last = MutableString(data)
-		# self.data = py.list(data)
-		
-	# def __init__(self, data):
-		# self.data = py.list(data)
-		
-	# def __repr__(self):
-		# return "".join(self.data)
-	# def __setitem__(self, index, value):
-		# self.data[index] = value
-	# def __getitem__(self, index):
-		# if type(index) == slice:
-			# return "".join(self.data[index])
-		# return self.data[index]
-	# def __delitem__(self, index):
-		# del self.data[index]
-	# def __add__(self, other):
-		# self.data.extend(py.list(other))
-	# def __len__(self):
-		# return len(self.data)
-	# @classmethod
-	# def __instancecheck__(cls, instance):
-		# return True
+def parseArgs(config=[],argv=sys.argv):
+	import argparse
+	parser = argparse.ArgumentParser()
+	parser.add_argument(
+		'--int','-i','-int',# -int 6 ok # -int6 error
+		type=int,
+		default=0,
+		help='get int.'
+	)
+	parser.add_argument(
+		'--str','--string','-s','-str',# -int 6 
+		type=str,
+		default='',
+	)
+	parser.add_argument(
+		'--float','-float','-f',
+		type=float,
+		default=0.0,
+	)	
+	FLAGS, unparsed = parser.parse_known_args()
+	# print(FLAGS.int)
+	##ipyEmbed()()
+	# print(unparsed)
+	return FLAGS
+parse_args=argsParse=argparse=argsParser=args_parse=args_parser=parseArgs	
 
 def mutableString(obj):
 	class MetaClass(type):

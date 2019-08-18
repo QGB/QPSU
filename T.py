@@ -71,10 +71,23 @@ def encode(s,encoding):
 	'''
 	'''
 	
+def diff(expected, actual):
+	"""
+	Helper function. Returns a string containing the unified diff of two multiline strings.
+	"""
+
+	import difflib
+	expected=expected.splitlines(1)
+	actual=actual.splitlines(1)
+
+	diff=difflib.unified_diff(expected, actual)
+
+	return ''.join(diff)
 	
 def join(iterable,separator=','):
 	if py.istr(iterable):return iterable
 	return separator.join([string(i) for i in iterable] )
+	
 def intToHex(number,uppercase=True):
 	'''
 '{:02X}'.format(257)=='101'

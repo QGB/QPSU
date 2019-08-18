@@ -61,6 +61,7 @@ def get(url,file='',
 	# return method(url,'get')#<http.client.HTTPResponse at 0x203a16a74a8>
 	url=autoUrl(url)
 	U=py.importU()
+	T=py.importT()
 	def writeFile():
 		if file:
 			U=py.importU()
@@ -75,7 +76,7 @@ def get(url,file='',
 		import requests
 		r=requests.get(url,headers=headers,verify=False,timeout=timeout)
 		if 'text' in U.getDictV(r.headers,'Content-Type'):
-			return T.autoDetect(r.content)
+			return T.autoDecode(r.content)
 			try:return r.content.decode('gb18030')
 			except:pass
 			return r.text

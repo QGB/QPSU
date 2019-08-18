@@ -4,7 +4,7 @@ import sys;'qgb.U' in sys.modules or sys.path.append('./');
 from qgb import *
 
 from wdom.tag import H1
-from wdom.document import set_app
+from wdom.document import set_app,get_document
 from wdom.server import start
 import wdom
 
@@ -19,8 +19,12 @@ def iterQ():
 
 # U.ipy_embed()()
 if __name__ == '__main__':
-	h = wdom.tag.Div()
-	for i in iterQ():
-		h.appendChild(i)
-	set_app(h) # equivalent to `wdom.document.get_document().body.appendChild(h1)`
+	document = get_document()
+	# for i in iterQ():
+		# document.appendChild(i)
+	div=wdom.tag.HTMLIFrameElement()
+	div.innerHTML=N.HTTP.get('http://192.168.1.111:23571/r=sys.q[-1][-1]')
+	document.appendChild(div)
+	
+	set_app(document) # equivalent to `wdom.document.get_document().body.appendChild(h1)`
 	start()
