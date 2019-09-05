@@ -2994,7 +2994,6 @@ def parseArgs(config=[],argv=sys.argv):
 		type=float,
 		default=0.0,
 	)	
-<<<<<<< HEAD
 	parser.add_argument(
 		'--dict','-dict','-d',
 		type=eval,  # dict       # -c: error: argument --dict/-dict/-d: invalid dict value: '{6:9}'
@@ -3011,8 +3010,6 @@ def parseArgs(config=[],argv=sys.argv):
 		default=(),
 	)	
 	
-=======
->>>>>>> d76b82d... =args_parse
 	FLAGS, unparsed = parser.parse_known_args()
 	# print(FLAGS.int)
 	##ipyEmbed()()
