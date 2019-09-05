@@ -1,5 +1,4 @@
 #! -*- encoding:utf-8 -*-
-
 import requests
 
 # 要访问的目标页面

@@ -239,6 +239,8 @@ def http(url,method='get',*args):
 def ipLocation(ip,reverse_ip=False,
 junk=['本机地址  CZ88.NET','IANA 保留地址','局域网 IP','局域网 对方和您在同一内部网'] ):
 	location=' '.join(ip_location_qqwry(ip))
+	location=location.replace('CZ88.NET','').strip()
+	
 	if location in junk:
 		return ip
 		location=py.No(location)	
