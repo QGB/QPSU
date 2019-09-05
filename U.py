@@ -2712,6 +2712,18 @@ def setDictValuePlusOne(adict,key):
 		adict[key]=1
 set_dict_plus_1=set_dict_value_plus_1=setDictPlusOne=setDictValuePlusOne		
 
+def dict_value_len(adict):
+	'''
+	range(-1) = range(0, -1)
+	'''
+	d={}
+	for k,v in adict.items():
+		l=len(v)#U.len
+		setDictValuePlusOne(d,l)
+		if l and (l in show_key_len_range):
+				setDictListValue(d,'%s-len'%l,k)							
+	return d
+
 def dict_value_len_count(adict,show_key_len_range=py.range(-1,-1) ):
 	'''
 	range(-1) = range(0, -1)
@@ -2982,6 +2994,22 @@ def parseArgs(config=[],argv=sys.argv):
 		type=float,
 		default=0.0,
 	)	
+	parser.add_argument(
+		'--dict','-dict','-d',
+		type=eval,  # dict       # -c: error: argument --dict/-dict/-d: invalid dict value: '{6:9}'
+		default={},
+	)	
+	parser.add_argument(
+		'--list','-list','-l',
+		type=eval,  #list list=['[', '1', ',', '2', ']']
+		default=[],
+	)	
+	parser.add_argument(
+		'--tuple','-tuple','-t',
+		type=eval,  #
+		default=(),
+	)	
+	
 	FLAGS, unparsed = parser.parse_known_args()
 	# print(FLAGS.int)
 	##ipyEmbed()()

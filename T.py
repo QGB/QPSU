@@ -173,8 +173,10 @@ filter_sint_list=filter_sint=filter_int=filterInt
 # u'([\u4e00-\u9fff]+)'  
 RE_ZH_PATTERN = re.compile(u'[\u4e00-\u9fa5]+')
 
-def filterZh(a,splitor=' '):
-	return splitor.join(RE_ZH_PATTERN.findall(a ) )
+def filterZh(a,max_not_zh=0,splitor=' '):
+	if not max_not_zh:
+		return splitor.join(RE_ZH_PATTERN.findall(a ) )
+	return regexReplace(a,r'[^\u4e00-\u9fa5]{%s,}'%max_not_zh,'')
 filter_zh=filterZh
 
 def hasZh(word):
