@@ -1190,8 +1190,13 @@ calltimes.clear=_ct_clear
 def setLogLevel(level=False):
 	''' logging.CRITICAL #50
 	'''
+	
 	if level==True:level=0
-	if level==False:level=50
+	if level==False:
+		level=50		
+		import urllib3
+		urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+
 		
 	
 	import logging
@@ -1200,7 +1205,10 @@ def setLogLevel(level=False):
 	
 	# log.setLevel(logging.NOTSET) #0
 	# log.setLevel(logging.CRITICAL) #50
-disableLog=setLogLevel
+setlog=setLogLevel
+
+def disableLog(a=True):
+	return setLogLevel((not a))
 	
 def setStd(name,file):
 	'''name=[std]out err in'''
@@ -2718,10 +2726,7 @@ def dict_value_len(adict):
 	'''
 	d={}
 	for k,v in adict.items():
-		l=len(v)#U.len
-		setDictValuePlusOne(d,l)
-		if l and (l in show_key_len_range):
-				setDictListValue(d,'%s-len'%l,k)							
+		d[k]=len(v)						
 	return d
 
 def dict_value_len_count(adict,show_key_len_range=py.range(-1,-1) ):
