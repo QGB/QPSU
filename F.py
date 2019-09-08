@@ -499,7 +499,7 @@ readjson=readJSON=json_load=read_json
 
 def write_json(file,obj):
 	import json
-	with py.open(file,'wb') as f:
+	with py.open(file,'w') as f: #not bytes,json write str
 		json.dump(obj=obj,fp=f)
 	return file
 
