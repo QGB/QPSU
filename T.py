@@ -546,7 +546,7 @@ def literal_eval(str):
 unrepr=ast_literal_eval=literal_eval
 
 def jsonToDict(a):
-	'''is2: 不同于 json_loads ，不会自动转换 到unicode'''
+	'''py2: 不同于 json_loads ，不会自动转换 到unicode'''
 	import ast
 	return ast.literal_eval(a.replace('false','False').replace('true','True'))
 js2py=jsonToDict

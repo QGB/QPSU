@@ -159,7 +159,14 @@ def dill_dump(obj,file=None,protocol=0):
 		return file
 	else:
 		return dill.dumps(obj=obj,protocol=protocol)
-
+  
+def load(file,):
+	''' '''
+	
+def write(file,obj,):
+	''' '''
+	
+		
 def chmod777(file,mode):
 	import os
 	os.chmod(file, 0o777) 
@@ -333,6 +340,7 @@ def new(a):
 	except Exception as e:
 		setErr(e)
 		return False
+		
 def isDir(ast):
 	'''#TODO:
 	
@@ -474,19 +482,28 @@ def read(file,mod='r',returnFile=False,encoding=''):
 		# return f,e
 		# if 'f' in py.dir() and f:f.close()
 		# return ()
-def readBytes(file):
+def read_bytes(file):
 	'''is2 rb return str'''
 	file=autoPath(file)
 	return py.open(file,'rb').read()
-	
-def readJSON(file,encoding=None):
+readb=readByte=readBytes=read_byte=read_bytes	
+
+def read_json(file,encoding=None):
 	''' '''
 	import json
 	file=autoPath(file)
 	if not encoding:encoding=detectEncoding(file)
 	with py.open(file,encoding=encoding) as f:
 		return json.load(f)
-read_json=readJSON
+readjson=readJSON=json_load=read_json
+
+def write_json(file,obj):
+	import json
+	with py.open(file,'wb') as f:
+		json.dump(obj=obj,fp=f)
+	return file
+
+writeJSON=json_dump=write_json
 
 def read_csv(file,encoding=None):
 	file=autoPath(file)
@@ -510,7 +527,7 @@ def read_qpsu_file(file,prefix='file/'):
 	U=py.importU()
 	# 'E:/QGB/babun/cygwin/bin/qgb/'
 	return read(U.getModPath()+prefix+file)
-	
+qpsufile=qpsuFile=readqp=readqpsu=readQPSU=read_qpsu=read_qpsu_file
 
 def write_xls(file,a):
 	file=autoPath(file)
