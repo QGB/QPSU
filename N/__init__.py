@@ -57,7 +57,7 @@ def uploadServer(port=1122,host='0.0.0.0',dir='./',url='/up'):
 			return r
 	app.run(host=host,port=port,debug=0,threaded=True)	
 		
-def rpcServer(port=23571,thread=True,ip='0.0.0.0',ssl_context=(),currentThread=False,app=None,key=None,
+def rpcServer(port=23571,thread=True,ip='0.0.0.0',ssl_context=(),currentThread=False,app=None,key=None,pformat_kw={'width':144},
 execLocals=None,locals=None,globals=None,qpsu='py,U,T,N,F',importMods='sys,os',request=True):
 	'''
 	locals : execLocals
@@ -89,6 +89,7 @@ execLocals=None,locals=None,globals=None,qpsu='py,U,T,N,F',importMods='sys,os',r
 	app=app or Flask('rpcServer'+U.stime_()   )
 	
 	def _flaskEval():
+		nonlocal globals,locals,pformat_kw
 		code=T.urlDecode(_request.url)
 		code=T.sub(code,':{}/'.format(port) )
 		U.log( (('\n'+code) if '\n' in code else code)[:99]	)
@@ -104,7 +105,7 @@ execLocals=None,locals=None,globals=None,qpsu='py,U,T,N,F',importMods='sys,os',r
 			globals['q']=_request
 			globals['p']=_response
 		if not globals:globals=None # 如果globals 为空dict，防止闭包保存变量，保持globals在每个请求重新为空这一特性
-		r=U.execResult(code,globals=globals,locals=locals) #因为在这里一般指定了 不为None的 globals，所以在每个请求中可以共享 
+		r=U.execResult(code,globals=globals,locals=locals,pformat_kw=pformat_kw) #因为在这里一般指定了 不为None的 globals，所以在每个请求中可以共享 
 		if not _response.get_data():
 			_response.set_data(r)
 		return _response
