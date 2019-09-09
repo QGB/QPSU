@@ -317,10 +317,11 @@ def whois(domain,raw_response=False):
 	}
 
 	data = {'domain': domain,  'isRefresh': '1'}
-	resp=requests.post('http://whois.4.cn/api/main',headers=headers,cookies=cookies,data=data)
-	json=T.json_loads(resp.content.decode('utf-8'))
+	response=requests.post('http://whois.4.cn/api/main',headers=headers,cookies=cookies,data=data)
+	json=T.json_loads(response.content.decode('utf-8'))
+	response.close()
 	if raw_response:
-		return resp
+		json['raw_response']=response
 	return json
 	
 	
