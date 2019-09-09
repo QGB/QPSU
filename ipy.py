@@ -49,11 +49,15 @@ def dill_dump(*vars):
 	for n,i in py.enumerate(dvars):
 		il=U.len(dvars[i])
 		if il:
-			il='%-2s(%-4s)'%(n,il)
+			if py.len(dvars)> 1:il='%-2s(%-4s)'%(n,il)
+			if py.len(dvars)==1:il='%-4s'%(il)
 		else:
 			il='%-2s'%n
 		r.append( [ i, il ] )
-	f='(%s) = [%s]'% ( ','.join([i[0] for i in r]) ,','.join([i[1] for i in r]))
+	if py.len(r)> 1:f='(%s) = [%s]'
+	if py.len(r)==1:f='%s-%s'
+
+	f=f % ( ','.join([i[0] for i in r]) ,','.join([i[1] for i in r]))
 	return F.dill_dump(obj=vars,file=f)
 	
 dump=dill_dump

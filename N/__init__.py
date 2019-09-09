@@ -82,7 +82,8 @@ execLocals=None,locals=None,globals=None,qpsu='py,U,T,N,F',importMods='sys,os',r
 	if qpsu:
 		for modName in qpsu.split(','):
 			globals[modName]=U.getMod('qgb.'+modName)	
-	
+		globals['pformat_kw']=pformat_kw
+		
 	from flask import Flask,make_response
 	from flask import request as _request
 	
