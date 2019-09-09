@@ -60,6 +60,8 @@ try:
 	thread=Thread
 	from multiprocessing import Process;process=Process
 	from collections import OrderedDict
+	from concurrent.futures import ThreadPoolExecutor
+	threadPool=ThreadPool=ThreadPoolExecutor
 except Exception as ei:
 	setErr(ei,msg='#Error py lib import')
 	
