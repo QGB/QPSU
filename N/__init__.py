@@ -273,6 +273,55 @@ pip install qqwry  # Not have cz88update
 	return ip_location_qqwry.q.lookup(ip)  #('北京市', '联通')
 
 ###################  qqwry end ###########################
+def address_coordinate(address,raw_response=True):
+	import requests
+	cookies = {
+		'BAIDUID': '7240C1BD73BF5509083867D8372AA3C8:FG=1',
+		'PSTM': '1547906786',
+		'BDUSS': 'dnamEzZk5OT3N6R3J2QnJVckMtdjdIMm54ZjY3VWNsTGQ5SmtodjVOS2JaOE5jQVFBQUFBJCQAAAAAAAAAAAEAAACYT6sRUUdCQ1MAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAJvam1yb2ptcaV',
+		'MCITY': '-%3A',
+		'H_WISE_SIDS': '131410_126124_128701_129321_114744_128142_120764_120189_131601_118886_118868_131402_118843_118833_118797_130762_131650_131577_131535_131534_131529_130222_131390_129565_107320_131394_130123_131518_131240_131195_117327_130347_117436_130075_129647_124635_130690_131435_131687_131036_131047_129981_130989_129901_129479_129646_124802_131467_131424_110085_127969_131506_123290_131094_131297_128200_131550_131264_131262_128600',
+		'BIDUPSID': '2DD44AA3F0CF69531B5E310CF80AEBD8',
+		'pgv_pvi': '6249972736',
+		'pgv_si': 's660814848',
+		'ZD_ENTRY': 'google',
+		'H_PS_PSSID': '1453_21112_18560_29523_29521_29720_29568_29220_22159',
+	}
+	headers = {
+		'Pragma': 'no-cache',
+		'Accept-Encoding': 'gzip, deflate, br',
+		'Accept-Language': 'zh-CN,zh;q=0.9,zh-TW;q=0.8,en;q=0.7',
+		'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/72.0.3626.121 YaBrowser/19.3.1.779 Yowser/2.5 Safari/537.36',
+		'Accept': '*/*',
+		'Referer': 'https://maplocation.sjfkai.com/',
+		'Connection': 'keep-alive',
+		'Cache-Control': 'no-cache',
+	}
+	# '湖南省长沙市长沙县长沙经济技术开发区开元东路华润置地广场一期12幢'
+	params=(('address', address),
+	('output', 'json'),
+	('ak', 'gQsCAgCrWsuN99ggSIjGn5nO'),
+	('callback', 'showLocation0'))
+
+	response = requests.get('https://api.map.baidu.com/geocoder/v2/', headers=headers, params=params, cookies=cookies)
+	s=response.content.decode('utf-8')
+	s=s.replace('showLocation0&&showLocation0(','')
+	s=s.replace('}})','}}')
+	T=py.importT()
+	try:
+		json=T.json_loads(s)
+	except Exception as e:
+		json={'err_s':s,
+			  'err':e}
+	response.close()
+	if raw_response:
+		json['raw_response']=response
+	return json
+	
+map_location=address_coordinate	
+	
+	
+	
 def whois(domain,raw_response=False):
 	'''
 In [59]: [i for i in dw if 'admin_name' not in dw[i] ] #58643
@@ -374,6 +423,11 @@ def bulk_whois(domain_list,args):
 			# remove blank lines
 			if clear_line != '':
 				csv_file.write(clear_line + '\n')
+################### whois end #####################
+
+
+
+
 
 def netplan_add_routes(ip,gateway=py.No('auto use first'),
 	adapter=py.No('auto use first who has routes'),
