@@ -1131,8 +1131,24 @@ def evalSafely(source, globals=None, locals=None,noErr=False):
 eval=evalSafely
 
 def execStrResult(source, globals=None, locals=None,pformat_kw={}):
-	'''.pformat(object, indent=1, width=80, depth=None, *, compact=False)
-'''
+	""".pformat(object, indent=1, width=80, depth=None, *, compact=False)
+exec('r=xx') ;return r # this has been tested in 2&3
+当没有定义 r 变量时，自动使用 最后一次 出现的值 作为r
+当定义了 r ，但不是最后一行，这可能是因为 还有一些收尾工作
+	
+# U.log(locals)
+		# body=ast.parse(code).body
+		# r_lineno=0
+		# for i,b in py.reversed(py.list( enumerate(body) )  ): # 从最后一条语句开始解析，序号还是原来的
+			# if isinstance(b, ast.Assign):
+				# if b.targets[0].id=='r':
+					# r_lineno=i
+					# break# r之前的就不管了
+			# [ 可能在r 之后 还有表达式 或者 根本没有出现 r ，Expr 都看成 r 
+			# if isinstance(b, ast.Expr):
+				# Assign
+			
+	"""
 	if globals==None:globals={}
 	if locals==None :locals ={}
 	try:

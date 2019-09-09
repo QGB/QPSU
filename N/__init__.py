@@ -57,60 +57,31 @@ def uploadServer(port=1122,host='0.0.0.0',dir='./',url='/up'):
 			return r
 	app.run(host=host,port=port,debug=0,threaded=True)	
 		
-def rpcServer(port=23571,thread=True,ip='0.0.0.0',ssl_context=(),currentThread=False,
-	execLocals=None,qpsu='py,U,T,N,F',importMods='sys,os',request=True,app=None,key=None):
-	''' if app : port useless
+def rpcServer(port=23571,thread=True,ip='0.0.0.0',ssl_context=(),currentThread=False,app=None,key=None,
+execLocals=None,locals=None,globals=None,qpsu='py,U,T,N,F',importMods='sys,os',request=True):
+	'''
+	locals : execLocals
+	if app : port useless
 	key char must in T.alphanumeric
 	ssl_context default use https port=443 
 	'''
 	from threading import Thread
-	from http.server import BaseHTTPRequestHandler as h
-	import ast
 	U=py.importU()
 	T=py.importT()
 	
-	if not execLocals:execLocals={}
+	if execLocals:
+		warnning=f'### deprecated args execLocals {ip}:{port}'
+		U.log(warnning)
+		globals=execLocals
+		locals={'warnning':warnning} #同时模仿以前可以保存变量的效果
 		
+	if not globals:globals={}
+	
 	for modName in importMods.split(','):
-		execLocals[modName]=U.getMod(modName)
+		globals[modName]=U.getMod(modName)
 	if qpsu:
 		for modName in qpsu.split(','):
-			execLocals[modName]=U.getMod('qgb.'+modName)	
-	
-	
-	def execResult(source, globals=None, locals=None):
-		'''exec('r=xx') ;return r # this has been tested in 2&3
-		当没有定义 r 变量时，自动使用 最后一次 出现的值 作为r
-		当定义了 r ，但不是最后一行，这可能是因为 还有一些收尾工作
-		'''
-		if globals==None:# /r=globals();r['_']=233  ,在下个请求中，globals重置了，为啥locals不会被重置？？？#看调用execResult时。
-			globals={}
-		if locals==None:#因为参数不是 不可变对象，且在接下来会改变
-			locals ={}
-		# U.log(locals)
-		# body=ast.parse(code).body
-		# r_lineno=0
-		# for i,b in py.reversed(py.list( enumerate(body) )  ): # 从最后一条语句开始解析，序号还是原来的
-			# if isinstance(b, ast.Assign):
-				# if b.targets[0].id=='r':
-					# r_lineno=i
-					# break# r之前的就不管了
-			# ''' [ 可能在r 之后 还有表达式 或者 根本没有出现 r ，Expr 都看成 r '''
-			# if isinstance(b, ast.Expr):
-				# Assign
-				
-		try:
-			exec(source, globals, locals)
-		except Exception as e:
-			return py.repr(e)
-			
-		if 'r' in locals:
-			r=locals['r']
-			if py.istr(r):return r
-			try:return U.pformat( r)
-			except:return py.repr(r)
-		else:
-			return 'can not found "r" variable after exec locals'+U.pformat(locals.keys())
+			globals[modName]=U.getMod('qgb.'+modName)	
 	
 	from flask import Flask,make_response
 	from flask import request as _request
@@ -128,9 +99,12 @@ def rpcServer(port=23571,thread=True,ip='0.0.0.0',ssl_context=(),currentThread=F
 		_response.headers['Content-Type'] = 'text/plain;charset=utf-8'
 		
 		if request:#rpcServer config
-			execLocals['request']=_request
-			execLocals['response']=_response
-		r=execResult(code,locals=execLocals) #因为在这里指定了locals，所以在每个请求中可以共享
+			globals['request']=_request
+			globals['response']=_response
+			globals['q']=_request
+			globals['p']=_response
+		if not globals:globals=None # 如果globals 为空dict，防止闭包保存变量，保持globals在每个请求重新为空这一特性
+		r=U.execResult(code,globals=globals,locals=locals) #因为在这里一般指定了 不为None的 globals，所以在每个请求中可以共享 
 		if not _response.get_data():
 			_response.set_data(r)
 		return _response
@@ -164,7 +138,8 @@ def rpcServer(port=23571,thread=True,ip='0.0.0.0',ssl_context=(),currentThread=F
 		t= Thread(target=app.run,name='qgb thread '+app.name,kwargs=flaskArgs)
 		t.start()
 		return (t,app)
-		
+########### flaskEval end ###########	
+	if py.is3():from http.server import BaseHTTPRequestHandler as h
 	class H(SimpleHTTPRequestHandler):
 		def do_GET(s):
 			code=s.path[1:]
