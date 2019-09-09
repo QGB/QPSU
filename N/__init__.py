@@ -297,6 +297,11 @@ pip install qqwry  # Not have cz88update
 
 ###################  qqwry end ###########################
 def whois(domain,raw_response=False):
+	'''
+In [59]: [i for i in dw if 'admin_name' not in dw[i] ] #58643
+['csfangyi.com', 'xn--xuw24ggz9aile.cn', '06jd.com', 'yzy88.com', 'cshelong.com']
+
+''' 
 	T=py.importT()
 	import requests
 	cookies = {	'st': '95f5609d7aaadb13806df43e2ca1961c',	}
