@@ -542,7 +542,7 @@ def write_xlsx(file,a):
 			sheet.cell(row=i+1, column=j+1).value=col
 			# i,j=i+1,j+1
 			# try:
-				# sheet.cell(row=i, column=j).value=col
+				# sheet.cell(row=i, column=j).value=col #这样出现错误表格格式 ，原因？
 			# except Exception as e:
 				# return e,sheet,i,j,col
 	saveExcel = file
