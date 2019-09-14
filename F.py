@@ -539,12 +539,12 @@ def write_xlsx(file,a):
 	sheet = outwb.create_sheet(index=0)  # 在将写的文件创建sheet
 	for i, row in py.enumerate(a):
 		for j, col in py.enumerate(row):
-			# sheet.cell(row=i+1, column=j+1).value=col
-			i,j=i+1,j+1
-			try:
-				sheet.cell(row=i, column=j).value=col
-			except Exception as e:
-				return e,sheet,i,j,col
+			sheet.cell(row=i+1, column=j+1).value=col
+			# i,j=i+1,j+1
+			# try:
+				# sheet.cell(row=i, column=j).value=col
+			# except Exception as e:
+				# return e,sheet,i,j,col
 	saveExcel = file
 	outwb.save(saveExcel)  # 一定要记得保存
 	return file
