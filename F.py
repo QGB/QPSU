@@ -529,9 +529,29 @@ def read_qpsu_file(file,prefix='file/'):
 	return read(U.getModPath()+prefix+file)
 qpsufile=qpsuFile=readqp=readqpsu=readQPSU=read_qpsu=read_qpsu_file
 
-def write_xls(file,a):
+def write_xlsx(file,a):
+	import openpyxl
 	file=autoPath(file)
+	if file.lower().endswith('.xls'):file=file[:-4]+'.xlsx'
+	if not file.lower().endswith('.xlsx'):file=file+'.xlsx'
+	
+	outwb = openpyxl.Workbook()  # 打开一个将写的文件
+	sheet = outwb.create_sheet(index=0)  # 在将写的文件创建sheet
+	for i, row in py.enumerate(a):
+		for j, col in py.enumerate(row):
+			sheet.cell(row=i+1, column=j+1).value=col
+			# try:
+				# sheet.cell(row=i+1, column=j+1).value=col
+			# except Exception as e:
+				# return 
+	saveExcel = file
+	outwb.save(saveExcel)  # 一定要记得保存
+	return file
+def write_xls(file,a):
+	'''ValueError: row index was 65536, not allowed by .xls format'''
 	import xlwt
+	file=autoPath(file)
+	
 	xldoc = xlwt.Workbook()
 	sheet = xldoc.add_sheet("Sheet1", cell_overwrite_ok=True)
 	for i, row in py.enumerate(a):

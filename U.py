@@ -1056,6 +1056,20 @@ def cdbabun(a=''):
 	s=r'C:\QGB\babun\cygwin\home\qgb/'
 	s=driverPath(s[1:])
 	return cd(s+a)
+	
+def get_current_file_dir():
+	frame=sys._getframe().f_back
+	g=frame.f_globals
+	if '__file__' not in g:
+		return py.No('not found __file__ in current module')
+	__file__=g['__file__']
+	import pathlib
+	p=pathlib.Path(__file__)
+	sp=p.root#win '\\'  linux '/'
+	return p.parent.absolute().__str__() +sp
+	
+getCurrentFilePath=get_file_dir=get_current_file_dir
+	
 def pwd(p=False,display=False):
 	s=os.getcwd()
 	if p or display:pln (s)
@@ -1066,7 +1080,7 @@ def pwd(p=False,display=False):
 	s=s.replace('\\','/')
 	
 	return s+pwd.sp#带sp方便使用者拼接路径
-getCurrentPath=pwd
+getCurrentPath=cwd=pwd
 	
 def random_choice(*a,**ka):
 	import random

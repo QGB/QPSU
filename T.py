@@ -147,7 +147,7 @@ def getFLD(url_or_domain):
 	try:
 		return tld.get_fld(fix_protocol=True,url=url_or_domain)
 	except Exception as e:
-		return py.No(e)
+		return py.No(url_or_domain,e)
 		#TldDomainNotFound: Domain 网站域名 didn't match any existing TLD name!
 get_fld=getFLD
 
