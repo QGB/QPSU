@@ -55,7 +55,9 @@ def dill_dump(*vars):
 			il='%-2s'%n
 		r.append( [ i, il ] )
 	if py.len(r)> 1:f='(%s) = [%s]'
-	if py.len(r)==1:f='%s-%s'
+	if py.len(r)==1:
+		f='%s-%s'
+		vars=vars[0]
 
 	f=f % ( ','.join([i[0] for i in r]) ,','.join([i[1] for i in r]))
 	return F.dill_dump(obj=vars,file=f)
