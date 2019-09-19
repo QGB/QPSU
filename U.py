@@ -1778,12 +1778,20 @@ def phtmlend():
 def mergeDict(*a):
 	r={}
 	for i in a:
-		if type(i) != py.dict:
+		if not py.isdict(i):
 			try:i=py.dict(i)
 			except:continue
-		for k,v in i.iteritems():
+		for k,v in i.items():
 			r[k]=v
 	return r
+merge_dict=mergeDict
+	
+def mergeList(*a):
+	r=[]
+	for i in a:
+		r.extend(i)
+	return r
+add_list=addList=merge_list=mergeList
 	
 def strTimeStamp():
 	return py.str(getTimestamp())
