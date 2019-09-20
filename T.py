@@ -53,6 +53,13 @@ try:
 					return 'utf-8'
 			except Exception as e:
 				pass
+		if r['encoding'] in ['gb2312' ]:
+			try:
+				if abytes.decode('gb18030').encode('gb18030')==abytes:
+					return 'gb18030'
+			except Exception as e:
+				pass		
+				
 		if r['confidence']>confidence:return r['encoding']
 		else:
 			if default:return default
