@@ -70,7 +70,7 @@ execLocals=None,locals=None,globals=None,qpsu='py,U,T,N,F',importMods='sys,os',r
 	T=py.importT()
 	
 	if execLocals:
-		warnning=f'### deprecated args execLocals {ip}:{port}'
+		warnning='### deprecated args execLocals {ip}:{port}'.format(ip=ip,port=port)
 		U.log(warnning)
 		globals=execLocals
 		locals={'warnning':warnning} #同时模仿以前可以保存变量的效果

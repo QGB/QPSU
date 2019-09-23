@@ -2839,7 +2839,7 @@ def dict_multi_pop(adict,*keys,default=py.No('key not in dict')):
 	for k in keys:
 		dr[k]=adict.pop(k,default)
 	return dr	
-dict_pop=dict_pop_multi_key=dict_multi_pop
+dict_pop=pop_dict_multi_key=dict_pop_multi_key=dict_multi_pop
 	
 def getLastException():
 	'''a callable
