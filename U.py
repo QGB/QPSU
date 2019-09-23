@@ -2055,11 +2055,16 @@ def getModulesByFile(fileName):
  <module 'mpl_toolkits' (namespace)> .
 '''
 	r=[]
-	for i in sys.modules.items():
-		file = getattr(i[1],'__file__','') or ''
+	dnf={}
+	for name in py.list(sys.modules.keys()):
+		mod=sys.modules[name]
+		file = py.getattr(mod,'__file__','')#  用getattr， 导致获取失败。。
+		if not file:
+			dnf[name]=mod
 		if fileName in file:
-			r.append(i[1])
-	if py.len(r)==1:return r[0]
+			r.append(mod)
+	# if py.len(r)==1:return r[0]
+	if not r:return py.No('can not found {} in sys.modules __file__ '.format(fileName),dnf)
 	return r
 	
 modulesByFile=getModsByFile=getModulesByFile

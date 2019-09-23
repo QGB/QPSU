@@ -98,13 +98,14 @@ def head(url):
 def options(url):
 	return dict(method(url,'options').info().items() )['allow']
 
-def autoUrl(a):
+def autoURL(a):
 	if type(a)==type(''):
 		if  '://' in a[1:10]:return a
 		else:return 'http://'+a
 	else:
 		raise Exception('url need string')
-
+autoUrl=auto_url=autoURL
+		
 def method(url,amethod='get',*args):
 	r'''#TODO: post etc need args'''
 	try:
