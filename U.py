@@ -2834,6 +2834,13 @@ Create a slice object.  This is used for extended slicing (e.g. a[0:10:2]).
 	return r
 getDict=getDictItems
 	
+def dict_multi_pop(adict,*keys,default=py.No('key not in dict')):
+	dr={}
+	for k in keys:
+		dr[k]=adict.pop(k,default)
+	return dr	
+dict_pop=dict_pop_multi_key=dict_multi_pop
+	
 def getLastException():
 	'''a callable
 	return Exception'''
