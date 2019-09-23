@@ -2048,13 +2048,15 @@ def exit(i=2357,msg=None):
 
 def getModulesByFile(fileName):
 	'''
+	return dict {sname:mod ...}
+	
 ('google', <module 'google' (namespace)>) argument of type 'NoneType' is not iterable             
 ('zope', <module 'zope' (namespace)>) argument of type 'NoneType' is not iterable                 
 ('mpl_toolkits', <module 'mpl_toolkits' (namespace)>) argument of type 'NoneType' is not iterable 
 
  <module 'mpl_toolkits' (namespace)> .
 '''
-	r=[]
+	dr={}
 	dnf={}
 	for name in py.list(sys.modules.keys()):
 		mod=sys.modules[name]
@@ -2062,10 +2064,10 @@ def getModulesByFile(fileName):
 		if not file:
 			dnf[name]=mod
 		if fileName in file:
-			r.append(mod)
+			dr[name]=mod
 	# if py.len(r)==1:return r[0]
-	if not r:return py.No('can not found {} in sys.modules __file__ '.format(fileName),dnf)
-	return r
+	if not dr:return py.No('can not found {} in sys.modules __file__ '.format(fileName),dnf)
+	return dr
 	
 modulesByFile=getModsByFile=getModulesByFile
 	
