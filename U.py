@@ -2769,8 +2769,6 @@ def setDictSetValue(adict,key,value):
 		adict[key]=py.set([value])
 set_dict_value_set=set_dict_set=setDictset=setDictSetValue
 
-
-
 def setDictValuePlusOne(adict,key):
 	if key in adict:
 		adict[key]+=1
@@ -2850,6 +2848,23 @@ def dict_multi_pop(adict,*keys,default=py.No('key not in dict')):
 		dr[k]=adict.pop(k,default)
 	return dr	
 dict_pop=pop_dict_multi_key=dict_pop_multi_key=dict_multi_pop
+	
+def split_list(alist,icount):
+	r=[]
+	ilen=len(alist)
+	for i in range(icount+1):
+		isize=int(ilen/icount +1)
+		imax=isize*i
+		if imax>ilen:
+			imax=ilen
+			imin=isize*(i-1)
+			#continue
+		else:
+			imin=imax-isize
+		if imin<0:
+			continue
+		r.append(alist[imin:imax])
+	return r
 	
 def getLastException():
 	'''a callable
