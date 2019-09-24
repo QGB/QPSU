@@ -307,7 +307,7 @@ def driverPath(a,reverse=True):
 	if not a.startswith(':'):a=':'+a
 	# try:AZ=T.AZ;exist=F.exist
 	# except:
-	AZ=''.join([chr(i) for i in range(65,65+26)])
+	AZ=''.join([chr(i) for i in py.range(65,65+26)])
 	exist=os.path.exists
 	if reverse:AZ=AZ[::-1]
 	for i in AZ:
@@ -1692,6 +1692,13 @@ def enumerate(a,start=0,ignoreNull=False,n=False):#todo 设计一个 indexList�
 		start+=1
 	return r
 il=ilist=indexList=enumerate
+
+def range(*a):
+	'''return list
+range(stop) 
+range(start, stop[, step]) 
+	'''
+	return py.list(py.range(*a))
 	
 def isModule(a):
 	return type(a) is module
@@ -1887,7 +1894,7 @@ def primes(n):
 
 	'''
 	#in py3 filter return	<filter at 0x169a9704e80>
-	r=filter(lambda x: not [x%i for i in range(2, int(x**0.5)+1) if x%i ==0], range(2,n+1))	
+	r=filter(lambda x: not [x%i for i in py.range(2, int(x**0.5)+1) if x%i ==0], py.range(2,n+1))	
 	return py.list(r)
   
   
@@ -2849,22 +2856,8 @@ def dict_multi_pop(adict,*keys,default=py.No('key not in dict')):
 	return dr	
 dict_pop=pop_dict_multi_key=dict_pop_multi_key=dict_multi_pop
 	
-def split_list(alist,icount):
-	r=[]
-	ilen=len(alist)
-	for i in range(icount+1):
-		isize=int(ilen/icount +1)
-		imax=isize*i
-		if imax>ilen:
-			imax=ilen
-			imin=isize*(i-1)
-			#continue
-		else:
-			imin=imax-isize
-		if imin<0:
-			continue
-		r.append(alist[imin:imax])
-	return r
+def split_list(alist,n):
+	return [alist[i:i+n] for i in py.range(0, py.len(alist), n)]
 	
 def getLastException():
 	'''a callable
