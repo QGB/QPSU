@@ -2857,7 +2857,9 @@ def dict_multi_pop(adict,*keys,default=py.No('key not in dict')):
 dict_pop=pop_dict_multi_key=dict_pop_multi_key=dict_multi_pop
 	
 def split_list(alist,n):
+	n=py.int(n)
 	return [alist[i:i+n] for i in py.range(0, py.len(alist), n)]
+splitList=split_list
 	
 def getLastException():
 	'''a callable
