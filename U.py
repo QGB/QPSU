@@ -2063,6 +2063,7 @@ def getModulesByFile(fileName):
 		file = py.getattr(mod,'__file__','')#  用getattr， 导致获取失败。。
 		if not file:
 			dnf[name]=mod
+			continue
 		if fileName in file:
 			dr[name]=mod
 	# if py.len(r)==1:return r[0]
@@ -2760,6 +2761,15 @@ def setDictListValue(adict,key,value):
 	else:
 		adict[key]=[value]
 set_dict_value_list=set_dict_list=setDictList=setDictListValue
+
+def setDictSetValue(adict,key,value):
+	if key in adict:
+		adict[key].add(value)
+	else:
+		adict[key]=py.set([value])
+set_dict_value_set=set_dict_set=setDictset=setDictSetValue
+
+
 
 def setDictValuePlusOne(adict,key):
 	if key in adict:
