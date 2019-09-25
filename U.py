@@ -2181,19 +2181,18 @@ def hash(obj,*other):
 def builtinFuncWrapForMultiArgs(builtinFunc,args,default=None):
 	'''Exception return py.No'''
 	obj,other=args ########## other is tuple
-	try:
-		r1=builtinFunc(obj)
-	except Exception as e:
-		if default!=None:
-			return default
-		r1=py.No(e)
-	if not other:
-		return r1
-	else:
-		r=[r1]
-		for i in other:
-			r.append(builtinFunc(i))
-		return r
+	other=py.list(other)
+	other.insert(0,obj)
+	r=[]
+	for i in other:
+		try:
+			r1=builtinFunc(i)
+		except Exception as e:
+			if default!=None:
+				r1=default
+			r1=py.No(e)
+		r.append(r1)
+	return r
 		
 def dis(a):
 	import dis
