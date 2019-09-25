@@ -32,7 +32,8 @@ LF=EOL=eol='\n'
 RE_IMG_URL=r'(((http://www)|(http://)|(www))[-a-zA-Z0-9@:%_\+.~#?&//=]+)\.(jpg|jpeg|gif|png|bmp|tiff|tga|svg)'
 RE_URL=r'http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\(\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+'
 RE_YMD=r"(19|20)[0-9]{2}[- /.](0[1-9]|1[012])[- /.](0[1-9]|[12][0-9]|3[01])"
-RE_WhiteSpace=r'\s'
+RE_WhiteSpace=r'\s+'
+
 ###############
 SQLITE='SELECT * FROM sqlite_master;'
 

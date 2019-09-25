@@ -258,7 +258,7 @@ if isnix():
 		#  0
 	
 ########################## end init #############################################
-def retry( exceptions,times=3):
+def retry( exceptions,times=3,sleep_second=0):
 
 
 	"""
@@ -290,6 +290,7 @@ def retry( exceptions,times=3):
 								exc_info=True
 							)
 							attempt += 1
+							if sleep_second:sleep(sleep_second)
 							break
 					else:#when no break
 						raise e
@@ -2856,8 +2857,8 @@ def dict_multi_pop(adict,*keys,default=py.No('key not in dict')):
 	return dr	
 dict_pop=pop_dict_multi_key=dict_pop_multi_key=dict_multi_pop
 	
-def split_list(alist,n):
-	n=py.int(n)
+def split_list(alist,sub_size):
+	n=py.int(sub_size)
 	return [alist[i:i+n] for i in py.range(0, py.len(alist), n)]
 splitList=split_list
 	
