@@ -2196,8 +2196,18 @@ def builtinFuncWrapForMultiArgs(builtinFunc,args,default=None):
 		return r
 	else:
 		return r[0]  #U.len(obj) == py.len(obj)
+
+def recursive_basic_type_filter(obj):
+	''' dict,tuple,list,set  '''
+	def isbasic(a):
+		return py.istr(a) or py.isnum(a) or py.isbyte(a)
+	if isbasic(obj):return obj
+	if py.isdict(obj):
+		return {k:recursive_basic_type_filter(v) for k,v in obj.items()}
+	if py.type(obj) in (py.tuple,py.list,py.set):
+		return [recursive_basic_type_filter(v) for v in obj]
+	return py.repr(obj)
 	
-		
 def dis(a):
 	import dis
 	if py.istr(a):
