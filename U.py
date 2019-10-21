@@ -2631,20 +2631,43 @@ except:pass
 	
 def logWindow():
 	import Tkinter as tk
-	#TODO:
-
+	#DEL : rpc replace this func
+#######################################
+gd_sync_level={
+'process':1,
+'python':1,
+'py':1,
+'system':2 ,
+'sys':2 , #not sys module
+'lan':3    ,# lan sync  #TODO default rpc to find out qpsu computer
+'wan':4    ,# internet sync
+'all':4    ,
+}
 def set(name,value=None):
-	if py.type(name) is not py.str and value==None:
-		set.__dict__['_']=name
-		return
-	set.__dict__[name]=value
-def get(name='_'):
-	return set.__dict__[name]
+	if level==gd_sync_level['process']:
+		import sys
+		d=py.getattr(sys,'_qgb_dict',{})
+		if value==None:
+			value=name
+			name='_'
+		d[name]=value
+		sys._qgb_dict=d
+		# set.__dict__['_']=name
+		# return
+	# set.__dict__[name]=value
+def get(name='_',default=py.No('can not get name'),level=gd_sync_level['process']):
+	if level==gd_sync_level['process']:
+		import sys
+		d=py.getattr(sys,'_qgb_dict',{})
+		#TODO 对于不存在的 name ，可以记录最后访问时间为 py.No，方便排查
+		return d.get(name,default)
 	#TODO
+	
+########################################	
 def google(a):
 	a=T.urlEncode(a)
-	return browser('https://init.pw/search?q='+a)
-	browser('https://www.google.com.my/#q='+a)
+	return browser('https://www.google.com.my/#q='+a)
+	# return browser('https://init.pw/search?q='+a)
 	
 def subprocess(cmd):
 	'''

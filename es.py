@@ -16,7 +16,9 @@ T=U.T;F=U.F
 import sys
 
 # es=Elasticsearch([b'\x88\xa3\xa3\x97zaa\xf1\xf4\xf9K\xf1\xf2\xf9K\xf5\xf4K\xf6\xf2z\xf9\xf2\xf0\xf0'.decode('cp424')]) # sg
-es=Elasticsearch([  b'\x88\xa3\xa3\x97zaa\xf5\xf8K\xf2\xf0K\xf1\xf3\xf7K\xf4\xf3z\xf9\xf2\xf0\xf0'.decode('cp424')]) # 58...43
+es=U.get('es',
+	Elasticsearch([  b'\x88\xa3\xa3\x97zaa\xf5\xf8K\xf2\xf0K\xf1\xf3\xf7K\xf4\xf3z\xf9\xf2\xf0\xf0'.decode('cp424')]),# 58...43
+	) 
 
 
 #TODO: git sync tools  ,save config to github | config level module,current python env(sys),current system(test file),global(github)
@@ -25,18 +27,16 @@ def setIndex(indexName):
 	'''#始终加载在此进程中第一次设置（或手动 sys.gsIndex=''）
 	'''
 	if not py.istr(indexName):raise py.ArgumentError('must str')
-	import sys
-	if not getattr(sys,'gsIndex',''):
-		sys.gsIndex=indexName
-	if getattr(sys,'gsIndex',''):
-		globals()['gsIndex']=sys.gsIndex
+	s=U.get('es_index')
+	if s:
+		globals()['gsIndex']=s
 setIndex(b'\x94\x89\x86\x85\x95\x87m\xa2\x85\x81\x99\x83\x88'.decode('cp424') ) # mf_s
 		
 		
-gsDocType='_doc'
+gsDocType=U.get('es_doc_type','_doc')
 
 
-def setLog(on=True):
+def setLog(on=U.get('es_log_level',True) ):
 	import logging
 	es_log=logging.getLogger('elasticsearch')
 	if on:

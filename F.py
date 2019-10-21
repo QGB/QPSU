@@ -540,7 +540,7 @@ def write_xlsx(file,a):
 	for i, row in py.enumerate(a):
 		for j, col in py.enumerate(row):
 			sheet.cell(row=i+1, column=j+1).value=col
-			# i,j=i+1,j+1
+			# i,j=i+1,j+1 #我知道原因了，这是因为i+1 只应该每行执行一次，把它提到col循环外就行了
 			# try:
 				# sheet.cell(row=i, column=j).value=col #这样出现错误表格格式 ，原因？
 			# except Exception as e:
@@ -573,7 +573,7 @@ def read_xls_sheets_name(file):
 	import xlrd                         
 	w=xlrd.open_workbook(file)           
 	return py.list(py.enumerate( w.sheet_names() )  )
-	
+get_xls_sheets_name=read_xls_sheets_name
 	
 def read_sqlite(file,table=''):
 	file=autoPath(file)

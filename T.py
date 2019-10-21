@@ -177,6 +177,11 @@ def filterInt(a,digits=py.range(1,999)):
 	return r
 filter_sint_list=filter_sint=filter_int=filterInt
 
+RE_HTML_TAG = re.compile(r'<[^>]+>')
+def filter_html(text):
+    return RE_HTML_TAG.sub('', text)
+	
+
 ################### zh #############################
 # u'([\u4e00-\u9fff]+)'  
 RE_ZH_PATTERN = re.compile(u'[\u4e00-\u9fa5]+')
@@ -227,6 +232,8 @@ def ipLocationText(text,location_format=' [{0}] ',reverse_ip=True,p=True):
 	r=regexReplace(text,RE_IP,fr)
 	if p:U.pln(r)
 	else:return r
+readableIPLocationText=ipLocationText
+
 	
 def readableSizeText(text,sizeMultiple=1,p=True):
 	''' if not p :return text'''
@@ -242,6 +249,9 @@ def readableSizeText(text,sizeMultiple=1,p=True):
 	if p:U.pln(r)
 	else:return r
 
+	
+	
+	
 def regexCount(a,regex):
 	return py.len(re.findall(regex, a))
 countRegex=regexCount
