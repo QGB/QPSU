@@ -732,7 +732,7 @@ def cmd(*a,**ka):
 		# if py.is3() and iswin():r=r.decode('mbcs')
 		return T.autoDecode(r)
 		# return os.system(s)
-	except Exception as e:return py.No(e)
+	except Exception as e:return py.No(e,s,ka)
 	# exit()
 # cmd('echo 23456|sub','3','')	
 
