@@ -2207,6 +2207,7 @@ def recursive_basic_type_filter(obj):
 	if py.type(obj) in (py.tuple,py.list,py.set):
 		return [recursive_basic_type_filter(v) for v in obj]
 	return py.repr(obj)
+filter_basic_type=recursive_basic_type_filter
 	
 def dis(a):
 	import dis
