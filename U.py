@@ -2207,7 +2207,7 @@ def recursive_basic_type_filter(obj):
 	if py.type(obj) in (py.tuple,py.list,py.set):
 		return [recursive_basic_type_filter(v) for v in obj]
 	return py.repr(obj)
-filter_basic_type=recursive_basic_type_filter
+basic_filter=basicFilter=filter_basic=filterBasic=filter_basic_type=recursive_basic_type_filter
 	
 def dis(a):
 	import dis
@@ -3134,6 +3134,30 @@ def parseArgs(config=[],argv=sys.argv):
 	# print(unparsed)
 	return FLAGS
 parse_args=argsParse=argparse=argsParser=args_parse=args_parser=parseArgs	
+
+def sha256_fingerprint_from_pub_key(pubkey_str):
+	import base64
+	import binascii
+	import hashlib
+	import re
+	import sys
+	pubkey_str = pubkey_str.strip()
+
+	# accept either base64 encoded data or full pub key file,
+	# same as `fingerprint_from_ssh_pub_key
+	if (re.search(r'^ssh-(?:rsa|dss) ', pubkey_str)):
+		pubkey_str = pubkey_str.split(None, 2)[1]
+
+	# Python 2/3 hack. May be a better solution but this works.
+	try:
+		pubkey_str = bytes(pubkey_str, 'ascii')
+	except TypeError:
+		pubkey_str = bytes(pubkey_str)
+
+	digest = hashlib.sha256(binascii.a2b_base64(pubkey_str)).digest()
+	encoded = base64.b64encode(digest).rstrip(b'=')  # ssh-keygen strips this
+	return "SHA256:" + encoded.decode('utf-8')
+
 
 def mutableString(obj):
 	class MetaClass(type):
