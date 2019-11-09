@@ -665,10 +665,10 @@ inAll=in_all
 def cmd(*a,**ka):
 	'''show=False :show command line
 	默认阻塞，直到进程结束返回
-
 	if 'timeout' not in ka:ka['timeout']=9     ## default timeout
+	
+	stdin : str,bytes
 	'''
-	s=''
 	if iswin() or iscyg():quot='"'
 	else:quot="'"
 	
@@ -685,58 +685,48 @@ def cmd(*a,**ka):
 			if (' ' in a[0]) and not a[0].startswith(quot):
 				# in linux,can't U.cmd("'ls'") ?
 				# if iswin():
-				s=quot+a[0]+quot
+				a[0]=quot+a[0]+quot
 			elif ':' in a[0] and iscyg():
-				s='cmd /c start "" '+ a[0]
+				a[0]='cmd /c start "" '+ a[0]
 			else:
-				s=a[0]
+				a[0]=a[0]
 				
-		elif len(a[0])==1:s=T.string(a[0])
-		elif len(a[0])>1:a=a[0]
-	if len(a)>1:
-		a=py.list(a)
-		s=T.string(a.pop(0))+' '
-		for i in a:
-			if type(i)==type([]):
-				for j in i:	
-					s+=quot+T.string(i)+quot+' '
-			else:
-				s+=quot+T.string(i)+quot+' '
-			
-	# pln(s)
-	# exit()
+
 	try:
 		import subprocess as sb	
 		
-		show   =get_duplicated_kargs(ka,'show')
+		show   =get_duplicated_kargs(ka,'show','echo')
 		stdin  =get_duplicated_kargs(ka,'stdin','input')
-		# timeout=get_duplicated_kargs(ka,'timeout')
+		timeout=get_duplicated_kargs(ka,'timeout',default=9)
 		
-		if show:pln (repr(s))
+		if show:pln (a)
 		if stdin:
 			if py.is3() and py.istr(stdin):
 				stdin=stdin.encode(gsencoding)
 			if not py.isbyte(stdin):
 				raise ArgumentUnsupported('stdin type',py.type(stdin),stdin  )
-			if 'timeout' not in ka:ka['timeout']=9     ## default timeout
 			ka['input']=stdin
 			# r.stdin.write(stdin)
-		
+		ka['timeout']=timeout     ## default timeout
 		
 		# if timeout:
-		r=sb.check_output(s,**ka)
-		
+		r=sb.check_output(*a,**ka)
+#TODO 在Windows下正常, Linux  sb.check_output("ls '-al' " ) 
+#FileNotFoundError: [Errno 2] No such file or directory: "ls '-al' ": "ls '-al' "
+
 		# r=sb.Popen(s,stdin=sb.PIPE,stdout=sb.PIPE,stderr=sb.PIPE)
 			
 		# r= r.stdout.read(-1)# 添加超时处理  see subprocess.py  406
 		# if py.is3() and iswin():r=r.decode('mbcs')
 		return T.autoDecode(r)
 		# return os.system(s)
-	except Exception as e:return py.No(e,s,ka)
+	except Exception as e:
+		print_tb()
+		return py.No(e,a,ka)
 	# exit()
 # cmd('echo 23456|sub','3','')	
 
-def get_duplicated_kargs(ka,*keys):
+def get_duplicated_kargs(ka,*keys,default=py.No('Not found matched kargs')):
 	'''
 def pop(d,k):
 	d.pop(k)
@@ -750,7 +740,7 @@ pop(_63,25)  #_63 has change
 		if i in ka:
 			r.append(ka[i])
 			ka.pop(i)
-	if py.len(r)==0:return py.No('Not found matched kargs',ka,keys)
+	if py.len(r)==0:return default
 	if py.len(r)>1:
 		rTrue=[i for i in r if i]  
 		if not rTrue:
@@ -758,7 +748,7 @@ pop(_63,25)  #_63 has change
 		if py.len(rTrue)>1:
 			raise Exception('kargs 存在多个 重复的 key',ka,keys)
 		r=rTrue
-
+	#######
 	if py.len(r)==1:return r[0]
 	else:raise Exception('kargs matched keys len <> 1',ka,keys)
 
@@ -2644,7 +2634,7 @@ gd_sync_level={
 'wan':4    ,# internet sync
 'all':4    ,
 }
-def set(name,value=None):
+def set(name,value=None,level=gd_sync_level['process']):
 	if level==gd_sync_level['process']:
 		import sys
 		d=py.getattr(sys,'_qgb_dict',{})
