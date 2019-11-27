@@ -229,9 +229,17 @@ if iswin() or iscyg():
 			# if(a!=()):s=str(s)+ ','+str(a)[1:-2]
 			# if iswin():windll.user32.MessageBoxA(0, str(s), str(st), 0)
 		setErr(ei,msg='#Error import Win'  )
-#'G:\\QGB\\babun\\cygwin\\lib\\python2.7\\qgb'   ValueError('Attempted relative import beyond toplevel package',)
-		# py.pdb()
-		# {0} {1}'.format(__name__,isMain() )
+	def driverPath(a,reverse=True):
+		'''from Z to C'''
+		if not a.startswith(':'):a=':'+a
+		# try:AZ=T.AZ;exist=F.exist
+		# except:
+		AZ=''.join([chr(i) for i in py.range(65,65+26)])
+		exist=os.path.exists
+		if reverse:AZ=AZ[::-1]
+		for i in sys.executable[0]+AZ:
+			if exist(i+a):return i+a
+		return ''	
 		
 	if iscyg():
 		def getCygPath():
@@ -301,19 +309,8 @@ def retry( exceptions,times=3,sleep_second=0):
 		
 	return decorator
 		
-		
 #TODO: if not has ei,import error occur twice,why?
-def driverPath(a,reverse=True):
-	'''from Z to C'''
-	if not a.startswith(':'):a=':'+a
-	# try:AZ=T.AZ;exist=F.exist
-	# except:
-	AZ=''.join([chr(i) for i in py.range(65,65+26)])
-	exist=os.path.exists
-	if reverse:AZ=AZ[::-1]
-	for i in AZ:
-		if exist(i+a):return i+a
-	return ''
+
 
 def getTestPath():
 	if isnix():
@@ -342,10 +339,6 @@ def getShellPath():
 		if 'wsPath' in os.environ:
 			s=os.environ['wsPath']
 		s='G:/QGB/babun/cygwin/home/qgb/wshell/'#如果开头多一个空格，在Pycharm 下返回False，其他环境下为True
-		if path.exists(s):
-			pass
-		else:
-			s='E:/sourceCode/shell/'
 		s=driverPath(s[1:]) or s
 	return s.replace('\\','/')
 gsw=gsWShell=getShellPath()
@@ -982,7 +975,7 @@ def chdir(ap=gst,*a,**ka):
 	ap=path.join(ap,*a)
 	
 
-	mkdir=True
+	mkdir=False #默认不创建
 	if 'md' in ka:mkdir=ka['md']
 	if 'mkdir' in ka:mkdir=ka['mkdir']
 	if iscyg():mkdir=False#cyg下可以创建带:的目录，导致切换异常
@@ -1034,7 +1027,7 @@ cdt=cdTest
 def cdQPSU(a=''):
 	return cd(getModPath()+a)
 # @property
-cdqp=cdqpsu=cdQPSU
+cdq=cdqp=cdqpsu=cdQPSU
 	
 def cdWShell(a=''):
 	return cd(gsWShell+a)

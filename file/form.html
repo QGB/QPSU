@@ -1,5 +1,10 @@
- <form method="post" enctype="multipart/form-data" action="/b=request.files['f'].read(-1);t=request.values['t'];r=[t,type(b),len(b)]"> 
+<!-- action="/b=request.files['f'].read(-1);t=request.values['t'];r=[t,type(b),len(b)]"  -->
+<form method="post" enctype="multipart/form-data" 
+action="/r=request.files['f'].save(U.gst+U.stime())"
+
+> 
 	<input type="text" name="t"> 
 	<input type="file" name="f">
 	<input type="submit" />
+
 </form> 

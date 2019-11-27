@@ -126,7 +126,7 @@ execLocals=None,locals=None,globals=None,qpsu='py,U,T,N,F',importMods='sys,os',r
 	if not app.name.startswith('rpcServer'):
 		return (py.No('caller provide app,so no thread start'),app)
 	
-	flaskArgs=py.dict(host=ip,port=port,debug=0,threaded=True)
+	flaskArgs=py.dict(host=ip,port=port,debug=0,threaded=False)
 	
 	if ssl_context:
 		flaskArgs['ssl_context']=ssl_context
