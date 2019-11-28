@@ -1082,19 +1082,35 @@ def sort(a,column=0, cmp=None, key=None, reverse=False):
 	在python2.x  sorted _5,cmp=lambda a,b:len(a)-len(b) 实现同上功能， 一般不用cmp 参数
 	sorted中cmp参数指定的函数用来进行元素间的比较。此函数需要2个参数，然后返回负数表示小于，0表示等于，正数表示大于。'''
 	repr=py.repr
-	if column>0:
-		def key(a):#a:item of sort list   |  *a: (item,)
-			return repr(a[column])
-			#TypeError: '<' not supported between instances of 'int' and 'str'
+	
+	def key_func(ai,size=99):#a:item of sort list   |  *a: (item,)
+		if py.isnum(ai):
+			return ai
+		elif py.istr(ai):
+			r=0xffff_ffff_ffff
+			for n,b in py.enumerate(ai[:size][::-1]):
+				r+=py.ord(b)*(0x110000**n)
+			return r
+		elif py.isbytes(ai):
+			r=0xffff_ffff
+			for n,b in py.enumerate(ai[:size][::-1]):
+				r+=py.ord(b)*(256**n)
+			return r
+		else:
+			if column>0:ai=ai[column]
+			ai=py.repr(ai)[:size] # 不会再次回到这个分支，istr
+			return key(ai=ai,size=size)
+	if not key:key=key_func
+	#TypeError: '<' not supported between instances of 'int' and 'str';key=None also err
 	if py.is2():
 		a=py.sorted(a,cmp=cmp,key=key, reverse=reverse)
 	else:
-		if cmp and  not key:
+		if cmp:#这个 arg 优先级最高
 			import functools
 			key=functools.cmp_to_key(cmp)
 		a=py.sorted(a,key=key, reverse=reverse)
 	if py.istr(a):
-		return ''.join([i for i in a])
+		return ''.join(a)
 	else:
 		return a
 def sortDictV(ad,key=lambda item:item[1],des=True):
