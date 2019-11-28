@@ -75,6 +75,12 @@ try:
 	from pprint import pprint,pformat
 except:pass
 ####################################################
+def justify(s,size,fillchar=' ',method='ljust'):
+	if size<1:raise py.ArgumentError('size must > 0',size)
+	if len(s)>=size:
+		return s[:size]
+	return py.getattr(s,method)(size,fillchar)	#padding
+	
 def encode(s,encoding):
 	'''
 	'''
