@@ -185,7 +185,7 @@ filter_sint_list=filter_sint=filter_int=filterInt
 
 RE_HTML_TAG = re.compile(r'<[^>]+>')
 def filter_html(text):
-    return RE_HTML_TAG.sub('', text)
+	return RE_HTML_TAG.sub('', text)
 	
 
 ################### zh #############################
@@ -199,14 +199,14 @@ def filterZh(a,max_not_zh=0,splitor=' '):
 filter_zh=filterZh
 
 def hasZh(word):
-    '''
-    判断传入字符串是否包含中文
-    :param word: 待判断字符串
-    :return: True:包含中文  False:不包含中文
-    '''
-    global RE_ZH_PATTERN
-    match = RE_ZH_PATTERN.search(word)
-    return match
+	'''
+	判断传入字符串是否包含中文
+	:param word: 待判断字符串
+	:return: True:包含中文  False:不包含中文
+	'''
+	global RE_ZH_PATTERN
+	match = RE_ZH_PATTERN.search(word)
+	return match
 contain_zh=has_zh=hasZh	
 	
 def readableTimeText(txt,browser=True):
@@ -269,8 +269,8 @@ func( a: <_sre.SRE_Match object; span=(2388, 2396), match='21758465'>  ):
 	
 	
 \QGB\Anaconda3\Lib\site-packages\jedi\evaluate\compiled\fake\_sre.pym
-    class SRE_Match():
-            yield SRE_Match(self)	
+	class SRE_Match():
+			yield SRE_Match(self)	
 	'''
 	if py.istr(str_or_func):
 		def func(_a):
@@ -325,6 +325,15 @@ in js:
 		else:
 			r[key]=py.repr(v)
 	return r
+
+
+def html_decoded(a):
+	from HTMLParser import HTMLParser
+	return HTMLParser().unescape(a)
+html_unescape=htmlDecode=html_decoded
+
+# data = "U.S. Adviser&#8217;s Blunt Memo on Iraq: Time &#8216;to Go Home&#8217;"
+# print decode_unicode_references(data)
 
 def urlEncode(a):
 	''' a : str_or_bytes
