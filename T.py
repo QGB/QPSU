@@ -186,7 +186,7 @@ filter_sint_list=filter_sint=filter_int=filterInt
 RE_HTML_TAG = re.compile(r'<[^>]+>')
 def filter_html(text):
 	return RE_HTML_TAG.sub('', text)
-	
+html_filter=filter_html
 
 ################### zh #############################
 # u'([\u4e00-\u9fff]+)'  
