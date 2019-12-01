@@ -56,7 +56,11 @@ def uploadServer(port=1122,host='0.0.0.0',dir='./',url='/up'):
 			r.headers['Content-Type'] = 'text/plain;charset=utf-8'
 			return r
 	app.run(host=host,port=port,debug=0,threaded=True)	
-		
+	
+def rpcGetVariable(varname,rpc_base=py.No('auto history e.g. [http://]127.0.0.1:23571[/../] '),
+		):
+	if rpc_base:
+		U.get
 def rpcServer(port=23571,thread=True,ip='0.0.0.0',ssl_context=(),currentThread=False,app=None,key=None,pformat_kw={'width':144},
 execLocals=None,locals=None,globals=None,
 qpsu='py,U,T,N,F',importMods='sys,os',request=True,
@@ -129,14 +133,14 @@ flaskArgs=py.dict(debug=0,threaded=True),
 	if not app.name.startswith('rpcServer'):
 		return (py.No('caller provide app,so no thread start'),app)
 	
-	flaskArgs=flaskArgs.update(py.dict(host=ip,port=port) )
+	flaskArgs.update(py.dict(host=ip,port=port) ) #可变dict，不能用flaskArgs=
 	
 	if ssl_context:
 		flaskArgs['ssl_context']=ssl_context
 		if port==23571:
 			port=443
 			flaskArgs['port']=port
-			
+	# U.log(flaskArgs)
 	if currentThread or not thread:
 		return app.run(**flaskArgs)
 	else:
@@ -215,6 +219,16 @@ def get(url,protocol='http',file=''):
 
 def http(url,method='get',*args):
 	return HTTP.method(url,method,*args)
+
+def ipToInt(ip):
+	ips=ip.split('.')
+	if py.len(ips)!=4:return py.No('ip format err',ip)
+	r=0
+	for n,s in py.enumerate(ips):
+		i=py.int(s)
+		r+=i*256**(3-n)
+	return r
+ip_int=ip2int=ipToInt
 
 def ipLocation(ip,reverse_ip=False,
 junk=['本机地址  CZ88.NET','IANA 保留地址','局域网 IP','局域网 对方和您在同一内部网'] ):

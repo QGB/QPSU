@@ -1195,8 +1195,8 @@ As a side effect, an implementation may insert additional keys into the dictiona
 给程序员的提示：内建函数eval()支持动态计算表达式。内建函数 globals()和locals()分别返回当前的全局变量和局部变量字典，可传递给exec使用。
 	diff between eval and exec in python
 	exec not return 
-	    a=exec('1')
-         ^
+		a=exec('1')
+		 ^
 		SyntaxError: invalid syntax
 '''
 	return py.help('exec')  # py2 & py3  OK
@@ -1423,7 +1423,7 @@ def printAttr(a,b='chrome',console=False,call=False):
 	 <td id=name>{1}</td>
 	 <td><textarea>{2}</textarea></td>
 	 <td>{3}</td>
-    </tr>'''
+	</tr>'''
 	sp=getModPath()+'file/attr.html'
 	r='';v='';vi=-1
 	for i,k in py.enumerate(d):
@@ -1657,7 +1657,7 @@ getargspec=getargs=getarg=getArgs
 def getattr(object, *names,default=None):
 	''' py2.7 
   File "qgb/U.py", line 1613
-    def getattr(object, *names,default=None):                                                        
+	def getattr(object, *names,default=None):                                                        
 SyntaxError: invalid syntax  
 
 	'''
@@ -1896,14 +1896,83 @@ def primes(n):
 	#in py3 filter return	<filter at 0x169a9704e80>
 	r=filter(lambda x: not [x%i for i in py.range(2, int(x**0.5)+1) if x%i ==0], py.range(2,n+1))	
 	return py.list(r)
-  
+
+def isPrime(n, k=5): # miller-rabin
+	from random import randint
+	if n < 2: return False
+	for p in [2,3,5,7,11,13,17,19,23,29]:
+		if n % p == 0: return n == p
+	s, d = 0, n-1
+	while d % 2 == 0:
+		s, d = s+1, d/2
+	d,n=py.int(d), py.int(n)
+	for i in range(k):
+		x = pow(randint(2, n-1), d, n)
+		if x == 1 or x == n-1: continue
+		for r in range(1, s):
+			x = (x * x) % n
+			if x == 1: return False
+			if x == n-1: break
+		else: return False
+	return True
+is_prime=isPrime
+
+def prime_factorization(n, b2=-1, b1=10000): # 2,3,5-wheel, then rho
+	'''
+https://stackoverflow.com/questions/51533621/prime-factorization-with-large-numbers-in-python 
+	'''
+	if not py.isnum(n):raise ArgumentError(n)
+	n=py.int(n)
+	def gcd(a,b): # euclid's algorithm
+		if b == 0: return a
+		return gcd(b, a%b)
+	def insertSorted(x, xs): # linear search
+		i, ln = 0, len(xs)
+		while i < ln and xs[i] < x: i += 1
+		xs.insert(i,x)
+		return xs
+	if -1 <= n <= 1: return [n]
+	if n < -1: return [-1] + factors(-n)
+	wheel = [1,2,2,4,2,4,2,4,6,2,6]
+	w, f, fs = 0, 2, []
+	while f*f <= n and f < b1:
+		while n % f == 0:
+			fs.append(f)
+			n /= f
+		f, w = f + wheel[w], w+1
+		if w == 11: w = 3
+	if n == 1: return fs
+	h, t, g, c = 1, 1, 1, 1
+	while not isPrime(n):
+		while b2 != 0 and g == 1:
+			h = (h*h+c)%n # the hare runs
+			h = (h*h+c)%n # twice as fast
+			t = (t*t+c)%n # as the tortoise
+			g = gcd(t-h, n); b2 -= 1
+		if b2 == 0: return fs
+		if isPrime(g):
+			while n % g == 0:
+				fs = insertSorted(g, fs)
+				n /= g
+		h, t, g, c = 1, 1, 1, c+1
+	n=py.int(n)
+	return insertSorted(n, fs)
+factors=integer_factorization=prime_factorization
+# (1917141215419419171412154194191714)
+# [2, 3, 13, 449941L, 54626569996995593878495243L]
+def product_of_integers(*a):
+	r=1
+	for i in a:
+		r=r*i
+	return r
+multiplication=product_of_integers
   
 def traverseTime(start,stop=None,step='day'):
 	'''
 	#TODO ipy 自动化测试框架 ， 解决 ipy3 兼容问题
 	range(start, stop[, step])
 	datetime.timedelta(  days=0, seconds=0, microseconds=0,
-                milliseconds=0, minutes=0, hours=0, weeks=0)
+				milliseconds=0, minutes=0, hours=0, weeks=0)
 	step default: 1(day)  [1day ,2year,....]  [-1day not supported]'''
 	import re,datetime as dt
 	sregex='([0-9]*)(micro|ms|milli|sec|minute|hour|day|month|year)'
@@ -2558,7 +2627,7 @@ def getModule(modName=None,surfixMatch=True):
 	if not modName:modName='qgb.U'
 	
 	if isModule(modName):return modName
-	modName=getattr(modName,'__module__',0) or modName
+	modName=py.getattr(modName,'__module__',0) or modName
 	# if debug():pln(modName,type(modName))
 	
 	if not py.istr(modName):
@@ -2644,7 +2713,7 @@ gd_sync_level={
 'all':4    ,
 }
 def set(name,value=None,level=gd_sync_level['process']):
-	if level==gd_sync_level['process']:
+	if level>=gd_sync_level['process']:
 		import sys
 		d=py.getattr(sys,'_qgb_dict',{})
 		if value==None:
@@ -2652,11 +2721,13 @@ def set(name,value=None,level=gd_sync_level['process']):
 			name='_'
 		d[name]=value
 		sys._qgb_dict=d
+	if level>=gd_sync_level['system']:
+		import sqlite3
 		# set.__dict__['_']=name
 		# return
 	# set.__dict__[name]=value
 def get(name='_',default=py.No('can not get name'),level=gd_sync_level['process']):
-	if level==gd_sync_level['process']:
+	if level>=gd_sync_level['process']:
 		import sys
 		d=py.getattr(sys,'_qgb_dict',{})
 		#TODO 对于不存在的 name ，可以记录最后访问时间为 py.No，方便排查
@@ -3024,7 +3095,7 @@ Out[80]: 1
 In [81]: U.pipInstall('flask')
 Collecting flask
   Downloading https://files.pythonhosted.org/packages/7f/e7/08578774ed4536d3242b14dacb4696386634607af824ea997202cd0edb4b/Flask-1.0.2-py2.py3-none-any.whl (91kB)
-    100% |████████████████████████████████| 92kB 169kB/s
+	100% |████████████████████████████████| 92kB 169kB/s
 Could not install packages due to an EnvironmentError: [Errno 2] No such file or directory: '/tmp/pip-req-tracker-04_vcnlz/b0a3f228a91008c9937cc5e1a2c648e5759a1339d8b8d5b2ce88693f'
 
 Out[81]: 1

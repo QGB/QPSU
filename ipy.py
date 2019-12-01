@@ -85,16 +85,18 @@ def outType(t=None,start=0,stop=U.IMAX,len=py.range(U.IMAX)):
 	is3:range(start, stop[, step]) -> range object
 	'''
 	if t !=None:
-		if type(t) is U.instance:
-			t=t.__class__
-		if type(t) is U.classType:#没有考虑 取出Class 类型的情况
+		# if type(t) is U.instance: # 这个什么意思来着
+			# t=t.__class__
+		if py.istr(t):
+			def m(a):return t in py.repr(a)
+		elif type(t) is U.classType:#没有考虑 取出Class 类型的情况
 			def m(a):return isinstance(a,t)
 		else:
 			if not isinstance(t,type):
 				t=type(t)
 			def m(a):return type(a) is t
 	r={}
-	for index,i in enumerate(gOut):
+	for index,i in py.enumerate(gOut):
 		if index<start or index>stop:continue
 		if t !=None:
 			if not m(gOut[i]):continue

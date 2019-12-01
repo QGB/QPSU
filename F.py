@@ -575,8 +575,9 @@ def read_xls_sheets_name(file):
 	return py.list(py.enumerate( w.sheet_names() )  )
 get_xls_sheets_name=read_xls_sheets_name
 	
-def read_sqlite(file,table=''):
+def read_sqlite(file,table='',sql="SELECT * FROM {};"):
 	file=autoPath(file)
+	if table:sql=sql.format(table)
 	import sqlite3
 	with sqlite3.connect(file) as con:
 		cursor = con.cursor()
@@ -585,7 +586,7 @@ def read_sqlite(file,table=''):
 		tables=[i[0] for i in cursor.fetchall()]
 		if table:
 			if not (table in tables):return py.No('no table',table,'found in',file)
-			cursor.execute("SELECT * FROM {};".format(table) )
+			cursor.execute(sql )
 			return cursor.fetchall()
 		else:
 			r={}
