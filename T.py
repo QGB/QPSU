@@ -335,7 +335,7 @@ def html_decoded(a):
 		unescape = HTMLParser().unescape
 	r=replacey(a,['<br>','<br/>','<br />'],'\n')
 	r= unescape(r).replace(py.chr(0xA0),' ')  # \xa=\n  not \xa0
-
+	return r
 html_unescape=htmlDecode=html_decoded
 
 # data = "U.S. Adviser&#8217;s Blunt Memo on Iraq: Time &#8216;to Go Home&#8217;"
