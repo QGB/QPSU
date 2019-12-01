@@ -187,6 +187,13 @@ RE_HTML_TAG = re.compile(r'<[^>]+>')
 def filter_html(text):
 	return RE_HTML_TAG.sub('', text)
 html_filter=filter_html
+
+def html2text(html,baseurl='',ignore_images=True,ignore_links=True,):
+	from html2text import HTML2Text
+	h=HTML2Text(baseurl=baseurl)
+	h.ignore_images=ignore_images
+	h.ignore_links=ignore_links
+	return h.handle(html)
 ################### zh #############################
 # u'([\u4e00-\u9fff]+)'  
 RE_ZH_PATTERN = re.compile(u'[\u4e00-\u9fa5]+')
@@ -327,13 +334,14 @@ in js:
 
 
 def html_decoded(a):
-	''' will remove html tag '''
+	''' will not remove html tag '''
 	if py.is3():
 		from html import unescape
 	if py.is2():
 		from HTMLParser import HTMLParser
 		unescape = HTMLParser().unescape
-	r=replacey(a,['<br>','<br/>','<br />'],'\n')
+	r=a
+	# r=replacey(a,['<br>','<br/>','<br />'],'\n')
 	r= unescape(r).replace(py.chr(0xA0),' ')  # \xa=\n  not \xa0
 	return r
 html_unescape=htmlDecode=html_decoded

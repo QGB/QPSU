@@ -57,10 +57,16 @@ def uploadServer(port=1122,host='0.0.0.0',dir='./',url='/up'):
 			return r
 	app.run(host=host,port=port,debug=0,threaded=True)	
 	
-def rpcGetVariable(varname,rpc_base=py.No('auto history e.g. [http://]127.0.0.1:23571[/../] '),
-		):
-	if rpc_base:
+def rpcGetVariable(varname,base=py.No('auto history e.g. [http://]127.0.0.1:23571[/../] '),
+		timeout=9,):
+	if not base:
 		U.get
+	if not base.endswith('/'):base+='/'
+	url='{}response.set_data(F.dill_dump({}))'.format(base,varname)
+	import requests,dill
+	b=requests.get(url,verify=False,timeout=timeout).content
+	return dill.loads(b)
+
 def rpcServer(port=23571,thread=True,ip='0.0.0.0',ssl_context=(),currentThread=False,app=None,key=None,pformat_kw={'width':144},
 execLocals=None,locals=None,globals=None,
 qpsu='py,U,T,N,F',importMods='sys,os',request=True,
