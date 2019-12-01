@@ -325,6 +325,7 @@ in js:
 		else:
 			r[key]=py.repr(v)
 	return r
+
 def urlEncode(a):
 	''' a : str_or_bytes
 	#todo 	convert Non-string objects
@@ -334,6 +335,8 @@ def urlEncode(a):
 		import urllib
 		return urllib.parse.quote(a)
 	raise NotImplementedError()
+url_encode=urlEncode
+
 def urlDecode(a):
 	''' a : str_or_bytes
 	'''
@@ -343,6 +346,8 @@ def urlDecode(a):
 		# if not py.istr():
 		return urllib.parse.unquote(a)
 	raise NotImplementedError()
+url_decode=urlDecode
+
 def startsEnds(a,chars):
 	'''S.strip([chars]) -> str
 '1234'.strip('1') # '234'

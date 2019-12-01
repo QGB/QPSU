@@ -2358,7 +2358,8 @@ pid=0, name='System Idle Process', cmdline=[]
 	# if err:return r,err
 	# else:  
 	return r
-ps=getProcess=getProcessList	
+ps=getTasklist=getProcess=getProcessList
+
 def getProcessPath(name='',pid=0):
 	if not (name or pid):pid=globals()['pid']
 	r=getProcessList(name=name,pid=pid)
@@ -2401,9 +2402,7 @@ def kill(a,caseSensitive=True,confirm=True):
 		if c.lower().startswith('n'):return
 	for i in r:
 		i.kill()
-def getTasklist():
-	''''''
-	return
+
 def notePadPlusPlus(a='',line=0,autof=True,getExePath=False):
 	'''
 --------> os.system('"M:\\Program Files\\Notepad++\\notepad++.exe" "IP.py"')
@@ -2418,6 +2417,17 @@ in ipy , npp() not autoReload when U.r(), But U.npp()
 '''
 	nppexe='/Notepad++/notepad++.exe'.lower()
 	npath=''	
+		# if Win.getVersionNumber()>=6.1:#win7
+		# appdata=os.getenv('appdata') or ''#win10 not have appdata  ?
+		# npath=appdata.replace('\\','/')+nppexe
+	if not os.path.exists(npath):	
+		npath=getModPath()[:3]+r'QGB'+nppexe
+	if not os.path.exists(npath):	
+		npath=getModPath()[:3]+r'QGB'+'/npp/notepad++.exe'
+	if not os.path.exists(npath):
+		npath=driverPath(r":\Program Files"+nppexe)#如果最后没有匹配到，则为 空.....
+	if DEBUG:pln (repr(npath),nppexe)
+	# npath='"%s"'%npath
 	# print(233333333333)  # add this work?
 	# msgbox(npath,py.dir())  #U.r not work ?
 	args=py.getattr(a,'args',None)
@@ -2460,17 +2470,7 @@ in ipy , npp() not autoReload when U.r(), But U.npp()
 		
 	if a.endswith('.pyc'):#AttributeError: 'code' object has no attribute 'endswith'
 		a=a[:-3]+'py'
-	# if Win.getVersionNumber()>=6.1:#win7
-		# appdata=os.getenv('appdata') or ''#win10 not have appdata  ?
-		# npath=appdata.replace('\\','/')+nppexe
-	if not os.path.exists(npath):	
-		npath=getModPath()[:3]+r'QGB'+nppexe
-	if not os.path.exists(npath):	
-		npath=getModPath()[:3]+r'QGB'+'/npp/notepad++.exe'
-	if not os.path.exists(npath):
-		npath=driverPath(r":\Program Files"+nppexe)#如果最后没有匹配到，则为 空.....
-	if DEBUG:pln (repr(npath),nppexe)
-	# npath='"%s"'%npath
+
 	if getExePath:return npath
 	if a:
 		if autof:
