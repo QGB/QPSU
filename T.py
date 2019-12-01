@@ -333,7 +333,7 @@ def html_decoded(a):
 	if py.is2():
 		from HTMLParser import HTMLParser
 		unescape = HTMLParser().unescape
-	r=replacey(['<br>','<br/>','<br />'],'\n')
+	r=replacey(a,['<br>','<br/>','<br />'],'\n')
 	r= unescape(r).replace(py.chr(0xA0),' ')  # \xa=\n  not \xa0
 
 html_unescape=htmlDecode=html_decoded
