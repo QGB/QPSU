@@ -328,8 +328,13 @@ in js:
 
 
 def html_decoded(a):
-	from HTMLParser import HTMLParser
-	return HTMLParser().unescape(a)
+	if py.is3():
+		from html import unescape
+	if py.is2():
+		from HTMLParser import HTMLParser
+		unescape = HTMLParser().unescape
+	return unescape(a).replace(py.chr(0xA0),' ')  # \xa=\n  not \xa0
+
 html_unescape=htmlDecode=html_decoded
 
 # data = "U.S. Adviser&#8217;s Blunt Memo on Iraq: Time &#8216;to Go Home&#8217;"
