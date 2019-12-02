@@ -2516,11 +2516,11 @@ def vscode(a='',lineno=0,auto_file_path=True,editor_path=py.No('config this syst
 					executor=F.join(f,'bin/code')
 			set('vscode_linux',executor,level=gd_sync_level['system'])
 			
-		env = get('vscode_linux_env',level=gd_sync_level['process'])
+		env = get('vscode_linux_env',level=gd_sync_level['process']) 
 		if not env:
-			ctime=0
-			for f,stat in F.ll('/tmp/',d=True,f=False,readable=False).items():
-				if not f.startswith('/tmp/vscode-') or py.len(f)<50:continue
+			ctime=0 # this is .sock file
+			for f,stat in F.ll('/tmp/',d=False,f=True,readable=False).items():
+				if not f.startswith('/tmp/vscode-') or not f.endswith('.sock'):continue
 				if stat[3]>ctime:
 					ctime=stat[3]
 					env={'VSCODE_IPC_HOOK_CLI':f}
