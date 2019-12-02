@@ -3,7 +3,7 @@
 	# import U
 	# U.tab()
 # except:pass
-__all__=['U','T','N','F']
+__all__=['U','T','N','F','py']
 
 # import sys
 # for i in __all__:

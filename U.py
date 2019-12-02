@@ -798,9 +798,9 @@ env PATH  无论在Windows 还是 Linux 统一使用大写是好的选择
 			ec = os.environ.copy()# 返回 dict ，而不是 env
 
 		p=''
-		for k,v in env.items():
+		for k in py.list(env.keys()): # RuntimeError: dictionary changed size during iteration
 			if k.upper()=='PATH':
-				p=v
+				p=env[k]
 				env.pop(k)
 
 		ps=get_env_path().split(os.pathsep)
