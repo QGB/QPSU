@@ -208,7 +208,7 @@ def isipy():
 			# pass
 		# f=f.f_back	
 	# return ipy
-getipy=isipy
+getipy=isIpy=is_ipy=isipy
 def isrepl():
 	i,o=sys.stdin.isatty(),sys.stdout.isatty()
 	if i==o:return i
@@ -2403,7 +2403,108 @@ def kill(a,caseSensitive=True,confirm=True):
 	for i in r:
 		i.kill()
 
-def notePadPlusPlus(a='',line=0,autof=True,getExePath=False):
+def get_obj_file_lineno(a,lineno=0,auto_file_path=True):
+	T=py.importT()
+	args=py.getattr(a,'args',None)
+	if args and py.iterable(args):
+		args=py.list(args)
+		if py.len(args)==3 and '-n' in args[2]: #isWin() and
+			ls=T.int_filter(args[2])
+			if ls:lineno=py.int(ls[0])
+			f=args[1]
+			return f,lineno
+		# if py.istr(args[0]) and nppexe in args[0].lower():return run(args)
+	
+	if isModule(a):
+		f=a.__file__
+		return f,lineno
+		
+	a=py.getattr(a,'func_code',None) or a
+	a=py.getattr(a,'__code__',None)  or a#is3
+	
+	if py.getattr(a,'co_filename',None): 	
+		if not lineno:lineno=a.co_firstlineno#先获取lineno,再改变 a
+		f=a.co_filename
+		return f,lineno
+	if py.getattr(a,'lineno',None):#is3 <FrameSummary  .__module__=='traceback'
+		if not lineno:lineno=a.lineno
+		f=a.filename
+		return f,lineno
+	if py.isdict(a) and py.len(a)==1:
+		t=dict_one_item(a)
+		if not py.istr(t[0]):raise py.ArgumentError('not dict{sfile:inum}',a)
+		f=t[0]
+		if not lineno and py.isint(t[1]):lineno=t[1]
+		return f,lineno
+	if py.type(a) in (py.list,py.tuple):
+	#,py.set TypeError: 'set' object does not support indexing
+		if not lineno and py.len(a)>1 and py.isint(a[1]):lineno=a[1]
+		f=a[0]
+		return f,lineno
+	if py.isfile(a):
+		f=a.name
+		return f,lineno
+	#########################多个 elif 只会执行第一个匹配到的
+	if py.istr(a):
+		gsm=[['qgb.ipy.save ',' success!'],
+				]
+		for i in gsm:
+			a=T.sub(a,i[0],i[1]) or a
+		
+		if a.lower.endswith('.pyc'):#AttributeError: 'code' object has no attribute 'endswith'
+			a=a[:-3]+'py'
+		f=a
+		if auto_file_path:
+			F=py.importF()
+			if not F.isabs(f):
+				f=F.auto_file_path(f)
+		return f,lineno
+	else:
+		if py.getattr(a,'__module__',None):
+			a=getModule(a)#python无法获取class行数？https://docs.python.org/2/library/inspect.html
+			return get_obj_file_lineno(a=a,lineno=lineno,auto_file_path=auto_file_path)
+	raise ArgumentUnsupported(a)
+		
+def vscode(a='',lineno=0,auto_file_path=True,editor_path=py.No('config this system editor_path'),):
+	'''
+	'''
+	if editor_path:
+		#TODO
+		raise NotImplementedError
+	F=py.importF()
+	if isLinux(): # only work when using remoteSSH
+		executor = get('vscode_linux',level=gd_sync_level['system'])
+		if not executor:
+			vsbin=F.expanduser('~/.vscode-server/bin/')
+			access_time=0
+			for f,stat in F.ll(vsbin,d=True,f=False,readable=False).items():
+				if stat[1]>access_time:
+					access_time=stat[1]
+					executor=F.join(f,'bin/code')
+			set('vscode_linux',executor,level=gd_sync_level['system'])
+			
+	if isWin():
+		executor = get('vscode_win',level=gd_sync_level['system'])
+		if not executor:
+			vscp=ps('code.exe')
+			if vscp:
+				executor=vscp[0].cmdline()[0]
+				set('vscode_win',executor,level=gd_sync_level['system'])
+				# U.log('vscode_win exe path cached %s'%executor)
+			else:
+				executor=F.expanduser(r'~\AppData\Local\Programs\Microsoft VS Code\_\Code.exe') 
+	f,lineno=get_obj_file_lineno(a,lineno=lineno,auto_file_path=auto_file_path)
+
+	r=run(executor,'--reuse-window','--goto','{}:{}'.format(
+		f,lineno
+		# *get_obj_file_lineno(a,lineno=lineno,auto_file_path=auto_file_path) 
+		)   )
+	if iswin() and isipy():sleep(1) # 解决光标下一行错位问题
+	pln(r.args)
+	return f,lineno
+vsc=VSCode=vsCode=vscode
+
+def notePadPlusPlus(a='',lineno=0,auto_file_path=True,editor_path=py.No('config this system editor_path'),):
 	'''
 --------> os.system('"M:\\Program Files\\Notepad++\\notepad++.exe" "IP.py"')
 'M:\Program' 不是内部或外部命令，也不是可运行的程序
@@ -2415,6 +2516,9 @@ Out[115]: 0
 
 in ipy , npp() not autoReload when U.r(), But U.npp()
 '''
+	if editor_path:
+		#TODO
+		raise NotImplementedError
 	nppexe='/Notepad++/notepad++.exe'.lower()
 	npath=''	
 		# if Win.getVersionNumber()>=6.1:#win7
@@ -2430,58 +2534,13 @@ in ipy , npp() not autoReload when U.r(), But U.npp()
 	# npath='"%s"'%npath
 	# print(233333333333)  # add this work?
 	# msgbox(npath,py.dir())  #U.r not work ?
-	args=py.getattr(a,'args',None)
-	if args and py.iterable(args):
-		args=py.list(args)
-		if py.istr(args[0]) and nppexe in args[0].lower():return run(args)
-	
-	if isModule(a):
-		a=a.__file__
-		autof=False
-		
-	a=py.getattr(a,'func_code',None) or a
-	a=py.getattr(a,'__code__',None)  or a#is3
-	
-	if py.getattr(a,'co_filename',None): 	
-		if not line:line=a.co_firstlineno#先获取line,再改变 a
-		a=a.co_filename
-		autof=False
-	if py.getattr(a,'lineno',None):#is3 <FrameSummary  .__module__=='traceback'
-		line=a.lineno
-		a=a.filename
-	if py.type(a) in (py.list,py.tuple):
-	#,py.set TypeError: 'set' object does not support indexing
-		if not line and py.len(a)>1:line=a[1]
-		a=a[0]
-	if py.isfile(a):a=a.name	
-	#########################多个 elif 只会执行第一个匹配到的
-	if py.istr(a):
-		gsm=[['qgb.ipy.save ',' success!'],
-				]
-		for i in gsm:
-			a=T.sub(a,i[0],i[1]) or a
-		pass
-	else:
-		if py.getattr(a,'__module__',None):
-			a=getModule(a)#python无法获取class行数？https://docs.python.org/2/library/inspect.html
-			return notePadPlusPlus(a)
-		raise ArgumentUnsupported(a)
-		
-		
-	if a.endswith('.pyc'):#AttributeError: 'code' object has no attribute 'endswith'
-		a=a[:-3]+'py'
 
-	if getExePath:return npath
 	if a:
-		if autof:
-			return run(npath,F.autof(a),'-n {0}'.format(line))
-		else:
-			return run(npath,a,'-n {0}'.format(line))
+		f,lineno=get_obj_file_lineno(a,lineno=lineno,auto_file_path=auto_file_path)
+		return run(npath,f,'-n {0}'.format(lineno))
 	else:
 		run(npath)
 		return npath 
-		
-	# cmd('npp',str(a))
 npp=notePadPlus=notePadPlusPlus
 	
 def nppMods(modName='qgb'):
@@ -2869,7 +2928,7 @@ getDictV=getDictNestedValue=getNestedValue
 
 def getDictItem(a):
 	return a.items().__iter__().__next__()
-
+dict_item=dict_one_item=get_dict_item=getDictItem
 def setDictListValue(adict,key,value):
 	if key in adict:
 		adict[key].append(value)
@@ -2955,7 +3014,7 @@ Create a slice object.  This is used for extended slicing (e.g. a[0:10:2]).
 		except py.StopIteration:
 			break
 	return r
-getDict=getDictItems
+dict_items=get_dict_items=getDictItems
 	
 def dict_multi_pop(adict,*keys,default=py.No('key not in dict')):
 	dr={}

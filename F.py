@@ -719,13 +719,12 @@ def ll(ap='.',readable=True,type='',t='',r=False,d=False,dir=False,f=False,file=
 		s=_os.stat(i)
 		dr[i]=[size(i),s.st_atime,s.st_mtime,s.st_ctime,s.st_mode]
 		if readable:
-			# py.importU()
-			
+			U=py.importU()
 			for j in py.range(len(dr[i])):
 				# U.pln i,j,repr(dr[i][j])
 				# if py.type(dr[i][j]) is py.long:
 				if j==0: dr[i][j]=readableSize(dr[i][j])
-				if py.type(dr[i][j]) is py.float:dr[i][j]=U.stime(time=dr[i][j])
+				if py.isfloat(dr[i][j]):dr[i][j]=U.stime(time=dr[i][j])
 	return dr
 
 SUFFIXES = {1000: ['KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'],
@@ -830,6 +829,19 @@ def getSplitor(ap):
 	return '/'#default	
 getsp=getSp=getSplitor		
 		
+def join_path(a,*p):
+	'''os.path.join(a, *p)
+Docstring:
+Join two or more pathname components, inserting '/' as needed.
+If any component is an absolute path, all previous path components
+will be discarded.  An empty last part will result in a path that
+ends with a separator.
+File:      /root/anaconda3/lib/python3.7/posixpath.py
+'''
+	import os
+	return os.path.join(a, *p)
+join=joinPath=path_join=join_path
+
 def mdcd(ap):
 	return py.importU().cd(makeDirs(ap))
 	
@@ -928,7 +940,8 @@ FileNotFoundError: [Errno 2] No such file or directory: '.
 	if py.len(fn)>=260 and U.iswin():
 		fn=nt_path(fn)
 	return fn
-	
+auto_file_path=auto_path=autoPath
+
 def nt_path(fn):
 	'''if linux etc ,will auto ignored
 	'''
