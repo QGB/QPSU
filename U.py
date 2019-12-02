@@ -804,8 +804,9 @@ env PATH  无论在Windows 还是 Linux 统一使用大写是好的选择
 				env.pop(k)
 
 		ps=get_env_path().split(os.pathsep)
-		if p and (p not in ps):ps.append(p)
-		env['PATH']=os.pathsep.join(ps)		
+		if p :
+			if (p not in ps):ps.append(p)
+			env['PATH']=os.pathsep.join(ps)	
 
 		env=ec.update(env)
 	######## 参数处理完毕，准备开始运行
@@ -2516,7 +2517,7 @@ def vscode(a='',lineno=0,auto_file_path=True,editor_path=py.No('config this syst
 					executor=F.join(f,'bin/code')
 			set('vscode_linux',executor,level=gd_sync_level['system'])
 			
-		env = get('vscode_linux_env',level=gd_sync_level['process']) 
+		env = get('vscode_linux_env',level=gd_sync_level['process']) or {}
 		if not env:
 			ctime=0 # this is .sock file
 			for f,stat in F.ll('/tmp/',d=False,f=True,readable=False).items():
