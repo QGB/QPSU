@@ -143,9 +143,13 @@ def dill_load(file,dill_ext='.dill'):
 			return dill.load(f)
 	except Exception as e:#TODO all  load save py.No
 		return py.No(file,e)
-		
-		
-def dill_dump(obj,file=None,protocol=0):
+
+def dill_loads(bytes):
+	import dill
+	return dill.loads(bytes)
+
+
+def dill_dump(obj,file=None,protocol=None):
 	'''
 	dill.dump(obj, file, protocol=None, byref=None, fmode=None, recurse=None)
 	dill.dumps(obj, protocol=None, byref=None, fmode=None, recurse=None)
@@ -716,7 +720,10 @@ def ll(ap='.',readable=True,type='',t='',r=False,d=False,dir=False,f=False,file=
 	dr={}
 	for i in list(ap,type=type,t=t,r=r,d=d,dir=dir,f=f,file=file):#ls 肯定返回 list类型！
 		# importU;if U.DEBUG:U.pln ap,repr(i)
-		s=_os.stat(i)
+		try:
+			s=_os.stat(i)
+		except:
+			continue
 		dr[i]=[size(i),s.st_atime,s.st_mtime,s.st_ctime,s.st_mode]
 		if readable:
 			U=py.importU()

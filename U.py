@@ -760,29 +760,61 @@ def pause(a='Press Enter to continue...\n',exit=True):
 			if exit:x()
 			return False
 	return True	
-def run(a,*args):
-	'''默认不阻塞
 
+def run(a,*args,env=py.No('if you want update env,give dict,path will merged')):
+	'''默认不阻塞, args converted to list of str
 If you're using Pyhton 3, command.args is the easiest way:
 	from subprocess import Popen
 	command = Popen(['ls', '-l'])
 pln command.args #['ls', '-l']
+
+env PATH  无论在Windows 还是 Linux 统一使用大写是好的选择
 '''
+	F=py.importF()
 	if DEBUG:pln (a,args)
 		
-	if type(a)==type(''):a=[a]
-	if type(a)!=type([]):a=py.list(a)
+	if py.istr(a):
+		if not args:
+			if not F.exists(a):
+				import shlex
+				a=shlex.split(a)  #如果不想自动拆分第一个参数 可以 run(cmd,'')  ,这样args 不为空
+			else:a=[a]
+		else:a=[a]
+	if not py.islist(a):a=py.list(a)
 	if len(args)>0:a.extend(args)
-	if type(a)==type([]):
-		for i,v in enumerate(a):
-			if not py.istr(v):
-				a[i]=v=str(v)
-			if py.iswin() and v.startswith('"') and v.endswith('"'):
-				a[i]=v[1,-1]
-			
-		r= __import__('subprocess').Popen(a)
-		if getPyVersion()<3.3:r.args=a
-		return r
+	# if py.islist(a):
+	for i,v in enumerate(a):
+		if not py.istr(v):
+			a[i]=v=str(v)
+		if py.iswin() and v.startswith('"') and v.endswith('"'):
+			a[i]=v[1,-1]
+	# a 处理完了，接着处理env
+	if not env:
+		env = os.environ
+	else:
+		try:
+			ec=F.dill_loads(F.dill_dump(os.environ) )
+		except:
+			ec = os.environ.copy()# 返回 dict ，而不是 env
+
+		p=''
+		for k,v in env.items():
+			if k.upper()=='PATH':
+				p=v
+				env.pop(k)
+
+		ps=get_env_path().split(os.pathsep)
+		if p and (p not in ps):ps.append(p)
+		env['PATH']=os.pathsep.join(ps)		
+
+		env=ec.update(env)
+	######## 参数处理完毕，准备开始运行
+	# r= __import__('subprocess').Popen(a)
+	import subprocess
+	# env["PATH"] = "/usr/sbin:/sbin:" + env["PATH"]
+	r=subprocess.Popen(a, env=env) # Windows下 光标有不回位问题 U.run('cmd /c set',env={'zzzzz':U.stime()})
+	if getPyVersion()<3.3:r.args=a
+	return r
 	'''
 In [151]: _131.poll?
 Signature: _131.poll()
@@ -2308,7 +2340,7 @@ linux:
 		if i.upper()==name_upper:
 			return os.environ(i)
 	return py.No('not found in os.environ',name)
-get_environ=get_env=getenv=getEnv=getEnviron
+get_env_path=get_path_env=get_environ=get_env=getenv=getEnv=getEnviron
 	
 def getParentPid():
 	import psutil
@@ -2472,17 +2504,28 @@ def vscode(a='',lineno=0,auto_file_path=True,editor_path=py.No('config this syst
 		#TODO
 		raise NotImplementedError
 	F=py.importF()
+	env={}
 	if isLinux(): # only work when using remoteSSH
 		executor = get('vscode_linux',level=gd_sync_level['system'])
 		if not executor:
 			vsbin=F.expanduser('~/.vscode-server/bin/')
-			access_time=0
+			ctime=0
 			for f,stat in F.ll(vsbin,d=True,f=False,readable=False).items():
-				if stat[1]>access_time:
-					access_time=stat[1]
+				if stat[3]>ctime:
+					ctime=stat[3]
 					executor=F.join(f,'bin/code')
 			set('vscode_linux',executor,level=gd_sync_level['system'])
 			
+		env = get('vscode_linux_env',level=gd_sync_level['process'])
+		if not env:
+			ctime=0
+			for f,stat in F.ll('/tmp/',d=True,f=False,readable=False).items():
+				if not f.startswith('/tmp/vscode-'):continue
+				if stat[3]>ctime:
+					ctime=stat[3]
+					env={'VSCODE_IPC_HOOK_CLI':f}
+			set('vscode_linux_env',env,level=gd_sync_level['process'])
+
 	if isWin():
 		executor = get('vscode_win',level=gd_sync_level['system'])
 		if not executor:
@@ -2493,16 +2536,20 @@ def vscode(a='',lineno=0,auto_file_path=True,editor_path=py.No('config this syst
 				# U.log('vscode_win exe path cached %s'%executor)
 			else:
 				executor=F.expanduser(r'~\AppData\Local\Programs\Microsoft VS Code\_\Code.exe') 
-	f,lineno=get_obj_file_lineno(a,lineno=lineno,auto_file_path=auto_file_path)
+	if not a:
+		run(executor)  # def run(
+		return executor
 
-	r=run(executor,'--reuse-window','--goto','{}:{}'.format(
-		f,lineno
+	f,lineno=get_obj_file_lineno(a,lineno=lineno,auto_file_path=auto_file_path)
 		# *get_obj_file_lineno(a,lineno=lineno,auto_file_path=auto_file_path) 
-		)   )
-	if iswin() and isipy():sleep(1) # 解决光标下一行错位问题
-	pln(r.args)
+	args=[executor,'--reuse-window','--goto','{}:{}'.format(
+		f,lineno
+		)]
+	pln(*args)
+	r=run(*args,env=env)
+	if iswin() and isipy():sleep(1) # 解决 Windows光标下一行错位问题
 	return f,lineno
-vsc=VSCode=vsCode=vscode
+code=vsc=VSCode=vsCode=vscode
 
 def notePadPlusPlus(a='',lineno=0,auto_file_path=True,editor_path=py.No('config this system editor_path'),):
 	'''
