@@ -360,7 +360,7 @@ def pln(*a,**ka):
 	return p(*a,**ka)	
 println=pln
 	
-def p(*a,**ka):
+def print_(*a,**ka):
 	'''
  # in  py 3.6
 	print(value, ..., sep=' ', end='\n', file=sys.stdout, flush=False)
@@ -427,6 +427,7 @@ iterable 的元素,没有特殊处理
 		p(end,sep='no useful',r='no useful',end='',file=file,flush=flush,cod=cod)
 	if r:return a
 	else:return
+p=print_
 # p(4,2,sep='9')
 # exit()
 def input(msg=''):
@@ -2546,7 +2547,8 @@ def vscode(a='',lineno=0,auto_file_path=True,editor_path=py.No('config this syst
 	args=[executor,'--reuse-window','--goto','{}:{}'.format(
 		f,lineno
 		)]
-	pln(*args,'env=',env)
+
+	print_("r'");pln(*args,"'",',env=',env)
 	r=run(*args,env=env)
 	if iswin() and isipy():sleep(1) # 解决 Windows光标下一行错位问题
 	return f,lineno
