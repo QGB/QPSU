@@ -2537,7 +2537,7 @@ def vscode(a='',lineno=0,auto_file_path=True,editor_path=py.No('config this syst
 			else:
 				executor=F.expanduser(r'~\AppData\Local\Programs\Microsoft VS Code\_\Code.exe') 
 	if not a:
-		run(executor)  # def run(
+		run(executor,env=env)  # def run(
 		return executor
 
 	f,lineno=get_obj_file_lineno(a,lineno=lineno,auto_file_path=auto_file_path)
@@ -2545,7 +2545,7 @@ def vscode(a='',lineno=0,auto_file_path=True,editor_path=py.No('config this syst
 	args=[executor,'--reuse-window','--goto','{}:{}'.format(
 		f,lineno
 		)]
-	pln(*args)
+	pln(*args,'env=',env)
 	r=run(*args,env=env)
 	if iswin() and isipy():sleep(1) # 解决 Windows光标下一行错位问题
 	return f,lineno
