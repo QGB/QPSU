@@ -2554,7 +2554,8 @@ def vscode(a='',lineno=0,auto_file_path=True,editor_path=py.No('config this syst
 	return f,lineno
 code=vsc=VSCode=vsCode=vscode
 
-def notePadPlusPlus(a='',lineno=0,auto_file_path=True,editor_path=py.No('config this system editor_path'),):
+def notePadPlusPlus(a='',lineno=0,auto_file_path=True,editor_path=py.No('config this system editor_path'),
+	getExePath=False,):
 	'''
 --------> os.system('"M:\\Program Files\\Notepad++\\notepad++.exe" "IP.py"')
 'M:\Program' 不是内部或外部命令，也不是可运行的程序
@@ -2589,7 +2590,7 @@ in ipy , npp() not autoReload when U.r(), But U.npp()
 		f,lineno=get_obj_file_lineno(a,lineno=lineno,auto_file_path=auto_file_path)
 		return run(npath,f,'-n {0}'.format(lineno))
 	else:
-		run(npath)
+		if not getExePath:run(npath)
 		return npath 
 npp=notePadPlus=notePadPlusPlus
 	
