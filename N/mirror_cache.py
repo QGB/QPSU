@@ -33,7 +33,7 @@ def mirror_cache(*a,**ka):
         
     send_headers={}
     for k,v in request.headers.items():
-        v=v.replace(request.url_root,target_base_url)
+        v=v.replace(request.host,target_host)
         send_headers[k]=v
 
     target=send_request(method=method, 
@@ -43,12 +43,13 @@ def mirror_cache(*a,**ka):
     return target_to_response(target)
 
 def run(target,port=1122,currentThread=True):
-    global app,thread,cache_path,target_base_url
+    global app,thread,cache_path,target_base_url,target_host
     from six.moves.urllib.parse import urlsplit
     up=urlsplit(url=target)
-    target_base_url='{}://{}/'.format(up.scheme,up.netloc)
-
-    cache_path=F.mkdir(up.netloc) # in gst
+    target_host=up.netloc
+    target_base_url='{}://{}/'.format(up.scheme,target_host)
+    
+    cache_path=F.mkdir(target_host) # in gst
     U.log(cache_path)
 
     flaskArgs=py.dict(port=port,host='0.0.0.0',debug=True,threaded=True)
