@@ -2485,7 +2485,7 @@ def get_obj_file_lineno(a,lineno=0,auto_file_path=True):
 		for i in gsm:
 			a=T.sub(a,i[0],i[1]) or a
 		
-		if a.lower.endswith('.pyc'):#AttributeError: 'code' object has no attribute 'endswith'
+		if a.lower().endswith('.pyc'):#AttributeError: 'code' object has no attribute 'endswith'
 			a=a[:-3]+'py'
 		f=a
 		if auto_file_path:
@@ -3273,39 +3273,40 @@ def filterWarningList():
 	import warnings
 	return warnings.filters
 
-def parseArgs(config=[],argv=sys.argv):
+def parseArgs(int=0,str='',float=0.0,dict={},list=[],tuple=py.tuple(),
+			):
 	import argparse
 	parser = argparse.ArgumentParser()
 	parser.add_argument(
 		'--int','-i','-int',# -int 6 ok # -int6 error
-		type=int,
-		default=0,
+		type=py.int,
+		default=int,
 		help='get int.'
 	)
 	parser.add_argument(
 		'--str','--string','-s','-str',# -int 6 
-		type=str,
-		default='',
+		type=py.str,
+		default=str,
 	)
 	parser.add_argument(
 		'--float','-float','-f',
-		type=float,
-		default=0.0,
+		type=py.float,
+		default=float,
 	)	
 	parser.add_argument(
 		'--dict','-dict','-d',
-		type=eval,  # dict       # -c: error: argument --dict/-dict/-d: invalid dict value: '{6:9}'
-		default={},
+		type=py.eval,  # dict       # -c: error: argument --dict/-dict/-d: invalid dict value: '{6:9}'
+		default=dict,
 	)	
 	parser.add_argument(
 		'--list','-list','-l',
-		type=eval,  #list list=['[', '1', ',', '2', ']']
-		default=[],
+		type=py.eval,  #list list=['[', '1', ',', '2', ']']
+		default=list,
 	)	
 	parser.add_argument(
 		'--tuple','-tuple','-t',
-		type=eval,  #
-		default=(),
+		type=py.eval,  #
+		default=tuple,
 	)	
 	
 	FLAGS, unparsed = parser.parse_known_args()

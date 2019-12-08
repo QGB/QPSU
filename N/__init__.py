@@ -105,7 +105,7 @@ flaskArgs=py.dict(debug=0,threaded=True),
 	def _flaskEval():
 		nonlocal globals,locals,pformat_kw
 		code=T.urlDecode(_request.url)
-		code=T.sub(code,':{}/'.format(port) )
+		code=T.sub(code,_request.url_root )
 		U.log( (('\n'+code) if '\n' in code else code)[:99]	)
 		# U.ipyEmbed()()
 		_response=make_response()

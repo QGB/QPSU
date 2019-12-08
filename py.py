@@ -230,7 +230,8 @@ def importN():
 	return from_qgb_import('N')
 def importF():
 	return from_qgb_import('F')
-	
+def importUTNF():
+	return map(from_qgb_import,'UTNF')
 	
 def traceback(ae=None):
 	import traceback

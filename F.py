@@ -153,6 +153,18 @@ def dill_dump(obj,file=None,protocol=None):
 	'''
 	dill.dump(obj, file, protocol=None, byref=None, fmode=None, recurse=None)
 	dill.dumps(obj, protocol=None, byref=None, fmode=None, recurse=None)
+
+	ValueError: pickle protocol must be <= 4 
+r=request.get ...
+F.readableSize(len(F.dill_dump(protocol=None,obj=r)  ) )#'14.192 KiB'
+
+F.readableSize(len(F.dill_dump(protocol=0,obj=r)  ) )   #'15.773 KiB'
+F.readableSize(len(F.dill_dump(protocol=1,obj=r)  ) )   #'19.177 KiB'
+F.readableSize(len(F.dill_dump(protocol=2,obj=r)  ) )   #'18.972 KiB'
+F.readableSize(len(F.dill_dump(protocol=3,obj=r)  ) )   #'14.192 KiB'
+F.readableSize(len(F.dill_dump(protocol=4,obj=r)  ) )   #'13.694 KiB'
+
+
 	'''
 	import dill
 	if file:
@@ -472,7 +484,7 @@ def read(file,mod='r',returnFile=False,encoding=''):
 	# try:
 	file=autoPath(file)
 	if py.is2():f=py.open(file,mod)
-	else:
+	else:#is3
 		encoding=encoding or detectEncoding(file,confidence=0.9,default='utf-8')
 		#utf-8 /site-packages/astropy/coordinates/builtin_frames/__init__.py  {'confidence': 0.73, 'encoding': 'Windows-1252'
 		f=py.open(file,mod,encoding=encoding)
@@ -489,7 +501,11 @@ def read(file,mod='r',returnFile=False,encoding=''):
 def read_bytes(file):
 	'''is2 rb return str'''
 	file=autoPath(file)
-	return py.open(file,'rb').read()
+	try:
+		with py.open(file,'rb') as f:
+			return f.read()
+	except Exception as e:
+		return py.No(e,file)
 readb=readByte=readBytes=read_byte=read_bytes	
 
 def read_json(file,encoding=None):
@@ -861,21 +877,26 @@ def makeDirs(ap,isFile=False):
 		if p.is_file():#if not exists, is_dir() is_file() both return False
 			if isFile:
 				return makeDirs(p.parent,isFile=False)
-			return py.No(ap,'exists , and it is a file')
-		e=py.No('None unexpected Exception')
+			return py.No(ap+' exists , and it is a file')
+		r=py.No('unexpected err')
 		try:
 			p.mkdir()
 		except (FileNotFoundError,):
-			makeDirs(p.parent,isFile=False)
-			p.mkdir() # 建立父目录后，再次尝试创建本目录
+			r=makeDirs(p.parent,isFile=False)
+			if r:p.mkdir() # 建立父目录后，再次尝试创建本目录 
+			else:return r
+			#但是如果父目录本来是个文件，再mkdir则FileNotFoundError: [WinError 3] 系统找不到指定的路径。
 		except FileExistsError:
 			pass
 		except Exception as e:
-			pass
+			r=e
 		if p.exists():
-			return py.str(p)
+			sp=autoPath(p)
+			if p.is_dir() and not sp.endswith('/'):
+				sp+='/'
+			return sp
 		else:
-			return py.No('unexpected dir not exists',p,e)
+			return py.No(r,p)
 			
 	U=py.importU()
 	sp=getSplitor(ap)
