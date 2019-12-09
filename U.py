@@ -1258,7 +1258,7 @@ def setLogLevel(level=False):
 	''' logging.CRITICAL #50
 	'''
 	
-	if level==True:level=0
+	if level==True:level=-1 # 0 useless
 	if level==False:
 		level=50		
 		import urllib3
@@ -1274,9 +1274,11 @@ def setLogLevel(level=False):
 	# log.setLevel(logging.CRITICAL) #50
 setlog=setLogLevel
 
-def disableLog(a=True):
-	return setLogLevel((not a))
-	
+def disableLog():return setLogLevel(False)
+disable_log=disableLog
+def enableLog():return setLogLevel(True)
+enable_log=enableLog
+
 def setStd(name,file):
 	'''name=[std]out err in'''
 	name=name.lower()
@@ -2269,7 +2271,7 @@ def getModPath(mod=None,qgb=True,slash=True,backSlash=False,endSlash=True,endsla
 	else:sp=sp.replace('\\','/')
 
 	return sp
-get_qpsu_path=getQpsuPath=get_module_path=getModPath
+get_qpsu_path=getQPSUPath=getQpsuPath=get_module_path=getModPath
 
 def slen(a,*other):
 	return py.repr(len(a,*other) )
@@ -2280,6 +2282,8 @@ def len(obj,*other):
 def hash(obj,*other):
 	'''Exception return py.No or [no...]'''
 	return builtinFuncWrapForMultiArgs(builtinFunc=py.hash,args=(obj,other))
+def id(obj,*other):
+	return builtinFuncWrapForMultiArgs(builtinFunc=py.id,args=(obj,other))
 
 def builtinFuncWrapForMultiArgs(builtinFunc,args,default=None):
 	'''Exception return py.No'''
@@ -3097,10 +3101,23 @@ def getLastException():
 		return	getException.__doc__
 lastErr=err=geterr=getErr=error=getException=getLastException
 
-def print_tb():
+def print_traceback_in_except():
+	'''
+try:
+    raise Exception
+except:
+    U.print_tb()  # has effect
+finally:
+    U.print_tb()  # None
+'''
 	import traceback
 	ex_type, ex, tb_obj = sys.exc_info()
 	traceback.print_tb(tb_obj)
+print_tb=print_traceback=print_traceback_in_except
+
+def print_stack():
+	import traceback
+	traceback.print_stack()
 
 def getClassHierarchy(obj):
 	'''In [68]: inspect.getmro?
@@ -3377,8 +3394,78 @@ def mutableString(obj):
 
 	return MutableString(obj)		
 
-class valueOfArgs():
+
+SKIP_ATTR_NAMES=[
+	'_ipython_canary_method_should_not_exist_','_repr_mimebundle_',
+	'__class__',#TypeError: 'NoneType' object is not iterable
+	'__mro__',
+	# '__init__', '__getattr__', '__parent_repr__', '__repr__',
+	# '_name',
+	]
+ValueOfAttr_NAMES=['__init__',
+ '__parent__',
+ '__child__',
+ '__getattr__',
+ '__getattribute__',
+ '__name__',
+#  '__call__',
+ '__str__',
+ '__parent_str__',
+ '__repr__',
+#  '__parent_repr__',
+ ]
+class ValueOfAttr(py.object):
 	'''  '''
+	def __init__(self,parent=None):
+		self.__parent__=parent
+		self.__child__=None
+
+	# def __getattr__(self, name):
+	def __getattribute__(self, name):
+		# log([id(self),name])
+		
+		if name in SKIP_ATTR_NAMES:
+			return
+		if name in ValueOfAttr_NAMES:
+			try:
+				return py.object.__getattribute__(self, name)
+			except Exception as e:
+				if name=='__name__':return ''
+				raise e
+
+		if name=='__class__':return ValueOfAttr()
+		
+		if name=='__call__':#不会调用实例上的 ,只会检查 类上有没有特殊方法
+			print_stack()
+			return __call__ 
+		
+		self.__name__=name
+
+		self.__child__= ValueOfAttr(parent=self)
+		return self.__child__
+
+	def __call__(self, *args, **kwargs):
+		# return print_stack()
+		r='('
+		for a in args:
+			r+=repr(a)+','
+		for k,v in kwargs.items():
+			r+='{}={},'.format(k,v)
+		r+=')'
+		return self.__str__()+r
+
+	def __parent_str__(self):
+		if self.__parent__==None:return ''
+		if not self.__child__:return py.str(self.__parent__)
+		return py.str(self.__parent__)+'.'
+
+	def __repr__(self):return self.__str__()
+	def __str__(self):
+		# return stime()
+		# if self.__name__=
+		# log([self.__parent_str__(),self.__name__])
+		return self.__parent_str__()+self.__name__
+
 
 #############################
 def main(display=True,pressKey=False,clipboard=False,escape=False,c=False,ipyOut=False,cmdPos=False,reload=False,*args):
