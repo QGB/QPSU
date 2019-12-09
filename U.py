@@ -2475,9 +2475,10 @@ def get_obj_file_lineno(a,lineno=0,auto_file_path=True):
 		if not lineno and py.len(a)>1 and py.isint(a[1]):lineno=a[1]
 		f=a[0]
 		return f,lineno
-	if py.isfile(a):
-		f=a.name
+	if py.isfile(a) and py.getattr(a,'name',''):
+		f=a.name  # 只能处理文件，其他file对象 AttributeError: 'HTTPResponse' object has no attribute 'name'
 		return f,lineno
+	
 	#########################多个 elif 只会执行第一个匹配到的
 	if py.istr(a):
 		gsm=[['qgb.ipy.save ',' success!'],
@@ -2494,10 +2495,11 @@ def get_obj_file_lineno(a,lineno=0,auto_file_path=True):
 				f=F.auto_file_path(f)
 		return f,lineno
 	else:
-		if py.getattr(a,'__module__',None):
-			a=getModule(a)#python无法获取class行数？https://docs.python.org/2/library/inspect.html
-			return get_obj_file_lineno(a=a,lineno=lineno,auto_file_path=auto_file_path)
-	raise ArgumentUnsupported(a)
+		# if py.getattr(a,'__module__',None):  
+		# #最后的情况，不要判断 get_module 会自动raise ArgumentUnsupported
+		a=get_obj_module(a)#python无法获取class行数？https://docs.python.org/2/library/inspect.html
+		return get_obj_file_lineno(a=a,lineno=lineno,auto_file_path=auto_file_path)
+	
 		
 def vscode(a='',lineno=0,auto_file_path=True,editor_path=py.No('config this system editor_path'),):
 	'''
@@ -2751,7 +2753,7 @@ def getModule(modName=None,surfixMatch=True):
 		modName=modName[4:]
 		return getModule(modName)
 	return ()
-getmod=getMod=getModule
+get_obj_module=get_module=getmod=getMod=getModule
 
 def test():
 	pln('sys.path *U* :',[i for i in sys.modules if 'U' in i])

@@ -14,6 +14,7 @@ app=Flask(__name__)
 N.rpcServer(locals=globals(),app=app,key='rpc')
 
 def target_to_response(target):
+    b=target.raw._fp._safe_read()
     response=make_response()
     response.status_code=target.status_code
     response.headers._list=list(target.headers.items())
@@ -39,16 +40,16 @@ def mirror_cache(*a,**ka):
     target=send_request(method=method, 
         url=target_base_url+path, 
         params=request.args, headers=send_headers, )
+    response= target_to_response(target)
     F.dill_dump(protocol=4,obj=target,file=fn)
-    return target_to_response(target)
-
+    return response
 def run(target,port=1122,currentThread=True):
     global app,thread,cache_path,target_base_url,target_host
     from six.moves.urllib.parse import urlsplit
     up=urlsplit(url=target)
     target_host=up.netloc
     target_base_url='{}://{}/'.format(up.scheme,target_host)
-    
+
     cache_path=F.mkdir(target_host) # in gst
     U.log(cache_path)
 
