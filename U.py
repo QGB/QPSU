@@ -1736,7 +1736,7 @@ range(start, stop[, step])
 	
 def isModule(a):
 	return type(a) is module
-isMod=ismod=ismodule=isModule
+is_module=isMod=ismod=ismodule=isModule
 
 def getHelp(a,del_head_line=0):
 	import pydoc,re
@@ -1861,7 +1861,7 @@ def getDate():
 date=getdate=getDate
 	
 def getFloaTail(a,ndigits=20,s=False,str=False,string=False,i=False,int=False):
-	''' see help round()
+	''' see help(round)
  0.1**5
  1.0000000000000003e-05
 
@@ -2269,6 +2269,7 @@ def getModPath(mod=None,qgb=True,slash=True,backSlash=False,endSlash=True,endsla
 	else:sp=sp.replace('\\','/')
 
 	return sp
+get_qpsu_path=getQpsuPath=get_module_path=getModPath
 
 def slen(a,*other):
 	return py.repr(len(a,*other) )
@@ -2481,7 +2482,7 @@ def get_obj_file_lineno(a,lineno=0,auto_file_path=True):
 	
 	#########################多个 elif 只会执行第一个匹配到的
 	if py.istr(a):
-		gsm=[['qgb.ipy.save ',' success!'],
+		gsm=[('qgb.ipy.save ',' success!'),
 				]
 		for i in gsm:
 			a=T.sub(a,i[0],i[1]) or a
@@ -2491,8 +2492,7 @@ def get_obj_file_lineno(a,lineno=0,auto_file_path=True):
 		f=a
 		if auto_file_path:
 			F=py.importF()
-			if not F.isabs(f):
-				f=F.auto_file_path(f)
+			f=F.auto_file_path(f)
 		return f,lineno
 	else:
 		# if py.getattr(a,'__module__',None):  
@@ -3376,7 +3376,10 @@ def mutableString(obj):
 			return len(self.data)
 
 	return MutableString(obj)		
-	
+
+class valueOfArgs():
+	'''  '''
+
 #############################
 def main(display=True,pressKey=False,clipboard=False,escape=False,c=False,ipyOut=False,cmdPos=False,reload=False,*args):
 	anames=py.tuple([i for i in py.dir() if not i .startswith('args')])
