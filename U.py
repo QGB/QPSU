@@ -3408,11 +3408,11 @@ ValueOfAttr_NAMES=['__init__',
  '__getattr__',
  '__getattribute__',
  '__name__',
-#  '__call__',
  '__str__',
  '__parent_str__',
  '__repr__',
-#  '__parent_repr__',
+'__v__',
+#  '__call__',
  ]
 class ValueOfAttr(py.object):
 	'''  '''
@@ -3448,11 +3448,12 @@ class ValueOfAttr(py.object):
 		# return print_stack()
 		r='('
 		for a in args:
-			r+=repr(a)+','
+			r+=pformat(v) +','
 		for k,v in kwargs.items():
-			r+='{}={},'.format(k,v)
+			r+='{}={},'.format(k,pformat(v) )
 		r+=')'
-		return self.__str__()+r
+		self.__v__ = self.__str__()+r
+		print(self.__v__)
 
 	def __parent_str__(self):
 		if self.__parent__==None:return ''
