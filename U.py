@@ -3465,7 +3465,7 @@ class ValueOfAttr(py.object):
 		# if self.__name__=
 		# log([self.__parent_str__(),self.__name__])
 		return self.__parent_str__()+self.__name__
-
+v=ValueOfAttr()
 
 #############################
 def main(display=True,pressKey=False,clipboard=False,escape=False,c=False,ipyOut=False,cmdPos=False,reload=False,*args):
