@@ -3447,7 +3447,7 @@ class ValueOfAttr(py.object):
 	def __call__(self, *args, **kwargs):
 		# return print_stack()
 		r='('
-		for a in args:
+		for v in args:
 			r+=pformat(v) +','
 		for k,v in kwargs.items():
 			r+='{}={},'.format(k,pformat(v) )
