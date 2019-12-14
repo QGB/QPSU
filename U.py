@@ -1742,7 +1742,7 @@ def getArgsDict(*args,**kwargs):
 		v=recursive_find(am) 
 		return py.dict(e=e,frame=frame,rd=rd,lines=lines,a=args,v=v,v_args=v.args,   )
 	
-getargspec=getargs=getarg=getArgs=getArgsDict
+get_arg=get_args=get_caller_args=getargspec=getargs=getarg=getArgs=get_args_dict=getArgsDict
 
 def getattr(object, *names,default=None):
 	''' py2.7 

@@ -105,7 +105,9 @@ def diff_bytes(b1,b2,p=True):
 	r=b''.join(r)
 	if p:
 		print(r)
-	else:rf.insert(0,r)
+	else:
+		rf.insert(0,' '*33)
+		rf.insert(0,r)
 
 	return rf
 diffb=diffBytes=diff_bytes
