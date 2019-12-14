@@ -1514,22 +1514,24 @@ pa=printattr=printAttr
 # repl()
 # printAttr(5)
 
-def dir(a,filter='',type=py.No):
-	r=[i for i in py.dir(a) if filter in i]
+def dir(a,filter='',type_filter=py.No,raw_value=False):
+	attrs=[i for i in py.dir(a) if filter in i]
 	rv=[]
 	err=py.No("#can't getattr ")
-	for i in r:
+	for i in attrs:
 		ok=True
 		v=getattr(a,i) # py.getattr(a,i,err)
-		if type!=py.No:#type!=py.no写的什么玩意？没看懂 2019-1-25 13:29:03         只要满足以下一条 就ok
+		if (not raw_value) and i in {'f_globals','f_locals','f_builtins'}:
+			v='{} : {}'.format(py.len(v),' '.join(v) )
+		if type_filter!=py.No:# 类型过滤 ,过滤只剩type_filter类型（如果指定了的话）        只要满足以下一条 就ok
 			ok=False
-			if py.istr(type):type=type.lower()
+			if py.istr(type_filter):type_filter=type_filter.lower()
 			
-			if type==py.callable or type=='callable':
-				if ok or py.callable(v):ok=1
-				else:                   ok=0
+			if type_filter==py.callable or type_filter=='callable':
+				if py.callable(v):ok=1
+				else:             ok=0
 			#############
-			if ok or py.type(v) is type or isinstance(v,type) or py.type(v)==py.type(type):
+			if ok or py.type(v) is type_filter or isinstance(v,type_filter) or py.type(v)==py.type(type_filter):
 				ok=1
 			else:ok=0
 			
@@ -1682,13 +1684,65 @@ name=getArgName=getVarName
 # repl()
 # exit()
 # getVarName(1l)
-def getArgs(a):
-	import inspect
+def ast_parse(source):
+	''' _ast.Module  '''
+	import ast
+	if py.istuple(source):
+		source=source[0]
+	if py.islist(source):
+		source=''.join(source) 
+	return ast.parse(source)
+
+def getArgsTest(a,b,c,d=2,**ka):
+	return getArgsDict()
+
+def getArgsDict(*args,**kwargs):
+	''' MUST BE FIRST LINE in caller '''
+	import inspect,ast
+	F=py.importF()
+	frame=inspect.currentframe()
+	if args or kwargs:
+		rd=py.dict(kwargs)
+	else:
+		frame=frame.f_back
+		args=[]
+		rd={}
+		for k ,v in frame.f_locals.items():
+			args.append(v)
+		else:
+			if args :
+				if py.isdict(v):
+					rd=v
+					args.pop()
+				else:rd={}
+		
+	# while F.dir(frame.f_back.f_code.co_filename).endswith('qgb'):
+	tb=inspect.getframeinfo(frame.f_back)
+	# return frame
+	lines, lnum=inspect.findsource(frame.f_back)
+	am=ast.parse(''.join(lines) )
+	def recursive_find(am):
+		for a in py.reversed(am.body):
+			if a.lineno > tb.lineno:
+				continue
+			if py.isinstance(a,(ast.ClassDef,ast.FunctionDef) ):
+				return recursive_find(a)
+			if py.isinstance(a,(ast.Assign,ast.Expr,) ):
+				v=a.value
+				if py.isinstance(v,ast.Call) :# and 'arg' in v.func.attr.lower():
+					return v
 	try:
-		return inspect.getargspec(a)
+		for ia,va in enumerate(recursive_find(am).args ):
+			name=astToSourceCode(va).strip()
+			if name[0]=='(' and name[-1]==')':name=name[1:-1]
+			rd[name]=args[ia]
+		return rd
 	except Exception as e:
-		return py.No(e)
-getargspec=getargs=getarg=getArgs
+		log(e)
+		v=recursive_find(am) 
+		return py.dict(e=e,frame=frame,rd=rd,lines=lines,a=args,v=v,v_args=v.args,   )
+	
+getargspec=getargs=getarg=getArgs=getArgsDict
 
 def getattr(object, *names,default=None):
 	''' py2.7 
@@ -3423,7 +3477,6 @@ class ValueOfAttr(py.object):
 	# def __getattr__(self, name):
 	def __getattribute__(self, name):
 		# log([id(self),name])
-		
 		if name in SKIP_ATTR_NAMES:
 			return
 		if name in ValueOfAttr_NAMES:

@@ -5,6 +5,7 @@ else:#['T','__main__']
 	import py
 FILE_NAME=fileChars=FILE_CHARS="!#$%&'()+,-0123456789;=@ABCDEFGHIJKLMNOPQRSTUVWXYZ[]^_`abcdefghijklmnopqrstuvwxyz{}~"+' .'
 PATH_NAME=pathChars=PATH_CHARS='/\\:'+FILE_NAME# include space, dot
+NOT_FILE_NAME=r'"*/:<>?\|'
 
 az=a_z='abcdefghijklmnopqrstuvwxyz'
 AZ=A_Z=a_z.upper()
@@ -84,8 +85,32 @@ def justify(s,size,fillchar=' ',method='ljust'):
 def encode(s,encoding):
 	'''
 	'''
-	
-def diff(expected, actual):
+
+def diff_bytes(b1,b2,p=True):
+	all_args=py.importU().getArgsDict()
+	U=py.importU();F=py.importF()
+	sp=F.mkdir(diff_bytes.__name__)
+	rf=[]
+	for k,v in  all_args.items():
+		# print(k,v)
+		if not py.isbytes(v):continue
+		f=F.write('{}{}={}'.format(sp,filename_legalized(k),len(v), ) ,v)
+		rf.append(f)
+
+	if py.isbytes(b1):b1=b1.splitlines()
+	if py.isbytes(b2):b2=b2.splitlines()
+	import difflib
+	context = difflib.context_diff
+	r=difflib.diff_bytes(context, b1 ,b2 )
+	r=b''.join(r)
+	if p:
+		print(r)
+	else:rf.insert(0,r)
+
+	return rf
+diffb=diffBytes=diff_bytes
+
+def diff(expected, actual,p=True):
 	"""
 	Helper function. Returns a string containing the unified diff of two multiline strings.
 	"""
@@ -95,8 +120,11 @@ def diff(expected, actual):
 	actual=actual.splitlines(1)
 
 	diff=difflib.unified_diff(expected, actual)
-
-	return ''.join(diff)
+	r=''.join(diff)
+	if p:
+		print(r)
+	else:
+		return r
 	
 def join(iterable,separator=','):
 	if py.istr(iterable):return iterable
@@ -718,11 +746,13 @@ def replacey(a,olds,new):
 	return a
 	
 	
-def replaceAll(a,old,new):
+def replace_all(a,old,new):
 	''' S.replace(old, new[, count]) -> string'''
 	while old in a:
 		a=a.replace(old,new)
 	return a
+replaceAll=replace_all
+
 def varname(a):
 	sv=az+'_'
 	if a[0] in sv:r=''
@@ -734,17 +764,29 @@ def varname(a):
 	return r
 	# return replacey(a,'_',':','.','\\','/','-','"',' ','\n','\r','\t','[',']')
 # U.pln( varname(i09)
-def fileNameLegalized(a,default='_'):
+
+def filename_legalized(a):
 	if not py.istr(a):a=string(a)
 	r=''
-	for i in range(len(a.strip() )  ):
-		if (a[i] in FILE_NAME) or hasZh(a[i] ):
-			r+=a[i]
-		else:r+=default
+	for c in a.strip():
+		if c in NOT_FILE_NAME:
+			r+=py.chr(py.ord(c)+0XFEE0)
+		else:r+=c
 	return r
-fileName=filename=fileNameLegalized
+fileName=filename=fileNameLegalized=file_legalized=filename_legalized
 # filename.__str__=FILE_NAME	
-	
+
+def pathname_legalized(a):
+	F=py.importF()
+	a=F.auto_path(a)
+	r=''
+	for n,c in py.enumerate(a.strip()):
+		if  (c in r'"*<>?|') or (c==':' and n!=1):
+			r+=py.chr(py.ord(c)+0XFEE0)
+		else:r+=c
+	return r
+pathName=pathname=path_legalized=pathname_legalized
+
 def haszh(a):
 	zhPattern = re.compile(u'[\u4e00-\u9fa5]+')
 	match = zhPattern.search(a)
