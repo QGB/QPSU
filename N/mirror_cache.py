@@ -17,6 +17,7 @@ def target_to_response(target):
     response=make_response()
     response.status_code=target.status_code
     response.headers._list=list(target.headers.items())
+    response.headers['Content-Security-Policy']=''
     response.headers['Content-Encoding']='utf-8'
     response.set_data(target.content)
     return response
