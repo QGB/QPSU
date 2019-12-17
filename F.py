@@ -874,9 +874,9 @@ def makeDirs(ap,isFile=False):
 		from pathlib import Path
 		p=Path(ap)
 		
+		if isFile:
+			return makeDirs(p.parent,isFile=False)
 		if p.is_file():#if not exists, is_dir() is_file() both return False
-			if isFile:
-				return makeDirs(p.parent,isFile=False)
 			return py.No(ap+' exists , and it is a file')
 		r=py.No('unexpected err')
 		try:
