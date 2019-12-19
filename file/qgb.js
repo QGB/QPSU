@@ -111,6 +111,13 @@ async function tab_update(tab,url){
    })
 }
 
+async function tab_remove(tab){
+    return new Promise(function (resolve, reject) {
+      chrome.tabs.remove(tab.id,function() { 
+        resolve(arguments)
+      })
+   })
+}
 
 
 //await tab_exec( await tab_current()  ,    'alert(new Date() )  '  )
@@ -119,12 +126,13 @@ async function tab_update(tab,url){
 //最好这个要阻塞，但是没找到好办法。要不只能轮询
 sg= _CODE(function(){
     us=Array.from(document.querySelectorAll('dl.item')).map(i=>i.querySelector('img') ).map(img=>img.src )
-    ds=Array.from(document.querySelectorAll('dl.item')).map(i=>i.outerHTML )
+    dis=Array.from(document.querySelectorAll('dl.item')).map(i=>i.outerHTML )
+    ds=[location.href , document.documentElement.outerHTML]
     imgs=[]
     async function main(){
     await post("https://okfw.net/r=t=T.json_loads(request.get_data());ts.append(t) ", new Date() )
-       await post("https://okfw.net/ud=T.json_loads(request.get_data());ds.append(ud);r=len(ds) ", [location.href , document.documentElement.outerHTML] )
-       await post("https://okfw.net/lds=T.json_loads(request.get_data());dis.append(lds);r=len(dis) ", ds )
+       await post("https://okfw.net/ud=T.json_loads(request.get_data());ds[ud[0]]=ud[1];r=len(ds) ", ds )
+       await post("https://okfw.net/lds=T.json_loads(request.get_data());dis.append(lds);r=len(dis) ", dis )
        imgs= await Promise.all(   us.map(async u=>[u,await get_img_b64(u)] ) );
        await post("https://okfw.net/ll=T.json_loads(request.get_data());imgs.append(ll);r=len(imgs) ", imgs )
 
@@ -139,14 +147,68 @@ sg= _CODE(function(){
 
 })
 
+
 async function ext_main(){
     var t=(await tab_query({url: "https://youxin-electronic.taobao.com/*"}) )[0]
-    
-    r=await tab_exec(t, sg )
+    url="https://youxin-electronic.taobao.com/search.htm?orderType=price_asc&pageNo="+1
+    while(url && url.length>9){
+        check=await post("https://okfw.net/url=T.json_loads(request.get_data());r=in_ds(url)",url)
+        if(check==='False' && t.url!=url){
+            await tab_update(t,url)   
+            t=(await tab_query({url: "https://youxin-electronic.taobao.com/*"}) )[0]
+        }
+        if(check==='True'){
+            var max=await post("https://okfw.net/r=max_ds()")
+            url="https://youxin-electronic.taobao.com/search.htm?orderType=price_asc&pageNo="+(parseInt(max)+1)
+            continue
+        }
 
-    if(next.style.background==="green")
+        
+        await sleep(888)
+        await tab_exec(t, sg )
+        await sleep(399)
+        for(var i of [0,1,2,3,4,5,6,7,8]){
+           console.log(i)
+           if(i%3==0){ await tab_exec(t, sg ) }
+           next=await tab_exec(t, _CODE(function(){
+               r=""
+               tmp=document.querySelector('.pagination-mini')
+               if(tmp){
+                    next=Array.from(tmp.querySelectorAll('a'))[1]
+                   if(next.style.background==="green") r=next.href 
+               }else{
+                   r='reload'
+               }
+                
 
-    return r
+            }))
+            if(next==='reload'){
+                await tab_update(t,url)   
+                t=(await tab_query({url: "https://youxin-electronic.taobao.com/*"}) )[0]
+                await sleep(888)
+                await tab_exec(t, sg )
+                await sleep(399)
+                continue
+            }
+
+
+            if(!next.startsWith('http') ){
+                await sleep(499)
+                continue   
+            }else{
+                url=next
+                break
+            }
+            
+
+        }
+        
+    }
+
+    console.log(await post("https://okfw.net/r=done=U.stime()") )
+ 
+
+
 }
 
 //////////////////////////////////////////////////////////////////

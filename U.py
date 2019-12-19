@@ -1111,13 +1111,17 @@ Return a random integer N such that a <= N <= b.'''
 	return random.randint(min, max)
 randint=ramdomInt=randomInt
 
-def sort(a,column=0, cmp=None, key=None, reverse=False):
+def sort(a,column=None, cmp=None, key=None, reverse=False):
 	''' py2&py3  sorted _3 ,key=lambda i:len(i)        按长度从小到大排序
 	在python2.x  sorted _5,cmp=lambda a,b:len(a)-len(b) 实现同上功能， 一般不用cmp 参数
-	sorted中cmp参数指定的函数用来进行元素间的比较。此函数需要2个参数，然后返回负数表示小于，0表示等于，正数表示大于。'''
+	sorted中cmp参数指定的函数用来进行元素间的比较。此函数需要2个参数，然后返回负数表示小于，0表示等于，正数表示大于。
+	#这句可能写错了 a:item of sort list   |  *a: (item,) 
+	'''
 	repr=py.repr
 	
-	def key_func(ai,size=99):#a:item of sort list   |  *a: (item,)
+	def key_func(ai,size=99,is_column=True):# ai :  item of a
+		
+		if is_column and py.isint(column) and column > -1:ai=ai[column]
 		if py.isnum(ai):
 			return ai
 		elif py.istr(ai):
@@ -1131,9 +1135,9 @@ def sort(a,column=0, cmp=None, key=None, reverse=False):
 				r+=py.ord(b)*(256**n)
 			return r
 		else:
-			if column>0:ai=ai[column]
 			ai=py.repr(ai)[:size] # 不会再次回到这个分支，istr
-			return key(ai=ai,size=size)
+			return key(ai=ai,size=size,is_column=False)
+
 	if not key:key=key_func
 	#TypeError: '<' not supported between instances of 'int' and 'str';key=None also err
 	if py.is2():
@@ -3520,6 +3524,38 @@ class ValueOfAttr(py.object):
 		# log([self.__parent_str__(),self.__name__])
 		return self.__parent_str__()+self.__name__
 v=ValueOfAttr()
+
+class StrRepr(str):
+	''' padding_times=0,padding='\t'
+str(object='') -> str
+str(bytes_or_buffer[, encoding[, errors]]) -> str
+
+
+'''
+	def __new__(cls, *a, **ka):
+		'''
+U.StrRepr(3232) ##					[<class 'qgb.U.StrRepr'>, (3232 , ), {}] 
+U.StrRepr(b'3232',encoding='ascii')	[<class 'qgb.U.StrRepr'>, (b'3232',), {'encoding': 'ascii'}]
+		 '''
+		# string=a[0]
+		# if py.isnum(string):
+		# 	string=py.str(string)
+		# if not py.istr(string):
+		# 	raise ArgumentError('must str,but got',string)
+		# self.string=string
+		StrRepr.padding=ka.pop('padding','\t')
+		StrRepr.padding_times=ka.pop('padding_times;',0)
+		StrRepr.padding_times=ka.pop('pi',StrRepr.padding_times)
+		StrRepr.padding_times=ka.pop('ip',StrRepr.padding_times)
+		StrRepr.padding_times=ka.pop('times',StrRepr.padding_times)
+		StrRepr.padding_times=ka.pop('width',StrRepr.padding_times)
+		
+		return str.__new__(cls, *a, **ka)
+
+	def __repr__(self):return self.__str__()
+	def __str__(self) :return (StrRepr.padding*StrRepr.padding_times)+ super().__str__() +(StrRepr.padding*StrRepr.padding_times)
+	
+
 
 #############################
 def main(display=True,pressKey=False,clipboard=False,escape=False,c=False,ipyOut=False,cmdPos=False,reload=False,*args):
