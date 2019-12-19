@@ -559,12 +559,22 @@ def bytesToBase64(a):
 	else:
 		return base64.b64encode(a)
 
-def base64decode(a):
+def base64_to_str(a):
 	import base64
 	if py.istr(a):
 		return detectAndDecode(base64.b64decode(a))
 	if py.isbyte(a):
 		return base64.b64decode(a) #type bytes
+base64decode=b64_str=base64_to_str	
+
+def base64_to_bytes(a):
+	import base64
+	if py.istr(a):
+		return base64.b64decode(a)
+	if py.isbyte(a):
+		return base64.b64decode(a) #type bytes
+b64_bytes=base64_to_bytes	
+
 		
 def strToBaseN(a,base=64,symbols=None):
 	if not symbols:symbols=gdBaseN[base]

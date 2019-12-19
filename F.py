@@ -934,7 +934,7 @@ def makeDirs(ap,isFile=False):
 md=mkdir=makeDirs		
 
 gbAutoPath=True
-def autoPath(fn,default=''):
+def autoPath(fn,default='',dir=False):
 	''' default is U.gst
 if fn.startswith("."): 如果路径中所有文件夹存在，则可以写入读取。否则无法写入读取。file io 都是这个规则吧
 FileNotFoundError: [Errno 2] No such file or directory: '.
@@ -949,8 +949,6 @@ FileNotFoundError: [Errno 2] No such file or directory: '.
 		default=U.gst
 	fn=str(fn)
 	fn=fn.replace('\\','/')
-	if fn.startswith("."):#TODO to avoid dos max_path ,  must \ full path
-		return fn;
 		
 	if fn.startswith("~/"):
 		import os
@@ -960,13 +958,15 @@ FileNotFoundError: [Errno 2] No such file or directory: '.
 			home=os.getenv('USERPROFILE')# 'C:/Users/Administrator'  not  cyg home os.getenv('HOME')
 		# else:		home=os.getenv('HOMEPATH')#  HOMEPATH=\Users\Administrator
 		fn= home+fn[1:];
-	
-	if not isAbs(fn):
+
+	#TODO to avoid dos max_path ,  must \ full path 2019年12月19日 不记得什么意思？ 
+	if (not fn.startswith(".")) and (not isAbs(fn)) :
 		while fn.startswith('/'):fn=fn[1:]
 		fn= default + fn
 	
 	if py.len(fn)>=260 and U.iswin():
 		fn=nt_path(fn)
+	if(dir and not fn.endswith('/')):fn+='/'
 	return fn
 auto_file_path=auto_path=autoPath
 
