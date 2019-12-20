@@ -224,13 +224,14 @@ async function taobao_get_item(){
             main()
 			r=new Date()
         }))
-        await sleep(444)
+        await sleep(1444)
         url=await post("https://okfw.net/r=u=yx_url()")
         await tab_update(t,url)  
-        await sleep(555)
+        await sleep(1555)
         t=await tab_query({url: "https://item.taobao.com/item.htm*"})
     
     }
+    console.log('done')
 }
 
 //////////////////////////////////////////////////////////////////
