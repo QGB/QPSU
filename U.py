@@ -1893,7 +1893,13 @@ def mergeList(*a):
 		r.extend(i)
 	return r
 add_list=addList=merge_list=mergeList
-	
+
+def itime_sec():
+	return py.int(timestamp())
+def itime_ms():
+	return py.int(timestamp()*1000)
+itime_js=itime_ms
+
 def strTimeStamp():
 	return py.str(getTimestamp())
 stimestamp=strTimeStamp	
@@ -1908,7 +1914,7 @@ In [305]: U.time
 Out[305]: 1490080571.125
 '''
 	return __import__('time').time()
-timestamp=getTimeStamp=getTimestamp
+ftime=timestamp=getTimeStamp=getTimestamp
 
 def getTime():
 	from datetime import datetime
@@ -1974,6 +1980,22 @@ def getStime(time=None,format=gsTimeFormatFile,ms=True):
 		else:return tMod.strftime(format)
 stime=getCurrentTimeStr=timeToStr=getStime
 	
+def float(x):
+	''' float(x=0, /)  Subclasses:     float64
+0.07999999999999999  hangs	
+	'''
+	r=py.float(x)
+	# for i in range(99):
+	while True:
+		s=py.str(r)
+		if '0'*12 in s:
+			r-=(0.1**16)
+		elif '9'*12 in s:
+			r+=(0.1**16)
+		else:
+			break
+	return r
+
 def int(a,default=None):
 	# if not a:return default
 	try:
@@ -3545,11 +3567,12 @@ U.StrRepr(b'3232',encoding='ascii')	[<class 'qgb.U.StrRepr'>, (b'3232',), {'enco
 		# self.string=string
 		StrRepr.padding=ka.pop('padding','\t')
 		StrRepr.padding_times=ka.pop('padding_times;',0)
+		StrRepr.padding_times=ka.pop('padding_width',StrRepr.padding_times)
 		StrRepr.padding_times=ka.pop('pi',StrRepr.padding_times)
 		StrRepr.padding_times=ka.pop('ip',StrRepr.padding_times)
 		StrRepr.padding_times=ka.pop('times',StrRepr.padding_times)
 		StrRepr.padding_times=ka.pop('width',StrRepr.padding_times)
-		
+
 		return str.__new__(cls, *a, **ka)
 
 	def __repr__(self):return self.__str__()
