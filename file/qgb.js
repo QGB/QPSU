@@ -130,16 +130,15 @@ sg= _CODE(function(){
     ds=[location.href , document.documentElement.outerHTML]
     imgs=[]
     async function main(){
-    await post("https://okfw.net/r=t=T.json_loads(request.get_data());ts.append(t) ", new Date() )
-       await post("https://okfw.net/ud=T.json_loads(request.get_data());ds[ud[0]]=ud[1];r=len(ds) ", ds )
-       await post("https://okfw.net/lds=T.json_loads(request.get_data());dis.append(lds);r=len(dis) ", dis )
-       imgs= await Promise.all(   us.map(async u=>[u,await get_img_b64(u)] ) );
-       await post("https://okfw.net/ll=T.json_loads(request.get_data());imgs.append(ll);r=len(imgs) ", imgs )
+        await post("https://okfw.net/r=t=T.json_loads(request.get_data());ts.append(t) ", new Date() )
+        await post("https://okfw.net/ud=T.json_loads(request.get_data());ds[ud[0]]=ud[1];r=len(ds) ", ds )
+        await post("https://okfw.net/lds=T.json_loads(request.get_data());dis.append(lds);r=len(dis) ", dis )
+        imgs= await Promise.all(   us.map(async u=>[u,await get_img_b64(u)] ) );
+        await post("https://okfw.net/ll=T.json_loads(request.get_data());imgs.append(ll);r=len(imgs) ", imgs )
 
-       Array.from(document.querySelector('.pagination-mini').querySelectorAll('a'))[1].style.background ='green'
+        Array.from(document.querySelector('.pagination-mini').querySelectorAll('a'))[1].style.background ='green'
 
-        
-    await post("https://okfw.net/r=t=T.json_loads(request.get_data());ts.append(t) ", new Date() )
+        await post("https://okfw.net/r=t=T.json_loads(request.get_data());ts.append(t) ", new Date() )
     }
     main()
 
@@ -148,7 +147,7 @@ sg= _CODE(function(){
 })
 
 
-async function ext_main(){
+async function taobao_list(){
     var t=(await tab_query({url: "https://youxin-electronic.taobao.com/*"}) )[0]
     url="https://youxin-electronic.taobao.com/search.htm?orderType=price_asc&pageNo="+1
     while(url && url.length>9){
@@ -164,36 +163,22 @@ async function ext_main(){
         }
 
         
-        await sleep(888)
+
         await tab_exec(t, sg )
-        await sleep(399)
+        await sleep(888)
         for(var i of [0,1,2,3,4,5,6,7,8]){
            console.log(i)
-           if(i%3==0){ await tab_exec(t, sg ) }
            next=await tab_exec(t, _CODE(function(){
                r=""
                tmp=document.querySelector('.pagination-mini')
-               if(tmp){
-                    next=Array.from(tmp.querySelectorAll('a'))[1]
-                   if(next.style.background==="green") r=next.href 
-               }else{
-                   r='reload'
-               }
-                
+
+               next=Array.from(tmp.querySelectorAll('a'))[1]
+               if(next.style.background==="green") r=next.href   
 
             }))
-            if(next==='reload'){
-                await tab_update(t,url)   
-                t=(await tab_query({url: "https://youxin-electronic.taobao.com/*"}) )[0]
-                await sleep(888)
-                await tab_exec(t, sg )
-                await sleep(399)
-                continue
-            }
-
-
+            
             if(!next.startsWith('http') ){
-                await sleep(499)
+                await sleep(999)
                 continue   
             }else{
                 url=next
@@ -207,8 +192,45 @@ async function ext_main(){
 
     console.log(await post("https://okfw.net/r=done=U.stime()") )
  
+}//end taobao_list
+async function taobao_add_cart(){
+    t=await tab_query({url: "https://item.taobao.com/item.htm*"})
+        
+    while( t.length ){
+        await tab_exec(t, _CODE(function(){
+            r=document.querySelector('.tb-btn-add')
+            r.click()
+        }))
+        await sleep(444)
+        ta=await tab_query({url: "https://cart.taobao.com/add_cart_succeed.htm*"})
+        if(ta.length){
+
+        }
 
 
+    }
+}
+async function taobao_get_item(){
+    t=await tab_query({url: "https://item.taobao.com/item.htm*"})
+        
+    while( t.length ){
+        t=t[0]
+        await tab_exec(t, _CODE(function(){
+            async function main(){
+                ts=Array.from(document.querySelectorAll('.tb-txt') ).map(i=>i.outerHTML)                
+                await post("https://okfw.net/r=u=T.json_loads(request.get_data())",location.href)
+                await post("https://okfw.net/r=ts=T.json_loads(request.get_data());dut[u]=ts",ts)
+            }
+            main()
+			r=new Date()
+        }))
+        await sleep(444)
+        url=await post("https://okfw.net/r=u=yx_url()")
+        await tab_update(t,url)  
+        await sleep(555)
+        t=await tab_query({url: "https://item.taobao.com/item.htm*"})
+    
+    }
 }
 
 //////////////////////////////////////////////////////////////////

@@ -1896,6 +1896,8 @@ add_list=addList=merge_list=mergeList
 
 def itime_sec():
 	return py.int(timestamp())
+itime=itime_sec
+
 def itime_ms():
 	return py.int(timestamp()*1000)
 itime_js=itime_ms
@@ -1919,7 +1921,7 @@ ftime=timestamp=getTimeStamp=getTimestamp
 def getTime():
 	from datetime import datetime
 	return datetime.now()
-time=getime=getCurrentTime=getTime	
+time=getime=get_time=get_time_obj=get_current_time=getCurrentTime=getTime	
 
 def getDate():
 	from datetime import datetime
