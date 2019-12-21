@@ -224,6 +224,21 @@ def html2text(html,baseurl='',ignore_images=True,ignore_links=True,):
 	h.ignore_images=ignore_images
 	h.ignore_links=ignore_links
 	return h.handle(html)
+
+def html_prettify(html, formatter="html5"):
+	'''
+	formatter =  'html',"html5","minimal",None
+	'''
+	from bs4 import BeautifulSoup
+	bs=BeautifulSoup(html,features="html5lib" )
+	r= bs.prettify(formatter=formatter)
+	for tag in ['<html>','</html>','<head>','</head>','<body>','</body>']:
+		if tag not in html:
+			r=r.replace(tag,'')
+	#TODO last line strip()
+	return r.strip()
+html_prett=pretty_html=html_pretty=prettify_html=html_prettify
+
 ################### zh #############################
 # u'([\u4e00-\u9fff]+)'  
 RE_ZH_PATTERN = re.compile(u'[\u4e00-\u9fa5]+')

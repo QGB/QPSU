@@ -1,19 +1,3 @@
-function teste(){
-
-    ds=document.querySelectorAll('dl.item') 
-    img=ds[1].querySelector('img')
-
-    img.setAttribute("crossOrigin",'Anonymous')
-
-    c= document.createElement("CANVAS")
-    ctx = c.getContext('2d');
-    ctx.drawImage(img,0,0);  
-
-    b = c.toDataURL("image/png");
-
-    console.log(b)
-}
-
 _TEXT=function(wrap) {return wrap.toString().match(/\/\*\s([\s\S]*)\s\*\//)[1];}  // 提取 /* 之间的内容 */
 _CODE=function(wrap) {return wrap.toString().match(/function\s*\(\s*\)\s*{\s*([\s\S]*)\s*}/ )[1];}//auto trim { code_start_end_space }
 
@@ -124,7 +108,7 @@ async function tab_remove(tab){
 
 
 //最好这个要阻塞，但是没找到好办法。要不只能轮询
-sg= _CODE(function(){
+gs_taobao_list= _CODE(function(){
     us=Array.from(document.querySelectorAll('dl.item')).map(i=>i.querySelector('img') ).map(img=>img.src )
     dis=Array.from(document.querySelectorAll('dl.item')).map(i=>i.outerHTML )
     ds=[location.href , document.documentElement.outerHTML]
@@ -135,8 +119,10 @@ sg= _CODE(function(){
         await post("https://okfw.net/lds=T.json_loads(request.get_data());dis.append(lds);r=len(dis) ", dis )
         imgs= await Promise.all(   us.map(async u=>[u,await get_img_b64(u)] ) );
         await post("https://okfw.net/ll=T.json_loads(request.get_data());imgs.append(ll);r=len(imgs) ", imgs )
-
-        Array.from(document.querySelector('.pagination-mini').querySelectorAll('a'))[1].style.background ='green'
+        next=(  document.querySelector(".ui-page-s-next") ||
+                Array.from(document.querySelector('.pagination-mini').querySelectorAll('a'))[1]
+            )//tmall ||taobao
+        next.style.background ='green'
 
         await post("https://okfw.net/r=t=T.json_loads(request.get_data());ts.append(t) ", new Date() )
     }
@@ -147,24 +133,23 @@ sg= _CODE(function(){
 })
 
 
-async function taobao_list(){
-    var t=(await tab_query({url: "https://youxin-electronic.taobao.com/*"}) )[0]
-    url="https://youxin-electronic.taobao.com/search.htm?orderType=price_asc&pageNo="+1
+async function taobao_list(base_url="https://youxin-electronic.taobao.com/"){
+    var t=(await tab_query({url: base_url+"*"}) )[0]
+    var base_search_url=base_url+"search.htm?orderType=price_asc&pageNo="
+    url=base_search_url+1
     while(url && url.length>9){
         check=await post("https://okfw.net/url=T.json_loads(request.get_data());r=in_ds(url)",url)
         if(check==='False' && t.url!=url){
             await tab_update(t,url)   
-            t=(await tab_query({url: "https://youxin-electronic.taobao.com/*"}) )[0]
+            t=(await tab_query({url: base_url+"*"}) )[0]
         }
         if(check==='True'){
             var max=await post("https://okfw.net/r=max_ds()")
-            url="https://youxin-electronic.taobao.com/search.htm?orderType=price_asc&pageNo="+(parseInt(max)+1)
+            url=base_search_url+(parseInt(max)+1)
             continue
         }
 
-        
-
-        await tab_exec(t, sg )
+        await tab_exec(t, gs_taobao_list )
         await sleep(888)
         for(var i of [0,1,2,3,4,5,6,7,8]){
            console.log(i)
@@ -193,11 +178,64 @@ async function taobao_list(){
     console.log(await post("https://okfw.net/r=done=U.stime()") )
  
 }//end taobao_list
+
+async function tmall_list(base_url="https://qyssm.tmall.com/"){
+    var t=(await tab_query({url: base_url+"*"}) )[0]
+    var base_search_url=base_url+"search.htm?search=y&scene=taobao_shop&orderType=price_asc&pageNo="
+    url=base_search_url+1
+    while(url && url.length>9){
+        check=await post("https://okfw.net/url=T.json_loads(request.get_data());r=in_ds(url)",url)
+        if(check==='False' && t.url!=url){
+            await tab_update(t,url)   
+            t=(await tab_query({url: base_url+"*"}) )[0]
+        }
+        if(check==='True'){
+            var max=await post("https://okfw.net/r=max_ds()")
+            url=base_search_url+(parseInt(max)+1)
+            continue
+        }
+
+        await tab_exec(t, gs_taobao_list )
+        await sleep(888)
+        for(var i of [0,1,2,3,4,5,6,7,8]){
+           console.log(i)
+           next=await tab_exec(t, _CODE(function(){
+               r=""
+               next=document.querySelector(".ui-page-s-next")
+               if(next.style.background==="green") r=next.href   
+            })) 
+              
+            if(!next){
+                if((i+1)%3===0){
+                    await tab_exec(t, gs_taobao_list )
+                    await sleep(888)
+                }
+                continue
+            }
+            if(!next.startsWith('http') ){
+                await sleep(999)
+                continue   
+            }else{
+                url=next
+                break
+            }
+            
+
+        }
+        
+    }
+
+    console.log(await post("https://okfw.net/r=done=U.stime()") )
+    
+}
+
+
 async function taobao_add_cart(){
     t=await tab_query({url: "https://item.taobao.com/item.htm*"})
         
     while( t.length ){
         await tab_exec(t, _CODE(function(){
+            l=document.querySelector('[data-value="1627207:98155855"]')
             r=document.querySelector('.tb-btn-add')
             r.click()
         }))

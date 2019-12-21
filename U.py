@@ -312,7 +312,7 @@ def retry( exceptions,times=3,sleep_second=0):
 #TODO: if not has ei,import error occur twice,why?
 
 
-def getTestPath():
+def get_test_path():
 	if isnix():
 		s='/test/'
 		home=os.getenv('HOME')
@@ -324,12 +324,19 @@ def getTestPath():
 				home=''
 		if home.startswith('/home/coding'):
 			home+='/workspace'
-		return home+s
+		return get('U.gst',home+s)
 	if iswin() or iscyg():
-		s='c:/test/'
-		return driverPath(s[1:]) or s
+		return get('U.gst',driverPath('c:/test/'[1:]))
+get_gst=getTestPath=get_test_path
 gst=gsTestPath=getTestPath()
 
+def set_test_path(sp):
+	global gst,gsTestPath
+	sp=sp.replace('\\','/')
+	if not sp.endswith('/'):
+		sp+='/'
+	gst=gsTestPath=set('U.gst',sp)
+	return gst
 
 def getShellPath():
 	'''wsPath=G:\QGB\babun\cygwin\home\qgb\wshell\
@@ -2922,7 +2929,7 @@ def set(name,value=None,level=gd_sync_level['process']):
 	if level>=gd_sync_level['system']:
 		import sqlite3
 	return value
-	
+
 def get(name='_',default=py.No('can not get name'),level=gd_sync_level['process']):
 	if level>=gd_sync_level['process']:
 		import sys
