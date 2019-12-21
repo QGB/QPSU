@@ -1,7 +1,7 @@
 from . import py
 U,T,N,F=py.importUTNF()
 import serial
-ENCODING='utf-8'
+ENCODING=U.get(__name__+'_encoding','utf-8')
 g=U.get(__name__+'_g')
 
 def list_all_com_ports():
@@ -31,6 +31,8 @@ def open_device(device, baudrate=115200, timeout=5):
                  **kwargs):
 '''
     global g
+    if py.isint(device):
+        device='COM{}'.format(device)
     g=serial.Serial(device, baudrate, timeout=timeout) 
     U.set(__name__+'_g',g)
     return g
