@@ -71,6 +71,10 @@ class No:
 		return r
 	def __len__(s):return 0
 	def __getitem__(s, key):return None
+	
+	def __iter__(self):return self
+	def __next__(self):raise StopIteration
+
 	def __contains__(s, key):return False# ('' in '') == True
 	def __hash__(s):return 0
 	
@@ -178,8 +182,7 @@ def pdb(frame=sys._getframe().f_back):
 	# if os.getenv('py.pdb') in (None,'False','false','f','0',''):return 'No py.pdb'
 	# "win can set 'PY.PDB': '1'  "
 	# if msg:print(msg)
-	import pdb
-	pdb.Pdb().set_trace(frame)
+	__import__('pdb').Pdb().set_trace(  frame)
 debug=pdb
 	
 def from_qgb_import(mod='U'):

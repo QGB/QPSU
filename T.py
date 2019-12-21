@@ -244,6 +244,12 @@ def html_prettify(html, formatter="html5",p=True):
 		return r
 html_prett=pretty_html=html_pretty=prettify_html=html_prettify
 
+def BeautifulSoup(html):
+	from bs4 import BeautifulSoup
+	bs=BeautifulSoup(html,features="html5lib" )	
+	return bs
+bs=beautifulSoup=BeautifulSoup
+
 ################### zh #############################
 # u'([\u4e00-\u9fff]+)'  
 RE_ZH_PATTERN = re.compile(u'[\u4e00-\u9fa5]+')

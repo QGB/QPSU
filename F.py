@@ -463,6 +463,25 @@ pretty=True        Format a Python object into a pretty-printed representation.
 	# except Exception as e:
 		# setErr(e)
 		# return False
+gb_write_auto_filename_len=True
+def write_auto_filename(*a,**ka):
+	all_args=py.importU().getArgsDict()
+	return all_args
+	U=py.importU()
+	T=py.importT()
+	sp=mkdir(U.gst+write_auto_filename.__name__)
+	rf=[]
+	for k,v in  all_args.items():
+		fn='{}{}'.format(sp,T.filename_legalized(k))
+		if gb_write_auto_filename_len:
+			len=U.len(v)
+			if py.isint(len):
+				fn+='={}'.format(len)
+		f=write(fn ,v,autoArgs=False)
+		rf.append(f)
+	return rf
+writeA=write_auto_args=write_args=write_auto_filename
+
 
 def append(file,data):
 	'''builtin afile.write() No breakLine'''

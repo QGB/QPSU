@@ -1727,7 +1727,10 @@ def getArgsDict(*args,**kwargs):
 					rd=v
 					args.pop()
 				else:rd={}
-		
+	if py.getattr(getArgsDict,'debug'):
+		log(['frame','args','rd'])
+		# return frame,args,rd	
+		__import__('pdb').Pdb().set_trace()
 	# while F.dir(frame.f_back.f_code.co_filename).endswith('qgb'):
 	tb=inspect.getframeinfo(frame.f_back)
 	# return frame
@@ -1749,7 +1752,7 @@ def getArgsDict(*args,**kwargs):
 			if name[0]=='(' and name[-1]==')':name=name[1:-1]
 			rd[name]=args[ia]
 		return rd
-	except Exception as e:
+	except Exception as e: # name全部获取到了。但是args 少了
 		log(e)
 		v=recursive_find(am) 
 		return py.dict(e=e,frame=frame,rd=rd,lines=lines,a=args,v=v,v_args=v.args,   )
@@ -2373,7 +2376,7 @@ def len(obj,*other):
 	if isinstance(obj, types.GeneratorType):
 		obj=py.list(obj)
 	return builtinFuncWrapForMultiArgs(builtinFunc=py.len,args=(obj,other) )# ,default=default
-	
+
 def hash(obj,*other):
 	'''Exception return py.No or [no...]'''
 	return builtinFuncWrapForMultiArgs(builtinFunc=py.hash,args=(obj,other))
