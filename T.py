@@ -225,7 +225,7 @@ def html2text(html,baseurl='',ignore_images=True,ignore_links=True,):
 	h.ignore_links=ignore_links
 	return h.handle(html)
 
-def html_prettify(html, formatter="html5"):
+def html_prettify(html, formatter="html5",p=True):
 	'''
 	formatter =  'html',"html5","minimal",None
 	'''
@@ -236,7 +236,12 @@ def html_prettify(html, formatter="html5"):
 		if tag not in html:
 			r=r.replace(tag,'')
 	#TODO last line strip()
-	return r.strip()
+	r= r.strip()
+	if p:
+		print(r)
+		return None
+	else:
+		return r
 html_prett=pretty_html=html_pretty=prettify_html=html_prettify
 
 ################### zh #############################

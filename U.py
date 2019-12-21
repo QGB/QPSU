@@ -328,7 +328,7 @@ def get_test_path():
 	if iswin() or iscyg():
 		return get('U.gst',driverPath('c:/test/'[1:]))
 get_gst=getTestPath=get_test_path
-gst=gsTestPath=getTestPath()
+gst=gsTestPath=get_test_path()
 
 def set_test_path(sp):
 	global gst,gsTestPath
@@ -337,6 +337,7 @@ def set_test_path(sp):
 		sp+='/'
 	gst=gsTestPath=set('U.gst',sp)
 	return gst
+set_gst=setTestPath=set_test_path
 
 def getShellPath():
 	'''wsPath=G:\QGB\babun\cygwin\home\qgb\wshell\
@@ -2331,6 +2332,7 @@ def getModPathForImport():
 	sp=os.path.dirname(sp)
 	if iswin():return sp#cygwin None
 	else:raise NotImplementedError('todo: cyg  nix')
+
 def getModPath(mod=None,qgb=True,slash=True,backSlash=False,endSlash=True,endslash=True,trailingSlash=True):
 	'''不返回模块文件，返回模块目录
 	@English The leading and trailing slash shown in the code 代码中的首尾斜杠'''
@@ -2367,7 +2369,11 @@ def slen(a,*other):
 	
 def len(obj,*other):
 	'''Exception return py.No or [no...]'''
+	import types
+	if isinstance(obj, types.GeneratorType):
+		obj=py.list(obj)
 	return builtinFuncWrapForMultiArgs(builtinFunc=py.len,args=(obj,other) )# ,default=default
+	
 def hash(obj,*other):
 	'''Exception return py.No or [no...]'''
 	return builtinFuncWrapForMultiArgs(builtinFunc=py.hash,args=(obj,other))
