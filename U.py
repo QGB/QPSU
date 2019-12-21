@@ -2921,9 +2921,8 @@ def set(name,value=None,level=gd_sync_level['process']):
 		sys._qgb_dict=d
 	if level>=gd_sync_level['system']:
 		import sqlite3
-		# set.__dict__['_']=name
-		# return
-	# set.__dict__[name]=value
+	return value
+	
 def get(name='_',default=py.No('can not get name'),level=gd_sync_level['process']):
 	if level>=gd_sync_level['process']:
 		import sys
