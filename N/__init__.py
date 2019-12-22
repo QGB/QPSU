@@ -207,8 +207,23 @@ def rpcClient(url_or_port='http://127.0.0.1:23571',code=''):
 		# from xmlrpc.client import ServerProxy,MultiCall
 	# server = ServerProxy(url)
 	# return server
-	
-	
+
+			
+def flask_html_response(response,html,remove_tag=(
+		['<script','</script>'],
+		['<SCRIPT','</SCRIPT>'],
+	),):
+	T=py.importT()
+	for start,end in remove_tag:
+		s=True
+		while s:
+			s=T.sub(html,start,end)
+			if not s:break
+			html=html.replace(start+s+end,'')
+	response.headers['Content-Type']='text/html;charset=utf-8';
+	response.set_data(html)
+htmlp=response_html=html_response=flask_html_response
+
 def get(url,protocol='http',file=''):
 	U=py.importU()
 	T=U.T

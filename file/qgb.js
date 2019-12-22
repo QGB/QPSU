@@ -103,6 +103,20 @@ async function tab_remove(tab){
    })
 }
 
+async function taobao_cart_back(){
+    gbloop=1
+    while(gbloop){
+        for(var t of (await tab_query({url: "https://cart.taobao.com/add_cart_succeed.htm*"}) )){
+            await tab_exec(t,_CODE(function(){
+                Array.from(document.querySelectorAll('span')).map(i=>i.style.background='green')
+                history.back()
+
+            }))
+        }
+        await sleep(444)
+    }
+        
+}
 
 //await tab_exec( await tab_current()  ,    'alert(new Date() )  '  )
 
@@ -111,11 +125,15 @@ async function tab_remove(tab){
 gs_taobao_list= _CODE(function(){
     us=Array.from(document.querySelectorAll('dl.item')).map(i=>i.querySelector('img') ).map(img=>img.src )
     dis=Array.from(document.querySelectorAll('dl.item')).map(i=>i.outerHTML )
+    if(!location.href){
+        alert('location.href no')
+        throw 233
+    }
     ds=[location.href , document.documentElement.outerHTML]
     imgs=[]
     async function main(){
         await post("https://okfw.net/r=t=T.json_loads(request.get_data());ts.append(t) ", new Date() )
-        await post("https://okfw.net/ud=T.json_loads(request.get_data());ds[ud[0]]=ud[1];r=len(ds) ", ds )
+        await post("https://okfw.net/ud=T.json_loads(request.get_data());ds[ud[0]]=ud[1];r=len(ds) " )
         await post("https://okfw.net/lds=T.json_loads(request.get_data());dis.append(lds);r=len(dis) ", dis )
         imgs= await Promise.all(   us.map(async u=>[u,await get_img_b64(u)] ) );
         await post("https://okfw.net/ll=T.json_loads(request.get_data());imgs.append(ll);r=len(imgs) ", imgs )
@@ -135,6 +153,7 @@ gs_taobao_list= _CODE(function(){
 
 async function taobao_list(base_url="https://youxin-electronic.taobao.com/"){
     var t=(await tab_query({url: base_url+"*"}) )[0]
+    console.log(await post("https://okfw.net/r=start_time=U.stime()"),t )
     var base_search_url=base_url+"search.htm?orderType=price_asc&pageNo="
     url=base_search_url+1
     while(url && url.length>9){
@@ -161,13 +180,19 @@ async function taobao_list(base_url="https://youxin-electronic.taobao.com/"){
                if(next.style.background==="green") r=next.href   
 
             }))
-            
-            if(!next.startsWith('http') ){
-                await sleep(999)
-                continue   
+           if(!next){
+                if((i+1)%3===0){
+                    await tab_exec(t, gs_taobao_list )
+                    await sleep(888)
+                }
+                continue
+           }
+           if(!next.startsWith('http') ){
+               await sleep(999)
+               continue   
             }else{
-                url=next
-                break
+               url=next
+               break
             }
             
 
@@ -227,6 +252,52 @@ async function tmall_list(base_url="https://qyssm.tmall.com/"){
 
     console.log(await post("https://okfw.net/r=done=U.stime()") )
     
+}
+
+gs_get_document= _CODE(function(){
+    async function main(){
+        dls=document.querySelectorAll('.tb-sku > dl.tm-sale-prop ')
+        for(dl of dls){
+
+        }
+        p=document.querySelector('.tm-fcs-panel')
+        //ts=Array.from(document.querySelectorAll('.tb-txt') ).map(i=>i.outerHTML)                
+        await post("https://okfw.net/u,h=T.json_loads(request.get_data());duh[u]=h;r=len(duh)",[location.href,document.documentElement.outerHTML])
+        p.style.background='green'
+
+    }
+    main()
+    r=new Date()
+})
+async function tmall_get_item(base_url="https://detail.tmall.com/item.htm"){
+    t=await tab_query({url: base_url+"*"})
+        
+    while( t.length ){
+        t=t[0]
+        await tab_exec(t,gs_get_document)
+        await sleep(9999*5)
+        r=await tab_exec(t, _CODE(function(){
+            r=document.querySelector('.tm-fcs-panel').style.background
+        }))    
+        n=0
+        while(r!='green'){
+            n+=1
+            await sleep(500)
+            r=await tab_exec(t, _CODE(function(){
+                r=document.querySelector('.tm-fcs-panel').style.background
+            })) 
+            console.log(new Date(),'wait...green')
+            if((n%5)===0){
+                await tab_exec(t,gs_get_document)
+            }
+        }
+        url=await post("https://okfw.net/r=u=next_url()")
+        await tab_update(t,url)  
+        await sleep(1555)
+        t=await tab_query({url: base_url+"*"})
+    
+    }
+    console.log('done')
 }
 
 

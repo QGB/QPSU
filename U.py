@@ -1527,6 +1527,7 @@ pa=printattr=printAttr
 # printAttr(5)
 
 def dir(a,filter='',type_filter=py.No,raw_value=False):
+	if py.istr(type_filter):type_filter=type_filter.lower()
 	attrs=[i for i in py.dir(a) if filter in i]
 	rv=[]
 	err=py.No("#can't getattr ")
@@ -1535,10 +1536,9 @@ def dir(a,filter='',type_filter=py.No,raw_value=False):
 		v=getattr(a,i) # py.getattr(a,i,err)
 		if (not raw_value) and i in {'f_globals','f_locals','f_builtins'}:
 			v='{} : {}'.format(py.len(v),' '.join(v) )
-		if type_filter!=py.No:# 类型过滤 ,过滤只剩type_filter类型（如果指定了的话）        只要满足以下一条 就ok
+		if not py.issubclass(type_filter,py.No):# 类型过滤 ,过滤只剩type_filter类型（如果指定了的话）        只要满足以下一条 就ok
 			ok=False
-			if py.istr(type_filter):type_filter=type_filter.lower()
-			
+
 			if type_filter==py.callable or type_filter=='callable':
 				if py.callable(v):ok=1
 				else:             ok=0
@@ -3080,9 +3080,22 @@ setErr( gError 还是要保留，像这种 出错 是正常流程的一部分，
 		except Exception as e:return py.No(e)
 getDictV=getDictNestedValue=getNestedValue
 
-def getDictItem(a):
+def getDictItem(d,index=0):
+	if index<0:index=py.len(d)+index
+	for n,k in py.enumerate(d):
+		if n==index:
+			return (k,d[k])
+	
 	return a.items().__iter__().__next__()
 dict_item=dict_one_item=get_dict_item=getDictItem
+
+def get_dict_value(d,index=0):
+	if index<0:index=py.len(d)+index
+	for n,v in py.enumerate(d.values()):
+		if n==index:
+			return v
+getDictValue=dict_value=get_dict_value
+
 def setDictListValue(adict,key,value):
 	if key in adict:
 		adict[key].append(value)
