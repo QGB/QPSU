@@ -13,7 +13,7 @@ def list_all_com_ports():
     return r
 list=list_all=list_com=list_com_ports=list_all_com_ports
 
-def open_device(device, baudrate=115200, timeout=5):
+def open_device(device, baudrate=115200, timeout=5,dtr=False):
     '''    'COM4',b,timeout=5sec
     def __init__(self,
                  port=None,
@@ -33,7 +33,13 @@ def open_device(device, baudrate=115200, timeout=5):
     global g
     if py.isint(device):
         device='COM{}'.format(device)
-    g=serial.Serial(device, baudrate, timeout=timeout) 
+    com = serial.Serial()
+    com.port = device
+    com.baudrate = baudrate
+    com.timeout = timeout
+    com.setDTR(dtr)
+    com.open()
+    g=com
     U.set(__name__+'_g',g)
     return g
 open=open_port=open_device
@@ -65,3 +71,54 @@ def read_all(dev=None,encoding=ENCODING,p=True):
     return b
 r=read=read_all
 
+if U.iswin():
+    isWin=True
+    from serial import win32 
+def dtr_high(dev=None):
+    '''s.setDTR(False) '''
+    if not dev:dev=g
+    if isWin:win32.EscapeCommFunction(dev._port_handle, win32.CLRDTR)
+
+def dtr_low(dev=None):
+    if not dev:dev=g
+    if isWin:win32.EscapeCommFunction(dev._port_handle, win32.SETDTR)
+
+def swi(a,b,time,dev=None):
+    if not dev:dev=g
+    count=[0]
+    try:
+        _sw(dev,count,time,a,b)
+    except:
+        pass
+    finally:
+        dtr_high(dev) # shutdown
+    return count[0]
+
+def sw(a,b,time=U.IMAX,dev=None):
+    if not dev:dev=g
+    a=0.000001*a
+    b=0.000001*b
+    count=[0]
+    try:
+        _sw(dev,count,time,a,b)
+    except:
+        pass
+    finally:
+        dtr_high(dev) # shutdown
+    return count[0]
+gb_sw=True
+def _sw(dev,count,time,a,b):
+    ''' micro second '''
+    global gb_sw
+    gb_sw=True
+    start=U.timestamp()
+    while gb_sw:
+        count[0]+=1
+        if (U.timestamp()-start)>time:
+            return
+        if count[0]%2==0:
+            dtr_low(dev)
+            U.sleep(a)
+        else:
+            dtr_high(dev)
+            U.sleep(b)

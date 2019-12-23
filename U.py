@@ -98,6 +98,37 @@ Class=py.Class
 instance=py.instance
 Class=classtype=classType=py.classType
 iterable=py.iterable
+#######################################
+gd_sync_level={
+'process':1,
+'python':1,
+'py':1,
+'system':2 ,
+'sys':2 , #not sys module
+'lan':3    ,# lan sync  #TODO default rpc to find out qpsu computer
+'wan':4    ,# internet sync
+'all':4    ,
+}
+def set(name,value=None,level=gd_sync_level['process']):
+	if level>=gd_sync_level['process']:
+		import sys
+		d=py.getattr(sys,'_qgb_dict',{})
+		if value==None:
+			value=name
+			name='_'
+		d[name]=value
+		sys._qgb_dict=d
+	if level>=gd_sync_level['system']:
+		import sqlite3
+	return value
+
+def get(name='_',default=py.No('can not get name'),level=gd_sync_level['process']):
+	if level>=gd_sync_level['process']:
+		import sys
+		d=py.getattr(sys,'_qgb_dict',{})
+		#TODO 对于不存在的 name ，可以记录最后访问时间为 py.No，方便排查
+		return d.get(name,default)
+	#TODO
 #########################
 def one_in(vs,*t):
 	'''(1,2,3,[t])	or	([vs].[t])'''
@@ -1526,7 +1557,7 @@ pa=printattr=printAttr
 # repl()
 # printAttr(5)
 
-def dir(a,filter='',type_filter=py.No,raw_value=False):
+def dir(a,filter='',type_filter=py.No('default not filter'),raw_value=False):
 	if py.istr(type_filter):type_filter=type_filter.lower()
 	attrs=[i for i in py.dir(a) if filter in i]
 	rv=[]
@@ -1536,14 +1567,16 @@ def dir(a,filter='',type_filter=py.No,raw_value=False):
 		v=getattr(a,i) # py.getattr(a,i,err)
 		if (not raw_value) and i in {'f_globals','f_locals','f_builtins'}:
 			v='{} : {}'.format(py.len(v),' '.join(v) )
-		if not py.issubclass(type_filter,py.No):# 类型过滤 ,过滤只剩type_filter类型（如果指定了的话）        只要满足以下一条 就ok
+		# if not py.issubclass(type_filter,py.No):# 这里很奇怪，这样判断 type_filter始终不是py.No
+		if type_filter:
+			# 类型过滤 ,过滤只剩type_filter类型（如果指定了的话）        只要满足以下一条 就ok
 			ok=False
 
 			if type_filter==py.callable or type_filter=='callable':
 				if py.callable(v):ok=1
 				else:             ok=0
 			#############
-			if ok or py.type(v) is type_filter or isinstance(v,type_filter) or py.type(v)==py.type(type_filter):
+			elif ok or py.type(v) is type_filter or isinstance(v,type_filter) or py.type(v)==py.type(type_filter):
 				ok=1
 			else:ok=0
 			
@@ -2915,37 +2948,6 @@ except:pass
 def logWindow():
 	import Tkinter as tk
 	#DEL : rpc replace this func
-#######################################
-gd_sync_level={
-'process':1,
-'python':1,
-'py':1,
-'system':2 ,
-'sys':2 , #not sys module
-'lan':3    ,# lan sync  #TODO default rpc to find out qpsu computer
-'wan':4    ,# internet sync
-'all':4    ,
-}
-def set(name,value=None,level=gd_sync_level['process']):
-	if level>=gd_sync_level['process']:
-		import sys
-		d=py.getattr(sys,'_qgb_dict',{})
-		if value==None:
-			value=name
-			name='_'
-		d[name]=value
-		sys._qgb_dict=d
-	if level>=gd_sync_level['system']:
-		import sqlite3
-	return value
-
-def get(name='_',default=py.No('can not get name'),level=gd_sync_level['process']):
-	if level>=gd_sync_level['process']:
-		import sys
-		d=py.getattr(sys,'_qgb_dict',{})
-		#TODO 对于不存在的 name ，可以记录最后访问时间为 py.No，方便排查
-		return d.get(name,default)
-	#TODO
 	
 ########################################	
 def google(a):
