@@ -197,7 +197,9 @@ get_fld=getFLD
 
 
 def filterInt(a,digits=py.range(1,999)):
-	digits=py.list(digits)
+	if py.isint(digits):
+		digits=py.range(digits,999)
+	# digits=py.list(digits)
 	r=[]
 	# pint=False
 	si=''

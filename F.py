@@ -381,9 +381,15 @@ def intToBytes(a):
 i2b=intToBytes
 
 def bytesToHex(a,split=''):
-	r=''
-	for i in a:
-		r+=DIH[ord(i) ]+split
+	'''如果 len(split)是奇数，肯定返回 （奇数+偶数）=奇数
+						偶=》偶
+	'''
+	if py.is3():
+		# ord=lambda b:py.int.from_bytes(b,'big')
+		ord=lambda i:i
+	else:
+		ord=py.ord
+	r=split.join( [DIH[ord(i)] for i in a] )
 	return r
 b2h=bytesToHex
 	

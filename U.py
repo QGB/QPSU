@@ -788,6 +788,7 @@ pop(_63,25)  #_63 has change
 getKargsDuplicated=getKArgsDuplicated=get_kargs_duplicated=get_duplicated_kargs
 
 def sleep(aisecond):
+	if not aisecond:return
 	__import__('time').sleep(aisecond)
 	
 def pause(a='Press Enter to continue...\n',exit=True):
@@ -1742,7 +1743,12 @@ def getArgsTest(a,b,c,d=2,**ka):
 	return getArgsDict()
 
 def getArgsDict(*args,**kwargs):
-	''' MUST BE FIRST LINE in caller '''
+	''' MUST BE FIRST LINE in caller 
+	#TODO  cache by file,lineno of caller's caller , avoid name searching, only get vars
+def tf(*a,k=1,**ka):...
+inspect.getargspec(tf) # raise \
+ValueError: Function has keyword-only parameters or annotations, use getfullargspec() API which can support them	
+	'''
 	import inspect,ast
 	F=py.importF()
 	frame=inspect.currentframe()
@@ -1760,8 +1766,8 @@ def getArgsDict(*args,**kwargs):
 					rd=v
 					args.pop()
 				else:rd={}
-	if py.getattr(getArgsDict,'debug'):
-		log(['frame','args','rd'])
+	if py.getattr(getArgsDict,'debug',0):
+		pln(getArgsDict.__name__,'frame','args','rd')
 		# return frame,args,rd	
 		__import__('pdb').Pdb().set_trace()
 	# while F.dir(frame.f_back.f_code.co_filename).endswith('qgb'):
@@ -1786,8 +1792,16 @@ def getArgsDict(*args,**kwargs):
 			rd[name]=args[ia]
 		return rd
 	except Exception as e: # name全部获取到了。但是args 少了
+		'''
+此问题是由于对,*a,**ka 支持不好
+先获取调用者的函数，再匹配vars
+from inspect import signature 
+sg.bind(#vars 如何处理，详细研究下 )    
+
+'''
 		log(e)
 		v=recursive_find(am) 
+		pln('error in',getArgsDict.__name__,'. debug vars return')
 		return py.dict(e=e,frame=frame,rd=rd,lines=lines,a=args,v=v,v_args=v.args,   )
 	
 get_arg=get_args=get_caller_args=getargspec=getargs=getarg=getArgs=get_args_dict=getArgsDict
@@ -2128,7 +2142,18 @@ def product_of_integers(*a):
 		r=r*i
 	return r
 multiplication=product_of_integers
-  
+
+def multiply_by_multiples(iterable,times):
+	''' r=a,b,c=list(map((2).__mul__, [1, 2, 3]))
+	'''
+	if py.iterable(times):
+		iterable,time=time,iterable
+	times=py.float(times)
+	mul=lambda a:times*py.float(a)
+	r=py.map(mul,iterable)
+	return py.list(r)
+mul=mutiply_iterable=mutiply_list=mutiply_tuple=multiply_by_multiples
+
 def traverseTime(start,stop=None,step='day'):
 	'''
 	#TODO ipy 自动化测试框架 ， 解决 ipy3 兼容问题
@@ -2461,7 +2486,15 @@ def getCallExpression(*a,**ka):
 		r
 	return r
 getCallExpr=getCallExpression
-	
+
+def set_env_path(p):
+	if not p :raise py.ArgumentError()
+	ps=os.environ['PATH'].split(os.pathsep)
+	if (p not in ps):ps.append(p)
+	ps.remove('')
+	os.environ['PATH']=os.pathsep.join(ps)		
+	return ps
+
 def getEnviron(name='PATH'):
 	'''
 linux:

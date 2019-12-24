@@ -2,7 +2,10 @@ from . import py
 U,T,N,F=py.importUTNF()
 import serial
 ENCODING=U.get(__name__+'_encoding','utf-8')
+devs=U.get(__name__+'_devs',{})
 g=U.get(__name__+'_g')
+if g:
+    devs[g.port.upper()]=g
 
 def list_all_com_ports():
     from serial.tools import list_ports
@@ -13,7 +16,26 @@ def list_all_com_ports():
     return r
 list=list_all=list_com=list_com_ports=list_all_com_ports
 
-def open_device(device, baudrate=115200, timeout=5,dtr=False):
+def set(var):
+    a=U.getArgsDict()
+    if py.len(a)!=1:raise py.EnvironmentError(var,a)
+    k,v=a.popitem()
+    if var!=v:raise py.EnvironmentError('var,v not match',var,v)
+    if not var:
+        return U.get(__name__+'_'+k)
+    if k=='g':
+        devs[dev.port.upper()]=dev
+        U.set(__name__+'_devs',devs)
+    return U.set(__name__+'_'+k,var)
+
+def set_g(dev):
+    global g
+    # if not dev:return py.No()
+    devs[dev.port.upper()]=dev
+    U.set(__name__+'_devs',devs)
+    g=U.set(__name__+'_g',dev)
+    return g
+def open_device(dev, baudrate=115200, timeout=5,dtr=False):
     '''    'COM4',b,timeout=5sec
     def __init__(self,
                  port=None,
@@ -31,28 +53,46 @@ def open_device(device, baudrate=115200, timeout=5,dtr=False):
                  **kwargs):
 '''
     global g
-    if py.isint(device):
-        device='COM{}'.format(device)
+    if isinstance(dev,serial.Serial):
+        dev=dev.port
+        # return set_g(dev)
+    if py.isint(dev):
+        dev='COM{}'.format(dev)
+    dev=dev.upper()
+    for k in py.list(devs):
+        if k.upper()==dev:
+            v=devs[k]
+            try:
+                v.flush()
+                return set_g(v)
+            except serial.SerialException:
+                devs.pop(k)
     com = serial.Serial()
-    com.port = device
+    com.port = dev
     com.baudrate = baudrate
     com.timeout = timeout
     com.setDTR(dtr)
     com.open()
-    g=com
-    U.set(__name__+'_g',g)
-    return g
-open=open_port=open_device
+    return set_g(com)
+    
+open=open_port=open_dev=open_device
 
-def write_one_line(input,dev=None,wait=1,encoding=ENCODING,p=True):
+def write_one_line(input,dev=None,wait=1,encoding=ENCODING,eol=b'\r\n',p=True):
     global g
     if not dev:dev=g=U.get(__name__+'_g')
     else      :g=U.set(__name__+'_g',dev)
+    if not py.isbytes(input):
+        input=str(input)
     if py.istr(input):
         input=input.encode(encoding)
-    if not input.endswith(b'\r\n'):
-        input+=b'\r\n'
-    g.write(input)
+    if not input.endswith(eol):
+        input+=eol
+    try:
+        g.write(input)
+    except serial.SerialException:
+        g=open_device(dev=g.port,baudrate=g.baudrate,timeout=g.timeout,
+            dtr=g._dtr_state, )
+        g.write(input)
     U.sleep(wait)
     return read_all(dev=g,encoding=encoding,p=p)
 w=write=write_line=write_one_line
@@ -63,25 +103,47 @@ def read_all(dev=None,encoding=ENCODING,p=True):
     if not dev:dev=g=U.get(__name__+'_g')
     else      :g=U.set(__name__+'_g',dev)
     b=g.read_all()
-    s=b.decode(encoding)
-    if(p):
+    if p:
+        s=b.decode(encoding)
         print(s)
         return None
-        return len(b)
     return b
 r=read=read_all
-
+def read_all_wait(dev,wait):
+    wait=py.max(0.1,wait)
+    r=b''
+    while 1:
+        U.sleep(wait)
+        c=dev.read(dev.in_waiting)
+        if c:
+            r+=c
+        else:
+            return r
 if U.iswin():
     isWin=True
     from serial import win32 
+
+def dtr_click(dev=None,wait=0.2):
+    '''s.setDTR(False) '''
+    if not dev:dev=g
+    if dev.dtr:
+        dev.dtr=0
+        U.sleep(wait)
+        dev.dtr=1
+    else:
+        dev.dtr=1
+        U.sleep(wait)
+        dev.dtr=0
+        
 def dtr_high(dev=None):
     '''s.setDTR(False) '''
     if not dev:dev=g
-    if isWin:win32.EscapeCommFunction(dev._port_handle, win32.CLRDTR)
-
+    if isWin:r=win32.EscapeCommFunction(dev._port_handle, win32.CLRDTR)
+high=dtr_high
 def dtr_low(dev=None):
     if not dev:dev=g
-    if isWin:win32.EscapeCommFunction(dev._port_handle, win32.SETDTR)
+    if isWin:r=win32.EscapeCommFunction(dev._port_handle, win32.SETDTR) #r=1
+l=o=low=dtr_low
 
 def swi(a,b,time,dev=None):
     if not dev:dev=g
@@ -122,3 +184,78 @@ def _sw(dev,count,time,a,b):
         else:
             dtr_high(dev)
             U.sleep(b)
+
+AT_TIMEOUT=U.get(__name__+'_'+"AT_TIMEOUT",6)
+AT_P=U.get(__name__+'_AT_'+"P",True)
+AT_EOL=U.get(__name__+'_AT_'+"EOL",b'\r\n')
+def AT(cmd,dev=None,timeout=AT_TIMEOUT,p=AT_P,encoding=ENCODING,eol=AT_EOL):
+    if not dev:dev=g
+    if cmd[:3] not in {'AT+',b'AT+'}:
+        cmd=cmd.upper() # bytes ok
+    if not py.isbytes(cmd):cmd=cmd.encode(encoding)
+    if not cmd.startswith(b'AT+'):cmd=b'AT+'+cmd
+    b=read_all(dev=dev,encoding=encoding,p=0)
+    if b:
+        print(b.decode(encoding))
+        print('='*11,len(b),'='*11)
+    t=timeout*0.001
+    start = U.timestamp()
+    dev.write(cmd+eol)
+    U.sleep(max(0.5,t))
+    b=dev.read(dev.in_waiting)
+    blines=b.splitlines()
+    if blines[0].strip()!=cmd.strip():
+        return py.No('{}!={}'.format(b,cmd))
+    while len(blines)<4: # err=4,gmr=7  
+        c = dev.read(1)
+        if c:
+            b=b+c+read_all_wait(dev=dev,wait=t)
+            # b=b+c+dev.read_all()
+            break
+        if (U.timestamp()-start)>timeout:
+            return py.No('timeout',timeout,b)    
+        U.sleep(t)
+    time=U.timestamp()-start
+    if p:
+        try:
+            s=b.decode(encoding)
+        except:
+            s=b
+        print(s.strip())
+        print('takes {:.3f} sec'.format(time,) , '%s blines'%len(blines), )
+        return None
+    return b,time
+at=AT   
+
+def AT_CSYSHEAP(dev=None,encoding=ENCODING):
+    if not dev:dev=g
+    for cmd in ['AT+CSYSHEAP',]:#'AT+CSYSFLASH',
+        b,time= AT(cmd=cmd  ,  dev=dev,p=0)
+        s=b.decode(encoding)
+        U.p(s)
+        i=T.filter_int(s,3)
+        if i:
+            i=py.int(i[0])
+            U.p(F.readableSize(i),'\ntakes %.3f sec'%time , )
+        
+    
+df=disk_usage=AT_CSYSHEAP
+
+def AT_CWLAP(dev=None):
+    if not dev:dev=g
+    r=AT(cmd='AT+CWLAP'  ,  dev=dev,p=False)
+lap=at_cwlap=AT_CWLAP
+
+def AT_CWJAP(name,password,dev=None,timeout=AT_TIMEOUT,p=AT_P):
+    if not dev:dev=g
+    return AT(cmd='AT+CWJAP="{}","{}"'.format(name,password),
+            dev=dev,timeout=timeout,p=p)
+jap=at_jap=at_cwjap=AT_CWJAP
+
+def AT_PING(ping_host=None,dev=None,timeout=AT_TIMEOUT,p=AT_P):
+    if not dev:dev=g
+    ping_host=set(ping_host)
+    return AT(cmd='AT+PING="{}"'.format(ping_host),
+            dev=dev,timeout=timeout,p=p)
+
+ping=at_ping=AT_PING
