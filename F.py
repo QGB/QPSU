@@ -374,6 +374,22 @@ isPath=isdir=isDir
 	# return ('/' in ast) or ('\\' in ast)
 	# return _p.sep in ast
 # def is	
+def bin(a,split=''):
+	'''
+bin(number, /)
+F.bin(1.0)=='0b00111111100000000000000000000000'
+'''
+	import struct
+	if py.isint(a):
+		return py.bin(a)
+	r='0b'
+	if py.isfloat(a):
+		r=r+split.join(py.bin(i).replace('0b', '').rjust(8, '0') for i in struct.pack('!f', a))
+	elif py.isbytes(a):
+		r=r+split.join(py.bin(i).replace('0b', '').rjust(8, '0') for i in a)
+	else:
+		raise py.ArgumentUnsupported('#TODO type',a)
+	return r
 def intToBytes(a):
 	T=py.importU().T
 	a=T.intToStr(a)
