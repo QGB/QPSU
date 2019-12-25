@@ -304,8 +304,7 @@ def getNameWithoutExt(a):
 		return T.subr(a,'','.')
 	else:return a
 
-	
-def autof(head,ext='',r='Default auto accroding to the head'):
+def auto_find_file(head,ext='',r='Default auto accroding to the head'):
 	'''r :recursion
 	return str  
 	# TODO # ext=?ext*     '''
@@ -344,7 +343,7 @@ def autof(head,ext='',r='Default auto accroding to the head'):
 	if not head.endswith(ext):head+=ext
 	
 	return head
-autoFileName=autof
+
 		
 def new(a):
 	'''will overwrite'''
@@ -377,7 +376,7 @@ isPath=isdir=isDir
 def bin(a,split=''):
 	'''
 bin(number, /)
-F.bin(1.0)=='0b00111111100000000000000000000000'
+F.bin(1.0)=='0b00111111100000000000000000000000'  # （大端）
 '''
 	import struct
 	if py.isint(a):
@@ -815,23 +814,30 @@ def numToSize(size, b1024=True):
 		if size < multiple:
 			return '{0:.3f} {1}'.format(size, suffix)
 	raise ValueError('number too large')
-readableSize=numToSize
-def size(asf): 
+readable_size=readableSize=numToSize
+
+def size(asf,int=py.No('ipython auto readable')): 
 	'''file or path return byte count
 	not exist return -1'''
 	asf=nt_path(asf)#if linux etc ,will auto ignored
 	# asf=autoPath(asf)#in there,can't use gst
 	size =0 #0L  SyntaxError in 3
 	if not _p.exists(asf):
-		return -1#-1L
+		return py.No('{} NOT EXISTS!'.format(asf))
 	if not _p.isdir(asf):
 		size= _p.getsize(asf)
 		if size<=0:
 			try:size=len(read(asf))
-			except:return -1#-1L
-		return size
-	for root, dirs, files in _os.walk(asf):  
-		size += sum([_p.getsize(_p.join(root, name)) for name in files])  	
+			except Exception as e:
+				return py.No('unexcept err',e,asf)
+		# return size
+	else:# is dir
+		for root, dirs, files in _os.walk(asf):  
+			size += sum([_p.getsize(_p.join(root, name)) for name in files])  	
+	U=py.importU()
+	# U.msgbox(U.is_ipy_cell())
+	if not int and U.is_ipy_cell():
+		size=readableSize(size)
 	return size 
 	
 # U.pln size(U.gst)
@@ -975,8 +981,8 @@ def makeDirs(ap,isFile=False):
 md=mkdir=makeDirs		
 
 gbAutoPath=True
-def autoPath(fn,default='',dir=False):
-	''' default is U.gst
+def autoPath(fn,ext='',default='',dir=False):
+	''' default is U.gst 
 if fn.startswith("."): 如果路径中所有文件夹存在，则可以写入读取。否则无法写入读取。file io 都是这个规则吧
 FileNotFoundError: [Errno 2] No such file or directory: '.
 
@@ -987,16 +993,17 @@ FileNotFoundError: [Errno 2] No such file or directory: '.
 		default=default.replace('\\','/')
 		if not default.endswith('/'):default+='/'
 	else:
-		default=U.gst
+		default=U.set_test_path(U.gst) # 防止 U.gst 被改变没被保存
 	fn=str(fn)
 	fn=fn.replace('\\','/')
-		
+	if ext and not ext.startswith('.'):ext='.'+ext
+	if not fn.lower().endswith(ext.lower()):fn+=ext
 	if fn.startswith("~/"):
 		import os
 		if U.isnix():
 			home=os.getenv('HOME')
 		else:
-			home=os.getenv('USERPROFILE')# 'C:/Users/Administrator'  not  cyg home os.getenv('HOME')
+			home=os.getenv('USERPRO`FILE`')# 'C:/Users/Administrator'  not  cyg home os.getenv('HOME')
 		# else:		home=os.getenv('HOMEPATH')#  HOMEPATH=\Users\Administrator
 		fn= home+fn[1:];
 
@@ -1009,7 +1016,7 @@ FileNotFoundError: [Errno 2] No such file or directory: '.
 		fn=nt_path(fn)
 	if(dir and not fn.endswith('/')):fn+='/'
 	return fn
-auto_file_path=auto_path=autoPath
+autofn=auto_filename=autoFileName=auto_file_path=auto_path=autoPath
 
 def nt_path(fn):
 	'''if linux etc ,will auto ignored

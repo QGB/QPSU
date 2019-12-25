@@ -81,7 +81,10 @@ async function tab_exec(tab,code){
     
     return new Promise(function (resolve, reject) {  //看下一行，其实 r=没用 ，反正默认返回最后一个值
       chrome.tabs.executeScript(tab_id,{'code': gs_lib_func+code+'\n r=JSON.stringify(r)' } ,function(as) { //array of any	(optional) result	The result of the script in every injected frame.
-        resolve(JSON.parse(as[0] )  ) // 【0】 这只是临时 方便await ，以后要删除
+        if(as.length)
+            resolve(JSON.parse(as[0] )  ) // 【0】 这只是临时 方便await ，以后要删除
+        else
+            resolve(as) 
       })
    })
 }

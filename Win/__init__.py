@@ -202,13 +202,19 @@ def getCmdHandle():
 	return kernel32.GetConsoleWindow()
 getcmdw=getCmdHandle
 	
-def getCmdLine():
+def getCmdLine(bytes=False):
 	'''------> k.GetCommandLineW()
 Out[9]: 'G'
 	'''
-	kernel32.GetCommandLineA.restype=LPSTR
-	return kernel32.GetCommandLineA()
-getCmd=getCmdLine
+	if bytes:
+		kernel32.GetCommandLineA.restype=LPSTR
+		b= kernel32.GetCommandLineA()
+		return b
+	else:
+		kernel32.GetCommandLineW.restype=ctypes.wintypes.LPCWSTR
+		s=kernel32.GetCommandLineW()
+		return s
+get_cmd=get_cmdline=get_command_line=GetCommandLine=getCmd=getCmdLine
 	
 def getTitle(h=0,size=1024):
 	'''h:window Handle'''

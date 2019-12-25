@@ -104,8 +104,11 @@ def read_all(dev=None,encoding=ENCODING,p=True):
     else      :g=U.set(__name__+'_g',dev)
     b=g.read_all()
     if p:
-        s=b.decode(encoding)
-        print(s)
+        try:
+            s=b.decode(encoding)
+        except Exception as e:
+            return b,e
+        if s:print(s)
         return None
     return b
 r=read=read_all
@@ -188,12 +191,15 @@ def _sw(dev,count,time,a,b):
 AT_TIMEOUT=U.get(__name__+'_'+"AT_TIMEOUT",6)
 AT_P=U.get(__name__+'_AT_'+"P",True)
 AT_EOL=U.get(__name__+'_AT_'+"EOL",b'\r\n')
-def AT(cmd,dev=None,timeout=AT_TIMEOUT,p=AT_P,encoding=ENCODING,eol=AT_EOL):
+def AT(cmd='',dev=None,timeout=AT_TIMEOUT,p=AT_P,encoding=ENCODING,eol=AT_EOL):
     if not dev:dev=g
+    cmd=set(cmd)
     if cmd[:3] not in {'AT+',b'AT+'}:
         cmd=cmd.upper() # bytes ok
+    if not cmd:
+        cmd=b'AT'
     if not py.isbytes(cmd):cmd=cmd.encode(encoding)
-    if not cmd.startswith(b'AT+'):cmd=b'AT+'+cmd
+    if not cmd.startswith(b'AT'):cmd=b'AT+'+cmd
     b=read_all(dev=dev,encoding=encoding,p=0)
     if b:
         print(b.decode(encoding))

@@ -239,7 +239,20 @@ def isipy():
 			# pass
 		# f=f.f_back	
 	# return ipy
-getipy=isIpy=is_ipy=isipy
+get_ipy=get_ipython=getipy=isIpy=is_ipy=isipy
+def is_ipy_cell():
+	''' 和 getArgsDict 一样，最多向上找两层，防止影响到意料之外的代码
+f.f_back  ~= None
+	'''
+	ipy=get_ipython()
+	if not ipy:
+		return py.No('Not even ipy')
+	f=sys._getframe().f_back
+	def check(f):
+		return f and f.f_code.co_filename.startswith('<ipython-input-')
+	return check(f) or check(f.f_back)
+is_ipy_call=is_ipy_cell	
+
 def isrepl():
 	i,o=sys.stdin.isatty(),sys.stdout.isatty()
 	if i==o:return i
@@ -709,7 +722,7 @@ def cmd(*a,**ka):
 		if iswin() or iscyg():
 			a=['cmd']
 			if 'timeout' not in ka:ka['timeout']=9
-			U.log('wait cmd.exe 9 sec ...')
+			log('wait cmd.exe 9 sec ...')
 		else:
 			raise ArgumentError('commands not null',a,ka)
 		# TODO #
@@ -2394,6 +2407,12 @@ def getModPathForImport():
 	if iswin():return sp#cygwin None
 	else:raise NotImplementedError('todo: cyg  nix')
 
+def get_qpsu_file_path(fn='',base='file/'):
+	qpsu=getModPath()+base
+	fn=qpsu+fn
+	return fn
+get_qpsu_path=getQPSUPath=getQpsuPath=get_qpsu_file_path
+
 def getModPath(mod=None,qgb=True,slash=True,backSlash=False,endSlash=True,endslash=True,trailingSlash=True):
 	'''不返回模块文件，返回模块目录
 	@English The leading and trailing slash shown in the code 代码中的首尾斜杠'''
@@ -2423,15 +2442,14 @@ def getModPath(mod=None,qgb=True,slash=True,backSlash=False,endSlash=True,endsla
 	else:sp=sp.replace('\\','/')
 
 	return sp
-get_qpsu_path=getQPSUPath=getQpsuPath=get_module_path=getModPath
+get_qpsu_dir=getQPSUDir=get_module_dir=get_module_path=getModPath
 
 def slen(a,*other):
 	return py.repr(len(a,*other) )
 	
 def len(obj,*other):
 	'''Exception return py.No or [no...]'''
-	import types
-	if isinstance(obj, types.GeneratorType):
+	if py.isgen(obj):
 		obj=py.list(obj)
 	return builtinFuncWrapForMultiArgs(builtinFunc=py.len,args=(obj,other) )# ,default=default
 
@@ -2487,11 +2505,20 @@ def getCallExpression(*a,**ka):
 	return r
 getCallExpr=getCallExpression
 
-def set_env_path(p):
-	if not p :raise py.ArgumentError()
+def set_env_path(append=[],delete=[]):
+	# if not p :raise py.ArgumentError()
+	if py.istr(append):append=[append]
+	if not py.islist(append):append=py.list(append)
+
+	if py.istr(delete):delete=[delete]
+	if not py.islist(delete):delete=py.list(delete)
+	if '' not in delete:delete.append('')
+	
 	ps=os.environ['PATH'].split(os.pathsep)
-	if (p not in ps):ps.append(p)
-	ps.remove('')
+	for p in append:
+		if (p not in ps):ps.append(p)
+	for p in delete:
+		if (p in ps)    :ps.remove(p)
 	os.environ['PATH']=os.pathsep.join(ps)		
 	return ps
 

@@ -85,13 +85,18 @@ class No:
 	def __ge__(self, other):return 0 >=	other
 	def __gt__(self, other):return 0 >	other
 	
+	def upper(s):return s
+	def lower(s):return s
 	# def __call__(s,*a,**ka):#不要定义这个，否则在ipy中不显示 repr
 		#乱来吗？  谁说一定返回 str
 		# return s.__str__()
 		
 	# @staticmethod #obj.__len__()==-1
 # no=No() #instance
-	
+def isgen(a):
+	import types
+	return isinstance(a, types.GeneratorType)
+
 def iterable(a):
 	try:
 		for i in a:pass
