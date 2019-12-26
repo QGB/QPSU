@@ -158,9 +158,7 @@ def save(file=None,lines=-1,tryExcept=False,out=False,columns=70,overide=True):
 		lsta,lend=0,gIn.__len__()
 	if file:#当指定file 名时，总是 overide
 		if T.istr(file):
-			file=F.autoPath(file,gsavePath)
-			if not file.lower().endswith('.py'):
-				file+='.py'
+			file=F.autoPath(file,ext='.py',default=gsavePath)
 			F.new(file)
 			if py.is2():file=open(file,'a')
 			else:file=open(file,'a',encoding="utf8")
@@ -171,7 +169,7 @@ def save(file=None,lines=-1,tryExcept=False,out=False,columns=70,overide=True):
 	else:
 		if gdTimeName and overide:
 			file=gdTimeName[py.list(gdTimeName.keys() )[-1]]#is3:TypeError: 'dict_keys' object does not support indexing
-			file=F.autoPath(file,gsavePath)
+			file=F.autoPath(file,ext='.py',default=gsavePath)
 			if py.is2():file=open(file,'w')
 			else:file=open(file,'w',encoding="utf8")
 			# last=-1

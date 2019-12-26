@@ -168,8 +168,7 @@ F.readableSize(len(F.dill_dump(protocol=4,obj=r)  ) )   #'13.694 KiB'
 	'''
 	import dill
 	if file:
-		if not file.lower().endswith('.dill'):
-			file+='.dill'
+		file=auto_path(file,ext='.dill')
 		with py.open(file,'wb') as f:
 			dill.dump(obj=obj,file=f,protocol=protocol)		
 		return file
@@ -705,13 +704,15 @@ def glob(path, pattern='**/*'):
 	import pathlib
 	return py.list(pathlib.Path('./').glob(pattern))
 
-def walk(top):
-	'''2&3 : os.walk(top, topdown=True, onerror=None, followlinks=False)
+def walk(ap):
+	'''
+return tuple(ap,dir_list,file_list )
+	2&3 : os.walk(top, topdown=True, onerror=None, followlinks=False)
 	'''
 	if py.is2():
-		return _os.walk(top).next()
+		return _os.walk(ap).next()
 	else:
-		return _os.walk(top).__next__()
+		return _os.walk(ap).__next__()
 		
 def list(ap='.',type='',t='',r=False,d=False,dir=False,f=False,file=False):
 	'''Parms:bool r recursion
@@ -749,12 +750,12 @@ def list(ap='.',type='',t='',r=False,d=False,dir=False,f=False,file=False):
 	try:r3=py.list(walk(ap))
 	except Exception as ew:
 		# pln ap;raise ew
-		return []
+		return py.No(ew)
 	
 	if ap=='./':ap=''
 	# U.repl()
-	r3[1]=[ap+i for i in r3[1]]
-	r3[2]=[ap+i for i in r3[2]]
+	r3[1]=[ap+i+'/' for i in r3[1]] #dirs
+	r3[2]=[ap+i for i in r3[2]] #files
 	
 	
 	if d:rls.extend(r3[1])
@@ -814,7 +815,7 @@ def numToSize(size, b1024=True):
 		if size < multiple:
 			return '{0:.3f} {1}'.format(size, suffix)
 	raise ValueError('number too large')
-readable_size=readableSize=numToSize
+ssize=readable_size=readableSize=numToSize
 
 def size(asf,int=py.No('ipython auto readable')): 
 	'''file or path return byte count

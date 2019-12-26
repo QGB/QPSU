@@ -254,7 +254,9 @@ f.f_back  ~= None
 is_ipy_call=is_ipy_cell	
 
 def isrepl():
-	i,o=sys.stdin.isatty(),sys.stdout.isatty()
+	# i,o=sys.stdin.isatty(),sys.stdout.isatty()  # 这样太简单粗暴了，我想要判断上面两层之内是不是用户手动输入
+	# TODO flask——rpc
+	return is_ipy_cell()
 	if i==o:return i
 	else:
 		raise Exception('std(in,out) isatty conflit')

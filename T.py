@@ -406,6 +406,11 @@ html_unescape=htmlDecode=html_decoded
 
 # data = "U.S. Adviser&#8217;s Blunt Memo on Iraq: Time &#8216;to Go Home&#8217;"
 # print decode_unicode_references(data)
+def netloc(url):
+	from six.moves.urllib.parse import urlsplit
+	up=urlsplit(url=url)
+	return up.netloc
+host_name=netloc
 
 def urlEncode(a):
 	''' a : str_or_bytes
