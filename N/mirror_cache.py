@@ -1,6 +1,6 @@
 #coding=utf-8
 import sys
-if __name__.endswith('qgb.N'):from qgb import py
+if __name__.endswith('qgb.N.mirror_cache'):from .. import py
 else:
 	from pathlib import Path
 	gsqp=Path(__file__).parent.parent.parent.absolute().__str__()

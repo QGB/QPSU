@@ -1,7 +1,8 @@
 #coding=utf-8
 import sys,os,IPython
-if __name__.endswith('.ipy'):from . import U,T,F,py#from .   Attempted relative import in non-package
-else:import U,T,F,py
+if __name__.endswith('qgb.ipy'):from . import py#from .   Attempted relative import in non-package
+else:import py
+U,T,N,F=py.importUTNF()
 gError=None
 # U.pln U.gError
 if not U.isipy():raise EnvironmentError

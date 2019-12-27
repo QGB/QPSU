@@ -3675,7 +3675,9 @@ U.StrRepr(b'3232',encoding='ascii')	[<class 'qgb.U.StrRepr'>, (b'3232',), {'enco
 
 
 #############################
-def main(display=True,pressKey=False,clipboard=False,escape=False,c=False,ipyOut=False,cmdPos=False,reload=False,*args):
+def main(display=True,pressKey=False,clipboard=False,
+	ipyArgs=False,escape=False,
+	c=False,ipyOut=False,cmdPos=False,reload=False,*args):
 	anames=py.tuple([i for i in py.dir() if not i .startswith('args')])
 	if not args:args=sys.argv
 	for i in args:
@@ -3698,9 +3700,18 @@ def main(display=True,pressKey=False,clipboard=False,escape=False,c=False,ipyOut
 	
 	if cmdPos:sImport+=";POS=pos=U.cmdPos;npp=NPP=U.notePadPlus;ULS=Uls=uls=F.ls;ll=ULL=Ull=ull=F.ll"
 		
+	if ipyArgs:
+		sImport=sImport.replace("'",r"\'")
+		sImport='''
+cmd /k ipython --no-banner  --autocall=2 "--InteractiveShellApp.exec_lines=['{}','U.cdt()']"
+'''.format(sImport).strip()
+		escape=False
+		clipboard=True
+		pln('# set below to clipboard')
+
+
 	if escape:sImport=sImport.replace("'",r"\'")
 	
-	if display:pln(sImport)
 	
 	if pressKey:
 		try:
@@ -3711,8 +3722,11 @@ def main(display=True,pressKey=False,clipboard=False,escape=False,c=False,ipyOut
 		try:
 			Clipboard.set(sImport)
 		except:pln('Clipboard err')
-	
-	return sImport
+	if display:
+		pln(sImport)
+	else:
+		return sImport
+
 gsImport='''import sys;'qgb.U' in sys.modules or sys.path.append('{0}');from qgb import *'''.format(getModPathForImport())	
 if __name__ == '__main__':
 	main()

@@ -1,7 +1,8 @@
 # coding=utf-8
-import os as _os;import sys as _sys;from os import path as _p
-if __name__.endswith('qgb.F'):from . import py,T
-else:import py,T
+import os as _os;import sys as _sys;from os import path as _p#endswith 是为了适配qgb处于另外一个包内的情况
+if __name__.endswith('qgb.F'):from . import py
+else:import py
+T=py.importT()
 gError=[]
 
 try:from pathlib import Path

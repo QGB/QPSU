@@ -80,8 +80,11 @@ async function tab_exec(tab,code){
     if(tab.id){tab_id=tab.id  }
     
     return new Promise(function (resolve, reject) {  //看下一行，其实 r=没用 ，反正默认返回最后一个值
-      chrome.tabs.executeScript(tab_id,{'code': gs_lib_func+code+'\n r=JSON.stringify(r)' } ,function(as) { //array of any	(optional) result	The result of the script in every injected frame.
-        if(as.length)
+      chrome.tabs.executeScript(tab_id,
+      {'code': gs_lib_func+code+
+            "\n rj=JSON.stringify(r);if(rj){r=rj}else{r==JSON.stringify(r+'')}"
+      } ,function(as) { //array of any	(optional) result	The result of the script in every injected frame.
+        if(as && as.length)
             resolve(JSON.parse(as[0] )  ) // 【0】 这只是临时 方便await ，以后要删除
         else
             resolve(as) 
@@ -110,11 +113,12 @@ async function taobao_cart_back(){
     gbloop=1
     while(gbloop){
         for(var t of (await tab_query({url: "https://cart.taobao.com/add_cart_succeed.htm*"}) )){
-            await tab_exec(t,_CODE(function(){
-                Array.from(document.querySelectorAll('span')).map(i=>i.style.background='green')
-                history.back()
+            await tab_remove(t)
+//             await tab_exec(t,_CODE(function(){
+//                 Array.from(document.querySelectorAll('span')).map(i=>i.style.background='green')
+//                 history.back()
 
-            }))
+//             }))
         }
         await sleep(444)
     }
@@ -303,6 +307,13 @@ async function tmall_get_item(base_url="https://detail.tmall.com/item.htm"){
     console.log('done')
 }
 
+async function get_urls_doc(
+  query_url="https://okfw.net/r=",post_url="https://okfw.net/r="){
+   tid=(await tab_query()).map(t=>t.id)[0] // seems min id
+   
+
+}
+    
 
 async function taobao_add_cart(){
     t=await tab_query({url: "https://item.taobao.com/item.htm*"})
