@@ -87,9 +87,6 @@ try:
 except Exception as ei:
 	setErr(ei,msg='#Error import '+str(ei))
 	
-try:
-	from pympler.asizeof import asizeof as sizeof
-except:pass
 aError=ArgsErr=argserr=argErr=argerr=argumentError=ArgumentException=py.ArgumentError	
 ArgumentUnsupported=py.ArgumentUnsupported
 ############
@@ -129,6 +126,11 @@ def get(name='_',default=py.No('can not get name'),level=gd_sync_level['process'
 		#TODO 对于不存在的 name ，可以记录最后访问时间为 py.No，方便排查
 		return d.get(name,default)
 	#TODO
+def get_or_set(name,default):
+	r=get(name)
+	if r:return r
+	return set(name,default)
+getset=getSet=get_set=get_or_set
 #########################
 def one_in(vs,*t):
 	'''(1,2,3,[t])	or	([vs].[t])'''
@@ -3532,6 +3534,47 @@ def sha256_fingerprint_from_pub_key(pubkey_str):
 	encoded = base64.b64encode(digest).rstrip(b'=')  # ssh-keygen strips this
 	return "SHA256:" + encoded.decode('utf-8')
 
+def sizeof_one_obj(obj):
+	from pympler.asizeof import asizeof
+	return F.IntSize(asizeof(obj))
+def sizeof(obj,*other):
+	return builtinFuncWrapForMultiArgs(builtinFunc=sizeof_one_obj,args=(obj,other) )
+size=asizeof=sizeof
+
+def gc():
+	import gc
+	return gc.collect()
+
+class IntOct(py.int):
+	def __new__(cls, *a, **ka):
+		return py.int.__new__(cls, *a, **ka)
+	def __repr__(self):
+		U=py.importU()
+		return '<{}>'.format(py.oct(self) )
+		# return '<{}={}>'.format(super().__repr__(),F.ssize(self) )
+IntFileMode=IntOct
+
+class FloatTime(py.float):
+	def __new__(cls, *a, **ka):
+		return py.float.__new__(cls, *a, **ka)
+	def __repr__(self):
+		U=py.importU()
+		return '<{}>'.format(stime(time=self) )
+
+class IntTime(py.int):
+	def __new__(cls, *a, **ka):
+		return py.int.__new__(cls, *a, **ka)
+	def __repr__(self):
+		U=py.importU()
+		return '<{}>'.format(stime(time=self) )
+
+class IntSize(py.int):
+	def __new__(cls, *a, **ka):
+		return py.int.__new__(cls, *a, **ka)
+	def __repr__(self):
+		return '<{}>'.format(F.numToSize(self) )
+		# return '<{}={}>'.format(super().__repr__(),F.ssize(self) )
+
 
 def mutableString(obj):
 	class MetaClass(type):
@@ -3641,7 +3684,7 @@ class ValueOfAttr(py.object):
 		return self.__parent_str__()+self.__name__
 v=ValueOfAttr()
 
-class StrRepr(str):
+class StrRepr(py.str):
 	''' padding_times=0,padding='\t'
 str(object='') -> str
 str(bytes_or_buffer[, encoding[, errors]]) -> str
@@ -3667,7 +3710,7 @@ U.StrRepr(b'3232',encoding='ascii')	[<class 'qgb.U.StrRepr'>, (b'3232',), {'enco
 		StrRepr.padding_times=ka.pop('times',StrRepr.padding_times)
 		StrRepr.padding_times=ka.pop('width',StrRepr.padding_times)
 
-		return str.__new__(cls, *a, **ka)
+		return py.str.__new__(cls, *a, **ka)
 
 	def __repr__(self):return self.__str__()
 	def __str__(self) :return (StrRepr.padding*StrRepr.padding_times)+ super().__str__() +(StrRepr.padding*StrRepr.padding_times)

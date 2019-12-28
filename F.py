@@ -776,20 +776,25 @@ def ll(ap='.',readable=True,type='',t='',r=False,d=False,dir=False,f=False,file=
 	readable is True: Size,Stime,..
 	linux struct stat: http://pubs.opengroup.org/onlinepubs/009695399/basedefs/sys/stat.h.html'''
 	dr={}
+	
 	for i in list(ap,type=type,t=t,r=r,d=d,dir=dir,f=f,file=file):#ls 肯定返回 list类型！
 		# importU;if U.DEBUG:U.pln ap,repr(i)
 		try:
 			s=_os.stat(i)
 		except:
 			continue
-		dr[i]=[size(i),s.st_atime,s.st_mtime,s.st_ctime,s.st_mode]
 		if readable:
 			U=py.importU()
-			for j in py.range(len(dr[i])):
-				# U.pln i,j,repr(dr[i][j])
-				# if py.type(dr[i][j]) is py.long:
-				if j==0: dr[i][j]=readableSize(dr[i][j])
-				if py.isfloat(dr[i][j]):dr[i][j]=U.stime(time=dr[i][j])
+			IntSize,FloatTime,IntOct=U.IntSize,U.FloatTime,U.IntOct
+			dr[i]=[ IntSize(size(i)),
+					FloatTime(s.st_atime),
+					FloatTime(s.st_mtime),
+					FloatTime(s.st_ctime),
+					IntOct (s.st_mode ),
+				]
+		else:
+			dr[i]=[size(i),s.st_atime,s.st_mtime,s.st_ctime,s.st_mode]
+
 	return dr
 
 SUFFIXES = {1000: ['KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'],
@@ -839,7 +844,7 @@ def size(asf,int=py.No('ipython auto readable')):
 	U=py.importU()
 	# U.msgbox(U.is_ipy_cell())
 	if not int and U.is_ipy_cell():
-		size=readableSize(size)
+		size=U.IntSize(size)
 	return size 
 	
 # U.pln size(U.gst)

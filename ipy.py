@@ -101,7 +101,7 @@ def outType(t=None,start=0,stop=U.IMAX,len=py.range(U.IMAX)):
 		if index<start or index>stop:continue
 		if t !=None:
 			if not m(gOut[i]):continue
-		r[i]=type(gOut[i]),U.len(gOut[i])
+		r[i]=type(gOut[i]),U.len(gOut[i]),U.sizeof(gOut[i])
 		
 	return r
 outype=outType
@@ -130,7 +130,8 @@ gsTryExcept=u'''try:{1}
 except Exception as _e{0}:U.pln {0},_e{0}'''
 #用print >>输出会自动换行,format 的参数应该与文本标记一致，
 #否则出现IndexError: tuple index out of range
-gdTimeName={}
+# gs_ipy_save_file_list_name=
+gdTimeName=U.get_or_set(__name__+'.save_file_list',{})
 gIgnoreIn=[ u'from qgb import *',u'ipy.',u'get_ipython()']
 # U.cdt()
 gsavePath=U.gst+'ipy/'
@@ -239,152 +240,38 @@ save.name='{0}.{1}'.format(__name__,save.__name__)
 def reset():
 	gipy.execution_count=0
 
-
 def ipyStart(*a):
 	import IPython
 	IPython.start_IPython()
-def ipyOutLast(i=None):
-	'''废弃不用  desperated绝望  @deprecated不建议
-	use _  ,  __ ,  ___ 
-	ORZ'''
-	# f=sys._getframe()
-	# while f and f.f_globals and 'get_ipython' not in f.f_globals.keys():
-		# f=f.f_back
-	# Out=f.f_globals['Out']
-	Out=gOut
-	# globals()['gipy']=5
-	
-	def length():return len(Out)
-
-	ipyOutLast.size=ipyOutLast.len=ipyOutLast.__len__=length
-	# U.pln( ipyOutLast.size
-	if i is None:
-		if Out:
-			# p("Out.keys ")
-			im=len(Out.keys())
-			if im<10:return Out.keys()
-			elif 9<im<21:return [(k,ct(Out)) for k in Out.keys()] 
-			else:
-				# repl()
-				r=[[]]
-				for i,k in py.enumerate(Out):#index ,key
-					# U.pln( i
-					r[-1].append((k,i))
-					if i%5==0:
-						r.append([])
-				return r
-		else:
-			U.pln( "##### IPy No Out #####")
-			return
-	
-	if Out:
-		try:
-			return Out[i]
-		except:return Out[Out.keys()[i]]
-	return Out
-	
-	
-#
-############以下暂时未用
-#
-def recorder():
-	while True:
-		try:
-			save(overide=True)
-			U.sleep(9)
-		except Exception as e:
-			if U.gbPrintErr:U.pln(e)
-			global gError
-			gError=e
-	from copy import deepcopy
-	F.md(date);U.cd(date)
-	fi=None;li=[]
-	def new():
-		U.pln(globals().keys()) 
-		U.pln( '*'*66)
-		U.pln( dir(recorder))
-		U.pln( recorder.__dict__)	
-		fi=open(U.stime()+'.In','a')
-		li=[]
-		# U.pln( fi
-	def write():
-		F.new(fi.name)
-		U.pln(li,file=fi)
-	new()
-	while True:
-		U.pln(fi) 
-		if len(gi)>len(li):
-			li=deepcopy(gi)
-			write()
-		else:
-			if li!=gi:
-				fi.close()
-				new()
-			else:pass#Not Change
-			
-		U.sleep(9)#second
-		
-		
-gt=None#thread
-def startRecord():
-	global gt
-	gt=U.thread(target=recorder)
-	gt.setName(save.name)
-	gt.setDaemon(True)
-#	setDaemon：主线程A启动了子线程B，调用b.setDaemaon(True)，则主线程结束时，会把子线程B也杀死，与C/C++中得默认效果是一样的。
-	gt.start()
-class IPy():
-	def __init__(s,mod=None):
-		pass
-		# if not mod:
-			# U.getMod(
-			# s._module=mod
-	def setModule(s,mod=None):
-		import sys
-		if not mod:
-			if 'qgb.ipy' in sys.modules:
-				mod=sys.modules['qgb.ipy']
-				if mod:
-					if type(mod)!=type(sys):mod=mod._module
-					#如果是module 直接往下执行
-	
-		if type(mod)==type(sys):
-			s._module=mod
-			return True
-		else:raise Exception('need module qgb.ipy')
-	def __nonzero__(s):
-		return True
-		
-	def __dir__(s):
-		return ['_module']
-	
-	def __call__(s):
-		return gipy
-	# def __repr__(s):
-		# return '444'
-	def __getattribute__ (*a,**ka):
-		U.pln('gab',a,ka) 
-		return a[0]
-	def __getattr__(s,*a,**ka):
-		U.pln('ga',a,ka) 
-		if a[0].startswith('__'):
-			def ta(*at,**kat):return '%s %s %s'%(a[0],len(at),len(kat))
-			return ta
-		return a[0]
-		# if a[0] in s.__dir__():return eval('{0}'.format(a[0]))
-	def rewrite(*a,**ka):
-		U.pln( 'rewrite',type(a[0]),a[1:],ka	)
-
-# U.pln( repr(F.md),U.getMod('qgb.ipy')
-
-# gi=IPy()
-# if U.getMod('qgb.ipy'):
-	# U.replaceModule('ipy',gi,package='qgb',backup=False)
 
 
-# U.msgbox()
-# F.writeIterable('ipy/fwi.txt',sys.modules)
+def _seq_pprinter_factory(start, end, basetype):
+	"""
+	Factory that returns a pprint function useful for sequences.  Used by
+	the default pprint for tuples, dicts, and lists.
+	"""
+	def inner(obj, p, cycle):
+		typ = type(obj)
+		if basetype is not None and typ is not basetype and typ.__repr__ != basetype.__repr__:
+			# If the subclass provides its own repr, use it instead.
+			return p.text(typ.__repr__(obj))
 
-# U.repl()
-# U.thread(target=recorder).start()
-# U.pln( 233
+		if cycle:
+			return p.text(start + '...' + end)
+		step = len(start)
+		p.begin_group(step, start)
+		rows = columnize([repr(l) for l in obj], separator=", ",
+						 displaywidth=p.max_width).split("\n")
+		rows.remove('')
+		for idx, x in p._enumerate(rows):
+			if idx:
+				p.breakable()
+			p.text(x)
+		if len(obj) == 1 and type(obj) is tuple:
+			# Special case for 1-item tuples.
+			p.text(',')
+		p.end_group(step, end)
+
+	return inner
+
+

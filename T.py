@@ -76,6 +76,27 @@ try:
 	from pprint import pprint,pformat
 except:pass
 ####################################################
+def columnize(iterable,width=120):
+	''' 144 break line in default Win+R Cmd window
+'''
+	# from IPython.utils.text import columnize as _columnize
+	if not py.iterable(iterable):return py.repr(iterable)
+	import IPython.utils.text
+#TODO dict columnize
+# { k1:v
+#	k2:[small list]
+# 	k3:[long,list,
+# 		auto ident
+# 		and columnize]
+#	k4:and recursively
+# }	
+	if py.isdict(iterable):
+		return pformat( iterable )
+		# return pformat( {k:pformat(v) for k,v in iterable.items() } )
+	r= IPython.utils.text.columnize([pformat(i) for i in iterable],
+		row_first=True, separator=' , ', displaywidth=width)
+	return r
+
 def justify(s,size,fillchar=' ',method='ljust'):
 	if size<1:raise py.ArgumentError('size must > 0',size)
 	if len(s)>=size:
@@ -408,6 +429,9 @@ html_unescape=htmlDecode=html_decoded
 # print decode_unicode_references(data)
 def netloc(url):
 	from six.moves.urllib.parse import urlsplit
+	url=url.strip()
+	if '://' not in url:
+		url='http://'+url
 	up=urlsplit(url=url)
 	return up.netloc
 host_name=netloc
@@ -681,7 +705,7 @@ def json_loads(astr):
 	try:
 		return json.loads(astr)
 	except Exception as e:
-		return py.No(e)
+		return py.No(e,astr)
 	
 def json_dumps(obj):
 	U=py.importU()
