@@ -75,9 +75,10 @@ except Exception as _e:pass
 try:
 	if __name__.endswith('qgb.U'):from . import F,T
 	else:import F,T
-	# if isMain():import F,T
-	# else:from . import F,T
 	write,read,ls,ll,md,rm=F.write,F.read,F.ls,F.ll,F.md,F.rm
+	IntSize=F.IntSize
+	F.fileName=F.filename=T.filename_legalized
+
 	from pprint import pprint,pformat
 	if __name__.endswith('qgb.U'):from . import Clipboard
 	else:                         import Clipboard
@@ -127,8 +128,10 @@ def get(name='_',default=py.No('can not get name'),level=gd_sync_level['process'
 		return d.get(name,default)
 	#TODO
 def get_or_set(name,default):
+	if py.isno(default):
+		raise py.ArgumentError('default cannot be py.No')
 	r=get(name)
-	if r:return r
+	if not py.isno(r):return r
 	return set(name,default)
 getset=getSet=get_set=get_or_set
 #########################
@@ -1583,7 +1586,9 @@ def dir(a,filter='',type_filter=py.No('default not filter'),raw_value=False):
 	for i in attrs:
 		ok=True
 		v=getattr(a,i) # py.getattr(a,i,err)
-		if (not raw_value) and i in {'f_globals','f_locals','f_builtins'}:
+		if (not raw_value) and i in {'f_builtins','__builtins__'}:
+			v='{} : {}'.format(py.len(v),py.type(v) )
+		if (not raw_value) and i in {'f_globals','f_locals'}:
 			v='{} : {}'.format(py.len(v),' '.join(v) )
 		# if not py.issubclass(type_filter,py.No):# 这里很奇怪，这样判断 type_filter始终不是py.No
 		if type_filter:
@@ -3191,7 +3196,7 @@ def dict_value_len(adict):
 	for k,v in adict.items():
 		d[k]=len(v)						
 	return d
-
+dictvlen=dictValueLen=dict_value_len
 def dict_value_len_count(adict,show_key_len_range=py.range(-1,-1) ):
 	'''
 	range(-1) = range(0, -1)
@@ -3567,13 +3572,6 @@ class IntTime(py.int):
 	def __repr__(self):
 		U=py.importU()
 		return '<{}>'.format(stime(time=self) )
-
-class IntSize(py.int):
-	def __new__(cls, *a, **ka):
-		return py.int.__new__(cls, *a, **ka)
-	def __repr__(self):
-		return '<{}>'.format(F.numToSize(self) )
-		# return '<{}={}>'.format(super().__repr__(),F.ssize(self) )
 
 
 def mutableString(obj):

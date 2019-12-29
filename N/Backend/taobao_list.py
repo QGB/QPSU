@@ -26,6 +26,20 @@ def init(shop):
 	gshop=U.set(gn+'shop',shop)
 	return gshop
 
+def pop_item_url_from_id_list(a):
+	if not a:return ''
+	id=''
+	if py.isdict(a):
+		id,v=a.popitem()
+	if py.islist(a):
+		id=a.pop() #-1
+	if not id:return ''
+	if 'id=' not in id:
+		return 'https://item.taobao.com/item.htm?id='+id
+	else:
+		return 'https://item.taobao.com/item.htm?id='+T.sub(id,'id=','')
+get_item_url=pop_item_url=pop_item_url_from_id_list
+
 def pop_url_from_shop(url,shop=None):
 	if not shop:shop=gshop
 	
@@ -71,10 +85,12 @@ def iter_sprice(shop=None):
 def rty(rows=None,**ka):
 	if not rows:rows=grows
 	rt=''
-	for row in U.sort(rows,**ka):
+	for index,row in enumerate(U.sort(rows,**ka)):
+		if 'item.taobao.com/item.htm?id=' in row[-3]:
+			row[-3]=T.sub(row[-3],'id=','')
 		tb=f'''{row[-1]}
 <span>{row[:4]}</span>  <br>
-<a target="_blank" href="taobao://item.taobao.com/item.htm?id={row[-3]}">{row[-2]} </a>
+<a target="_blank" href="taobao://item.taobao.com/item.htm?id={row[-3]}">{'%4s'%index}  {row[-2]} </a>
 <br><hr>
 '''
 		rt+=tb

@@ -212,8 +212,12 @@ def rpcClient(url_or_port='http://127.0.0.1:23571',code=''):
 def flask_html_response(response,html,remove_tag=(
 		['<script','</script>'],
 		['<SCRIPT','</SCRIPT>'],
-	),):
+	),encoding='utf-8'):
 	T=py.importT()
+	if py.isbyte(html):#TODO byte remove tag,no convert
+		html=html.decode(encoding)
+	if not py.istr(html):
+		html=py.str(html)
 	for start,end in remove_tag:
 		s=True
 		while s:
@@ -222,7 +226,7 @@ def flask_html_response(response,html,remove_tag=(
 			html=html.replace(start+s+end,'')
 	response.headers['Content-Type']='text/html;charset=utf-8';
 	response.set_data(html)
-htmlp=response_html=html_response=flask_html_response
+html=htmlp=response_html=html_response=flask_html_response
 
 def get(url,protocol='http',file=''):
 	U=py.importU()

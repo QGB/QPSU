@@ -217,6 +217,31 @@ def getFLD(url_or_domain):
 get_fld=getFLD
 
 
+################### zh #############################
+# u'([\u4e00-\u9fff]+)'  
+RE_ZH_PATTERN = re.compile(u'[\u4e00-\u9fa5]+')
+
+def list_filter_zh(a):
+	return RE_ZH_PATTERN.findall(a )
+filter_zh_as_list=list_filter_zh
+
+def str_filter_zh(a,max_not_zh=0,splitor=' '):
+	if not max_not_zh:
+		return splitor.join(RE_ZH_PATTERN.findall(a ) )
+	return regexReplace(a,r'[^\u4e00-\u9fa5]{%s,}'%max_not_zh,'')
+filter_zh_as_str=filter_zh=filterZh=str_filter_zh
+
+def hasZh(word):
+	'''
+	判断传入字符串是否包含中文
+	:param word: 待判断字符串
+	:return: True:包含中文  False:不包含中文
+	'''
+	global RE_ZH_PATTERN
+	match = RE_ZH_PATTERN.search(word)
+	return match
+contain_zh=has_zh=hasZh	
+################# zh end ##############
 def filterInt(a,digits=py.range(1,999)):
 	if py.isint(digits):
 		digits=py.range(digits,999)
@@ -248,18 +273,29 @@ def html2text(html,baseurl='',ignore_images=True,ignore_links=True,):
 	h.ignore_links=ignore_links
 	return h.handle(html)
 
-def html_prettify(html, formatter="html5",p=True):
+def html_prettify(html, formatter="html5",p=py.No('auto')):
 	'''
 	formatter =  'html',"html5","minimal",None
 	'''
-	from bs4 import BeautifulSoup
-	bs=BeautifulSoup(html,features="html5lib" )
+	import bs4
+	if py.isinstance(html,bs4.element.Tag):
+		return html.prettify(formatter=formatter)
+	if py.isinstance(html,bs4.BeautifulSoup):
+		bs=html
+	else:
+		bs=BeautifulSoup(html)
 	r= bs.prettify(formatter=formatter)
 	for tag in ['<html>','</html>','<head>','</head>','<body>','</body>']:
 		if tag not in html:
 			r=r.replace(tag,'')
 	#TODO last line strip()
 	r= r.strip()
+	if py.isno(p):
+		U=py.importU()
+		if U.is_ipy_call():
+			p=True
+		else:
+			p=False
 	if p:
 		print(r)
 		return None
@@ -269,31 +305,14 @@ html_prett=pretty_html=html_pretty=prettify_html=html_prettify
 
 def BeautifulSoup(html):
 	from bs4 import BeautifulSoup
-	bs=BeautifulSoup(html,features="html5lib" )	
+	try:
+		import lxml
+		bs=BeautifulSoup(html,features='lxml' )	
+	except:
+		bs=BeautifulSoup(html,features="html5lib" )	
 	return bs
 bs=beautifulSoup=BeautifulSoup
 
-################### zh #############################
-# u'([\u4e00-\u9fff]+)'  
-RE_ZH_PATTERN = re.compile(u'[\u4e00-\u9fa5]+')
-
-def filterZh(a,max_not_zh=0,splitor=' '):
-	if not max_not_zh:
-		return splitor.join(RE_ZH_PATTERN.findall(a ) )
-	return regexReplace(a,r'[^\u4e00-\u9fa5]{%s,}'%max_not_zh,'')
-filter_zh=filterZh
-
-def hasZh(word):
-	'''
-	判断传入字符串是否包含中文
-	:param word: 待判断字符串
-	:return: True:包含中文  False:不包含中文
-	'''
-	global RE_ZH_PATTERN
-	match = RE_ZH_PATTERN.search(word)
-	return match
-contain_zh=has_zh=hasZh	
-	
 def readableTimeText(txt,browser=True):
 	U=py.importU()
 	def ref(a):
@@ -307,7 +326,8 @@ def readableTimeText(txt,browser=True):
 	if browser:
 		U.browserObj(r)
 	else:return r
-	
+timeText=readableTimeText
+
 RE_IP= re.compile('''(?:(?:2(?:[0-4][0-9]|5[0-5])|[0-1]?[0-9]?[0-9])\.){3}(?:(?:2([0-4][0-9]|5[0-5])|[0-1]?[0-9]?[0-9]))''')
 def ipLocationText(text,location_format=' [{0}] ',reverse_ip=True,p=True):
 	U=py.importU()
@@ -814,7 +834,6 @@ def replacey(a,olds,new):
 		a=a.replace(i,new)
 	return a
 	
-	
 def replace_all(a,old,new):
 	''' S.replace(old, new[, count]) -> string'''
 	while old in a:
@@ -822,6 +841,19 @@ def replace_all(a,old,new):
 	return a
 replaceAll=replace_all
 
+def index_of_multi(a,*target):
+	'''return one of target index in a
+	'''
+	for t in target:
+		i=a.find(t)
+		if i>0:return i
+	return -1
+indexOf=index_of=index_of_multi
+
+
+
+
+#############  str ops end ########3
 def varname(a):
 	sv=az+'_'
 	if a[0] in sv:r=''

@@ -38,6 +38,7 @@ def getIpyHistory(file='~/.ipython/profile_default/history.sqlite'):
 def dill_dump(*vars):
 	'''	'''
 	F=py.importF()
+	T=py.importT()
 	import ast
 	co=sys._getframe().f_back.f_code
 	dvars={}
@@ -69,6 +70,8 @@ def dill_dump(*vars):
 		vars=vars[0]
 
 	f=f % ( ','.join([i[0] for i in r]) ,','.join([i[1] for i in r]))
+	f=f.replace('"""',"'")
+	f=T.fileName(f)
 	return F.dill_dump(obj=vars,file=f)
 	
 dump=dill_dump

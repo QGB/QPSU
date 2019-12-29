@@ -104,7 +104,7 @@ def autoURL(a):
 		else:return 'http://'+a
 	else:
 		raise Exception('url need string')
-autoUrl=auto_url=autoURL
+autourl=autoUrl=auto_url=autoURL
 		
 def method(url,amethod='get',*args):
 	r'''#TODO: post etc need args'''

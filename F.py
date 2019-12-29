@@ -1,13 +1,13 @@
 # coding=utf-8
-import os as _os;import sys as _sys;from os import path as _p#endswith 是为了适配qgb处于另外一个包内的情况
+import sys as _sys;from os import path as _p#endswith 是为了适配qgb处于另外一个包内的情况
 if __name__.endswith('qgb.F'):from . import py
 else:import py
 T=py.importT()
-gError=[]
-
+import os as _os
 try:from pathlib import Path
 except:pass
 
+gError=[]
 def setErr(ae):
 	global gError
 	U=py.importU()
@@ -18,6 +18,13 @@ def setErr(ae):
 	else:
 		gError=ae
 	if U.gbPrintErr:U.pln('#Error ',ae)
+###################
+class IntSize(py.int):
+	def __new__(cls, *a, **ka):
+		return py.int.__new__(cls, *a, **ka)
+	def __repr__(self):
+		return '<{}>'.format(numToSize(self) )
+		# return '<{}={}>'.format(super().__repr__(),F.ssize(self) )
 
 def replaceOnce(a,old,new):
 	return a.replace(old, new,1) #count=1 #TypeError: replace() takes no keyword arguments 
