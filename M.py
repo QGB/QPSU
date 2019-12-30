@@ -81,13 +81,13 @@ def wifi_connect(ssid,pw):
 	n.active(True)
 	n.connect(ssid,pw)
 	return n.isconnected()
-wc=wific=wifi_connect
+jap=wc=wific=wifi_connect
 
 def wifi_ap(ssid,pw):
 	# Change ssid/password of ESP8266's AP:
 	n= network.WLAN(network.AP_IF)
 	n.config(essid=ssid, authmode=network.AUTH_WPA_WPA2_PSK, password=pw)
-ap=wifi_ap
+ap=new_ap=wifi_ap
 
 def setup():
 	wifi_connect('TP-LINK_8CD652','12345678')

@@ -167,6 +167,22 @@ gURL_unreserved_mark=('-','_','.','!','~','*',"'",'(',')')
 gURL_reserved=(';','/','?',':','@','&','=','+','$',',')
 gsURL_not_escaped=gURL_not_escaped='-0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ_abcdefghijklmnopqrstuvwxyz.'
 
+def get_url_arg(url,arg_name):
+	if py.is2():
+		from urlparse import urlparse,parse_qs
+	else:
+		from urllib.parse import urlparse,parse_qs
+	o = urlparse(url)
+	d=parse_qs(o.query)
+	if arg_name not in d:
+		return py.No('not found {} in [{}]'.format(arg_name,url),d)
+	v=d[arg_name]
+	if py.len(v)==1:
+		return v[0]
+	else:
+		return v
+parse_url_arg=get_url_args=get_url_arg
+
 def FileNameToURL(a):
 	'''
 	urllib.parse.unquote(string, encoding='utf-8', errors='replace')

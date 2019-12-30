@@ -6,7 +6,7 @@ else:
 	if gsqp not in sys.path:sys.path.append(gsqp)#py3 works
 	from qgb import py
 U,T,N,F=py.importUTNF()
-gtb_list=U.set(__name__,  U.get(__name__,{})  )
+gdshop_dui=gtb_list=U.set(__name__,  U.get(__name__,{})  )
 gn=__name__+'.'
 get_set=lambda a,default='':U.set(gn+a,  U.get(gn+a,default)  )
 gshop=get_set('shop','')
@@ -20,11 +20,20 @@ def init(shop):
 	global gshop
 	shop=shop.lower()
 	if '.taobao.com' in shop:
-		shop=T.netloc(shop).replace('.taobao.com')
+		shop=T.netloc(shop).replace('.taobao.com','')
 	if shop not in gtb_list:
 		gtb_list[shop]={}
 	gshop=U.set(gn+'shop',shop)
 	return gshop
+
+gdu_pageNo_null=get_set('pageNo_null',{})
+def recycle_pageNo_null_url():
+	for shop,dui in gdshop_dui.items():
+		for u in list(dui):
+			if 'pageNo=' not in u:
+				gdu_pageNo_null[u]=dui.pop(u)
+				U.pln('recycled:',shop,u)
+remove_pageNo_null_url=pop_pageNo_null_url=recycle_pageNo_null_url
 
 def pop_item_url_from_id_list(a):
 	if not a:return ''
@@ -72,7 +81,8 @@ def max_num():
 
 def iter_items(shop=None):
 	if not shop:shop=gshop
-	for url,page in gtb_list[shop].items():
+	for url in py.list(gtb_list[shop]):
+		page=gtb_list[shop][url]
 		yield from page
 
 
@@ -106,7 +116,11 @@ def result(shop=None):
 		bs = T.BeautifulSoup(html)
 		a=bs.select('.item-name')[0]
 		h=a.get('href')
-		if not h.startswith('//item.taobao.com/item.htm?id='):1/0
+# '//item.taobao.com/item.htm?spm=a1z10.3-c.w4002-21992529001.30.1887510dqsrC5C&id=597761481418'		
+		if not h.startswith('//item.taobao.com/item.htm?') or 'id=' not in h:
+			U.pln('not correct taobao item href',U.stime())
+			py.pdb()
+		id=T.get_url_arg(h,'id')
 		cp=bs.select('[class=c-price]')[0]
 		cp=float(cp.text)
 		sp=bs.select('[class=s-price]')
@@ -116,7 +130,7 @@ def result(shop=None):
 		else:
 			sp=cp
 		img=bs.select('img')[0]
-		row=[int((sp-cp)*100)/100,cp,sp, h[30:], T.replacey(a.text.strip() ,['【优信电子】',],''),img ]
+		row=[int((sp-cp)*100)/100,cp,sp, id, T.replacey(a.text.strip() ,['【优信电子】',],''),img ]
 		row.insert(0,int( (row[0]/row[1])* 100 ) )
 		row=tuple(row)
 		rows.add(row)
