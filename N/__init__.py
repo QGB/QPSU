@@ -229,14 +229,15 @@ def pdf2html(url,response=None,path='/root/pdf/',pw=None):
 		b=N.HTTP.getBytes(url)
 		if not b:return do_resp(b)
 		U.pln(F.write(path+fn,b))
-	if not pw:
-		pw=U.get('sudo_pw')
-	if not pw:
-		return do_resp('wocao,no pw')
+	if not F.exists(path+fn[:-4]+'.html'):
+		if not pw:
+			pw=U.get('sudo_pw')
+		if not pw:
+			return do_resp('wocao,no pw')
 	# -it : the input device is not a TTY
-	cmd='docker run --rm -v {}:/pdf bwits/pdf2htmlex pdf2htmlEX --zoom 1.3 {}'
-	cmd=cmd.format(path,fn)
-	U.sudo(password=pw,cmd=cmd)
+		cmd='docker run --rm -v {}:/pdf bwits/pdf2htmlex pdf2htmlEX --zoom 1.3 {}'
+		cmd=cmd.format(path,fn)
+		U.sudo(password=pw,cmd=cmd)
 	fs=F.ls(path,f=1)
 	for f in fs:
 		if fn[:-5] in f and not f.endswith('.pdf'):
