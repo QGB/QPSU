@@ -233,7 +233,8 @@ def pdf2html(url,response=None,path='/root/pdf/',pw=None):
 		pw=U.get('sudo_pw')
 	if not pw:
 		return do_resp('wocao,no pw')
-	cmd='docker run -ti --rm -v {}:/pdf bwits/pdf2htmlex pdf2htmlEX --zoom 1.3 {}'
+	# -it : the input device is not a TTY
+	cmd='docker run --rm -v {}:/pdf bwits/pdf2htmlex pdf2htmlEX --zoom 1.3 {}'
 	cmd=cmd.format(path,fn)
 	U.sudo(password=pw,cmd=cmd)
 	fs=F.ls(path,f=1)
