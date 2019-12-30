@@ -1271,6 +1271,8 @@ exec('r=xx') ;return r # this has been tested in 2&3
 	if 'r' in locals:
 		r=locals['r']
 		if py.istr(r):return r
+		if not pformat_kw:
+			pformat_kw=get('pformat_kw',{})
 		try:return pformat(r,**pformat_kw)# in U
 		except:return py.repr(r)
 	else:

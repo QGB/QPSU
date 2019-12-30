@@ -67,7 +67,7 @@ def rpcGetVariable(varname,base=py.No('auto history e.g. [http://]127.0.0.1:2357
 	b=requests.get(url,verify=False,timeout=timeout).content
 	return dill.loads(b)
 
-def rpcServer(port=23571,thread=True,ip='0.0.0.0',ssl_context=(),currentThread=False,app=None,key=None,pformat_kw={'width':144},
+def rpcServer(port=23571,thread=True,ip='0.0.0.0',ssl_context=(),currentThread=False,app=None,key=None,
 execLocals=None,locals=None,globals=None,
 qpsu='py,U,T,N,F',importMods='sys,os',request=True,
 flaskArgs=py.dict(debug=0,threaded=True),
@@ -81,6 +81,8 @@ flaskArgs=py.dict(debug=0,threaded=True),
 	from threading import Thread
 	U=py.importU()
 	T=py.importT()
+	if not U.get('pformat_kw'):
+		U.set('pformat_kw',{'width':144})
 	
 	if execLocals:
 		warnning='### deprecated args execLocals {ip}:{port}'.format(ip=ip,port=port)
@@ -95,7 +97,6 @@ flaskArgs=py.dict(debug=0,threaded=True),
 	if qpsu:
 		for modName in qpsu.split(','):
 			globals[modName]=U.getMod('qgb.'+modName)	
-		globals['pformat_kw']=pformat_kw
 		
 	from flask import Flask,make_response
 	from flask import request as _request
@@ -103,7 +104,7 @@ flaskArgs=py.dict(debug=0,threaded=True),
 	app=app or Flask('rpcServer'+U.stime_()   )
 	
 	def _flaskEval():
-		nonlocal globals,locals,pformat_kw
+		nonlocal globals,locals 
 		code=T.urlDecode(_request.url)
 		code=T.sub(code,_request.url_root )
 		U.log( (('\n'+code) if '\n' in code else code)[:99]	)
@@ -119,7 +120,7 @@ flaskArgs=py.dict(debug=0,threaded=True),
 			globals['q']=_request
 			globals['p']=_response
 		if not globals:globals=None # 如果globals 为空dict，防止闭包保存变量，保持globals在每个请求重新为空这一特性
-		r=U.execResult(code,globals=globals,locals=locals,pformat_kw=pformat_kw) #因为在这里一般指定了 不为None的 globals，所以在每个请求中可以共享 
+		r=U.execResult(code,globals=globals,locals=locals) #因为在这里一般指定了 不为None的 globals，所以在每个请求中可以共享 
 		if not _response.get_data():
 			_response.set_data(r)
 		return _response
