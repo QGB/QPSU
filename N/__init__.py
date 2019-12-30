@@ -209,7 +209,7 @@ def rpcClient(url_or_port='http://127.0.0.1:23571',code=''):
 	# server = ServerProxy(url)
 	# return server
 
-def pdf2html(url,response=None,path='/root/pdf/',pw=None):
+def pdf2html(url,response=None,zoom=U.get('pdf2html_zoom',1),path='/root/pdf/',pw=None):
 	def do_resp(a):
 		if not response:return a
 		if not (py.istr(a) or py.isbytes(a)):
@@ -235,8 +235,8 @@ def pdf2html(url,response=None,path='/root/pdf/',pw=None):
 		if not pw:
 			return do_resp('wocao,no pw')
 	# -it : the input device is not a TTY
-		cmd='docker run --rm -v {}:/pdf bwits/pdf2htmlex pdf2htmlEX --zoom 1.3 {}'
-		cmd=cmd.format(path,fn)
+		cmd='docker run --rm -v {path}:/pdf bwits/pdf2htmlex pdf2htmlEX --no-drm 1 --zoom {zoom} {fn}'
+		cmd=cmd.format(path=path,fn=fn,zoom=zoom)
 		U.sudo(password=pw,cmd=cmd)
 	fs=F.ls(path,f=1)
 	for f in fs:
