@@ -3670,7 +3670,7 @@ class ValueOfAttr(py.object):
 		if is_ipy_cell():
 			print(self.__v__)
 		else:
-			return self.__v__
+			return StrRepr( self.__v__ )
 	def __parent_str__(self):
 		if self.__parent__==None:return ''
 		if not self.__child__:return py.str(self.__parent__)
