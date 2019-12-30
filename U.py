@@ -3667,8 +3667,10 @@ class ValueOfAttr(py.object):
 			r+='{}={},'.format(k,pformat(v) )
 		r+=')'
 		self.__v__ = self.__str__()+r
-		print(self.__v__)
-
+		if is_ipy_cell():
+			print(self.__v__)
+		else:
+			return self.__v__
 	def __parent_str__(self):
 		if self.__parent__==None:return ''
 		if not self.__child__:return py.str(self.__parent__)
