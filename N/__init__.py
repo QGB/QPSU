@@ -209,7 +209,7 @@ def rpcClient(url_or_port='http://127.0.0.1:23571',code=''):
 	# server = ServerProxy(url)
 	# return server
 
-def pdf2html(url,response=None,zoom=U.get('pdf2html_zoom',1),path='/root/pdf/',pw=None):
+def pdf2html(url,response=None,zoom=None,path=None,pw=None):
 	def do_resp(a):
 		if not response:return a
 		if not (py.istr(a) or py.isbytes(a)):
@@ -221,6 +221,10 @@ def pdf2html(url,response=None,zoom=U.get('pdf2html_zoom',1),path='/root/pdf/',p
 		return a
 
 	U,T,N,F=py.importUTNF()
+	if not zoom:
+		zoom=U.get('pdf2html_zoom',1)
+	if not path:
+		path=U.get('pdf2html_path','/root/pdf/')
 	U.cd(path)
 	fn=T.url2fn(url[-200:])
 	if not fn.endswith('.pdf'):fn+='.pdf'
