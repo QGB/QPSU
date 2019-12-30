@@ -208,6 +208,37 @@ def rpcClient(url_or_port='http://127.0.0.1:23571',code=''):
 	# server = ServerProxy(url)
 	# return server
 
+def pdf2html(url,response=None,path='/root/pdf/',pw=None):
+	def do_resp(a):
+		if not response:return a
+		if not (py.istr(a) or py.isbytes(a)):
+			a=T.pformat(a)
+			response.set_data(a)	
+		else:
+			response.headers['Content-Type']='text/html;charset=utf-8';
+			response.set_data(a)	
+		return a
+
+	U,T,N,F=py.importUTNF()
+	U.cd(path)
+	b=N.HTTP.getBytes(url)
+	if not b:return do_resp(b)
+	fn=T.url2fn(url[-200:])
+	if not fn.endswith('.pdf'):fn+='.pdf'
+	U.pln(F.write(path+fn,b))
+	if not pw:
+		pw=U.get('sudo_pw')
+	if not pw:
+		return do_resp('wocao,no pw')
+	cmd='docker run -ti --rm -v {}:/pdf bwits/pdf2htmlex pdf2htmlEX --zoom 1.3 {}'
+	cmd=cmd.format(path,fn)
+	U.sudo(password=pw,cmd=cmd)
+	fs=F.ls(path,f=1)
+	for f in fs:
+		if fn[:-5] in f and not f.endswith('.pdf'):
+			t=F.read(f)
+			return do_resp(t)
+	return do_resp(['not found html of pdf : ',fn,fs])
 			
 def flask_html_response(response,html,remove_tag=(
 		['<script','</script>'],
