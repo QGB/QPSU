@@ -221,11 +221,13 @@ def pdf2html(url,response=None,path='/root/pdf/',pw=None):
 
 	U,T,N,F=py.importUTNF()
 	U.cd(path)
-	b=N.HTTP.getBytes(url)
-	if not b:return do_resp(b)
 	fn=T.url2fn(url[-200:])
 	if not fn.endswith('.pdf'):fn+='.pdf'
-	U.pln(F.write(path+fn,b))
+	
+	if not F.exists(path+fn):
+		b=N.HTTP.getBytes(url)
+		if not b:return do_resp(b)
+		U.pln(F.write(path+fn,b))
 	if not pw:
 		pw=U.get('sudo_pw')
 	if not pw:
