@@ -240,7 +240,8 @@ def pdf2html(url,response=None,path='/root/pdf/',pw=None):
 		if fn[:-5] in f and not f.endswith('.pdf'):
 			t=F.read(f)
 			return do_resp(t)
-	return do_resp(['not found html of pdf : ',fn,fs])
+	return do_resp(['not found html of pdf : ',fn,
+		U.v.U.sudo(password=pw,cmd=cmd),fs])
 			
 def flask_html_response(response,html,remove_tag=(
 		['<script','</script>'],
