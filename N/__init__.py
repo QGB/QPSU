@@ -233,7 +233,8 @@ def pdf2html(url,response=None,zoom=None,path=None,pw=None):
 		b=N.HTTP.getBytes(url)
 		if not b:return do_resp(b)
 		U.pln(F.write(path+fn,b))
-	if not F.exists(path+fn[:-4]+'.html'):
+	html_file=path+fn[:-4]+'.html'
+	if not F.exists(html_file):
 		if not pw:
 			pw=U.get('sudo_pw')
 		if not pw:
@@ -242,14 +243,12 @@ def pdf2html(url,response=None,zoom=None,path=None,pw=None):
 		cmd='docker run --rm -v {path}:/pdf bwits/pdf2htmlex pdf2htmlEX --no-drm 1 --zoom {zoom} {fn}'
 		cmd=cmd.format(path=path,fn=fn,zoom=zoom)
 		U.sudo(password=pw,cmd=cmd)
-	fs=F.ls(path,f=1)
-	for f in fs:
-		if fn[:-5] in f and not f.endswith('.pdf'):
-			t=F.read(f)
-			return do_resp(t)
-	return do_resp(['not found html of pdf : ',fn,
+	if not F.exists(html_file):
+		fs=F.ls(path,f=1)
+		return do_resp(['not found html of pdf : ',fn,
 		U.v.U.sudo(password=pw,cmd=cmd),fs])
-			
+	else:
+		do_resp(F.read(html_file))
 def flask_html_response(response,html,remove_tag=(
 		['<script','</script>'],
 		['<SCRIPT','</SCRIPT>'],
@@ -507,9 +506,6 @@ def bulk_whois(domain_list,args):
 			if clear_line != '':
 				csv_file.write(clear_line + '\n')
 ################### whois end #####################
-
-
-
 
 
 def netplan_add_routes(ip,gateway=py.No('auto use first'),
