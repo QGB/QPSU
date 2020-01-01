@@ -51,10 +51,11 @@ try:
 	import network
 except:pass
 
-def ip():
+def ifconfig():
 	n=network.WLAN(network.STA_IF)
 	return n.ifconfig()
-	
+ip=ipconfig=ifconfig
+
 def wifi_scan(p=1):
 	n=network.WLAN(network.STA_IF)
 	n.active(True)
@@ -90,7 +91,8 @@ def wifi_ap(ssid,pw):
 ap=new_ap=wifi_ap
 
 def setup():
-	wifi_connect('TP-LINK_8CD652','12345678')
+	wifi_connect ('TP-LINK_8CD652','12345678')
+	wifi_connect ('TP-LINK_516',str(112109389836//6))
 
 def gc():
 	import gc
@@ -106,6 +108,7 @@ r=reload
 def reboot():
 	import machine
 	return machine.reset()
+reset=restart=reboot
 
 gdpin={}
 def gpio(index=2,mod=1):
@@ -127,15 +130,35 @@ def gpi(index=0):
 	gdpin[(index,0)]=machine.Pin(index, machine.Pin.IN, machine.Pin.PULL_UP)
 	return gdpin[(index,0)]
 
-def blink(a=0.2,b=0.47,index=2):
+
+def blink(a=0.2,b=0.47,index=None):
+	if index==None:index=2
+	if 'gop' in globals():
+		p=gop
+	else:
+		from machine import Pin
+		p=Pin(index,Pin.OUT)
 	from time import sleep
-	p=Pin(index)
 	while 1:
 		p.off()
 		sleep(a)
 		p.on()
 		sleep(b)
-	
+
+def go(*a):
+	o=gpo_3()
+	try:
+		blink(*a)
+	except KeyboardInterrupt as e:
+		o.off()
+		return e
+
+def gpo_3():
+	global gop # RX 
+	from machine import Pin
+	gop=Pin(3,Pin.OUT)
+	return gop
+o3=gpo3=gpo_3
 
 class V():
 	# def __getattribute__(self, name):

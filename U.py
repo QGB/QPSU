@@ -2466,6 +2466,12 @@ def len(obj,*other):
 
 def hash(obj,*other):
 	'''Exception return py.No or [no...]'''
+	if py.islist(obj):
+		if other:return py.No('#TODO hash multi list ',obj,len(other))
+		try:
+			return py.hash(py.tuple(obj))
+		except Exception as e:
+			return py.No(e)
 	return builtinFuncWrapForMultiArgs(builtinFunc=py.hash,args=(obj,other))
 def id(obj,*other):
 	return builtinFuncWrapForMultiArgs(builtinFunc=py.id,args=(obj,other))
@@ -3174,14 +3180,14 @@ def setDictListValue(adict,key,value):
 		adict[key].append(value)
 	else:
 		adict[key]=[value]
-set_dict_value_list=set_dict_list=setDictList=setDictListValue
+add_dict_value_list=set_dict_value_list=set_dict_list=setDictList=setDictListValue
 
 def setDictSetValue(adict,key,value):
 	if key in adict:
 		adict[key].add(value)
 	else:
 		adict[key]=py.set([value])
-set_dict_value_set=set_dict_set=setDictset=setDictSetValue
+add_dict_value_jihe=add_dict_value_set=set_dict_value_set=set_dict_set=setDictset=setDictSetValue
 
 def setDictValuePlusOne(adict,key):
 	if key in adict:
@@ -3218,9 +3224,16 @@ def dict_value_hash_count(adict,):
 	d={}
 	for k,v in adict.items():
 		l=hash(v)#U.hash
-		setDictValuePlusOne(d,l)
-		# if l and (l in show_key_len_range):
-				# setDictListValue(d,'%s-len'%l,k)							
+		if l in d:
+			if py.islist(d[l]):
+				list=d[l].obj
+				list.append(k)
+			else:
+				list=[d[l].obj]
+			d[l]=IntWithObj(d[l]+1,list)
+		else:
+			d[l]=IntWithObj(1,k)
+		# setDictValuePlusOne(d,l)
 	return d
 	
 def getDictItems(a,*range,index=False):
@@ -3552,14 +3565,32 @@ def gc():
 	import gc
 	return gc.collect()
 
-class IntOct(py.int):
+class IntWithObj(py.int):
+	'''int(x, base=10) -> integer 
+	IntWithOther(x,obj) #default base 10
+	'''
+	def __new__(cls, *a, **ka):
+		if len(a)!=2:
+			raise py.ArgumentError('IntWithOther only need Two args:\
+IntWithOther(intable,obj) , but get {}'.format(py.len(a)))
+		obj=a[1]
+		a=(a[0],)
+		# ka.setdefault('base',10) #TypeError: int() can't convert non-string with explicit base
+		i= py.int.__new__(cls, *a, **ka)
+		i.obj=i.a=obj
+		return i
+	def __repr__(self):
+		return '<{}>'.format(self)
+IntObj=IntWithOther=IntWithObj	
+
+class IntReprAsOct(py.int):
 	def __new__(cls, *a, **ka):
 		return py.int.__new__(cls, *a, **ka)
 	def __repr__(self):
 		U=py.importU()
 		return '<{}>'.format(py.oct(self) )
 		# return '<{}={}>'.format(super().__repr__(),F.ssize(self) )
-IntFileMode=IntOct
+IntFileMode=IntOct=IntReprAsOct
 
 class FloatTime(py.float):
 	def __new__(cls, *a, **ka):

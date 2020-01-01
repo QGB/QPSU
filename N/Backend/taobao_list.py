@@ -111,8 +111,13 @@ imgs=[];dis=[];ts=[];ds={}
 def result(shop=None):
 	global grows
 	if not shop:shop=gshop
+	if py.islist(shop):
+		items=shop
+		shop='TB.result-test-{}'.format(len(items))
+	else:
+		items=iter_items(shop) 
 	rows=py.set()
-	for html in U.progressbar( iter_items(shop) ):
+	for html in U.progressbar( ):
 		bs = T.BeautifulSoup(html)
 		a=bs.select('.item-name')[0]
 		h=a.get('href')
