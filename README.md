@@ -20,7 +20,7 @@ $ python -m qgb # it will print like below
 
 import sys;'qgb.U' in sys.modules or sys.path.append('/home/qgb/');from qgb import *
 
-now, you can paste this line to your IPython or python project.
+# now, you can paste this line to your IPython or python project.
 
 from qgb import * # equals: from qgb import U,T,N,F,py 
 # if in Windows system, Win module automatically added.
