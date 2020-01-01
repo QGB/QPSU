@@ -3225,7 +3225,7 @@ def dict_value_hash_count(adict,):
 	for k,v in adict.items():
 		l=hash(v)#U.hash
 		if l in d:
-			if py.islist(d[l]):
+			if py.islist(d[l].obj):
 				list=d[l].obj
 				list.append(k)
 			else:
@@ -3577,7 +3577,7 @@ IntWithOther(intable,obj) , but get {}'.format(py.len(a)))
 		a=(a[0],)
 		# ka.setdefault('base',10) #TypeError: int() can't convert non-string with explicit base
 		i= py.int.__new__(cls, *a, **ka)
-		i.obj=i.a=obj
+		i.a=i.arg=i.obj=obj
 		return i
 	def __repr__(self):
 		return '<{}>'.format(self)
