@@ -243,9 +243,10 @@ def pdf2html(url,response=None,zoom=None,path=None,pw=None):
 		return a
 	
 	if not F.exists(path+fn):
-		b=N.HTTP.getBytes(url)
-		if not b:return do_resp(b)
-		U.pln(F.write(path+fn,b))
+		U.cmd('wget','-O',fn, url,timeout=30)
+		# b=N.HTTP.getBytes(url)
+		# if not b:return do_resp(b)
+		# U.pln(F.write(path+fn,b))
 	html_file=path+fn[:-4]+'.html'
 	if not F.exists(html_file):
 		if not pw:
