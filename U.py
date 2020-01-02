@@ -770,7 +770,7 @@ def cmd(*a,**ka):
 		ka['timeout']=timeout     ## default timeout
 		
 		# if timeout:
-		r=sb.check_output(*a,**ka)
+		r=sb.check_output(a,**ka)
 #TODO 在Windows下正常, Linux  sb.check_output("ls '-al' " ) 
 #FileNotFoundError: [Errno 2] No such file or directory: "ls '-al' ": "ls '-al' "
 
