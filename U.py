@@ -715,6 +715,11 @@ def in_all(v,*ts):
 	return [v]
 inAll=in_all
 ##########################################
+def split_cmd_str(a):
+	import shlex
+	return shlex.split(a)
+shlex_split=split_cmd_str
+
 def cmd(*a,**ka):
 	'''show=False :show command line
 	默认阻塞，直到进程结束返回
@@ -734,15 +739,17 @@ def cmd(*a,**ka):
 			raise ArgumentError('commands not null',a,ka)
 		# TODO #
 	if len(a)==1:
-		if py.istr(a[0]):
-			if (' ' in a[0]) and not a[0].startswith(quot):
+		a=a[0]
+		if py.istr(a):
+			if (' ' in a) and not a.startswith(quot):
+				a=split_cmd_str(a)
 				# in linux,can't U.cmd("'ls'") ?
 				# if iswin():
-				a[0]=quot+a[0]+quot
-			elif ':' in a[0] and iscyg():
-				a[0]='cmd /c start "" '+ a[0]
-			else:
-				a[0]=a[0]
+				# a=quot+a+quot
+			elif ':' in a and iscyg():
+				a='cmd /c start "" '+ a
+			# else:
+			# 	a=a
 				
 
 	try:
@@ -3564,6 +3571,16 @@ size=asizeof=sizeof
 def gc():
 	import gc
 	return gc.collect()
+
+def get_objects(type,len=None):
+	import gc
+	isinstance= py.isinstance
+	r=[]
+	for o in gc.get_objects():
+		if isinstance(o,type):
+			r.append(o)
+	return r
+find_objects=get_obj=get_objects
 
 class IntWithObj(py.int):
 	'''int(x, base=10) -> integer 

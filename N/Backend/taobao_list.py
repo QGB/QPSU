@@ -42,6 +42,8 @@ def pop_item_url_from_id_list(a):
 		id,v=a.popitem()
 	if py.islist(a):
 		id=a.pop() #-1
+	if py.islist(id):
+		id=id[-3]
 	if not id:return ''
 	if 'id=' not in id:
 		return 'https://item.taobao.com/item.htm?id='+id
@@ -95,7 +97,32 @@ def iter_sprice(shop=None):
 def rty(rows=None,**ka):
 	if not rows:rows=grows
 	rt=''
+
+	dcol_range={}
+	for k in py.list(ka):
+		for c in k:
+			if c in T._09:
+				i=py.int(c)
+				v=ka.pop(k)
+				if py.isnum(v):
+					dcol_range[i]=[v,U.IMAX]
+				elif py.len(v)==2:
+					dcol_range[i]=v
+				else:
+					raise py.ArgumentError(' col range must int or [a,b] ')
+				break
+	if dcol_range:
+		print(' dcol_range:', dcol_range)
 	for index,row in enumerate(U.sort(rows,**ka)):
+		_continue=1
+		for ic,ran in dcol_range.items():
+			if not py.isnum(row[ic]):
+				rt+=f'#  {row}[{ic}]<hr>'
+				_continue=0
+			if not ran[0]<=row[ic]<=ran[1]:
+				_continue=0
+		if not _continue:continue
+
 		if 'item.taobao.com/item.htm?id=' in row[-3]:
 			row[-3]=T.sub(row[-3],'id=','')
 		tb=f'''{row[-1]}
@@ -117,7 +144,7 @@ def result(shop=None):
 	else:
 		items=iter_items(shop) 
 	rows=py.set()
-	for html in U.progressbar( ):
+	for html in U.progressbar( items ):
 		bs = T.BeautifulSoup(html)
 		a=bs.select('.item-name')[0]
 		h=a.get('href')

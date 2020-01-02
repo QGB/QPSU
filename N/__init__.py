@@ -209,6 +209,19 @@ def rpcClient(url_or_port='http://127.0.0.1:23571',code=''):
 	# server = ServerProxy(url)
 	# return server
 
+def get_all_socket_obj():
+	import socket
+	return U.get_objects(socket.socket) 
+
+def get_socket_req(PORT = 65432,HOST = '127.7.7.7'):
+    import socket
+    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+        s.bind((HOST, PORT))
+        s.listen()
+        req, addr = s.accept()
+        return req, addr
+
+
 def pdf2html(url,response=None,zoom=None,path=None,pw=None):
 	U,T,N,F=py.importUTNF()
 	if not zoom:
@@ -714,7 +727,7 @@ if __name__=='__main__':
 	gsurlip=['http://ip.chinaz.com/getip.aspx'][0]
 
 	s=http(gsurlip)#.encode('utf8').decode('mbcs')
-			 
+
 	U.pln( s.decode('utf8').encode('mbcs'))
 	# import chardet
 	# U.pln( chardet.detect(s)

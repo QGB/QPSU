@@ -10,7 +10,7 @@ QPSU also called 'UTNF' because qgb module mainly directly contains :
     qgb.F (File utils)
 ```
 
-qgb.py module is a independent lightweight wrapper of python core api.
+`qgb.py` module is a independent lightweight wrapper of python core api.
 
 ### Install
 ##### directly clone 

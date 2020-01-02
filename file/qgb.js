@@ -235,9 +235,9 @@ async function taobao_list(base_url="https://youxin-electronic.taobao.com/"){
     var t=(await tab_query({url: base_url+"*"}) )[0]
     console.log(await post("https://okfw.net/r=start_time=U.stime()"),t )
     var base_search_url=base_url+"search.htm?orderType=price_asc&pageNo="
-    url=base_search_url+1
+    var url=base_search_url+1
     while(url && url.length>9){
-        check=await post("https://okfw.net/url=T.json_loads(request.get_data());r=TB.include(url)",url)
+        var check=await post("https://okfw.net/url=T.json_loads(request.get_data());r=TB.include(url)",url)
         if(check==='False' && t.url!=url){
             await tab_update(t,url)   
             t=(await tab_query({url: base_url+"*"}) )[0]
@@ -249,14 +249,14 @@ async function taobao_list(base_url="https://youxin-electronic.taobao.com/"){
         }
 
         await tab_exec(t, gs_taobao_list )
-        await sleep(888)
+        await rpc_sleep()
         for(var i of [0,1,2,3,4,5,6,7,8]){
            console.log(i)
-           next=await tab_exec(t, _CODE(function(){
+           var next=await tab_exec(t, _CODE(function(){
                r=""
-               tmp=document.querySelector('.pagination-mini')
+               var tmp=document.querySelector('.pagination-mini')
 
-               next=Array.from(tmp.querySelectorAll('a'))[1]
+               var next=Array.from(tmp.querySelectorAll('a'))[1]
                if(next.style.background==="green") r=next.href   
 
             }))
@@ -382,11 +382,16 @@ async function tmall_get_item(base_url="https://detail.tmall.com/item.htm"){
 }
     
 
-async function taobao_add_cart(){
-    t=await tab_query({active:true,url: "https://item.taobao.com/item.htm*"})
-    t=t[0]
+async function taobao_add_cart(asurl="https://okfw.net/r=TB.get_item_url(carts)"){
+    ta=await tab_query({url: "https://cart.taobao.com/add_cart_succeed.htm*"})
+    for(var t of ta){
+        console.log(t.id,t.title)
+        await tab_remove(t)
+    }
+    
+    t=tid=(await tab_query()).map(t=>t.id)[0] // seems min id
 
-    url=await post("https://okfw.net/r=TB.get_item_url(cart_ids)")
+    url=await post(asurl)
     while( url&&url.length ){
         await tab_update(t,url)
         await rpc_sleep()
@@ -398,7 +403,7 @@ async function taobao_add_cart(){
         ta=await tab_query({url: "https://cart.taobao.com/add_cart_succeed.htm*"})
         if(ta.length){
             t=ta[0]
-            url=await post("https://okfw.net/r=TB.get_item_url(cart_ids)")
+            url=await post(asurl)
         }else{
             url 
         }
