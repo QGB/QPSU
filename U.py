@@ -2429,7 +2429,7 @@ def get_qpsu_file_path(fn='',base='file/'):
 	qpsu=getModPath()+base
 	fn=qpsu+fn
 	return fn
-get_qpsu_path=getQPSUPath=getQpsuPath=get_qpsu_file_path
+qpsu_file=get_qpsu_file_path=getQPSUFilePath=getQpsuFilePath=get_qpsu_file_path
 
 def getModPath(mod=None,qgb=True,slash=True,backSlash=False,endSlash=True,endslash=True,trailingSlash=True):
 	'''不返回模块文件，返回模块目录
@@ -2460,7 +2460,7 @@ def getModPath(mod=None,qgb=True,slash=True,backSlash=False,endSlash=True,endsla
 	else:sp=sp.replace('\\','/')
 
 	return sp
-get_qpsu_dir=getQPSUDir=get_module_dir=get_module_path=getModPath
+get_qpsu_path=getQPSUPath=getQpsuPath=get_qpsu_dir=getQPSUDir=get_module_dir=get_module_path=getModPath
 
 def slen(a,*other):
 	return py.repr(len(a,*other) )
