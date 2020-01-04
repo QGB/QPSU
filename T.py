@@ -12,11 +12,12 @@ AZ=A_Z=a_z.upper()
 
 azAZ=aZ=a_Z=a_z+A_Z
 AZaz=Az=A_z=a_z+A_Z
-character=azAZ###Do not Change
+character=aZ=azAZ###Do not Change
 
 num=s09=_09=number='0123456789'
 
 azAZ09=aZ09=a_Z0_9=alphanumeric=character+number#azAZ09, not gs09AZ
+aZ09_=_aZ09=_alphanumeric=alphanumeric_=alphanumeric+'_'
 Az09=A_z0_9=A_Z+a_z+number
 
 Hex=gshex='0123456789abcdef'

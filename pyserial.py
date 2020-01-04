@@ -1,7 +1,7 @@
 from . import py
 U,T,N,F=py.importUTNF()
 import serial
-ENCODING=U.get(__name__+'_encoding','utf-8')
+gencoding = ENCODING = U.get(__name__+'_encoding','utf-8')
 devs=U.get(__name__+'_devs',{})
 g=U.get(__name__+'_g')
 if g:
@@ -35,7 +35,7 @@ def set_g(dev):
     U.set(__name__+'_devs',devs)
     g=U.set(__name__+'_g',dev)
     return g
-def open_device(dev, baudrate=115200, timeout=5,dtr=False):
+def open_device(dev=None, baudrate=115200, timeout=5,dtr=1):
     '''    'COM4',b,timeout=5sec
     def __init__(self,
                  port=None,
@@ -53,6 +53,7 @@ def open_device(dev, baudrate=115200, timeout=5,dtr=False):
                  **kwargs):
 '''
     global g
+    if not dev:dev=g
     if isinstance(dev,serial.Serial):
         dev=dev.port
         # return set_g(dev)
@@ -122,22 +123,49 @@ def read_all_wait(dev,wait):
             r+=c
         else:
             return r
+
+gthread=None  #为了reload后能更新 monitor_loop 代码，不用 U.get
+def monitor(wait=0.3):
+    global gthread
+    def monitor_loop():
+        nonlocal i
+        U.sleep(0.03)
+        U.pln(i,'monitor_loop started at',U.stime())
+        while gthread and gthread.is_alive():
+            i+=1
+            try:
+                b0=write(p=0,wait=wait,input=i)
+            except Exception as e:
+                U.sleep(1)
+                U.pln(e,'  #',i,U.stime())
+                continue
+            # b1='{}\r\n'.format(i).encode(gencoding) 
+            # if b0!=b1:
+            #     U.pln(b0,'!=',b1,'  #',i,'try reopen at',U.stime())
+        U.pln(i,'monitor_loop done!',U.stime())
+    if gthread and gthread.is_alive():
+        return U.pln(i,'monitor_loop still running!',U.stime())
+    i=0
+    gthread=U.Thread(target=monitor_loop)
+    return gthread.start()
+
+
 if U.iswin():
     isWin=True
     from serial import win32 
-
-def dtr_click(dev=None,wait=0.2):
+def dtr_click(wait=0.01,dev=None,):
     '''s.setDTR(False) '''
     if not dev:dev=g
-    if dev.dtr:
-        dev.dtr=0
-        U.sleep(wait)
-        dev.dtr=1
-    else:
-        dev.dtr=1
-        U.sleep(wait)
-        dev.dtr=0
-        
+    # if dev.dtr:
+        # dev.dtr=1
+        # U.sleep(wait)
+        # dev.dtr=0
+    #     return
+    dev.dtr=0
+    U.sleep(wait)
+    dev.dtr=1
+hl=click=dtr_click
+
 def dtr_high(dev=None):
     '''s.setDTR(False) '''
     if not dev:dev=g
@@ -148,18 +176,19 @@ def dtr_low(dev=None):
     if isWin:r=win32.EscapeCommFunction(dev._port_handle, win32.SETDTR) #r=1
 l=o=low=dtr_low
 
-def swi(a,b,time,dev=None):
+def swi(l,h,time=U.IMAX,final=dtr_low,dev=None):
     if not dev:dev=g
     count=[0]
     try:
-        _sw(dev,count,time,a,b)
+        _sw(dev,count,time,l,h)
     except:
         pass
     finally:
-        dtr_high(dev) # shutdown
+        final(dev) # shutdown
     return count[0]
+blink=swi
 
-def sw(a,b,time=U.IMAX,dev=None):
+def sw(a,b,time=U.IMAX,dev=None,final=dtr_high):
     if not dev:dev=g
     a=0.000001*a
     b=0.000001*b

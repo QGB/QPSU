@@ -227,13 +227,14 @@ def istermux():
 def iscyg():
 	return 'cygwin' in  platform.system().lower()
 # gipy=None#这个不是qgb.ipy, 是否与U.F U.T 这样的风格冲突？
-def isipy():
+def isipy(): # e=False
 	# global gipy
 	try:
 		if not py.modules('IPython'):return None
 		import IPython
 		return IPython.get_ipython()
-	except:return False
+	except:
+		return False
 	# ipy=False  #如果曾经有过实例，现在没有直接返回原来
 	# f=sys._getframe()
 	# while f and f.f_globals:# and 'get_ipython' not in f.f_globals.keys()
@@ -3039,14 +3040,26 @@ def google(a):
 	return browser('https://www.google.com.my/#q='+a)
 	# return browser('https://init.pw/search?q='+a)
 	
-def subprocess(cmd):
+def subprocess_popen(cmd):
 	'''
 	subprocess
 	sb.stdin.close() 才返回  stdout stderr
 	'''
 	from subprocess import PIPE,Popen
 	return Popen(cmd,stdin=PIPE,stdout=PIPE,stderr=PIPE)
-	
+subprocess=subprocessPopen=subprocess_popen
+
+def get_iterable(iterable,index=0): #TODO start, stop[, step])
+	if not py.isint(index):
+		raise py.ArgumentUnsupported('')
+	if index<0:
+		index=len(iterable)-1
+	for n,v in py.enumerate(iterable):
+		if n==index:
+			return v
+	return py.No('iterable index out of range',iterable,index,)
+get_one_from_set=get_from_set=get_from_jihe=getIterable=get_iterable
+
 def sub(a,len='default return len 9',start=0,step=1):
 	'''sub dict,list,tuple....iterable
 	like a[start:start+len:step]
@@ -3581,6 +3594,41 @@ def get_objects(type,len=None):
 			r.append(o)
 	return r
 find_objects=get_obj=get_objects
+
+def git_upload(commit_msg=None,repo='QPSU',repo_path=get_qpsu_dir(),
+			git_exe=r"D:\Program Files\Git\bin\git.exe",
+			git_remotes=['https://git.coding.net/qgb/','https://github.com/qgb/',],
+			user_email='qgbcs1@gmail.com',
+			user_name='qgb',
+
+		):
+	if not commit_msg:commit_msg=stime()
+	commit_msg=T.replacey(commit_msg,['"'],'')
+	ipy=get_ipy()
+	cmd=r'''
+cd /d {repo_path}
+"{git_exe}" config --global user.email {user_email}
+"{git_exe}" config --global user.name {user_name}
+
+"{git_exe}" config --global core.autocrlf false
+"{git_exe}" config --global core.filemode false
+"{git_exe}" config --global credential.helper store
+"{git_exe}" config --global http.sslverify "false"
+echo 	 git config done
+"{git_exe}" add -A
+"{git_exe}" commit -m "{commit_msg}"
+echo 	 git commit "{commit_msg}" done
+'''
+	for url in git_remotes:
+		if not url.endswith('/'):url+='/'
+		cmd+='"{git_exe}" '+'push {0} master\necho \t push {0} done\n'.format(url+repo)
+	
+	cmd=T.replace_all(cmd.strip(),'\n\n','\n')
+	cmd=cmd.replace('\n',' & ')
+	ipy.system(cmd)
+	return cmd
+
+up=git_upload
 
 class IntWithObj(py.int):
 	'''int(x, base=10) -> integer 

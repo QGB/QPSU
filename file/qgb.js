@@ -383,6 +383,7 @@ async function tmall_get_item(base_url="https://detail.tmall.com/item.htm"){
     
 
 async function taobao_add_cart(asurl="https://okfw.net/r=TB.get_item_url(carts)"){
+    if(!asurl.startsWith('https://'))asurl="https://okfw.net/r=TB.get_item_url("+asurl+")"
     ta=await tab_query({url: "https://cart.taobao.com/add_cart_succeed.htm*"})
     for(var t of ta){
         console.log(t.id,t.title)

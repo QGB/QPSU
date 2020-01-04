@@ -11,7 +11,7 @@ gn=__name__+'.'
 get_set=lambda a,default='':U.set(gn+a,  U.get(gn+a,default)  )
 gshop=get_set('shop','')
 
-grows=[]
+grows=get_set('rows',[])
 # g=get_set('')
 
 from urllib.parse import parse_qs
@@ -100,12 +100,17 @@ def rty(rows=None,**ka):
 
 	dcol_range={}
 	for k in py.list(ka):
-		for c in k:
+		for nc,c in py.enumerate(k):
 			if c in T._09:
 				i=py.int(c)
 				v=ka.pop(k)
 				if py.isnum(v):
 					dcol_range[i]=[v,U.IMAX]
+				elif py.istr(v):
+					if k[nc-1]=='_':
+						dcol_range[-i]=v
+					else:
+						dcol_range[i]=v
 				elif py.len(v)==2:
 					dcol_range[i]=v
 				else:
@@ -114,14 +119,20 @@ def rty(rows=None,**ka):
 	if dcol_range:
 		print(' dcol_range:', dcol_range)
 	for index,row in enumerate(U.sort(rows,**ka)):
-		_continue=1
+		_continue=0
 		for ic,ran in dcol_range.items():
-			if not py.isnum(row[ic]):
-				rt+=f'#  {row}[{ic}]<hr>'
-				_continue=0
-			if not ran[0]<=row[ic]<=ran[1]:
-				_continue=0
-		if not _continue:continue
+				# rt+=f'#  {row}[{ic}]<hr>'
+				# _continue=0
+			if ic>=0 and py.istr(row[ic]) and py.istr(ran):
+				if not ran in row[ic]:
+					_continue=1
+			if ic<0 and py.istr(row[ic]) and py.istr(ran):
+				if ran in row[ic]:
+					_continue=1
+			if py.isnum(row[ic]) and py.isnum(ran[0]):
+				if not ran[0]<=row[ic]<=ran[1]:
+					_continue=1
+		if _continue:continue
 
 		if 'item.taobao.com/item.htm?id=' in row[-3]:
 			row[-3]=T.sub(row[-3],'id=','')

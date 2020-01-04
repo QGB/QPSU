@@ -70,22 +70,32 @@ def include(file,keyword):
 	
 def stat(path, dir_fd=None, follow_symlinks=True):
 	U=py.importU()
+	IntSize,FloatTime,IntOct=U.IntSize,U.FloatTime,U.IntOct	
 	import os
 	try:
 		if isinstance(path,os.stat_result):
 			s=path
 		else:
 			s=os.stat(path=path, dir_fd=dir_fd, follow_symlinks=follow_symlinks)
+		# return [
+		# 		path,
+		# 		IntSize(s.st_size),
+		# 		FloatTime(s.st_atime),
+		# 		FloatTime(s.st_mtime),
+		# 		FloatTime(s.st_ctime),
+		# 		IntOct (s.st_mode ),
+		# 		]
+		
 	except Exception as e:
 		return py.No(e)
 	r={}
 	for i in py.dir(s):
 		if not i.startswith('st_'):continue
 		v=getattr(s,i,py.No('Error getattr') )
-		if i=='st_size':r[i]=readableSize(v);continue
-		if i=='st_mode':r[i]=py.oct(v)      ;continue
+		if i=='st_size':r[i]=IntSize(v);continue
+		if i=='st_mode':r[i]=IntOct(v)      ;continue
 		if i.endswith('time'):
-			r[i]=U.stime(v)
+			r[i]=FloatTime(v)
 			continue
 		r[i]=v
 	return r
