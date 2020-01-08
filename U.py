@@ -3621,15 +3621,25 @@ def get_objects(type,len=None):
 find_objects=get_obj=get_objects
 
 def git_upload(commit_msg=None,repo='QPSU',repo_path=get_qpsu_dir(),
-			git_exe=r"D:\Program Files\Git\bin\git.exe",
+			git_exe=None,
 			git_remotes=['https://git.coding.net/qgb/','https://github.com/qgb/',],
 			user_email='qgbcs1@gmail.com',
 			user_name='qgb',
 
 		):
+	ipy=get_ipy(raise_EnvironmentError=True)
+	if not git_exe:
+		if isWin():
+			git_exe=get_or_set('git_exe',r"D:\Program Files\Git\bin\git.exe")
+		if isLinux():
+			git_exe=get_or_set('git_exe',r"/usr/bin/git")
+
 	if not commit_msg:commit_msg=stime()
 	commit_msg=T.replacey(commit_msg,['"'],'')
-	ipy=get_ipy(raise_EnvironmentError=True)
+
+	if '://' in repo:
+		git_remotes=[T.sub(repo,'','/')]
+		repo=T.subLast(repo,'/')
 	cmd=r'''
 cd /d {repo_path}
 "{git_exe}" config --global user.email {user_email}
