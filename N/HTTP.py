@@ -38,14 +38,20 @@ Type:      function
 '''
 	import requests
 	return requests.post(url,data=data)
-	
-def getBytes(url):
+
+def get_str(url):
+	T=py.importT()
+	return T.auto_decode(  get_bytes(url)  )
+getStr=get_str
+
+def get_bytes(url):
 	url=autoUrl(url)
 	import requests
 	try:
 		return requests.get(url).content
 	except Exception as e:
 		return py.No(e)
+getBytes=get_byte=get_bytes
 
 gheaders=headers={'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/59.0.2171.95 Safari/537.36'}
 

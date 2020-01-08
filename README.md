@@ -1,5 +1,5 @@
 # QGB's Python Simplified Utils
-## Usability is important than performance
+## Usability important than performance
 
 In this project, 'qgb' is the top module name.<br>
 QPSU also called 'UTNF' because qgb module mainly directly contains :

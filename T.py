@@ -330,19 +330,20 @@ def BeautifulSoup(html):
 	return bs
 bs=beautifulSoup=BeautifulSoup
 
-def readableTimeText(txt,browser=True):
+def readableTimeText(txt,browser=False):
 	U=py.importU()
 	def ref(a):
 		a=a.group()
 		it=py.int(a)
 		if py.len(a)==13:
 			it=it/1000
-		return U.stime(a)
+		return U.stime(it)
 
-	r= regexReplace(_4 , r'\d{10,}',ref)
+	r= regexReplace(txt , r'\d{10,}',ref)
 	if browser:
 		U.browserObj(r)
-	else:return r
+	else:
+		return U.StrRepr(r)
 timeText=readableTimeText
 
 RE_IP= re.compile('''(?:(?:2(?:[0-4][0-9]|5[0-5])|[0-1]?[0-9]?[0-9])\.){3}(?:(?:2([0-4][0-9]|5[0-5])|[0-1]?[0-9]?[0-9]))''')
@@ -414,7 +415,7 @@ def autoDecode(abytes,confidence=0.7,default=py.No('default encoding "" ')  ):
 	if not py.isbyte(abytes):
 		raise py.ArgumentError('is not bytes',abytes)
 	return abytes.decode( detect(abytes=abytes,confidence=confidence,default=default) )
-detectDecode=detectAndDecode=autoDecode
+detect_decode=detectDecode=detectAndDecode=auto_decode=autoDecode
 
 def decode(abytes,codecs=('gb18030','utf-8','auto','latin' ) ):
 	for i in codecs:

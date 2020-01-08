@@ -389,7 +389,7 @@ def set_test_path(sp):
 		sp+='/'
 	gst=gsTestPath=set('U.gst',sp)
 	return gst
-set_gst=setTestPath=set_test_path
+setgst=set_gst=setTestPath=set_test_path
 
 def getShellPath():
 	'''wsPath=G:\QGB\babun\cygwin\home\qgb\wshell\
@@ -2730,6 +2730,7 @@ def vscode(a='',lineno=0,auto_file_path=True,editor_path=py.No('config this syst
 	F=py.importF()
 	env={}
 	if isLinux(): # only work when using remoteSSH
+		cmd_encoding='UTF-8'
 		executor = get('vscode_linux',level=gd_sync_level['system'])
 		if not executor:
 			vsbin=F.expanduser('~/.vscode-server/bin/')
@@ -2751,6 +2752,7 @@ def vscode(a='',lineno=0,auto_file_path=True,editor_path=py.No('config this syst
 			set('vscode_linux_env',env,level=gd_sync_level['process'])
 
 	if isWin():
+		cmd_encoding='gb18030'
 		executor = get('vscode_win',level=gd_sync_level['system'])
 		if not executor:
 			vscp=ps('code.exe')
@@ -2761,6 +2763,7 @@ def vscode(a='',lineno=0,auto_file_path=True,editor_path=py.No('config this syst
 			else:
 				executor=F.expanduser(r'~\AppData\Local\Programs\Microsoft VS Code\_\Code.exe') 
 	if not a:
+		# cmd(executor,env=env,encoding=cmd_encoding) 
 		run(executor,env=env)  # def run(
 		return executor
 
@@ -2771,7 +2774,8 @@ def vscode(a='',lineno=0,auto_file_path=True,editor_path=py.No('config this syst
 		)]
 
 	print_("r'");pln(*args,"'",',env=',env)
-	r=run(*args,env=env)
+	# r=cmd(args,env=env,encoding=cmd_encoding)
+	r=run(args,env=env)
 	if iswin() and isipy():sleep(1) # 解决 Windows光标下一行错位问题
 	return f,lineno
 code=vsc=VSCode=vsCode=vscode
