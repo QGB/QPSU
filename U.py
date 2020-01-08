@@ -779,7 +779,7 @@ def cmd(*a,**ka):
 		r=sb.run(a,capture_output=True,**ka)
 	except Exception as e:
 		print_traceback()
-		return py.No('sb.run err', e,r,a,ka)
+		return py.No('sb.run err', e,a,ka)
 
 	try:
 		so=T.auto_decode(r.stdout)
@@ -2746,9 +2746,16 @@ def vscode(a='',lineno=0,auto_file_path=True,editor_path=py.No('config this syst
 		#TODO
 		raise NotImplementedError
 	F=py.importF()
+	def run_vscode():
+		if isWin(): #cmd()  : ('', 'socket: (10106) 无法加载或初始化请求的服务提供程序。\r\r\n')
+			run(args,env=env)  # def run(
+		if isLinux():
+			cmd(args,env=env,encoding='UTF-8') 
+		if '--goto'  in args:
+			return f,lineno
+		return executor
 	env={}
 	if isLinux(): # only work when using remoteSSH
-		cmd_encoding='UTF-8'
 		executor = get('vscode_linux',level=gd_sync_level['system'])
 		if not executor:
 			vsbin=F.expanduser('~/.vscode-server/bin/')
@@ -2770,7 +2777,6 @@ def vscode(a='',lineno=0,auto_file_path=True,editor_path=py.No('config this syst
 			set('vscode_linux_env',env,level=gd_sync_level['process'])
 
 	if isWin():
-		cmd_encoding='gb18030'
 		executor = get('vscode_win',level=gd_sync_level['system'])
 		if not executor:
 			vscp=ps('code.exe')
@@ -2780,22 +2786,19 @@ def vscode(a='',lineno=0,auto_file_path=True,editor_path=py.No('config this syst
 				# U.log('vscode_win exe path cached %s'%executor)
 			else:
 				executor=F.expanduser(r'~\AppData\Local\Programs\Microsoft VS Code\_\Code.exe') 
+	args=[executor,'--reuse-window']
 	if not a:
-		# cmd(executor,env=env,encoding=cmd_encoding) 
-		run(executor,env=env)  # def run(
-		return executor
+		return run_vscode()
+		
 
 	f,lineno=get_obj_file_lineno(a,lineno=lineno,auto_file_path=auto_file_path)
 		# *get_obj_file_lineno(a,lineno=lineno,auto_file_path=auto_file_path) 
-	args=[executor,'--reuse-window','--goto','{}:{}'.format(
-		f,lineno
-		)]
+	args=args+['--goto','{}:{}'.format( f,lineno )   ]
 
 	print_("r'");pln(*args,"'",',env=',env)
-	# r=cmd(args,env=env,encoding=cmd_encoding)
-	r=run(args,env=env)
-	if iswin() and isipy():sleep(1) # 解决 Windows光标下一行错位问题
-	return f,lineno
+	# r=run(args,env=env)
+	return run_vscode()
+
 code=vsc=VSCode=vsCode=vscode
 
 def notePadPlusPlus(a='',lineno=0,auto_file_path=True,editor_path=py.No('config this system editor_path'),
