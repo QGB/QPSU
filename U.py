@@ -3638,7 +3638,7 @@ def git_upload(commit_msg=None,repo='QPSU',repo_path=get_qpsu_dir(),
 	commit_msg=T.replacey(commit_msg,['"'],'')
 
 	if '://' in repo:
-		git_remotes=[T.sub(repo,'','/')]
+		git_remotes=[T.subLast(repo,'','/')]
 		repo=T.subLast(repo,'/')
 	cmd=r'''
 cd /d {repo_path}
@@ -3662,7 +3662,7 @@ echo 	 git commit "{commit_msg}" done
 	cmd=cmd.replace('\n',' & ')
 	ipy.system(cmd)
 	return cmd
-up=git_upload
+up=git_up=gitUp=git_upload
 
 def python(args='-V',*a,**ka):
 	''' for copy paste,import U'''
