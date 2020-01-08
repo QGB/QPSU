@@ -411,9 +411,11 @@ func( a: <_sre.SRE_Match object; span=(2388, 2396), match='21758465'>  ):
 	return p.sub(func,a)
 ##################  regex end  ############################
 def autoDecode(abytes,confidence=0.7,default=py.No('default encoding "" ')  ):
+	if abytes==b'':return ''
 	if py.isunicode(abytes):return abytes
 	if not py.isbyte(abytes):
 		raise py.ArgumentError('is not bytes',abytes)
+
 	return abytes.decode( detect(abytes=abytes,confidence=confidence,default=default) )
 detect_decode=detectDecode=detectAndDecode=auto_decode=autoDecode
 

@@ -227,14 +227,18 @@ def istermux():
 def iscyg():
 	return 'cygwin' in  platform.system().lower()
 # gipy=None#这个不是qgb.ipy, 是否与U.F U.T 这样的风格冲突？
-def isipy(): # e=False
+def isipy(**ka): # e=False
 	# global gipy
+	raise_EnvironmentError=get_duplicated_kargs(ka,
+'raise_err','raise_error','raiseError','raiseErr','raise_EnvironmentError','EnvironmentError')
 	try:
-		if not py.modules('IPython'):return None
+		# if not py.modules('IPython'):return py.No()
 		import IPython
 		return IPython.get_ipython()
-	except:
-		return False
+	except Exception as e:
+		if raise_EnvironmentError:
+			raise
+		return py.No(e)
 	# ipy=False  #如果曾经有过实例，现在没有直接返回原来
 	# f=sys._getframe()
 	# while f and f.f_globals:# and 'get_ipython' not in f.f_globals.keys()
@@ -753,37 +757,41 @@ def cmd(*a,**ka):
 			# 	a=a
 				
 
+	import subprocess as sb	
+	
+	show   =get_duplicated_kargs(ka,'show','echo')
+	stdin  =get_duplicated_kargs(ka,'stdin','input')
+	timeout=get_duplicated_kargs(ka,'timeout',default=9)
+	
+	if show:pln (a)
+	if stdin:
+		if py.is3() and py.istr(stdin):
+			stdin=stdin.encode(gsencoding)
+		if not py.isbyte(stdin):
+			raise ArgumentUnsupported('stdin type',py.type(stdin),stdin  )
+		ka['input']=stdin
+		# r.stdin.write(stdin)
+	ka['timeout']=timeout     ## default timeout
+	
 	try:
-		import subprocess as sb	
-		
-		show   =get_duplicated_kargs(ka,'show','echo')
-		stdin  =get_duplicated_kargs(ka,'stdin','input')
-		timeout=get_duplicated_kargs(ka,'timeout',default=9)
-		
-		if show:pln (a)
-		if stdin:
-			if py.is3() and py.istr(stdin):
-				stdin=stdin.encode(gsencoding)
-			if not py.isbyte(stdin):
-				raise ArgumentUnsupported('stdin type',py.type(stdin),stdin  )
-			ka['input']=stdin
-			# r.stdin.write(stdin)
-		ka['timeout']=timeout     ## default timeout
-		
 		# if timeout:
-		r=sb.check_output(a,**ka)
-#TODO 在Windows下正常, Linux  sb.check_output("ls '-al' " ) 
-#FileNotFoundError: [Errno 2] No such file or directory: "ls '-al' ": "ls '-al' "
+		# r=sb.check_out(a,**ka)
+		r=sb.run(a,capture_output=True,**ka)
+	except Exception as e:
+		print_traceback()
+		return py.No('sb.run err', e,r,a,ka)
 
-		# r=sb.Popen(s,stdin=sb.PIPE,stdout=sb.PIPE,stderr=sb.PIPE)
-			
-		# r= r.stdout.read(-1)# 添加超时处理  see subprocess.py  406
-		# if py.is3() and iswin():r=r.decode('mbcs')
-		return T.autoDecode(r)
+	try:
+		so=T.auto_decode(r.stdout)
+		se=T.auto_decode(r.stderr)
+		if not se:
+			return so
+		else:
+			return so,se
 		# return os.system(s)
 	except Exception as e:
-		print_tb()
-		return py.No(e,a,ka)
+		print_traceback()
+		return py.No('T.auto_decode err',e,r,a,ka)
 	# exit()
 # cmd('echo 23456|sub','3','')	
 
@@ -1588,9 +1596,19 @@ pa=printattr=printAttr
 # repl()
 # printAttr(5)
 
-def dir(a,filter='',type_filter=py.No('default not filter'),raw_value=False):
+def dir(a,type_filter=py.No('default not filter'),raw_value=False,**ka):
+	'''
+	[attr_]filter='',
+	skip
+	'''
 	if py.istr(type_filter):type_filter=type_filter.lower()
-	attrs=[i for i in py.dir(a) if filter in i]
+	filter=get_duplicated_kargs(ka,'filter','keyFilter','key_filter','attr_filter','attrFilter')
+	skip=get_duplicated_kargs(ka,'skip','skipKey','key_skip','skip_key','attr_skip','attrSkip')
+	attrs=py.dir(a)
+	if filter:
+		attrs=[i for i in attrs if filter in i]
+	if skip:
+		attrs=[i for i in attrs if skip not in i]
 	rv=[]
 	err=py.No("#can't getattr ")
 	for i in attrs:
@@ -3608,7 +3626,7 @@ def git_upload(commit_msg=None,repo='QPSU',repo_path=get_qpsu_dir(),
 		):
 	if not commit_msg:commit_msg=stime()
 	commit_msg=T.replacey(commit_msg,['"'],'')
-	ipy=get_ipy()
+	ipy=get_ipy(raise_EnvironmentError=True)
 	cmd=r'''
 cd /d {repo_path}
 "{git_exe}" config --global user.email {user_email}
@@ -3631,8 +3649,22 @@ echo 	 git commit "{commit_msg}" done
 	cmd=cmd.replace('\n',' & ')
 	ipy.system(cmd)
 	return cmd
-
 up=git_upload
+
+def python(args='-V',*a,**ka):
+	''' for copy paste,import U'''
+	U=py.importU()
+	a=py.list(a)
+	if py.istr(args):
+		a.insert(0,args)
+	elif py.iterable(args):
+		a=py.list(args)+a
+	if 'python' not in a[0].lower():
+		a.insert(0,sys.executable)
+	return U.cmd(a,**ka)
+
+def python_m(*a,**ka):
+	return python('-m',*a,**ka)
 
 class IntWithObj(py.int):
 	'''int(x, base=10) -> integer 
