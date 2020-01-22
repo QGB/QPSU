@@ -95,9 +95,13 @@ class No:
 		
 	# @staticmethod #obj.__len__()==-1
 # no=No() #instance
-def isgen(a):
+def isbool(a):
+	return (a is True) or (a is False)
+
+def is_generator(a):
 	import types
 	return isinstance(a, types.GeneratorType)
+isgen=isGenerator=is_generator
 
 def iterable(a):
 	try:

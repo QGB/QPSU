@@ -209,6 +209,22 @@ def rpcClient(url_or_port='http://127.0.0.1:23571',code=''):
 	# server = ServerProxy(url)
 	# return server
 
+def parse_pem(pem_str_or_bytes):
+	if py.istr(pem_str_or_bytes):
+		pem_bytes=pem_str_or_bytes.encode('utf-8')
+	elif py.isbytes(pem_str_or_bytes):
+		pem_bytes=pem_str_or_bytes
+	else:
+		raise py.ArgumentError()
+	import pem
+	list= pem.parse(pem_bytes)
+	if py.len(list)==1:
+		return list[0]
+	else:
+		return list
+	# with open('cert.pem', 'rb') as f:
+	# 	certs = pem.parse(f.read())
+
 def get_all_socket_obj():
 	import socket
 	return U.get_objects(socket.socket) 
@@ -264,6 +280,21 @@ def pdf2html(url,response=None,zoom=None,path=None,pw=None):
 	else:
 		return do_resp(F.read(html_file))
 
+def html_script(response,*urls,rpc_base=None):
+	U,T,N,F=py.importUTNF()
+	if not rpc_base:rpc_base=U.get_or_set('rpc_base','/')
+	html=''
+	for url in urls:
+		html=html+"""
+<script src="{rpc_base}r=N.get('''{url}''')">
+</script>
+<hr>
+{url}
+<hr>
+{js}
+	""".format(url=url,rpc_base=rpc_base,js=N.get(url)[:999] ) 
+	return flask_html_response(response=response,remove_tag=[],html=html )
+	
 def flask_html_response(response,html,remove_tag=(
 		['<script','</script>'],
 		['<SCRIPT','</SCRIPT>'],
@@ -284,8 +315,9 @@ def flask_html_response(response,html,remove_tag=(
 html=htmlp=response_html=html_response=flask_html_response
 
 def get(url,protocol='http',file=''):
-	U=py.importU()
-	T=U.T
+	U,T,N,F=py.importUTNF()
+	if F.exist(url):
+		return F.read(url)
 	if '://' in url:
 		p=T.sub(url,'',':')
 		if p:protocol=p

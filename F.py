@@ -301,7 +301,7 @@ def getPaths(a):
 	else:
 		raise NotImplementedError('*nux')
 	
-def getNameFromPath(a):
+def get_filename_from_full_path(a):
 	''' if a.endswith('/'):return ''
 	'''
 	a=a.replace('\\','/')
@@ -309,7 +309,7 @@ def getNameFromPath(a):
 	else:
 		# import T
 		return T.subr(a,'/','')
-getNameFromPath
+get_name=getname=getName=getNameFromPath=getFilename=get_filename=get_filename_from_full_path
 # filename=fileName=getname=getName=name
 		
 def getNameWithoutExt(a):
@@ -688,7 +688,7 @@ def writeYaml(file,obj):
 		
 def isDir(file):
 	return _p.isdir(file)
-isFolder=isdir=isDir
+is_folder=isFolder=is_dir=isdir=isDir
 	
 def exist(fn,zero=False):
 	''': path.exist('c:')
@@ -938,9 +938,34 @@ join=joinPath=path_join=join_path
 
 def mdcd(ap):
 	return py.importU().cd(makeDirs(ap))
-	
-def makeDirs(ap,isFile=False):
+
+def move(source,target):
+	F=py.importF()
+	source=F.autoPath(source)
+	target=F.autoPath(target)
+	if target.endswith('/'):
+		n=F.getName(source)
+		target+=n
+	import os
+	try:
+		os.rename(source, target)
+		if not target.endswith('/') and F.isDir(target):
+			target=target+'/'
+		return target
+	except (FileNotFoundError,FileExistsError) as e: # parentheses required, otherwise invalid syntax
+		return py.No(e,source,target)
+
+	# if not F.exist(target):
+	# 	return py.No('moved to '+ target+' ,But not exist',source)
+	# import shutil
+	# shutil.move(source, target)
+	# os.replace(source, target)
+mv=move
+
+def makeDirs(ap,isFile=False,cd=0):
 	ap=autoPath(ap)
+	if not py.isbool(isFile) and not py.isint(isFile):
+		py.importU().log('F.md(str,isFile={})'.format(repr(isFile)))
 	if py.is3():
 		from pathlib import Path
 		p=Path(ap)
@@ -955,7 +980,7 @@ def makeDirs(ap,isFile=False):
 		except (FileNotFoundError,):
 			r=makeDirs(p.parent,isFile=False)
 			if r:p.mkdir() # 建立父目录后，再次尝试创建本目录 
-			else:return r
+			# else:return r
 			#但是如果父目录本来是个文件，再mkdir则FileNotFoundError: [WinError 3] 系统找不到指定的路径。
 		except FileExistsError:
 			pass
@@ -965,10 +990,13 @@ def makeDirs(ap,isFile=False):
 			sp=autoPath(p)
 			if p.is_dir() and not sp.endswith('/'):
 				sp+='/'
-			return sp
+			r=sp
 		else:
-			return py.No(r,p)
-			
+			r=py.No(r,p)
+		if r and cd:py.importU().cd(r)
+		return r
+
+	# if py.is2():		#########################################	
 	U=py.importU()
 	sp=getSplitor(ap)
 	ap=ap.split(sp)

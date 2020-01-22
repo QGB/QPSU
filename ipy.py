@@ -8,8 +8,8 @@ gError=None
 if not U.isipy():raise EnvironmentError
 g=get=gipy=U.isipy()#不能直接引用U.ipy,环境不确定 动态判断避免识别错误 g.
 gipy.autocall=2
-if U.iswin():
-	gipy.editor='cmd /k %s' % U.npp(getExePath=True)
+if U.isWin():
+	gipy.editor='cmd /k %s' % U.npp(get_cmd=True)
 	try:
 		from IPython.utils import py3compat # python 3.7
 	except:pass
@@ -17,7 +17,9 @@ if U.iswin():
 		from IPython.utils.process import py3compat # python 3.5
 	except:pass
 	py3compat.DEFAULT_ENCODING='gb18030' # default utf-8
-	
+if U.isLinux():
+	gipy.editor=''	
+
 gIn=gipy.user_ns['In'];gOut=gipy.user_ns['Out']
 # version='.'.join([str(i) for i in IPython.version_info if py.isnum(i)])  #(5, 1, 0, '') 5.1.0
 version=py.float('{0}.{1}{2}\n{3}'.format(*IPython.version_info).splitlines()[0])

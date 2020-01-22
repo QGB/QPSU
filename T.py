@@ -480,11 +480,8 @@ def urlEncode(a):
 	''' a : str_or_bytes
 	#todo 	convert Non-string objects
 	'''
-	
-	if py.is3():
-		import urllib
-		return urllib.parse.quote(a)
-	raise NotImplementedError()
+	from six.moves.urllib.parse import quote
+	return quote(a) # if a is function: TypeError: quote_from_bytes() expected bytes
 url_encode=urlEncode
 
 def urlDecode(a):

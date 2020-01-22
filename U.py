@@ -214,15 +214,16 @@ platform.architecture()     ('64bit', 'WindowsPE')    ('32bit', 'WindowsPE')
 def isWin():
 	if platform.system().startswith('Windows'):return True
 	else:return False
-iswin=isWin
+is_win=iswin=isWin
 
 def isLinux():return platform.system()=='Linux'
 islinux=isLinux
 def isMacOS():return platform.system()=='darwin'
-isOSX=ismacos=isMacOS
+is_osx=isOSX=ismacos=isMacOS
 	
-def istermux():
+def is_termux():
 	return '/com.termux' in sys.executable
+istermux=isTermux=is_termux
 
 def iscyg():
 	return 'cygwin' in  platform.system().lower()
@@ -720,10 +721,20 @@ def in_all(v,*ts):
 	return [v]
 inAll=in_all
 ##########################################
+def join_as_cmd_str(args,*a):
+	import shlex
+	a=py.list(a)
+	if py.istr(args):
+		a.insert(0,args)
+	elif py.iterable(args):
+		a=py.list(args)+a
+	return ' '.join(shlex.quote(x) for x in a)
+joinCmd=join_cmd=cmdJoin=cmd_join=shlex_join=join_as_cmd_str
+
 def split_cmd_str(a):
 	import shlex
 	return shlex.split(a)
-shlex_split=split_cmd_str
+splitCmd=split_cmd=cmdSplit=cmd_split=shlex_split=split_cmd_str
 
 def cmd(*a,**ka):
 	'''show=False :show command line
@@ -837,6 +848,13 @@ def pause(a='Press Enter to continue...\n',exit=True):
 			if exit:x()
 			return False
 	return True	
+
+def os_system(str):
+	a=split_cmd_str(str)
+	if py.len(a)>1 and '"' in str:
+		str='"%s"'%str
+	return os.system(str)
+system=os_system
 
 def run(a,*args,env=py.No('if you want update env,give dict,path will merged')):
 	'''默认不阻塞, args converted to list of str
@@ -2573,10 +2591,13 @@ linux:
 
 '''	
 	import os
-	r=os.getenv(name)
-	if r:return r
+	# r=os.getenv(name)
+	# if r:return r
 	
 	name_upper=name.upper()
+	if name_upper=='PATH':
+		return os.environ['PATH'].split(os.pathsep)
+
 	for i in  os.environ:
 		if i.upper()==name_upper:
 			return os.environ(i)
@@ -2739,7 +2760,8 @@ def get_obj_file_lineno(a,lineno=0,auto_file_path=True):
 		return get_obj_file_lineno(a=a,lineno=lineno,auto_file_path=auto_file_path)
 	
 		
-def vscode(a='',lineno=0,auto_file_path=True,editor_path=py.No('config this system editor_path'),):
+def vscode(a='',lineno=0,auto_file_path=True,get_cmd=False,
+	editor_path=py.No('config this system editor_path'),):
 	'''
 	'''
 	if editor_path:
@@ -2747,14 +2769,31 @@ def vscode(a='',lineno=0,auto_file_path=True,editor_path=py.No('config this syst
 		raise NotImplementedError
 	F=py.importF()
 	def run_vscode():
+		pln(args,',env=',env)
+		if get_cmd:
+			if isWin():
+				return args
 		if isWin(): #cmd()  : ('', 'socket: (10106) 无法加载或初始化请求的服务提供程序。\r\r\n')
 			run(args,env=env)  # def run(
+			if isipy():sleep(1) # 解决 Windows光标下一行错位问题
 		if isLinux():
 			cmd(args,env=env,encoding='UTF-8') 
 		if '--goto'  in args:
 			return f,lineno
 		return executor
 	env={}
+	
+	if isWin():
+		executor = get('vscode_win',level=gd_sync_level['system'])
+		if not executor:
+			vscp=ps('code.exe')
+			if vscp:
+				executor=vscp[0].cmdline()[0]
+				set('vscode_win',executor,level=gd_sync_level['system'])
+				# U.log('vscode_win exe path cached %s'%executor)
+			else:
+				executor=F.expanduser(r'~\AppData\Local\Programs\Microsoft VS Code\_\Code.exe') 
+
 	if isLinux(): # only work when using remoteSSH
 		executor = get('vscode_linux',level=gd_sync_level['system'])
 		if not executor:
@@ -2776,16 +2815,6 @@ def vscode(a='',lineno=0,auto_file_path=True,editor_path=py.No('config this syst
 					env={'VSCODE_IPC_HOOK_CLI':f}
 			set('vscode_linux_env',env,level=gd_sync_level['process'])
 
-	if isWin():
-		executor = get('vscode_win',level=gd_sync_level['system'])
-		if not executor:
-			vscp=ps('code.exe')
-			if vscp:
-				executor=vscp[0].cmdline()[0]
-				set('vscode_win',executor,level=gd_sync_level['system'])
-				# U.log('vscode_win exe path cached %s'%executor)
-			else:
-				executor=F.expanduser(r'~\AppData\Local\Programs\Microsoft VS Code\_\Code.exe') 
 	args=[executor,'--reuse-window']
 	if not a:
 		return run_vscode()
@@ -2794,15 +2823,13 @@ def vscode(a='',lineno=0,auto_file_path=True,editor_path=py.No('config this syst
 	f,lineno=get_obj_file_lineno(a,lineno=lineno,auto_file_path=auto_file_path)
 		# *get_obj_file_lineno(a,lineno=lineno,auto_file_path=auto_file_path) 
 	args=args+['--goto','{}:{}'.format( f,lineno )   ]
-
-	print_("r'");pln(*args,"'",',env=',env)
 	# r=run(args,env=env)
 	return run_vscode()
 
 code=vsc=VSCode=vsCode=vscode
 
 def notePadPlusPlus(a='',lineno=0,auto_file_path=True,editor_path=py.No('config this system editor_path'),
-	getExePath=False,):
+	get_cmd=False,):
 	'''
 --------> os.system('"M:\\Program Files\\Notepad++\\notepad++.exe" "IP.py"')
 'M:\Program' 不是内部或外部命令，也不是可运行的程序
@@ -2837,7 +2864,7 @@ in ipy , npp() not autoReload when U.r(), But U.npp()
 		f,lineno=get_obj_file_lineno(a,lineno=lineno,auto_file_path=auto_file_path)
 		return run(npath,f,'-n {0}'.format(lineno))
 	else:
-		if not getExePath:run(npath)
+		if not get_cmd:run(npath)
 		return npath 
 npp=notePadPlus=notePadPlusPlus
 	
@@ -3024,13 +3051,18 @@ pln({0})
 			pln(ei)
 def explorer(path='.'):
 	''' exp can not open g:/qgb '''
-	path=path.replace('/','\\')
-	ps=r'''C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe -Command ii {}.'''.format(path)
+	if not path or path=='.':path=pwd(p=False)
+	path=F.auto_path(path)
+
+	# path=path.replace('/','\\')
+	ps='# Not impl in this system'
 	if iswin():
-		if Win.getVersionNumber()>6.0:#vista
-			os.system(ps)
-		else:
-			os.system('explorer.exe '+path)
+		ps=r'''C:/Windows/System32/WindowsPowerShell/v1.0/powershell.exe -Command ii {}.'''.format(path)
+		if Win.getVersionNumber()<=6.0:#vista
+			ps='explorer.exe '+path
+		os.system(ps)
+	return StrRepr(ps)
+
 exp=explorer
 
 def log(*a):
@@ -3620,9 +3652,40 @@ def get_objects(type,len=None):
 	return r
 find_objects=get_obj=get_objects
 
+def git_commit(commit_msg=None,dir='.',
+	git_exe=None, user_email='qgbcs1@gmail.com', user_name='qgb',):
+	U,T,N,F=py.importUTNF()
+	U.cd(dir)
+	U.pwd(p=1)
+	ipy=U.get_ipy(raise_EnvironmentError=True)
+	if not git_exe:
+		if U.isWin():
+			git_exe=U.get_or_set('git_exe',r"D:\Program Files\Git\bin\git.exe")
+		if U.isLinux():
+			git_exe=U.get_or_set('git_exe',r"/usr/bin/git")
+
+	cmd=r'''   
+"   "{git_exe}" config --global user.email {user_email}
+"{git_exe}" config --global user.name {user_name}
+
+"{git_exe}" config --global core.autocrlf false
+"{git_exe}" config --global core.filemode false
+"{git_exe}" config --global credential.helper store
+"{git_exe}" config --global http.sslverify "false"
+echo 	 git config done
+"{git_exe}" add -A
+"{git_exe}" commit -m "{commit_msg}"
+echo 	 git commit "{commit_msg}" done   "
+'''
+	cmd=T.replace_all(cmd.strip(),'\n\n','\n')
+	cmd=cmd.replace('\n',' & ')
+	ipy.system(cmd)
+	return cmd
+commit=commit_git=gitCommit=git_commit
+
 def git_upload(commit_msg=None,repo='QPSU',repo_path=get_qpsu_dir(),
-			git_exe=None,
 			git_remotes=['https://git.coding.net/qgb/','https://github.com/qgb/',],
+			git_exe=None,
 			user_email='qgbcs1@gmail.com',
 			user_name='qgb',
 
@@ -3809,9 +3872,9 @@ class ValueOfAttr(py.object):
 		# return print_stack()
 		r='('
 		for v in args:
-			r+=pformat(v) +','
+			r+=pformat(v,**get('pformat_kw',{})  ) +','
 		for k,v in kwargs.items():
-			r+='{}={},'.format(k,pformat(v) )
+			r+='{}={},'.format(k,pformat(v,**get('pformat_kw',{}) ) )
 		r+=')'
 		self.__v__ = self.__str__()+r
 		if is_ipy_cell():

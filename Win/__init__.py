@@ -97,14 +97,14 @@ def lmHash(a):
 	
 #######################################################################
 class SYSTEM_POWER_STATUS(ctypes.Structure):
-    _fields_ = [
-        ('ACLineStatus', wintypes.BYTE),
-        ('BatteryFlag', wintypes.BYTE),
-        ('BatteryLifePercent', wintypes.BYTE),
-        ('Reserved1', wintypes.BYTE),
-        ('BatteryLifeTime', wintypes.DWORD),
-        ('BatteryFullLifeTime', wintypes.DWORD),
-    ]
+	_fields_ = [
+		('ACLineStatus', wintypes.BYTE),
+		('BatteryFlag', wintypes.BYTE),
+		('BatteryLifePercent', wintypes.BYTE),
+		('Reserved1', wintypes.BYTE),
+		('BatteryLifeTime', wintypes.DWORD),
+		('BatteryFullLifeTime', wintypes.DWORD),
+	]
 SYSTEM_POWER_STATUS_P = ctypes.POINTER(SYSTEM_POWER_STATUS)
 GetSystemPowerStatus = ctypes.windll.kernel32.GetSystemPowerStatus
 GetSystemPowerStatus.argtypes = [SYSTEM_POWER_STATUS_P]
@@ -112,19 +112,19 @@ GetSystemPowerStatus.restype = wintypes.BOOL
 systemPowerStatus = SYSTEM_POWER_STATUS()
 
 def batteryIsOn():
-    if not GetSystemPowerStatus(ctypes.pointer(systemPowerStatus)):
-        raise ctypes.WinError()
-    return systemPowerStatus.ACLineStatus == 0
-    
+	if not GetSystemPowerStatus(ctypes.pointer(systemPowerStatus)):
+		raise ctypes.WinError()
+	return systemPowerStatus.ACLineStatus == 0
+	
 def batteryPercent():
-    if not GetSystemPowerStatus(ctypes.pointer(systemPowerStatus)):
-        raise ctypes.WinError()
-    return systemPowerStatus.BatteryLifePercent
+	if not GetSystemPowerStatus(ctypes.pointer(systemPowerStatus)):
+		raise ctypes.WinError()
+	return systemPowerStatus.BatteryLifePercent
 
 def batteryFlag():
-    if not GetSystemPowerStatus(ctypes.pointer(systemPowerStatus)):
-        raise ctypes.WinError()
-    return systemPowerStatus.BatteryFlag
+	if not GetSystemPowerStatus(ctypes.pointer(systemPowerStatus)):
+		raise ctypes.WinError()
+	return systemPowerStatus.BatteryFlag
 #########################################################################
 
 gdAddressType={1: ['MIB_IPADDR_PRIMARY', 'Primary IP address', '主IP地址'],
@@ -197,6 +197,19 @@ The address type or state. This member can be a combination of the following val
 		# U.repl()
 	return tuple(r)
 getAllNetwork=getAllNetworkInterfaces
+
+def CommandLineToArgvW(cmd):
+	import ctypes
+	if py.is2():
+		cmd=py.unicode(cmd)
+	nargs = ctypes.c_int()
+	ctypes.windll.shell32.CommandLineToArgvW.restype = ctypes.POINTER(ctypes.c_wchar_p)
+	lpargs = ctypes.windll.shell32.CommandLineToArgvW(cmd, ctypes.byref(nargs))
+	args = [lpargs[i] for i in range(nargs.value)]
+	if ctypes.windll.kernel32.LocalFree(lpargs):
+		raise AssertionError
+	return args
+splitCmd=split_cmd=cmdSplit=cmd_split=shlex_split=split_cmd_str=CommandLineToArgvW
 
 def getCmdHandle():
 	return kernel32.GetConsoleWindow()
@@ -405,10 +418,10 @@ Out[76]: (1365L, 767L)
 	
 	
 	User32.mouse_event.argtypes=[DWORD,
-                                 DWORD,
-                                 DWORD,
-                                 DWORD,
-                                 ctypes.wintypes.c_void_p]#ULONG_PTR	
+								 DWORD,
+								 DWORD,
+								 DWORD,
+								 ctypes.wintypes.c_void_p]#ULONG_PTR	
 	U=py.importU()
 	if U.debug():U.pln(event,x,y,dwData,None)
 	User32.mouse_event(event,x,y,dwData,None)

@@ -205,6 +205,10 @@ async function taobao_cart_back(){
 
 //await tab_exec( await tab_current()  ,    'alert(new Date() )  '  )
 
+async function taobao_search_list(base_url="https://youxin-electronic.taobao.com/"){
+
+}
+
 
 //最好这个要阻塞，但是没找到好办法。要不只能轮询
 gs_taobao_list= _CODE(function(){
@@ -233,7 +237,9 @@ gs_taobao_list= _CODE(function(){
 
 async function taobao_list(base_url="https://youxin-electronic.taobao.com/"){
     var t=(await tab_query({url: base_url+"*"}) )[0]
-    console.log(await post("https://okfw.net/r=start_time=U.stime()"),t )
+    console.log(await post(
+"https://okfw.net/base_url=T.json_loads(request.get_data());r=start_time=[TB.init(base_url),U.stime()]",base_url),t )
+    
     var base_search_url=base_url+"search.htm?orderType=price_asc&pageNo="
     var url=base_search_url+1
     while(url && url.length>9){
@@ -438,6 +444,7 @@ async function taobao_get_item(){
 
 //////////////////////////////////////////////////////////////////
 async function main(){
+    return console.log(eval('2+2'))
     if(!chrome.tabs)return
     return t=await tab_current()
     var img="https://img.alicdn.com/bao/uploaded/i3/2658592015/TB2Xk8McA.OyuJjSszhXXbZbVXa_!!2658592015.jpg_240x240.jpg"
