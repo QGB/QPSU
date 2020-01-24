@@ -3683,6 +3683,50 @@ echo 	 git commit "{commit_msg}" done   "
 	return cmd
 commit=commit_git=gitCommit=git_commit
 
+def git_config_list(a='g'):
+	''' a : Config file location
+g    --global              use global config file
+s   --system              use system config file
+l   --local               use repository config file
+    -f, --file <file>     use given config file
+    --blob <blob-id>      read config from given blob object
+	'''
+	a=a.lower()
+	U=py.importU()
+	cmd=a
+	if U.one_in(['s','y','t','e','m'],a):
+		cmd='--system'
+	if U.one_in(['g','gl','b'],a):
+		cmd='--global'	
+	if U.one_in(['l','o','c'],a):
+		cmd='--local'
+
+	return git('config --list '+cmd,p=1)
+
+def git(args='config --list --global',*a,git_exe=None,p=1):
+	''' --version 
+config -l  == config --list --global	
+ --global
+ --system
+ --local
+
+	 '''
+	U=py.importU()
+	a=py.list(a)
+	if py.istr(args):
+		a.insert(0,args)
+	elif py.iterable(args):
+		a=py.list(args)+a
+		
+	ipy=get_ipy(raise_EnvironmentError=True)
+	if isWin():
+		git_exe=get_or_set('git_exe',r"D:\Program Files\Git\bin\git.exe")
+	if isLinux():
+		git_exe=get_or_set('git_exe',r"/usr/bin/git")
+	cmd=f'''"{git_exe}" {' '.join(a)} '''
+	if p:U.pln(cmd)
+	ipy.system(cmd)
+
 def git_upload(commit_msg=None,repo='QPSU',repo_path=get_qpsu_dir(),
 			git_remotes=['https://git.coding.net/qgb/','https://github.com/qgb/',],
 			git_exe=None,
