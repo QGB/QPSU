@@ -3729,7 +3729,9 @@ config -l  == config --list --global
 
 def git_upload(commit_msg=None,repo='QPSU',repo_path=get_qpsu_dir(),
 			git_remotes=['https://qgbcs@gitee.com/qgbcs/',
-				'https://git.coding.net/qgb/','https://github.com/qgb/',],
+				# 'https://git.coding.net/qgb/',
+				'https://github.com/qgb/',
+				],
 			git_exe=None,
 			user_email='qgbcs1@gmail.com',
 			user_name='qgb',
