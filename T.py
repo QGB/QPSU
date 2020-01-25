@@ -78,7 +78,8 @@ try:
 except:pass
 ####################################################
 def columnize(iterable,width=120):
-	''' 144 break line in default Win+R Cmd window
+	''' split long list to columnize small list
+	144 break line in default Win+R Cmd window
 '''
 	# from IPython.utils.text import columnize as _columnize
 	if not py.iterable(iterable):return py.repr(iterable)
@@ -98,12 +99,41 @@ def columnize(iterable,width=120):
 		row_first=True, separator=' , ', displaywidth=width)
 	return r
 
-def justify(s,size,fillchar=' ',method='ljust'):
-	if size<1:raise py.ArgumentError('size must > 0',size)
-	if len(s)>=size:
-		return s[:size]
-	return py.getattr(s,method)(size,fillchar)	#padding
+def justify(s,size,fillchar=' ',method='ljust',cut=None):
+	''' if cut && cut is not int:cut=size
 	
+	'''
+	if size<1:raise py.ArgumentError('size must > 0',size)
+	if cut==None:
+		U=py.importU()
+		cut=U.get_or_set('T.padding.cut',False)
+	if cut:
+		if not py.isint(cut):
+			cut=size
+		if len(s)>cut:
+			return s[:cut]+'…' # 省略号 不是 dot
+		# else:# 跳出 cut
+		
+	return py.getattr(s,method)(size,fillchar)	#padding
+padding=justify
+
+def padding_column(a,size,fillchar=' ',method='ljust',cut=False):
+	# a=py.list(a) # do not change input arg !!!
+	U=py.importU()
+	StrRepr=U.StrRepr
+	r=[]
+	for n,i in py.enumerate(a):
+		row=[]
+		for c in i:
+			rc=StrRepr(
+	justify(s=pformat(c),size=size,fillchar=fillchar,method=method,
+			cut=cut )
+			)
+			row.append(rc)
+		r.append(row)
+	return r
+column_justify=column_padding=padding_column
+
 def encode(s,encoding):
 	'''
 	'''

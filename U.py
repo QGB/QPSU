@@ -1232,7 +1232,7 @@ def sort(a,column=None, cmp=None, key=None, reverse=False,keys=py.tuple()):
 			return r
 		else:
 			ai=py.repr(ai)[:size] # 不会再次回到这个分支，  istr
-			return key(ai=ai,size=size,column=False)
+			return key_func(ai=ai,size=size,column=False)
 
 	if keys:
 		def keys_func(e):
@@ -1245,7 +1245,7 @@ def sort(a,column=None, cmp=None, key=None, reverse=False,keys=py.tuple()):
 				else:
 					raise py.ArgumentUnsupported(k)
 			return r
-		key=key_func
+		key=keys_func
 
 	if not key:key=key_func
 	#TypeError: '<' not supported between instances of 'int' and 'str';key=None also err
@@ -1260,6 +1260,7 @@ def sort(a,column=None, cmp=None, key=None, reverse=False,keys=py.tuple()):
 		return ''.join(a)
 	else:
 		return a
+
 def sortDictV(ad,key=lambda item:item[1],des=True):
 	'''des True,,, python dict key auto sort ?'''
 	if type(ad) is not dict:return {}
