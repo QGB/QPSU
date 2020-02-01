@@ -44,8 +44,8 @@ porcelain.push(repo.path,"https://wrong_name@e.coding.net/...",'master',username
 
 porcelain.push(repo.path,"https://http://e.coding.net/...",'master',username='correct_name',password=_)  #  OK!	
 	'''
-	if not 'refspecs' in ka:
-		ka['refspecs']=branch
+	if ':' not in url:
+		url='https://'+url
 	domain=T.netloc(url)
 	if not username:
 		username=U.get_or_input(domain+'_git.username')
@@ -53,6 +53,8 @@ porcelain.push(repo.path,"https://http://e.coding.net/...",'master',username='co
 	if not password:
 		password=U.get_or_input(domain+'_git.password')
 	ka['password']=password
+	if not 'refspecs' in ka:
+		ka['refspecs']=branch
 	if not path and '/qpsu' in url.lower():
 		path=U.get_qpsu_dir()
 	if not path:	
