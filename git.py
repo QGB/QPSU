@@ -13,6 +13,7 @@ import shutil
 # headers={'Authorization':F.read('Authorization')}
 # opener.addheaders = py.list(headers.items())
 # urllib.request.install_opener(opener)
+grepo=U.get('git.repo')
 
 def clone(url,path=None):
 	client, target = dulwich.client.get_transport_and_path(url) #c , 'user/repo'
@@ -44,6 +45,7 @@ porcelain.push(repo.path,"https://wrong_name@e.coding.net/...",'master',username
 
 porcelain.push(repo.path,"https://http://e.coding.net/...",'master',username='correct_name',password=_)  #  OK!	
 	'''
+	global grepo
 	if ':' not in url:
 		url='https://'+url
 	domain=T.netloc(url)
@@ -110,4 +112,5 @@ def commit(repo,commit_msg):
 		return b'',py.No("Empty commit!")
 
 def log(max_entriesss=11,repo=None):
+
 	return dulwich.porcelain.log(max_entries=max_entries) 
