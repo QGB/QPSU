@@ -1,17 +1,18 @@
-import sys;'qgb.U' in sys.modules or sys.path.append('C:/qgb/');from qgb import *
+if __name__.endswith('qgb.F'):from . import py
+else:import py
+U,T,N,F=py.importUTNF()
+
 import dulwich
-import dulwich.client
-from dulwich.repo import Repo
-from dulwich import index
+from dulwich import client,index,repo,porcelain
 
 import os
 import shutil
 
-from six.moves import urllib
-opener = urllib.request.build_opener()
-headers={'Authorization':F.read('Authorization')}
-opener.addheaders = py.list(headers.items())
-urllib.request.install_opener(opener)
+# from six.moves import urllib
+# opener = urllib.request.build_opener()
+# headers={'Authorization':F.read('Authorization')}
+# opener.addheaders = py.list(headers.items())
+# urllib.request.install_opener(opener)
 
 def clone(url,path=None):
 	client, target = dulwich.client.get_transport_and_path(url) #c , 'user/repo'
@@ -24,9 +25,9 @@ def clone(url,path=None):
 	if len(ls)>1: #skip .git
 		return py.No('Not empty dir:'+path,ls)
 	if len(ls)==1:
-		r = Repo(path)
+		r = dulwich.repo.Repo(path)
 	else:	
-		r = Repo.init(path)
+		r = dulwich.repo.Repo.init(path)
 	print(U.stime(),'fetching url...')
 	remote_refs = client.fetch(url, r)
 	r[b"HEAD"] = remote_refs[b"HEAD"]
@@ -51,11 +52,14 @@ porcelain.push(repo.path,"https://http://e.coding.net/...",'master',username='co
 	if not password:
 		password=U.get_or_input('git.password')
 	ka['password']=password
-	if not path:
-		client, target = dulwich.client.get_transport_and_path(url) 
+	if not path and '/qpsu' in url.lower():
+		path=U.get_qpsu_dir()
+	if not path:	
+		_client, target = dulwich.client.get_transport_and_path(url) 
 		if target.endswith('.git'):
 			target=target[:-4]
 		path=target
+		
 	path=F.auto_path(path)
 	ls=F.ls(path)
 	if len(ls) < 1:
