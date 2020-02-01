@@ -3805,6 +3805,27 @@ def python(args='-V',*a,**ka):
 def python_m(*a,**ka):
 	return python('-m',*a,**ka)
 
+def select_columns(table,*a):
+	''' select_column(table,[1,2,3]) or 
+select_column(table,1,2,3)
+	'''
+	if py.len(a)==1 and not py.isint(a[0]):
+		a=a[0]
+	for row in table:
+		r=[]
+		for n,i in py.enumerate(row):
+			if n in a:
+				r.append(i)
+		yield r
+select_cols=select_column=select_columns
+
+def index_dict(*a):
+	d={}
+	for n,v in py.enumerate(a):
+		d[n]=v
+	return d
+int_dict=intDict=indexDict=index_dict
+
 class IntWithObj(py.int):
 	'''int(x, base=10) -> integer 
 	IntWithOther(x,obj) #default base 10
