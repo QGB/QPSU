@@ -127,6 +127,13 @@ def get(name='_',default=py.No('can not get name'),level=gd_sync_level['process'
 		#TODO 对于不存在的 name ，可以记录最后访问时间为 py.No，方便排查
 		return d.get(name,default)
 	#TODO
+
+def get_or_set_input(name):
+	r=get(name)
+	if not py.isno(r):return r
+	return set(name,py.input('%r : '%name) )
+getInput=getOrInput=get_or_input=get_or_set_input
+
 def get_or_set(name,default):
 	if py.isno(default):
 		raise py.ArgumentError('default cannot be py.No')
@@ -1152,15 +1159,11 @@ def cdTest(a=''):
 	return cd(gst+a)
 cdt=cdTest
 	
-def cd_qpsu(a=''):
+def cdQPSU(a=''):
 	return cd(getModPath()+a)
 # @property
-cdq=cdqp=cdqpsu=cdQPSU=cd_qpsu
-
-def cdqp_file():
-	return cd_qpsu('file')
-cdqpf=cdqf=cdqp_file
-
+cdq=cdqp=cdqpsu=cdQPSU
+	
 def cdWShell(a=''):
 	return cd(gsWShell+a)
 cds=cdws=cdWShell
@@ -1209,15 +1212,17 @@ Return a random integer N such that a <= N <= b.'''
 	return random.randint(min, max)
 randint=ramdomInt=randomInt
 
-def sort(a,column=None, cmp=None, key=None, reverse=False,keys=py.tuple()):
+def sort(a,column=None, cmp=None, key=None, reverse=False):
 	''' py2&py3  sorted _3 ,key=lambda i:len(i)        按长度从小到大排序
 	在python2.x  sorted _5,cmp=lambda a,b:len(a)-len(b) 实现同上功能， 一般不用cmp 参数
 	sorted中cmp参数指定的函数用来进行元素间的比较。此函数需要2个参数，然后返回负数表示小于，0表示等于，正数表示大于。
 	#这句可能写错了 a:item of sort list   |  *a: (item,) 
 	'''
-	def key_func(ai,size=99,column=column):# ai :  item of a
+	repr=py.repr
+	
+	def key_func(ai,size=99,is_column=True):# ai :  item of a
 		
-		if py.isint(column) and column > -1:ai=ai[column]
+		if is_column and py.isint(column) and column > -1:ai=ai[column]
 		if py.isnum(ai):
 			return ai
 		elif py.istr(ai):
@@ -1231,21 +1236,8 @@ def sort(a,column=None, cmp=None, key=None, reverse=False,keys=py.tuple()):
 				r+=py.ord(b)*(256**n)
 			return r
 		else:
-			ai=py.repr(ai)[:size] # 不会再次回到这个分支，  istr
-			return key_func(ai=ai,size=size,column=False)
-
-	if keys:
-		def keys_func(e):
-			r=[]
-			for k in keys:
-				if py.isint(k):
-					r.append(key_func(e,column=k))
-				elif py.callable(k):
-					r.append(k(e))
-				else:
-					raise py.ArgumentUnsupported(k)
-			return r
-		key=keys_func
+			ai=py.repr(ai)[:size] # 不会再次回到这个分支，istr
+			return key(ai=ai,size=size,is_column=False)
 
 	if not key:key=key_func
 	#TypeError: '<' not supported between instances of 'int' and 'str';key=None also err
@@ -1260,7 +1252,6 @@ def sort(a,column=None, cmp=None, key=None, reverse=False,keys=py.tuple()):
 		return ''.join(a)
 	else:
 		return a
-
 def sortDictV(ad,key=lambda item:item[1],des=True):
 	'''des True,,, python dict key auto sort ?'''
 	if type(ad) is not dict:return {}
@@ -3402,7 +3393,7 @@ finally:
 	import traceback
 	ex_type, ex, tb_obj = sys.exc_info()
 	traceback.print_tb(tb_obj)
-traceback=print_tb=print_traceback=print_traceback_in_except
+print_tb=print_traceback=print_traceback_in_except
 
 def print_stack():
 	import traceback
@@ -3805,27 +3796,6 @@ def python(args='-V',*a,**ka):
 def python_m(*a,**ka):
 	return python('-m',*a,**ka)
 
-def select_columns(table,*a):
-	''' select_column(table,[1,2,3]) or 
-select_column(table,1,2,3)
-	'''
-	if py.len(a)==1 and not py.isint(a[0]):
-		a=a[0]
-	for row in table:
-		r=[]
-		for n,i in py.enumerate(row):
-			if n in a:
-				r.append(i)
-		yield r
-select_cols=select_column=select_columns
-
-def index_dict(*a):
-	d={}
-	for n,v in py.enumerate(a):
-		d[n]=v
-	return d
-int_dict=intDict=indexDict=index_dict
-
 class IntWithObj(py.int):
 	'''int(x, base=10) -> integer 
 	IntWithOther(x,obj) #default base 10
@@ -3996,28 +3966,18 @@ U.StrRepr(b'3232',encoding='ascii')	[<class 'qgb.U.StrRepr'>, (b'3232',), {'enco
 		# if not py.istr(string):
 		# 	raise ArgumentError('must str,but got',string)
 		# self.string=string
-		r=py.str.__new__(cls, a[0])
+		StrRepr.padding=ka.pop('padding','\t')
+		StrRepr.padding_times=ka.pop('padding_times;',0)
+		StrRepr.padding_times=ka.pop('padding_width',StrRepr.padding_times)
+		StrRepr.padding_times=ka.pop('pi',StrRepr.padding_times)
+		StrRepr.padding_times=ka.pop('ip',StrRepr.padding_times)
+		StrRepr.padding_times=ka.pop('times',StrRepr.padding_times)
+		StrRepr.padding_times=ka.pop('width',StrRepr.padding_times)
 
-		r.padding='\t'
-		r.padding_times=0
-		if py.len(a)==2:
-			if py.istr(a[1]):
-				r.padding=a[1]
-			if py.isint(a[1]):
-				r.padding_times=a[1]
-
-		r.padding=ka.pop('padding',r.padding)
-		r.padding_times=ka.pop('padding_times;',r.padding_times)
-		r.padding_times=ka.pop('padding_width',r.padding_times)
-		r.padding_times=ka.pop('pi',r.padding_times)
-		r.padding_times=ka.pop('ip',r.padding_times)
-		r.padding_times=ka.pop('times',r.padding_times)
-		r.padding_times=ka.pop('width',r.padding_times)
-
-		return r
+		return py.str.__new__(cls, *a, **ka)
 
 	def __repr__(self):return self.__str__()
-	def __str__(r) :return (r.padding*r.padding_times)+ super().__str__() +(r.padding*r.padding_times)
+	def __str__(self) :return (StrRepr.padding*StrRepr.padding_times)+ super().__str__() +(StrRepr.padding*StrRepr.padding_times)
 	
 
 

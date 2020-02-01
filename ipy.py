@@ -9,7 +9,7 @@ if not U.isipy():raise EnvironmentError
 g=get=gipy=U.isipy()#不能直接引用U.ipy,环境不确定 动态判断避免识别错误 g.
 gipy.autocall=2
 if U.isWin():
-	gipy.editor='cmd /k start ""  %s' % U.npp(get_cmd=True)
+	gipy.editor='cmd /k %s' % U.npp(get_cmd=True)
 	try:
 		from IPython.utils import py3compat # python 3.7
 	except:pass

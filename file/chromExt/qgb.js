@@ -1,5 +1,6 @@
 _TEXT=function(wrap) {return wrap.toString().match(/\/\*\s([\s\S]*)\s\*\//)[1];}  // 提取 /* 之间的内容 */
 _CODE=function(wrap) {return wrap.toString().match(/function\s*\(\s*\)\s*{\s*([\s\S]*)\s*}/ )[1];}//auto trim { code_start_end_space }
+
 function sleep(ms) {return new Promise(resolve => setTimeout(resolve, ms) )  }
 function _sleep(sec){// chrome 74 还有效~
  // console.log(new Date().toISOString())  // 

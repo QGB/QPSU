@@ -78,8 +78,7 @@ try:
 except:pass
 ####################################################
 def columnize(iterable,width=120):
-	''' split long list to columnize small list
-	144 break line in default Win+R Cmd window
+	''' 144 break line in default Win+R Cmd window
 '''
 	# from IPython.utils.text import columnize as _columnize
 	if not py.iterable(iterable):return py.repr(iterable)
@@ -99,57 +98,12 @@ def columnize(iterable,width=120):
 		row_first=True, separator=' , ', displaywidth=width)
 	return r
 
-def justify(s,size,fillchar=' ',method='ljust',cut=None):
-	''' if cut && cut is not int:cut=size
-	
-	'''
-	if size<0:raise py.ArgumentError('size must >= 0',size)
-	if cut==None:
-		U=py.importU()
-		cut=U.get_or_set('T.padding.cut',False)
-	if cut:
-		if not py.isint(cut):
-			cut=size
-		if len(s)>cut:
-			return s[:cut]+'…' # 省略号 不是 dot
-		# else:# 跳出 cut
-		
+def justify(s,size,fillchar=' ',method='ljust'):
+	if size<1:raise py.ArgumentError('size must > 0',size)
+	if len(s)>=size:
+		return s[:size]
 	return py.getattr(s,method)(size,fillchar)	#padding
-padding=justify
-
-def padding_column(a,col_size=0,fillchar=' ',method='ljust',cut=False):
-	'''col_size: int or dict
-
-	'''
-	# a=py.list(a) # do not change input arg !!!
-	U=py.importU()
-	StrRepr=U.StrRepr
-	r=[]
-	for n,i in py.enumerate(a):
-		row=[]
-		ka=py.dict(fillchar=fillchar,method=method,cut=cut)
-		for nc,c in enumerate(i):
-			# s=pformat(c,**U.get('pformat_kw'))
-			if py.isint(col_size):
-				ka.update(py.dict(size=col_size,cut=cut))
-			elif py.isdict(col_size):
-				if nc in col_size:
-					v=col_size[nc]
-					if not py.isint(v):
-						ka.update(py.dict(size=v[0],cut=v[1]))
-					else:
-						ka.update(py.dict(size=v,cut=cut))
-				else:
-					ka.update(py.dict(size=0,cut=cut))
-			
-			rc=StrRepr(
-	justify(s=string(c),**ka )
-			)
-			row.append(rc)
-		r.append(row)
-	return r
-column_justify=column_padding=padding_column
-
+	
 def encode(s,encoding):
 	'''
 	'''

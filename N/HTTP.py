@@ -44,11 +44,11 @@ def get_str(url):
 	return T.auto_decode(  get_bytes(url)  )
 getStr=get_str
 
-def get_bytes(url,**ka):
+def get_bytes(url):
 	url=autoUrl(url)
 	import requests
 	try:
-		return requests.get(url,**ka).content
+		return requests.get(url).content
 	except Exception as e:
 		return py.No(e)
 getBytes=get_byte=get_bytes
