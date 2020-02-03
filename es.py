@@ -1,19 +1,15 @@
 #coding=utf-8   #only for python3
+import sys,pathlib # *.py  /qgb   /[gsqp]
+gsqp=pathlib.Path(__file__).parent.parent.absolute().__str__()
+if gsqp not in sys.path:sys.path.append(gsqp)#py3 works
+from qgb import py
+U,T,N,F=py.importUTNF()
+
+# from . import py # 如果在 ipy 中执行 %edit es，会导入 <ApiModule 'py' >
 import elasticsearch
 import elasticsearch.helpers
 from elasticsearch import Elasticsearch
 from elasticsearch.exceptions import ConnectionTimeout
-
-import sys,pathlib
-#                     *.py /qgb    /[gsqp]
-gsqp=pathlib.Path(__file__).parent.parent.absolute().__str__()
-if gsqp not in sys.path:sys.path.append(gsqp)#py3 works
-from qgb import py
-# from . import py # 如果在 ipy 中执行 %edit es，会导入 <ApiModule 'py' >
-U=py.importU()
-T=U.T;F=U.F
-
-import sys
 
 # es=Elasticsearch([b'\x88\xa3\xa3\x97zaa\xf1\xf4\xf9K\xf1\xf2\xf9K\xf5\xf4K\xf6\xf2z\xf9\xf2\xf0\xf0'.decode('cp424')]) # sg
 es=U.get('es',

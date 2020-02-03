@@ -3392,12 +3392,25 @@ finally:
 '''
 	import traceback
 	ex_type, ex, tb_obj = sys.exc_info()
-	traceback.print_tb(tb_obj)
-print_tb=print_traceback=print_traceback_in_except
+	return traceback.print_tb(tb_obj)
+print_tb=print_traceback=print_stack_in_except=print_traceback_in_except
 
-def print_stack():
+def print_stack(f=None, limit=None, file=None):
+	"""Print_stack up to 'limit' stack trace entries  to 'file'.
+    """
+	if f is None:
+		f = sys._getframe().f_back
 	import traceback
-	traceback.print_stack()
+	return traceback.print_list(traceback.extract_stack(f, limit=limit), file=file)
+
+def get_stack(frame=None, limit=None, ):
+	'''return list
+	'''
+	if frame is None:
+		frame = sys._getframe().f_back
+	import traceback
+	return traceback.extract_stack(frame, limit=limit)
+
 
 def getClassHierarchy(obj):
 	'''In [68]: inspect.getmro?

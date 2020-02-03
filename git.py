@@ -66,7 +66,7 @@ porcelain.push(repo.path,"https://http://e.coding.net/...",'master',username='co
 		path=target
 		
 	path=F.auto_path(path)
-	ls=F.ls(path)
+	ls=[i[len(path):] for i in F.ls(path,d=0,f=1,r=1)]
 	if len(ls) < 1:
 		return py.No('Not contains .git dir:'+path,ls)
 
@@ -111,6 +111,6 @@ def commit(repo,commit_msg):
 	else:
 		return b'',py.No("Empty commit!")
 
-def log(max_entriesss=11,repo=None):
-
+def log(max_entries=11,repo=None):
+	
 	return dulwich.porcelain.log(max_entries=max_entries) 

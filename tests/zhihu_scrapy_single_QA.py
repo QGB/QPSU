@@ -1,6 +1,9 @@
-import sys;'qgb.U' in sys.modules or sys.path.append('C:/QGB/babun/cygwin/bin/')
-from qgb import *
+#coding=utf-8   
+import sys,pathlib # *.py  /tests /qgb   /[gsqp]
+gsqp=pathlib.Path(__file__).parent.parent.parent.absolute().__str__()
+if gsqp not in sys.path:sys.path.append(gsqp)#py3 works
 from qgb import py
+U,T,N,F=py.importUTNF()
 N.rpcServer(port=2345,execLocals=globals())
 
 c=item=html=0
@@ -20,7 +23,7 @@ def zhihu_question(id):
 	headers = {
 		'accept-language': 'zh-CN,zh;q=0.9',
 		'origin': 'https://www.zhihu.com',
-		'referer': 'https://www.zhihu.com/question/290268306',
+		'referer': 'https://www.zhihu.com/oh_my_god_fuck_me',
 		'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/69.0.3497.100 Safari/537.36'
 	}
 	
@@ -51,13 +54,14 @@ def zhihu_question(id):
 	for i,v in enumerate(answers):
 		r+=f'\n[第{i+1}] {T.filterZh(v[0],11)} {v[1]}'
 	return title+r
-zhihu=zhihu_question
+question=qu=zhihu=zhihu_question
 	
 def extract_answer(s):
 	import re
 	REG = re.compile('<[^>]*>')
-	temp_list = REG.sub("", s).replace("\n", "").replace(" ","")
-	return temp_list
+	r = REG.sub("", s).replace("\n", "").replace(" ","")
+	r=T.replacey(r,['&gt','&#34'],' ')
+	return r
 
 def pq(c):		
 	return [ 
@@ -70,9 +74,12 @@ def spq(c):
 	title=''
 	try:title=c['data'][0]['question']['title']
 	except:pass
+	title=T.replacey(title,[',','.','，','。',],' ')
 	U.log([title,len(answers)])
 	
 	r=''
-	for i,v in enumerate(answers):
-		r+=f'\n[第{i+1}] {v[0]} {v[1]}'
+	for i,(c,time) in enumerate(answers):
+
+		r+=f'\n[第{i+1}] {c} {time}'
 	return title+r
+
