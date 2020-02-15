@@ -3381,7 +3381,7 @@ def getLastException():
 		return	getException.__doc__
 lastErr=err=geterr=getErr=error=getException=getLastException
 
-def print_traceback_in_except():
+def print_traceback_in_except(*msg):
 	'''
 try:
     raise Exception
@@ -3392,8 +3392,17 @@ finally:
 '''
 	import traceback
 	ex_type, ex, tb_obj = sys.exc_info()
-	return traceback.print_tb(tb_obj)
-print_tb=print_traceback=print_stack_in_except=print_traceback_in_except
+	traceback.print_tb(tb_obj)
+	if msg:pln(msg)
+
+print_tb=print_tb_stack=print_traceback=print_stack_in_except=print_traceback_in_except
+
+def get_traceback_stack( limit=None, ):
+	import traceback
+	ex_type, ex, tb = sys.exc_info()
+	return traceback.extract_tb(tb, limit=limit)
+get_tb_stack=get_traceback_stack
+
 
 def print_stack(f=None, limit=None, file=None):
 	"""Print_stack up to 'limit' stack trace entries  to 'file'.
@@ -3402,6 +3411,7 @@ def print_stack(f=None, limit=None, file=None):
 		f = sys._getframe().f_back
 	import traceback
 	return traceback.print_list(traceback.extract_stack(f, limit=limit), file=file)
+
 
 def get_stack(frame=None, limit=None, ):
 	'''return list
@@ -3809,6 +3819,35 @@ def python(args='-V',*a,**ka):
 def python_m(*a,**ka):
 	return python('-m',*a,**ka)
 
+	
+	
+class IntCustomStrRepr(py.int):
+	'''为了避免循环调用，同时保留int 值，请用 T.string 来获取 raw str(int)
+	int(x, base=10) -> integer 
+	IntCustomRepr(x,target=func(i,ka),a1=..) #default base 10
+	'''
+	def __new__(cls, *a, **ka):
+		if len(a)!=1:
+			raise py.ArgumentError('only need one intable arg,but get {}'.format(py.len(a)))
+		self= py.int.__new__(cls, *a)
+		self.target=ka.pop('target',0)
+		self.target=ka.pop('repr',self.target)
+		self.target=ka.pop('func',self.target)
+		self.target=ka.pop('function',self.target)
+		self.target=ka.pop('custom',self.target)
+		if not self.target:
+			self.target=T.justify
+		self.ka=ka
+		return self
+		
+	def __repr__(self):return self.__str__()
+	def __str__(self):#super().__str__()
+		'''
+		'''
+		return self.target(self,**self.ka)
+		
+IntRepr=IntStrRepr=IntCustomRepr=IntCustomStrRepr
+
 class IntWithObj(py.int):
 	'''int(x, base=10) -> integer 
 	IntWithOther(x,obj) #default base 10
@@ -3944,10 +3983,10 @@ class ValueOfAttr(py.object):
 			r+='{}={},'.format(k,pformat(v,**get('pformat_kw',{}) ) )
 		r+=')'
 		self.__v__ = self.__str__()+r
-		if is_ipy_cell():
-			print(self.__v__)
-		else:
-			return StrRepr( self.__v__ )
+		# if is_ipy_cell():
+			# print(self.__v__)
+		# else:
+		return StrRepr( self.__v__ )
 	def __parent_str__(self):
 		if self.__parent__==None:return ''
 		if not self.__child__:return py.str(self.__parent__)
@@ -3979,18 +4018,27 @@ U.StrRepr(b'3232',encoding='ascii')	[<class 'qgb.U.StrRepr'>, (b'3232',), {'enco
 		# if not py.istr(string):
 		# 	raise ArgumentError('must str,but got',string)
 		# self.string=string
-		StrRepr.padding=ka.pop('padding','\t')
-		StrRepr.padding_times=ka.pop('padding_times;',0)
-		StrRepr.padding_times=ka.pop('padding_width',StrRepr.padding_times)
-		StrRepr.padding_times=ka.pop('pi',StrRepr.padding_times)
-		StrRepr.padding_times=ka.pop('ip',StrRepr.padding_times)
-		StrRepr.padding_times=ka.pop('times',StrRepr.padding_times)
-		StrRepr.padding_times=ka.pop('width',StrRepr.padding_times)
-
-		return py.str.__new__(cls, *a, **ka)
-
+		# padding      =ka.pop('padding'       ,'\t')
+		# padding_times=ka.pop('padding_times;',0)
+		# padding_times=ka.pop('padding_width' ,padding_times)
+		# padding_times=ka.pop('pi'            ,padding_times)
+		# padding_times=ka.pop('ip'            ,padding_times)
+		# padding_times=ka.pop('times'         ,padding_times)
+		# padding_times=ka.pop('width'         ,padding_times)
+		if not a:
+			a=(ka.pop('object'),)
+		try:
+			self= py.str.__new__(cls, *a)
+		except Exception as e:
+			return py.No(e,cls, a, ka)
+			
+		self.ka=ka
+		return self
+		
 	def __repr__(self):return self.__str__()
-	def __str__(self) :return (StrRepr.padding*StrRepr.padding_times)+ super().__str__() +(StrRepr.padding*StrRepr.padding_times)
+	def __str__(self) :
+		return T.justify(super().__str__(),**self.ka)
+	# return (self.padding*self.padding_times)+ super().__str__() +(self.padding*self.padding_times)
 	
 
 

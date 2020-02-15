@@ -98,11 +98,17 @@ def columnize(iterable,width=120):
 		row_first=True, separator=' , ', displaywidth=width)
 	return r
 
-def justify(s,size,fillchar=' ',method='ljust'):
-	if size<1:raise py.ArgumentError('size must > 0',size)
-	if len(s)>=size:
+def justify(s,size=0,char=' ',method='ljust',cut=False):
+	''' ljust() 方法返回一个原字符串左对齐,并使用空格填充右边至指定长度的新字符串。
+	'''
+	s= string(s)
+	if size<1:
+		return s
+		# raise py.ArgumentError('size must > 0',size)
+	if cut and len(s)>=size:
 		return s[:size]
-	return py.getattr(s,method)(size,fillchar)	#padding
+	return py.getattr(s,method)(size,char)	#
+padding=justify
 	
 def encode(s,encoding):
 	'''
@@ -168,13 +174,16 @@ gURL_unreserved_mark=('-','_','.','!','~','*',"'",'(',')')
 gURL_reserved=(';','/','?',':','@','&','=','+','$',',')
 gsURL_not_escaped=gURL_not_escaped='-0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ_abcdefghijklmnopqrstuvwxyz.'
 
-def get_url_arg(url,arg_name):
+def parse_url_arg(url):
 	if py.is2():
 		from urlparse import urlparse,parse_qs
 	else:
 		from urllib.parse import urlparse,parse_qs
 	o = urlparse(url)
-	d=parse_qs(o.query)
+	return parse_qs(o.query)
+
+def get_url_arg(url,arg_name):
+	d=parse_url_arg(url)
 	if arg_name not in d:
 		return py.No('not found {} in [{}]'.format(arg_name,url),d)
 	v=d[arg_name]
@@ -182,7 +191,7 @@ def get_url_arg(url,arg_name):
 		return v[0]
 	else:
 		return v
-parse_url_arg=get_url_args=get_url_arg
+get_url_args=get_url_arg
 
 def FileNameToURL(a):
 	'''
@@ -410,6 +419,44 @@ func( a: <_sre.SRE_Match object; span=(2388, 2396), match='21758465'>  ):
 		p=regex
 	return p.sub(func,a)
 ##################  regex end  ############################
+def iter_detect(b,range=[]):
+	'''
+
+	'''
+	U=py.importU()
+	r=[]
+	size=len(py.str(len(b)))+2
+	ib=U.IntRepr(len(b),size=size)
+	hb=U.IntRepr(hash(b),size=22)
+	iz=U.IntRepr(0,size=size)
+	hz=U.IntRepr(0,size=22)
+	for c in charset:#max len(c) == 18 , #max hash len == 20
+		w=[U.StrRepr(c,size=18),ib,hb]
+		try:
+			s=b.decode(c)
+			w.append( U.IntRepr(len(s),size=size) )
+			if range:
+				if py.isint(range):
+					w.append( U.StrRepr(s[range,range+22],size=22) )
+				elif U.len(range)==2:
+					w.append( U.StrRepr(s[range[0],range[1]],size=22) )
+			else:
+				w.append( U.IntRepr(hash(s),size=22) )
+			# w=w+[, ] # TODO repr more info obj
+		except:
+			w=w+[iz,hz,iz,hz]
+			r.append(w)
+			continue
+			
+		try:
+			bb=s.encode(c)
+			w=w+[U.IntRepr(len(bb),size=size),U.IntRepr(hash(bb),size=22)]
+		except:
+			w=w+[iz,hz]
+		r.append(w)
+	return r
+iterDecode=iter_decode=iterDetect=iter_detect		
+		
 def autoDecode(abytes,confidence=0.7,default=py.No('default encoding "" ')  ):
 	if abytes==b'':return ''
 	if py.isunicode(abytes):return abytes
@@ -766,8 +813,11 @@ def string(a,decode=''):
 		except:return ''
 	else:
 		if isinstance(a,py.bytes) and decode:return a.decode(decode)
+		if py.isint(a):# in case : U.IntCustomStrRepr
+			a=py.int(a)
 		try:return py.str(a)
-		except:return ''
+		except Exception as e:return py.No(e,a)
+		
 def stringToChars(a):
 	'''TODO:flap'''
 	a=string(a)

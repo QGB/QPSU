@@ -137,7 +137,8 @@ isnumber=isnum
 
 def isint(a):
 	if is2():return type(a) in (int,long)
-	else    :return type(a) in (int,)
+	# else    :return type(a) in (int,) # 这个不会判断子类
+	return isinstance(a,int)
 
 def isfloat(a):
 	return isinstance(a,float)

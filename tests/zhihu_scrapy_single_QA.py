@@ -83,3 +83,45 @@ def spq(c):
 		r+=f'\n[第{i+1}] {c} {time}'
 	return title+r
 
+def zhuanlan_list_20(u,offset=0,limit=20):
+    # global zps
+    us=T.sub(u,'/people/','')
+    if us:u=us
+    url=f"https://www.zhihu.com/api/v4/members/{u}/articles?limit={limit}&offset={offset}"    
+    b=N.HTTP.getBytes(url)
+    zps=[int(i[3:]) for i in T.matchRegexAll(b,rb"\/p\/\d+")]
+    if not zps:print(b)
+    print(U.len(zps,U.unique(zps)))
+    return zps
+
+def get_one_article(pi):
+	if py.istr(pi) and '/p/' in pi:
+		pi=T.sub(pi,'/p/','')
+	if py.isint(pi):
+		pi=py.str(pi)
+		
+	h=N.HTTP.getBytes("https://rss.lilydjwg.me/static_zhihu/"+pi)
+	h=h.decode("utf8")
+	t=T.html2text(h)
+	t=T.filterZh(t,11)
+	return t
+one=one_article=get_one_article
+
+dph=U.getset(99,{})
+dpt={}	
+def zhuanlan(u='',offset=0,limit=20):
+	if not u:u=U.cbg()
+	zpss=[]
+	for i in range(U.getset(40,40)//20):
+		i= zhuanlan_list_20(u,i*20)
+		zpss.extend(i)
+	for pi in U.unique(zpss):
+		pi=str(pi)
+		
+		dpt[pi]=t
+		# dph[pi]=h
+		print(pi,U.stime(),len(t))
+
+	return '\n\\n\n'.join(dpt.values())
+
+z=zl=zhuanlan

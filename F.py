@@ -565,6 +565,24 @@ def read_bytes(file):
 		return py.No(e,file)
 readb=readByte=readBytes=read_byte=read_bytes	
 
+
+def read_bytes_chunks(path,size = 8192):
+	path=auto_file_path(path)
+	try:
+		with open(path, 'rb') as fd:
+			yield fd.read(0) # 让错误提前暴露。不会造成 500 Internal Server error
+			while 1:
+				buf = fd.read(size)
+				if buf:
+					yield buf
+				else:
+					break
+	except Exception as e:
+		# py.importU().print_tb_stack(path,size,e)
+		return py.No(e,path,size)                         
+		# raise StopIteration(e)
+rbc=read_bytes_stream=read_as_stream=read_file_chunks=readBytesChunks=read_bytes_chunks
+			
 def read_json(file,encoding=None):
 	''' '''
 	import json

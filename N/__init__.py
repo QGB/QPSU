@@ -246,7 +246,7 @@ def pdf2html(url,response=None,zoom=None,path=None,pw=None):
 		path=U.get('pdf2html_path','/root/pdf/')
 	U.cd(path)
 	fn=T.url2fn(url[-200:])
-	if not fn.endswith('.pdf'):fn+='.pdf'
+	if not fn.lower().endswith('.pdf'):fn+='.pdf'
 
 	def do_resp(a):
 		if not response:return a
@@ -313,6 +313,20 @@ def flask_html_response(response,html,remove_tag=(
 	response.headers['Content-Type']='text/html;charset=utf-8';
 	response.set_data(html)
 html=htmlp=response_html=html_response=flask_html_response
+
+def flask_file_stream_response(response,file,):
+	from flask import stream_with_context
+	U,T,N,F=py.importUTNF()
+	# try:
+	gen=F.read_as_stream(file) # 这里不会出错，iter generator 才 服务器内部错误
+	try:
+		py.next(gen)
+		response.response=stream_with_context(gen)
+	except Exception as e:
+		r=T.pformat([e,U.get_tb_stack()],**U.get('pformat_kw',{}))
+		response.set_data(r)
+
+file=stream_file=file_stream=read_as_stream=flask_file_stream_response
 
 def get(url,protocol='http',file=''):
 	U,T,N,F=py.importUTNF()
@@ -617,6 +631,7 @@ def getAllAdapter():
 	if U.iswin():
 		from qgb import Win
 		return Win.getAllNetworkInterfaces()
+getIP=getip=get_ip=getAllAdapter
 
 #setip 192.168  ,  2.2	
 def setIP(ip='',adapter='',gateway='',source='dhcp',mask='',ip2=192.168,dns=py.No('gateway') ):
