@@ -322,7 +322,9 @@ def flask_file_stream_response(response,file,):
 	try:
 		py.next(gen)
 		response.response=stream_with_context(gen)
+		# 不获取filename, 保存文件名是 D__test_7C_荣耀7C-LND-B202_8.0.zip
 		# 不进行url_encode,chrome ERR_RESPONSE_HEADERS_TRUNCATED
+		# response.headers['Content-Disposition'] = "inline; filename=" + T.url_encode(file)
 		response.headers['Content-Disposition'] = "inline; filename=" + T.url_encode(F.get_filename_from_full_path(file))
 	except Exception as e:
 		# r=T.pformat([e,U.get_tb_stack()],**U.get('pformat_kw',{}))
