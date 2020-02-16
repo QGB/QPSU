@@ -555,18 +555,25 @@ def read(file,mod='r',returnFile=False,encoding=''):
 		# return f,e
 		# if 'f' in py.dir() and f:f.close()
 		# return ()
-def read_bytes(file):
-	'''is2 rb return str'''
+def read_bytes(file,size=-1,):
+	'''is2 rb return str
+f.read(size=-1, /)
+Read and return up to n bytes.
+	
+	'''
 	file=autoPath(file)
 	try:
 		with py.open(file,'rb') as f:
-			return f.read()
+			return f.read(size)
 	except Exception as e:
 		return py.No(e,file)
 readb=readByte=readBytes=read_byte=read_bytes	
 
 
 def read_bytes_chunks(path,size = 8192):
+	'''try this func
+except : StopIteration((PermissionError(13, 'Permission denied'), 'D:/',8192)
+	'''
 	path=auto_file_path(path)
 	try:
 		with open(path, 'rb') as fd:
@@ -579,7 +586,8 @@ def read_bytes_chunks(path,size = 8192):
 					break
 	except Exception as e:
 		# py.importU().print_tb_stack(path,size,e)
-		return py.No(e,path,size)                         
+		return (e,path,size)          #               
+		# return py.No(e,path,size)                         
 		# raise StopIteration(e)
 rbc=read_bytes_stream=read_as_stream=read_file_chunks=readBytesChunks=read_bytes_chunks
 			

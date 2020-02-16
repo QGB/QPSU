@@ -121,7 +121,7 @@ flaskArgs=py.dict(debug=0,threaded=True),
 			globals['p']=_response
 		if not globals:globals=None # 如果globals 为空dict，防止闭包保存变量，保持globals在每个请求重新为空这一特性
 		r=U.execResult(code,globals=globals,locals=locals) #因为在这里一般指定了 不为None的 globals，所以在每个请求中可以共享 
-		if not _response.get_data():
+		if (not _response.response) and (not _response.get_data()):
 			_response.set_data(r)
 		return _response
 	
@@ -324,7 +324,8 @@ def flask_file_stream_response(response,file,):
 		response.response=stream_with_context(gen)
 		response.headers['Content-Disposition'] = "inline; filename=" + F.get_filename_from_full_path(file)
 	except Exception as e:
-		r=T.pformat([e,U.get_tb_stack()],**U.get('pformat_kw',{}))
+		# r=T.pformat([e,U.get_tb_stack()],**U.get('pformat_kw',{}))
+		r=py.repr(e)
 		response.set_data(r)
 
 file=stream_file=file_stream=read_as_stream=flask_file_stream_response
