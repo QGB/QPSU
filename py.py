@@ -72,7 +72,8 @@ class No:
 		r='\t\t'+r
 		return r
 	def __len__(s):return 0
-	def __getitem__(s, key):return None # https://stackoverflow.com/questions/20551042/whats-the-difference-between-iter-and-getitem 
+	def __getitem__(s, key):
+		return No(s.msg+'[{}]'.format(key),s,key) # https://stackoverflow.com/questions/20551042/whats-the-difference-between-iter-and-getitem 
 #是的，这是预期的设计。它被记录，经过充分测试并被诸如str的序列类型所依赖。__getitem__版本是Python拥有现代迭代器之前的传统。这个想法是，使用序列s [0]，s [1]，s [2]，...，直到出现IndexError或StopIteration为止，任何序列（可索引且具有长度的序列）都可以自动迭代
 	def __iter__(self):return self
 	def __next__(self):raise StopIteration

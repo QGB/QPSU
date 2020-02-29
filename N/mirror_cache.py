@@ -28,7 +28,7 @@ def mirror_cache(*a,**ka):
     # us=request.path.split('/')
     path=request.path[1:]
     method=request.method
-    fn=cache_path+method+T.url2fn(request.environ.get('HTTP_COOKIE','')[:99]+path )
+    fn=cache_path+method[:1]+T.url2fn(path+request.environ.get('HTTP_COOKIE','')[:99] )
     if use_cache:
         target=F.dill_load(fn)
         if target:return target_to_response(target)

@@ -10,7 +10,32 @@ function _sleep(sec){// chrome 74 还有效~
  // console.log(new Date().toISOString())
 }
 
+function xpath(sp,ele){
+    //var sp = "//a[text()='SearchingText']";
+    return document.evaluate(sp, ele||document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue;
+}
 
+function xpath_all(sp,ele){
+    let results = [];
+    let query =  document.evaluate(sp, ele||document, null, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE, null)
+    for (let i = 0, length = query.snapshotLength; i < length; ++i) {
+        results.push(query.snapshotItem(i));
+    }
+//     try {
+//       var thisNode = query.iterateNext();
+
+//       while (thisNode) {
+//         results.push(thisNode);
+//         thisNode = query.iterateNext();
+//       }
+//     }
+//     catch (e) {
+//         return query
+//          throw ['Error: Document tree modified during iteration ' , e ]
+//     }
+    return results;
+}
+var xpathAll=xpath_all
 
 function get_img(URL) {
     return new Promise((resolve, reject) => {

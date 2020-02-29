@@ -135,12 +135,23 @@ def get_or_set_input(name):
 getInput=getOrInput=get_or_input=get_or_set_input
 
 def get_or_set(name,default):
-	if py.isno(default):
-		raise py.ArgumentError('default cannot be py.No')
+	# if py.isno(default) or (default==None):
+	if not default:
+		raise py.ArgumentError('default cannot be {}'.format( repr(default) ))
 	r=get(name)
 	if not py.isno(r):return r
 	return set(name,default)
 getset=getSet=get_set=get_or_set
+
+def set_or_get(name,default):
+	# if py.isno(default) or (default==None):
+	if not default:
+		r=get(name)
+		if not py.isno(r):return r
+		else:
+			raise py.ArgumentError('default cannot be {} when get {} == {}'.format( repr(default) ,name,repr(r) ))
+	return set(name,default)
+setget=setGet=set_get=set_or_get
 #########################
 def one_in(vs,*t):
 	'''(1,2,3,[t])	or	([vs].[t])'''

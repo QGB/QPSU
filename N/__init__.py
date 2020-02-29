@@ -228,6 +228,7 @@ def parse_pem(pem_str_or_bytes):
 def get_all_socket_obj():
 	import socket
 	return U.get_objects(socket.socket) 
+get_socket_all_obj=get_all_socket_obj
 
 def get_socket_req(PORT = 65432,HOST = '127.7.7.7'):
     import socket
@@ -333,7 +334,54 @@ def flask_file_stream_response(response,file,):
 
 file=stream_file=file_stream=read_as_stream=flask_file_stream_response
 
-def get(url,protocol='http',file=''):
+def set_proxy(host='',port='',protocol='socks5',target_protocol=('http','https'),**ka):
+	''' no args provide,proxy will clean
+'proxies','proxy','ip'  =py.No('duplicated arg:host')	
+	'''
+	U,T,N,F=py.importUTNF()
+	d={}
+	proxies=U.get_duplicated_kargs(ka,'proxies','proxy','ip')
+	if not host and proxies:
+		host=proxies
+	if py.isdict(host):
+		for k,v in host.items():
+			d.update( set_proxy(v,target_protocol=k) ) # 递归
+		return d
+	
+	host=host.strip()
+	if '://' in host:
+		protocol=T.sub(host,'','://')
+		host=T.sub(host,'://','')
+	if ':' in host:
+		port=T.subLast(host,':','')
+		host=T.subLast(host,'',':')
+
+	if py.istr(target_protocol):
+		target_protocol=[target_protocol]
+	for t in target_protocol:
+		# if not ip:
+		host=U.set('{}.proxy.host'.format(t),host)
+		port=U.set('{}.proxy.port'.format(t),port)
+		protocol=U.set('{}.proxy.protocol'.format(t),protocol)
+		if not host or not port or not protocol:continue
+		d[t]="{}://{}:{}".format(protocol,host,port)
+	return d
+	# {'http': "socks5://myproxy:9191"}
+setProxy=set_proxy
+
+def get_proxy(target_protocol=('http','https'), ):
+	U,T,N,F=py.importUTNF()
+	d={}
+	for t in target_protocol:
+		host=U.get('{}.proxy.host'.format(t),)
+		port=U.get('{}.proxy.port'.format(t),)
+		protocol=U.get('{}.proxy.protocol'.format(t),)
+		if not host or not port or not protocol:continue
+		d[t]="{}://{}:{}".format(protocol,host,port)
+	return d
+getProxy=get_proxy
+
+def get(url,protocol='http',**ka):
 	U,T,N,F=py.importUTNF()
 	if F.exist(url):
 		return F.read(url)
@@ -344,9 +392,7 @@ def get(url,protocol='http',file=''):
 	else:url=protocol+'://'+url
 	if url.startswith('http'):
 		# import HTTP
-		return HTTP.get(url,file=file)	
-	raise U.NotImplementedError
-	return U.getAllMods()
+		return HTTP.get(url,**ka)	
 
 def http(url,method='get',*args):
 	return HTTP.method(url,method,*args)

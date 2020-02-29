@@ -42,7 +42,7 @@ Type:      function
 def get_str(url):
 	T=py.importT()
 	return T.auto_decode(  get_bytes(url)  )
-getStr=get_str
+gets=getStr=get_str
 
 def get_bytes(url):
 	url=autoUrl(url)
@@ -51,7 +51,7 @@ def get_bytes(url):
 		return requests.get(url).content
 	except Exception as e:
 		return py.No(e)
-getBytes=get_byte=get_bytes
+getb=getByte=getBytes=get_byte=get_bytes
 
 gheaders=headers={'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/59.0.2171.95 Safari/537.36'}
 
@@ -62,12 +62,18 @@ def random_headers():
 def get(url,file='',
 		headers = gheaders,
 		timeout=9,
-		
+		**ka ,
 	):
-	# return method(url,'get')#<http.client.HTTPResponse at 0x203a16a74a8>
+	U,T,N,F=py.importUTNF()
 	url=autoUrl(url)
-	U=py.importU()
-	T=py.importT()
+
+	proxies=U.get_duplicated_kargs(ka,'proxies','proxy')
+	if proxies:
+		proxies=N.set_proxy(proxy)
+	else:
+		proxies=N.get_proxy()
+
+
 	def writeFile():
 		if file:
 			U=py.importU()
@@ -77,25 +83,32 @@ def get(url,file='',
 			else:
 				return py.No('response.content is Null!')
 			
-	
+	b=b''
 	try:
 		import requests
-		r=requests.get(url,verify=False,timeout=timeout,headers=headers)
-		if 'text' in U.getDictV(r.headers,'Content-Type'):
+		r=requests.get(url,verify=False,timeout=timeout,headers=headers,proxies=proxies)
+		if 'text' in U.getDictV(r.headers,'Content-Type').lower():
 			return T.autoDecode(r.content)
-			try:return r.content.decode('gb18030')
-			except:pass
-			return r.text
+			# try:return r.content.decode('gb18030')
+			# except:pass
+			# return r.text
 		else:
-			return r.content
+			b= r.content
+			
 	except ModuleNotFoundError:
 		try:
-			r=grequest.urlopen(url).read()
+			b=grequest.urlopen(url).read()
 		except Exception as e:
 			return py.No(url,e)
 		#####################
 	except Exception as e:
 		return py.No(e)
+
+	try:
+		s= T.auto_decode(b)
+		if not s and b:raise Exception('decode error')
+	except:
+		return b
 
 
 def head(url):

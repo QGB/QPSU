@@ -30,7 +30,11 @@ bytes256=byte256=b''.join( [py.byte(i) for i in range(256)  ] )
 
 CR='\r'
 LF=EOL=eol='\n'
-###############
+TAB=Tab=tab='\t'
+######### html ######
+hr='<hr>'
+br='<br>'
+#######################
 RE_IMG_URL=r'(((http://www)|(http://)|(www))[-a-zA-Z0-9@:%_\+.~#?&//=]+)\.(jpg|jpeg|gif|png|bmp|tiff|tga|svg)'
 RE_URL=r'http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\(\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+'
 RE_YMD=r"(19|20)[0-9]{2}[- /.](0[1-9]|1[012])[- /.](0[1-9]|[12][0-9]|3[01])"
@@ -155,7 +159,30 @@ def diff(expected, actual,p=True):
 		print(r)
 	else:
 		return r
-	
+
+def recursive_join(s,iter,prepend_layer=False,append_layer=False,format_layer=False,_layer=0):
+	if py.istr(iter):
+		return iter
+	else:
+		si=py.str(_layer)
+		if prepend_layer:
+			return s.join([recursive_join(si+s,i,_layer=_layer+1,
+					prepend_layer=True,append_layer=append_layer,format_layer=format_layer
+				) for i in iter])
+		
+		if append_layer:
+			return s.join([recursive_join(s+si,i,_layer=_layer+1,
+					prepend_layer=prepend_layer,append_layer=True,format_layer=format_layer
+				) for i in iter])
+		
+		if format_layer:
+			return s.join([recursive_join(s.format(_layer),i,_layer=_layer+1,
+					prepend_layer=prepend_layer,append_layer=append_layer,format_layer=True
+				) for i in iter])
+		return s.join([recursive_join(s.format(_layer),i,_layer=_layer+1, ) for i in iter])
+
+recursiveJoin=recursive_join
+
 def join(iterable,separator=','):
 	if py.istr(iterable):return iterable
 	return separator.join([string(i) for i in iterable] )
@@ -435,13 +462,8 @@ def iter_detect(b,range=[]):
 		try:
 			s=b.decode(c)
 			w.append( U.IntRepr(len(s),size=size) )
-			if range:
-				if py.isint(range):
-					w.append( U.StrRepr(s[range,range+22],size=22) )
-				elif U.len(range)==2:
-					w.append( U.StrRepr(s[range[0],range[1]],size=22) )
-			else:
-				w.append( U.IntRepr(hash(s),size=22) )
+		
+			w.append( U.IntRepr(hash(s),size=22) )
 			# w=w+[, ] # TODO repr more info obj
 		except:
 			w=w+[iz,hz,iz,hz]
@@ -453,6 +475,14 @@ def iter_detect(b,range=[]):
 			w=w+[U.IntRepr(len(bb),size=size),U.IntRepr(hash(bb),size=22)]
 		except:
 			w=w+[iz,hz]
+
+		if py.isint(range):
+			w.append( U.StrRepr(s[range:range+22],size=22) )
+		elif U.len(range)==2:
+			w.append( U.StrRepr(s[range[0]:range[1]],size=22) )
+		
+
+
 		r.append(w)
 	return r
 iterDecode=iter_decode=iterDetect=iter_detect		
