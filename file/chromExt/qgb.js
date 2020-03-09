@@ -10,6 +10,15 @@ function _sleep(sec){// chrome 74 还有效~
  // console.log(new Date().toISOString())
 }
 
+function add_script(url){
+    var s = document.createElement("script");
+    s.type = "text/javascript";
+    s.src = url
+    document.querySelector("head").appendChild(s)
+    return s
+}
+
+
 function xpath(sp,ele){
     //var sp = "//a[text()='SearchingText']";
     return document.evaluate(sp, ele||document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue;
@@ -211,6 +220,12 @@ async function get_urls_doc(
 
 }
 
+_QCODE=function(wrap) {
+    s= wrap.toString().match(/function\s*\(\s*\)\s*{\s*([\s\S]*)\s*}/ )[1];
+    s=s.replace('qs(','document.querySelectorAll')
+
+}
+
 ///////////////////////// lib end //////////////////////////////////////
 async function taobao_cart_back(){
     gbloop=1
@@ -266,7 +281,8 @@ async function taobao_list(base_url="https://youxin-electronic.taobao.com/"){
 "https://okfw.net/base_url=T.json_loads(request.get_data());r=start_time=[TB.init(base_url),U.stime()]",base_url),t )
     
     var base_search_url=base_url+"search.htm?orderType=price_asc&pageNo="
-    var url=base_search_url+1
+    var max=await post("https://okfw.net/r=TB.max_num()")
+    var url=base_search_url+(parseInt(max)+1)
     while(url && url.length>9){
         var check=await post("https://okfw.net/url=T.json_loads(request.get_data());r=TB.include(url)",url)
         if(check==='False' && t.url!=url){

@@ -21,9 +21,9 @@ def init(shop):
 	shop=shop.lower()
 	if '.taobao.com' in shop:
 		shop=T.netloc(shop).replace('.taobao.com','')
-	if shop not in gtb_list:
-		gtb_list[shop]={}
 	gshop=U.set(gn+'shop',shop)
+	if shop not in gtb_list:
+		gtb_list[gshop]={}
 	return gshop
 
 gdu_pageNo_null=get_set('pageNo_null',{})
@@ -77,7 +77,12 @@ def max_num():
 			U.beep()
 			U.pln(gshop,'no pageNo:',url)
 			continue
-		i=int(parse_qs(url).get('pageNo')[0] )
+		si=parse_qs(url).get('pageNo')[0]
+		si=T.match_int(si) # avoid ValueError: invalid literal for int() with base 10: '56#anchor'
+		if not si:
+			U.log('no pageNo in :',gshop,url,si,parse_qs(url))
+			continue
+		i=int(si[0] )
 		mi.append(i)
 	return max(mi)
 

@@ -135,8 +135,8 @@ def get_or_set_input(name):
 getInput=getOrInput=get_or_input=get_or_set_input
 
 def get_or_set(name,default):
-	# if py.isno(default) or (default==None):
-	if not default:
+	# if not default: # ipy module set {}
+	if py.isno(default) or (default==None):
 		raise py.ArgumentError('default cannot be {}'.format( repr(default) ))
 	r=get(name)
 	if not py.isno(r):return r
@@ -1051,6 +1051,17 @@ def repl(_=None,printCount=False,msg=''):
 		# return
 	# except:pass
 repl=pys=pyshell=repl
+
+def remove_module(m):
+	import sys
+	if py.istr(m):
+		return sys.modules.pop(m)
+	for k in py.list(sys.modules):
+		v=sys.modules[k]
+		if v==m:
+			return sys.modules.pop(k)
+	return py.No('can not found ',m,'in sys.modules')
+del_mod=delete_mod=del_modules=delete_modules=remove_mod=remove_module
 
 def reload(*mods):
 	''' 不是一个模块时，尝试访问mod._module'''
@@ -2419,7 +2430,7 @@ def getModulesByFile(fileName):
 	if not dr:return py.No('can not found {} in sys.modules __file__ '.format(fileName),dnf)
 	return dr
 	
-modulesByFile=getModsByFile=getModulesByFile
+get_module_by_file=modulesByFile=getModsByFile=getModulesByFile
 	
 def getModsBy__all__(modPath=None):
 	r=[]
@@ -2519,26 +2530,40 @@ get_qpsu_path=getQPSUPath=getQpsuPath=get_qpsu_dir=getQPSUDir=get_module_dir=get
 
 def slen(a,*other):
 	return py.repr(len(a,*other) )
-	
+
+def _len(obj):
+	'''len(obj, /)
+
+	'''
+	if py.isgen(obj):
+		n=-1
+		for i in obj :
+			n=n+1
+		return n+1
+	return py.len(obj)
+
+len_generator=generator_len=_len
+
 def len(obj,*other):
 	'''Exception return py.No or [no...]'''
-	if py.isgen(obj):
-		obj=py.list(obj)
-	return builtinFuncWrapForMultiArgs(builtinFunc=py.len,args=(obj,other) )# ,default=default
+	return FuncWrapForMultiArgs(f=_len,args=(obj,other) )# ,default=default
 
-def hash(obj,*other):
-	'''Exception return py.No or [no...]'''
+def _hash(obj):
 	if py.islist(obj):
-		if other:return py.No('#TODO hash multi list ',obj,len(other))
 		try:
 			return py.hash(py.tuple(obj))
 		except Exception as e:
 			return py.No(e)
-	return builtinFuncWrapForMultiArgs(builtinFunc=py.hash,args=(obj,other))
-def id(obj,*other):
-	return builtinFuncWrapForMultiArgs(builtinFunc=py.id,args=(obj,other))
+	return py.hash(obj)
 
-def builtinFuncWrapForMultiArgs(builtinFunc,args,default=None):
+def hash(obj,*other):
+	'''Exception return py.No or [no...]'''
+	return FuncWrapForMultiArgs(f=_hash,args=(obj,other))
+
+def id(obj,*other):
+	return FuncWrapForMultiArgs(f=py.id,args=(obj,other))
+
+def FuncWrapForMultiArgs(f,args,default=None):
 	'''Exception return py.No'''
 	obj,other=args ########## other is tuple
 	all=py.list(other)
@@ -2546,7 +2571,7 @@ def builtinFuncWrapForMultiArgs(builtinFunc,args,default=None):
 	r=[]
 	for i in all:
 		try:
-			r1=builtinFunc(i)
+			r1=f(i)
 		except Exception as e:
 			if default!=None:
 				r1=default
@@ -2556,6 +2581,7 @@ def builtinFuncWrapForMultiArgs(builtinFunc,args,default=None):
 		return r
 	else:
 		return r[0]  #U.len(obj) == py.len(obj)
+builtinFuncWrapForMultiArgs=FuncWrapForMultiArgs
 
 def recursive_basic_type_filter(obj):
 	''' dict,tuple,list,set  '''
@@ -3124,16 +3150,49 @@ def subprocess_popen(cmd):
 	return Popen(cmd,stdin=PIPE,stdout=PIPE,stderr=PIPE)
 subprocess=subprocessPopen=subprocess_popen
 
-def get_iterable(iterable,index=0): #TODO start, stop[, step])
+def itertools_tee(obj,count=2):
+	'''itertools.tee(iterable, n=2) --> tuple of n independent iterators.	
+#理解错误###itertools.tee返回的第一个是原gen 但是却是<itertools._tee at 0x11c34eab508>类型 ，也就是说调用后如果使用了第一个返回值，原始gen也会改变###
+
+一旦 tee() 实施了一次分裂，原有的 iterable 不应再被使用；否则tee对象无法得知 iterable 可能已向后迭代。
+tee 迭代器不是线程安全的。当同时使用由同一个 tee() 调用所返回的迭代器时可能引发 RuntimeError，即使原本的 iterable 是线程安全的。
+该迭代工具可能需要相当大的辅助存储空间（这取决于要保存多少临时数据）。通常，如果一个迭代器在另一个迭代器开始之前就要使用大部份或全部数据，使用 list() 会比 tee() 更快。
+In [153]: g=iterable=py.enumerate(In)
+In [154]: r=U.copy_gen(g,9)
+In [155]: for i in r[7]:print(i);break
+(0, '')
+In [156]: for i in r[7]:print(i);break
+(1, 'vsc(U._len)')
+In [157]: for i in g:print(i);break
+(2, 'g=iterable=py.enumerate(In)')
+
+	'''
+	if not count or count < 1:
+		raise py.ArgumentError('至少要1个copy吧，但count=',count)
+	import itertools
+	return itertools.tee(obj,count)
+	# if count==1:
+	# 	return r[0]
+	# else:
+	# 	return r#[1:]
+
+gen_copy=copy_gen=generator_copy=copy_generator=tee=itertools_tee
+
+def get_one_from_iterable(iterable,index=0): #TODO start, stop[, step])
 	if not py.isint(index):
-		raise py.ArgumentUnsupported('')
+		raise py.ArgumentUnsupported('index must be int',index)
+	
+	if py.isgen(iterable):
+		iterable,i2=copy_generator(iterable)
+
 	if index<0:
-		index=len(iterable)-1
+		index,raw_index=_len(i2)+index,index
+
 	for n,v in py.enumerate(iterable):
 		if n==index:
 			return v
 	return py.No('iterable index out of range',iterable,index,)
-get_one_from_set=get_from_set=get_from_jihe=getIterable=get_iterable
+get_one_from_set=get_from_set=get_jihe=get_from_jihe=getIterable=get_iterable=get_one_from_iterable
 
 def sub(a,len='default return len 9',start=0,step=1):
 	'''sub dict,list,tuple....iterable
@@ -3676,7 +3735,7 @@ def sizeof_one_obj(obj):
 	from pympler.asizeof import asizeof
 	return F.IntSize(asizeof(obj))
 def sizeof(obj,*other):
-	return builtinFuncWrapForMultiArgs(builtinFunc=sizeof_one_obj,args=(obj,other) )
+	return FuncWrapForMultiArgs(f=sizeof_one_obj,args=(obj,other) )
 size=asizeof=sizeof
 
 def gc():

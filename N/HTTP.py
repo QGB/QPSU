@@ -107,9 +107,10 @@ def get(url,file='',
 	try:
 		s= T.auto_decode(b)
 		if not s and b:raise Exception('decode error')
+		return s
 	except:
 		return b
-
+	
 
 def head(url):
 	return method(url,'head').info().items()

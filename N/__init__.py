@@ -286,13 +286,23 @@ def html_script(response,*urls,rpc_base=None):
 	if not rpc_base:rpc_base=U.get_or_set('rpc_base','/')
 	html=''
 	for url in urls:
-		html=html+"""
-<script src="{rpc_base}r=N.get('''{url}''')">
-</script>
+		if ('://' not in url) and (not F.exist(url) ):
+			html+="""
+<hr>
+{url}
+<hr>
+<script> {url} </script>
+			
+			""".format(url=url)
+			continue
+		html+="""
 <hr>
 {url}
 <hr>
 {js}
+<script src="{rpc_base}r=N.get('''{url}''')">
+</script>
+
 	""".format(url=url,rpc_base=rpc_base,js=N.get(url)[:999] ) 
 	return flask_html_response(response=response,remove_tag=[],html=html )
 	

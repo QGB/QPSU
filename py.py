@@ -100,8 +100,12 @@ def isbool(a):
 	return (a is True) or (a is False)
 
 def is_generator(a):
-	import types
-	return isinstance(a, types.GeneratorType)
+	return callable(getattr(a,'__next__',0))
+	# import types
+	# if isinstance(a, types.GeneratorType):return True
+	# import itertools #itertools is native module,no py file
+	# if isinstance(a,itertools._tee)      :return True
+	# return False
 isgen=isGenerator=is_generator
 
 def iterable(a):

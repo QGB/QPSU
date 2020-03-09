@@ -34,6 +34,7 @@ TAB=Tab=tab='\t'
 ######### html ######
 hr='<hr>'
 br='<br>'
+u23=s23='%23-'
 #######################
 RE_IMG_URL=r'(((http://www)|(http://)|(www))[-a-zA-Z0-9@:%_\+.~#?&//=]+)\.(jpg|jpeg|gif|png|bmp|tiff|tga|svg)'
 RE_URL=r'http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\(\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+'
@@ -185,7 +186,7 @@ recursiveJoin=recursive_join
 
 def join(iterable,separator=','):
 	if py.istr(iterable):return iterable
-	return separator.join([string(i) for i in iterable] )
+	return separator.join( string(i) for i in iterable )
 	
 def intToHex(number,uppercase=True):
 	'''
@@ -295,7 +296,7 @@ def hasZh(word):
 	return match
 contain_zh=has_zh=hasZh	
 ################# zh end ##############
-def filterInt(a,digits=py.range(1,999)):
+def filter_sint_list(a,digits=py.range(1,999)):
 	if py.isint(digits):
 		digits=py.range(digits,999)
 	# digits=py.list(digits)
@@ -312,7 +313,7 @@ def filterInt(a,digits=py.range(1,999)):
 	if py.len(si) in digits:
 		r.append(si)
 	return r
-filter_sint_list=filter_sint=filter_int=filterInt
+matchInt=match_int=filter_sint=filter_int=filterInt=filter_sint_list
 
 RE_HTML_TAG = re.compile(r'<[^>]+>')
 def filter_html(text):
@@ -559,7 +560,7 @@ def urlEncode(a):
 	'''
 	from six.moves.urllib.parse import quote
 	return quote(a) # if a is function: TypeError: quote_from_bytes() expected bytes
-url_encode=urlEncode
+urlencode=url_encode=urlEncode
 
 def urlDecode(a):
 	''' a : str_or_bytes
@@ -570,7 +571,7 @@ def urlDecode(a):
 		# if not py.istr():
 		return urllib.parse.unquote(a)
 	raise NotImplementedError()
-url_decode=urlDecode
+urldecode=url_decode=urlDecode
 
 def startsEnds(a,chars):
 	'''S.strip([chars]) -> str
@@ -820,7 +821,8 @@ def json_loads(astr):
 		return json.loads(astr)
 	except Exception as e:
 		return py.No(e,astr)
-	
+json_load=json_loads
+
 def json_dumps(obj):
 	U=py.importU()
 	def default(obj):# not json basic class
@@ -832,7 +834,8 @@ def json_dumps(obj):
 		return json.dumps(obj ,default=default )
 	except Exception as e:
 		return py.No(e)
-	
+json_dump=json_dumps
+
 def string(a,decode=''):
 	'''return unicode'''
 	if py.is2():
@@ -886,7 +889,7 @@ def isString(a):
 	else:return isinstance(a,str)
 istr=isStr=isString	
 
-def sub(s,s1,s2=''):
+def sub_head(s,s1,s2=''):
 	if(s==None):return ()
 	if not istr(s):s=str(s)
 	i1=s.find(s1)
@@ -899,9 +902,9 @@ def sub(s,s1,s2=''):
 	i1+=len(s1)
 	# U.pln( i1,i2
 	return s[i1:i2]
-subLeft=subl=sub
+subLeft=subl=sub=sub_head
 
-def subRight(s,s1,s2=''):
+def sub_tail(s,s1,s2=''):
 	if(s==None):return ()
 	s=str(s)
 	i1=0
@@ -915,18 +918,18 @@ def subRight(s,s1,s2=''):
 	i1+=len(s1)
 	# U.pln( i1,i2
 	return s[i1:i2]
-subLast=subr=subRight
+subLast=subr=subRight=sub_tail
 	
 def removeAllSpace(a):
 	'''in char256 {' ', '\x0b', '\x1c', '\x1d', '\t', '\x0c', '\x1e', '\x85', '\xa0', '\x1f', '\r', '\n'}  removed'''
 	import re
 	return re.sub(r"\s+", "", a, flags=re.UNICODE)
-delAllSpace=removeAllSpaces=removeAllSpace
+del_space=del_spaces=delAllSpace=removeAllSpaces=removeAllSpace
 
 def replacey(a,olds,new):
 	if not py.istr(a):return py.No('a is not str',a)
 	# else:a=str(a)
-	if(len(olds)<1):raise Exception('Target chars Null')
+	# if(len(olds)<1):raise Exception('Target chars Null')
 	for i in olds:
 		a=a.replace(i,new)
 	return a
@@ -946,7 +949,6 @@ def index_of_multi(a,*target):
 		if i>0:return i
 	return -1
 indexOf=index_of=index_of_multi
-
 
 
 
