@@ -26,9 +26,11 @@ try:
 	if __name__.endswith('qgb.N'):
 		from . import HTTP
 		from . import HTTPServer
+		from . import HTML
 	else:
 		import HTTP
 		import HTTPServer
+		import HTML
 except Exception as ei:
 	py.traceback(ei)
 
@@ -281,31 +283,6 @@ def pdf2html(url,response=None,zoom=None,path=None,pw=None):
 	else:
 		return do_resp(F.read(html_file))
 
-def html_script(response,*urls,rpc_base=None):
-	U,T,N,F=py.importUTNF()
-	if not rpc_base:rpc_base=U.get_or_set('rpc_base','/')
-	html=''
-	for url in urls:
-		if ('://' not in url) and (not F.exist(url) ):
-			html+="""
-<hr>
-{url}
-<hr>
-<script> {url} </script>
-			
-			""".format(url=url)
-			continue
-		html+="""
-<hr>
-{url}
-<hr>
-{js}
-<script src="{rpc_base}r=N.get('''{url}''')">
-</script>
-
-	""".format(url=url,rpc_base=rpc_base,js=N.get(url)[:999] ) 
-	return flask_html_response(response=response,remove_tag=[],html=html )
-	
 def flask_html_response(response,html,remove_tag=(
 		['<script','</script>'],
 		['<SCRIPT','</SCRIPT>'],
@@ -343,6 +320,12 @@ def flask_file_stream_response(response,file,):
 		response.set_data(r)
 
 file=stream_file=file_stream=read_as_stream=flask_file_stream_response
+
+def is_flask_request(q):
+	from werkzeug.local import LocalProxy
+	if isinstance(q,LocalProxy):
+		return True
+	return False
 
 def set_proxy(host='',port='',protocol='socks5',target_protocol=('http','https'),**ka):
 	''' no args provide,proxy will clean

@@ -150,7 +150,7 @@ def serialize(obj,file=None,protocol=0):
 		return pickle.dumps(obj=obj,protocol=protocol)	
 s=pickle_dump=serialize
 
-def dill_load(file,dill_ext='.dill'):
+def dill_load_file(file,dill_ext='.dill'):
 	import dill
 	dill.settings['ignore']=False #KeyError: 'ignore'
 	
@@ -161,13 +161,15 @@ def dill_load(file,dill_ext='.dill'):
 			return dill.load(f)
 	except Exception as e:#TODO all  load save py.No
 		return py.No(file,e)
+dill_load=dill_load_file
 
-def dill_loads(bytes):
+
+def dill_load_bytes(bytes):
 	import dill
 	return dill.loads(bytes)
+dill_loads=dill_load_byte=dill_load_bytes
 
-
-def dill_dump(obj,file=None,protocol=None):
+def dill_dump_bytes(obj,file=None,protocol=None):
 	'''
 	dill.dump(obj, file, protocol=None, byref=None, fmode=None, recurse=None)
 	dill.dumps(obj, protocol=None, byref=None, fmode=None, recurse=None)
@@ -192,7 +194,24 @@ F.readableSize(len(F.dill_dump(protocol=4,obj=r)  ) )   #'13.694 KiB'
 		return file
 	else:
 		return dill.dumps(obj=obj,protocol=protocol)
-  
+dill_dump=dill_dumps=dill_dump_bytes 
+
+def dill_dump_string(obj,**ka):
+	U=py.importU()
+	encoding=U.get_duplicated_kargs(ka,'encoding','coding')
+	if not encoding:
+		encoding=U.get_or_set('dill_string.encoding',default='latin')
+	return dill_dump_bytes(obj).decode(encoding)	
+dill_dump_str=dill_dump_string
+
+def dill_load_string(s,**ka):
+	U=py.importU()
+	encoding=U.get_duplicated_kargs(ka,'encoding','coding')
+	if not encoding:
+		encoding=U.get_or_set('dill_string.encoding',default='latin')
+	return dill_load_bytes(s.encode(encoding) )
+dill_load_str=dill_load_string
+
 def load(file,):
 	''' '''
 	
@@ -203,6 +222,7 @@ def write(file,obj,):
 def chmod777(file,mode):
 	import os
 	os.chmod(file, 0o777) 
+	
 def getMode(file):
 	import os
 	try:
@@ -851,6 +871,7 @@ def numToSize(size, b1024=True):
 	Returns: string
 	test git
 	'''
+	size=py.int(size)
 	if size < 0:
 		return size
 		# raise ValueError('number must be non-negative')

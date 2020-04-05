@@ -836,8 +836,8 @@ pop(_63,25)  #_63 has change
 	for i in keys:
 		if not py.istr(i):raise ArgumentError('keys should be a list of str,but get',i)
 		if i in ka:
-			r.append(ka[i])
-			ka.pop(i)
+			r.append(ka.pop(i))
+			
 	if py.len(r)==0:return default
 	if py.len(r)>1:
 		rTrue=[i for i in r if i]  
@@ -2267,7 +2267,7 @@ def traverseTime(start,stop=None,step='day'):
 		rm=re.match(sregex,step)
 		if not rm or not step.startswith(rm.group()):
 			raise Exception('Invalid argument step '+py.repr(step))
-		istep,step=int(rm.group(1),default=1,error=0),rm.group(2)
+		istep,step=int(rm.group(1),default=1,),rm.group(2)
 		if step.startswith('year'):
 			istep,step=365*istep,'day'#没考虑闰年
 		if step.startswith('ms'):step='milliseconds'
@@ -2663,7 +2663,7 @@ def getProcessByPid(pid):
 	import psutil
 	return psutil.Process(pid)			 
 									
-def getProcessList(name='',cmd='',pid=0):
+def get_all_process_list(name='',cmd='',pid=0):
 	'''if err return [r, {i:err}  ]
 _62.name()#'fontdrvhost.exe'
 _62.cmdline()#AccessDenied: psutil.AccessDenied (pid=8, name='fontdrvhost.exe')
@@ -2696,7 +2696,45 @@ pid=0, name='System Idle Process', cmdline=[]
 	# if err:return r,err
 	# else:  
 	return r
-ps=getTasklist=getProcess=getProcessList
+ps=getTasklist=getProcess=getProcessList=get_all_process_list
+
+def get_all_process_value_list(**ka):
+	U=py.importU()
+	size=9
+
+	da={}
+	da['pid']=U.get_duplicated_kargs(ka,'pid','PID',default=1)
+	da['ppid']=U.get_duplicated_kargs(ka,'ppid','PPID',default=1)
+
+	da['cmd']=U.get_duplicated_kargs(ka,'cmd','CMD','cmdline',default=1) # cmd 每行最后		
+	###########
+	if U.get_duplicated_kargs(ka,'title','tips','tip',default=1):
+		title=[]
+		for k,v in da.items():
+			if v:title.append(U.StrRepr(k,size=size))
+		r=[title]			
+	else:
+		r=[]
+	###########
+	for p in get_all_process_list():
+		row=[]
+		for k,v in da.items():
+			if v:
+				try:
+					pv=py.getattr(p,k)
+					if py.callable(pv):
+						pv=pv()
+					if py.isint(pv):
+						pv=U.IntRepr(pv,size=size)
+					row.append(pv)
+
+				except Exception as e:
+					row.append(py.No(e))
+		
+		# if cmd:row.append(p.cmd)
+		r.append(row)
+	return r
+psCmd=ps_cmd=ps_value=ps_values=get_all_process_cmd_list=get_all_process_value_list
 
 def getProcessPath(name='',pid=0):
 	if not (name or pid):pid=globals()['pid']
@@ -3529,10 +3567,16 @@ def selectBox(*a):
 	top=tk.Tk()
 	tk.mainloop()
 
-def getCmd():
+def get_self_raw_cmdline():
 	if iswin() or iscyg():
 		return Win.getCmd()
-getCmdline=getCmd
+	raise py.EnvironmentError('TODO: NOT Win')
+getCmdline=getCmd=get_cmd=get_raw_cmd=get_raw_cmdline=get_self_raw_cmdline
+
+def get_cmdline_by_pid(pid=None):
+	if pid==None:
+		return get_self_raw_cmdline()
+	
 
 def save(a,name=0):
 	if not iswin():raise NotImplementedError()
@@ -3734,6 +3778,7 @@ def sha256_fingerprint_from_pub_key(pubkey_str):
 def sizeof_one_obj(obj):
 	from pympler.asizeof import asizeof
 	return F.IntSize(asizeof(obj))
+
 def sizeof(obj,*other):
 	return FuncWrapForMultiArgs(f=sizeof_one_obj,args=(obj,other) )
 size=asizeof=sizeof
@@ -3900,13 +3945,11 @@ class IntCustomStrRepr(py.int):
 		if len(a)!=1:
 			raise py.ArgumentError('only need one intable arg,but get {}'.format(py.len(a)))
 		self= py.int.__new__(cls, *a)
-		self.target=ka.pop('target',0)
-		self.target=ka.pop('repr',self.target)
-		self.target=ka.pop('func',self.target)
-		self.target=ka.pop('function',self.target)
-		self.target=ka.pop('custom',self.target)
-		if not self.target:
-			self.target=T.justify
+
+		self.target=get_duplicated_kargs(ka,'f','target','repr','__repr__','func','function','custom',default=T.justify)
+		
+		# if not self.target:
+		# 	self.target=
 		self.ka=ka
 		return self
 		
@@ -3914,8 +3957,15 @@ class IntCustomStrRepr(py.int):
 	def __str__(self):#super().__str__()
 		'''
 		'''
-		return self.target(self,**self.ka)
-		
+		if py.callable(self.target):
+			return self.target(self,**self.ka)
+		else:
+			if self.ka:
+				raise py.ArgumentError('when IntRepr target not callable,must no keyword args!')
+			if py.istr(self.target):
+				return self.target
+			return repr(self.target)
+
 IntRepr=IntStrRepr=IntCustomRepr=IntCustomStrRepr
 
 class IntWithObj(py.int):
@@ -4115,7 +4165,8 @@ U.StrRepr(b'3232',encoding='ascii')	[<class 'qgb.U.StrRepr'>, (b'3232',), {'enco
 #############################
 def main(display=True,pressKey=False,clipboard=False,
 	ipyArgs=False,escape=False,
-	c=False,ipyOut=False,cmdPos=False,reload=False,*args):
+	vsc=False,
+	c=False,ipyOut=False,cmdPos=False,reload=False,*args,**ka):
 	anames=py.tuple([i for i in py.dir() if not i .startswith('args')])
 	if not args:args=sys.argv
 	for i in args:
@@ -4132,12 +4183,17 @@ def main(display=True,pressKey=False,clipboard=False,
 	sImport=gsImport
 	if c:sImport+=';C=c=U.clear'
 	
+	if not reload:reload=get_duplicated_kargs(ka,'R','r','rr')
 	if reload:sImport+=";R=r=U.reload"
 		
 	if ipyOut:sImport+=';O=o=U.ipyOutLast'
-	
+
+	if not cmdPos:cmdPos=get_duplicated_kargs(ka,'cmdpos','pos','window_pos')	
 	if cmdPos:sImport+=";POS=pos=U.cmdPos;npp=NPP=U.notePadPlus;ULS=Uls=uls=F.ls;ll=ULL=Ull=ull=F.ll"
-		
+	
+	if not vsc:vsc=get_duplicated_kargs(ka,'edit','editor','npp')
+	if vsc:   sImport+=";npp=U.npp;vsc=U.vsc"
+
 	if ipyArgs:
 		sImport=sImport.replace("'",r"\'")
 		sImport='''
@@ -4156,6 +4212,8 @@ cmd /k ipython --no-banner  --autocall=2 "--InteractiveShellApp.exec_lines=['{}'
 			import win32api
 			win32api.ShellExecute(0, 'open', gsw+'exe/key.exe', sImport+'\n','',0)
 		except:pln('PressKey err')
+
+	if not clipboard:clipboard=get_duplicated_kargs(ka,'cb','CB','clip_board')
 	if clipboard:
 		try:
 			Clipboard.set(sImport)

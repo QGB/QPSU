@@ -35,6 +35,7 @@ TAB=Tab=tab='\t'
 hr='<hr>'
 br='<br>'
 u23=s23='%23-'
+p23='#-'
 #######################
 RE_IMG_URL=r'(((http://www)|(http://)|(www))[-a-zA-Z0-9@:%_\+.~#?&//=]+)\.(jpg|jpeg|gif|png|bmp|tiff|tga|svg)'
 RE_URL=r'http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\(\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+'
@@ -147,6 +148,7 @@ diffb=diffBytes=diff_bytes
 
 def diff(expected, actual,p=True):
 	"""
+	Compare two sequences of lines; generate the delta as a unified diff.
 	Helper function. Returns a string containing the unified diff of two multiline strings.
 	"""
 
@@ -530,7 +532,16 @@ in js:
 	return r
 
 
-def html_decoded(a):
+def html_encode(a):
+	if py.is3():
+		from html import escape
+	if py.is2():
+		from HTMLParser import HTMLParser
+		escape = HTMLParser().escape #TODO not test 
+	# 
+	return escape(a)
+
+def html_decode(a):
 	''' will not remove html tag '''
 	if py.is3():
 		from html import unescape
@@ -541,7 +552,7 @@ def html_decoded(a):
 	# r=replacey(a,['<br>','<br/>','<br />'],'\n')
 	r= unescape(r).replace(py.chr(0xA0),' ')  # \xa=\n  not \xa0
 	return r
-html_unescape=htmlDecode=html_decoded
+html_unescape=htmlDecode=html_decoded=html_decode
 
 # data = "U.S. Adviser&#8217;s Blunt Memo on Iraq: Time &#8216;to Go Home&#8217;"
 # print decode_unicode_references(data)
@@ -950,7 +961,13 @@ def index_of_multi(a,*target):
 	return -1
 indexOf=index_of=index_of_multi
 
-
+def format(s,**ka):
+	''' 解决 python 自带format 不能跳过 未指定的 {name} 的问题 （ HTML-CSS  格式化）
+	'''
+	for k,v in ka.items():
+		k='{%s}'%k
+		s=s.replace(k,v)
+	return s
 
 #############  str ops end ########3
 def varname(a):
