@@ -149,13 +149,14 @@ def rty(rows=None,**ka):
 		rt+=tb
 	return rt
 
-def load(f):
+def load(file):
 	global grows
-	grows=F.dill_load(file=f)
-	shop=T.sub(f,'','-')
+
+	grows=F.dill_load(file=file)
+	shop=T.sub(file,'','-')
 	if shop:
-		f=shop
-	return f,len(grows)
+		file=shop
+	return file,len(grows)
 
 imgs=[];dis=[];ts=[];ds={}
 def result(shop=None):

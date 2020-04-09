@@ -219,7 +219,7 @@ def write(file,obj,):
 	''' '''
 	
 		
-def chmod777(file,mode=0o777 ):
+def chmod777(file,mode=0o777,):
 	import os
 	os.chmod(file, mode) 
 chmod=chmod777

@@ -2703,12 +2703,12 @@ def get_all_process_value_list(**ka):
 	size=9
 
 	da={}
-	da['pid']=U.get_duplicated_kargs(ka,'pid','PID',default=1)
+	da['pid']=U.get_duplicated_kargs(ka,'pid','PID','p',default=1)
 	da['ppid']=U.get_duplicated_kargs(ka,'ppid','PPID',default=1)
 
-	da['cmd']=U.get_duplicated_kargs(ka,'cmd','CMD','cmdline',default=1) # cmd 每行最后		
+	da['cmd']=U.get_duplicated_kargs(ka,'cmd','CMD','cmdline','command','c',default=1) # cmd 每行最后		
 	###########
-	if U.get_duplicated_kargs(ka,'title','tips','tip',default=1):
+	if U.get_duplicated_kargs(ka,'title','tips','tip','t',default=1):
 		title=[]
 		for k,v in da.items():
 			if v:title.append(U.StrRepr(k,size=size))
@@ -2734,7 +2734,7 @@ def get_all_process_value_list(**ka):
 		# if cmd:row.append(p.cmd)
 		r.append(row)
 	return r
-psCmd=ps_cmd=ps_value=ps_values=get_all_process_cmd_list=get_all_process_value_list
+psCmd=ps_cmd=ps_value=ps_values=GetCommandLine=getCommandLine=get_command_line=get_all_process_cmd_list=get_all_process_value_list
 
 def getProcessPath(name='',pid=0):
 	if not (name or pid):pid=globals()['pid']
