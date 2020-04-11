@@ -192,3 +192,30 @@ def result(shop=None):
 		rows.add(row)
 	grows=rows
 	return F.dill_dump(obj=rows,file='{}-{}'.format(shop,len(rows)))
+
+def get_price_list_from_setMdskip(d):
+	'''https://mdskip.taobao.com/core/initItemDetail.htm?isUseInventoryCenter=false&cartEnable=true&service3C=false&isApparel=false&isSecKill=false&tmallBuySupport=true&isAreaSell=false&tryBeforeBuy=false&offlineShop=false&itemId=597606333219&showShopProm=true&isPurchaseMallPage=false&itemGmtModified=1586583685000&isRegionLevel=false&household=false&sellerPreview=false&queryMemberRight=true&addressLevel=2&isForbidBuyItem=false&callback=setMdskip&timestamp=1586591444224&isg=dBNwXtilqQnbNHidBOfgSZlsvAbToIOb4sPP3hrRQICPO41H77k5WZXXqRTMCnGVH6YMR35fHFhYBeYBqMIKnxvOa6Fy_7kSndC..&isg2=BLq611-JsKSWiz8nzofghCAaC-Dcaz5FTP5lBsSyas0Jt1rxrPkTVYCOB0NrJ7bd
+	'''
+	r=[]
+	d=d['defaultModel']
+	d=d['itemPriceResultDO']
+	p=d['priceInfo']
+	for skuid,v in p.items():
+		old=v['price']
+		old=U.FloatRepr(old,size=9)
+		
+		pl=v.get('promotionList',[])
+		if len(pl)==1:
+			new=pl[0]['price']
+			new=U.FloatRepr(new,size=9)
+		else:
+			new=py.No('promotionList.len != 1',skuid,pl)
+		
+		r.append([skuid,new,old])# 1 , 2 , 3 
+		
+	return r
+get_price=get_price_list=get_price_list_from_setMdskip
+
+def get_price_num_list_from_setMdskip(d):
+	return [i[1] for i in get_price_list_from_setMdskip(d)]
+get_price_num=get_price_num_list_from_setMdskip

@@ -21,7 +21,7 @@ else:
 		print(urllib,ei)
 		py.importU().repl()
 
-def post(url,data):
+def post(url,**ka):
 	'''
 Signature: requests.post(url, data=None, json=None, **kwargs)
 Docstring:
@@ -35,20 +35,39 @@ Sends a POST request.
 :rtype: requests.Response
 File:      e:\qgb\anaconda3\lib\site-packages\requests\api.py
 Type:      function
-'''
-	import requests
-	return requests.post(url,data=data)
+'''	
+	U,T,N,F=py.importUTNF()
 
-def get_str(url):
+	url=autoUrl(url)
+	proxies=U.get_duplicated_kargs(ka,'proxies','proxy')
+	if proxies:
+		proxies=N.set_proxy(proxy)
+	else:
+		proxies=N.get_proxy()
+	ka['proxies']=proxies
+	
+	import requests
+	return requests.post(url,**ka)
+
+def get_str(url,**ka ,):
 	T=py.importT()
-	return T.auto_decode(  get_bytes(url)  )
+	return T.auto_decode(  get_bytes(url,**ka)  )
 gets=getStr=get_str
 
-def get_bytes(url):
+def get_bytes(url,	**ka ,):
+	U,T,N,F=py.importUTNF()
+
 	url=autoUrl(url)
+	proxies=U.get_duplicated_kargs(ka,'proxies','proxy')
+	if proxies:
+		proxies=N.set_proxy(proxy)
+	else:
+		proxies=N.get_proxy()
+	ka['proxies']=proxies
+
 	import requests
 	try:
-		return requests.get(url).content
+		return requests.get(url,**ka).content
 	except Exception as e:
 		return py.No(e)
 getb=getByte=getBytes=get_byte=get_bytes

@@ -8,7 +8,7 @@ else:
 	from qgb import py
 U,T,N,F=py.importUTNF()
 
-def html_script(response,*urls,rpc_base=None):
+def html_script(response,*urls,rpc_base=None,max_show_len=999):
 	if not rpc_base:rpc_base=U.get_or_set('rpc_base','/')
 	html=''
 	for url in urls:
@@ -29,7 +29,7 @@ def html_script(response,*urls,rpc_base=None):
 <script src="{rpc_base}r=N.get('''{url}''')">
 </script>
 
-	""".format(url=url,rpc_base=rpc_base,js=N.get(url)[:999] ) 
+	""".format(url=url,rpc_base=rpc_base,js=N.get(url)[:max_show_len] ) 
 	return N.flask_html_response(response=response,remove_tag=[],html=html )
 N.html_script=N.htmlScript=N.script=html_script
 
@@ -39,7 +39,6 @@ gid_select=U.get_or_set(__name__+'.gid_select',{})
 def select_result(q,response,**ka):
 	if N.is_flask_request(q):
 		q=q.values
-	# raise py.ArgumentError('要post {id:,k...} 后的 request.values, 直接用是不行的。',q,response,ka)
 	if G_SELECT_ID not in q:
 		raise py.ArgumentError('要post {id:,k...} 后的 request.values, 直接用get不带参数 是不行的。',q,response,ka)
 	# if 'id' not in r:
@@ -79,7 +78,7 @@ def select_result(q,response,**ka):
 
 	return select(r,response=response,**ka)
 
-def select(iterable,response=None,**ka):
+def select(iterable,**ka):
 	'''
 #<!-- 
 				# 不能用  editable="false" readyonly  
@@ -87,7 +86,8 @@ def select(iterable,response=None,**ka):
 				# background="green" 无效 , lavender淡紫色, 熏衣草花 ,#e6e6fa 太淡啦
 				#  -->	
 	 '''
-	request=U.get_duplicated_kargs(ka,'q','req','request','requests')
+	response=U.get_duplicated_kargs(ka,'p','resp','response','rp')
+	request=U.get_duplicated_kargs(ka,'q','req','request','requests','rq')
 	url=U.get_duplicated_kargs(ka,'url','mark_url', 'request_url')
 	 
 	if N.is_flask_request(request) and not url:
@@ -150,7 +150,7 @@ def select(iterable,response=None,**ka):
 				# k,v=fk(k),fv(v)
 				rows+=hd.format(i=i,name=py.id(k), k=fk(k),v=fv(v) ,checked='')
 				i+=1
-			py.importU().log(rows)	
+			# py.importU().log(rows)	
 			response.headers['Content-Type']='text/html;charset=utf-8';
 			response.set_data(    T.format( ha, rows=rows  )     )	
 		return r
@@ -167,7 +167,43 @@ def select(iterable,response=None,**ka):
 		else:
 			rd = gid_select[id]
 		return do_resp(rd,rd.items(),rd.disabled.items())
+
+	if py.islist(iterable):
+		if isinstance(iterable,DictSelect):
+			rd=iterable
+		elif id not in gid_select:
+			rd = gid_select[id]=DictSelect(iterable)
+			rd.id=id
+		else:
+			rd = gid_select[id]
+		return do_resp(rd,rd.items(),rd.disabled.items())
+
 ################################################
+
+class ListSelect(py.list):
+	'''
+	'''
+	def __init__(*args, **kwds):
+		'''Initialize an ordered dictionary.  The signature is the same as
+		regular dictionaries.  Keyword argument order is preserved.
+		'''
+		if not args:
+			raise TypeError("descriptor '__init__' of select object "
+							"needs an argument")
+		self, *args = args
+		if len(args) > 1:
+			raise TypeError('expected at most 1 arguments, got %d' % len(args))
+		args=args[0]
+
+		try:
+			self.disabled=args.disabled # 没有类型检查，self 与 disabled 类型不同就完蛋
+		except AttributeError:
+			try:
+				self.disabled
+			except AttributeError:
+				self.disabled=[]
+
+		self.update(args, **kwds)
 
 class DictSelect(py.dict):
 	'''

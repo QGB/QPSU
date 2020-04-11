@@ -859,6 +859,9 @@ def string(a,decode=''):
 		if isinstance(a,py.bytes) and decode:return a.decode(decode)
 		if py.isint(a):# in case : U.IntCustomStrRepr
 			a=py.int(a)
+		if py.isfloat(a):## 添加一种 CustomStrRepr
+			a=py.float(a) 
+
 		try:return py.str(a)
 		except Exception as e:return py.No(e,a)
 		

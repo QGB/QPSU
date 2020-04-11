@@ -44,7 +44,7 @@ else:
 def uploadServer(port=1122,host='0.0.0.0',dir='./',url='/up'):
 	'''curl  http://127.0.0.1:1122/up -F file=@./U.py
 	'''
-	U=py.importU()	
+	U,T,N,F=py.importUTNF()
 	
 	from flask import Flask,request,make_response, send_from_directory
 	app= Flask('uploadServer'+U.stime_() )
@@ -61,13 +61,54 @@ def uploadServer(port=1122,host='0.0.0.0',dir='./',url='/up'):
 	
 def rpcGetVariable(varname,base=py.No('auto history e.g. [http://]127.0.0.1:23571[/../] '),
 		timeout=9,):
+	U,T,N,F=py.importUTNF()	
 	if not base:
-		U.get
+		base=U.get_or_set('N.rpc.base','http://127.0.0.1:23571/')
 	if not base.endswith('/'):base+='/'
-	url='{}response.set_data(F.dill_dump({}))'.format(base,varname)
-	import requests,dill
-	b=requests.get(url,verify=False,timeout=timeout).content
-	return dill.loads(b)
+	U.set('N.rpc.base',base)
+	
+	url='{0}response.set_data(F.dill_dump({1}))'.format(base,varname)
+	# import requests,dill
+	# dill_loads=dill.loads
+	# get=requests.get
+	dill_loads=py.importF().dill_loads
+	get=HTTP.get_bytes
+
+	b=get(url,verify=False,timeout=timeout)
+	if not b:return b
+	if not py.isbytes(b):
+		b=b.content
+	return dill_loads(b)
+rpc_get=rpc_get_var=rpcGetVariable
+
+def rpcSetVariable(*obj,base=py.No('auto history e.g. [http://]127.0.0.1:23571[/../] '),timeout=9,varname='v'):
+	U,T,N,F=py.importUTNF()
+	if len(base)==1 and ',' not in varname:
+		obj=obj[0]
+
+	if not base:
+		base=U.get_or_set('N.rpc.base','http://127.0.0.1:23571/')
+	if not base.endswith('/'):base+='/'
+	U.set('N.rpc.base',base)
+
+	url='{0}{1}=F.dill_loads(request.get_data());r=U.id({1})'.format(base,varname)
+	# import requests,dill
+	# dill_loads=dill.loads
+	# post=requests.post
+	post=HTTP.post
+	dill_dump=F.dill_dump
+
+	b=post(url,verify=False,timeout=timeout,data=dill_dump(obj)) # data=list:TypeError: cannot unpack non-iterable int object
+	if not b:return b
+	if not py.isbytes(b):
+		b=b.content
+	if py.isbytes(b):
+		b= b.decode('utf-8')
+	# if py.istr:
+	return url,b
+
+rpc_set=rpc_set_var=rpcSetVariable
+
 
 def rpcServer(port=23571,thread=True,ip='0.0.0.0',ssl_context=(),currentThread=False,app=None,key=None,
 execLocals=None,locals=None,globals=None,

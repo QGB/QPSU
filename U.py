@@ -3936,16 +3936,42 @@ def python_m(*a,**ka):
 
 	
 	
+class FloatCustomStrRepr(py.float):
+	'''每添加一种 CustomStrRepr ，需要在 T.string 中添加相应的 str 代码
+	或者用 self.raw 来保存 # 不行，直接保存参数 类型不对
+	'''
+	def __new__(cls, *a, **ka):
+		if py.len(a)!=1:
+			raise py.ArgumentError('only need one intable arg,but get {}'.format(py.len(a)))
+		self= py.float.__new__(cls, *a)
+		self.target=get_duplicated_kargs(ka,'f','target','repr','__repr__','func','function','custom',default=T.justify)
+		self.ka=ka
+		return self
+		
+	def __repr__(self):return self.__str__()
+	def __str__(self):#super().__str__()
+		'''
+		'''
+		if py.callable(self.target):
+			return self.target(self,**self.ka)
+		else:
+			if self.ka:
+				raise py.ArgumentError('when CustomStrRepr target not callable,must no keyword args!')
+			if py.istr(self.target):
+				return self.target
+			return repr(self.target)
+
+FloatRepr=FloatStrRepr=FloatCustomStrRepr
+	
 class IntCustomStrRepr(py.int):
 	'''为了避免循环调用，同时保留int 值，请用 T.string 来获取 raw str(int)
 	int(x, base=10) -> integer 
 	IntCustomRepr(x,target=func(i,ka),a1=..) #default base 10
 	'''
 	def __new__(cls, *a, **ka):
-		if len(a)!=1:
+		if py.len(a)!=1:
 			raise py.ArgumentError('only need one intable arg,but get {}'.format(py.len(a)))
 		self= py.int.__new__(cls, *a)
-
 		self.target=get_duplicated_kargs(ka,'f','target','repr','__repr__','func','function','custom',default=T.justify)
 		
 		# if not self.target:
@@ -3961,7 +3987,7 @@ class IntCustomStrRepr(py.int):
 			return self.target(self,**self.ka)
 		else:
 			if self.ka:
-				raise py.ArgumentError('when IntRepr target not callable,must no keyword args!')
+				raise py.ArgumentError('when CustomStrRepr target not callable,must no keyword args!')
 			if py.istr(self.target):
 				return self.target
 			return repr(self.target)
