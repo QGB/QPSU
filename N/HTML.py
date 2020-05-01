@@ -169,10 +169,10 @@ def select(iterable,**ka):
 		return do_resp(rd,rd.items(),rd.disabled.items())
 
 	if py.islist(iterable):
-		if isinstance(iterable,DictSelect):
+		if isinstance(iterable,ListSelect):
 			rd=iterable
 		elif id not in gid_select:
-			rd = gid_select[id]=DictSelect(iterable)
+			rd = gid_select[id]=ListSelect(iterable)
 			rd.id=id
 		else:
 			rd = gid_select[id]
