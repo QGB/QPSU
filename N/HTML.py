@@ -176,7 +176,7 @@ def select(iterable,**ka):
 			rd.id=id
 		else:
 			rd = gid_select[id]
-		return do_resp(rd,rd.items(),rd.disabled.items())
+		return do_resp(  rd,enumerate(rd),enumerate(rd.disabled) 	)
 
 ################################################
 
