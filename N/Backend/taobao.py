@@ -193,6 +193,45 @@ def result(shop=None):
 	grows=rows
 	return F.dill_dump(obj=rows,file='{}-{}'.format(shop,len(rows)))
 
+def taobao_sku(d):
+	'''item html : 
+ Hub.config.set('sku', {
+     valCartInfo      : {
+         itemId : '355190223
+         cartUrl: '//cart.ta
+     },
+     apiRelateMarket  : '//t
+     apiAddCart       : '//c
+     apiInsurance     : '',
+     wholeSibUrl      : '//d
+     areaLimit        : '',
+     bigGroupUrl      : '',
+     valPostFee       : '',
+     coupon           : {
+         couponApi         :
+         couponWidgetDomain:
+         cbUrl             :
+     },
+     valItemInfo      : { #这里开始 大概 1424 行
+         
+         defSelected: -1,
+         skuMap     : {";162}
+         ,propertyMemoMap: {...}
+		}  # 这个 结束
+	'''
+	if py.istr(d):d=T.load_js_obj(d)
+	m=d['propertyMemoMap']
+	skuMap=d['skuMap']
+	r=[]
+	for i,name in m.items():
+		row=[]
+		pi=skuMap[ ';{};'.format(i) ] #  {'oversold': False, 'price': '1.80', 'skuId': '4451749127064', 'stock': '2'}
+		row=[ U.FloatRepr(pi['price'],size=8) ,U.StrRepr(i,size=20),U.StrRepr(name) , ]
+		if pi['oversold']:row.append('oversold')
+
+		r.append(row)
+	return r
+
 def get_price_list_from_setMdskip(d):
 	'''https://mdskip.taobao.com/core/initItemDetail.htm?isUseInventoryCenter=false&cartEnable=true&service3C=false&isApparel=false&isSecKill=false&tmallBuySupport=true&isAreaSell=false&tryBeforeBuy=false&offlineShop=false&itemId=597606333219&showShopProm=true&isPurchaseMallPage=false&itemGmtModified=1586583685000&isRegionLevel=false&household=false&sellerPreview=false&queryMemberRight=true&addressLevel=2&isForbidBuyItem=false&callback=setMdskip&timestamp=1586591444224&isg=dBNwXtilqQnbNHidBOfgSZlsvAbToIOb4sPP3hrRQICPO41H77k5WZXXqRTMCnGVH6YMR35fHFhYBeYBqMIKnxvOa6Fy_7kSndC..&isg2=BLq611-JsKSWiz8nzofghCAaC-Dcaz5FTP5lBsSyas0Jt1rxrPkTVYCOB0NrJ7bd
 	'''
@@ -214,8 +253,145 @@ def get_price_list_from_setMdskip(d):
 		r.append([skuid,new,old])# 1 , 2 , 3 
 		
 	return r
-get_price=get_price_list=get_price_list_from_setMdskip
+tmall_sku=get_price=get_price_list=get_price_list_from_setMdskip
 
 def get_price_num_list_from_setMdskip(d):
 	return [i[1] for i in get_price_list_from_setMdskip(d)]
 get_price_num=get_price_num_list_from_setMdskip
+
+def count_money(y,max):
+	y=U.sort(y)
+	if y[0]>=max:return {y[0]:y[0]}
+	d={}
+	for i in y:
+
+		for j in y:
+			yield
+
+cm=count_money		   
+
+def iter_max_list(*a,**ka):
+	all=iter_max(*a)
+	r=[]
+	for row in all:
+		r.append((sum(row),row))
+	return U.sort(r,**ka)
+
+def iter_max(y,max,layer=0):
+	if max==0:
+		yield []  ;return
+		
+	if y[0]>=max: # 不能去掉，否则 RecursionError: maximum recursion depth exceeded in comparison
+		yield y[:1]  ;return
+	
+	for n,i in enumerate(y):
+		for j in iter_max(y,max-i,layer=layer+1):
+			mr=sum(j,i) # sum(i,j) #TypeError: 'int' object is not iterable
+			if mr>=max:
+				yield [i, *j]
+				# continue
+		else:
+			if i>=max:
+				yield [i]
+				return
+
+def iter_max_(y,max,layer=0):
+	y=U.sort(y)
+	if y[0]>=max:
+		# yield y[0]
+		return y[:1]
+		# return [y[0],{y[0]:1} ]
+	else:
+		loop_times=int( (max//y[0])+1  )
+		# return loop_times
+
+	result=[]
+	# n=0
+	# for n in range(1,loop_times+1):
+	for n,i in enumerate(y):
+		print('===',layer,n)
+		try:
+			r=[i, *iter_max(y,max-i,layer=layer+1) ]
+			if sum(r) < max:
+				return r
+			else:
+				raise Exception(r)
+		except Exception as e:
+			r=e.args[0]
+			if layer==0:
+				print(r)
+			else:
+				raise e
+
+
+
+	return
+	from itertools import product
+	for r in product(y, repeat=loop_times):
+		mr=sum(r)
+		if mr < max:raise Exception('impossible!') 
+		# yield r
+		n+=1
+	return n
+
+gm=0
+def rec(y,max,layer=0):
+	global gm,gs
+	# if y[0]>=max:
+	# 	return y[:1]
+		# yield y[:1]
+		# return [y[0],{y[0]:1} ]
+	# else:
+	if layer==0:
+		gm=int( (max//y[0])  - 1 ) 
+		gs=set()
+
+	if layer==gm:
+		for i in y:
+			yield [i]
+			
+		return
+	
+	for i in y:
+		for j in rec(y,max,layer=layer+1):
+			t= tuple( [i , *j ] )
+			if t in gs:
+				continue
+			else:
+				gs.add(t)
+			# if tuple(set(t)) in gs:
+				# continue
+			yield t
+		# 
+def ec(*a,**ka):
+	for i in TB.rec(*a,**ka):
+		t
+
+
+
+
+
+def permutations(arr, position=0,end=None):
+	global gs,gt
+	
+	if end==None:
+		end=len(arr)
+		gs=set()
+		gt=set()
+	
+	if position == end:
+		t=tuple(arr)
+		gt.add(t)
+		gs.add(tuple(set(arr)))
+ 
+	else:
+		for index in range(position, end):
+ 
+			arr[index], arr[position] = arr[position], arr[index]
+			permutations(arr, position+1, end)
+			arr[index], arr[position] = arr[position], arr[index]
+ 
+	return U.len(gs,gt)
+# arr = ["a","b","c"]
+# permutations(arr, 0, len(arr))			
+

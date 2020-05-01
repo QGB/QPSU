@@ -1,5 +1,5 @@
 #coding=utf-8
-cs=charset={'cp864', 'rot-13', 'iso8859-14', 'mac-cyrillic', 'cp852', 'cp863', 'cp367', 'iso8859-5', 'iso8859-16', 'cp500', 'gbk', 'mac-iceland', 'cp869', 'mac-arabic', 'koi8-r', 'koi8-u', 'cp856', 'cp949', 'cp1258', 'cp874', 'iso8859-4', 'euc-kr', 'utf-32', 'cp037', 'cp1255', 'cp850', 'bz2-codec', 'palmos', 'utf-16-le', 'cp737', 'punycode', 'cp437', 'iso8859-15', 'iso8859-1', 'cp858', 'iso2022-jp-2004', 'utf-32-le', 'gb2312', 'ascii', 'latin-1', 'iso2022-jp-ext', 'hex-codec', 'mac-centeuro', 'unicode-escape', 'shift-jisx0213', 'raw-unicode-escape', 'iso8859-3', 'cp866', 'iso8859-7', 'mac-latin2', 'iso8859-2', 'big5hkscs', 'cp1254', 'hz', 'iso2022-jp-1', 'mac-romanian', 'iso2022-kr', 'utf-16-be', 'iso8859-11', 'iso8859-13', 'cp1361', 'cp819', 'charmap', 'cp860', 'cp950', 'cp1140', 'iso2022-jp', 'hp-roman8', 'euc-jis-2004', 'utf-16', 'cp1253', 'cp1256', 'cp936', 'big5', 'cp1026', 'cp855', 'cp1251', 'mac-greek', 'cp1250', 'cp932', 'mbcs', 'iso8859-9', 'uu-codec', 'shift-jis-2004', 'unicode-internal', 'zlib-codec', 'iso2022-jp-3', 'cp1252', 'cp775', 'quopri-codec', 'tis-620', 'johab', 'shift-jis', 'cp1006', 'iso8859-6', 'utf-7', 'utf-8-sig', 'cp861', 'iso8859-8', 'cp1257', 'iso2022-jp-2', 'gb18030', 'base64-codec', 'cp720', 'iso8859-10', 'cp862', 'euc-jp', 'ptcp154', 'cp865', 'utf-32-be', 'cp875', 'utf-8', 'idna', 'mac-farsi', 'mac-roman', 'mac-turkish', 'euc-jisx0213', 'cp857', 'mac-croatian', 'cp424'}
+# cs=charset={'cp864', 'rot-13', 'iso8859-14', 'mac-cyrillic', 'cp852', 'cp863', 'cp367', 'iso8859-5', 'iso8859-16', 'cp500', 'gbk', 'mac-iceland', 'cp869', 'mac-arabic', 'koi8-r', 'koi8-u', 'cp856', 'cp949', 'cp1258', 'cp874', 'iso8859-4', 'euc-kr', 'utf-32', 'cp037', 'cp1255', 'cp850', 'bz2-codec', 'palmos', 'utf-16-le', 'cp737', 'punycode', 'cp437', 'iso8859-15', 'iso8859-1', 'cp858', 'iso2022-jp-2004', 'utf-32-le', 'gb2312', 'ascii', 'latin-1', 'iso2022-jp-ext', 'hex-codec', 'mac-centeuro', 'unicode-escape', 'shift-jisx0213', 'raw-unicode-escape', 'iso8859-3', 'cp866', 'iso8859-7', 'mac-latin2', 'iso8859-2', 'big5hkscs', 'cp1254', 'hz', 'iso2022-jp-1', 'mac-romanian', 'iso2022-kr', 'utf-16-be', 'iso8859-11', 'iso8859-13', 'cp1361', 'cp819', 'charmap', 'cp860', 'cp950', 'cp1140', 'iso2022-jp', 'hp-roman8', 'euc-jis-2004', 'utf-16', 'cp1253', 'cp1256', 'cp936', 'big5', 'cp1026', 'cp855', 'cp1251', 'mac-greek', 'cp1250', 'cp932', 'mbcs', 'iso8859-9', 'uu-codec', 'shift-jis-2004', 'unicode-internal', 'zlib-codec', 'iso2022-jp-3', 'cp1252', 'cp775', 'quopri-codec', 'tis-620', 'johab', 'shift-jis', 'cp1006', 'iso8859-6', 'utf-7', 'utf-8-sig', 'cp861', 'iso8859-8', 'cp1257', 'iso2022-jp-2', 'gb18030', 'base64-codec', 'cp720', 'iso8859-10', 'cp862', 'euc-jp', 'ptcp154', 'cp865', 'utf-32-be', 'cp875', 'utf-8', 'idna', 'mac-farsi', 'mac-roman', 'mac-turkish', 'euc-jisx0213', 'cp857', 'mac-croatian', 'cp424'}
 
 def b2h(bs,split=''):
 	return split.join(
@@ -75,13 +75,23 @@ def wifi_scan(p=1):
 			r.append(row)
 	gc()
 	if not p:return r
-ws=wifi_scan
+wl=lw=wifi_ls=ls_wifi=wifi_list=ws=wifi_scan
 
+def is_wifi_connected():
+	global STA_IF
+	if not STA_IF:
+		STA_IF=network.WLAN(network.STA_IF)
+	return STA_IF.isconnected()
+isc=iswifi=iswific=is_wific=isconnected=is_wifi_connected
+	
+STA_IF=0
 def wifi_connect(ssid,pw):
-	n=network.WLAN(network.STA_IF)
-	n.active(True)
-	n.connect(ssid,pw)
-	return n.isconnected()
+	global STA_IF
+	if not STA_IF:
+		STA_IF=network.WLAN(network.STA_IF)
+	STA_IF.active(True)
+	STA_IF.connect(ssid,pw)
+	return STA_IF.isconnected()
 jap=wc=wific=wifi_connect
 
 def wifi_ap(ssid,pw):
@@ -91,13 +101,17 @@ def wifi_ap(ssid,pw):
 ap=new_ap=wifi_ap
 
 def setup():
-	wifi_connect ('TP-LINK_8CD652','12345678')
+	import webrepl_setup
+	return wifi_connect('TP-LINK_8CD652*','12345678')
+	
+	
+	wifi_connect ('TP-LINK_8CD652','1234567810')
 	wifi_connect ('TP-LINK_516',str(112109389836//6))
 
 def gc():
 	import gc
 	return gc.collect()
-	
+		
 def reload(m='M'):
 	import sys
 	sys.modules.pop(m)
@@ -169,6 +183,50 @@ class V():
 		print('CALL ',self,a,ka)
 		
 		
+def print_time_ms(sleep=0.3):
+	import time
+	while 1:
+		print(time.ticks_ms())
+		time.sleep(sleep)
+	return
+pt=pms=print_ms=print_time_ms
+
+def lp():
+	import machine
+	for index in range(32):
+		if (index,0) in gdpin:
+			print('skip0-',index)
+			continue
+		try:
+			gdpin[(index,0)]=machine.Pin(index, machine.Pin.IN, machine.Pin.PULL_UP)
+		except Exception as e:
+			print(index,e)
+	for k,p in gdpin.items():
+		print(p.value(),k[0])
+
+import machine,time
 		
+def off(*a,t=0.001):
+	time.sleep(t)
+	for i in a:
+		i.off()
 		
-		
+def step(t=0.001,a=1,b=2,c=0,d=3):
+	
+	a=gpo(a,)
+	b=gpo(b,)
+	c=gpo(c,)
+	d=gpo(d,)
+
+	off(a,b,c,d)
+	while 1:
+		a.on()
+		off(a,b,c,d,t=t)
+				
+		b.on()
+		off(a,b,c,d,t=t)		
+		c.on()
+		off(a,b,c,d,t=t)		
+		d.on()
+		off(a,b,c,d,t=t)
+	# machine.Pin(index, machine.Pin.IN, machine.Pin.PULL_UP)h

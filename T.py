@@ -83,6 +83,31 @@ try:
 	from pprint import pprint,pformat
 except:pass
 ####################################################
+
+def is_valid_idcard(idcard):
+	import re
+	IDCARD_REGEX = '[1-9][0-9]{14}([0-9]{2}[0-9X])?'
+
+	if isinstance(idcard, int):
+		idcard = str(idcard)
+
+	if not re.match(IDCARD_REGEX, idcard):
+		return False
+
+	items = [int(item) for item in idcard[:-1]]
+
+	## 加权因子表
+	factors = (7, 9, 10, 5, 8, 4, 2, 1, 6, 3, 7, 9, 10, 5, 8, 4, 2)
+
+	## 计算17位数字各位数字与对应的加权因子的乘积
+	copulas = sum([a * b for a, b in zip(factors, items)])
+
+	## 校验码表
+	ckcodes = ('1', '0', 'X', '9', '8', '7', '6', '5', '4', '3', '2')
+
+	return ckcodes[copulas % 11].upper() == idcard[-1].upper()
+sfz=isfz=is_sfz	=is_valid_idcard
+
 def columnize(iterable,width=120):
 	''' 144 break line in default Win+R Cmd window
 '''
@@ -819,6 +844,15 @@ def literal_eval(str):
 	import ast
 	return ast.literal_eval(str)
 unrepr=ast_literal_eval=literal_eval
+
+def javascript_object_loads(s):
+	'''	js_obj = '{x:1, y:2, z:3}'
+
+	'''
+	import demjson 
+	return demjson.decode(s)
+
+load_js=loads_js=load_js_obj=load_js_object=js_loads=js_obj_loads=javascript_object_loads
 
 def jsonToDict(a):
 	'''py2: 不同于 json_loads ，不会自动转换 到unicode'''

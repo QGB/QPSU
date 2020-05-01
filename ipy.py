@@ -182,6 +182,7 @@ def save(file=None,lines=-1,tryExcept=False,out=False,columns=70,overide=True):
 	if file:#当指定file 名时，总是 overide
 		if T.istr(file):
 			file=F.autoPath(file,ext='.py',default=gsavePath)
+			file=T.filename(file)
 			F.new(file)
 			if py.is2():file=open(file,'a')
 			else:file=open(file,'a',encoding="utf8")

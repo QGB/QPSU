@@ -2161,7 +2161,12 @@ def int(a,default=None):
 		if default!=None:
 			return default
 		return py.No(e)
-	
+
+def math_factorial(n):
+	import math
+	return math.factorial(n)
+jc=factorial=math_factorial
+
 def primes(n):
 	''' 
 
@@ -2734,7 +2739,7 @@ def get_all_process_value_list(**ka):
 		# if cmd:row.append(p.cmd)
 		r.append(row)
 	return r
-psCmd=ps_cmd=ps_value=ps_values=GetCommandLine=getCommandLine=get_command_line=get_all_process_cmd_list=get_all_process_value_list
+psCmd=ps_cmd=ps_value=ps_values=GetCommandLine=getCommandLine=get_command_line=getCmdList=get_cmd_list=get_all_process_cmd_list=get_all_process_value_list
 
 def getProcessPath(name='',pid=0):
 	if not (name or pid):pid=globals()['pid']
@@ -3357,7 +3362,8 @@ def getDictItem(d,index=0):
 		if n==index:
 			return (k,d[k])
 	
-	return a.items().__iter__().__next__()
+	return py.No('d[{}] out of range'.format(index) ,d,index)
+	# return d.items().__iter__().__next__()
 dict_item=dict_one_item=get_dict_item=getDictItem
 
 def get_dict_value(d,index=0):
@@ -3386,7 +3392,14 @@ def setDictValuePlusOne(adict,key):
 		adict[key]+=1
 	else:
 		adict[key]=1
-set_dict_plus_1=set_dict_value_plus_1=setDictPlusOne=setDictValuePlusOne		
+dict_key_count=dict_key_count_plus_1=dict_key_count_plus_one=count_dict_key=set_dict_plus_one=set_dict_plus_1=set_dict_value_plus_1=setDictPlusOne=setDictValuePlusOne		
+
+def count_hashable_in_iterable(iter):
+	d={}
+	for k in iter:
+		dict_key_count_plus_1(d,k)
+	return d
+ct_iter=count_iter=count_list=count_hashable=count_in_iterable=count_hashable_in_iterable
 
 def dict_value_len(adict):
 	'''
@@ -3427,30 +3440,58 @@ def dict_value_hash_count(adict,):
 			d[l]=IntWithObj(1,k)
 		# setDictValuePlusOne(d,l)
 	return d
-	
+
+def get_slice_range(*a,len=0):
+	''' slice to [all index list]
+	'''
+	if (not a)  or  (not len) or (not py.isint(len) ) or (len < 1) :return []
+	_len=-1 * len
+	if py.len(a)==1 :
+		if py.type(a[0]) in [py.range,py.slice]:#stop不可能None
+			range=[   a[0].start or 0   ,   a[0].stop    ,   a[0].step or 1   ]
+		else:
+			range=[0,a[0],1]
+	elif py.len(a)==2 :
+		range=[a[0],a[1],1]
+	else:
+		range=[a[0],a[1],a[2]]
+
+	if range[0]<0:range[0]+=len
+	if range[1]<0:range[1]+=len
+	if range[2]<0:
+		#TODO
+		raise py.NotImplementedError('step < 0')
+
+	return py.list(py.range(*range) )
+get_all_index_list=get_index_list=get_slice_range
+
 def getDictItems(a,*range,index=False):
 	'''
 *range= (stop) 
 *range= (start, stop[, step])
 
 #TODO
-Init signature: slice(self, /, *args, **kwargs)
-Docstring:
-slice(stop)
-slice(start, stop[, step])
+[, step] 未用到
 
 Create a slice object.  This is used for extended slicing (e.g. a[0:10:2]).
 '''
 
-	r=[]
 	iter=a.items().__iter__()
-	range=py.list(py.range(*range) )
+
+
+	t=get_slice_range(*range,len=py.len(a))
+	if not t:
+		return py.No('empty get_slice_range( *{} )'.format(range))
+	else:
+		range=t
+
+	r=[]
 	i=-1
 	while True:
 		try:
 			item=iter.__next__()
 			i+=1
-			if i>range[-1]:break
+			if range and i>range[-1]:break
 			if i in range:
 				if index:
 					r.append([i, item] )

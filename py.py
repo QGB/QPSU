@@ -136,8 +136,8 @@ def isnum(a):
 		4 实数
 		5 复数   complex()==0j
 		6 其他类型'''
-	if is2():return type(a) in (int,long,float,complex)#isinstance better?
-	else    :return type(a) in (int,float,complex)
+	if is2():return type(a) in (int,long,float,complex) or isint(a) or isfloat(a)#isinstance better?
+	else    :return type(a) in (int,float,complex) or isint(a) or isfloat(a)
 isnumber=isnum
 
 def isint(a):

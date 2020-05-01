@@ -58,6 +58,21 @@ def uploadServer(port=1122,host='0.0.0.0',dir='./',url='/up'):
 			r.headers['Content-Type'] = 'text/plain;charset=utf-8'
 			return r
 	app.run(host=host,port=port,debug=0,threaded=True)	
+
+def get_or_set_rpc_base(base):
+	if not base:
+		base=U.get_or_set('N.rpc.base','http://127.0.0.1:23571/')
+	if not py.istr(base):
+		if py.isfloat(base):
+			base='http://192.168.{}:23571/'.format(base)
+		else:
+			raise py.ArgumentUnsupported('rpc base_url:',base)
+
+	if not base.endswith('/'):
+		if ':' not in base:
+			base=base+':23571'
+		base+='/'
+	return U.set('N.rpc.base',base)	
 	
 def rpcGetVariable(varname,base=py.No('auto history e.g. [http://]127.0.0.1:23571[/../] '),
 		timeout=9,):
@@ -81,17 +96,16 @@ def rpcGetVariable(varname,base=py.No('auto history e.g. [http://]127.0.0.1:2357
 	return dill_loads(b)
 rpc_get=rpc_get_var=rpcGetVariable
 
-def rpcSetVariable(*obj,base=py.No('auto history e.g. [http://]127.0.0.1:23571[/../] '),timeout=9,varname='v'):
+def rpcSetVariable(*obj,base=py.No('auto history e.g. [http://]127.0.0.1:23571[/../] '),timeout=9,varname='v',**ka):
 	U,T,N,F=py.importUTNF()
-	if len(base)==1 and ',' not in varname:
+	ext_cmd=U.get_duplicated_kargs(ka,'ext_cmd','cmd','extCmd','other_cmd')
+	
+	if len(obj)==1 and ',' not in varname:
 		obj=obj[0]
 
-	if not base:
-		base=U.get_or_set('N.rpc.base','http://127.0.0.1:23571/')
-	if not base.endswith('/'):base+='/'
-	U.set('N.rpc.base',base)
 
-	url='{0}{1}=F.dill_loads(request.get_data());r=U.id({1})'.format(base,varname)
+
+	url='{0}{1}=F.dill_loads(request.get_data());r=U.id({1});{2}'.format(base, varname,ext_cmd	)
 	# import requests,dill
 	# dill_loads=dill.loads
 	# post=requests.post
@@ -281,6 +295,10 @@ def get_socket_req(PORT = 65432,HOST = '127.7.7.7'):
         req, addr = s.accept()
         return req, addr
 
+def get_rpc_request_a(request):
+	a=T.subr(request.url,T.u23)
+	return T.url_decode(a)
+geta=get_a=get_request_a=get_rpc_request_a
 
 def pdf2html(url,response=None,zoom=None,path=None,pw=None):
 	U,T,N,F=py.importUTNF()
