@@ -203,7 +203,6 @@ class ListSelect(py.list):
 			except AttributeError:
 				self.disabled=[]
 
-		self.update(args, **kwds)
 
 class DictSelect(py.dict):
 	'''
