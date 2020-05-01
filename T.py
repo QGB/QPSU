@@ -349,6 +349,8 @@ html_filter=filter_html
 
 def html2text(html,baseurl='',ignore_images=True,ignore_links=True,):
 	from html2text import HTML2Text
+	if not html:return html
+	
 	h=HTML2Text(baseurl=baseurl)
 	h.ignore_images=ignore_images
 	h.ignore_links=ignore_links
