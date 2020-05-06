@@ -739,6 +739,17 @@ def in_all(v,*ts):
 	return [v]
 inAll=in_all
 ##########################################
+def which(cmd):
+	'''  return str  '''
+	import shutil
+	# import shutil.which # ModuleNotFoundError: No module named 'shutil.which'; 'shutil' is not a package
+	r=shutil.which(cmd)  #  if not exist:return None 
+	if py.istr(r):
+		r=r.replace('\\','/')
+	if not r:return ''
+	return r
+where=which
+
 def join_as_cmd_str(args,*a):
 	import shlex
 	a=py.list(a)

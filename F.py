@@ -1145,7 +1145,7 @@ Out[166]: '\\\\?\\C:\\Users\\Administrator\\.gradle\\caches\\3.3\\scripts-remapp
 ed\\sync_local_repo10406_a5s4kku7mncoj5pzsbgck2y4v\\6oxfw7eb7mpz692y3xnywccj1\\i
 nit1efd45104ffa2d33563b85b9edda76e3\\classes\\sync_local_repo10406_a5s4kku7mncoj
 5pzsbgck2y4v$_run_closure1$_closure2$_closure4$_closure5.class'''
-	return _p.abspath(file)
+	return _p.abspath(file).replace('\\','/')
 		
 def isAbs(file):
 	'''in cygwin:

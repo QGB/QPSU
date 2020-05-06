@@ -18,7 +18,7 @@ if U.isWin():
 	except:pass
 	py3compat.DEFAULT_ENCODING='gb18030' # default utf-8
 if U.isLinux():
-	gipy.editor=''	
+	gipy.editor='vim'	
 
 gIn=gipy.user_ns['In'];gOut=gipy.user_ns['Out']
 # version='.'.join([str(i) for i in IPython.version_info if py.isnum(i)])  #(5, 1, 0, '') 5.1.0

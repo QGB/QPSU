@@ -58,7 +58,7 @@ def select_result(q,response,**ka):
 			# id=v
 			# id=py.int(id)
 			r=gid_select[ py.int(v) ]
-			disabled=r.disabled
+			disabled=r.disabled # 检查是否是 select对象
 			continue
 		if v!='on':
 			raise py.ArgumentError('unexpected submit value (must be "on") :',k,v,q)
@@ -66,15 +66,18 @@ def select_result(q,response,**ka):
 		qs.add(k)
 	# q=dict(q) # 如果不进行转换 就 id=q.pop('id')  TypeError("'CombinedMultiDict' objects are immutable")
 	
-	for k in py.list(r):
-		if id(k) not in qs:
-			disabled[k]=r.pop(k)
-			continue
+	r.update_status(qs)
+	# for k in py.list(r):
+	# 	if id(k) not in qs:
+	# 		r.move_to_disabled(k)
+	# 		# ##disabled[k]=r.pop(k)
+	# 		continue
 	
-	for k in py.list(disabled):
-		if id(k) in qs:
-			r[k]=disabled.pop(k)
-			continue
+	# for k in py.list(disabled):
+	# 	if id(k) in qs:
+	# 		r.move_back(k)
+			# r[k]=disabled.pop(k)
+			# continue
 
 	return select(r,response=response,**ka)
 
@@ -135,20 +138,22 @@ def select(iterable,**ka):
 <input  type="text"  readonly="readonly"  name="{G_SELECT_URL}" value={url} style="
     background: lightgray;
 	width:80%
-">
+"> 
 <br>
 			'''.format(url=url,id=id,   G_SELECT_ID=G_SELECT_ID,G_SELECT_URL=G_SELECT_URL   )
 			i=0
 			# fk=lambda k: T.html_encode(repr(k))  #为啥会出现 0 ☑ q." checked > '
 			fk=lambda _k:T.html_encode(repr(_k))  
 			fv=lambda _v:T.html_encode(repr(_v)[:155-1] )# 全中文 80% 正好两行
+			# U.msgbox(list(kv)[:9])
 			for k,v in kv:
 				# k,v=fk(k),fv(v)
-				rows+=hd.format(i=i,name=py.id(k), k=fk(k),v=fv(v) ,checked='checked')
+				# U.msgbox(k,v)
+				rows+=hd.format(i=i,name=r.id(k,v), k=fk(k),v=fv(v) ,checked='checked')
 				i+=1
 			for k,v in disabled:
 				# k,v=fk(k),fv(v)
-				rows+=hd.format(i=i,name=py.id(k), k=fk(k),v=fv(v) ,checked='')
+				rows+=hd.format(i=i,name=r.id(k,v), k=fk(k),v=fv(v) ,checked='')
 				i+=1
 			# py.importU().log(rows)	
 			response.headers['Content-Type']='text/html;charset=utf-8';
@@ -183,17 +188,18 @@ def select(iterable,**ka):
 class ListSelect(py.list):
 	'''
 	'''
-	def __init__(*args, **kwds):
+	def __init__(self,*args, **ka):
 		'''Initialize an ordered dictionary.  The signature is the same as
 		regular dictionaries.  Keyword argument order is preserved.
 		'''
 		if not args:
 			raise TypeError("descriptor '__init__' of select object "
 							"needs an argument")
-		self, *args = args
+		# self, *args = args
 		if len(args) > 1:
 			raise TypeError('expected at most 1 arguments, got %d' % len(args))
-		args=args[0]
+		super().__init__(*args)
+		# args=args[0]
 
 		try:
 			self.disabled=args.disabled # 没有类型检查，self 与 disabled 类型不同就完蛋
@@ -203,11 +209,29 @@ class ListSelect(py.list):
 			except AttributeError:
 				self.disabled=[]
 
+	def id(self,k,v):
+		return py.id(v)
+	
+	def update_status(self,ids):
+		si=py.set()
+		
+		# for i,v in enumerate(self.disabled):
+
+		for i,v in enumerate(self):
+			if id(v) not in ids:
+				si.add(i)
+		n=0
+		for i in si:
+			v=self.pop(i+n)
+			self.disabled.append(v)
+			n=n-1
+				# self.disabled.append(v)
+
 
 class DictSelect(py.dict):
 	'''
 	'''
-	def __init__(*args, **kwds):
+	def __init__(*args, **ka):
 		'''Initialize an ordered dictionary.  The signature is the same as
 		regular dictionaries.  Keyword argument order is preserved.
 		'''
@@ -227,6 +251,6 @@ class DictSelect(py.dict):
 			except AttributeError:
 				self.disabled={}
 
-		self.update(args, **kwds)
+		self.update(args, **ka)
 
 	# def disable(self,key):
