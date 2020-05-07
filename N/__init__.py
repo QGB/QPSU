@@ -40,6 +40,21 @@ if py.is3():
 else:
 	from SimpleHTTPServer import SimpleHTTPRequestHandler
 	from BaseHTTPServer import HTTPServer as _HTTPServer
+
+def range_http_server(port=2233,**ka):
+	try				  :import http.server as SimpleHTTPServer	# Python3
+	except ImportError:import SimpleHTTPServer					# Python 2
+	from RangeHTTPServer import RangeRequestHandler
+
+
+	ip=U.get_duplicated_kargs(ka,'ip','bind','addr','address','listen','IP',default='0.0.0.0')
+	# import RangeHTTPServer
+
+	a=U.parse_args(port=port,ip=ip)
+
+	return SimpleHTTPServer.test(HandlerClass=RangeRequestHandler,port=a.port,bind=a.ip)
+	
+	
 	
 def uploadServer(port=1122,host='0.0.0.0',dir='./',url='/up'):
 	'''curl  http://127.0.0.1:1122/up -F file=@./U.py

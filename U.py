@@ -249,7 +249,7 @@ def iscyg():
 def isipy(**ka): # e=False
 	# global gipy
 	raise_EnvironmentError=get_duplicated_kargs(ka,
-'raise_err','raise_error','raiseError','raiseErr','raise_EnvironmentError','EnvironmentError')
+'raise_err','raise_error','raiseError','raiseErr','raise_EnvironmentError','EnvironmentError','raiseEnvironmentError')
 	try:
 		# if not py.modules('IPython'):return py.No()
 		import IPython
@@ -3761,7 +3761,7 @@ def filterWarningList():
 	import warnings
 	return warnings.filters
 
-def parseArgs(int=0,str='',float=0.0,dict={},list=[],tuple=py.tuple(),
+def parseArgs(int=0,str='',float=0.0,dict={},list=[],tuple=py.tuple(),**ka
 			):
 	import argparse
 	parser = argparse.ArgumentParser()
@@ -3796,13 +3796,19 @@ def parseArgs(int=0,str='',float=0.0,dict={},list=[],tuple=py.tuple(),
 		type=py.eval,  #
 		default=tuple,
 	)	
-	
+	for k,v in ka.items():
+		parser.add_argument(
+			'--%s'%k,'-%s'%k,
+			type=py.eval ,  #
+			default=v,
+		)		
+
 	FLAGS, unparsed = parser.parse_known_args()
 	# print(FLAGS.int)
 	##ipyEmbed()()
 	# print(unparsed)
 	return FLAGS
-parse_args=argsParse=argparse=argsParser=args_parse=args_parser=parseArgs	
+cmd_arg=cmd_args=parse_arg=parse_args=argsParse=argparse=argsParser=args_parse=args_parser=parseArgs	
 
 def sha256_fingerprint_from_pub_key(pubkey_str):
 	import base64
@@ -3981,10 +3987,15 @@ def python(args='-V',*a,**ka):
 		a=py.list(args)+a
 	if 'python' not in a[0].lower():
 		a.insert(0,sys.executable)
+
+	a=[i.strip() for i in a]
 	return U.cmd(a,**ka)
 
 def python_m(*a,**ka):
 	return python('-m',*a,**ka)
+
+def python_c(*a,**ka):
+	return python('-c',*a,**ka)
 
 	
 	

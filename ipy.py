@@ -18,14 +18,18 @@ if U.isWin():
 	except:pass
 	py3compat.DEFAULT_ENCODING='gb18030' # default utf-8
 if U.isLinux():
-	gipy.editor='vim'	
+	vim=U.where('vim')
+	if vim:
+		gipy.editor=vim
+	else:
+		gipy.editor=U.where('vi')
 
 gIn=gipy.user_ns['In'];gOut=gipy.user_ns['Out']
 # version='.'.join([str(i) for i in IPython.version_info if py.isnum(i)])  #(5, 1, 0, '') 5.1.0
 version=py.float('{0}.{1}{2}\n{3}'.format(*IPython.version_info).splitlines()[0])
 # gipy.editor=U.npp()
 def sycn():
-	''' '''
+	'''    '''
 # __frame=sys._getframe().f_back	
 
 def getIpyHistory(file='~/.ipython/profile_default/history.sqlite'):
