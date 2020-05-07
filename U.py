@@ -3799,7 +3799,7 @@ def parseArgs(int=0,str='',float=0.0,dict={},list=[],tuple=py.tuple(),**ka
 	for k,v in ka.items():
 		parser.add_argument(
 			'--%s'%k,'-%s'%k,
-			type=py.eval ,  #
+			type=py.type(v) ,  # str 不类型可能不能直接eval, 所以不能直接使用 type=py.eval, 
 			default=v,
 		)		
 
