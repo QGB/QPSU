@@ -53,7 +53,7 @@ def range_http_server(port=2233,**ka):
 	a=U.parse_args(port=port,ip=ip)
 
 	return SimpleHTTPServer.test(HandlerClass=RangeRequestHandler,port=a.port,bind=a.ip)
-	
+RangeRequestHandler=RangeHTTPServer=rangeHTTPServer=range_http_server
 	
 	
 def uploadServer(port=1122,host='0.0.0.0',dir='./',url='/up'):
