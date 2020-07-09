@@ -2094,23 +2094,39 @@ def getDate():
 	return datetime.now().date()
 date=getdate=getDate
 	
-def getFloaTail(a,ndigits=20,s=False,str=False,string=False,i=False,int=False):
-	''' see help(round)
+def getFloaTail(a,**ka):
+	'''  ,ndigits=20,str=False,int=False  # default return float
+	
+	see help(round)
  0.1**5
  1.0000000000000003e-05
 
  0.1**4
  0.00010000000000000002 小数位数20
+
+ In [77]: U.getFloaTail(f,ndigits=3,s=True)
+Out[77]: '.296'
+
+In [78]: U.getFloaTail(f,ndigits=3,i=True)
+Out[78]: 296
+
+In [79]: U.getFloaTail(f,ndigits=3,f=True)
+Out[79]: 0.296
+
  '''
- 
-	if type(a) is float:
+	ndigits=get_duplicated_kargs(ka,'n','nd','digit','digits','ndigits')
+	str=get_duplicated_kargs(ka,'s','str','string','STR','S')
+	int=get_duplicated_kargs(ka,'i','int','integer','INT','I','Integer')
+
+	if py.isfloat(a):
 		a=round(a-py.int(a),ndigits)#This always returns a floating point number.
-		if s or str or string:
+		if str:
 			return py.str(a)[1:]
-		if i or int:
+		if int:
 			return py.int(py.str(a)[2:])#
-		return a	
-				
+		return a	#default
+	else:
+		return py.No('Not float')		
 def stime_(time=None,ms=True):
 	r=getStime(time=time,ms=ms)
 	return T.regexReplace(r,'[^0-9_]','_')
@@ -2136,9 +2152,12 @@ def getStime(time=None,format=gsTimeFormatFile,ms=True):
 	
 	if '%' in format:
 		if time:
+			if time > IMAX:
+				time=time/1000
+				# print(type(time ),getFloaTail(time,ndigits=3,s=True) )
 			r=tMod.strftime(format,tMod.localtime(time))
 #localtime: time.struct_time(tm_year=1970, tm_mon=1, tm_mday=1, tm_hour=8,....
-			if type(time) is float and ms:
+			if ms and py.isfloat(time):
 				if '__' in format:
 					if not r.endswith('__'):r+='__'
 				# else:#r endswith '.' 
@@ -2173,7 +2192,54 @@ def int(a,default=None):
 			return default
 		return py.No(e)
 
+def least_common_multiple(x,y):
+	'''最大公因数（英语：highest common factor，hcf）也称最大公约数（英语：greatest common divisor，gcd）
+least common multiple , lcm 最小公倍数
+	'''
+	# 1. from https://bugs.python.org/msg361033
+	from math import gcd
+	if x==0:return 0
+	return abs(x // gcd(x, y) * y)
+	############
+
+	# 2. numpy
+	try:
+		from numpy import lcm
+		return lcm(x,y)
+	except Exception as e:
+		pass
+	############
+
+	# 3. slow version #	
+	if x>y:z = x
+	else  :z = y
+	while(True):
+		if((z % x == 0) and (z % y == 0)):
+			lcm = z
+			break
+		z += 1 
+	return lcm
+	############
+lcm=least_common_multiple	
+
+def greatest_common_divisor(x,y):
+	'''最大公因数（英语：highest common factor，hcf）也称最大公约数（英语：greatest common divisor，gcd）
+least common multiple , lcm 最小公倍数
+	'''
+	try:
+		from math import gcd
+		return gcd(x,y)
+	except Exception as e:
+		pass
+	
+	 # euclid's algorithm
+	if y == 0: return x
+	return gcd(y, x%y)
+gcd=greatest_common_divisor
+
 def math_factorial(n):
+	'''分解质因数
+	'''	
 	import math
 	return math.factorial(n)
 jc=factorial=math_factorial
@@ -3544,11 +3610,11 @@ lastErr=err=geterr=getErr=error=getException=getLastException
 def print_traceback_in_except(*msg):
 	'''
 try:
-    raise Exception
+	raise Exception
 except:
-    U.print_tb()  # has effect
+	U.print_tb()  # has effect
 finally:
-    U.print_tb()  # None
+	U.print_tb()  # None
 '''
 	import traceback
 	ex_type, ex, tb_obj = sys.exc_info()
@@ -3566,7 +3632,7 @@ get_tb_stack=get_traceback_stack
 
 def print_stack(f=None, limit=None, file=None):
 	"""Print_stack up to 'limit' stack trace entries  to 'file'.
-    """
+	"""
 	if f is None:
 		f = sys._getframe().f_back
 	import traceback
@@ -3891,8 +3957,8 @@ def git_config_list(a='g'):
 g    --global              use global config file
 s   --system              use system config file
 l   --local               use repository config file
-    -f, --file <file>     use given config file
-    --blob <blob-id>      read config from given blob object
+	-f, --file <file>     use given config file
+	--blob <blob-id>      read config from given blob object
 	'''
 	a=a.lower()
 	U=py.importU()

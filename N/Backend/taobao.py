@@ -150,13 +150,13 @@ def rty(rows=None,**ka):
 	return rt
 
 def load(file):
-	global grows
-
+	global grows ,gshop
+	file=file.replace('\\','/')
 	grows=F.dill_load(file=file)
-	shop=T.sub(file,'','-')
+	shop=T.sub_last(file,'/','-')
 	if shop:
-		file=shop
-	return file,len(grows)
+		gshop=shop
+	return file,gshop,len(grows)
 
 imgs=[];dis=[];ts=[];ds={}
 def result(shop=None):

@@ -968,7 +968,7 @@ def sub_tail(s,s1,s2=''):
 	i1+=len(s1)
 	# U.pln( i1,i2
 	return s[i1:i2]
-subLast=subr=subRight=sub_tail
+sub_last=subLast=subr=subRight=sub_tail
 	
 def removeAllSpace(a):
 	'''in char256 {' ', '\x0b', '\x1c', '\x1d', '\t', '\x0c', '\x1e', '\x85', '\xa0', '\x1f', '\r', '\n'}  removed'''

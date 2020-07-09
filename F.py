@@ -872,8 +872,11 @@ def numToSize(size, b1024=True):
 	Returns: string
 	test git
 	'''
+	U,T,N,F=py.importUTNF()	
+	if py.istr(size) or py.isbyte(size):
+		size=U.len(size)
 	size=py.int(size)
-	if size < 0:
+	if size <= 0:
 		return size
 		# raise ValueError('number must be non-negative')
 

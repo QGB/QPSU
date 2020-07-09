@@ -51,7 +51,7 @@ def range_http_server(port=2233,**ka):
 	# import RangeHTTPServer
 
 	a=U.parse_args(port=port,ip=ip)
-
+ 
 	return SimpleHTTPServer.test(HandlerClass=RangeRequestHandler,port=a.port,bind=a.ip)
 RangeRequestHandler=RangeHTTPServer=rangeHTTPServer=range_server=range_http_server
 	
@@ -360,11 +360,15 @@ def pdf2html(url,response=None,zoom=None,path=None,pw=None):
 def flask_html_response(response,html,remove_tag=(
 		['<script','</script>'],
 		['<SCRIPT','</SCRIPT>'],
-	),encoding='utf-8'):
-	T=py.importT()
-	if py.isbyte(html):#TODO byte remove tag,no convert
+	),encoding='utf-8',splitor='<hr>'):
+	U,T,N,F=py.importUTNF()
+	if py.istr(html):
+		pass
+	elif py.isbyte(html):#TODO byte remove tag,no convert
 		html=html.decode(encoding)
-	if not py.istr(html):
+	elif U.iterable(html):#TODO byte remove tag,no convert
+		html=splitor.join( py.str(i) for i in html )
+	else:#if not py.istr(html):
 		html=py.str(html)
 	for start,end in remove_tag:
 		s=True
@@ -752,9 +756,16 @@ def getAllAdapter():
 getIP=getip=get_ip=getAllAdapter
 
 #setip 192.168  ,  2.2	
+def auto_ip(ip,ip2=192.168):
+	if py.isint(ip):
+		ip='{0}.2.{1}'.format(ip2,ip)
+	if py.isfloat(ip):
+		ip='{0}.{1}'.format(ip2,ip)		
+	return ip
+
 def setIP(ip='',adapter='',gateway='',source='dhcp',mask='',ip2=192.168,dns=py.No('gateway') ):
 	'''配置的 DNS 服务器不正确或不存在。   # 其实已经设置好了，可以正常使用'''
-	U=py.importU()
+	U,T,N,F=py.importUTNF()
 	if U.islinux():
 		import socket,struct,fcntl
 		if not py.isbytes(adapter):adapter=adapter.encode('ascii')
@@ -785,16 +796,14 @@ def setIP(ip='',adapter='',gateway='',source='dhcp',mask='',ip2=192.168,dns=py.N
 			
 	if ip:
 		source='static'
-		if type(ip) is py.int:
-			ip='{0}.2.{1}'.format(ip2,ip)
-		if type(ip) is py.float:
-			ip='{0}.{1}'.format(ip2,ip)		
+		ip=N.auto_ip(ip,ip2)	
 		
 		if not mask:mask='255.255.255.0'
 		if not mask.startswith('mask'):mask='mask='+mask
 		
-		if not gateway:
-			T=py.importT()
+		if gateway:
+			gateway=N.auto_ip(gateway,ip2)	
+		else:
 			gateway=T.subLast(ip,'','.')+'.1'
 		if not gateway.startswith('gateway'):
 			if not dns:

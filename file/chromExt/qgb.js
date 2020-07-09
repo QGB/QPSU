@@ -76,6 +76,21 @@ async function get_img_b64(URL) {
 
 }
 
+
+
+async function get(url){
+	return new Promise(function (resolve, reject) {
+        var xhr = new XMLHttpRequest();
+        xhr.open('GET', url, true);
+        xhr.onload = function () {
+            resolve(xhr.response);
+        };
+        xhr.send()
+    });
+	
+}
+
+
 async function post(url,data){
     if(typeof a!='string')data=JSON.stringify(data)
 
@@ -486,6 +501,10 @@ async function taobao_get_item(){
     
     }
     console.log('done')
+}
+
+async function taobao_trade_backup(){
+	
 }
 
 //////////////////////////////////////////////////////////////////
