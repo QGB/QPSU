@@ -271,11 +271,17 @@ def count_money(y,max):
 cm=count_money		   
 
 def iter_max_list(*a,**ka):
-	all=iter_max(*a)
 	r=[]
-	for row in all:
-		r.append((sum(row),row))
-	return U.sort(r,**ka)
+	for i in iter_max(*a):
+		i=U.sort(i)
+		if i in r:continue
+		r.append(i)
+	lr=[]
+	for i in r:
+		s=U.IntCustomRepr(0,str='# '+T.justify(len(i),4,))
+		lr.append([s,*i])
+		
+	return lr
 
 def iter_max(y,max,layer=0):
 	if max==0:

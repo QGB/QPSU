@@ -1,8 +1,4 @@
 #coding=utf-8
-# try:
-	# import U
-	# U.tab()
-# except:pass
 __all__=['U','T','N','F','py']
 
 # import sys
@@ -50,3 +46,9 @@ except Exception as e:
 # except Exception as e:
 	# pass
 	# U.pln( e
+'''
+ipdb> !__import__('qgb.U').U.npp(self.handle)
+<subprocess.Popen object at 0x00000283E707DE08>
+ipdb> !__import__('qgb').U.npp(self.handle)
+<subprocess.Popen object at 0x00000283E743B1C8>
+'''

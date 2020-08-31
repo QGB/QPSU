@@ -36,7 +36,11 @@ class ArgumentUnsupported(ArgumentError):#an unsupported argument# 为了能快�
 	pass
 
 def isno(a):
-	return isinstance(a,No) or 'py.No' in repr(getattr(a,'__class__',0))
+	return isinstance(a,No) or \
+		'py.No' in repr(getattr(a,'__class__',0)) or\
+		(istr(a) and a.startswith('\t\t###<py.No|')) or\
+		False		#TO ADD...
+		
 gno2e=False
 class No:
 	''''is a None object with msg and raw args

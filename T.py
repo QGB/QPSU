@@ -83,6 +83,124 @@ try:
 	from pprint import pprint,pformat
 except:pass
 ####################################################
+def wc_ljust(text, length, padding=' '):
+	return text + padding * py.max(0, (length - wcswidth(text)))
+def wc_rjust(text, length, padding=' '):
+	'''rjust() 返回一个原字符串右对齐, 在左边填充
+	'''
+	# from wcwidth import wcswidth
+	return padding * py.max(0, (length - wcswidth(text))) + text
+
+def wc_cut(s,size):
+	from wcwidth import wcwidth
+	width = 0
+	for n,c in py.enumerate(s):
+		wcw = wcwidth(c)
+		if width>=size:
+			break
+		if wcw < 0:
+			width += 0
+		else:
+			width += wcw
+	return s[:n]
+def wcswidth(pwcs, n=None):
+	"""
+	Given a unicode string, return its printable length on a terminal.
+
+	Return the width, in cells, necessary to display the first ``n``
+	characters of the unicode string ``pwcs``.  When ``n`` is None (default),
+	return the length of the entire string.
+
+	 if a non-printable character is encountered. 0 width added
+	"""
+	# pylint: disable=C0103
+	#         Invalid argument name "n"
+	from wcwidth import wcwidth
+	end = len(pwcs) if n is None else n
+	idx = py.slice(0, end)
+	width = 0
+	for char in pwcs[idx]:
+		wcw = wcwidth(char)
+		if wcw < 0:
+			width += 0
+		else:
+			width += wcw
+	return width  #py.No return 0
+display_width=get_str_display_width=wcswidth
+
+
+def get_javascript_function(source,function_name):
+	T=py.importT()
+	start='async function {}('.format(function_name)
+	end='}}//end {}'.format(function_name)
+#format string '}}'表示一个 },否则 ValueError: Single '}' encountered in format string
+	r=T.sub(source,start,end)
+	if not r:
+		start='function {}('.format(function_name)
+		r=T.sub(source,start,end)
+		if not r:
+			return py.No('not found function {} in js source'.format(function_name),source,start,end)
+		return start+r+end
+	return start+r+end
+getjsf=get_js_func=get_js_function=get_javascript_function
+
+def lxml_etree_to_str(e):
+	from lxml import etree
+	h= etree.tostring(e, pretty_print=True).decode()
+	if '&#' in h:
+		h=html_decode(h)
+	return h
+			
+x2s=xpath2str=xpath_to_str=xpath_str=xpath_element_to_str=element_to_str=etree_tostring=lxml_to_str=etree_to_str=etree_tostring=lxml_etree_to_str
+
+def xpath(*a,**ka):
+	'''  xpath(astr<optional > ,xpath,file=''<only_optional_ka> ):
+	'''
+	from lxml import etree
+	U=py.importU()
+	sa_err='ArgumentError: You must provide (either astr or file<only_optional_ka>) and xpath , '
+	# print(len(a))
+	if len(a)>2:
+		return py.No(sa_err+'but got len(a)==%s'% len(a),a,ka)
+	astr=U.get_duplicated_kargs(ka,'a','ast','astr','s','st','t','text','txt','h','html')
+	file=U.get_duplicated_kargs(ka,'file','f','FILE','fileName','filename')#last
+	xpath=U.get_duplicated_kargs(ka,'xpath','x','XPath','xp')
+	if not xpath:
+		if len(a) == 1:
+			if not astr and not file:
+				return py.No(sa_err+'but only got 1 argument',a)	
+			xpath=a[0]
+		elif len(a)==2:
+			if astr:return py.No(sa_err+'but got duplicated [astr]')
+			astr =a[0]
+			xpath=a[1]	
+			
+	if file:
+		if astr or len(a)!=1:
+			return py.No(sa_err+'not both. len(a)==%s>1'%len(a))
+		F=py.importF()
+		file=F.auto_path(file)
+		e= etree.parse(file, etree.HTMLParser())
+	else:
+		e= etree.fromstring(astr, etree.HTMLParser())
+	return e.xpath(xpath)
+	
+def word_wrap(s,width=70,eol=py.No('auto'),**ka):
+	'''textwrap.wrap(text, width=70, **kwargs)'''
+	U=py.importU()
+	replace_whitespace=U.get_duplicated_kargs(ka,'replace_whitespace','remove_old_eol','del_eol','del_old')
+	import textwrap
+	if not eol:
+		if '\r\n' in s:
+			eol='\r\n'
+		else:
+			eol='\n'
+	return eol.join(
+		textwrap.wrap(s, width=width, replace_whitespace=replace_whitespace)
+	)
+	
+	
+break_line=word_wrap
 
 def is_valid_idcard(idcard):
 	import re
@@ -129,16 +247,22 @@ def columnize(iterable,width=120):
 		row_first=True, separator=' , ', displaywidth=width)
 	return r
 
-def justify(s,size=0,char=' ',method='ljust',cut=False):
+def justify(s,size=0,char=' ',method=wc_ljust,cut=False):#'ljust'
 	''' ljust() 方法返回一个原字符串左对齐,并使用空格填充右边至指定长度的新字符串。
 	'''
 	s= string(s)
 	if size<1:
 		return s
 		# raise py.ArgumentError('size must > 0',size)
-	if cut and len(s)>=size:
-		return s[:size]
-	return py.getattr(s,method)(size,char)	#
+	if py.istr(method):
+		if cut and len(s)>=size:
+			return s[:size]
+		return py.getattr(s,method)(size,char)	#
+	if py.callable(method):
+		if cut and wcswidth(s)>=size:
+			return wc_cut(s,size)
+		return method(s,size,char) #TODO 统一参数
+	raise NotImplementedError('method must str.funcName or callable')
 padding=justify
 	
 def encode(s,encoding):
@@ -211,7 +335,9 @@ def recursive_join(s,iter,prepend_layer=False,append_layer=False,format_layer=Fa
 
 recursiveJoin=recursive_join
 
-def join(iterable,separator=','):
+def join(iterable,**ka):#separator=','
+	U=py.importU()
+	separator=U.get_duplicated_kargs(ka,'split','splitor','separator',default=',')
 	if py.istr(iterable):return iterable
 	return separator.join( string(i) for i in iterable )
 	
@@ -236,6 +362,7 @@ def parse_url_arg(url):
 		from urllib.parse import urlparse,parse_qs
 	o = urlparse(url)
 	return parse_qs(o.query)
+parse_qs=parse_url_arg
 
 def get_url_arg(url,arg_name):
 	d=parse_url_arg(url)
@@ -246,8 +373,18 @@ def get_url_arg(url,arg_name):
 		return v[0]
 	else:
 		return v
-get_url_args=get_url_arg
+url_get_arg=get_url_arg
 
+def get_url_args(url,*a,default=py.No('Not found')):
+	d=parse_url_arg(url)
+	r=[]
+	for i in a:
+		v=d.get(i,default)
+		if py.len(v)==1 and py.islist(v):
+			v=v[0]
+		r.append(v)
+	return r
+	
 def FileNameToURL(a):
 	'''
 	urllib.parse.unquote(string, encoding='utf-8', errors='replace')
@@ -284,6 +421,17 @@ def urlToFileName(url):
 	
 url2fn=url2file=url2fileName=url_to_filename=urlToFileName
 
+
+def get_domain_parts_by_url(url_or_domain):
+	'''In [513]: domain_parts, non_zero_i, parsed_url
+Out[513]:
+(['buyertrade', 'taobao', 'com'],
+ 2,
+ SplitResult(scheme='https', netloc='buyertrade.taobao.com', path='/trade/itemlist/list_bought_items.htm', query='', fragment=''))
+'''
+
+	import tld
+	return tld.utils.process_url(fix_protocol=True,url=url_or_domain)[0]
 
 def getFLD(url_or_domain):
 	"""Extract the first level domain.
@@ -340,7 +488,7 @@ def filter_sint_list(a,digits=py.range(1,999)):
 	if py.len(si) in digits:
 		r.append(si)
 	return r
-matchInt=match_int=filter_sint=filter_int=filterInt=filter_sint_list
+int_filter=matchInt=match_int=filter_sint=filter_int=filterInt=filter_sint_list
 
 RE_HTML_TAG = re.compile(r'<[^>]+>')
 def filter_html(text):
@@ -384,7 +532,7 @@ def html_prettify(html, formatter="html5",p=py.No('auto')):
 		return None
 	else:
 		return r
-html_prett=pretty_html=html_pretty=prettify_html=html_prettify
+nice_html=htmlBeautify=html_beautify=html_prett=pretty_html=html_pretty=prettify_html=html_prettify
 
 def BeautifulSoup(html):
 	from bs4 import BeautifulSoup
@@ -862,13 +1010,32 @@ def jsonToDict(a):
 	return ast.literal_eval(a.replace('false','False').replace('true','True'))
 js2py=jsonToDict
 	
-def json_loads(astr):
+def json_load(astr='',file=None,**ka):
 	import json
+	if not (astr or file):
+		return py.No('either astr or file, but not any') #一个也没有 不用 both not
+	if (astr and file):
+		return py.No('either str or file, but not both') # not all 可以吗
+	
+	if file:
+		if py.istr(file):
+			F=py.importF()
+			file=F.auto_path(file)
+			file=py.open(file,'rb')
+		if not py.isfile(file):
+			return py.No('file must be str or file-like-obj')
+			
+		with file:
+			try:
+				return json.load(file,**ka)
+			except Exception as e:
+				return py.No(e,file)	
+	#######			
 	try:
-		return json.loads(astr)
+		return json.loads(astr,**ka)
 	except Exception as e:
 		return py.No(e,astr)
-json_load=json_loads
+json_loads=json_load
 
 def json_dumps(obj):
 	U=py.importU()
@@ -955,26 +1122,47 @@ def sub_head(s,s1,s2=''):
 subLeft=subl=sub=sub_head
 
 def sub_tail(s,s1,s2=''):
+	'''
+T.subLast('C:/test/list_bought_items.htm/10_15_知乎周源_list_bought_items.htm','_','_list_bought_items',)
+应该等于 	知乎周源
+'''	
 	if(s==None):return ()
-	s=str(s)
+	if not py.istr(s):
+		s=str(s)
 	i1=0
-	if s1!='':i1=s.rfind(s1)
-	if(s2==''):
-		i2=s.__len__()
+	if s2:
+		i2=s.rfind(s2)
+		if i2==-1:return ''
+		if s1:
+			i1=s[:i2].rfind(s1)
+			if i1==-1:return ''
+			i1+=len(s1)
+		else:
+			i1=0
 	else:
-		i2=s.rfind(s2,i1+1)
-	if(-1==i1 or -1==i2):
-		return ''
-	i1+=len(s1)
+		i1=s.rfind(s1)
+		if i1==-1:return ''
+		i1+=len(s1)
+		i2=s.__len__()
+	return s[i1:i2] 
+
+	# if(s2==''):
+	# 	i2=s.__len__()
+	# else:
+	# 	i2=s.rfind(s2,i1+1)
+	# if(-1==i1 or -1==i2):
+	# 	return ''
+	# i1+=len(s1)
 	# U.pln( i1,i2
-	return s[i1:i2]
+	# return s[i1:i2]
 sub_last=subLast=subr=subRight=sub_tail
 	
-def removeAllSpace(a):
-	'''in char256 {' ', '\x0b', '\x1c', '\x1d', '\t', '\x0c', '\x1e', '\x85', '\xa0', '\x1f', '\r', '\n'}  removed'''
+def replace_all_space(a,to='',target=r"\s+"):
+	'''  多个连续空白字符会 缩减成 一个空格
+	in char256 {' ', '\x0b', '\x1c', '\x1d', '\t', '\x0c', '\x1e', '\x85', '\xa0', '\x1f', '\r', '\n'}  removed'''
 	import re
-	return re.sub(r"\s+", "", a, flags=re.UNICODE)
-del_space=del_spaces=delAllSpace=removeAllSpaces=removeAllSpace
+	return re.sub(target, to, a, flags=re.UNICODE)
+del_space=del_spaces=remove_all_space=replace_all_spaces=delAllSpace=removeAllSpaces=removeAllSpace=replace_all_space
 
 def replacey(a,olds,new):
 	if not py.istr(a):return py.No('a is not str',a)
@@ -1021,13 +1209,18 @@ def varname(a):
 	# return replacey(a,'_',':','.','\\','/','-','"',' ','\n','\r','\t','[',']')
 # U.pln( varname(i09)
 
-def filename_legalized(a):
+def filename_legalized(a,space=' '):
+	'''  # 多个连续空白字符会 缩减成 一个 space
+	'''
 	if not py.istr(a):a=string(a)
+	a=replace_all_space(a.strip(),space)
 	r=''
-	for c in a.strip():
+	for c in a:
 		if c in NOT_FILE_NAME:
 			r+=py.chr(py.ord(c)+0XFEE0)
-		else:r+=c
+			continue
+		r+=c
+	
 	return r
 fileName=filename=fileNameLegalized=file_legalized=filename_legalized
 # filename.__str__=FILE_NAME	
@@ -1043,12 +1236,12 @@ def pathname_legalized(a):
 	return r
 pathName=pathname=path_legalized=pathname_legalized
 
-def haszh(a):
+def is_have_zh(a):
 	zhPattern = re.compile(u'[\u4e00-\u9fa5]+')
 	match = zhPattern.search(a)
 	if match:return True
 	return False
-	
+has_zh=haszh=hasZh=is_have_zh
 # def har(fileName):
 
 	
@@ -1065,7 +1258,7 @@ class Har():
 	def __len__(s):
 		return
 	
-def min(*a):
+def min_len(*a):
 	'''return min length string(a[i])'''
 	r=''
 	for i in a:
@@ -1074,7 +1267,7 @@ def min(*a):
 	return r
 	
 	
-def max(*a):
+def max_len(*a):
 	'''return max length string(a[i])'''
 	r=''
 	for i in a:

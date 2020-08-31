@@ -41,7 +41,32 @@ else:
 	from SimpleHTTPServer import SimpleHTTPRequestHandler
 	from BaseHTTPServer import HTTPServer as _HTTPServer
 
+def zhihu_question(url,response=None):
+	import qgb.tests.zhihu_scrapy_single_QA
+	if not( py.istr(url) or py.isint(url) ):
+		url=py.getattr(url,'url')
+		
+	r= qgb.tests.zhihu_scrapy_single_QA.zhihu(url)
+	if response:
+		response.set_data(r)
+	return r
+	
+zhihu=zhihu_question	
+
+
 def range_http_server(port=2233,**ka):
+	'''
+#TODO 标准库test 不支持https 
+
+['C:/QGB/npp/notepad++.exe',
+ 'C:\\QGB\\Anaconda3\\lib\\http\\server.py',
+ '-n 1219']
+ 
+def test(HandlerClass=BaseHTTPRequestHandler,
+         ServerClass=ThreadingHTTPServer,
+         protocol="HTTP/1.0", port=8000, bind=""):	
+	
+	'''
 	try				  :import http.server as SimpleHTTPServer	# Python3
 	except ImportError:import SimpleHTTPServer					# Python 2
 	from RangeHTTPServer import RangeRequestHandler
@@ -179,7 +204,7 @@ flaskArgs=py.dict(debug=0,threaded=True),
 		nonlocal globals,locals 
 		code=T.urlDecode(_request.url)
 		code=T.sub(code,_request.url_root )
-		U.log( (('\n'+code) if '\n' in code else code)[:99]	)
+		# U.log( (('\n'+code) if '\n' in code else code)[:99]	)
 		# U.ipyEmbed()()
 		_response=make_response()
 		_response.headers['X-XSS-Protection']=0
@@ -360,7 +385,7 @@ def pdf2html(url,response=None,zoom=None,path=None,pw=None):
 def flask_html_response(response,html,remove_tag=(
 		['<script','</script>'],
 		['<SCRIPT','</SCRIPT>'],
-	),encoding='utf-8',splitor='<hr>'):
+	),encoding='utf-8',splitor='<hr>',**ka):
 	U,T,N,F=py.importUTNF()
 	if py.istr(html):
 		pass
@@ -370,6 +395,12 @@ def flask_html_response(response,html,remove_tag=(
 		html=splitor.join( py.str(i) for i in html )
 	else:#if not py.istr(html):
 		html=py.str(html)
+		
+	if U.get_duplicated_kargs(ka,'remove_script','del_script'):
+		remove_tag=(
+['<script','</script>'], ['<SCRIPT','</SCRIPT>'],
+		)
+	
 	for start,end in remove_tag:
 		s=True
 		while s:

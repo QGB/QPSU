@@ -1,7 +1,6 @@
 _TEXT=function(wrap) {return wrap.toString().match(/\/\*\s([\s\S]*)\s\*\//)[1];}  // 提取 /* 之间的内容 */
 _CODE=function(wrap) {return wrap.toString().match(/function\s*\(\s*\)\s*{\s*([\s\S]*)\s*}/ )[1];}//auto trim { code_start_end_space }
 
-function sleep(ms) {return new Promise(resolve => setTimeout(resolve, ms) )  }
 function _sleep(sec){// chrome 74 还有效~
  // console.log(new Date().toISOString())  // 
   var xhr = new XMLHttpRequest();
@@ -18,11 +17,19 @@ function add_script(url){
     return s
 }
 
+function sleep(ms) {return new Promise(resolve => setTimeout(resolve, ms) )  }//end sleep
 
 function xpath(sp,ele){
     //var sp = "//a[text()='SearchingText']";
-    return document.evaluate(sp, ele||document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue;
-}
+	if(ele){
+		if(!sp.startsWith('.')){
+			sp='.'+sp
+		}
+	}else{
+		ele=document//直接重新赋值参数不用加 var
+	}
+    return document.evaluate(sp, ele, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue;
+}//end xpath
 
 function xpath_all(sp,ele){
     let results = [];
@@ -30,21 +37,36 @@ function xpath_all(sp,ele){
     for (let i = 0, length = query.snapshotLength; i < length; ++i) {
         results.push(query.snapshotItem(i));
     }
-//     try {
-//       var thisNode = query.iterateNext();
-
-//       while (thisNode) {
-//         results.push(thisNode);
-//         thisNode = query.iterateNext();
-//       }
-//     }
-//     catch (e) {
-//         return query
-//          throw ['Error: Document tree modified during iteration ' , e ]
-//     }
     return results;
-}
+}//end xpath_all
 var xpathAll=xpath_all
+
+async function post(url,data){
+    if(typeof a!='string')data=JSON.stringify(data)
+
+    return new Promise(function (resolve, reject) {
+        var xhr = new XMLHttpRequest();
+        xhr.open('post', url, true);
+        // xhr.responseType = 'document';
+        xhr.onload = function () {
+            resolve(xhr.response);
+        };
+        xhr.send(data)
+    });
+}//end post
+
+
+async function rpc_sleep(aisec){
+    if(!aisec){
+        aisec="U.get('rpc_sleep',1)"
+    }
+    var sec=await post("https://okfw.net/r="+aisec+";U.sleep(r)")
+    var r=Number.parseFloat(sec)
+    if(!r){
+        return sec
+    }
+    return r 
+}//end rpc_sleep
 
 function get_img(URL) {
     return new Promise((resolve, reject) => {
@@ -91,19 +113,6 @@ async function get(url){
 }
 
 
-async function post(url,data){
-    if(typeof a!='string')data=JSON.stringify(data)
-
-    return new Promise(function (resolve, reject) {
-        var xhr = new XMLHttpRequest();
-        xhr.open('post', url, true);
-        // xhr.responseType = 'document';
-        xhr.onload = function () {
-            resolve(xhr.response);
-        };
-        xhr.send(data)
-    });
-}
 //await post("https://okfw.net/r=U.dir(q)",[1,2,3] )
 /////////////////////////////////////////////////////////////////////
 async function tab_query(qd={} ){
@@ -116,7 +125,7 @@ async function tab_query(qd={} ){
 }
 getAllTabs=get_all_tabs= tab_query
 
-async function tab_query_id(exp=i=>i.id,qd={} ){
+async function tab_query_id(exp= i=>i.id ,qd={} ){
     return Array.from(await tab_query(qd)).map(exp)
 }
 
@@ -134,7 +143,11 @@ var gs_lib_func = _sleep.toString()+
 async function tab_exec(tab,code){
     var tab_id=tab
     if(tab.id){tab_id=tab.id  }
-    
+	
+    if(typeof code==="function"){
+		code=_CODE(code)
+	}
+	
     return new Promise(function (resolve, reject) {  //看code最后行，其实 r=没用 ，反正js默认返回最后一个值
       chrome.tabs.executeScript(tab_id,
       {'code': 'r=undefined\n'+ //每次执行后默认保留变量，去除它
@@ -173,12 +186,6 @@ async function tab_remove(tab){
         resolve(arguments)
       })
    })
-}
-
-async function rpc_sleep(aisec){
-    sec=await post("https://okfw.net/r=U.get('rpc_sleep',1);U.sleep(r)")
-    sec=Number.parseInt(sec)
-    return sec
 }
 
 async function get_urls_doc(
@@ -511,7 +518,9 @@ async function taobao_trade_backup(){
 async function main(){
     return console.log(eval('2+2'))
     if(!chrome.tabs)return
-    return t=await tab_current()
+	var t=await tab_current()
+    return t
+	
     var img="https://img.alicdn.com/bao/uploaded/i3/2658592015/TB2Xk8McA.OyuJjSszhXXbZbVXa_!!2658592015.jpg_240x240.jpg"
     var ds=document.querySelectorAll('dl.item') 
     img=ds[5].querySelector('img')

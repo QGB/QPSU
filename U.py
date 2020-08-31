@@ -515,9 +515,9 @@ p=print_
 # exit()
 def input(msg=''):
 	if py.is2():
-		return raw_input(msg)
+		return py.raw_input(msg)
 	else:
-		return input(msg)
+		return py.input(msg)
 
 def readStdin(size=-1):
 	'''size<0 read all, 
@@ -751,12 +751,17 @@ def which(cmd):
 where=which
 
 def join_as_cmd_str(args,*a):
-	import shlex
 	a=py.list(a)
 	if py.istr(args):
 		a.insert(0,args)
 	elif py.iterable(args):
 		a=py.list(args)+a
+		
+	import subprocess
+	return subprocess.list2cmdline(a)
+
+	# abandon      #不是 abundant
+	import shlex
 	return ' '.join(shlex.quote(x) for x in a)
 joinCmd=join_cmd=cmdJoin=cmd_join=shlex_join=join_as_cmd_str
 
@@ -861,11 +866,32 @@ pop(_63,25)  #_63 has change
 	if py.len(r)==1:return r[0]
 	else:raise Exception('kargs matched keys len <> 1',ka,keys)
 
-getKargsDuplicated=getKArgsDuplicated=get_kargs_duplicated=get_duplicated_kargs
+get_ka=get_multi_ka=getKargsDuplicated=getKArgsDuplicated=get_kargs_duplicated=get_duplicated_kargs
 
 def sleep(aisecond):
 	if not aisecond:return
 	__import__('time').sleep(aisecond)
+
+def wait_can_be_interrupted(aisecond):
+	U=py.importU()
+	from threading import Event      
+	e=U.get_or_set('wait_event',Event())
+	e.clear()
+	begin=U.itime_ms()
+	e.wait(aisecond)
+	ms=U.itime_ms()-begin
+	e.clear()
+	return ms
+sleep_with_interrupt=wait=wait_with_interrupt=wait_can_be_interrupted
+
+
+def interrupt_wait():
+	U=py.importU()
+	e=U.get('wait_event')
+	if not e:
+		return py.No('no wait_event')
+	return e.set() # None
+wb=bw=wait_break=bwait=break_wait=interrupt_sleep=sleep_interrupt=wait_interrupt=interrupt_wait		
 	
 def pause(a='Press Enter to continue...\n',exit=True):
 	'''a=msg'''
@@ -1557,13 +1583,16 @@ def add(*a):
 		else:
 			raise NotImplementedError('not num type')
 	return r		
-def maxLen(*a):
+def max_len(*a):
+	'''  max( *map(len,U.col(lr,5)) ) '''
 	if py.len(a)==1:a=flat(a)
 	im=-1
 	for i in a:
 		i=len(i)
 		if i>im:im=i
 	return im
+maxLen=max_len	
+	
 def minLen(*a):
 	if py.len(a)==1:a=flat(a)
 	if not a:return -1
@@ -2166,7 +2195,12 @@ def getStime(time=None,format=gsTimeFormatFile,ms=True):
 			return r
 		else:return tMod.strftime(format)
 stime=getCurrentTimeStr=timeToStr=getStime
-	
+
+def parse_time_str(a):
+	from dateutil import parser
+	return parser.parse(a)
+parse_time=stime2time=stime_to_time=parse_stime=parse_time_str	
+
 def float(x):
 	''' float(x=0, /)  Subclasses:     float64
 0.07999999999999999  hangs	
@@ -2644,6 +2678,9 @@ def hash(obj,*other):
 
 def id(obj,*other):
 	return FuncWrapForMultiArgs(f=py.id,args=(obj,other))
+	
+def type(obj,*other):
+	return FuncWrapForMultiArgs(f=py.type,args=(obj,other))
 
 def FuncWrapForMultiArgs(f,args,default=None):
 	'''Exception return py.No'''
@@ -3227,7 +3264,7 @@ def explorer(path='.'):
 		os.system(ps)
 	return StrRepr(ps)
 
-exp=explorer
+exxp=exp=explorer
 
 def log(*a):
 	''' rewrite bellow 
@@ -3542,14 +3579,14 @@ def get_slice_range(*a,len=0):
 	return py.list(py.range(*range) )
 get_all_index_list=get_index_list=get_slice_range
 
-def getDictItems(a,*range,index=False):
+def getDictItems(a,*range,index=False,key=True, ):
 	'''
 *range= (stop) 
 *range= (start, stop[, step])
 
 #TODO
-[, step] 未用到
-
+1. [, step] 未用到
+2. value=True
 Create a slice object.  This is used for extended slicing (e.g. a[0:10:2]).
 '''
 
@@ -3567,6 +3604,8 @@ Create a slice object.  This is used for extended slicing (e.g. a[0:10:2]).
 	while True:
 		try:
 			item=iter.__next__()
+			if not key:item=item[1]
+			
 			i+=1
 			if range and i>range[-1]:break
 			if i in range:
@@ -3719,7 +3758,7 @@ def load(name=0,returnFile=False):
 	# if name:#TODO 配合 save 并正确转换到相应类型，使用对象序列化？ 
 
 	
-def	renameDictKey(d,new,old={}):
+def	rename_dict_key(d,new,old={}):
 	if not old:
 		for i in d:
 			old=i
@@ -3730,6 +3769,8 @@ def	renameDictKey(d,new,old={}):
 		d[new] = d.pop(old)
 	return d
 		# del d[old]#这个可以删除item,py27
+renameDictKey=rename_dict_key
+
 def beep(ms=1000,hz=2357):
 	if iswin():
 		try:
@@ -3744,6 +3785,32 @@ def unique(iterable):
 	for i in iterable:
 		if i not in r:r.append(i)
 	return r
+
+def get_column_from_2D_list(matrix, i):
+	return [row[i] for row in matrix]
+col=column=get_2D_list_column=get_2d_list_column=get_column_from_2D_list	
+
+def get_2D_list_shape(a):
+	import numpy as np
+	return np.shape(a)
+get_2d_array_shape=get_2d_list_length=get_2d_list_shape=get_2D_list_shape
+
+def get_2D_list_max_min_wcswidth(lr):
+	'''  get_2D_list_max_min(a,func=T.wcswidth)
+	'''
+	U,T,N,F=py.importUTNF()
+	irows,icols=U.get_2d_array_shape(lr)
+	tj=[StrRepr(col,size=5) for col in 'icols,min,max,imin,imax,min_v,max_v'.split(',')]
+	for i in range(icols):
+		y=U.get_2d_list_column(lr,i)
+		if not py.istr(y[0]):continue
+		ry=[T.wcswidth(s) for s in y]
+		max=py.max(*ry)
+		min=py.min(*ry)
+		imax=ry.index(max)
+		imin=ry.index(min)
+		tj.append([i,min,max,imin,imax,lr[imin][i],lr[imax][i] ])
+	return tj
 
 def pipInstall(modName):
 	''' #TODO 在同一个进程内 pipInstall 只能运行一次
@@ -4055,6 +4122,7 @@ def python(args='-V',*a,**ka):
 		a.insert(0,sys.executable)
 
 	a=[i.strip() for i in a]
+	print(U.v.U.cmd(a,**ka) )
 	return U.cmd(a,**ka)
 
 def python_m(*a,**ka):
@@ -4098,13 +4166,15 @@ class IntCustomStrRepr(py.int):
 	IntCustomRepr(x,target=func(i,ka),a1=..) #default base 10
 	'''
 	def __new__(cls, *a, **ka):
-		if py.len(a)!=1:
-			raise py.ArgumentError('only need one intable arg,but get {}'.format(py.len(a)))
-		self= py.int.__new__(cls, *a)
-		self.target=get_duplicated_kargs(ka,'f','target','repr','__repr__','func','function','custom',default=T.justify)
+		# if py.len(a)!=1:
+			# raise py.ArgumentError('only need one intable arg,but get {}'.format(py.len(a)))
+		self= py.int.__new__(cls, a[0])
+		self.target=get_duplicated_kargs(ka,'f','target','func','function',
+		'repr','__repr__','str','__str__','custom',default=T.justify)
 		
 		# if not self.target:
 		# 	self.target=
+		self.a=a
 		self.ka=ka
 		return self
 		
@@ -4113,7 +4183,12 @@ class IntCustomStrRepr(py.int):
 		'''
 		'''
 		if py.callable(self.target):
-			return self.target(self,**self.ka)
+			# try:
+			return self.target(*self.a,**self.ka)
+			# except Exception as e:
+				# print(self.a,self.ka)
+				# e.self=self
+				# raise e
 		else:
 			if self.ka:
 				raise py.ArgumentError('when CustomStrRepr target not callable,must no keyword args!')
@@ -4312,6 +4387,13 @@ U.StrRepr(b'3232',encoding='ascii')	[<class 'qgb.U.StrRepr'>, (b'3232',), {'enco
 		
 	def __repr__(self):return self.__str__()
 	def __str__(self) :
+		repr=get_duplicated_kargs(self.ka,'repr','str','s','st','__repr__','__str__')
+		if repr:
+			if py.callable(repr):
+				return repr( **self.ka )
+			else:
+				return py.str(repr)
+			
 		return T.justify(super().__str__(),**self.ka)
 	# return (self.padding*self.padding_times)+ super().__str__() +(self.padding*self.padding_times)
 	

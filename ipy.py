@@ -185,8 +185,8 @@ def save(file=None,lines=-1,tryExcept=False,out=False,columns=70,overide=True):
 		lsta,lend=0,gIn.__len__()
 	if file:#当指定file 名时，总是 overide
 		if T.istr(file):
+			file=T.filename(file)# 如果用 pathname 不好处理 含有 /斜杠的问题
 			file=F.autoPath(file,ext='.py',default=gsavePath)
-			file=T.filename(file)
 			F.new(file)
 			if py.is2():file=open(file,'a')
 			else:file=open(file,'a',encoding="utf8")

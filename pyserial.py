@@ -78,6 +78,22 @@ def open_device(dev=None, baudrate=115200, timeout=5,dtr=1):
     
 open=open_port=open_dev=open_device
 
+def close(dev=None):
+	global g
+	if not dev:
+		dev=U.get(__name__+'_g',g)
+	
+    if dev:
+		dev.close()
+	
+	if dev==g:
+		g=py.No('closed dev at '+U.stime(),g)
+		U.set(__name__+'_g',g)	
+	
+	return dev
+			
+    # dev=U.get_or_set(__name__+'_g',dev)
+
 def write_one_line(input,dev=None,wait=1,encoding=ENCODING,eol=b'\r\n',p=True):
     global g
     if not dev:dev=g=U.get(__name__+'_g')
