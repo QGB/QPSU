@@ -675,7 +675,7 @@ def write_xlsx(file,a):
 def write_xls(file,a):
 	'''ValueError: row index was 65536, not allowed by .xls format'''
 	import xlwt
-	file=autoPath(file)
+	file=autoPath(file,ext='xls')
 	
 	xldoc = xlwt.Workbook()
 	sheet = xldoc.add_sheet("Sheet1", cell_overwrite_ok=True)

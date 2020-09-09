@@ -304,8 +304,9 @@ if iswin() or iscyg():
 			# if(a!=()):s=str(s)+ ','+str(a)[1:-2]
 			# if iswin():windll.user32.MessageBoxA(0, str(s), str(st), 0)
 		setErr(ei,msg='#Error import Win'  )
-	def driverPath(a,reverse=True):
+	def find_driver_path(a,reverse=True):
 		'''from Z to C'''
+		if len(a)>1 and a[1]==':':a=a[1:]
 		if not a.startswith(':'):a=':'+a
 		# try:AZ=T.AZ;exist=F.exist
 		# except:
@@ -315,7 +316,8 @@ if iswin() or iscyg():
 		for i in sys.executable[0]+AZ:
 			if exist(i+a):return i+a
 		return ''	
-		
+		driverPath=driver_path=find_driver_path
+
 	if iscyg():
 		def getCygPath():
 			try:r=getProcessPath()
@@ -1981,6 +1983,18 @@ def enumerate(a,start=0,ignoreNull=False,n=False):#todo 设计一个 indexList�
 		start+=1
 	return r
 il=ilist=indexList=enumerate
+
+def map(*a):
+	'''TypeError: map() takes no keyword arguments
+Init signature: map(self, /, *args, **kwargs)
+Docstring:
+map(func, *iterables) --> map object
+
+Make an iterator that computes the function using arguments from
+each of the iterables.  Stops when the shortest iterable is exhausted.
+Type:           type
+'''
+	return py.list(py.map(*a))
 
 def range(*a):
 	'''return list
@@ -3733,7 +3747,61 @@ getCmdline=getCmd=get_cmd=get_raw_cmd=get_raw_cmdline=get_self_raw_cmdline
 def get_cmdline_by_pid(pid=None):
 	if pid==None:
 		return get_self_raw_cmdline()
-	
+
+def beep(ms=1000,hz=2357):
+	if iswin():
+		try:
+			import winsound
+			return winsound.Beep(hz,ms)
+		except:
+			pass
+	p('\a')
+
+def nircmd(*a):
+	'''
+The “old style” string formatting syntax %(name)s   auto ignore not use dict key
+'''	
+	if not iswin():raise py.EnvironmentError()
+	if len(a)==1 and ( py.islist(a) or py.istuple(a) ):
+		a=a[0]
+	a=py.list(a)
+	for n,v in py.enumerate(a):
+		if py.islist(v) or  py.istuple(v) or py.isdict(v) :
+			raise py.ArgumentError('a[%(n)s]==%(v)s  ;a=' % py.locals() ,a,n,v)
+		if not py.istr(v):  # int ERROR :  File "C:\QGB\Anaconda3\lib\subprocess.py", line 530, in list2cmdline    needquote = (" " in arg) or ("\t" in arg) or not arg
+			a[n]=T.string(v)
+
+	nircmd=find_driver_path('C:/QGB/babun/cygwin/home/qgb/wshell/exe/nircmd/nircmd.exe')
+	c=nircmd,*a
+	cmd(c);return c
+	# return cmd(c),c
+
+def system_mute():
+	return nircmd( 'mutesysvolume', '1')
+mute=mute_system=system_mute
+
+def system_unmute():
+	return nircmd( 'mutesysvolume', '0')
+unmute=unmute_system=system_unmute
+
+def set_system_volume(a):
+	''' 655.35 - 65535  == vol 1 - 100
+	'''
+	if py.isfloat(a):
+		if not 0<=a<=1:raise py.ArgumentError('vol float shoud in [0,1]')
+		if a<0.01:a=0
+		a=py.int(65535*a)
+
+	elif py.isint(a):
+		if a<655:
+			if 0<=a<=100:
+				a=655*a
+			else:
+				raise py.ArgumentError('vol int shoud in [0,100]  or [0,65534]')
+	else:
+		raise py.ArgumentUnsupported(a)
+	return nircmd( 'setsysvolume',a )
+vol=set_vol=set_volumn=set_volume=set_system_volumn=set_system_volume
 
 def save(a,name=0):
 	if not iswin():raise NotImplementedError()
@@ -3770,24 +3838,21 @@ def	rename_dict_key(d,new,old={}):
 	return d
 		# del d[old]#这个可以删除item,py27
 renameDictKey=rename_dict_key
-
-def beep(ms=1000,hz=2357):
-	if iswin():
-		try:
-			import winsound
-			return winsound.Beep(hz,ms)
-		except:
-			pass
-	p('\a')
-
 def unique(iterable):
 	r=[]
 	for i in iterable:
 		if i not in r:r.append(i)
 	return r
 
-def get_column_from_2D_list(matrix, i):
-	return [row[i] for row in matrix]
+def get_column_from_2D_list(matrix, *col_index):
+	r=[]
+	for row in matrix:
+		l=[]
+		for i in col_index:
+			l.append(row[i])
+		r.append(l)
+	return r	
+	# return [ for row in matrix]
 col=column=get_2D_list_column=get_2d_list_column=get_column_from_2D_list	
 
 def get_2D_list_shape(a):
@@ -3800,7 +3865,8 @@ def get_2D_list_max_min_wcswidth(lr):
 	'''
 	U,T,N,F=py.importUTNF()
 	irows,icols=U.get_2d_array_shape(lr)
-	tj=[StrRepr(col,size=5) for col in 'icols,min,max,imin,imax,min_v,max_v'.split(',')]
+	title=[StrRepr(col,size=5) for col in 'icols,min,max,imin,imax,min_v,max_v'.split(',')]
+	tj=[title]
 	for i in range(icols):
 		y=U.get_2d_list_column(lr,i)
 		if not py.istr(y[0]):continue
