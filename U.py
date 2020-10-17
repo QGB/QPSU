@@ -403,7 +403,7 @@ def get_test_path():
 			home+='/workspace'
 		return get('U.gst',home+s)
 	if iswin() or iscyg():
-		return get('U.gst',driverPath('c:/test/'[1:]))
+		return get('U.gst',find_driver_path('c:/test/'[1:]))
 get_gst=getTestPath=get_test_path
 gst=gsTestPath=get_test_path()
 
@@ -424,7 +424,7 @@ def getShellPath():
 		if 'wsPath' in os.environ:
 			s=os.environ['wsPath']
 		s='G:/QGB/babun/cygwin/home/qgb/wshell/'#如果开头多一个空格，在Pycharm 下返回False，其他环境下为True
-		s=driverPath(s[1:]) or s
+		s=find_driver_path(s[1:]) or s
 	return s.replace('\\','/')
 gsw=gsWShell=getShellPath()
 
@@ -895,12 +895,15 @@ def interrupt_wait():
 	return e.set() # None
 wb=bw=wait_break=bwait=break_wait=interrupt_sleep=sleep_interrupt=wait_interrupt=interrupt_wait		
 	
-def pause(a='Press Enter to continue...\n',exit=True):
+def pause(a='Press Enter to continue...\n',exit=False):
 	'''a=msg'''
+	if py.is2():input=py.raw_input
+	else:input=py.input
+
 	if iswin():
 		# cmd('pause');return
 		try:
-			raw_input(a)
+			input(a)
 		except BaseException:#SystemExit is BaseException
 			if exit:x()
 			return False
@@ -1881,8 +1884,11 @@ def ast_parse(source):
 def getArgsTest(a,b,c,d=2,**ka):
 	return getArgsDict()
 
-def getArgsDict(*args,**kwargs):
+def get_caller_args_dict(*args,**kwargs):
 	''' MUST BE FIRST LINE in caller 
+	
+无法正确处理 *a，**ka 
+	
 	#TODO  cache by file,lineno of caller's caller , avoid name searching, only get vars
 def tf(*a,k=1,**ka):...
 inspect.getargspec(tf) # raise \
@@ -1898,9 +1904,10 @@ ValueError: Function has keyword-only parameters or annotations, use getfullargs
 		args=[]
 		rd={}
 		for k ,v in frame.f_locals.items():
+			
 			args.append(v)
 		else:
-			if args :
+			if args:
 				if py.isdict(v):
 					rd=v
 					args.pop()
@@ -1940,10 +1947,10 @@ sg.bind(#vars 如何处理，详细研究下 )
 '''
 		log(e)
 		v=recursive_find(am) 
-		pln('error in',getArgsDict.__name__,'. debug vars return')
-		return py.dict(e=e,frame=frame,rd=rd,lines=lines,a=args,v=v,v_args=v.args,   )
+		pln('error in',__name__,getArgsDict.__name__,'. debug vars return')
+		return py.dict(e=e,frame=frame,rd=rd,lines=lines,args=args,v=v,v_args=v.args, locals=locals()  ) # 形式参数 不会出现在 locals 中？
 	
-get_arg=get_args=get_caller_args=getargspec=getargs=getarg=getArgs=get_args_dict=getArgsDict
+get_arg=get_args=getargspec=getargs=getarg=getArgs=get_args_dict=getArgsDict=get_function_args_dict =get_caller_args=get_caller_args_dict
 
 def getattr(object, *names,default=None):
 	''' py2.7 
@@ -2658,8 +2665,18 @@ def getModPath(mod=None,qgb=True,slash=True,backSlash=False,endSlash=True,endsla
 	return sp
 get_qpsu_path=getQPSUPath=getQpsuPath=get_qpsu_dir=getQPSUDir=get_module_dir=get_module_path=getModPath
 
-def slen(a,*other):
+def len_return_string(a,*other):
 	return py.repr(len(a,*other) )
+lens=len_return_str=len_return_string
+
+def len_args_as_string(*a):
+	'''In [57]: print(i for i in range(8))
+<generator object <genexpr> at 0x000001939D3F8E48>
+In [59]: print(*[i for i in range(8)])
+0 1 2 3 4 5 6 7
+'''
+	return len(*[T.string(i) for i in a])
+slen=str_len=string_len=len_arg_as_string=len_args_as_string
 
 def _len(obj):
 	'''len(obj, /)
@@ -3717,7 +3734,7 @@ Type:      function
 	return ()
 getclassInherit=getClassHierarchy
 
-def getFile(a):
+def get_file_by_object(a):
 	import inspect
 	try:
 		inspect.getfile(a)
@@ -3726,7 +3743,7 @@ def getFile(a):
 			return getFile(py.type(a))
 		if 'built-in' in e.message:
 			return e.message
-getfile=getFile
+getfile=getFile=get_file=get_file_by_object
 
 #def 	#把一个数分解成2的次方之和。
 
@@ -3801,7 +3818,7 @@ def set_system_volume(a):
 	else:
 		raise py.ArgumentUnsupported(a)
 	return nircmd( 'setsysvolume',a )
-vol=set_vol=set_volumn=set_volume=set_system_volumn=set_system_volume
+vol=setVol=setVolume=et_vol=set_volumn=set_volume=set_system_volumn=set_system_volume
 
 def save(a,name=0):
 	if not iswin():raise NotImplementedError()
@@ -3960,8 +3977,12 @@ def filterWarningList():
 	import warnings
 	return warnings.filters
 
-def parseArgs(int=0,str='',float=0.0,dict={},list=[],tuple=py.tuple(),**ka
-			):
+def parse_cmd_args(int=0,str='',float=0.0,dict={},list=[],tuple=py.tuple(),**ka,  ):
+	'''
+	用int=4不行，必须加上 - ，【"C:\\QGB\\Anaconda3\\lib\\argparse.py", line 1470, in _get_optional_kwargs】【 ValueError: invalid option string 'int': must start with a character '-'】，
+	如果在命令行中忘记加上 - ，这里则获取不到这个参数
+	
+	'''
 	import argparse
 	parser = argparse.ArgumentParser()
 	parser.add_argument(
@@ -4002,12 +4023,14 @@ def parseArgs(int=0,str='',float=0.0,dict={},list=[],tuple=py.tuple(),**ka
 			default=v,
 		)		
 
-	FLAGS, unparsed = parser.parse_known_args()
-	# print(FLAGS.int)
+	namespace, unparsed_list = parser.parse_known_args() #  return namespace, args
+	set('argparse.ArgumentParser',parser)
+	set(parse_cmd_args.__name__+'.unparsed_list',unparsed_list)
+	# print(namespace.int)
 	##ipyEmbed()()
-	# print(unparsed)
-	return FLAGS
-cmd_arg=cmd_args=parse_arg=parse_args=argsParse=argparse=argsParser=args_parse=args_parser=parseArgs	
+	# print(unparsed_list)
+	return namespace
+cmd_arg=cmd_args=parse_arg=parse_args=argsParse=argparse=argsParser=args_parse=args_parser=parseArgs=get_cmd_arg=get_cmd_args=parse_cmd_args
 
 def sha256_fingerprint_from_pub_key(pubkey_str):
 	import base64
@@ -4129,6 +4152,9 @@ config -l  == config --list --global
 	if p:U.pln(cmd)
 	ipy.system(cmd)
 
+def git_clone(*a,git_exe=None,p=1):
+	return git('clone',*a,git_exe=git_exe,p=p)
+	
 def git_upload(commit_msg=None,repo='QPSU',repo_path=get_qpsu_dir(),
 			git_remotes=['https://qgbcs@gitee.com/qgbcs/',
 				# 'https://git.coding.net/qgb/',
@@ -4404,6 +4430,9 @@ class ValueOfAttr(py.object):
 		# else:
 		return StrRepr( self.__v__ )
 	def __parent_str__(self):
+		''' 无法简单得到 U.v.f 的值，因为 f 处于调用者的 变量空间
+		gs=sys._getframe().f_back.f_globals
+		'''
 		if self.__parent__==None:return ''
 		if not self.__child__:return py.str(self.__parent__)
 		return py.str(self.__parent__)+'.'

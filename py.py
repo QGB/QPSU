@@ -35,12 +35,12 @@ class ArgumentError(Exception):
 class ArgumentUnsupported(ArgumentError):#an unsupported argument# 为了能快速找到Arg 开头的异常
 	pass
 
-def isno(a):
+def isNo(a):
 	return isinstance(a,No) or \
 		'py.No' in repr(getattr(a,'__class__',0)) or\
 		(istr(a) and a.startswith('\t\t###<py.No|')) or\
 		False		#TO ADD...
-		
+isno=isNo		
 gno2e=False
 class No:
 	''''is a None object with msg and raw args

@@ -1,9 +1,9 @@
 from . import py
 U,T,N,F=py.importUTNF()
 import serial
-gencoding = ENCODING = U.get(__name__+'_encoding','utf-8')
-devs=U.get(__name__+'_devs',{})
-g=U.get(__name__+'_g')
+gencoding = ENCODING = U.get(__name__+'.gencoding','utf-8')
+devs=U.get(__name__+'.devs',{})
+g=U.get(__name__+'.g')
 if g:
     devs[g.port.upper()]=g
 
@@ -17,23 +17,28 @@ def list_all_com_ports():
 list=list_all=list_com=list_com_ports=list_all_com_ports
 
 def set(var):
+    return var
     a=U.getArgsDict()
+	#有可能 a=={}  ,
     if py.len(a)!=1:raise py.EnvironmentError(var,a)
     k,v=a.popitem()
     if var!=v:raise py.EnvironmentError('var,v not match',var,v)
     if not var:
-        return U.get(__name__+'_'+k)
+        return U.get(__name__+'.'+k)
     if k=='g':
         devs[dev.port.upper()]=dev
-        U.set(__name__+'_devs',devs)
-    return U.set(__name__+'_'+k,var)
+        U.set(__name__+'.devs',devs)
+    return U.set(__name__+'.'+k,var)
 
+def geta(*a,**ka):	
+	return U.getArgsDict(1,2,3 )
+	
 def set_g(dev):
     global g
     # if not dev:return py.No()
     devs[dev.port.upper()]=dev
-    U.set(__name__+'_devs',devs)
-    g=U.set(__name__+'_g',dev)
+    U.set(__name__+'.devs',devs)
+    g=U.set(__name__+'.g',dev)
     return g
 def open_device(dev=None, baudrate=115200, timeout=5,dtr=1):
     '''    'COM4',b,timeout=5sec
@@ -81,23 +86,23 @@ open=open_port=open_dev=open_device
 def close(dev=None):
 	global g
 	if not dev:
-		dev=U.get(__name__+'_g',g)
+		dev=U.get(__name__+'.g',g)
 	
-    if dev:
+	if dev:
 		dev.close()
 	
 	if dev==g:
 		g=py.No('closed dev at '+U.stime(),g)
-		U.set(__name__+'_g',g)	
+		U.set(__name__+'.g',g)	
 	
 	return dev
 			
-    # dev=U.get_or_set(__name__+'_g',dev)
+    # dev=U.get_or_set(__name__+'.g',dev)
 
 def write_one_line(input,dev=None,wait=1,encoding=ENCODING,eol=b'\r\n',p=True):
     global g
-    if not dev:dev=g=U.get(__name__+'_g')
-    else      :g=U.set(__name__+'_g',dev)
+    if not dev:dev=g=U.get(__name__+'.g')
+    else      :g=U.set(__name__+'.g',dev)
     if not py.isbytes(input):
         input=str(input)
     if py.istr(input):
@@ -117,8 +122,8 @@ w=write=write_line=write_one_line
 
 def read_all(dev=None,encoding=ENCODING,p=True):
     global g
-    if not dev:dev=g=U.get(__name__+'_g')
-    else      :g=U.set(__name__+'_g',dev)
+    if not dev:dev=g=U.get(__name__+'.g')
+    else      :g=U.set(__name__+'.g',dev)
     b=g.read_all()
     if p:
         try:
@@ -233,12 +238,12 @@ def _sw(dev,count,time,a,b):
             dtr_high(dev)
             U.sleep(b)
 
-AT_TIMEOUT=U.get(__name__+'_'+"AT_TIMEOUT",6)
-AT_P=U.get(__name__+'_AT_'+"P",True)
-AT_EOL=U.get(__name__+'_AT_'+"EOL",b'\r\n')
+AT_TIMEOUT=U.get_or_set(__name__+'.'+"AT_TIMEOUT",6)
+AT_P=U.get_or_set(__name__+'.AT_'+"P",True)
+AT_EOL=U.get_or_set(__name__+'.AT_'+"EOL",b'\r\n')
 def AT(cmd='',dev=None,timeout=AT_TIMEOUT,p=AT_P,encoding=ENCODING,eol=AT_EOL):
     if not dev:dev=g
-    cmd=set(cmd)
+    cmd=set(cmd).strip()
     if cmd[:3] not in {'AT+',b'AT+'}:
         cmd=cmd.upper() # bytes ok
     if not cmd:
@@ -255,7 +260,8 @@ def AT(cmd='',dev=None,timeout=AT_TIMEOUT,p=AT_P,encoding=ENCODING,eol=AT_EOL):
     U.sleep(max(0.5,t))
     b=dev.read(dev.in_waiting)
     blines=b.splitlines()
-    if blines[0].strip()!=cmd.strip():
+	# if not :return py.No()
+    if blines and blines[0].strip()!=cmd.strip():
         return py.No('{}!={}'.format(b,cmd))
     while len(blines)<4: # err=4,gmr=7  
         c = dev.read(1)

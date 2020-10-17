@@ -3,6 +3,7 @@ import pyppeteer
 
 from qgb import py
 U,T,N,F=py.importUTNF()
+from qgb import A
 
 taobao_trade=U.getMod(__name__)
 URL_WULIU_BY_TRADE_ID='https://buyertrade.taobao.com/trade/json/transit_step.do?bizOrderId='
@@ -61,28 +62,110 @@ async def get_user(page=None):
 	if not page:page=await get_page()
 	return await page.evaluate(taobao_trade.js_get_user)
 
-
+def is_chrome_process_exists():
+	if U.iswin():
+		ps= U.ps('chrome.exe')
+		if ps:
+			U.set('chrome.exe',ps[0].exe())
+		return ps
+	elif U.isnix():
+		return U.ps('chrome')
+	else:
+		raise EnvironmentError('#TODO not support this system')
 uk='pyppeteer.connect'
 browser=U.get(uk)
+async def get_browser(browserURL='http://127.0.0.1:9222',browserWSEndpoint='',
+	executablePath=r'C:\Users\qgb\AppData\Local\CentBrowser\Application\chrome.exe'):
+	''' await tb.pyppeteer.launcher.get_ws_endpoint('http://127.0.0.1:9222')
+# if not chrome.exe or : BrowserError: Browser closed unexpectedly:	
+	'''
+	global browser
+	browser=U.get(uk)
+	if browser:
+		try:
+			await browser.version()
+			# pages = await browser.pages()#这样不能检测浏览器是否关闭
+			return browser
+		except:
+			browser=U.set(uk,py.No(U.stime()))
+			
+	try:
+		if browserWSEndpoint:
+			browser=await pyppeteer.connect(browserWSEndpoint=browserWSEndpoint)
+		else:
+			with pyppeteer.launcher.urlopen(browserURL) as f:
+				data = T.json_loads(f.read().decode())			
+			browser=await pyppeteer.connect(browserURL=browserURL)
+	except Exception as e: #
+		U.log(e)
+		# if is_chrome_process_exists(): # 会自动开一个 全新环境
+			# ret
+		browser=await pyppeteer.launcher.launch({'executablePath': executablePath, 'headless': False, 'slowMo': 30})
+    
+	return U.set( uk,browser)
+
+async def new_page(url='http://www.stathub.cn/headless/'):
+	''' Go to the ``url``.
+
+:arg string url: URL to navigate page to. The url should include
+                 scheme, e.g. ``https://``.
+
+Available options are:
+
+* ``timeout`` (int): Maximum navigation time in milliseconds, defaults
+  to 30 seconds, pass ``0`` to disable timeout. The default value can
+  be changed by using the :meth:`setDefaultNavigationTimeout` method.
+* ``waitUntil`` (str|List[str]): When to consider navigation succeeded,
+  defaults to ``load``. Given a list of event strings, navigation is
+  considered to be successful after all events have been fired. Events
+  can be either:
+
+  * ``load``: when ``load`` event is fired.
+  * ``domcontentloaded``: when the ``DOMContentLoaded`` event is fired.
+  * ``networkidle0``: when there are no more than 0 network connections
+    for at least 500 ms.
+  * ``networkidle2``: when there are no more than 2 network connections
+    for at least 500 ms.
+
+The ``Page.goto`` will raise errors if:
+
+* there's an SSL error (e.g. in case of self-signed certificates)
+* target URL is invalid
+* the ``timeout`` is exceeded during navigation
+'''
+	browser=await get_browser()
+	page=await browser.newPage()
+	await page.setViewport(VIEW_PORT)
+	await page.evaluateOnNewDocument(JS_ONLOAD)
+	if '#' not in url:
+		url+='#'+U.stime()
+	await page.goto(url)
+	return page
+	
 async def get_page(page=None,url=py.No(URL_TRADE_LIST)):
-	global browser,JS_ONLOAD
-	if py.istr(page) and ('://' in page) and not url:
+	global JS_ONLOAD
+	# py.pdb()()
+	if py.istr(page) and not url: # and ('://' in page) 
 		url,page=page,None
 
 	if not url:url=URL_TRADE_LIST
 	if not page:
-		if not browser:
-			browser=U.set( 
-				uk,await pyppeteer.connect(browserURL='http://127.0.0.1:9222')
-				)
-		for n,detected,page,u in (await set_pages_onload()):
+		browser=get_browser()
+		all_pages=await set_pages_onload()
+		for n,detected,page,u in all_pages:
 			if u.startswith(url):
 				break
 		else:
+			for n,detected,page,u in all_pages:
+				if url in u: # 优先 startswith，因为是两次循环匹配
+					
+					return U.set('page',page)
+			else:
+				return py.No('can not found page.url.startswith  or  in page.url:'+url)
 			return py.No('can not found page url.startswith:'+url)
 		# page=pages[-1]
-	U.set('page',page)
-	return page
+	return U.set('page',page)
+	
 		
 	
 	# await page.goto('https://okfw.net/r='+repr(U.stime() )  )
@@ -106,25 +189,62 @@ async def get_pages_onload(pages=None,viewport=None):
 		]
 		r.append(row)
 	return r
-
-async def set_pages_onload(pages=None,viewport=1):
+VIEW_PORT={'width':1340,'height':670}
+async def set_pages_onload(pages=None,viewport=VIEW_PORT):
 	if not pages:
-		pages = await browser.pages()
+		p4s=await get_pages_onload()
+		pages=[i[2] for i in p4s]
 	for page in pages:
 		try:
 			if await page.evaluate(JS_DETECT_AUTOMATION) :
 				await page.evaluateOnNewDocument(JS_ONLOAD)
 				await page.evaluate(JS_ONLOAD)
 				# await page.reload() # 刷新才生效
-				if viewport:
-					await page.setViewport({'width':1340,'height':670})
+				if viewport and py.isdict(viewport):
+					await page.setViewport(viewport)
 		except Exception as e:
 			print(e)
 	return await get_pages_onload(pages=pages)
+
+async def scroll_page_bottom(page):
+	return await page.evaluate('window.scrollTo(0, document.body.scrollHeight || document.documentElement.scrollHeight);')
+page_scroll_bottom=scroll_page_bottom	
+
+
 async def next_page_trade_list(page=0):
 	if not page:page=await get_page()
 	return await page.evaluate(taobao_trade.js_trade_list_next)
 next=next_page_trade_list
+
+async def add_cart(*page_urls):
+	tb=taobao_trade
+	
+	r=[]
+	for u in page_urls:
+		i=await tb.get_page(url=u)
+		# a='https://item.taobao.com/item.htm?id=566965639091')# 带垫螺丝
+		# b=await tb.get_page(url='https://item.taobao.com/item.htm?id=520596842170')# 防盗螺丝
+		if not i:
+			return py.No(u,i)
+		t=await  i.title()
+		r.append([U.stime(),t])
+		await i.bringToFront()
+		if 'detail.tmall.com/item.htm' in i.url:
+			await i.evaluate('''r=xpath('//a[contains(@id,"J_LinkBasket" )]');r.click();''')
+			continue
+		
+		await page_scroll_bottom(i)
+
+		popsku=await i.evaluate('''r=xpath('//div[contains(@class,"tb-popsku-large" )]');if(!r){r=233}else{r.getAttribute('style')} ''')
+		if popsku!='display: block;':
+			# add_cart_btn=
+			await i.evaluate('''r=xpath('//a[contains(@id,"J_TabShopCart" )]');r.click();''')
+			await A.sleep(0.01)
+			# return i,t,popsku 
+		#qd=
+		await i.evaluate('''r=xpath('//a[contains(@class,"J_PopSKUAddCart" )]');r.click() ''')
+		# r.append([t,qd])
+	return r
 
 async def is_trade_list_loading(page=0):
 	if not page:page=await get_page(url=URL_TRADE_LIST)
@@ -143,7 +263,7 @@ async def get_curent_page_trade_list(page=0):
 
 	# user,max=await page.evaluate(taobao_trade.js_um)
 	return await page.evaluate(taobao_trade.js_trade_list)
-get_list=get_page_list=get_curent_page_trade_list
+# get_list=get_page_list=get_curent_page_trade_list
 
 
 async def iter_wuliu_json(ids):

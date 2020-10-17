@@ -1298,14 +1298,20 @@ def readNumber(a,split=4,p=True):
 	a=''.join(U.one_in(py.list(a),number))
 	while(a.startswith('0')):a=a[1:]
 
-	s='';im=py.len(a);iz=0;zh[0]=''#忽略 个
-	for i,k in enumerate(a):	
+	s='';im=py.len(a);
+	iz=0;
+	zh[0]=''#忽略 个
+	# zh=zh[1:]#忽略 个
+	b=a[::-1]
+	for i,k in enumerate(b):	
+		# if i!=0 and i%split==0:
 		if i%split==0:
-			i=a[im-i-split:im-i]
-			s=i+zh[iz]+s
+			w=b[i:i+split]
+			s=w[::-1]+zh[iz]+s
 			iz+=1
 			# U.pln(  i,
-	s=a[0:im-((iz-1)*split)]+s
+	if iz*split<im: # 如果不加这个判断  T.readNumber(234556789)== '京2亿3455万6789'
+		s=b[iz*split:im][::-1]+zh[iz+1]+s
 	# U.repl()
 	# for i in zh:U.pln( i.decode('utf-8').encode(U.stdout.encoding) )
 	if py.is2():s=s.decode('utf-8').encode(U.stdout.encoding)

@@ -336,7 +336,19 @@ def get_socket_req(PORT = 65432,HOST = '127.7.7.7'):
         return req, addr
 
 def get_rpc_request_a(request):
-	a=T.subr(request.url,T.u23)
+	''' 
+a=T.subr(u,T.u23)#'%23-'	
+	'''
+	U,T,N,F=py.importUTNF()
+	u=request.url
+	if '%23' not in u:
+		raise py.ArgumentError('%23 not in request.url')
+	if '%23=' in u:
+		a=T.sub_tail(u,'%23=')
+	elif '%23-' in u:
+		a=T.sub_tail(u,'%23-')
+	else:
+		a=T.sub_tail(u,'%23')
 	return T.url_decode(a)
 geta=get_a=get_request_a=get_rpc_request_a
 
@@ -794,7 +806,7 @@ def auto_ip(ip,ip2=192.168):
 		ip='{0}.{1}'.format(ip2,ip)		
 	return ip
 
-def setIP(ip='',adapter='',gateway='',source='dhcp',mask='',ip2=192.168,dns=py.No('gateway') ):
+def setIP(ip='',adapter='',gateway='',source='dhcp',mask='',ip2=192.168,dns=py.No('auto use gateway') ):
 	'''配置的 DNS 服务器不正确或不存在。   # 其实已经设置好了，可以正常使用'''
 	U,T,N,F=py.importUTNF()
 	if U.islinux():
@@ -837,17 +849,21 @@ def setIP(ip='',adapter='',gateway='',source='dhcp',mask='',ip2=192.168,dns=py.N
 		else:
 			gateway=T.subLast(ip,'','.')+'.1'
 		if not gateway.startswith('gateway'):
-			if not dns:
+			if py.isNo(dns) and 'auto' in dns.msg:
 				dns=gateway
-			dns='address={}  register=primary'.format(dns)
+			if dns:
+				dns=N.auto_ip(dns,ip2)	
+				dns='address={}  register=primary'.format(dns)
 			gateway='gateway='+gateway
 			
 		if not ip.startswith('addr'):ip='address='+ip
 	else:
 		ip=''
 	r=[ 'netsh interface ip set address name={0} source={1} {2} {3} {4} '.format(adapter,source,ip,mask,gateway),
-		'netsh interface ip set dnsservers name={0} source={1} {2}'.format(adapter,source,dns)
 		]
+	if dns:
+		dns='netsh interface ip set dnsservers name={0} source={1} {2}'.format(adapter,source,dns)
+		r.append(dns)
 	import os
 	for i in r:
 		os.system(i)
