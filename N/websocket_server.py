@@ -37,7 +37,16 @@ loop=asyncio.get_event_loop()
 
 loop.run_until_complete(start_server)
 print(U.stime(),'run_until_complete done!')
-loop.run_forever()
+
+def wakeup():
+	loop.call_later(0.1, wakeup)
+
+try:
+	loop.call_later(0.1, wakeup)
+	loop.run_forever()
+except KeyboardInterrupt:
+	U.msgbox(U.stime())
+	# U.exit('KeyboardInterrupt')
 print(U.stime(),'run_forever')
 
 

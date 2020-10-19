@@ -71,18 +71,47 @@ try:
 	import win32gui
 except Exception as ei:pass
 
-def runAsAdmin():
-	import subprocess as sp
-	p = sp.Popen(['runas', '/noprofile', '/user:Administrator', r"notepad.exe C:\Windows\System32\drivers\etc\hosts"],stdin=sp.PIPE)
-	p.stdin.write(b'0') #password
-	p.communicate()
 
+
+def run_as_user(cmd=r"notepad.exe C:\Windows\System32\drivers\etc\hosts",user=py.No('use current USER, no password window, privileg also can be elevated')):
+	'''#带有 / -  的命令参数， 一定要三个引号。 三个以下都不行，示例：
+Win.runAsAdmin('cmd """ /k ping 192.168.43.1"""') 
+Win.runAsAdmin('python """-c input(233)""" ')  
+Win.runAsAdmin('ssh-keygen ')  # 运行程序名中含有 - 没关系
+Win.runAsAdmin('cmd """ -k echo 233 """') # -k 参数无效，只能/k
+
+	user='Administrator' ,
+'''
+	if user:
+		if not user.strip().startswith('-Credential '):
+			user="-Credential '%s'"%user
+	else:
+		user='' # 不提供-Credential 参数，就好像右键 管理员运行一样，不要密码。是这个原因吗？
+	ps=['powershell.exe',
+# '-WindowStyle',
+# 'Hidden',# 在外层使用这个会将调用的python cmd窗口一起隐藏 ，要像下面一样在内层
+
+ '-ExecutionPolicy', 
+ 'Bypass',# 多参数不能写成一项，否则不允许使用与号(&)。& 运算符是为将来使用而保留的；请用双引号将与号引起来("&")，以将其作为字符串的一部分传递。: ParserError: (:) [], ParentContainsErrorRecordException
+
+ '-command',
+r"""& {Start-Process powershell.exe %(user)s -WindowStyle Hidden -ArgumentList 'Start-Process %(cmd)s -Verb runAs'} """ % py.locals()]
+	U,T,N,F=py.importUTNF()
+	return ps,U.cmd(ps)
+
+	# import subprocess as sp
+	# p = sp.Popen(['runas', '/noprofile', '/user:'+user.strip(), r"notepad.exe C:\Windows\System32\drivers\etc\hosts"],stdin=sp.PIPE)
+	# p.stdin.write(b'0') #password
+	# p.communicate()
+npp_hosts=edit_hosts=runAs=run_as=runAsAdmin=run_as_admin=run_as_administrator=cmd_as_user=run_as_user
+	
 def test():
 	import subprocess as sp
 	p = sp.Popen([r'E:\QGB\Anaconda3\python.exe'],stdin=sp.PIPE)
 	p.stdin.write(b'print(2333)') #password
 	p.communicate()
 	return p.pid
+	
 def ntHash(a):
 	'''pip3 install passlib
 	case sensitive'''

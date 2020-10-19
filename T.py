@@ -1190,6 +1190,12 @@ indexOf=index_of=index_of_multi
 
 def format(s,**ka):
 	''' 解决 python 自带format 不能跳过 未指定的 {name} 的问题 （ HTML-CSS  格式化）
+	
+ >  '%(a)s %(b)s'%(3,2)
+TypeError: format requires a mapping  
+##Solution##  '%(a)s %(b)s' % py.locals()
+
+'%(1)s %("")s'%{'1':1,'""':54353}  # dict key必须为str，%()s支持任意字符串？，dict-key只能多，不能少
 	'''
 	for k,v in ka.items():
 		k='{%s}'%k

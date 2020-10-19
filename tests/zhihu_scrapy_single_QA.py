@@ -4,14 +4,13 @@ gsqp=pathlib.Path(__file__).parent.parent.parent.absolute().__str__()
 if gsqp not in sys.path:sys.path.append(gsqp)#py3 works
 from qgb import py
 U,T,N,F=py.importUTNF()
-thread,server=N.rpcServer(port=2345,execLocals=globals())
+thread,server=N.rpcServer(port=2345,locals=globals())
 
 c=item=html=0
 next_url=[]
 answers=[]
-next_url=[]
 def zhihu_question(id):
-	global c,next_url,answers,html,next_url
+	global c,next_url,answers,html
 	###
 	import urllib3;urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)###
 	import requests
