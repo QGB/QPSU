@@ -120,11 +120,13 @@ def set(name,value=None,level=gd_sync_level['process']):
 		import sqlite3
 	return value
 
-def get(name='_',default=py.No('can not get name'),level=gd_sync_level['process']):
+def get(name='_',default=None,level=gd_sync_level['process']):
 	if level>=gd_sync_level['process']:
 		import sys
 		d=py.getattr(sys,'_qgb_dict',{})
 		#TODO 对于不存在的 name ，可以记录最后访问时间为 py.No，方便排查
+		if default==None:
+			default=py.No('can not get name '+py.repr(name))
 		return d.get(name,default)
 	#TODO
 
@@ -768,6 +770,7 @@ def join_as_cmd_str(args,*a):
 joinCmd=join_cmd=cmdJoin=cmd_join=shlex_join=join_as_cmd_str
 
 def split_cmd_str(a):
+	'''return list'''
 	import shlex
 	return shlex.split(a)
 splitCmd=split_cmd=cmdSplit=cmd_split=shlex_split=split_cmd_str
@@ -1407,6 +1410,10 @@ As a side effect, an implementation may insert additional keys into the dictiona
 	return py.help('exec')  # py2 & py3  OK
 	# exec(s)
 
+def calltimes_return_string(a=''):
+	return py.str(calltimes(a=a))
+sct=scount=calltimes_return_string	
+	
 def calltimes(a=''):
 	'''U.ct.clear.__dict__
 	'''
@@ -2760,6 +2767,111 @@ def getCallExpression(*a,**ka):
 	return r
 getCallExpr=getCallExpression
 
+def simulate_system_actions(a=py.No("str[key|key_write ] or action list[['click',xy],[foreground,title|handle],['k','sss'],['t','text']]"),key='', delay=0.2,restore_state_after=True, exact=None):
+	'''pip install keyboard
+Signature: keyboard.write(text, delay=0, restore_state_after=True, exact=None)
+Docstring:
+Sends artificial keyboard events to the OS, simulating the typing of a given
+text. Characters not available on the keyboard are typed as explicit unicode
+characters using OS-specific functionality, such as alt+codepoint.
+
+To ensure text integrity, all currently pressed keys are released before
+the text is typed, and modifiers are restored afterwards.
+
+- `delay` is the number of seconds to wait between keypresses, defaults to
+no delay.
+- `restore_state_after` can be used to restore the state of pressed keys
+after the text is typed, i.e. presses the keys that were released at the
+beginning. Defaults to True.
+- `exact` forces typing all characters as explicit unicode (e.g.
+alt+codepoint or special events). If None, uses platform-specific suggested
+value.
+File:      c:\qgb\anaconda3\lib\site-packages\keyboard\__init__.py'''
+	import keyboard
+	def _key_write(astr):
+		keyboard.write(text=astr, delay=delay, restore_state_after=restore_state_after, exact=exact)
+	def _key_press(akey):
+		# parsed=keyboard.parse_hotkey(akey)
+		# if py.len(parsed)>1: #如果 多个组合键中间想要delay,使用 action_list 
+		keyboard.press_and_release(akey, do_press=True, do_release=True)
+	def _sleep(sec=None):
+		if (index+1)==py.len(a):return
+		if not sec:sec=delay #暂时没用 默认参数
+		sleep(sec)
+		if sec!=0.2:
+			r.append(['delay',sec])
+	if a and not py.istr(a):
+		if py.isdict(a):a=a.items()
+		r=[]
+		for index,row in py.enumerate(a):
+			if py.istr(row):
+				try:
+					keyboard.parse_hotkey(row) #将 parsed传入 将会再次parse_hotkey，导致无按键效果
+					_key_press(row)
+					r.append(['key',row])
+				except:
+					_key_write(row)
+					r.append(['txt',row])
+				_sleep(delay)
+				continue
+			if py.isdict(row):
+				if py.len(row)!=1:raise py.ArgumentError("a[%s]== %r dict.len != 1,should be {'key|text':'str_data' }"%(index,row))
+				for _row in row.items():
+					row=_row
+				
+			if py.islist(row) or py.istuple(row):
+				if py.len(row)!=2:raise py.ArgumentError("a[%s]== %r list.len != 2 ,should be['key|text','str_data']"%(index,row))
+				if py.isint(row[0]) and py.isint(row[1]):
+					row=['click',row]
+				
+				action=row[0].lower()
+				if 'click' in action:######
+					from qgb import Win
+					Win.click(*row[1])
+					r.append(['click',row[1]])
+					_sleep(delay)
+					continue
+				elif one_in(['front','window','for','forground','foreground','win32gui.setforegroundwindow','setforegroundwindow','foreground'],action):
+					if py.istr(row[1]):
+						from qgb import Win
+						for handle,title,balala in Win.getAllWindows():
+							if row[1]==title:break
+						else:
+							for handle,title,balala in Win.getAllWindows():
+								if row[1] in title:break
+							else:
+								raise py.EnvironmentError('cannot find ForegroundWindow title : '+row[1])
+					elif py.isint(row[1]):
+						handle=row[1]
+					else:
+						raise py.ArgumentError('foreground,row[1]',row)
+					import win32gui
+					win32gui.SetForegroundWindow(handle)
+					r.append(['foreground',row[1]])
+					_sleep(delay);continue
+				elif one_in(['delay','sleep','wait'],action):
+					_sleep(py.int(row[1]))	
+					continue
+				elif 't' in action:############
+					_key_write(row[1])
+					r.append(['txt',row[1]])
+					_sleep(delay);continue
+				elif 'k' in action:############
+					_key_press(row[1])
+					r.append(['key',row[1]])
+					_sleep(delay);continue
+				else:###########################
+					raise py.ArgumentError("a[%s]== %r[0] not supported!! key|text|delay"%(index,row))
+			
+		return r	
+	if a :_key_write(a)
+	
+	if key:_key_press(key)
+	
+	
+		
+system_key=key_actions=key_action=keyboard_write=pressKey=keyPress=press_key=key_press=simulate_key_press=system_actions=system_action=sys_act=sys_acts=sys_actions=sys_action=simulate_system_actions
+
 def set_env_path(append=[],delete=[]):
 	# if not p :raise py.ArgumentError()
 	if py.istr(append):append=[append]
@@ -3777,10 +3889,18 @@ def beep(ms=1000,hz=2357):
 def nircmd(*a):
 	'''
 The “old style” string formatting syntax %(name)s   auto ignore not use dict key
+
+nircmd.exe sendkeypress 8 6 8 0 5 8' 必须隔开
 '''	
-	if not iswin():raise py.EnvironmentError()
+	U,T,N,F=py.importUTNF()
+	if not U.iswin():raise py.EnvironmentError()
 	if len(a)==1 and ( py.islist(a) or py.istuple(a) ):
 		a=a[0]
+		if py.istr(a):
+			a=U.split_cmd(a)
+			a[0]=a[0].strip().lower()
+			if 'nircmd' in a[0]:a.pop(0)
+			
 	a=py.list(a)
 	for n,v in py.enumerate(a):
 		if py.islist(v) or  py.istuple(v) or py.isdict(v) :
@@ -3973,10 +4093,46 @@ def filterWarning(category=DeprecationWarning):
 	return warnings.filterwarnings("ignore", category=category)	
 filterwarnings=filterWarning
 
-def filterWarningList():
+def get_warnings_filters():
 	import warnings
 	return warnings.filters
+filterWarningList=warnings_filters=get_warnings_filters
 
+def parse_cmd_duplicated_arg(*names,default=py.No('no default'),type=py.No('auto use default')):
+	names_list=[]
+	for i in names:
+		if not i.startswith('-'):
+			names_list.append('-'+i)
+		else:
+			names_list.append(i)
+			
+	if py.isno(default) and py.isno(type) and 'auto' in type.msg:
+		raise py.ArgumentError('no default or no type')
+	if default:
+		if type:
+			if py.type(default)!=type:
+				raise py.ArgumentError('default_type and type "conflict with each other" ')
+		else:
+			type=py.type(default)
+	else:
+		default=None
+	import argparse
+	parser = argparse.ArgumentParser()
+
+	parser.add_argument(*names_list,type=type,default=default,)	# type 参数必须callable，传No肯定不行
+	namespace, unparsed_list = parser.parse_known_args()
+	
+	r=[]
+	for k,v in py.vars(namespace).items():
+		if v:r.append([k,v])
+	if py.len(r)==0:
+		return default
+	if py.len(r)==1:
+		return r[0][1]
+	else:
+		return py.No('get duplicated arg_name value, cmd should provide only one',namespace,r)
+parse_cmd_arg_duplicate=parse_cmd_arg_duplicated=get_duplicated_arg_cmd=get_duplicated_cmd_arg=get_duplicated_cmd_args=parse_cmd_args_duplicated=parse_cmd_duplicated_args=parse_cmd_duplicated_arg
+	
 def parse_cmd_args(int=0,str='',float=0.0,dict={},list=[],tuple=py.tuple(),**ka,  ):
 	'''
 	用int=4不行，必须加上 - ，【"C:\\QGB\\Anaconda3\\lib\\argparse.py", line 1470, in _get_optional_kwargs】【 ValueError: invalid option string 'int': must start with a character '-'】，

@@ -193,17 +193,23 @@ def execute(source, globals=None, locals=None):
 	exec(source,globals,locals)   # is2  exec(expr, globals, locals) 等同于exec expr in globals, locals
 	
 gpdb=True	
-def pdb(frame=sys._getframe().f_back):
+def pdb(frame=No('if no frame use: py.pdb()()')):
 	'''import pdb;pdb.set_trace()
 	call pdb in pdb is useless
 	
+	frame=sys._getframe().f_back
 	'''
 	if not gpdb:return
 	# import os
 	# if os.getenv('py.pdb') in (None,'False','false','f','0',''):return 'No py.pdb'
 	# "win can set 'PY.PDB': '1'  "
 	# if msg:print(msg)
-	__import__('pdb').Pdb().set_trace(  frame)
+	set_trace=__import__('pdb').Pdb().set_trace
+	if frame:
+		set_trace(  frame)
+	else:
+		return set_trace
+	# __import__('pdb').Pdb().set_trace(  frame)
 debug=pdb
 	
 def from_qgb_import(mod='U'):
@@ -214,10 +220,9 @@ def from_qgb_import(mod='U'):
 			return sys.modules['qgb.'+mod]
 	if mod in sys.modules: 
 		return sys.modules[mod]
-		# else:
-			# return from_qgb_import('qgb.'+mod)
-			
-		# else:
+	# else: 往下走，不要乱改
+		# return No(mod+' not in sys.modules')
+		
 	s='''
 try:from qgb import {0}
 except:pass

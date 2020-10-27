@@ -798,6 +798,34 @@ def getAllAdapter():
 		return Win.getAllNetworkInterfaces()
 getIP=getip=get_ip=getAllAdapter
 
+URL_SCHEME_CHARS=py.No('call N.auto_url will auto set')
+def auto_url(a,default_protocol='http'):
+	'''According to RFC 2396, Appendix A:
+scheme = alpha *( alpha | digit | "+" | "-" | "." )
+
+Scheme names consist(组成) of a sequence of characters beginning with a lower case letter(小写字母开头) and followed by any combination of lower case letters, digits, plus ("+"), period句号 ("."), or hyphen ("-").
+'''
+	global URL_SCHEME_CHARS
+	T=py.importT()
+	URL_SCHEME_CHARS=T.alphanumeric+'+.-'
+	if py.istr(a):
+		a=a.strip()
+		if  '://' in a:
+			i=0 # 放宽一点要求，不检查首位，有时出现全部大写的URL
+			while(a[i] in URL_SCHEME_CHARS):
+				i+=1
+			else:#elif ：SyntaxError: invalid syntax
+				if a[i:i+3]=='://':
+					return a
+				else:
+					raise py.ArgumentError('url SCHEME invalid',a,i)
+			return a
+		return default_protocol+'://'+a
+	else:
+		raise Exception('url need string')
+autourl=autoUrl=autoURL=auto_url
+
+
 #setip 192.168  ,  2.2	
 def auto_ip(ip,ip2=192.168):
 	if py.isint(ip):

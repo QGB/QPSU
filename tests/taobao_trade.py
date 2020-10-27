@@ -11,6 +11,40 @@ URL_TRADE_LIST='https://buyertrade.taobao.com/trade/itemlist/list_bought_items.h
 
 us=zu=F.dill_load('C:/test/zu-67.dill')  
 
+async def get_element_absolute_position_of_system_screen(page,selector,green=False):
+	if green:
+		await page.evaluate(''' e=document.querySelector('%s').style.backgroundColor='green' '''%selector)
+		
+	x,y= await page.evaluate(''' e=document.querySelector('%s').getBoundingClientRect();[e.x,e.y] '''%selector)
+	return x+34,y+71
+	
+get_xy=get_abs_xy=get_element_xy=get_element_absolute_position_of_system_screen	
+	 
+async def evaluate(page,code):
+	try:
+		return await page.evaluate(code)
+	except Exception as e:
+		return py.No(e)
+
+u_key_defs='pyppeteer.us_keyboard_layout.keyDefinitions'
+async def press_keys(page,*s,xy=(None,None)):
+	from qgb import Win
+	if len(s)==1 and py.istr(s[0]):
+		key_defs=U.get(u_key_defs)
+		if not key_defs:
+			key_defs=[]
+			for k,v in pyppeteer.us_keyboard_layout.keyDefinitions.items():
+				if py.len(k)>1:
+					key_defs.append(k)
+			U.set(u_key_defs,key_defs)
+		## cache end
+		if s not in key_defs: # if in, s=tuple(skey)
+			s=s[0]
+	xy=Win.click(*xy)
+	for k in s:
+		await page.keyboard.press(k)
+	return s,xy
+	
 async def backup_cookie(user=0,page=py.No('auto last -1')):
 	if not user:
 		user=await page.evaluate(taobao_trade.js_get_user)
@@ -142,28 +176,43 @@ The ``Page.goto`` will raise errors if:
 	await page.goto(url)
 	return page
 	
-async def get_page(page=None,url=py.No(URL_TRADE_LIST)):
+async def _get_page_by_url(browser,url):
+	for i in range(8):
+		try:
+			all_pages=await get_pages_onload()
+			break
+		except Exception as e:
+			print('_get_page_by_url ',U.stime(),e)
+			print()
+			continue
+	for n,detected,page,u in all_pages:
+		if u.startswith(url):
+			return page
+	else:
+		for n,detected,page,u in all_pages:
+			if url in u: # 优先 startswith，因为是两次循环匹配
+				return page
+		else:
+			return py.No('can not found page.url.startswith  or  in page.url:'+url)
+		return py.No('can not found page url.startswith:'+url)
+
+async def get_page(page=None,url=py.No(URL_TRADE_LIST),wait=None,browser=None):
 	global JS_ONLOAD
 	# py.pdb()()
 	if py.istr(page) and not url: # and ('://' in page) 
 		url,page=page,None
 
 	if not url:url=URL_TRADE_LIST
-	if not page:
-		browser=get_browser()
-		all_pages=await set_pages_onload()
-		for n,detected,page,u in all_pages:
-			if u.startswith(url):
-				break
-		else:
-			for n,detected,page,u in all_pages:
-				if url in u: # 优先 startswith，因为是两次循环匹配
-					
-					return U.set('page',page)
-			else:
-				return py.No('can not found page.url.startswith  or  in page.url:'+url)
-			return py.No('can not found page url.startswith:'+url)
-		# page=pages[-1]
+	if not browser:browser=get_browser()
+	if not wait and not page:
+		page=await _get_page_by_url(browser,url)
+	if wait and not page:
+		start=U.timestamp()
+		while not page:
+			page=await _get_page_by_url(browser,url)
+			await A.sleep(py.max(0.1,wait/10))
+			if U.timestamp()-start > wait:
+				return py.No('%s sec timeout!,can not found page.url:%s'%(wait,url))
 	return U.set('page',page)
 	
 		
@@ -185,7 +234,7 @@ async def get_pages_onload(pages=None,viewport=None):
 	r=[]			
 	for n,page in enumerate(pages):
 		row=[n,await page.evaluate(JS_DETECT_AUTOMATION),page,
-			T.justify(page.url,size=80,cut=1), 
+			U.StrRepr(page.url,size=80,cut=1), 
 		]
 		r.append(row)
 	return r
@@ -210,6 +259,61 @@ async def scroll_page_bottom(page):
 	return await page.evaluate('window.scrollTo(0, document.body.scrollHeight || document.documentElement.scrollHeight);')
 page_scroll_bottom=scroll_page_bottom	
 
+######### taobao  start ########
+def taobao_login(user,pw,user_input_xy=(1050, 383)):
+	return U.simulate_system_actions([('for','login.taobao'),user_input_xy,'ctrl+a','backspace',user,'tab',pw,'Enter']) 
+login=taobao_login
+	
+async def buy_item_sku(id,sku):
+	if py.isint(id):id=py.str(id)
+	if '://' not in id:
+		id='https://item.taobao.com/item.htm?id='+id.strip()
+	tb=taobao_trade
+	p=await tb.get_page(id)
+	if not p:
+		p=await tb.new_page(id)
+	print(p)
+	await p.evaluate(''' e=xpath("//span[contains(., '%s')] ") ; e.click() ''' % sku)
+	print('click sku')
+	await A.sleep(0.4)#sec
+	await p.evaluate(''' e=xpath('//div[@class="tb-btn-buy"]/a');e.click() ''')
+	print('click 立即购买')
+	await A.sleep(1)#sec ,过早获取到
+	
+	p=await tb.get_page('https://buy.taobao.com/auction/buy_now.jhtml',wait=4)
+	for i in range(9):
+		await evaluate(p,''' document.querySelector('#submitOrderPC_1 > div.wrapper > a').style.backgroundColor='green' ''')
+		green=await evaluate(p,''' document.querySelector('#submitOrderPC_1 > div.wrapper > a').style.backgroundColor ''')
+		if green=='green':
+			break
+		await A.sleep(0.9)
+		print('buy——btn not green',i,green)
+		if i==8:return p
+		
+	print(green,U.stime())
+	await p.evaluate(''' e= document.querySelector('#submitOrderPC_1 > div.wrapper > a') ;e.click() ''')
+	# return p
+	await A.sleep(3)#sec
+	
+	pa=await tb.get_page('https://cashierstm.alipay.com/standard',wait=9)#https://cashierstm.alipay.com/standard/lightpay/lightPayCashier.htm?orderId=  
+	#https://cashierstm.alipay.com/standard/gateway/agentFeeEnoughPay.htm?orderId=
+	
+	return await alipay_buy(pa)
+async def alipay_buy(pa,pw_file='130_pw.txt'):
+	tb=taobao_trade
+	from qgb import Win
+	
+	if not pa:return pa
+	await pa.bringToFront()
+	# x,y=await tb.get_abs_xy(pa,'label[class=ui-label]')#(x+222,y+5)
+	x,y=await tb.get_abs_xy(pa,'a[seed="sc_edit_forgetPwd"]')#(x-180,y+5)
+	
+	s,[x,y]=await tb.press_keys(pa,F.read(pw_file),xy= (x-180,y+5))
+	await A.sleep(0.6)#sec
+	Win.click(x,y+67)
+	
+	return pa
+	
 
 async def next_page_trade_list(page=0):
 	if not page:page=await get_page()

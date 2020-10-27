@@ -38,7 +38,7 @@ Type:      function
 '''	
 	U,T,N,F=py.importUTNF()
 
-	url=autoUrl(url)
+	url=N.auto_url(url)
 	proxies=U.get_duplicated_kargs(ka,'proxies','proxy')
 	if proxies:
 		proxies=N.set_proxy(proxy)
@@ -57,7 +57,7 @@ gets=getStr=get_str
 def get_bytes(url,	**ka ,):
 	U,T,N,F=py.importUTNF()
 
-	url=autoUrl(url)
+	url=N.auto_url(url)
 	proxies=U.get_duplicated_kargs(ka,'proxies','proxy')
 	if proxies:
 		proxies=N.set_proxy(proxy)
@@ -84,7 +84,7 @@ def get(url,file='',
 		**ka ,
 	):
 	U,T,N,F=py.importUTNF()
-	url=autoUrl(url)
+	url=N.auto_url(url)
 
 	proxies=U.get_duplicated_kargs(ka,'proxies','proxy')
 	if proxies:
@@ -137,18 +137,12 @@ def head(url):
 def options(url):
 	return dict(method(url,'options').info().items() )['allow']
 
-def autoURL(a):
-	if type(a)==type(''):
-		if  '://' in a[1:10]:return a
-		else:return 'http://'+a
-	else:
-		raise Exception('url need string')
-autourl=autoUrl=auto_url=autoURL
 		
 def method(url,amethod='get',*args):
 	r'''#TODO: post etc need args'''
+	U,T,N,F=py.importUTNF()
 	try:
-		url=autoUrl(url)
+		url=N.auto_url(url)
 		request = grequest(url)
 		request.get_method = lambda : amethod.upper()
 		response = grequest.urlopen(request)

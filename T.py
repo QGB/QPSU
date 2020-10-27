@@ -422,28 +422,40 @@ def urlToFileName(url):
 url2fn=url2file=url2fileName=url_to_filename=urlToFileName
 
 
-def get_domain_parts_by_url(url_or_domain):
-	'''In [513]: domain_parts, non_zero_i, parsed_url
+def get_domain_parts_by_url(url_or_domain,**ka):
+	'''(url,
+                fail_silently=False,
+                fix_protocol=True,#False,
+                search_public=True,
+                search_private=True)
+	
+	
+	In [513]: domain_parts, non_zero_i, parsed_url
 Out[513]:
 (['buyertrade', 'taobao', 'com'],
  2,
  SplitResult(scheme='https', netloc='buyertrade.taobao.com', path='/trade/itemlist/list_bought_items.htm', query='', fragment=''))
+ 
+ T.get_domain_parts_by_url(websocket,fix_protocol=False)   
 '''
-
+	if 'fix_protocol' not in ka:
+		ka['fix_protocol']=True
+	
 	import tld
-	return tld.utils.process_url(fix_protocol=True,url=url_or_domain)[0]
+	return tld.utils.process_url(url=url_or_domain,**ka)[0]
 
-def getFLD(url_or_domain):
+def getFLD(url_or_domain,fix_protocol=True):
 	"""Extract the first level domain.
 	
 	"""
 	import tld
 	try:
-		return tld.get_fld(fix_protocol=True,url=url_or_domain)
+		return tld.get_fld(fix_protocol=fix_protocol,url=url_or_domain)
 	except Exception as e:
 		return py.No(url_or_domain,e)
 		#TldDomainNotFound: Domain 网站域名 didn't match any existing TLD name!
 get_fld=getFLD
+
 
 
 ################### zh #############################
@@ -732,13 +744,14 @@ html_unescape=htmlDecode=html_decoded=html_decode
 # data = "U.S. Adviser&#8217;s Blunt Memo on Iraq: Time &#8216;to Go Home&#8217;"
 # print decode_unicode_references(data)
 def netloc(url):
+	''' return "ip:port" '''
 	from six.moves.urllib.parse import urlsplit
 	url=url.strip()
 	if '://' not in url:
 		url='http://'+url
 	up=urlsplit(url=url)
 	return up.netloc
-host_name=netloc
+host_name=get_url_netloc=netloc
 
 def urlEncode(a):
 	''' a : str_or_bytes
@@ -1105,6 +1118,9 @@ def isString(a):
 	if py.is2():return isinstance(a,basestring)#py.type(a) in (py.str,py.unicode)
 	else:return isinstance(a,str)
 istr=isStr=isString	
+
+
+# def sub_head_if_not_s2(s,s1,s2=''):
 
 def sub_head(s,s1,s2=''):
 	if(s==None):return ()

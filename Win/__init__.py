@@ -15,7 +15,7 @@ try:from . import Constants
 except:
 	try:import Constants
 	except Exception as ei:
-		import pdb;pdb.set_trace()	
+		import pdb;pdb.set_trace()
 #python G:\QGB\babun\cygwin\lib\python2.7\qgb\Win/__init__.py 	
 #sys.path ['G:\\QGB\\babun\\cygwin\\lib\\python2.7\\qgb\\Win',
 #sys.path ['G:\\QGB\\babun\\cygwin\\lib\\python2.7\\qgb'   can import py
@@ -75,10 +75,11 @@ except Exception as ei:pass
 
 def run_as_user(cmd=r"notepad.exe C:\Windows\System32\drivers\etc\hosts",user=py.No('use current USER, no password window, privileg also can be elevated')):
 	'''#带有 / -  的命令参数， 一定要三个引号。 三个以下都不行，示例：
-Win.runAsAdmin('cmd """ /k ping 192.168.43.1"""') 
-Win.runAsAdmin('python """-c input(233)""" ')  
-Win.runAsAdmin('ssh-keygen ')  # 运行程序名中含有 - 没关系
-Win.runAsAdmin('cmd """ -k echo 233 """') # -k 参数无效，只能/k
+Win.runAs('cmd """ /k ping 192.168.43.1"""') 
+Win.runAs('python """-c input(233)""" ')  
+Win.runAs('ssh-keygen ')  # 运行程序名中含有 - 没关系
+Win.runAs('cmd """ -k echo 233 """') # -k 参数无效，只能/k
+Win.runAs('cmd """ /k whoami """',user='administrator')
 
 	user='Administrator' ,
 '''
@@ -103,7 +104,7 @@ r"""& {Start-Process powershell.exe %(user)s -WindowStyle Hidden -ArgumentList '
 	# p = sp.Popen(['runas', '/noprofile', '/user:'+user.strip(), r"notepad.exe C:\Windows\System32\drivers\etc\hosts"],stdin=sp.PIPE)
 	# p.stdin.write(b'0') #password
 	# p.communicate()
-npp_hosts=edit_hosts=runAs=run_as=runAsAdmin=run_as_admin=run_as_administrator=cmd_as_user=run_as_user
+npp_hosts=edit_hosts=runAs=powershell_run_as=run_as=runAsAdmin=run_as_admin=run_as_administrator=cmd_as_user=run_as_user
 	
 def test():
 	import subprocess as sp
@@ -379,16 +380,32 @@ def msgbox(s='',st='title',*a):
 	else:
 		return user32.MessageBoxW(0, str(s), str(st), 0)		
 
-def getCursorPos():
+def get_cursor_pos():
 	from ctypes import Structure,c_ulong,byref
 	class POINT(Structure):
 		_fields_ = [("x", c_ulong), ("y", c_ulong)]
 	pt = POINT()
 	user32.GetCursorPos(byref(pt))
 	return pt.x,pt.y		
-getMousePos=GetCursorPos=getCurPos=getCursorPos
+getMousePos=GetCursorPos=getCurPos=getCursorPos=get_cursor_pos
 
-setMousePos=setCursorPos=SetCursorPos=setCurPos=user32.SetCursorPos
+def set_cursor_pos(x,y):
+	x,y=py.int(x),py.int(y)
+	user32.SetCursorPos(x,y)
+	return x,y
+setMousePos=setCursorPos=SetCursorPos=setCurPos=set_mouse_pos=set_cur_pos=set_cursor_pos
+
+def mouse_click(x=None,y=None):
+	import win32api, win32con
+	if not x and not py.isint(x):x=get_cursor_pos()[0]
+	if not y and not py.isint(y):y=get_cursor_pos()[1]
+	x,y=py.int(x),py.int(y)
+	win32api.SetCursorPos((x,y))
+	win32api.mouse_event(win32con.MOUSEEVENTF_LEFTDOWN,x,y,0,0)
+	win32api.mouse_event(win32con.MOUSEEVENTF_LEFTUP,x,y,0,0)
+	return x,y
+click=mouse_click	
+# click(10,10)
 ######################
 def mouse_event(x,y,event=0,abs=True,move=True):
 	'''
