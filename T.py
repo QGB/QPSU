@@ -1317,6 +1317,10 @@ def readNumber(a,split=4,p=True):
 	if py.isnum(a):a=py.int(a)#py2 ok
 	if not py.istr(a):a=str(a)
 	U=py.importU()
+	decimals=''#小数点
+	if a.find('.')==a.rfind('.')!=-1:
+		decimals=sub_tail(a,'.')
+		if decimals:decimals='.'+decimals
 	a=''.join(U.one_in(py.list(a),number))
 	while(a.startswith('0')):a=a[1:]
 
@@ -1334,6 +1338,7 @@ def readNumber(a,split=4,p=True):
 			# U.pln(  i,
 	if iz*split<im: # 如果不加这个判断  T.readNumber(234556789)== '京2亿3455万6789'
 		s=b[iz*split:im][::-1]+zh[iz+1]+s
+	s=s+decimals
 	# U.repl()
 	# for i in zh:U.pln( i.decode('utf-8').encode(U.stdout.encoding) )
 	if py.is2():s=s.decode('utf-8').encode(U.stdout.encoding)

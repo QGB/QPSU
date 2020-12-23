@@ -11,6 +11,40 @@ URL_TRADE_LIST='https://buyertrade.taobao.com/trade/itemlist/list_bought_items.h
 
 us=zu=F.dill_load('C:/test/zu-67.dill')  
 
+def _registed_click_pop_cart():
+	if U.isWin():
+		from qgb import Win
+		ox,oy=Win.get_cursor_pos()
+		x,y=1080,123
+		Win.click(884,717) #scroll bottom
+		U.sleep(0.3)
+		Win.click(657,674) #add btn
+		U.sleep(1.6)
+		for i in range(19):
+			if Win.get_color([889, 485])!=12698049:#grey
+				Win.click(1080,123)#pop btn
+				U.log(i)
+				break
+			U.sleep(0.3)
+		else:
+			return 'error'
+		Win.click(888,274)#s top
+		U.sleep(0.3)
+		Win.click(ox,oy)
+		return ox,oy
+
+def registe_click_pop_cart_hotkey(hotkey='alt+z',callback=_registed_click_pop_cart):
+	k=U.get(hotkey)
+	# if k:
+		# print(U.stime(),'using registed hotkey',hotkey)
+		# return k
+	import keyboard
+	keyboard.unhook_all_hotkeys()
+	
+	k=keyboard.add_hotkey(hotkey, callback)
+	return hotkey,U.set(hotkey,k),id(k)
+hotkey=bind_click_pop_cart_hotkey=registe_click_pop_cart_hotkey
+
 async def get_element_absolute_position_of_system_screen(page,selector,green=False):
 	if green:
 		await page.evaluate(''' e=document.querySelector('%s').style.backgroundColor='green' '''%selector)
@@ -203,7 +237,7 @@ async def get_page(page=None,url=py.No(URL_TRADE_LIST),wait=None,browser=None):
 		url,page=page,None
 
 	if not url:url=URL_TRADE_LIST
-	if not browser:browser=get_browser()
+	if not browser:browser=await get_browser()
 	if not wait and not page:
 		page=await _get_page_by_url(browser,url)
 	if wait and not page:
@@ -320,34 +354,68 @@ async def next_page_trade_list(page=0):
 	return await page.evaluate(taobao_trade.js_trade_list_next)
 next=next_page_trade_list
 
-async def add_cart(*page_urls):
+async def add_cart(id,sku=py.No('click all')):
+	'''  
+await post('https://okfw.net/b=q.get_data();s=T.json_loads(b);r=len(s)',$0.innerHTML)
+	'''
 	tb=taobao_trade
-	
+	id=str(id)
 	r=[]
-	for u in page_urls:
-		i=await tb.get_page(url=u)
-		# a='https://item.taobao.com/item.htm?id=566965639091')# 带垫螺丝
-		# b=await tb.get_page(url='https://item.taobao.com/item.htm?id=520596842170')# 防盗螺丝
-		if not i:
-			return py.No(u,i)
-		t=await  i.title()
-		r.append([U.stime(),t])
-		await i.bringToFront()
-		if 'detail.tmall.com/item.htm' in i.url:
-			await i.evaluate('''r=xpath('//a[contains(@id,"J_LinkBasket" )]');r.click();''')
-			continue
-		
-		await page_scroll_bottom(i)
-
-		popsku=await i.evaluate('''r=xpath('//div[contains(@class,"tb-popsku-large" )]');if(!r){r=233}else{r.getAttribute('style')} ''')
-		if popsku!='display: block;':
-			# add_cart_btn=
-			await i.evaluate('''r=xpath('//a[contains(@id,"J_TabShopCart" )]');r.click();''')
+	p=await tb.get_page(url=id)
+	if not p:
+		if '://' not in id:
+			id='https://item.taobao.com/item.htm?id=%s'%id
+		p=await tb.new_page(url=id)
+	t=await p.title()
+	r.append([U.stime(),p,[T.sub(p.url,'id=',''),t] , ])
+	await p.bringToFront()
+	if 'detail.tmall.com/item.htm' in p.url:
+		await p.evaluate('''r=xpath('//a[contains(@id,"J_LinkBasket" )]');r.click();''')
+		raise NotImplementedError()
+	await page_scroll_bottom(p)
+	top_add_cart_btn=await p.querySelector('a#J_TabShopCart')
+	await top_add_cart_btn.click()# 页面初始加载必须先点击才会出现 popsku 
+	popsku=await p.querySelector('div.tb-popsku' )
+	async def check_popsku():
+		style=await popsku.getProperty('style')
+		display=await style.getProperty('display')
+		value=await display.jsonValue()
+		if 'none' in value:
+			await top_add_cart_btn.click()
 			await A.sleep(0.01)
-			# return i,t,popsku 
-		#qd=
-		await i.evaluate('''r=xpath('//a[contains(@class,"J_PopSKUAddCart" )]');r.click() ''')
-		# r.append([t,qd])
+			
+	add=await p.querySelector('a.J_PopSKUAddCart')
+	cancel=await p.querySelector('a.J_PopSKUCancer')
+	
+	try:await cancel.click()
+	except:pass
+	
+	props=await p.querySelectorAll('.J_PopSKUProps>.J_Prop ')
+	if len(props)>1: #TODO
+		U.beep()
+		await A.sleep(3)
+		U.beep()
+		await A.sleep(6)
+		return r,len(props)
+		
+	
+	
+	ses=await p.querySelectorAll('.J_PopSKUProps > dl.J_Prop > dd > ul > li > a > span')
+	for se in ses:
+		await check_popsku()
+		t=await (await se.getProperty('textContent')).jsonValue()
+		for s in sku:
+			if t in s:
+				break
+		else:
+			if sku:# 指定了sku，但是没有找到（not break）
+				continue
+		await se.click()
+		await A.sleep(0.1)
+		await add.click()
+		await A.sleep(1)
+		r.append(t)
+		
 	return r
 
 async def is_trade_list_loading(page=0):
@@ -841,3 +909,4 @@ async function main(){
 
 main()
 '''
+

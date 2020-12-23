@@ -12,19 +12,25 @@ def replace_ws_url(ws,netloc='127.0.0.1:8765'):
 # py.pdb()()
 import asyncio,websockets
 import signal
-async def proxy(websocket, path):
-	global target_connect
-	client_msg = await websocket.recv()
+async def proxy(client, path):
+	# global target_connect
+		# await client.send(U.stime()+client_msg)
+	while True:
+		client_msg = await client.recv()
+		u=f'ws://{target_netloc}{path}'
+		t=U.get(u)
+		if not t:
+			t=U.set(u,await websockets.connect(u,max_size=None, ping_interval=None, ping_timeout=9999))
+		# py.pdb()()
+		await t.send(client_msg)
+		r = await t.recv()
+		
+		await client.send(r)
+		print(f"{U.stime()} {client_msg} > [{path}] > {r}")
+		print()
     # print(f"< {name}")
 
     # greeting = f"{path} {name} !"
-	async with websockets.connect(f'ws://{target_netloc}{path}') as target_connect:
-		await target_connect.send(client_msg)
-		r = await target_connect.recv()
-	
-	await websocket.send(r)
-	print(f"{U.stime()} {client_msg} > [{path}] > {r}")
-
 
 def wakeup():
 	loop.call_later(0.1, wakeup)
@@ -37,9 +43,8 @@ if '__main__' in __name__:
 	if not target_url:
 		raise py.ArgumentError('cmd must provide target_url:-u[rl]')
 	target_netloc=T.netloc(target_url)
-	target_connect=U.get(target_url)
-
-	print([U.stime(),listen_host,listen_port,target_url,target_connect])
+	
+	print([U.stime(),listen_host,listen_port,target_url,target_netloc, sys._qgb_dict ])
 
 	start_server = websockets.serve(proxy, listen_host,listen_port)
 

@@ -350,7 +350,7 @@ a=T.subr(u,T.u23)#'%23-'
 	else:
 		a=T.sub_tail(u,'%23')
 	return T.url_decode(a)
-geta=get_a=get_request_a=get_rpc_request_a
+geta=get_a=get_request_a=get_flask_request_a=get_rpc_request_a
 
 def pdf2html(url,response=None,zoom=None,path=None,pw=None):
 	U,T,N,F=py.importUTNF()
@@ -423,6 +423,71 @@ def flask_html_response(response,html,remove_tag=(
 	response.set_data(html)
 html=htmlp=response_html=html_response=flask_html_response
 
+def get_chunk(full_path,byte1, byte2=None,):
+	 # = "try2.mp4"
+	file_size = os.stat(full_path).st_size
+	start = 0
+	length = 102400
+
+	if byte1 < file_size:
+		start = byte1
+	if byte2:
+		length = byte2 + 1 - byte1
+	else:
+		length = file_size - start
+
+	with open(full_path, 'rb') as f:
+		f.seek(start)
+		chunk = f.read(length)
+	return chunk, start, length, file_size
+
+def flask_media_stream_response(request,response,file=None,):		
+	from flask import stream_with_context
+	U,T,N,F=py.importUTNF()
+	if not file:
+		file=get_flask_request_a(request)					
+	import re
+	range_header = request.headers.get('Range', None)
+	byte1, byte2 = 0, None
+	if range_header:
+		match = re.search(r'(\d+)-(\d*)', range_header)
+		groups = match.groups()
+
+		if groups[0]:
+			byte1 = int(groups[0])
+		if groups[1]:
+			byte2 = int(groups[1])
+			
+	gen=F.read_as_stream(file,start=byte1) # 这里不会出错，iter generator 才 服务器内部错误
+	try:
+		py.next(gen)
+		response.response=stream_with_context(gen)
+		response.headers['Content-Type'] = 'video/mp4'
+		response.headers['mimetype'] = 'video/mp4'
+		if range_header:
+			response.headers.add('Content-Range', 'bytes {0}-'.format(byte1
+		#, byte1 + length - 1, file_size
+			))
+			if byte1>0:
+				response.status_code = 206
+
+	except Exception as e:
+		# r=T.pformat([e,U.get_tb_stack()],**U.get('pformat_kw',{}))
+		r=py.repr(e)
+		response.set_data(r)
+	return	
+		
+	
+
+	chunk, start, length, file_size = get_chunk(byte1, byte2)
+	resp = Response(chunk, 206, mimetype='video/mp4',
+					  content_type='video/mp4', direct_passthrough=True)
+	resp.headers.add('Content-Range', 'bytes {0}-{1}/{2}'.format(start, start + length - 1, file_size))
+	return resp	
+	
+	
+mp4_response=media_response=flask_media_stream_response
+	
 def flask_file_stream_response(response,file,):
 	from flask import stream_with_context
 	U,T,N,F=py.importUTNF()
@@ -444,9 +509,7 @@ file=stream_file=file_stream=read_as_stream=flask_file_stream_response
 
 def is_flask_request(q):
 	from werkzeug.local import LocalProxy
-	if isinstance(q,LocalProxy):
-		return True
-	return False
+	return isinstance(q,LocalProxy)
 
 def set_proxy(host='',port='',protocol='socks5',target_protocol=('http','https'),**ka):
 	''' no args provide,proxy will clean

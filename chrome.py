@@ -9,7 +9,10 @@ import pyppeteer
 import asyncio
 
 def connect(ws):
-	''' qgb'''
+	''' qgb
+print(connection, browserContextIds, ignoreHTTPSErrors, defaultViewport)	
+<pyppeteer.connection.Connection object at 0x0000016D1F3B2D88> [] False {'width': 800, 'height': 600}	
+	'''
 	
 
 

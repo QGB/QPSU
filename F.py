@@ -381,7 +381,7 @@ def auto_find_file(head,ext='',r='Default auto accroding to the head'):
 	if not head.endswith(ext):head+=ext
 	
 	return head
-
+autof=auto_find_file
 		
 def new(a):
 	'''will overwrite'''
@@ -591,7 +591,7 @@ Read and return up to n bytes.
 readb=readByte=readBytes=read_byte=read_bytes	
 
 
-def read_bytes_chunks(path,size = 8192):
+def read_bytes_chunks(path,start=0,size = 8192):
 	'''try this func
 except : StopIteration((PermissionError(13, 'Permission denied'), 'D:/',8192)
 	'''
@@ -599,6 +599,7 @@ except : StopIteration((PermissionError(13, 'Permission denied'), 'D:/',8192)
 	try:
 		with open(path, 'rb') as fd:
 			yield fd.read(0) # 让错误提前暴露。不会造成 500 Internal Server error
+			fd.seek(start)
 			while 1:
 				buf = fd.read(size)
 				if buf:
@@ -1123,6 +1124,7 @@ autofn=auto_filename=autoFileName=auto_file_path=auto_path=autoPath
 
 def nt_path(fn):
 	'''if linux etc ,will auto ignored
+write success, read failed ?	
 	'''
 	U=py.importU()
 	fn=_p.abspath(fn)

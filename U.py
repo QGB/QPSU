@@ -877,6 +877,17 @@ def sleep(aisecond):
 	if not aisecond:return
 	__import__('time').sleep(aisecond)
 
+def sleep_until(time):
+	U=py.importU()
+	from threading import Event      
+	e=U.get_or_set('wait_event',Event())
+	e.clear()
+	begin=U.itime_ms()
+	e.wait(aisecond)
+	ms=U.itime_ms()-begin
+	e.clear()
+	return ms	
+	
 def wait_can_be_interrupted(aisecond):
 	U=py.importU()
 	from threading import Event      
@@ -1432,8 +1443,9 @@ def _ct_clear():
 calltimes.clear=_ct_clear
 
 
-def setLogLevel(level=False):
+def set_log_level(level=False,logger=None):
 	''' logging.CRITICAL #50
+	return level<int>
 	'''
 	
 	if level==True:level=-1 # 0 useless
@@ -1443,14 +1455,18 @@ def setLogLevel(level=False):
 		urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 		
-	
 	import logging
-	#Disable all logging calls of severity 'level' and below.
-	logging.disable(level)
-	
+	if logger:
+		if py.istr(logger):
+			logger=logging.getLogger(logger)
+		logger.setLevel(level)
+	else:
+		#Disable all logging calls of severity 'level' and below.
+		logging.disable(level)
+	return level
 	# log.setLevel(logging.NOTSET) #0
 	# log.setLevel(logging.CRITICAL) #50
-setlog=setLogLevel
+setlog=setLogLevel=set_log=set_log_level
 
 def disableLog():return setLogLevel(False)
 disable_log=disableLog
@@ -1621,7 +1637,7 @@ def avgLen(*a):
 		im+=len(i)
 	return float(im)/len(a)	
 	
-def printAttr(a,b='chrome',console=False,call=False):
+def dir_show_in_html(a,b='chrome',console=False,call=False):
 	'''if call: aoto call __methods which is no args
 	
 	py.dir  request  'werkzeug.local.LocalProxy'  ==   []
@@ -1691,7 +1707,7 @@ def printAttr(a,b='chrome',console=False,call=False):
 	
 	
 	# cdBack()
-pa=printattr=printAttr
+pa=printattr=printAttr=html_dir=htmlDir=dir_show_in_html
 # repl()
 # printAttr(5)
 
@@ -2117,8 +2133,9 @@ def mergeList(*a):
 	return r
 add_list=addList=merge_list=mergeList
 
-def itime_sec():
-	return py.int(timestamp())
+def itime_sec(a=py.No('auto current timestamp second')):
+	if not a:a=timestamp()
+	return py.int(a)
 itime=itime_sec
 
 def itime_ms():
@@ -2129,7 +2146,7 @@ def strTimeStamp():
 	return py.str(getTimestamp())
 stimestamp=strTimeStamp	
 	
-def getTimestamp():
+def getTimestamp(a=py.No('auto current timestamp(float)')):
 	'''return: float
 --------> U.time()
 Out[304]: 1490080570.265625
@@ -2138,7 +2155,17 @@ In [305]: U.time
 --------> U.time()
 Out[305]: 1490080571.125
 '''
-	return __import__('time').time()
+	import time
+	if not a:
+		a=time.time()
+	elif py.istr(a) and '-' in a:
+		return
+	elif py.isnum(a) and a>0:
+		return
+	else:
+		raise py.ArgumentUnsupported(a)
+		
+	return a
 ftime=timestamp=getTimeStamp=getTimestamp
 
 def getTime():
@@ -2224,9 +2251,11 @@ def getStime(time=None,format=gsTimeFormatFile,ms=True):
 		else:return tMod.strftime(format)
 stime=getCurrentTimeStr=timeToStr=getStime
 
-def parse_time_str(a):
-	from dateutil import parser
-	return parser.parse(a)
+def parse_time_str(a,format='%Y-%m-%d__%H.%M.%S'):
+	import time
+	return time.strptime(a,format)
+	# from dateutil import parser
+	# return parser.parse(a)
 parse_time=stime2time=stime_to_time=parse_stime=parse_time_str	
 
 def float(x):
@@ -2769,6 +2798,9 @@ getCallExpr=getCallExpression
 
 def simulate_system_actions(a=py.No("str[key|key_write ] or action list[['click',xy],[foreground,title|handle],['k','sss'],['t','text']]"),key='', delay=0.2,restore_state_after=True, exact=None):
 	'''pip install keyboard
+key='Win+D'  # mute  ,not min all window	
+	
+	
 Signature: keyboard.write(text, delay=0, restore_state_after=True, exact=None)
 Docstring:
 Sends artificial keyboard events to the OS, simulating the typing of a given
@@ -2831,7 +2863,7 @@ File:      c:\qgb\anaconda3\lib\site-packages\keyboard\__init__.py'''
 					r.append(['click',row[1]])
 					_sleep(delay)
 					continue
-				elif one_in(['front','window','for','forground','foreground','win32gui.setforegroundwindow','setforegroundwindow','foreground'],action):
+				elif one_in(['set_window','top','front','window','for','forground','foreground','win32gui.setforegroundwindow','setforegroundwindow',],action):
 					if py.istr(row[1]):
 						from qgb import Win
 						for handle,title,balala in Win.getAllWindows():
@@ -2846,6 +2878,9 @@ File:      c:\qgb\anaconda3\lib\site-packages\keyboard\__init__.py'''
 					else:
 						raise py.ArgumentError('foreground,row[1]',row)
 					import win32gui
+					# if not win32gui.IsWindowVisible(handle): #先不考虑
+						
+           
 					win32gui.SetForegroundWindow(handle)
 					r.append(['foreground',row[1]])
 					_sleep(delay);continue
@@ -4380,7 +4415,37 @@ def python_c(*a,**ka):
 	return python('-c',*a,**ka)
 
 	
+
+def integer_to_rgb_tuple(RGBint):
+	blue =  RGBint & 255
+	green = (RGBint >> 8) & 255
+	red =   (RGBint >> 16) & 255
+	return (red, green, blue)
+i2rgb=rgbint2rgbtuple=convert_integer_to_rgb_tuple=int2rgb=int_to_rgb=integer_to_rgb_tuple
+
+def rgb_name(r,g=None,b=None):
+	if not py.isint(r):
+		if g==None and b==None:
+			r,g,b=r
+		else:
+			raise py.ArgumentError()
+	else:
+		if g==None and b==None:
+			r,g,b=integer_to_rgb_tuple(r)
+	rgb=(r,g,b)
+	hex='0x%02x_%02x_%02x '%rgb#TypeError: %i format: a number is required, not list
+		#rgb 必须用tuple ，不能用list
+	import webcolors
+	try:
+		name=hex+'#'+webcolors.rgb_to_name(rgb)
+	except ValueError:
+		name=hex  
+	return name
+i2srgb=int2srgb=int_to_srgb=rgb_name			
 	
+	
+	
+############## qgb type ######################	
 class FloatCustomStrRepr(py.float):
 	'''每添加一种 CustomStrRepr ，需要在 T.string 中添加相应的 str 代码
 	或者用 self.raw 来保存 # 不行，直接保存参数 类型不对

@@ -71,7 +71,20 @@ try:
 	import win32gui
 except Exception as ei:pass
 
-
+def get_cursor_pos_color(pos=(),x=None,y=None):
+	''' return (x,y),color  '''
+	U,T,N,F=py.importUTNF()
+	if not pos:
+		pos=get_cursor_pos()
+	pos=py.list(pos)
+	if py.isint(x):pos[0]=x
+	if py.isint(y):pos[1]=y
+	
+	import win32gui
+	color=win32gui.GetPixel(win32gui.GetDC(win32gui.GetActiveWindow()),*pos)
+	color=U.IntCustomRepr(color,repr=U.rgb_name(color))
+	return pos,color
+get_color=get_xy_color=get_cursor_pos_color
 
 def run_as_user(cmd=r"notepad.exe C:\Windows\System32\drivers\etc\hosts",user=py.No('use current USER, no password window, privileg also can be elevated')):
 	'''#带有 / -  的命令参数， 一定要三个引号。 三个以下都不行，示例：
@@ -334,22 +347,26 @@ def getWindowSize(h):
 	return (r[2]-r[0],r[3]-r[1])
 getwh=getsize=getSize=getWSize=getWindowSize
 
+def is_window_topmost(handle):
+	''' return 0(NOT_TOP) else 8(TOP) '''
+	import win32gui,win32con
+	return (win32gui.GetWindowLong(handle, win32con.GWL_EXSTYLE) & win32con.WS_EX_TOPMOST)
+
 def setWindowPos(hwnd=0,x=0,y=0,w=0,h=0,rect=(),top=None,flags=None):
 	'''if not flags:flags=SWP_SHOWWINDOW  # 无论是否top，是否拥有焦点，默认显示此窗口
 	'''
 	if not hwnd:
 		hwnd=getCmdHandle()
-		if x==y==w==h==0 and not rect:
-			x,y,w,h=(199,-21,999,786)
+		# if x==y==w==h==0 and not rect:
+			# x,y,w,h=(199,-21,999,786)
 	if not rect:
 		rect=getWindowPos(hwnd)
 	if not x:x=rect[0]
 	if not y:y=rect[1]
 	if not w:w=rect[2]-rect[0]
 	if not h:h=rect[3]-rect[1]
-	if top!=None:	
-		if top:top=HWND_TOPMOST
-		else:  top=HWND_NOTOPMOST  #-2
+	if top:top=HWND_TOPMOST
+	else:  top=HWND_NOTOPMOST  #-2
 	if not flags:flags=SWP_SHOWWINDOW  # 无论是否top，是否拥有焦点，默认显示此窗口
 		
 	if user32.SetWindowPos(hwnd,top,x,y,w,h,flags):#1
