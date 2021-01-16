@@ -71,17 +71,27 @@ try:
 	import win32gui
 except Exception as ei:pass
 
-def get_cursor_pos_color(pos=(),x=None,y=None):
-	''' return (x,y),color  '''
+def get_cursor_pos_color(x=None,y=None,**ka):
+	''' x or y arg 优先
+	
+	return [x,y],color  '''
 	U,T,N,F=py.importUTNF()
-	if not pos:
-		pos=get_cursor_pos()
+	
+	if not py.isint(x) and y==None:
+		pos=x
+	if x==None or y==None:
+		pos=U.get_duplicated_kargs(ka,'pos','xy')
+		if not pos:
+			pos=get_cursor_pos()
+	else:
+		pos=[x,y]
 	pos=py.list(pos)
 	if py.isint(x):pos[0]=x
 	if py.isint(y):pos[1]=y
 	
 	import win32gui
 	color=win32gui.GetPixel(win32gui.GetDC(win32gui.GetActiveWindow()),*pos)
+	if color<256:color=256*256*color
 	color=U.IntCustomRepr(color,repr=U.rgb_name(color))
 	return pos,color
 get_color=get_xy_color=get_cursor_pos_color
@@ -275,8 +285,14 @@ get_cmd=get_cmdline=get_command_line=GetCommandLine=getCmd=getCmdLine
 def getTitle(h=0,size=1024):
 	'''h:window Handle'''
 	if not h:h=getCmdHandle()
-	title = ctypes.create_string_buffer(size)
-	user32.GetWindowTextA(h,title,size)
+	if py.is2():
+		# size= user32.GetWindowTextLengthA(h) + 1  # always =2 in py3?
+		title = ctypes.create_string_buffer(size)
+		user32.GetWindowTextA(h,title,size)
+	else:
+		length = user32.GetWindowTextLengthW(h) + 1
+		title = ctypes.create_unicode_buffer(length)
+		user32.GetWindowTextW(h, title, length)
 	return title.value
 getitle=getTitle
 	
@@ -303,8 +319,44 @@ def getAllWindows():
 	win32gui.EnumWindows(EnumWindowsProc, mlst)
 	# for handle in handles:
 		# mlst.append(handle)
-	return [(i[0],i[1].decode('mbcs'),get_pid_by_hwnd(i[0])) for i in mlst]
+	if py.is2():
+		return [(i[0],i[1].decode('mbcs'),get_pid_by_hwnd(i[0])) for i in mlst]
+	else:
+		return [(i[0],i[1] ,get_pid_by_hwnd(i[0])) for i in mlst]
 EnumWindows=getAllWindow=getAllWindows
+
+def set_foreground(title=None,handle=None,pid=None,process_name='',**ka):
+	U,T,N,F=py.importUTNF()
+	if not title:title=U.get_duplicated_kargs(ka,'t',)
+	if not handle:handle=U.get_duplicated_kargs(ka,'hwnd','h')
+	if not process_name:process_name=U.get_duplicated_kargs(ka,'name','pn','process')
+	
+	if not handle:
+		from qgb import Win
+		for h,t,p in Win.getAllWindows():
+			if t==title or p==pid:
+				handle=h;break
+			if process_name and process_name==U.get_process_name_by_pid(p):
+				handle=h;break
+		else:
+			if (not title) and (not process_name):raise py.ArgumentError(py.locals())
+			for h,t,p in Win.getAllWindows():
+				if title and title in t:
+					handle=h;break
+				if process_name and process_name in U.get_process_name_by_pid(p):
+					handle=h;break
+			else:
+				raise py.EnvironmentError('cannot find ForegroundWindow title : '+a)
+		# if py.isint(title):
+			# handle=title		
+	# else:
+		# raise py.ArgumentError('foreground,a',row)
+	import win32gui
+	# if not win32gui.IsWindowVisible(handle): #先不考虑
+		
+
+	win32gui.SetForegroundWindow(handle)
+	return U.IntCustomRepr(handle,repr='Win.set_foreground(%r)'%handle)
 
 def get_pid_by_hwnd(hwnd):
 	try:
@@ -404,7 +456,7 @@ def get_cursor_pos():
 	pt = POINT()
 	user32.GetCursorPos(byref(pt))
 	return pt.x,pt.y		
-getMousePos=GetCursorPos=getCurPos=getCursorPos=get_cursor_pos
+getMousePos=GetCursorPos=getCurPos=getCursorPos=get_cur_pos=get_cursor_pos
 
 def set_cursor_pos(x,y):
 	x,y=py.int(x),py.int(y)

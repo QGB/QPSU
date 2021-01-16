@@ -105,9 +105,9 @@ gd_sync_level={
 'sys':2 , #not sys module
 'lan':3    ,# lan sync  #TODO default rpc to find out qpsu computer
 'wan':4    ,# internet sync
-'all':4    ,
+'all':5    ,
 }
-def set(name,value=None,level=gd_sync_level['process']):
+def set(name,value=None,level=gd_sync_level['process'],**ka):
 	if level>=gd_sync_level['process']:
 		import sys
 		d=py.getattr(sys,'_qgb_dict',{})
@@ -873,10 +873,13 @@ pop(_63,25)  #_63 has change
 
 get_ka=get_multi_ka=getKargsDuplicated=getKArgsDuplicated=get_kargs_duplicated=get_duplicated_kargs
 
-def sleep(aisecond):
-	if not aisecond:return
-	__import__('time').sleep(aisecond)
-
+def sleep(asecond):
+	''' asecond: int or float'''
+	if not asecond:return 
+	__import__('time').sleep(asecond)
+	return IntCustomRepr(asecond,repr='U.sleep(%s)'%asecond)
+delay=sleep
+	
 def sleep_until(time):
 	U=py.importU()
 	from threading import Event      
@@ -889,6 +892,9 @@ def sleep_until(time):
 	return ms	
 	
 def wait_can_be_interrupted(aisecond):
+	'''interrupt : 
+	U.get('wait_event').set()
+	'''
 	U=py.importU()
 	from threading import Event      
 	e=U.get_or_set('wait_event',Event())
@@ -1346,7 +1352,7 @@ def sortDictV(ad,key=lambda item:item[1],des=True):
 def dictToList(a):
 	return py.list(a.items())
 
-def evalSafely(source, globals=None, locals=None,noErr=False):
+def eval_safely(source, globals=None, locals=None,noErr=False):
 	''' '''
 	if globals==locals==None:
 		f=sys._getframe().f_back
@@ -1359,7 +1365,7 @@ def evalSafely(source, globals=None, locals=None,noErr=False):
 			return py.No(e)
 		else:
 			return e
-eval=evalSafely
+eval=evalSafely=safely_eval=safe_eval=eval_safely
 
 def execStrResult(source, globals=None, locals=None,pformat_kw={}):
 	""".pformat(object, indent=1, width=80, depth=None, *, compact=False)
@@ -2796,6 +2802,20 @@ def getCallExpression(*a,**ka):
 	return r
 getCallExpr=getCallExpression
 
+def simulate_key_write(astr):
+	import keyboard
+	keyboard.write(text=astr, delay=delay, restore_state_after=restore_state_after, exact=exact)
+	return StrRepr(astr,repr='U.simulate_key_write(%r)'%astr)
+text_key=text_key_write=keyboard_write=simulate_key_write	
+
+def simulate_key_press(akey):
+	# parsed=keyboard.parse_hotkey(akey)
+	# if py.len(parsed)>1: #如果 多个组合键中间想要delay,使用 action_list 
+	import keyboard
+	keyboard.press_and_release(akey, do_press=True, do_release=True)
+	return StrRepr(akey,repr='U.simulate_key_press(%r)'%akey)
+system_key=pressKey=keyPress=press_key=key_press=simulate_key_press
+
 def simulate_system_actions(a=py.No("str[key|key_write ] or action list[['click',xy],[foreground,title|handle],['k','sss'],['t','text']]"),key='', delay=0.2,restore_state_after=True, exact=None):
 	'''pip install keyboard
 key='Win+D'  # mute  ,not min all window	
@@ -2819,13 +2839,6 @@ beginning. Defaults to True.
 alt+codepoint or special events). If None, uses platform-specific suggested
 value.
 File:      c:\qgb\anaconda3\lib\site-packages\keyboard\__init__.py'''
-	import keyboard
-	def _key_write(astr):
-		keyboard.write(text=astr, delay=delay, restore_state_after=restore_state_after, exact=exact)
-	def _key_press(akey):
-		# parsed=keyboard.parse_hotkey(akey)
-		# if py.len(parsed)>1: #如果 多个组合键中间想要delay,使用 action_list 
-		keyboard.press_and_release(akey, do_press=True, do_release=True)
 	def _sleep(sec=None):
 		if (index+1)==py.len(a):return
 		if not sec:sec=delay #暂时没用 默认参数
@@ -2839,10 +2852,10 @@ File:      c:\qgb\anaconda3\lib\site-packages\keyboard\__init__.py'''
 			if py.istr(row):
 				try:
 					keyboard.parse_hotkey(row) #将 parsed传入 将会再次parse_hotkey，导致无按键效果
-					_key_press(row)
+					simulate_key_press(row)
 					r.append(['key',row])
 				except:
-					_key_write(row)
+					simulate_key_write(row)
 					r.append(['txt',row])
 				_sleep(delay)
 				continue
@@ -2852,60 +2865,45 @@ File:      c:\qgb\anaconda3\lib\site-packages\keyboard\__init__.py'''
 					row=_row
 				
 			if py.islist(row) or py.istuple(row):
-				if py.len(row)!=2:raise py.ArgumentError("a[%s]== %r list.len != 2 ,should be['key|text','str_data']"%(index,row))
+				# if py.len(row)!=2:raise py.ArgumentError("a[%s]== %r list.len != 2 ,should be['key|text','str_data']"%(index,row))
 				if py.isint(row[0]) and py.isint(row[1]):
 					row=['click',row]
 				
 				action=row[0].lower()
 				if 'click' in action:######
 					from qgb import Win
+					if py.len(row)==1:
+						row.append(Win.get_cursor_pos())
 					Win.click(*row[1])
 					r.append(['click',row[1]])
 					_sleep(delay)
 					continue
-				elif one_in(['set_window','top','front','window','for','forground','foreground','win32gui.setforegroundwindow','setforegroundwindow',],action):
-					if py.istr(row[1]):
-						from qgb import Win
-						for handle,title,balala in Win.getAllWindows():
-							if row[1]==title:break
-						else:
-							for handle,title,balala in Win.getAllWindows():
-								if row[1] in title:break
-							else:
-								raise py.EnvironmentError('cannot find ForegroundWindow title : '+row[1])
-					elif py.isint(row[1]):
-						handle=row[1]
-					else:
-						raise py.ArgumentError('foreground,row[1]',row)
-					import win32gui
-					# if not win32gui.IsWindowVisible(handle): #先不考虑
-						
-           
-					win32gui.SetForegroundWindow(handle)
-					r.append(['foreground',row[1]])
+				elif one_in(['set_window','top','front','window','for','forground','foreground','win32gui.setforegroundwindow','setforegroundwindow','forward'],action):
+					a=Win.set_foreground(row[1])
+					r.append(['foreground',a])
 					_sleep(delay);continue
 				elif one_in(['delay','sleep','wait'],action):
 					_sleep(py.int(row[1]))	
 					continue
 				elif 't' in action:############
-					_key_write(row[1])
+					simulate_key_write(row[1])
 					r.append(['txt',row[1]])
 					_sleep(delay);continue
 				elif 'k' in action:############
-					_key_press(row[1])
+					simulate_key_press(row[1])
 					r.append(['key',row[1]])
 					_sleep(delay);continue
 				else:###########################
 					raise py.ArgumentError("a[%s]== %r[0] not supported!! key|text|delay"%(index,row))
 			
-		return r	
-	if a :_key_write(a)
+		return py.tuple(r)
+	if a :simulate_key_write(a)
 	
-	if key:_key_press(key)
+	if key:simulate_key_press(key)
 	
 	
 		
-system_key=key_actions=key_action=keyboard_write=pressKey=keyPress=press_key=key_press=simulate_key_press=system_actions=system_action=sys_act=sys_acts=sys_actions=sys_action=simulate_system_actions
+key_action=key_actions=system_actions=system_action=sys_act=sys_acts=sys_actions=sys_action=simulate_system_actions
 
 def set_env_path(append=[],delete=[]):
 	# if not p :raise py.ArgumentError()
@@ -2955,11 +2953,16 @@ def getParentCmdLine():
 	return psutil.Process(getppid()).cmdline()
 getpargv=getParentCmdLine	
 
-def getProcessByPid(pid):
+def get_process_by_pid(pid):
 	'''process_name = process.name()'''
 	import psutil
 	return psutil.Process(pid)			 
-									
+getProcessByPid=get_process_by_pid
+
+def get_process_name_by_pid(pid):
+	import psutil
+	return psutil.Process(pid).name()						
+						
 def get_all_process_list(name='',cmd='',pid=0):
 	'''if err return [r, {i:err}  ]
 _62.name()#'fontdrvhost.exe'
@@ -4423,14 +4426,30 @@ def integer_to_rgb_tuple(RGBint):
 	return (red, green, blue)
 i2rgb=rgbint2rgbtuple=convert_integer_to_rgb_tuple=int2rgb=int_to_rgb=integer_to_rgb_tuple
 
+def RGBAfromInt(argb_int):
+	blue =  argb_int & 255
+	green = (argb_int >> 8) & 255
+	red =   (argb_int >> 16) & 255
+	alpha = (argb_int >> 24) & 255
+	return (red, green, blue, alpha)
+
+def rgb_tuple_to_integer(rgb):
+	return rgb[2]*256*256+rgb[1]*256+rgb[0]
+rgb2i=rgb_to_int=rgb_to_integer=rgb_tuple_to_integer
+
 def rgb_name(r,g=None,b=None):
 	if not py.isint(r):
 		if g==None and b==None:
-			r,g,b=r
+			if py.istr(r):
+				if r.startswith('0x'):
+					r=py.int(r[:10],16)
+				else:
+					r=py.int(r)
+			else:	
+				r,g,b=r
 		else:
 			raise py.ArgumentError()
-	else:
-		if g==None and b==None:
+	if py.isint(r) and g==None and b==None:
 			r,g,b=integer_to_rgb_tuple(r)
 	rgb=(r,g,b)
 	hex='0x%02x_%02x_%02x '%rgb#TypeError: %i format: a number is required, not list
@@ -4443,7 +4462,89 @@ def rgb_name(r,g=None,b=None):
 	return name
 i2srgb=int2srgb=int_to_srgb=rgb_name			
 	
+def iter_screen_colors(xrange=[855,1311],yrange=[],default_step=3,set_cur_pos=False,**ka):
+	# cc=-1
+	U,T,N,F=py.importUTNF()
+	pos=py.list(Win.get_cur_pos())
+	x=U.get_ka(ka,'x','X')
+	y=U.get_ka(ka,'y','Y')
+	if py.isint(x):pos[0]=x;xrange=None
+	elif x and py.iterable(x):xrange=x  ###<py.No  py.iterable(x)==True
+	if py.isint(y):pos[1]=y;yrange=None
+	elif y and py.iterable(y):yrange=y
 	
+	if not xrange:xrange=[pos[0],pos[0]+default_step] # 只有一个坐标
+	if not yrange:yrange=[pos[1],pos[1]+default_step]
+	
+	if not U.all_in(U.len(xrange,yrange),[2,3]):
+		raise py.ArgumentError(xrange,yrange)
+	
+	if py.len(xrange)<3:xrange.append(default_step)
+	if py.len(yrange)<3:yrange.append(default_step)
+	
+	print(xrange,yrange,'\n',x,y)
+	
+	# if set_cur_pos:Win.set_cur_pos(xrange[0],yrange[0])
+	
+
+	from PIL import Image, ImageGrab
+	im =ImageGrab.grab()
+
+	import win32gui,win32api,win32ui
+	
+	hwnd = win32gui.WindowFromPoint((xrange[0],yrange[0]))
+	dc = win32gui.GetDC(0)
+	dcObj = win32ui.CreateDCFromHandle(dc)
+	monitor = (0, 0, win32api.GetSystemMetrics(0), win32api.GetSystemMetrics(1))
+	dcObj.Rectangle((xrange[0],yrange[0],xrange[1],yrange[1]))
+	# win32gui.InvalidateRect(hwnd, monitor, True) 
+	win32gui.UpdateWindow(hwnd)
+	red = 255#win32api.RGB(255, 0, 0)
+	
+	rd={}
+	for ny,y in py.enumerate(py.range(*yrange)):
+		for nx,x in py.enumerate(py.range(*xrange)):
+			if set_cur_pos and (ny==0 or nx==0):
+				win32gui.SetPixel(dc, x, y, red)
+			rgb=im.getpixel((x,y));
+			c=U.IntCustomRepr(U.rgb_to_int(rgb),repr=U.rgb_name(rgb))
+			# c=Win.get_color(x,y)[-1]
+			# rgb=integer_to_rgb_tuple(c)
+			if c in rd:
+				rd[c].append([nx,ny])
+				continue
+			# c[0]=
+			# c[0].append('| %s'%nx)
+			rd[c]=[x,y]
+		
+		
+		# cc=c[-1]
+	# U.pprint(rd)
+	return rd
+	
+def register_hotkey	(callback,hotkey='alt+z',unregister_all=True):
+	'''  U.hotkey(lambda:print(U.stime()))
+	
+	'''
+	import keyboard
+	U,T,N,F=py.importUTNF()
+	if unregister_all:
+		try:
+			keyboard.unhook_all_hotkeys() #
+		except Exception as e:
+			print(e)
+		# keyboard._recording = None
+		# keyboard._pressed_events.clear()
+		# keyboard._physically_pressed_keys.clear()
+		# keyboard._logically_pressed_keys.clear()
+		# keyboard._hotkeys.clear()
+		# keyboard._listener.init()#不加这句 init，第一次运行报AttributeError: '_KeyboardListener' object has no attribute 'blocking_hotkeys'
+		# keyboard._word_listeners = {} 	
+		
+
+	k=keyboard.add_hotkey(hotkey, callback)
+	return hotkey,U.set(hotkey,k),id(k)
+hotkey=hot_key=registe_hotkey=bind_hotkey=register_hotkey	
 	
 ############## qgb type ######################	
 class FloatCustomStrRepr(py.float):
@@ -4747,6 +4848,7 @@ def main(display=True,pressKey=False,clipboard=False,
 	if not vsc:vsc=get_duplicated_kargs(ka,'edit','editor','npp')
 	if vsc:   sImport+=";npp=U.npp;vsc=U.vsc"
 
+	if not clipboard:clipboard=get_duplicated_kargs(ka,'cb','cbs','clipBoard','clip_board','ctrl_v')
 	if ipyArgs:
 		sImport=sImport.replace("'",r"\'")
 		sImport='''

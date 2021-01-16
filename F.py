@@ -546,14 +546,22 @@ def append(file,data):
 	'''builtin afile.write() No breakLine'''
 	write(file,data,mod='a')
 	
-def detectEncoding(file,confidence=0.7,default=py.No('not have default encoding')):
+def detect_file_encoding(file,confidence=0.7,default=py.No('not have default encoding'),buffer_size=9999,p=True):
 	if py.istr(file):
-		file=py.open(file,'rb')
-	if py.isfile(file):
-		return T.detect(file.read(),confidence=confidence,default=default)
+		with py.open(file,'rb') as f:
+			b=f.read(buffer_size)
+	elif py.isfile(file):
+		if 'b' not in file.mode:raise py.ArgumentError("'b' not in file.mode",file)
+		i=file.tell()
+		b=file.read(buffer_size)
+		file.seek(i)
 		
 	else:raise py.ArgumentError('need str or file')
-detect=detectEncoding
+
+	c= T.detect(b,confidence=confidence,default=default)
+	if p:print(file,c) #TODO U.get_or_set('detect_file_encoding.p',True)
+	return c
+detect=detectEncoding=detect_encoding=detect_file_encoding
 	
 def read(file,mod='r',returnFile=False,encoding=''):
 	'''if returnFile:

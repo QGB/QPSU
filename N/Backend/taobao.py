@@ -270,19 +270,46 @@ def count_money(y,max):
 
 cm=count_money		   
 
-def iter_max_list(*a,**ka):
-	r=[]
-	for i in iter_max(*a):
-		i=U.sort(i)
-		if i in r:continue
-		r.append(i)
-	lr=[]
-	for i in r:
-		s=U.IntCustomRepr(0,str='# '+T.justify(len(i),4,))
-		lr.append([s,*i])
-		
-	return lr
-
+def iter_max_list(*a,round=2,c1=[]):
+	def get_lr(*a,topN=U.IMAX):
+		r=[]
+		for n,i in py.enumerate(iter_max(*a) ):
+			if n>topN:break
+			i=U.sort(i)
+			if i in r:continue
+			r.append(i)
+		lr=[]
+		for i in r:
+			sum=py.round(py.sum(i),round)
+			s='%s Sum:'%(len(i),)
+			s=U.IntCustomRepr(len(i),str='Len:'+s.rjust(7))
+			lr.append([s,sum,*i])
+		return lr
+	nc=-1
+	y,max,*_=a
+	r=get_lr(y,max)
+	lr_list=[]
+	for nc,c in py.enumerate(c1):
+		lr=get_lr(y,max-c,topN=99)
+		lr=U.sort(lr,column=1)[:9]
+		for i in lr:
+			i[1]+=c
+			i[1]=py.round(i[1],round)
+			i.append([c])
+			
+		# lr_list.append(lr)
+			# r.insert(i,(nc+1)*(n+1)-1)
+		r.extend(lr)
+	else:
+		if nc<1:return r
+	# for i in py.range(9):
+		# for lr in lr_list:
+			# if len(lr)<=i:break
+			# r.append(lr[i])
+	return U.sort(r,column=1)
+	
+	
+	
 def iter_max(y,max,layer=0):
 	if max==0:
 		yield []  ;return

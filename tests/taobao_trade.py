@@ -16,6 +16,7 @@ def _registed_click_pop_cart():
 		from qgb import Win
 		ox,oy=Win.get_cursor_pos()
 		x,y=1080,123
+		
 		Win.click(884,717) #scroll bottom
 		U.sleep(0.3)
 		Win.click(657,674) #add btn
@@ -39,7 +40,8 @@ def registe_click_pop_cart_hotkey(hotkey='alt+z',callback=_registed_click_pop_ca
 		# print(U.stime(),'using registed hotkey',hotkey)
 		# return k
 	import keyboard
-	keyboard.unhook_all_hotkeys()
+	
+	keyboard.unhook_all_hotkeys() #
 	
 	k=keyboard.add_hotkey(hotkey, callback)
 	return hotkey,U.set(hotkey,k),id(k)
