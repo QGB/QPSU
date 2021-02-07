@@ -86,9 +86,9 @@ def get(url,file='',
 	U,T,N,F=py.importUTNF()
 	url=N.auto_url(url)
 
-	proxies=U.get_duplicated_kargs(ka,'proxies','proxy')
+	proxies=U.get_duplicated_kargs(ka,'proxies','proxys','proxyes','proxy')
 	if proxies:
-		proxies=N.set_proxy(proxy)
+		proxies=N.set_proxy(proxies)
 	else:
 		proxies=N.get_proxy()
 

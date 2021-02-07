@@ -85,14 +85,14 @@ def is_wifi_connected():
 isc=iswifi=iswific=is_wific=isconnected=is_wifi_connected
 	
 STA_IF=0
-def wifi_connect(ssid,pw):
+def wifi_connect(ssid='test',pw=''.join(str(i) for i in range(1,9))):
 	global STA_IF
 	if not STA_IF:
 		STA_IF=network.WLAN(network.STA_IF)
 	STA_IF.active(True)
 	STA_IF.connect(ssid,pw)
 	return STA_IF.isconnected()
-jap=wc=wific=wifi_connect
+c=jap=wc=wific=wifi_connect
 
 def wifi_ap(ssid,pw):
 	# Change ssid/password of ESP8266's AP:
@@ -194,6 +194,7 @@ pt=pms=print_ms=print_time_ms
 def lp():
 	import machine
 	for index in range(32):
+		print(index)
 		if (index,0) in gdpin:
 			print('skip0-',index)
 			continue

@@ -174,7 +174,7 @@ async def get_browser(browserURL='http://127.0.0.1:9222',browserWSEndpoint='',
     
 	return U.set( uk,browser)
 
-async def new_page(url='http://www.stathub.cn/headless/'):
+async def new_page(url='https://intoli.com/blog/not-possible-to-block-chrome-headless/chrome-headless-test.html'):
 	''' Go to the ``url``.
 
 :arg string url: URL to navigate page to. The url should include
@@ -207,6 +207,8 @@ The ``Page.goto`` will raise errors if:
 	page=await browser.newPage()
 	await page.setViewport(VIEW_PORT)
 	await page.evaluateOnNewDocument(JS_ONLOAD)
+	if '://' not in url:
+		url='https://'+url
 	if '#' not in url:
 		url+='#'+U.stime()
 	await page.goto(url)

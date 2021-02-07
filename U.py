@@ -1933,7 +1933,6 @@ ValueError: Function has keyword-only parameters or annotations, use getfullargs
 		args=[]
 		rd={}
 		for k ,v in frame.f_locals.items():
-			
 			args.append(v)
 		else:
 			if args:
@@ -2802,13 +2801,13 @@ def getCallExpression(*a,**ka):
 	return r
 getCallExpr=getCallExpression
 
-def simulate_key_write(astr):
+def simulate_key_write(astr, delay=0.2,restore_state_after=True, exact=None):
 	import keyboard
 	keyboard.write(text=astr, delay=delay, restore_state_after=restore_state_after, exact=exact)
 	return StrRepr(astr,repr='U.simulate_key_write(%r)'%astr)
 text_key=text_key_write=keyboard_write=simulate_key_write	
 
-def simulate_key_press(akey):
+def simulate_key_press(akey, delay=0.2,restore_state_after=True, exact=None):
 	# parsed=keyboard.parse_hotkey(akey)
 	# if py.len(parsed)>1: #如果 多个组合键中间想要delay,使用 action_list 
 	import keyboard
@@ -4522,8 +4521,13 @@ def iter_screen_colors(xrange=[855,1311],yrange=[],default_step=3,set_cur_pos=Fa
 	# U.pprint(rd)
 	return rd
 	
-def register_hotkey	(callback,hotkey='alt+z',unregister_all=True):
-	'''  U.hotkey(lambda:print(U.stime()))
+def register_hotkey	(callback=lambda:U.get('hotkey_f')(),hotkey='alt+z',unregister_all=True):
+	'''  
+def f():
+    print(23)
+U.set('hotkey_f',f)	
+	
+	U.hotkey(lambda:print(U.stime()))
 	
 	'''
 	import keyboard
