@@ -485,6 +485,7 @@ iterable 的元素,没有特殊处理
 		if 'flush' in k:flush=ka[k];continue
 		if 'cod'   in k:cod  =ka[k];continue# 解码
 		if 'r'     in k:r    =ka[k];continue#  放最后，防止名字冲突
+		if not a and 'a' in ka:a    =(ka[k],);continue
 	if py.len(a)==0:#print (end='233') #233
 		write(end)
 		if flush:
@@ -4520,6 +4521,7 @@ def iter_screen_colors(xrange=[855,1311],yrange=[],default_step=3,set_cur_pos=Fa
 		# cc=c[-1]
 	# U.pprint(rd)
 	return rd
+color_iter_screen=color_iter=iter_screen_colors
 	
 def register_hotkey	(callback=lambda:U.get('hotkey_f')(),hotkey='alt+z',unregister_all=True):
 	'''  
@@ -4550,6 +4552,43 @@ U.set('hotkey_f',f)
 	return hotkey,U.set(hotkey,k),id(k)
 hotkey=hot_key=registe_hotkey=bind_hotkey=register_hotkey	
 	
+	
+def get_svg_qrcode(text=py.No('auto get clipboard'),file=py.No('auto using text'),title=py.No('svg html title auto using text'),scale=5):
+	'''Signature:
+q.svg(
+    file,
+    scale=1,
+    module_color='#000',
+    background=None,
+    quiet_zone=4,
+    xmldecl=True,
+    svgns=True,
+    title=None,
+    svgclass='pyqrcode',
+    lineclass='pyqrline',
+    omithw=False,
+    debug=False,
+)
+text直接传入 title 有问题 , T.html_encode fix it：
+	This page contains the following errors:
+	error on line 3 at column 66: EntityRef: expecting ';'
+	Below is a rendering of the page up to the first error.
+
+	
+'''
+	import pyqrcode
+	U,T,N,F=py.importUTNF()
+	
+	if not text:text=U.pln(r=1,a=U.cbg())
+	if not file:file=U.gst+T.file_legalized(text)[-244:]
+	if not file.lower().endswith('.svg'):file+='.svg'
+	if py.isno(title) and 'auto ' in title.msg:title='U.qrcode '+text
+	if title:title=T.html_encode(title)
+	
+	q=pyqrcode.create(text)
+	q.svg(file=file,scale=scale,title=title)  # None 
+	return  file
+qr=qrcode=svg_qrcode=get_svg_qrcode	
 ############## qgb type ######################	
 class FloatCustomStrRepr(py.float):
 	'''每添加一种 CustomStrRepr ，需要在 T.string 中添加相应的 str 代码

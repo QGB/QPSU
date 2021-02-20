@@ -185,8 +185,10 @@ def xpath(*a,**ka):
 		e= etree.fromstring(astr, etree.HTMLParser())
 	return e.xpath(xpath)
 	
-def word_wrap(s,width=70,eol=py.No('auto'),**ka):
-	'''textwrap.wrap(text, width=70, **kwargs)'''
+def word_wrap(s,width=46,eol=py.No('auto'),**ka):
+	'''textwrap.wrap(text, width=70, **kwargs)
+47: zhuanlan code max len	
+	'''
 	U=py.importU()
 	replace_whitespace=U.get_duplicated_kargs(ka,'replace_whitespace','remove_old_eol','del_eol','del_old')
 	import textwrap
@@ -1233,6 +1235,7 @@ def varname(a):
 
 def filename_legalized(a,space=' '):
 	'''  # 多个连续空白字符会 缩减成 一个 space
+not auto cut long string
 	'''
 	if not py.istr(a):a=string(a)
 	a=replace_all_space(a.strip(),space)

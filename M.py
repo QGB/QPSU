@@ -26,10 +26,12 @@ def gv():
 	print(sys_info())
 	
 def sleep(t=0.001):
+	import time
 	time.sleep(t)
 	
 def ls(p='/'):
 	return os.listdir(p)
+	
 	
 def sys_info(unit=1024):
 	import gc
@@ -37,7 +39,7 @@ def sys_info(unit=1024):
 	A = gc.mem_alloc()
 	T = F+A
 	P = '{0:.2f}%'.format(F/T*100)
-	return 'disk Total:{0} KB, Free:{1} KB. === '.format(*disk_usage())+'mem Total:{0} Free:{1} ({2})'.format(T,F,P)
+	return 'disk Total:{0} KB, Free:{1} KB. === '.format(*disk_usage(unit=unit))+'mem Total:{0} Free:{1} ({2})'.format(T,F,P)
 mem=info=sys_info
 
 def disk_usage(unit=1024): 
@@ -86,6 +88,8 @@ isc=iswifi=iswific=is_wific=isconnected=is_wifi_connected
 	
 STA_IF=0
 def wifi_connect(ssid='test',pw=''.join(str(i) for i in range(1,9))):
+	'''mpfshell -c open ws:192.168.43.145,1234
+	'''
 	global STA_IF
 	if not STA_IF:
 		STA_IF=network.WLAN(network.STA_IF)
@@ -139,9 +143,10 @@ IN -- 0
 	return gdpin[(index,mod)]
 led2=gpo=pin=Pin=gpio
 
-def gpi(index=0):
+def gpi(index=0,mod=None):
 	import machine
-	gdpin[(index,0)]=machine.Pin(index, machine.Pin.IN, machine.Pin.PULL_UP)
+	if mod==None:mod=machine.Pin.PULL_UP
+	gdpin[(index,0)]=machine.Pin(index, machine.Pin.IN, mod)
 	return gdpin[(index,0)]
 
 
@@ -191,19 +196,32 @@ def print_time_ms(sleep=0.3):
 	return
 pt=pms=print_ms=print_time_ms
 
-def lp():
+
+def lp(mode=None,max_len=44,skip_pin=[6,7,8,9,10,11,12]):
+	global f
 	import machine
-	for index in range(32):
+	if mode==None:mode=machine.Pin.PULL_UP
+	f=open('data.txt','w')
+	for index in range(max_len):
 		print(index)
-		if (index,0) in gdpin:
+		# if index in [6,7,8,9,10,11,12]:continue
+		# continue
+
+		if (index,mode) in gdpin or index in skip_pin:
 			print('skip0-',index)
+			f.write('=='+str(index)+'\n')
+			f.flush()			
 			continue
+		
+		f.write(str(index)+'\n')
+		f.flush()
+	
 		try:
-			gdpin[(index,0)]=machine.Pin(index, machine.Pin.IN, machine.Pin.PULL_UP)
+			gdpin[(index,mode)]=machine.Pin(index, machine.Pin.IN, mode)
 		except Exception as e:
 			print(index,e)
 	for k,p in gdpin.items():
-		print(p.value(),k[0])
+		print(p.value(),k,p)
 
 import machine,time
 		
@@ -231,3 +249,33 @@ def step(t=0.001,a=1,b=2,c=0,d=3):
 		d.on()
 		off(a,b,c,d,t=t)
 	# machine.Pin(index, machine.Pin.IN, machine.Pin.PULL_UP)h
+	
+def http_get(url):
+	if '://' not in url:url='http://'+url
+	import urequests
+	return urequests.get(url)
+get=http_get
+
+def localtime():
+	import utime
+	return utime.localtime()
+time=localtime	
+
+upip=0
+def upip_install(pkg_name):
+	global upip
+	if not upip:
+		import upip
+	return upip.install(pkg_name)
+pip=pip_install=upip_install	
+
+def pwm(pin=17,freq=1,duty=0.5):
+	''' machine.Pin.OUT == 3
+	'''
+	from machine import Pin,PWM
+	if duty<1:
+		duty=round(duty*1024) #1023
+	pin=Pin(17,3)
+	p=PWM(pin, freq=freq, duty=duty)
+	return p
+	
