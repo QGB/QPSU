@@ -4394,7 +4394,7 @@ def git_upload(commit_msg=None,repo='QPSU',repo_path=get_qpsu_dir(),
 				'https://github.com/qgb/',
 				],
 			git_exe=None,
-			user_email='qgbcs1@gmail.com',
+			user_email='qgbcs1'+py.chr(0x40)+'gmail.com',
 			user_name='qgb',
 
 		):
