@@ -428,3 +428,32 @@ def permutations(arr, position=0,end=None):
 # arr = ["a","b","c"]
 # permutations(arr, 0, len(arr))			
 
+
+
+def f_addCart():
+    global gx,gy
+    x,y=U.seach_image_on_screen('C:/test/clipboard/item-addCart-display-label.png')
+    if x==-1:Win.click(1009, 120);U.sleep(0.4)
+    x,y=U.seach_image_on_screen('C:/test/clipboard/mbbxg-addCart-not-selected.png')  
+    x0,y0=625,250
+    if x==-1:
+        if Win.get_cur_pos()!=(x0+41*gx,y0+46*gy):           
+            Win.click(x0+41*gx,y0+46*gy)
+        #if U.seach_image_on_screen('C:/test/clipboard/mbbxg-addCart-not-selected.png')!=[-1,-1]:
+         #   return f_addCart()
+        #U.sleep(0.6)
+        x,y=U.seach_image_on_screen('C:/test/clipboard/item-addCart-confim-btn.png')    
+        if x==-1:return print(U.stime(),'No btn')
+        Win.click(x+40,y+20)
+        if gx==5:
+            gx=0;gy+=1
+        else:
+            gx+=1    
+        #U.sleep(0.4)
+    else:
+        Win.click(x0+41*gx,y0+46*gy)
+       # print(gx,gy,'not select')
+        return f_addCart()
+    return gx,gy
+# U.set('hotkey_f',lambda:print(U.stime(), f_addCart())  )     
+#gx,gy=0,0    

@@ -63,8 +63,8 @@ def range_http_server(port=2233,**ka):
  '-n 1219']
  
 def test(HandlerClass=BaseHTTPRequestHandler,
-         ServerClass=ThreadingHTTPServer,
-         protocol="HTTP/1.0", port=8000, bind=""):	
+		 ServerClass=ThreadingHTTPServer,
+		 protocol="HTTP/1.0", port=8000, bind=""):	
 	
 	'''
 	try				  :import http.server as SimpleHTTPServer	# Python3
@@ -167,7 +167,7 @@ rpc_set=rpc_set_var=rpcSetVariable
 def rpcServer(port=23571,thread=True,ip='0.0.0.0',ssl_context=(),currentThread=False,app=None,key=None,
 execLocals=None,locals=None,globals=None,
 qpsu='py,U,T,N,F',importMods='sys,os',request=True,
-flaskArgs=py.dict(debug=0,threaded=True),
+flaskArgs=None,
 	):
 	'''
 	locals : execLocals
@@ -180,6 +180,9 @@ flaskArgs=py.dict(debug=0,threaded=True),
 	T=py.importT()
 	if not U.get('pformat_kw'):
 		U.set('pformat_kw',{'width':144})
+	
+	if not flaskArgs:
+		flaskArgs=py.dict(debug=0,threaded=True)
 	
 	if execLocals:
 		warnning='### deprecated args execLocals {ip}:{port}'.format(ip=ip,port=port)
@@ -328,12 +331,12 @@ def get_all_socket_obj():
 get_socket_all_obj=get_all_socket_obj
 
 def get_socket_req(PORT = 65432,HOST = '127.7.7.7'):
-    import socket
-    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-        s.bind((HOST, PORT))
-        s.listen()
-        req, addr = s.accept()
-        return req, addr
+	import socket
+	with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+		s.bind((HOST, PORT))
+		s.listen()
+		req, addr = s.accept()
+		return req, addr
 
 def get_rpc_request_a(request):
 	''' 
@@ -507,6 +510,39 @@ def flask_file_stream_response(response,file,):
 
 file=stream_file=file_stream=read_as_stream=flask_file_stream_response
 
+def flask_image_response(response,image,format='png',**ka):
+	from io import BytesIO
+	img_io = BytesIO()
+	image.save(img_io, format)
+	img_io.seek(0)
+	# response.response=stream_with_context(gen)
+	ctype='image/'+format
+	response.headers['Content-Type'] = ctype
+	response.headers['mimetype'] = ctype
+	bytes=img_io.read(-1)
+	response.set_data(bytes)
+	return U.v  # huawei Android 旧版 系统浏览器，如果url 不是 .png等 结尾。不会显示图像
+	# return response,image,bytes
+
+def flask_screenshot_response(response,rect=py.No('rect=[x,y,x1,y1] or auto get clipboard or full_screen '),**ka):
+	''' rect (crop)  defining the left, upper, right, and lower pixel
+	'''
+	from PIL import ImageGrab,Image
+	U,T,N,F=py.importUTNF()
+	if rect:
+		if py.isinstance(rect,Image.Image):
+			im=rect
+		elif U.len(rect)!=4:
+			raise py.ArgumentError('rect must be PIL Image or [ x0,y0,x1,y1 ]')
+		else:
+			im = ImageGrab.grab(rect)
+	else:	
+		im = ImageGrab.grabclipboard()
+		if not im:
+			im=ImageGrab.grab()
+	return flask_image_response(response,im)
+img= screenshot_response=flask_screenshot_response
+	
 def is_flask_request(q):
 	from werkzeug.local import LocalProxy
 	return isinstance(q,LocalProxy)
@@ -602,7 +638,7 @@ sip_location=sipLocation=ip_location=ipLocation
 ######################  qqwry   ###########################
 gw_qqwry=['CoreLink骨干网', '不丹', '东帝汶', '中非', '丹麦', '乌克兰', '乌兹别克斯坦', '乌干达', '乌拉圭', '乍得', '也门', '亚太地区', '亚洲', '亚美尼亚', '以色列', '伊拉克', '伊朗', '伯利兹', '佛得角', '俄罗斯', '保加利亚', '克罗地亚', '关岛', '冈比亚', '冰岛', '几内亚', '几内亚比绍', '列支敦士登', '刚果共和国', '刚果民主共和国', '利比亚', '利比里亚', '加勒比海地区', '加拿大', '加纳', '加蓬', '匈牙利', '北美地区', '北马其顿', '北马里亚纳群岛', '南极洲', '南苏丹', '南非', '博茨瓦纳', '卡塔尔', '卢旺达', '卢森堡', '印尼', '印度', '印度尼西亚', '危地马拉', '厄瓜多尔', '厄立特里亚', '叙利亚', '古巴', 
 '台湾省', '台湾省云林县', '台湾省南投县', '台湾省南投县南投市', '台湾省台东县', '台湾省台中市', '台湾省台北市', '台湾省台南市', '台湾省嘉义县', '台湾省嘉义市', '台湾省基隆市', '台湾省宜兰县', '台湾省屏东县', '台湾省彰化县', '台湾省新北市', '台湾省新竹县', '台湾省新竹市', '台湾省桃园市', '台湾省澎湖县', '台湾省花莲县', '台湾省苗栗县', '台湾省金门县', '台湾省高雄市', 
-'吉尔吉斯斯坦', '吉布提', '哈萨克斯坦', '哥伦比亚', '哥斯达黎加', '喀麦隆', '图瓦卢', '土库曼斯坦', '土耳其', '圣卢西亚', '圣基茨和尼维斯', '圣多美和普林西比', '圣巴泰勒米', '圣文森特和格林纳丁斯', '圣皮埃尔和密克隆群岛', '圣诞岛', '圣马力诺', '圭亚那', '坦桑尼亚', '埃及', '埃塞俄比亚', '基里巴斯', '塔吉克斯坦', '塞内加尔', '塞尔维亚', '塞拉利昂', '塞浦路斯', '塞舌尔', '墨西哥', '多哥', '多米尼克', '多米尼加', '奥兰群岛', '奥地利', '委内瑞拉', '孟加拉', '孟加拉国', '安哥拉', '安圭拉', '安提瓜和巴布达', '安道尔', '密克罗尼西亚联邦', '尼加拉瓜', '尼日利亚', '尼日尔', '尼泊尔', '巴勒斯坦', '巴哈马', '巴基斯坦', '巴巴多斯', '巴布亚新几内亚', '巴拉圭', '巴拿马', '巴林', '巴西', '布基纳法索', '布隆迪', '希腊', '帕劳', '库克群岛', '库拉索', '开曼群岛', '德国', '意大利', '所罗门群岛', '托克劳', '拉美地区', '拉脱维亚', '挪威', '捷克', '摩尔多瓦', '摩洛哥', '摩纳哥', '文莱', '斐济', '斯威士兰', '斯洛伐克', '斯洛文尼亚', '斯里兰卡', '新加坡', '新喀里多尼亚', '新西兰', '日本', '智利', '朝鲜', '柬埔寨', '根西岛', '格林纳达', '格陵兰', '格鲁吉亚', '梵蒂冈', '欧洲', '欧洲地区', '欧盟', '欧美地区', '比利时', '毛里塔尼亚', '毛里求斯', '汤加', '沙特阿拉伯', '法国', '法属圣马丁', '法属圭亚那', '法属波利尼西亚', '法罗群岛', '波兰', '波多黎各', '波斯尼亚和黑塞哥维那', '泰国', '泽西岛', '津巴布韦', '洪都拉斯', '海地', '澳大利亚', '澳洲', '澳门', '爱尔兰', '爱沙尼亚', '牙买加', '特克斯和凯科斯群岛', '特立尼达和多巴哥', '玻利维亚', '瑙鲁', '瑞典', '瑞士', '瓜德罗普', '瓦利斯和富图纳群岛', '瓦努阿图', '留尼汪岛', '白俄罗斯', '百慕大', '直布罗陀', '福克兰群岛', '科威特', '科摩罗', '科特迪瓦', '科索沃', '秘鲁', '突尼斯', '立陶宛', '索马里', '约旦', '纳米比亚', '纽埃', '缅甸', '罗马尼亚', '美国', '美属维尔京群岛', '美属萨摩亚', '美洲地区', '老挝', '肯尼亚', '芬兰', '苏丹', '苏里南', '英国', '英属印度洋领地', '英属维尔京群岛', '荷兰', '荷兰加勒比', '荷兰省', '荷属圣马丁', '莫桑比克', '莱索托', '菲律宾', '萨尔瓦多', '萨摩亚', '葡萄牙', '蒙古', '蒙特塞拉特岛', '西班牙', '诺福克岛', '贝宁', '赞比亚', '赤道几内亚', '越南', '阿塞拜疆', '阿富汗', '阿尔及利亚', '阿尔巴尼亚', '阿曼', '阿根廷', '阿联酋', '阿鲁巴', '非洲地区', '韩国', '韩国首尔', '香港', '马尔代夫', '马恩岛', '马拉维', '马提尼克', '马来西亚', '马约特', '马绍尔群岛', '马耳他', '马达加斯加', '马里', '黎巴嫩', '黑山'] 
+'吉尔吉斯斯坦', '吉布提', '哈萨克斯坦', '哥伦比亚', '哥斯达黎加', '喀麦隆', '图瓦卢', '土库曼斯坦', '土耳其', '圣卢西亚', '圣基茨和尼维斯', '圣多美和普林西比', '圣巴泰勒米', '圣文森特和格林纳丁斯', '圣皮埃尔和密克隆群岛', '圣诞岛', '圣马力诺', '圭亚那', '坦桑尼亚', '埃及', '埃塞俄比亚', '基里巴斯', '塔吉克斯坦', '塞内加尔', '塞尔维亚', '塞拉利昂', '塞浦路斯', '塞舌尔', '墨西哥', '多哥', '多米尼克', '多米尼加', '奥兰群岛', '奥地利', '委内瑞拉', '孟加拉', '孟加拉国', '安哥拉', '安圭拉', '安提瓜和巴布达', '安道尔', '密克罗尼西亚联邦', '尼加拉瓜', '尼日利亚', '尼日尔', '尼泊尔', '巴勒斯坦', '巴哈马', '巴基斯坦', '巴巴多斯', '巴布亚新几内亚', '巴拉圭', '巴拿马', '巴林', '巴西', '布基纳法索', '布隆迪', '希腊', '帕劳', '库克群岛', '库拉索', '开曼群岛', '德国', '意大利', '所罗门群岛', '托克劳', '拉美地区', '拉脱维亚', '挪威', '捷克', '摩尔多瓦', '摩洛哥', '摩纳哥', '文莱', '斐济', '斯威士兰', '斯洛伐克', '斯洛文尼亚', '斯里兰卡', '新加坡', '新喀里多尼亚', '新西兰', '日本', '智利', '朝鲜', '柬埔寨', '根西岛', '格林纳达', '格陵兰', '格鲁吉亚', '梵蒂冈', '欧洲', '欧洲地区', '欧盟', '欧美地区', '比利时', '毛里塔尼亚', '毛里求斯', '汤加', '沙特阿拉伯', '法国', '法属圣马丁', '法属圭亚那', '法属波利尼西亚', '法罗群岛', '波兰', '波多黎各', '波斯尼亚和黑塞哥维那', '泰国', '泽西岛', '津巴布韦', '洪都拉斯', '海地', '澳大利亚', '澳洲', '澳门', '爱尔兰', '爱沙尼亚', '牙买加', '特克斯和凯科斯群岛', '特立尼达和多巴哥', '玻利维亚', '瑙鲁', '瑞典', '瑞士', '瓜德罗普', '瓦利斯和富图纳群岛', '瓦努阿图', '留尼汪岛', '白俄罗斯', '百慕大', '直布罗陀', '福克兰群岛', '科威特', '科摩罗', '科特迪瓦', '科索沃', '秘鲁', '突尼斯', '立陶宛', '索马里', '约旦', '纳米比亚', '纽埃', '缅甸', '罗马尼亚', '美国', '美属维尔京群岛', '美属萨摩亚', '美洲地区', '老挝', '肯尼亚', '芬兰', '苏丹', '苏里南', '英国', '英属印度洋领地', '英属维尔京群岛', '荷兰', '荷兰加勒比', '荷兰省', '荷属圣马丁', '莫桑比克', '莱索托', '菲律宾', '萨尔瓦多', '萨摩亚', '葡萄牙', '蒙古 ', '蒙特塞拉特岛', '西班牙', '诺福克岛', '贝宁', '赞比亚', '赤道几内亚', '越南', '阿塞拜疆', '阿富汗', '阿尔及利亚', '阿尔巴尼亚', '阿曼', '阿根廷', '阿联酋', '阿鲁巴', '非洲地区', '韩国', '韩国首尔', '香港', '马尔代夫', '马恩岛', '马拉维', '马提尼克', '马来西亚', '马约特', '马绍尔群岛', '马耳他', '马达加斯加', '马里', '黎巴嫩', '黑山'] 
 #278
 
 g_reserved_qqwry=[ 'IANA机构', 'IANA保留地址', '运营商级NAT','本机地址', '本地', 'IANA', '局域网']
@@ -991,7 +1027,7 @@ def scanPorts(host,threadsMax=33,from_port=1,to_port=65535,callback=None,ip2=192
 		try:
 			s = socket.socket()
 			result = s.connect_ex((host,port))
-			# U.pln('working on port > '+(str(port)))      
+			# U.pln('working on port > '+(str(port)))	  
 			if result == 0:
 				counting_open.append(port)
 				#U.pln((str(port))+' -> open') 
@@ -1013,7 +1049,7 @@ def scanPorts(host,threadsMax=33,from_port=1,to_port=65535,callback=None,ip2=192
 	percent=0.0
 	for i in range(from_port, to_port+1):
 		if (i/im>percent):
-			U.pln( 'Scanning  %.0f%%' % (percent*100), len(threads)     )
+			U.pln( 'Scanning  %.0f%%' % (percent*100), len(threads)	 )
 			percent+=0.01
 			
 		if len(threads)<=threadsMax:

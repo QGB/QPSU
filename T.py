@@ -822,13 +822,38 @@ flags	标志位，用于控制正则表达式的匹配方式，如：是否区�
 		return []
 match_groups=matchGroups=regexMatchGroups
 
-def regexMatch(a,regex):
-	''' return :str  match_groups first
+def regex_match_one(a,*regexs,**ka):
+	'''  raise_exception=False
+
+	return :str  match_groups first
+	
+	
+正则表达式的先行断言和后行断言一共有4种形式：
+
+(?=pattern) 零宽正向先行断言(zero-width positive lookahead assertion) 代表字符串中的一个位置，紧接该位置之后的字符序列能够匹配pattern。
+
+
+(?!pattern) 零宽负向先行断言(zero-width negative lookahead assertion)
+
+(?<=pattern) 零宽正向后行断言(zero-width positive lookbehind assertion) 代表字符串中的一个位置，紧接该位置之前的字符序列能够匹配pattern。
+
+
+(?<!pattern) 零宽负向后行断言(zero-width negative lookbehind assertion)	
 	'''
-	r=regexMatchGroups(a,regex)
-	if r:return r
-	else:return ''
-matchRegexOne=regexMatch
+	U=py.importU()	
+	
+	raise_exception=U.get_duplicated_kargs(ka,'raise_exception','exception','exp','throw_err')
+	for regex in regexs:
+		r=regexMatchGroups(a,regex)
+		if r:
+			if py.len(r)>1:
+				print('#TODO :fix regex_match_one return all match list')
+				return r
+			return r[0]		
+	if raise_exception:
+		raise Exception('Not match regexs in a',a,regexs)
+	return ''
+matchRegexOne=regexMatch=regexMatchOne=regex_match_one
 
 def re_search(regex,a):
 	'''不是 research 研究 ！,跟 match()  只有参数顺序不同，方便 re.search 改写'''

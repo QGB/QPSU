@@ -446,7 +446,15 @@ def pln(*a,**ka):
 	if 	'end' not in ka:ka['end']='\n'
 	return p(*a,**ka)	
 println=pln
-	
+
+def print_return(*a,**ka):
+	p(*a,**ka)
+	if py.len(a)==1:
+		return a[0]
+	else:
+		return a
+pr=print_return
+
 def print_(*a,**ka):
 	'''
  # in  py 3.6
@@ -1760,9 +1768,9 @@ gAllValue=[]
 def dirValue(a=None,filter='',type=None,recursion=False,depth=2,timeout=6,__ai=0):
 	'''a=None is dir()
 	约定：只有无参数函数才用 getXX  ?'''
-	if not __ai:dirValue.start=getTime();dirValue.cache=[]
+	if not __ai:dirValue.start=itime();dirValue.cache=[]
 	r={}
-	if getTime()-dirValue.start>timeout:return py.No('#timeout')#r[i]='!timeout %s s'%timeout;break
+	if itime()-dirValue.start>timeout:return py.No('#timeout')#r[i]='!timeout %s s'%timeout;break
 	
 	if a==None:
 		import inspect
@@ -2802,21 +2810,24 @@ def getCallExpression(*a,**ka):
 	return r
 getCallExpr=getCallExpression
 
-def simulate_key_write(astr, delay=0.2,restore_state_after=True, exact=None):
+def simulate_key_write(astr, delay=0,restore_state_after=True, exact=None):
 	import keyboard
+	if not delay:delay=get_kargs_duplicated(ka,'Delay','sleep','pause','wait')
 	keyboard.write(text=astr, delay=delay, restore_state_after=restore_state_after, exact=exact)
 	return StrRepr(astr,repr='U.simulate_key_write(%r)'%astr)
 text_key=text_key_write=keyboard_write=simulate_key_write	
 
-def simulate_key_press(akey, delay=0.2,restore_state_after=True, exact=None):
+def simulate_key_press(akey, delay=0,restore_state_after=True, exact=None,**ka):
 	# parsed=keyboard.parse_hotkey(akey)
 	# if py.len(parsed)>1: #如果 多个组合键中间想要delay,使用 action_list 
 	import keyboard
+	if not delay:delay=get_kargs_duplicated(ka,'Delay','sleep','pause','wait')
 	keyboard.press_and_release(akey, do_press=True, do_release=True)
+	if delay and delay>0:sleep(delay)
 	return StrRepr(akey,repr='U.simulate_key_press(%r)'%akey)
 system_key=pressKey=keyPress=press_key=key_press=simulate_key_press
 
-def simulate_system_actions(a=py.No("str[key|key_write ] or action list[['click',xy],[foreground,title|handle],['k','sss'],['t','text']]"),key='', delay=0.2,restore_state_after=True, exact=None):
+def simulate_system_actions(a=py.No("str[key|key_write ] or action list[['click',xy],[foreground,title|handle],['k','sss'],['t','text']]"),key='', delay=py.No('using _DELAY'),restore_state_after=True, exact=None,**ka):
 	'''pip install keyboard
 key='Win+D'  # mute  ,not min all window	
 	
@@ -2839,11 +2850,19 @@ beginning. Defaults to True.
 alt+codepoint or special events). If None, uses platform-specific suggested
 value.
 File:      c:\qgb\anaconda3\lib\site-packages\keyboard\__init__.py'''
+	Win=py.from_qgb_import('Win')
+	_DELAY=0.2
+	if not py.isint(delay):
+		delay=get_duplicated_kargs(ka,'sleep','delay','wait')
+	if not py.isint(delay):
+		delay=_DELAY
+		
 	def _sleep(sec=None):
-		if (index+1)==py.len(a):return
+		#TypeError: object of type 'IntCustomStrRepr' has no len()
+		# if (index+1)==py.len(a):return #skip last sleep
 		if not sec:sec=delay #暂时没用 默认参数
 		sleep(sec)
-		if sec!=0.2:
+		if sec!=_DELAY:
 			r.append(['delay',sec])
 	if a and not py.istr(a):
 		if py.isdict(a):a=a.items()
@@ -2871,7 +2890,6 @@ File:      c:\qgb\anaconda3\lib\site-packages\keyboard\__init__.py'''
 				
 				action=row[0].lower()
 				if 'click' in action:######
-					from qgb import Win
 					if py.len(row)==1:
 						row.append(Win.get_cursor_pos())
 					Win.click(*row[1])
@@ -2954,9 +2972,11 @@ def getParentCmdLine():
 getpargv=getParentCmdLine	
 
 def get_process_by_pid(pid):
-	'''process_name = process.name()'''
+	'''process_name = process.name()
+pid Not exist will NoSuchProcess: psutil.NoSuchProcess no process found with pid 35454	
+	'''
 	import psutil
-	return psutil.Process(pid)			 
+	return psutil.Process(pid)			  
 getProcessByPid=get_process_by_pid
 
 def get_process_name_by_pid(pid):
@@ -3060,13 +3080,13 @@ def kill(a,caseSensitive=True,confirm=True):
 	ta=py.type(a)
 	r=[]
 	
-	if ta in (py.str,py.unicode):
+	if py.istr(a):
 		for i in psutil.process_iter():
 			if caseSensitive:
 				if i.name() == a:r.append(i)
 			else:
 				if i.name().lower() == a.lower():r.append(i)
-	elif ta is type(0):
+	elif py.isint(a):
 		if not psutil.pid_exists(a):
 			raise ArgumentError('pid %s not exist!'%a)
 		r=[psutil.Process(a)]
@@ -3074,11 +3094,23 @@ def kill(a,caseSensitive=True,confirm=True):
 		raise ArgumentUnsupported()
 	if confirm:
 		pprint(r)
-		c=raw_input('kill Process？(n cancel)')
+		c=py.input('kill Process？(n cancel)')
 		if c.lower().startswith('n'):return
 	for i in r:
 		i.kill()
-
+def get_process_all_modules_by_pid(pid,only_name=0):
+	import psutil
+	try:
+		p = psutil.Process( pid )
+		r=p.memory_maps()	#  pmmap_grouped list
+	except Exception as e:
+		return py.No(e)
+	if only_name:
+		F=py.importF()
+		r=[F.get_filename_from_full_path(i.path) for i in r] 
+	return r  
+	# for dll in p.memory_maps():
+	# print(dll.path)get_dlls=get_dll=getDLL=getDLLs=getDll=getDlls=getdlls=get_dll_list=get_process_dlls_by_pid=get_process_all_dlls_by_pid=get_process_all_modules_by_pid
 def get_obj_file_lineno(a,lineno=0,auto_file_path=True):
 	T=py.importT()
 	args=py.getattr(a,'args',None)
@@ -4330,7 +4362,7 @@ config -l  == config --list --global
  --local
 
 	 '''
-	U=py.importU()
+	U,T,N,F=py.importUTNF()
 	a=py.list(a)
 	if py.istr(args):
 		a.insert(0,args)
@@ -4338,15 +4370,22 @@ config -l  == config --list --global
 		a=py.list(args)+a
 		
 	ipy=get_ipy(raise_EnvironmentError=True)
-	if isWin():
+	if git_exe and F.exist(git_exe):
+		U.set('git_exe',git_exe)
+	elif isWin():
 		git_exe=get_or_set('git_exe',r"D:\Program Files\Git\bin\git.exe")
-	if isLinux():
+	elif isLinux():
 		git_exe=get_or_set('git_exe',r"/usr/bin/git")
 	cmd=f'''"{git_exe}" {' '.join(a)} '''
 	if p:U.pln(cmd)
 	ipy.system(cmd)
+	return git_exe,a
 
-def git_clone(*a,git_exe=None,p=1):
+def git_clone(*a,depth=1,git_exe=None,p=1):
+	a=py.list(a)
+	if depth:
+		#TODO iter a find depth argument
+		a.append('--depth=%s'%depth)
 	return git('clone',*a,git_exe=git_exe,p=p)
 	
 def git_upload(commit_msg=None,repo='QPSU',repo_path=get_qpsu_dir(),
@@ -4410,6 +4449,7 @@ def python(args='-V',*a,**ka):
 	a=[i.strip() for i in a]
 	print(U.v.U.cmd(a,**ka) )
 	return U.cmd(a,**ka)
+python_v=python_V=python
 
 def python_m(*a,**ka):
 	return python('-m',*a,**ka)
@@ -4553,7 +4593,7 @@ U.set('hotkey_f',f)
 hotkey=hot_key=registe_hotkey=bind_hotkey=register_hotkey	
 	
 	
-def get_svg_qrcode(text=py.No('auto get clipboard'),file=py.No('auto using text'),title=py.No('svg html title auto using text'),scale=5):
+def get_svg_qrcode(text=py.No('auto get clipboard'),file=py.No('auto using text'),title=py.No('svg html title auto using text'),scale=5,browser=True):
 	'''Signature:
 q.svg(
     file,
@@ -4587,8 +4627,85 @@ text直接传入 title 有问题 , T.html_encode fix it：
 	
 	q=pyqrcode.create(text)
 	q.svg(file=file,scale=scale,title=title)  # None 
+	if browser:U.browser(file)
 	return  file
 qr=qrcode=svg_qrcode=get_svg_qrcode	
+
+def seach_image_on_screen(image_path=py.No('if not ,attempt to get clipBoard image'),format='png'):
+	try:
+		U,T,N,F=py.importUTNF()
+		ClipBoard=py.from_qgb_import('Clipboard')
+		from screen_search import  screen_search
+	except Exception as e:
+		return py.No(e)
+		
+	if not image_path:
+		image_path=ClipBoard.get_image(U.stime())
+	if not F.exist(image_path):
+		image_path+='.'+format
+	if not F.exist(image_path):
+		return py.No('image_path Not Exist!%r'%image_path)
+		# return py.No('image_path Not Exist! '+('%r'%image_path).strip())
+	ss=screen_search.Search(image_path)
+	x,y=ss.imagesearch()
+	return x,y
+find_image_on_screen=seach_image_on_screen	
+
+def set_timed_task(func,every='day',time='05:09',unit=1):
+	'''U.set_timed_task(baidu_start,'2hour') 
+'''
+	U,T,N,F=py.importUTNF()
+	import schedule
+	###  check schedule_background_run 
+	SCHEDULE_RUN_PENDING='schedule.run_pending()'
+	t=U.get(SCHEDULE_RUN_PENDING)
+	if t:
+		if not py.getattr(t,'is_alive',lambda:0)():
+			t=None 
+	if not t:
+		def schedule_background_run():
+			while True:
+				schedule.run_pending()
+				U.sleep(1)
+		t=U.Thread(target=schedule_background_run)
+		U.set(SCHEDULE_RUN_PENDING,t)
+		t.start()
+	#### check run end ####
+	if py.istr(every) and  ':' in every:
+		time=every
+		every='day'
+	if py.istr(time) and ':' in time:
+		if py.len( time.split(':')[0]  )==1:
+			time='0'+time	
+	numbers= U.one_in(every,T._09+'.')
+	if numbers:
+		every=T.replacey(every,numbers,'').strip()
+		unit=py.float(''.join(numbers))
+	if every=='sec':every='second'
+	if unit>0:
+		if not every.endswith('s'):
+			every+='s'
+	if 'day' in every:
+		r=py.getattr(schedule.every(unit),every).at(time).do(func)#type schedule.Job    
+	else:	
+		r=py.getattr(schedule.every(unit),every).do(func)  # every current time ,Depend Time unit   
+	return schedule.jobs,U.StrRepr('\n#######  U.get(%r)'%SCHEDULE_RUN_PENDING+' == '),t #,r
+	
+schedule=everyday_time_task=set_time_task=timing_task=dsrw=set_schedule=setInterval=set_interval=set_timed_task
+
+def remove_timed_task(index=-1):
+	''' -1 is last added
+0 is first added'''
+	import schedule
+	return schedule.jobs,'########## pop:',schedule.jobs.pop(index)
+schedule_jobs_pop=pop_time_task=cancel_time_task=del_time_task=remove_time_task=remove_timed_task
+	
+def get_timed_task_list():
+	import schedule
+	return schedule.jobs
+schedule_jobs=time_task=get_time_task=get_timed_task=get_timed_task_list
+	
+	
 ############## qgb type ######################	
 class FloatCustomStrRepr(py.float):
 	'''每添加一种 CustomStrRepr ，需要在 T.string 中添加相应的 str 代码

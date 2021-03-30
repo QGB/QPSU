@@ -464,11 +464,22 @@ def set_cursor_pos(x,y):
 	return x,y
 setMousePos=setCursorPos=SetCursorPos=setCurPos=set_mouse_pos=set_cur_pos=set_cursor_pos
 
-def mouse_click(x=None,y=None):
+def mouse_click(x=None,y=None,*a,_1=False):
+	''' click(*xy+(2,3)) == click(x,y,2,3) == click(x+2,y+3)
+	'''
 	import win32api, win32con
 	if not x and not py.isint(x):x=get_cursor_pos()[0]
 	if not y and not py.isint(y):y=get_cursor_pos()[1]
 	x,y=py.int(x),py.int(y)
+	if not _1:
+		if x==-1 or y==-1:
+			U=py.importU()
+			return x,U.IntRepr(y,repr='%s # -1 not click! #'%y)
+			
+	if a:
+		if py.len(a)!=2:raise py.ArgumentError('a must be 2 int tuple')
+		x=x+a[0]
+		y=y+a[1]
 	win32api.SetCursorPos((x,y))
 	win32api.mouse_event(win32con.MOUSEEVENTF_LEFTDOWN,x,y,0,0)
 	win32api.mouse_event(win32con.MOUSEEVENTF_LEFTUP,x,y,0,0)

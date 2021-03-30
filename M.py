@@ -129,7 +129,7 @@ def reboot():
 reset=restart=reboot
 
 gdpin={}
-def gpio(index=2,mod=1):
+def gpio(index=2,mod=3):
 	'''import mac	hine;help(machine.Pin)
 IN -- 0
   OUT -- 1
@@ -137,6 +137,8 @@ IN -- 0
   PULL_UP -- 1
   IRQ_RISING -- 1
   IRQ_FALLING -- 2
+  
+  machine.Pin.OUT == 3
 '''
 	import machine
 	gdpin[(index,mod)]=machine.Pin(index,mod)
@@ -271,6 +273,11 @@ pip=pip_install=upip_install
 
 def pwm(pin=17,freq=1,duty=0.5):
 	''' machine.Pin.OUT == 3
+
+p=M.pwm()
+from time import sleep as s
+f=p.freq
+	
 	'''
 	from machine import Pin,PWM
 	if duty<1:
@@ -278,4 +285,5 @@ def pwm(pin=17,freq=1,duty=0.5):
 	pin=Pin(17,3)
 	p=PWM(pin, freq=freq, duty=duty)
 	return p
-	
+
+# def fs()	

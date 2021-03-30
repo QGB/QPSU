@@ -678,9 +678,9 @@ def write_xlsx(file,a):
 				# sheet.cell(row=i, column=j).value=col #这样出现错误表格格式 ，原因？
 			# except Exception as e:
 				# return e,sheet,i,j,col
-	saveExcel = file
-	outwb.save(saveExcel)  # 一定要记得保存
+	outwb.save(file)  # 一定要记得保存
 	return file
+	
 def write_xls(file,a):
 	'''ValueError: row index was 65536, not allowed by .xls format'''
 	import xlwt
@@ -759,6 +759,7 @@ True
 >>> path.exists('o:')
 True
 '''
+	if not fn:return fn
 	U=py.importU()
 	if U.iscyg():
 		if len(fn)==2 and fn[-1]==':':fn+='/'
