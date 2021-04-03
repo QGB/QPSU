@@ -457,7 +457,7 @@ def flask_html_response(response,html,remove_tag=(
 	else:#if not py.istr(html):
 		html=py.str(html)
 		
-	if U.get_duplicated_kargs(ka,'remove_script','del_script'):
+	if U.get_duplicated_kargs(ka,'remove_script','del_script','no_script'):
 		remove_tag=(
 ['<script','</script>'], ['<SCRIPT','</SCRIPT>'],
 		)
