@@ -66,6 +66,15 @@ def ping(addr,sum=5,timeout= 4,ttl=None,seq=0,size=56,interface=None,p=False):
 ) -> float 
 Returns:
     The delay in seconds/milliseconds or None on timeout. # qgb return ms
+	
+C:\QGB\Anaconda3\lib\site-packages\ping3.py in send_one_ping(sock, dest_addr, icmp_id, seq, size)
+    189     _debug("Sent ICMP Payload:", icmp_payload)
+    190     packet = icmp_header + icmp_payload
+--> 191     sock.sendto(packet, (dest_addr, 0))  # addr = (ip, port). Port is 0 respectively the OS default behavior will be used.
+    192
+    193
+
+OSError: [WinError 10051] 向一个无法连接的网络尝试了一个套接字操作。	
 '''
 	import ping3
 	addr=auto_ip(addr)
@@ -77,14 +86,17 @@ Returns:
 		print(sv, )
 		print('-'*80)
 	for i in py.range(sum):
-		ms=ping3.ping(dest_addr=addr,timeout=timeout,unit='ms',ttl=ttl,seq=seq,size=size,interface=interface)
+		try:
+			ms=ping3.ping(dest_addr=addr,timeout=timeout,unit='ms',ttl=ttl,seq=seq,size=size,interface=interface)
+		except Exception as e:
+			return py.No(e)
 		if ms==None:
 			re.append(i)
 		if p:
 			print('%-5s'%i,'%-15s'%U.stime()[12:],'ms=',ms,)
 		r.append([i,ms])
 	if py.len(re)==sum:
-		return py.No('ping %s %s times all faild!'%(addr,sum),addr=addr,timeout=timeout,ttl=ttl,seq=seq,size=size,interface=interface)
+		return py.No('ping %s %s times all faild!'%(addr,sum),addr,timeout,ttl,seq,size,interface)
 	else:
 		return r
 
