@@ -68,7 +68,7 @@ def wifi_scan(p=1):
 		ssid=ssid.decode('utf-8')
 		bssid=b2h(bssid,split='-')
 		if p:
-			print('%-20s'%ssid, bssid, channel, RSSI, authmode, hidden )
+			print('%-20s'%ssid, bssid, '%-2s'%channel, RSSI, authmode, hidden )
 		else:
 			row=(ssid, bssid, channel, RSSI, authmode, hidden)
 			# if r and RSSI>r[0][3]:
@@ -77,7 +77,7 @@ def wifi_scan(p=1):
 			r.append(row)
 	gc()
 	if not p:return r
-wl=lw=wifi_ls=ls_wifi=wifi_list=ws=wifi_scan
+wl=lw=wifi_ls=ls_wifi=wifi_list=ws=get_wifi_list=wifi_scan
 
 def is_wifi_connected():
 	global STA_IF

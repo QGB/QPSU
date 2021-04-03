@@ -8,7 +8,7 @@ try:
 except Exception as err:
 	gError=err
 
-def get():
+def get(p=0):
 	'''win32con.
 CF_DSPTEXT     ', 129],
 CF_OEMTEXT     ', 7],
@@ -24,6 +24,7 @@ CF_UNICODETEXT ', 13],
 	w.OpenClipboard()
 	d = w.GetClipboardData(win32con.CF_UNICODETEXT)
 	w.CloseClipboard()
+	if p:U.pln(d)
 	return d
 
 def set(aString,p=0):

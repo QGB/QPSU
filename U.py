@@ -4431,7 +4431,7 @@ echo 	 git commit "{commit_msg}" done
 	
 	cmd=T.replace_all(cmd.strip(),'\n\n','\n')
 	cmd=cmd.replace('\n',' & ')
-	ipy.system(cmd)
+	ipy.system(cmd) # using current function variable
 	return cmd
 up=git_up=gitUp=git_upload
 

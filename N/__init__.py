@@ -53,6 +53,40 @@ def zhihu_question(url,response=None):
 	
 zhihu=zhihu_question	
 
+def ping(addr,sum=5,timeout= 4,ttl=None,seq=0,size=56,interface=None,p=False):
+	''' ping3.ping(
+    dest_addr: str,
+    timeout: int = 4,
+    unit: str = 's', ##unit: The unit of returned value. "s" for seconds, "ms" for milliseconds. (default "s")
+    src_addr: str = None,
+    ttl: int = None,
+    seq: int = 0,
+    size: int = 56,
+    interface: str = None,
+) -> float 
+Returns:
+    The delay in seconds/milliseconds or None on timeout. # qgb return ms
+'''
+	import ping3
+	addr=auto_ip(addr)
+	r=[];re=[]
+	if p:
+		U,T,N,F=py.importUTNF()
+		sv=U.v(dest_addr=addr,timeout=timeout,unit='ms',ttl=ttl,seq=seq,size=size,interface=interface)[1:-2]
+		print(U.stime(),'%54s'%addr)
+		print(sv, )
+		print('-'*80)
+	for i in py.range(sum):
+		ms=ping3.ping(dest_addr=addr,timeout=timeout,unit='ms',ttl=ttl,seq=seq,size=size,interface=interface)
+		if ms==None:
+			re.append(i)
+		if p:
+			print('%-5s'%i,'%-15s'%U.stime()[12:],'ms=',ms,)
+		r.append([i,ms])
+	if py.len(re)==sum:
+		return py.No('ping %s %s times all faild!'%(addr,sum),addr=addr,timeout=timeout,ttl=ttl,seq=seq,size=size,interface=interface)
+	else:
+		return r
 
 def range_http_server(port=2233,**ka):
 	'''
