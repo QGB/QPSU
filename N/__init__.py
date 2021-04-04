@@ -412,8 +412,6 @@ a=T.subr(u,T.u23)#'%23-'
 	if py.istr(request):return request
 	U,T,N,F=py.importUTNF()
 	u=request.url
-	if '%23' not in u:
-		raise py.ArgumentError('%23 not in request.url')
 	if '%23=' in u:
 		a=T.sub_tail(u,'%23=')
 	elif '%23-' in u:
@@ -421,6 +419,8 @@ a=T.subr(u,T.u23)#'%23-'
 	elif '#-' in u:
 		a=T.sub_tail(u,'#-')
 	else:
+		if '%23' not in u:
+			raise py.ArgumentError('%23 not in request.url')
 		a=T.sub_tail(u,'%23')
 	return T.url_decode(a)
 geta=get_a=get_request_a=get_flask_request_a=get_rpc_request_a
