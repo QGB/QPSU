@@ -50,8 +50,29 @@ def zhihu_question(url,response=None):
 	if response:
 		response.set_data(r)
 	return r
-	
 zhihu=zhihu_question	
+
+def get_github_raw(q):
+	''' 
+https://github.com/nobodywasishere/SGH-I537_NA_LL_Opensource/blob/d731152178585788b45d6fd9c0168412ced4bfd8/Platform/vendor/samsung/common/packages/apps/SBrowser/src/chrome/test/data/extensions/api_test/webrequest_sendmessage/background.html
+
+https://github.com/nobodywasishere/SGH-I537_NA_LL_Opensource/blob/master/Platform/vendor/samsung/common/packages/apps/SBrowser/src/chrome/test/data/extensions/api_test/webrequest_sendmessage/background.html
+
+https://github.com/Banou26/chromium-issue-1178811/raw/main/content-script.js
+
+https://raw.githubusercontent.com/Banou26/chromium-issue-1178811/main/content-script.js
+'''	
+	a=get_flask_request_a(q)
+	sa=a.split('/')
+	if '://github.com/' in a:
+		n0=-1
+		for n,i in py.enumerate(sa):
+			if i=='github.com':
+				n0=n
+				
+	
+	
+graw=getraw=github_raw=raw_github=get_github_raw	
 
 def ping(addr,sum=5,timeout= 4,ttl=None,seq=0,size=56,interface=None,p=False):
 	''' ping3.ping(
@@ -388,6 +409,7 @@ def get_rpc_request_a(request):
 	''' 
 a=T.subr(u,T.u23)#'%23-'	
 	'''
+	if py.istr(request):return request
 	U,T,N,F=py.importUTNF()
 	u=request.url
 	if '%23' not in u:
@@ -396,6 +418,8 @@ a=T.subr(u,T.u23)#'%23-'
 		a=T.sub_tail(u,'%23=')
 	elif '%23-' in u:
 		a=T.sub_tail(u,'%23-')
+	elif '#-' in u:
+		a=T.sub_tail(u,'#-')
 	else:
 		a=T.sub_tail(u,'%23')
 	return T.url_decode(a)

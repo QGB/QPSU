@@ -71,6 +71,20 @@ try:
 	import win32gui
 except Exception as ei:pass
 
+def is_monitor_off():
+	''' 
+只有这四种：
+'MONITORINFOF_PRIMARY',
+'MONITOR_DEFAULTTONEAREST',
+'MONITOR_DEFAULTTONULL',
+'MONITOR_DEFAULTTOPRIMARY',
+ 
+ '''
+	import win32gui,win32con,win32api
+	hMonitor=win32api.MonitorFromPoint((0, 0), win32con.MONITOR_DEFAULTTOPRIMARY)
+	
+	return
+	
 def get_cursor_pos_color(x=None,y=None,**ka):
 	''' x or y arg 优先
 	
