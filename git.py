@@ -2,12 +2,12 @@ if __name__.endswith('qgb.F'):from . import py
 else:import py
 U,T,N,F=py.importUTNF()
 
-import os
+import os,sys
 import shutil
 
 import dulwich
 from dulwich import client,index,repo,porcelain
-from dulwich.client import get_transport_and_path_from_url #return (<dulwich.client.SSHGitClient at 0x23218db7f88>, '/qgb/xxnet.git')
+from dulwich.client import get_transport_and_path_from_url #	return (<dulwich.client.SSHGitClient at 0x23218db7f88>, '/qgb/xxnet.git')
 
 try:
 	import paramiko
@@ -56,13 +56,14 @@ porcelain.push(repo.path,"https://http://e.coding.net/...",'master',username='co
 	global grepo
 	if ':' not in url:
 		url='https://'+url
-	domain=T.netloc(url)
-	if not username:
-		username=U.get_or_input(domain+'_git.username')
-	ka['username']=username
-	if not password:
-		password=U.get_or_input(domain+'_git.password')
-	ka['password']=password
+	if 'git@' not in url:
+		domain=T.netloc(url)
+		if not username:
+			username=U.get_or_input(domain+'_git.username')
+		ka['username']=username
+		if not password:
+			password=U.get_or_input(domain+'_git.password')
+		ka['password']=password
 	if not 'refspecs' in ka:
 		ka['refspecs']=branch
 	if not path and '/qpsu' in url.lower():
@@ -79,7 +80,7 @@ porcelain.push(repo.path,"https://http://e.coding.net/...",'master',username='co
 		return py.No('Not contains .git dir:'+path,ls)
 
 	repo=dulwich.repo.Repo(path)
-	U.pln(path,'add ...',U.stime())
+	U.pln(path,'adding ...',U.stime())
 	repo.stage(['git.py'],)
 	dulwich.porcelain.add(repo.path)
 	# repo.stage(['a']) 
@@ -97,7 +98,12 @@ porcelain.push(repo.path,"https://http://e.coding.net/...",'master',username='co
 	repo.close()
 	U.pln('push ...',U.stime())
 	try:
-		dulwich.porcelain.push(repo.path, url , **ka )
+		#repo.path == 'C:/QGB/babun/cygwin/bin/qgb/'
+		if 'git@' in url:
+			push_with_key(repo.path,url,**ka)
+		else:
+			dulwich.porcelain.push(repo.path, url , **ka )
+		
 	except Exception as e:
 		U.print_tb()
 		U.v.dulwich.porcelain.push(repo.path, url , **ka )
@@ -122,3 +128,79 @@ def commit(repo,commit_msg):
 def log(max_entries=11,repo=None):
 	
 	return dulwich.porcelain.log(max_entries=max_entries) 
+	
+	
+def open_private_key(f,):
+	''' 
+paramiko.RSAKey.from_private_key(open_private_key(f),)  == <paramiko.rsakey.RSAKey at 0x23218fda648>'''
+	if py.isfile(f):
+		file=f
+	elif not py.istr(f):
+		raise py.ArgumentError('key f type must file or str',f)
+	elif F.exist(f):
+		file=py.open(f)
+	elif py.len(f)<256 and 'PRIVATE KEY' not in f.upper():
+		raise py.ArgumentError('private_key f str format Error ! Or [%s] not exist'%f)
+	else:
+		from io import StringIO
+		file=StringIO(f)
+	return file	
+	
+def push_with_key(repo_path,remote="ssh://git@github.com:22/QGB/QPSU.git",private_key=U.gst+'id_rsa',refspecs='master',errstream=getattr(sys.stderr, 'buffer', None),private_key_password=None,):
+	from dulwich.contrib.paramiko_vendor import ParamikoSSHVendor
+	import dulwich.porcelain
+	from dulwich.protocol import (
+		Protocol,
+		ZERO_SHA,
+	)
+	from dulwich.objectspec import (
+		parse_commit,
+		parse_object,
+		parse_ref,
+		parse_reftuples,
+		parse_tree,
+		)
+	DEFAULT_ENCODING = 'utf-8'	
+	selected_refs = []
+	
+	
+	
+	
+	with open_private_key(private_key) as fpkey, dulwich.porcelain.open_repo_closing(repo_path) as r:
+		def update_refs(refs):
+			selected_refs.extend(parse_reftuples(r.refs, refs, refspecs))
+			new_refs = {}
+			# TODO: Handle selected_refs == {None: None}
+			for (lh, rh, force) in selected_refs:
+				if lh is None:
+					new_refs[rh] = ZERO_SHA
+				else:
+					new_refs[rh] = r.refs[lh]
+			return new_refs
+		
+		import paramiko
+		pkey=paramiko.RSAKey.from_private_key(fpkey, password=private_key_password)
+
+		if 'git@' not in repo_path:
+			repo_path
+		
+		client, path=dulwich.client.get_transport_and_path( remote, vendor=ParamikoSSHVendor(pkey=pkey))
+		
+		err_encoding = getattr(errstream, 'encoding', None) or DEFAULT_ENCODING
+		remote_location_bytes = client.get_url(path).encode(err_encoding)
+		#b'ssh://git@github.com:22/QGB/QPSU.git'
+		try:
+			client.send_pack(
+				path, update_refs,
+				generate_pack_data=r.object_store.generate_pack_data,
+				progress=errstream.write)
+			errstream.write(
+				b"Push to " + remote_location_bytes + b" successful.\n")
+		except (UpdateRefsError, SendPackError) as e:
+			errstream.write(b"Push to " + remote_location_bytes +
+							b" failed -> " + e.message.encode(err_encoding) +
+							b"\n")
+			return e				
+		return client
+		# return r.path,remote_location_bytes
+		
