@@ -160,6 +160,12 @@ def push_with_key(repo_path,remote="ssh://git@github.com:22/QGB/QPSU.git",privat
 		parse_reftuples,
 		parse_tree,
 		)
+	from dulwich.errors import (
+		GitProtocolError,
+		NotGitRepository,
+		SendPackError,
+		UpdateRefsError,
+    )	
 	DEFAULT_ENCODING = 'utf-8'	
 	selected_refs = []
 	
@@ -194,13 +200,17 @@ def push_with_key(repo_path,remote="ssh://git@github.com:22/QGB/QPSU.git",privat
 				path, update_refs,
 				generate_pack_data=r.object_store.generate_pack_data,
 				progress=errstream.write)
+			# print(remote_location_bytes)
 			errstream.write(
 				b"Push to " + remote_location_bytes + b" successful.\n")
+			errstream.flush()	# 与 stdout 混合打印时 ，顺序可能不同
 		except (UpdateRefsError, SendPackError) as e:
 			errstream.write(b"Push to " + remote_location_bytes +
 							b" failed -> " + e.message.encode(err_encoding) +
 							b"\n")
-			return e				
+			return e
+		finally:
+			errstream.flush()
 		return client
 		# return r.path,remote_location_bytes
 		
