@@ -2,11 +2,19 @@ if __name__.endswith('qgb.F'):from . import py
 else:import py
 U,T,N,F=py.importUTNF()
 
-import dulwich
-from dulwich import client,index,repo,porcelain
-
 import os
 import shutil
+
+import dulwich
+from dulwich import client,index,repo,porcelain
+from dulwich.client import get_transport_and_path_from_url #return (<dulwich.client.SSHGitClient at 0x23218db7f88>, '/qgb/xxnet.git')
+
+try:
+	import paramiko
+except Exception as e:
+	print('pip install dulwich paramiko',e)
+
+
 
 # from six.moves import urllib
 # opener = urllib.request.build_opener()
