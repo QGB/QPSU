@@ -3,7 +3,7 @@ import sys
 if __name__.endswith('qgb.N'):from qgb import py
 else:
 	from pathlib import Path
-	gsqp=Path(__file__).parent.parent.parent.absolute().__str__()
+	gsqp=Path(__file__).absolute().parent.parent.parent.absolute().__str__()
 	if gsqp not in sys.path:sys.path.append(gsqp)#py3 works
 	from qgb import py
 	# import py  #'py': <module 'py' from '..\\py.py'>,
@@ -469,7 +469,7 @@ def pdf2html(url,response=None,zoom=None,path=None,pw=None):
 
 def flask_html_response(response,html,remove_tag=(
 		['<script','</script>'],
-		['<SCRIPT','</SCRIPT>'],
+['<SCRIPT','</SCRIPT>'],'ondragstart=','oncopy=','oncut=','oncontextmenu=','"return false;"',
 	),encoding='utf-8',splitor='<hr>',**ka):
 	U,T,N,F=py.importUTNF()
 	if py.istr(html):
@@ -486,7 +486,12 @@ def flask_html_response(response,html,remove_tag=(
 ['<script','</script>'], ['<SCRIPT','</SCRIPT>'],
 		)
 	
-	for start,end in remove_tag:
+	for itag in remove_tag:
+		if py.istr(itag):
+			html=html.replace(itag,'')
+			continue
+		if py.len(itag)==2:
+			start,end=itag
 		s=True
 		while s:
 			s=T.sub(html,start,end)

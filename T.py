@@ -15,7 +15,7 @@ AZaz=Az=A_z=a_z+A_Z
 character=aZ=azAZ###Do not Change
 
 num=s09=_09=number='0123456789'
-
+_10='1234567890'
 azAZ09=aZ09=a_Z0_9=alphanumeric=character+number#azAZ09, not gs09AZ
 aZ09_=_aZ09=_alphanumeric=alphanumeric_=alphanumeric+'_'
 Az09=A_z0_9=A_Z+a_z+number

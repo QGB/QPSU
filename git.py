@@ -83,16 +83,9 @@ porcelain.push(repo.path,"https://http://e.coding.net/...",'master',username='co
 	U.pln(path,'adding ...',U.stime())
 	repo.stage(['git.py'],)
 	dulwich.porcelain.add(repo.path)
-	# repo.stage(['a']) 
-	# cid=repo.do_commit(message=b"dulwic")	
-	# author = "{0} <{1}>".format(name, email)
-	# author=author.encode('utf-8')
+	
 	U.pln('commit ...',U.stime())
-	# bhash=repo.do_commit(message=commit_msg
-				  # , author=author
-				  # , committer=author 
-				  # , merge_heads=None
-					  # )
+
 	bhash,commit_msg=commit(repo,commit_msg)					
 	r= bhash,commit_msg, ka
 	repo.close()
@@ -208,7 +201,7 @@ def push_with_key(repo_path,remote="ssh://git@github.com:22/QGB/QPSU.git",privat
 			errstream.write(b"Push to " + remote_location_bytes +
 							b" failed -> " + e.message.encode(err_encoding) +
 							b"\n")
-			return e
+			return py.No(e)
 		finally:
 			errstream.flush()
 		return client

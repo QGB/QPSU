@@ -1,7 +1,8 @@
 #coding=utf-8
 import sys,pathlib
-#                     *.py /N     /qgb    /[gsqp]  # 如果要修改路径，框选两行，一起删除
-gsqp=pathlib.Path(__file__).parent.parent.parent.absolute().__str__()
+# 如果要修改路径，框选两行，一起删除
+#			                     *.py /N     /qgb    /[gsqp]  
+gsqp=pathlib.Path(__file__).absolute().parent.parent.parent.absolute().__str__()
 if gsqp not in sys.path:sys.path.append(gsqp)#py3 works
 from qgb import py
 U=py.importU()

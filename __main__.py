@@ -1,6 +1,6 @@
 import sys
 from pathlib import Path
-gsqp=Path(__file__).parent.parent.absolute().__str__()
+gsqp=Path(__file__).absolute().parent.parent.absolute().__str__()
 if gsqp not in sys.path:sys.path.append(gsqp)#py3 works
 
 if len(sys.argv )>1:

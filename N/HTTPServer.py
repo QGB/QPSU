@@ -3,7 +3,7 @@ import os,sys
 if __name__.endswith('qgb.N.HTTPServer'):from .. import py
 else:
 	from pathlib import Path
-	gsqp=Path(__file__).parent.parent.parent.absolute().__str__()
+	gsqp=Path(__file__).absolute().parent.parent.parent.absolute().__str__()
 	if gsqp not in sys.path:sys.path.append(gsqp)#py3 works
 	from qgb import py
 U=py.importU()

@@ -3,7 +3,7 @@ import sys #endswith 是为了适配qgb处于另外一个包内的情况
 if __name__.endswith('qgb.N.HTTP'):from .. import py
 else:
 	from pathlib import Path
-	gsqp=Path(__file__).parent.parent.parent.absolute().__str__()
+	gsqp=Path(__file__).absolute().parent.parent.parent.absolute().__str__()
 	if gsqp not in sys.path:sys.path.append(gsqp)#py3 works
 	from qgb import py
 

@@ -26,6 +26,28 @@ class IntSize(py.int):
 		return '<{}>'.format(numToSize(self) )
 		# return '<{}={}>'.format(super().__repr__(),F.ssize(self) )
 
+def test_long_filename():
+	'''
+245
+246
+247
+248
+249 #FileNotFoundError     Windows 10                    
+
+'''
+	v='a234567890b234567890c234567890d234567890e234567890f234567890g234567890h234567890i234567890j234567890k234567890l234567890m234567890n234567890o234567890p234567890q234567890r234567890s234567890t234567890u234567890v234567890w234567890x234567890y234567890z23456789'# len(v)==259
+	p=F.mkdir(U.gst+'fn')
+	U.cd(p)
+	for n in range(245,260):
+		print(n)
+		with open(v[:n],'w') as f:f.write(str(n))
+		with open(p+v[:n],'w') as f:f.write(str(n))
+		#249 两个同样  #FileNotFoundError 
+		
+	# for n in range(245,260):
+		# print(n)
+		
+		
 def replaceOnce(a,old,new):
 	return a.replace(old, new,1) #count=1 #TypeError: replace() takes no keyword arguments 
 	
@@ -161,7 +183,7 @@ def dill_load_file(file,dill_ext='.dill'):
 			return dill.load(f)
 	except Exception as e:#TODO all  load save py.No
 		return py.No(file,e)
-dill_load=dill_load_file
+read_dill=dill_load=dill_load_file
 
 
 def dill_load_bytes(bytes):
@@ -194,7 +216,7 @@ F.readableSize(len(F.dill_dump(protocol=4,obj=r)  ) )   #'13.694 KiB'
 		return file
 	else:
 		return dill.dumps(obj=obj,protocol=protocol)
-dill_dump=dill_dumps=dill_dump_bytes 
+write_dill=dill_dump=dill_dumps=dill_dump_bytes 
 
 def dill_dump_string(obj,**ka):
 	U=py.importU()
@@ -1116,7 +1138,7 @@ FileNotFoundError: [Errno 2] No such file or directory: '.
 		if U.isnix():
 			home=os.getenv('HOME')
 		else:
-			home=os.getenv('USERPRO`FILE`')# 'C:/Users/Administrator'  not  cyg home os.getenv('HOME')
+			home=os.getenv('USERPROFILE')# 'C:/Users/Administrator'  not  cyg home os.getenv('HOME')
 		# else:		home=os.getenv('HOMEPATH')#  HOMEPATH=\Users\Administrator
 		fn= home+fn[1:];
 
@@ -1131,6 +1153,15 @@ FileNotFoundError: [Errno 2] No such file or directory: '.
 	return fn
 autofn=auto_filename=autoFileName=auto_file_path=auto_path=autoPath
 
+
+def get_nt_short_path_name(long_name):
+	import win32api
+	if py.len(long_name)<250:return long_name
+	if not long_name.startswith( u"\\\\?\\"):
+		long_name=u"\\\\?\\"+long_name
+	return win32api.GetShortPathName(long_name)
+shortPath=short_path=get_win_short_path=win_short_path=get_windows_short_path=windows_short_path=nt_short_path=get_short_path=GetShortPath=GetShortPathName=get_nt_short_path_name
+
 def nt_path(fn):
 	'''if linux etc ,will auto ignored
 write success, read failed ?	
@@ -1140,7 +1171,9 @@ write success, read failed ?
 	if  U.iswin():#or cyg?
 		if not py.isunicode(fn):fn=fn.decode(U.T.detect(fn))#暂时没想到更好方法，头晕
 		fn=fn.replace(u'/',u'\\')
-		if fn.startswith(u"\\\\"):
+		if u"\\\\?\\" in fn:
+			pass
+		elif fn.startswith(u"\\\\"):
 			fn=u"\\\\?\\UNC\\" + fn[2:]
 		else:
 			fn=u"\\\\?\\" + fn    

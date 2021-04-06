@@ -835,6 +835,10 @@ def cmd(*a,**ka):
 	try:
 		# if timeout:
 		# r=sb.check_out(a,**ka)
+		if not py.getattr(sb,'run',0): 
+			#pythonAnywhere TypeError("__init__() got an unexpected keyword argument 'capture_output'",
+			ka['stderr']=sb.STDOUT
+			return sb.check_output(a,**ka)
 		r=sb.run(a,capture_output=True,**ka)
 	except Exception as e:
 		print_traceback()
@@ -4593,7 +4597,7 @@ U.set('hotkey_f',f)
 hotkey=hot_key=registe_hotkey=bind_hotkey=register_hotkey	
 	
 	
-def get_svg_qrcode(text=py.No('auto get clipboard'),file=py.No('auto using text'),title=py.No('svg html title auto using text'),scale=5,browser=True):
+def get_svg_qrcode(text=py.No('auto get clipboard'),file=py.No('auto using text'),title=py.No('svg html title auto using text'),scale=8,browser=True):
 	'''Signature:
 q.svg(
     file,
