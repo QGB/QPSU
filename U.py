@@ -4725,16 +4725,17 @@ def get_timed_task_list():
 	return schedule.jobs
 schedule_jobs=time_task=get_time_task=get_timed_task=get_timed_task_list
 	
-def iter_high_demensional_coordinate(*shape,**ka):
+def iter_each_demensional_coordinate(*shape,**ka):
 	'''args: *shape is the size of each dimension   (xM,yM,zM....) 
 return yield (0,0,0...)  ---  	(xM-1,yM-1,zM-1....) 
 	'''
 	nd=py.len(shape)
 	im=nd-1
-	# lr=[py.range(m) for m in shape]
 	r=[0]*nd
 	
-	# c=0
+	for size in shape:
+		if size<=0:raise py.ArgumentError(' size of each dimension must > 0 ')
+	
 	while True:
 		yield r
 		r[-1]+=1
@@ -4744,7 +4745,7 @@ return yield (0,0,0...)  ---  	(xM-1,yM-1,zM-1....)
 				r[i]=0
 				r[i-1]+=1
 
-iterN=iterdc=iter2d=iter3d=iternd=iterNd=iter_N_d=iter_high_demensional_coordinate	
+iterN=iterdc=iter2d=iter3d=iternd=iterNd=iter_N_d=iter_high_demensional_coordinate=iter_each_demensional_coordinate	
 	
 ############## qgb type ######################	
 class FloatCustomStrRepr(py.float):
