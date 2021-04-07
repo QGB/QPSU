@@ -835,8 +835,10 @@ def cmd(*a,**ka):
 	try:
 		# if timeout:
 		# r=sb.check_out(a,**ka)
+		#pythonAnywhere  IPython[py2.7] REPL  sb.run does not exist
+		#pythonAnywhere  web[py3.6]  TypeError("__init__() got an unexpected keyword argument 'capture_output'",
 		if not py.getattr(sb,'run',0): 
-			#pythonAnywhere TypeError("__init__() got an unexpected keyword argument 'capture_output'",
+			#pythonAnywhere T
 			ka['stderr']=sb.STDOUT
 			return sb.check_output(a,**ka)
 		r=sb.run(a,capture_output=True,**ka)
@@ -4089,8 +4091,16 @@ def get_2D_list_max_min_wcswidth(lr):
 		tj.append([i,min,max,imin,imax,lr[imin][i],lr[imax][i] ])
 	return tj
 
-def pipInstall(modName):
+def pip_install(modName):
 	''' #TODO 在同一个进程内 pipInstall 只能运行一次
+	
+清华大学 :https://pypi.tuna.tsinghua.edu.cn/simple/
+阿里云: http://mirrors.aliyun.com/pypi/simple/
+豆瓣 http://pypi.douban.com/simple/
+中国科学技术大学 http://pypi.mirrors.ustc.edu.cn/simple/
+华中科技大学http://pypi.hustunique.com/	
+	
+	
 In [79]: U.pipInstall('dill')
 Requirement already satisfied: dill in /usr/local/lib/python3.6/site-packages (0.2.9)
 Out[79]: 0
@@ -4110,8 +4120,14 @@ Out[81]: 1
 #######################
 '''
 	from pip.__main__ import _main as pip
-	return pip(['install',modName])
-pip_install=pipInstall
+
+	return pip(['install',
+' -i',
+'http://pypi.douban.com/simple',
+'--trusted-host',
+'pypi.douban.com',	
+	modName])
+pip=pipInstall=pip_install
 	
 def pip_clean_cache():
 	if isnix():  cachePath=r'~/.cache/pip'  # and it respects the XDG_CACHE_HOME directory.
@@ -4709,6 +4725,26 @@ def get_timed_task_list():
 	return schedule.jobs
 schedule_jobs=time_task=get_time_task=get_timed_task=get_timed_task_list
 	
+def iter_high_demensional_coordinate(*shape,**ka):
+	'''args: *shape is the size of each dimension   (xM,yM,zM....) 
+return yield (0,0,0...)  ---  	(xM-1,yM-1,zM-1....) 
+	'''
+	nd=py.len(shape)
+	im=nd-1
+	# lr=[py.range(m) for m in shape]
+	r=[0]*nd
+	
+	# c=0
+	while True:
+		yield r
+		r[-1]+=1
+		for i in py.range(im,-1,-1):
+			if r[i]>=shape[i]:
+				if i==0:return
+				r[i]=0
+				r[i-1]+=1
+
+iterN=iterdc=iter2d=iter3d=iternd=iterNd=iter_N_d=iter_high_demensional_coordinate	
 	
 ############## qgb type ######################	
 class FloatCustomStrRepr(py.float):

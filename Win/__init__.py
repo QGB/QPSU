@@ -368,8 +368,11 @@ def set_foreground(title=None,handle=None,pid=None,process_name='',**ka):
 	import win32gui
 	# if not win32gui.IsWindowVisible(handle): #先不考虑
 		
-
-	win32gui.SetForegroundWindow(handle)
+	try:
+		win32gui.SetForegroundWindow(handle)
+	except Exception as e:
+		return py.No(e)
+		
 	return U.IntCustomRepr(handle,repr='Win.set_foreground(%r)'%handle)
 
 def get_pid_by_hwnd(hwnd):

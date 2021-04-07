@@ -35,11 +35,11 @@ def mirror_cache(*a,**ka):
 	
 	if use_cache:
 		target=F.dill_load(fn)
-		print()
 		if target:
-			U.p('##',fn,file=sys.stderr,flush=True)
+			# print()
+			# U.p('##',fn,file=sys.stderr,flush=True)
 			return target_to_response(target)
-		
+	print(path,U.stime())	
 	send_headers={}
 	for k,v in request.headers.items():
 		v=v.replace(request.host,target_host)
@@ -58,7 +58,7 @@ def run(target,port=1122,currentThread=True):
 	up=urlsplit(url=target)
 	target_host=up.netloc
 	target_base_url='{}://{}/'.format(up.scheme,target_host)
-
+	
 	cache_path=F.mkdir(target_host) # in gst
 	U.log(cache_path)
 
