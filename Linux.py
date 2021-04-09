@@ -26,33 +26,24 @@ def get_tty_height():
 
 
 
-def ssh(host, cmd, user, password, timeout=30, bg_run=False):                                                                                                 
+def auto_switch_network(bg_run=False):                                                                                                 
 	"""SSH'es to a host using the supplied credentials and executes a command.                                                                                                 
 	Throws an exception if the command doesn't return 0.                                                                                                                       
-	bgrun: run command in the background"""                                                                                                                                    
+	bgrun: run command in the background
+pip install dulwich paramiko ping3 pexpect	
+	"""                                                                                                                                    
 	import pexpect
+	wds=[31,43]
+	i=0
+	while 1:
+		i+=1
+		gateway='192.168.%s.1' % wds[i%len(wds)]
+		if N.ping(gateway,p=1):
+			F.write('/etc/resolv.conf','nameserver '+gateway)
+			c=pexpect.spawn('ssh -CNR *:8206:127.0.0.1:22 qgb@%s62'%gateway)
+			c.expect(['[Pp]assword:'],timeout=3)     
+			c.sendline('0')  
+			while c.isalive():
+				if not N.ping(gateway,p=1):
+					break
 
-	# fname = tempfile.mktemp()                                                                                                                                                  
-	# fout = open(fname, 'w')                                                                                                                                                    
-
-	# options = '-q -oStrictHostKeyChecking=no -oUserKnownHostsFile=/dev/null -oPubkeyAuthentication=no'                                                                         
-	# if bg_run:                                                                                                                                                         
-	# 	options += ' -f'                                                                                                                                                       
-	# ssh_cmd = 'ssh %s@%s %s "%s"' % (user, host, options, cmd)                                                                                                                 
-	ssh_cmd = 'ssh '
-	child = pexpect.spawn(ssh_cmd, timeout=timeout)  #spawnu for Python 3                                                                                                                          
-	child.expect(['[pP]assword: '])                                                                                                                                                                                                                                                                                               
-	child.sendline(password)                                                                                                                                                   
-	# child.logfile = fout                                                                                                                                                       
-	child.expect(pexpect.EOF)                                                                                                                                                  
-	child.close()                                                                                                                                                              
-	# fout.close()                                                                                                                                                               
-
-	fin = open(fname, 'r')                                                                                                                                                     
-	stdout = fin.read()                                                                                                                                                        
-	fin.close()                                                                                                                                                                
-
-	if 0 != child.exitstatus:                                                                                                                                                  
-		raise Exception(stdout)                                                                                                                                                
-
-	return stdout	
