@@ -48,12 +48,12 @@ pip install dulwich paramiko ping3 pexpect
 	while 1:
 		i+=1
 		gateway='192.168.%s.1' % wds[i%len(wds)]
-		if N.ping(gateway,p=1):
+		ip='%s62'%gateway
+		if N.ping(ip,p=1):
 			F.write('/etc/resolv.conf','nameserver '+gateway)
-			c=ssh_trans('%s62'%gateway)
-
+			c=ssh_trans(ip)
 			while c.isalive():
-				if not N.ping(gateway,9,p=1):
+				if not N.ping(ip,9,p=1):
 					c.terminate()
 				U.sleep(0.9)
 		U.sleep(1)
