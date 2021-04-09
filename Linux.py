@@ -25,7 +25,16 @@ def get_tty_height():
 	return get_tty_size()[0]
 
 
-
+def ssh_trans(ip):
+	c=pexpect.spawn('ssh -CNR *:8206:127.0.0.1:22 qgb@'+ip)
+	try:
+		c.expect(['[Pp]assword:'],timeout=3)     
+		c.sendline('0')
+	except Exception as e:
+		c.terminate() 
+		U.sleep(0.5)
+		return ssh_trans(ip)
+	return c
 def auto_switch_network(bg_run=False):                                                                                                 
 	"""SSH'es to a host using the supplied credentials and executes a command.                                                                                                 
 	Throws an exception if the command doesn't return 0.                                                                                                                       
@@ -40,10 +49,10 @@ pip install dulwich paramiko ping3 pexpect
 		gateway='192.168.%s.1' % wds[i%len(wds)]
 		if N.ping(gateway,p=1):
 			F.write('/etc/resolv.conf','nameserver '+gateway)
-			c=pexpect.spawn('ssh -CNR *:8206:127.0.0.1:22 qgb@%s62'%gateway)
-			c.expect(['[Pp]assword:'],timeout=3)     
-			c.sendline('0')  
-			while c.isalive():
-				if not N.ping(gateway,p=1):
-					break
+			c=ssh_trans('%s62'%gateway)
 
+			while c.isalive():
+				if not N.ping(gateway,9,p=1):
+					c.terminate()
+				U.sleep(0.9)
+		U.sleep(1)
