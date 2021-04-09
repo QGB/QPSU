@@ -26,6 +26,7 @@ def get_tty_height():
 
 
 def ssh_trans(ip):
+	import pexpect
 	c=pexpect.spawn('ssh -CNR *:8206:127.0.0.1:22 qgb@'+ip)
 	try:
 		c.expect(['[Pp]assword:'],timeout=3)     
@@ -41,7 +42,7 @@ def auto_switch_network(bg_run=False):
 	bgrun: run command in the background
 pip install dulwich paramiko ping3 pexpect	
 	"""                                                                                                                                    
-	import pexpect
+	
 	wds=[31,43]
 	i=0
 	while 1:
