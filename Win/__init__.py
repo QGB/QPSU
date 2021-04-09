@@ -339,12 +339,14 @@ def getAllWindows():
 		return [(i[0],i[1] ,get_pid_by_hwnd(i[0])) for i in mlst]
 EnumWindows=getAllWindow=getAllWindows
 
-def set_foreground(title=None,handle=None,pid=None,process_name='',**ka):
+def set_foreground(title=None,handle=None,pid=None,process_name='',raise_error=0,**ka):
 	U,T,N,F=py.importUTNF()
 	if not title:title=U.get_duplicated_kargs(ka,'t',)
 	if not handle:handle=U.get_duplicated_kargs(ka,'hwnd','h')
 	if not process_name:process_name=U.get_duplicated_kargs(ka,'name','pn','process')
-	
+	if not raise_error:raise_error=U.get_duplicated_kargs(ka,'err','error','exp','exception','Exception',
+'raise_err','raise_error','raiseError','raiseErr','raise_EnvironmentError','EnvironmentError','raiseEnvironmentError')
+
 	if not handle:
 		from qgb import Win
 		for h,t,p in Win.getAllWindows():
@@ -360,7 +362,7 @@ def set_foreground(title=None,handle=None,pid=None,process_name='',**ka):
 				if process_name and process_name in U.get_process_name_by_pid(p):
 					handle=h;break
 			else:
-				raise py.EnvironmentError('cannot find ForegroundWindow title : '+a)
+				if raise_error:raise py.EnvironmentError('cannot find ForegroundWindow title : '+a)
 		# if py.isint(title):
 			# handle=title		
 	# else:
@@ -371,6 +373,7 @@ def set_foreground(title=None,handle=None,pid=None,process_name='',**ka):
 	try:
 		win32gui.SetForegroundWindow(handle)
 	except Exception as e:
+		if raise_error:raise
 		return py.No(e)
 		
 	return U.IntCustomRepr(handle,repr='Win.set_foreground(%r)'%handle)

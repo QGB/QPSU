@@ -425,6 +425,15 @@ a=T.subr(u,T.u23)#'%23-'
 	return T.url_decode(a)
 geta=get_a=get_request_a=get_flask_request_a=get_rpc_request_a
 
+
+def get_flask_request_file(q):
+	''' dir(f)  
+[__...,'_parse_content_type', '_parsed_content_type', 'close', 'content_length', 'content_type', 'filename', 'headers', 'mimetype', 'mimetype_params', 'name', 'save', 'stream']
+'''	
+	f=q.files['file']
+	r=f.save(dp+f.filename)  # None
+	return f,r
+
 def pdf2html(url,response=None,zoom=None,path=None,pw=None):
 	U,T,N,F=py.importUTNF()
 	if not zoom:

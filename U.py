@@ -2833,7 +2833,7 @@ def simulate_key_press(akey, delay=0,restore_state_after=True, exact=None,**ka):
 	return StrRepr(akey,repr='U.simulate_key_press(%r)'%akey)
 system_key=pressKey=keyPress=press_key=key_press=simulate_key_press
 
-def simulate_system_actions(a=py.No("str[key|key_write ] or action list[['click',xy],[foreground,title|handle],['k','sss'],['t','text']]"),key='', delay=py.No('using _DELAY'),restore_state_after=True, exact=None,**ka):
+def simulate_system_actions(a=py.No("str[key|key_write ] or action list[['click',xy],[foreground,title|handle],['k','sss'],['t','text']]"),key='', delay=py.No('using _DELAY'),restore_state_after=True, exact=None,raise_error=False,**ka):
 	'''pip install keyboard
 key='Win+D'  # mute  ,not min all window	
 	
@@ -2862,6 +2862,9 @@ File:      c:\qgb\anaconda3\lib\site-packages\keyboard\__init__.py'''
 		delay=get_duplicated_kargs(ka,'sleep','delay','wait')
 	if not py.isint(delay):
 		delay=_DELAY
+	if not raise_error:
+		raise_error=get_duplicated_kargs(ka,'err','error','exp','exception','Exception',
+'raise_err','raise_error','raiseError','raiseErr','raise_EnvironmentError','EnvironmentError','raiseEnvironmentError')
 		
 	def _sleep(sec=None):
 		#TypeError: object of type 'IntCustomStrRepr' has no len()
@@ -2903,7 +2906,7 @@ File:      c:\qgb\anaconda3\lib\site-packages\keyboard\__init__.py'''
 					_sleep(delay)
 					continue
 				elif one_in(['set_window','top','front','window','for','forground','foreground','win32gui.setforegroundwindow','setforegroundwindow','forward'],action):
-					a=Win.set_foreground(row[1])
+					a=Win.set_foreground(row[1],raise_error=raise_error)
 					r.append(['foreground',a])
 					_sleep(delay);continue
 				elif one_in(['delay','sleep','wait'],action):
@@ -3003,7 +3006,7 @@ pid=0, name='System Idle Process', cmdline=[]
 		try:
 			i.cmd=' '.join(i.cmdline())
 		except Exception as e:
-			i.cmd=str(e) #NoneObj #TODO 需要一个 空字符 类，携带出错或其他信息				
+			i.cmd=py.No(e) #NoneObj #TODO 需要一个 空字符 类，携带出错或其他信息				
 
 		if pid:
 			if pid==i.pid:r.append(i)
@@ -3025,6 +3028,8 @@ pid=0, name='System Idle Process', cmdline=[]
 ps=getTasklist=getProcess=getProcessList=get_all_process_list
 
 def get_all_process_value_list(**ka):
+	''' ka : title=True  : return [  [pid      , ppid     , cmd      ] ...] 
+	'''
 	U=py.importU()
 	size=9
 
@@ -3060,7 +3065,7 @@ def get_all_process_value_list(**ka):
 		# if cmd:row.append(p.cmd)
 		r.append(row)
 	return r
-psCmd=ps_cmd=ps_value=ps_values=GetCommandLine=getCommandLine=get_command_line=getCmdList=get_cmd_list=get_all_process_cmd_list=get_all_process_value_list
+ps_path=psCmd=ps_cmd=ps_value=ps_values=GetCommandLine=getCommandLine=get_command_line=getCmdList=get_cmd_list=get_all_process_cmd_list=get_all_process_value_list
 
 def getProcessPath(name='',pid=0):
 	if not (name or pid):pid=globals()['pid']
@@ -4495,7 +4500,7 @@ def RGBAfromInt(argb_int):
 
 def rgb_tuple_to_integer(rgb):
 	return rgb[2]*256*256+rgb[1]*256+rgb[0]
-rgb2i=rgb_to_int=rgb_to_integer=rgb_tuple_to_integer
+color2int=color_to_int=rgb2i=rgb_to_int=rgb_to_integer=rgb_tuple_to_integer
 
 def rgb_name(r,g=None,b=None):
 	if not py.isint(r):
@@ -4736,16 +4741,17 @@ return yield (0,0,0...)  ---  	(xM-1,yM-1,zM-1....)
 	for size in shape:
 		if size<=0:raise py.ArgumentError(' size of each dimension must > 0 ')
 	
+	shape_indexs=py.list(py.range(im,-1,-1))
 	while True:
 		yield r
 		r[-1]+=1
-		for i in py.range(im,-1,-1):
+		for i in shape_indexs:
 			if r[i]>=shape[i]:
 				if i==0:return
 				r[i]=0
 				r[i-1]+=1
 
-iterN=iterdc=iter2d=iter3d=iternd=iterNd=iter_N_d=iter_high_demensional_coordinate=iter_each_demensional_coordinate	
+range2d=rangen=rangeN=itern=iterN=iterdc=iter2d=iter3d=iternd=iterNd=iter_N_d=iter_high_demensional_coordinate=iter_each_demensional_coordinate	
 	
 ############## qgb type ######################	
 class FloatCustomStrRepr(py.float):
