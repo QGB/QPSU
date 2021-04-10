@@ -337,9 +337,12 @@ if isnix():
 	def isroot():
 		return os.getuid()==0
 	
-	def sudo(cmd,password):
+	def sudo(cmd,password=py.No('auto get_or_input')):
 		'''cmd can use pipe 'id|cut -c 2-22'
 		'''		
+		if password==0:password='0'
+		if not password:
+			password=get_or_input("root.password")
 		from subprocess import call
 		return call("echo {} | sudo -S {}".format(password, cmd), shell=True)
 		#  0

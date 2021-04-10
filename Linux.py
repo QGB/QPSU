@@ -1,3 +1,15 @@
+#coding=utf-8
+TMUX_NOTE='''
+ I discovered that the -t and -s switches seem to accept [session]:window and not [session:]window. That is to say that specifying the session is optional, but including the : is mandatory. (I am using tmux 1.5)
+ 
+:join-pane -s :1  把第 1 个window 加入到当前 pane
+:break-pane -t [session]:[window]  分离当前 pane	到独立的 window ,不指定默认当前 session
+
+:break-pane -t 1:0  # 当 session1存在window0时，命令没有成功执行。改成 1:1 成功
+
+'''	
+
+
 import sys,pathlib				# *.py  /qgb   /[gsqp]
 gsqp=pathlib.Path(__file__).absolute().parent.parent.absolute().__str__()
 if gsqp not in sys.path:sys.path.append(gsqp)#py3 works
@@ -36,7 +48,7 @@ def ssh_trans(ip):
 		U.sleep(0.5)
 		return ssh_trans(ip)
 	return c
-def auto_switch_network(bg_run=False):                                                                                                 
+def auto_switch_network(bg_run=False):
 	"""SSH'es to a host using the supplied credentials and executes a command.                                                                                                 
 	Throws an exception if the command doesn't return 0.                                                                                                                       
 	bgrun: run command in the background
@@ -57,3 +69,10 @@ pip install dulwich paramiko ping3 pexpect
 					c.terminate()
 				U.sleep(0.9)
 		U.sleep(1)
+
+def set_dns_server(ip):
+	ip=N.auto_ip(ip)
+	return F.write('/etc/resolv.conf','nameserver '+ip)
+dns=set_dns=set_dns_server	
+
+
