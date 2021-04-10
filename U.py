@@ -343,14 +343,15 @@ if isnix():
 		if password==0:password='0'
 		if not password:
 			password=get_or_input("root.password")
-		from subprocess import call,PIPE,Popen
-		try:
-			return call("echo {} | sudo -S {}".format(password, cmd), shell=True)
-		except:
-			p = Popen(['sudo', '-S'] + cmd, stdin=PIPE, stderr=PIPE,
-          universal_newlines=True)
-			sudo_prompt = p.communicate(password + '\n')
-			return sudo_prompt
+		from subprocess import call
+		# try:
+		return call("echo {} | sudo -S {}".format(password, cmd), shell=True)
+		# except:
+			# from subprocess import PIPE,Popen
+			# p = Popen(['sudo', '-S'] + cmd, stdin=PIPE, stderr=PIPE,
+          # universal_newlines=True)
+			# sudo_prompt = p.communicate(password + '\n')
+			# return sudo_prompt
 			# [1]
 		#  0
 # u1604 # /bin/sh: 1: Syntax error: end of file unexpected
