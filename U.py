@@ -126,7 +126,7 @@ def get(name='_',default=None,level=gd_sync_level['process']):
 		d=py.getattr(sys,'_qgb_dict',{})
 		#TODO 对于不存在的 name ，可以记录最后访问时间为 py.No，方便排查
 		if default==None:
-			default=py.No('can not get name '+py.repr(name))
+			default=py.No('can not get name '+py.repr(name),no_raise=True)
 		return d.get(name,default)
 	#TODO
 

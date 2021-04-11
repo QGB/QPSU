@@ -48,8 +48,8 @@ class No:
 	TypeError: unsupported operand type(s) for +: 'float' and 'No'
 	
 	'''
-	def __init__(s,msg=None,*a):
-		if gno2e:raise Exception(msg,*a)
+	def __init__(s,msg=None,*a,no_raise=False):
+		if gno2e and not no_raise:raise Exception(msg,*a)
 		
 		if msg and istr(msg):s.msg=msg
 		else:
