@@ -334,6 +334,10 @@ else:# *nix etc..， #TODO:isAndroid
 	pid=os.getpid()
 				
 if isnix():
+	'''
+u1604:  IPython repl  ok	,  bash python -c error  ?
+	
+	'''
 	def isroot():
 		return os.getuid()==0
 	
@@ -343,9 +347,11 @@ if isnix():
 		if password==0:password='0'
 		if not password:
 			password=get_or_input("root.password")
+		
 		from subprocess import call
 		# try:
 		return call("echo {} | sudo -S {}".format(password, cmd), shell=True)
+		
 		# except:
 			# from subprocess import PIPE,Popen
 			# p = Popen(['sudo', '-S'] + cmd, stdin=PIPE, stderr=PIPE,

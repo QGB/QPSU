@@ -755,9 +755,15 @@ def netloc(url):
 	return up.netloc
 host_name=get_url_netloc=netloc
 
+def url_split(url):
+	from six.moves.urllib.parse import urlsplit
+	return urlsplit(url=url)  # obj
+urlsplit=url_split	
+
 def urlEncode(a):
 	''' a : str_or_bytes
 	#todo 	convert Non-string objects
+#TODO 重复调用 会出现 "%252525252525...."	
 	'''
 	from six.moves.urllib.parse import quote
 	return quote(a) # if a is function: TypeError: quote_from_bytes() expected bytes

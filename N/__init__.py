@@ -7,7 +7,7 @@ else:
 	if gsqp not in sys.path:sys.path.append(gsqp)#py3 works
 	from qgb import py
 	# import py  #'py': <module 'py' from '..\\py.py'>,
-
+U,T,N,F=None,None,None,None
 # __all__=['N','HTTPServer']
 
 gError=[]
@@ -41,6 +41,79 @@ else:
 	from SimpleHTTPServer import SimpleHTTPRequestHandler
 	from BaseHTTPServer import HTTPServer as _HTTPServer
 
+
+def download_http_everthing(url,save_path=py.No('auto using pwd ?'),r=1,p=1):
+	'''   '''
+	global U,T,N,F
+	U,T,N,F=py.importUTNF()
+	from six.moves.urllib.parse import urlsplit
+
+	h=N.get(url)
+	if py.istr(h) and '''<a href="/"><img class="logo" src="/Everything.gif" alt="Everything"></a>''' in h:
+		pass
+			# url+='/'
+	else:
+		return h
+	url=N.auto_url(url)
+	# if not url.endswith('/'):url+='/'
+	up=urlsplit(url=url)  # obj
+	
+	netloc=up.netloc
+	url_base='http://'+netloc
+	
+	ups=[s for s in up.path.split('/') if s]	
+	if not ups:cu='es-'+U.stime()
+	else     :cu=ups[-1]
+	
+	# icu=url.rindex('/',0,-1)
+	# if icu<=6:cu=''#'download_http_everthing'
+	# else:
+		# cu=url[icu+1 : -1] # 'C%3A'	
+		# if ':' in cu:cu=T.url_encode(cu)
+	
+	#索引 /   indexof">索引 C:</p>     ">索引 C:\test</p>
+	# c_folder=T.sub(h,'<tr><td colspan="3"><p class="indexof">','</p></td></tr>')
+	# c_folder=F.get_filename(c_folder) # ''      '索引 C:'     'test'
+	# save_path=F.mkdir(save_path)
+	if not save_path.endswith('/') and not save_path.endswith('\\'):
+		save_path+='/'
+	save_path_cu=F.mkdir(save_path+cu)
+	rfs=[]
+	for r4 in parse_everthing_html(h):
+		fn=save_path_cu + [s for s in r4[0].split('/') if s] [-1]
+		if r4[-1]:
+			fn+='/'
+			if r:
+				rfs.append( 
+	{fn:download_http_everthing(url_base+r4[0],save_path=save_path_cu,r=r,p=p) } 
+				)
+				
+			# continue  # skip folder
+		else:
+			fn=N.HTTP.get(url_base+r4[0],file=fn)	
+			rfs.append(fn)
+		if p:print(fn)	
+	return rfs	
+des=down_es=esdl=dl_es=dles=download_es=download_everthing_http=download_http_everthing
+
+	
+def parse_everthing_html(html):
+	''' 名称	大小	修改日期    isd
+	'''
+	global T
+	if not T:T=py.importT()
+	b=T.BeautifulSoup(html)
+	r=[]
+	for n,e in enumerate(b.select('tr[class*=trdata]')     ):
+		p=T.sub(e,'<a href="','"><img alt="')
+		size=T.sub(e,'<td class="sizedata"><span class="nobr"><nobr>','</nobr></span>')
+		time=T.sub(e,'<td class="modifieddata"><span class="nobr"><nobr><span class="nobr"><nobr>','</nobr></span></nobr></span></td>')
+		isd=T.sub(e,'<img alt="" class="icon" src="/','.gif"/') == 'folder'
+		# print('%-3s %-80s %-6s %-22s %-5s'%(n,p,size,time,isd)  )
+		r.append([p,size,time,isd])
+	return r	
+parse_es=parse_everthing=parse_everthing_http=parse_http_everthing=parse_everthing_html
+	
 def zhihu_question(url,response=None):
 	import qgb.tests.zhihu_scrapy_single_QA
 	if not( py.istr(url) or py.isint(url) ):

@@ -95,17 +95,18 @@ def get(url,file='',
 
 	def writeFile():
 		if file:
-			U=py.importU()
 			content=r.content
-			if content:
-				return U.F.write(file,content)
-			else:
-				return py.No('response.content is Null!')
+			# if content:
+			return F.write(file,content)
+			# else:
+				# return py.No('response.content is Null!')
 			
 	b=b''
 	try:
 		import requests
 		r=requests.get(url,verify=False,timeout=timeout,headers=headers,proxies=proxies)
+		if file:return F.write(file,r.content)
+		#TODO decode
 		if 'text' in U.getDictV(r.headers,'Content-Type').lower():
 			return T.autoDecode(r.content)
 			# try:return r.content.decode('gb18030')
@@ -124,7 +125,7 @@ def get(url,file='',
 		return py.No(e)
 
 	try:
-		s= T.auto_decode(b)
+		s= T.auto_decode(b[:999])
 		if not s and b:raise Exception('decode error')
 		return s
 	except:
