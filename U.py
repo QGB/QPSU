@@ -4435,7 +4435,7 @@ def git_clone(*a,depth=1,git_exe=None,p=1):
 def git_upload(commit_msg=None,repo='QPSU',repo_path=get_qpsu_dir(),
 			git_remotes=['https://qgbcs@gitee.com/qgbcs/',
 				# 'https://git.coding.net/qgb/',
-				'https://github.com/qgb/',
+				'https://qgb@github.com/qgb/',
 				],
 			git_exe=None,
 			user_email='qgbcs1'+py.chr(0x40)+'gmail.com',
