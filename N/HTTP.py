@@ -107,7 +107,7 @@ def get(url,file='',
 		r=requests.get(url,verify=False,timeout=timeout,headers=headers,proxies=proxies)
 		if file:return F.write(file,r.content)
 		#TODO decode
-		if 'text' r.headers.get('Content-Type','').lower():
+		if 'text' in r.headers.get('Content-Type','').lower():
 			return T.autoDecode(r.content)
 			# try:return r.content.decode('gb18030')
 			# except:pass
