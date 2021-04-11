@@ -481,6 +481,8 @@ def get_socket_req(PORT = 65432,HOST = '127.7.7.7'):
 def get_rpc_request_a(request):
 	''' 
 a=T.subr(u,T.u23)#'%23-'	
+
+pythonAnywhere : multi[ // or  %2F%2F%2F%2F%2F ] in url will auto convert to one / ,it can't bypass
 	'''
 	if py.istr(request):return request
 	U,T,N,F=py.importUTNF()
@@ -489,7 +491,7 @@ a=T.subr(u,T.u23)#'%23-'
 		a=T.sub_tail(u,'%23=')
 	elif '%23-' in u:
 		a=T.sub_tail(u,'%23-')
-	elif '#-' in u:
+	elif '#-' in u: # pythonAnywhere
 		a=T.sub_tail(u,'#-')
 	else:
 		if '%23' not in u:

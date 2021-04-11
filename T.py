@@ -83,6 +83,33 @@ try:
 	from pprint import pprint,pformat
 except:pass
 ####################################################
+
+def chr_string(chars,quote=quote,alphanumeric=alphanumeric_,chr_func=lambda c:'chr(%s)'%py.ord(c) ,):
+	s=''
+	last='' #  alphan:a  oherchar:c
+	for c in chars:
+		if c in alphanumeric:
+			if not last:
+				c=quote+c
+			if last=='c':
+				c='+'+quote+c
+
+			last='a'
+		else:
+			c=chr_func(c)
+			if not last:pass
+			if last=='a':
+				c=quote+'+'+c
+			if last=='c':
+				c='+'+c
+			last='c'
+		s+=c
+	if last=='a':s+=quote
+
+	U=py.importU()
+	return U.StrRepr(s)
+get_chr_str=make_chr_str=chr_s=chr_str=chr_string	
+
 def wc_ljust(text, length, padding=' '):
 	return text + padding * py.max(0, (length - wcswidth(text)))
 def wc_rjust(text, length, padding=' '):
@@ -760,13 +787,17 @@ def url_split(url):
 	return urlsplit(url=url)  # obj
 urlsplit=url_split	
 
-def urlEncode(a):
+def urlEncode(a,safe='/', encoding=None, errors=None):
 	''' a : str_or_bytes
 	#todo 	convert Non-string objects
 #TODO 重复调用 会出现 "%252525252525...."	
+	
+quote real path	
+ 'C:\\QGB\\Anaconda3\\lib\\urllib\\parse.py',
+ '-n 782'	
 	'''
 	from six.moves.urllib.parse import quote
-	return quote(a) # if a is function: TypeError: quote_from_bytes() expected bytes
+	return quote(a,safe=safe, encoding=encoding, errors=errors) # if a is function: TypeError: quote_from_bytes() expected bytes
 urlencode=url_encode=urlEncode
 
 def urlDecode(a):
