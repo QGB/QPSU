@@ -13,7 +13,7 @@ from requests import request as send_request
 from flask import Flask,request,make_response
 
 app=Flask(__name__)
-N.rpcServer(locals=globals(),app=app,key='rpc')
+N.rpcServer(locals=globals(),globals=globals(),app=app,key='rpc')
 
 def target_to_response(target):
 	response=make_response()
@@ -62,6 +62,7 @@ def run(target,port=1122,currentThread=True):
 	cache_path=F.mkdir(target_host) # in gst
 	U.log(cache_path)
 
+	
 	flaskArgs=py.dict(port=port,host='0.0.0.0',debug=True,threaded=True)
 	if currentThread:
 		thread=None
