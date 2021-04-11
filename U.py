@@ -856,7 +856,7 @@ def cmd(*a,**ka):
 		# r=sb.check_out(a,**ka)
 		#pythonAnywhere  IPython[py2.7] REPL  sb.run does not exist
 		#pythonAnywhere  web[py3.6]  TypeError("__init__() got an unexpected keyword argument 'capture_output'",
-		if not py.getattr(sb,'run',0): 
+		if not py.getattr(sb,'run',0) or 'capture_output' not in getfullargspec(sb.run).kwonlyargs: 
 			#pythonAnywhere T
 			ka['stderr']=sb.STDOUT
 			return sb.check_output(a,**ka)
@@ -3698,7 +3698,7 @@ def jDictValue(a,b):
 	return	r
 jdv=jDictValue
 
-def getNestedValue(a,*key):
+def get_nested_value(a,*key):
 	'''safely get nested  a[k1][k2][...]
 	
 setErr( gError 还是要保留，像这种 出错 是正常流程的一部分，但是又想把错误记录下来
@@ -3709,11 +3709,11 @@ setErr( gError 还是要保留，像这种 出错 是正常流程的一部分，
 		try:return a[key[0]]
 		except Exception as e:return py.No(e)
 	else:
-		try:return getNestedValue(a[key[0]],*key[1:]) 
+		try:return get_nested_value(a[key[0]],*key[1:]) 
 		except Exception as e:return py.No(e)
-getDictV=getDictNestedValue=getNestedValue
+getDictNestedValue=getNestedValue=get_nested_value
 
-def getDictItem(d,index=0):
+def get_dict_item(d,index=0):
 	if index<0:index=py.len(d)+index
 	for n,k in py.enumerate(d):
 		if n==index:
@@ -3721,14 +3721,14 @@ def getDictItem(d,index=0):
 	
 	return py.No('d[{}] out of range'.format(index) ,d,index)
 	# return d.items().__iter__().__next__()
-dict_item=dict_one_item=get_dict_item=getDictItem
+dict_item=dict_one_item=getDictItem=get_dict_item
 
 def get_dict_value(d,index=0):
 	if index<0:index=py.len(d)+index
 	for n,v in py.enumerate(d.values()):
 		if n==index:
 			return v
-getDictValue=dict_value=get_dict_value
+getDictV=getDictValue=dict_value=get_dict_value
 
 def setDictListValue(adict,key,value):
 	if key in adict:
@@ -4770,7 +4770,35 @@ return yield (0,0,0...)  ---  	(xM-1,yM-1,zM-1....)
 				r[i]=0
 				r[i-1]+=1
 
-range2d=rangen=rangeN=itern=iterN=iterdc=iter2d=iter3d=iternd=iterNd=iter_N_d=iter_high_demensional_coordinate=iter_each_demensional_coordinate	
+range2d=rangen=rangeN=itern=iterN=iterdc=iter2d=iter3d=iternd=iterNd=iter_N_d=iter_all_coordinate=iter_coordinate=iter_high_demensional_coordinate=iter_each_demensional_coordinate
+
+def getfullargspec(callable):
+	'''
+In [1069]: inspect.getfullargspec(sb.run)
+Out[1069]: FullArgSpec(args=[], varargs='popenargs', varkw='kwargs', defaults=None, kwonlyargs=['input', 'capture_output', 'timeout', 'check'], kwonlydefaults={'input': None, 'capture_output': False, 'timeout': None, 'check': False}, annota
+tions={})
+
+In [1070]: sb.run?
+sb.run(
+    *popenargs,
+    input=None,
+    capture_output=False,
+    timeout=None,
+    check=False,
+    **kwargs,
+)
+
+	
+inspect.getargspec : ValueError: Function has keyword-only parameters or annotations, use getfullargspec() API which can support them
+
+ValueError: no signature found for builtin type <class 'dict'>
+	'''
+	import inspect
+	try:
+		return inspect.getfullargspec(callable)
+	except Exception as e:
+		return py.No(e)
+getargspec=getfullargspec
 	
 ############## qgb type ######################	
 class FloatCustomStrRepr(py.float):

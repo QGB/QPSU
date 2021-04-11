@@ -82,7 +82,12 @@ porcelain.push(repo.path,"https://http://e.coding.net/...",'master',username='co
 	repo=dulwich.repo.Repo(path)
 	U.pln(path,'adding ...',U.stime())
 	repo.stage(['git.py'],)
-	dulwich.porcelain.add(repo.path)
+	dulwich.porcelain.add(repo.path)  #TODO  pwd 必须在当前repo目录下 ，否则
+# 1-> 212     treepath = os.path.relpath(path, repopath)
+    # 213     if treepath.startswith(b'..'):
+    # 214         raise ValueError('Path not in repo')
+# ipdb> !(path, repopath)
+# (b'C:\\test\\www\\png\\0010005960.png', b'C:/QGB/babun/cygwin/bin/qgb/')		
 	
 	U.pln('commit ...',U.stime())
 
