@@ -313,7 +313,9 @@ flaskArgs=None,
 	locals : execLocals
 	if app : port useless
 	key char must in T.alphanumeric
+key compatibility :  key='#rpc\n'==chr(35)+'rpc'+chr(10)	
 	ssl_context default use https port=443 
+	
 	'''
 	from threading import Thread
 	U=py.importU()
@@ -367,10 +369,11 @@ flaskArgs=None,
 	
 	if py.istr(key):
 		if py.len(key)<1:return py.No('key length < 1',key)
-		for i in key:
-			if i not in T.alphanumeric:
-				return py.No('key char must in T.alphanumeric',key)
-		@app.route('/#'+key+'\n<path:text>',
+		# for i in key:
+			# if i not in T.alphanumeric:
+				# return py.No('key char must in T.alphanumeric',key)
+		
+		@app.route('/'+key+'<path:text>',
 			methods=['GET', 'POST', 'OPTIONS', 'PUT', 'DELETE', 'HEAD', 'PATCH'])
 		def flaskEval(*a,**ka):return _flaskEval()
 	else:
