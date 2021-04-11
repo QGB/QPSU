@@ -47,6 +47,7 @@ class No:
 #TODO
 	TypeError: unsupported operand type(s) for +: 'float' and 'No'
 	
+no_raise=Ture  用法：  py.No 用于配置 . 并非预料之外的异常
 	'''
 	def __init__(s,msg=None,*a,no_raise=False):
 		if gno2e and not no_raise:raise Exception(msg,*a)
