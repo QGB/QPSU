@@ -220,7 +220,7 @@ write_dill=dill_dump=dill_dumps=dill_dump_bytes
 
 def dill_dump_string(obj,**ka):
 	U=py.importU()
-	encoding=U.get_duplicated_kargs(ka,'encoding','coding')
+	encoding=U.get_duplicated_kargs(ka,'encoding','encode','coding')
 	if not encoding:
 		encoding=U.get_or_set('dill_string.encoding',default='latin')
 	return dill_dump_bytes(obj).decode(encoding)	
@@ -228,7 +228,7 @@ dill_dump_str=dill_dump_string
 
 def dill_load_string(s,**ka):
 	U=py.importU()
-	encoding=U.get_duplicated_kargs(ka,'encoding','coding')
+	encoding=U.get_duplicated_kargs(ka,'encoding','encode','coding')
 	if not encoding:
 		encoding=U.get_or_set('dill_string.encoding',default='latin')
 	return dill_load_bytes(s.encode(encoding) )

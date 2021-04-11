@@ -837,10 +837,10 @@ def cmd(*a,**ka):
 
 	import subprocess as sb	
 	
-	show   =get_duplicated_kargs(ka,'show','echo')
-	stdin  =get_duplicated_kargs(ka,'stdin','input')
-	timeout=get_duplicated_kargs(ka,'timeout',default=9)
-	
+	show    =get_duplicated_kargs(ka,'show','echo')
+	stdin   =get_duplicated_kargs(ka,'stdin','input')
+	timeout =get_duplicated_kargs(ka,'timeout',default=9)
+	encoding=U.get_duplicated_kargs(ka,'encoding','encode','coding',default='utf-8')
 	if show:pln (a)
 	if stdin:
 		if py.is3() and py.istr(stdin):
@@ -859,7 +859,9 @@ def cmd(*a,**ka):
 		if not py.getattr(sb,'run',0) or 'capture_output' not in getfullargspec(sb.run).kwonlyargs: 
 			#pythonAnywhere T
 			ka['stderr']=sb.STDOUT
-			return sb.check_output(a,**ka)
+			r= sb.check_output(a,**ka) # bytes
+			try:return r.decode(encoding)
+			except:return r
 		r=sb.run(a,capture_output=True,**ka)
 	except Exception as e:
 		print_traceback()
