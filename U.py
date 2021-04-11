@@ -840,7 +840,7 @@ def cmd(*a,**ka):
 	show    =get_duplicated_kargs(ka,'show','echo')
 	stdin   =get_duplicated_kargs(ka,'stdin','input')
 	timeout =get_duplicated_kargs(ka,'timeout',default=9)
-	encoding=U.get_duplicated_kargs(ka,'encoding','encode','coding',default='utf-8')
+	encoding=get_duplicated_kargs(ka,'encoding','encode','coding',default='utf-8')
 	if show:pln (a)
 	if stdin:
 		if py.is3() and py.istr(stdin):
