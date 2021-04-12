@@ -13,7 +13,7 @@ from requests import request as send_request
 from flask import Flask,request,make_response
 
 app=Flask(__name__)
-N.rpcServer(locals=globals(),globals=globals(),app=app,key='rpc')
+N.rpcServer(locals=globals(),globals=globals(),app=app,key='-')
 
 def target_to_response(target):
 	response=make_response()
@@ -53,14 +53,8 @@ def mirror_cache(*a,**ka):
 	return response
 	
 def run(target,port=1122,currentThread=True):
-	global app,thread,cache_path,target_base_url,target_host
-	from six.moves.urllib.parse import urlsplit
-	up=urlsplit(url=target)
-	target_host=up.netloc
-	target_base_url='{}://{}/'.format(up.scheme,target_host)
-	
-	cache_path=F.mkdir(target_host) # in gst
-	U.log(cache_path)
+	global app,thread
+	U.log(config(target))
 
 	
 	flaskArgs=py.dict(port=port,host='0.0.0.0',debug=True,threaded=True)
@@ -72,6 +66,15 @@ def run(target,port=1122,currentThread=True):
 		thread.start()
 		return (thread,app)
 
+def config(target):
+	global cache_path,target_base_url,target_host
+	from six.moves.urllib.parse import urlsplit
+	up=urlsplit(url=target)
+	target_host=up.netloc
+	target_base_url='{}://{}/'.format(up.scheme,target_host)
+	cache_path=F.mkdir(target_host) # in gst	
+	return cache_path,target_base_url,target_host
+	
 if __name__=='__main__':
 	a=U.parseArgs(str=r'https://www.dulwich.io',int=1122)
 	run(target=a.str,port=a.int)

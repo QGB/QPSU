@@ -978,6 +978,9 @@ def StrToBytes(a,coding='ISO-8859-1'):
 		
 ###################
 gdBaseN={
+
+62:alphanumeric,
+63:alphanumeric_,
 64:Az09+'+/',#注意 不是alphanumeric+'+/',即 azAZ09
 94:printAscii[1:],
 256:char256
