@@ -345,10 +345,11 @@ key compatibility :  key='#rpc\n'==chr(35)+'rpc'+chr(10)
 	
 	app=app or Flask('rpcServer'+U.stime_()   )
 	
-	def _flaskEval():
+	def _flaskEval(code=None):
 		nonlocal globals,locals 
-		code=T.urlDecode(_request.url)
+		if not code:code=T.urlDecode(_request.url)
 		code=T.sub(code,_request.url_root )
+		if key and code.startswith(key):code=code[py.len(key):]
 		# U.log( (('\n'+code) if '\n' in code else code)[:99]	)
 		# U.ipyEmbed()()
 		_response=make_response()
