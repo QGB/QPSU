@@ -1236,10 +1236,10 @@ def chdir(ap=gst,*a,**ka):
 	if 'mkdir' in ka:mkdir=ka['mkdir']
 	if iscyg():mkdir=False#cyg下可以创建带:的目录，导致切换异常
 	if mkdir:F.mkdir(ap)
-	global gscdb
+	global CD_HISTORY
 	# repl()
-	# if path.abspath(gscdb) != pwd():
-	gscdb.append(pwd())
+	# if path.abspath(CD_HISTORY) != pwd():
+	CD_HISTORY.append(pwd())
 	
 	if path.isdir(ap):
 		if show_path:
@@ -1260,11 +1260,11 @@ def chdir(ap=gst,*a,**ka):
 	return py.No("#Can't cd "+ap)
 cd=chdir
 
-gscdb=[]
+CD_HISTORY=get_or_set('CD_HISTORY',[])
 def cdBack(index=-1,p=0):
 	'''False: cd path list []'''
-	if gscdb:
-		return cd(gscdb[index],p=p)
+	if CD_HISTORY:
+		return cd(CD_HISTORY[index],p=p)
 	else:
 		return False
 cdb=cdBack
