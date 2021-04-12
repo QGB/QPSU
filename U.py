@@ -1242,7 +1242,9 @@ def chdir(ap=gst,*a,**ka):
 	gscdb.append(pwd())
 	
 	if path.isdir(ap):
-		if show_path:U.pln(ap)
+		if show_path:
+			U=py.importU()
+			U.pln(ap)
 		os.chdir(ap);return ap#True
 	
 	app=path.dirname(ap)
