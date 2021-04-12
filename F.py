@@ -176,14 +176,13 @@ def dill_load_file(file,dill_ext='.dill'):
 	import dill
 	dill.settings['ignore']=False #KeyError: 'ignore'
 	
-	if not file.lower().endswith(dill_ext):
-		file+=dill_ext
+	file=auto_path(file,ext=dill_ext)
 	try:
 		with py.open(file,'rb') as f:
 			return dill.load(f)
 	except Exception as e:#TODO all  load save py.No
 		return py.No(file,e)
-read_dill=dill_load=dill_load_file
+dill_read=read_dill=dill_load=dill_load_file
 
 
 def dill_load_bytes(bytes):
@@ -191,7 +190,7 @@ def dill_load_bytes(bytes):
 	return dill.loads(bytes)
 dill_loads=dill_load_byte=dill_load_bytes
 
-def dill_dump_bytes(obj,file=None,protocol=None):
+def dill_dump_bytes(obj,file=None,protocol=None,dill_ext='.dill'):
 	'''
 	dill.dump(obj, file, protocol=None, byref=None, fmode=None, recurse=None)
 	dill.dumps(obj, protocol=None, byref=None, fmode=None, recurse=None)
@@ -210,13 +209,13 @@ F.readableSize(len(F.dill_dump(protocol=4,obj=r)  ) )   #'13.694 KiB'
 	'''
 	import dill
 	if file:
-		file=auto_path(file,ext='.dill')
+		file=auto_path(file,ext=dill_ext)
 		with py.open(file,'wb') as f:
 			dill.dump(obj=obj,file=f,protocol=protocol)		
 		return file
 	else:
 		return dill.dumps(obj=obj,protocol=protocol)
-write_dill=dill_dump=dill_dumps=dill_dump_bytes 
+dill_write=write_dill=dill_dump=dill_dumps=dill_dump_bytes 
 
 def dill_dump_string(obj,**ka):
 	U=py.importU()

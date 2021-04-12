@@ -12,6 +12,10 @@ U,T,N,F=py.importUTNF()
 from requests import request as send_request
 from flask import Flask,request,make_response
 
+use_cache=True	
+ips=F.dill_load('ips') or []
+
+
 app=Flask(__name__)
 N.rpcServer(locals=globals(),globals=globals(),app=app,key='-')
 
@@ -24,13 +28,16 @@ def target_to_response(target):
 	response.set_data(target.content)
 	return response
 
-use_cache=True	
 @app.errorhandler(404)
 def mirror_cache(*a,**ka):
 	''' 
 # 'Content-Length': '',  pythonAnywhere 这一句 请求头， 会导致绝大数网站返回 400  错误
 '''	
 	# us=request.path.split('/')
+	request.headers.get('X-Real-Ip',request.remote_addr) 
+	if ip not in ips:
+		return ip+'\nNot allowed! ips'
+		
 	path=request.path[1:]
 	method=request.method
 	# fn=cache_path+method[:1]+T.url2fn(path+request.environ.get('HTTP_COOKIE','')[:99] )
