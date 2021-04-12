@@ -1225,6 +1225,7 @@ C=c=cls=clear
 
 
 def chdir(ap=gst,*a,**ka):
+	global CD_HISTORY
 	if not ap:ap=gst
 	if not py.istr(ap):raise py.ArgumentError('ap must be str Not:{0}'.format(ap))
 	ap=path.join(ap,*a)
@@ -1236,7 +1237,6 @@ def chdir(ap=gst,*a,**ka):
 	if 'mkdir' in ka:mkdir=ka['mkdir']
 	if iscyg():mkdir=False#cyg下可以创建带:的目录，导致切换异常
 	if mkdir:F.mkdir(ap)
-	global CD_HISTORY
 	# repl()
 	# if path.abspath(CD_HISTORY) != pwd():
 	CD_HISTORY.append(pwd())
