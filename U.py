@@ -1229,19 +1229,20 @@ def chdir(ap=gst,*a,**ka):
 	if not py.istr(ap):raise py.ArgumentError('ap must be str Not:{0}'.format(ap))
 	ap=path.join(ap,*a)
 	
+	show_path=get_duplicated_kargs(ka,'p','show_path','print','print_')
 
 	mkdir=False #默认不创建
 	if 'md' in ka:mkdir=ka['md']
 	if 'mkdir' in ka:mkdir=ka['mkdir']
 	if iscyg():mkdir=False#cyg下可以创建带:的目录，导致切换异常
 	if mkdir:F.mkdir(ap)
-	
 	global gscdb
 	# repl()
 	# if path.abspath(gscdb) != pwd():
 	gscdb.append(pwd())
 	
 	if path.isdir(ap):
+		if show_path:U.pln(ap)
 		os.chdir(ap);return ap#True
 	
 	app=path.dirname(ap)
@@ -1258,10 +1259,10 @@ def chdir(ap=gst,*a,**ka):
 cd=chdir
 
 gscdb=[]
-def cdBack(index=-1):
+def cdBack(index=-1,p=0):
 	'''False: cd path list []'''
 	if gscdb:
-		return cd(gscdb[index])
+		return cd(gscdb[index],p=p)
 	else:
 		return False
 cdb=cdBack
