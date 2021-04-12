@@ -1,5 +1,10 @@
-if __name__.endswith('qgb.F'):from . import py
-else:import py
+#coding=utf-8
+import sys,pathlib
+# 要修改路径，框选两行，一起删除 *.py /qgb   /[gsqp]  
+gsqp=pathlib.Path(__file__).absolute().parent.parent.absolute().__str__()
+if gsqp not in sys.path:sys.path.append(gsqp)#py3 works
+from qgb import py
+# 上个版本问题： print(dir(py),py) #['__doc__', '__file__', '__loader__', '__name__', '__package__', '__path__', '__spec__'] <module 'py' (namespace)>
 U,T,N,F=py.importUTNF()
 
 import os,sys

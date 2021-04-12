@@ -27,6 +27,9 @@ def target_to_response(target):
 use_cache=True	
 @app.errorhandler(404)
 def mirror_cache(*a,**ka):
+	''' 
+# 'Content-Length': '',  pythonAnywhere 这一句 请求头， 会导致绝大数网站返回 400  错误
+'''	
 	# us=request.path.split('/')
 	path=request.path[1:]
 	method=request.method
@@ -39,12 +42,15 @@ def mirror_cache(*a,**ka):
 			# print()
 			# U.p('##',fn,file=sys.stderr,flush=True)
 			return target_to_response(target)
-	print(path,U.stime())	
+	print(U.stime(),path)	
 	send_headers={}
 	for k,v in request.headers.items():
 		v=v.replace(request.host,target_host)
+		if k=='Content-Length':
+			if v:print('### Content-Length',U.stime(),request.url,request.headers.)
+			continue
 		send_headers[k]=v
-
+	
 	target=send_request(method=method, 
 		url=target_base_url+path, 
 		params=request.args, headers=send_headers, )
