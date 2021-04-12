@@ -34,7 +34,7 @@ def mirror_cache(*a,**ka):
 # 'Content-Length': '',  pythonAnywhere 这一句 请求头， 会导致绝大数网站返回 400  错误
 '''	
 	# us=request.path.split('/')
-	request.headers.get('X-Real-Ip',request.remote_addr) 
+	ip=request.headers.get('X-Real-Ip',request.remote_addr) 
 	if ip not in ips:
 		return ip+'\nNot allowed! ips'
 		
