@@ -14,6 +14,17 @@ from flask import Flask,request,make_response
 
 use_cache=True	
 ips=F.dill_load('ips') or []
+def config(target):
+	global cache_path,target_base_url,target_host
+	from six.moves.urllib.parse import urlsplit
+	up=urlsplit(url=target)
+	target_host=up.netloc
+	target_base_url='{}://{}/'.format(up.scheme,target_host)
+	cache_path=F.mkdir(target_host) # in gst	
+	return cache_path,target_base_url,target_host
+
+target_base_url=F.dill_load('target_base_url') or ''
+if target_base_url:print( config(target_base_url) )
 
 
 app=Flask(__name__)
@@ -79,14 +90,6 @@ def run(target,port=1122,currentThread=True):
 		thread.start()
 		return (thread,app)
 
-def config(target):
-	global cache_path,target_base_url,target_host
-	from six.moves.urllib.parse import urlsplit
-	up=urlsplit(url=target)
-	target_host=up.netloc
-	target_base_url='{}://{}/'.format(up.scheme,target_host)
-	cache_path=F.mkdir(target_host) # in gst	
-	return cache_path,target_base_url,target_host
 
 if __name__=='__main__':
 	a=U.parseArgs(str=r'https://www.dulwich.io',int=1122)
