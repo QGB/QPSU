@@ -41,15 +41,20 @@ else:
 	from SimpleHTTPServer import SimpleHTTPRequestHandler
 	from BaseHTTPServer import HTTPServer as _HTTPServer
 
-def copy_request(a):
+def copy_request(a,p=True):
 	import requests
 	U,T,N,F=py.importUTNF()
 	if py.istr(a):a=F.dill_load(a)
 	req=py.getattr(a,'request',0)
 	if req:a=req
+		# params=request.args, # ?a=b  in a.url
+		
+	if p:print(
+U.v.requests.request(method=a.method,url=a.url,headers=a.headers,)
+	)
+		
 	return requests.request(method=a.method, 
 		url=a.url, 
-		# params=request.args, # ?a=b  in a.url
 		headers=a.headers, )
 copy_req=req_copy=request_copy=copy_request
 	
