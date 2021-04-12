@@ -41,6 +41,18 @@ else:
 	from SimpleHTTPServer import SimpleHTTPRequestHandler
 	from BaseHTTPServer import HTTPServer as _HTTPServer
 
+def copy_request(a):
+	import requests
+	U,T,N,F=py.importUTNF()
+	if py.istr(a):a=F.dill_load(a)
+	req=py.getattr(a,'request',0)
+	if req:a=req
+	return requests.request(method=a.method, 
+		url=a.url, 
+		# params=request.args, # ?a=b  in a.url
+		headers=a.headers, )
+copy_req=req_copy=request_copy=copy_request
+	
 
 def download_http_everthing(url,save_path=py.No('auto using pwd ?'),r=1,p=1):
 	'''   '''

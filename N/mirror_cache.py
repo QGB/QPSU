@@ -74,15 +74,6 @@ def config(target):
 	cache_path=F.mkdir(target_host) # in gst	
 	return cache_path,target_base_url,target_host
 
-def copy_request(a):
-	if py.istr(a):a=F.dill_load(a)
-	req=py.getattr(a,'request',0)
-	if req:a=req
-	
-	return send_request(method=a.method, 
-		url=a.url, 
-		# params=request.args, # ?a=b  in a.url
-		headers=a.headers, )
 if __name__=='__main__':
 	a=U.parseArgs(str=r'https://www.dulwich.io',int=1122)
 	run(target=a.str,port=a.int)
