@@ -53,7 +53,8 @@ def mirror_cache(*a,**ka):
 	method=request.method
 	# fn=cache_path+method[:1]+T.url2fn(path+request.environ.get('HTTP_COOKIE','')[:99] )
 	url=T.sub(request.url,request.url_root ) 
-	fn=cache_path+method[:1]+T.url2fn(url)
+	fn=cache_path+method[:1]+T.url2fn(url)[:254]  
+#Linux OSError: [Errno 36] File name too long  path 不算长度内。filename 长度<= 255 OK
 	
 	if use_cache:
 		target=F.dill_load(fn)
