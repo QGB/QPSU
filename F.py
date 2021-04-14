@@ -874,7 +874,7 @@ def list(ap='.',type='',t='',r=False,d=False,dir=False,f=False,file=False):
 	# else:return r3[1]+r3[2]
 ls=list
 
-def ll(ap='.',readable=True,type='',t='',r=False,d=False,dir=False,f=False,file=False):
+def ll(ap='.',readable=True,type='',t='',r=False,d=False,dir=False,f=False,file=False,return_dict=True):
 	'''return {file : [size,atime,mtime,ctime,st_mode]}
 	readable is True: Size,Stime,..
 	linux struct stat: http://pubs.opengroup.org/onlinepubs/009695399/basedefs/sys/stat.h.html'''
@@ -897,8 +897,10 @@ def ll(ap='.',readable=True,type='',t='',r=False,d=False,dir=False,f=False,file=
 				]
 		else:
 			dr[i]=[size(i),s.st_atime,s.st_mtime,s.st_ctime,s.st_mode]
-
-	return dr
+	if return_dict:
+		return dr
+	else:
+		return [[k,*v] for k,v in dr.items()]
 
 SUFFIXES = {1000: ['KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'],
 			1024: ['KiB', 'MiB', 'GiB', 'TiB', 'PiB', 'EiB', 'ZiB', 'YiB']}

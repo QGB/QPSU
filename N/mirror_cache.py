@@ -15,7 +15,7 @@ from flask import Flask,request,make_response
 use_cache=True
 replace_domain=True
 gencoding='utf-8'
-base_host='' # flask_request.host
+base_host=b'' # bytes flask_request.host
 app=Flask(__name__)
 N.rpcServer(locals=globals(),globals=globals(),app=app,key='-')
 def config(target):
