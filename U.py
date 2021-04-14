@@ -145,14 +145,18 @@ def get_or_set(name,default):
 	return set(name,default)
 getset=getSet=get_set=get_or_set
 
-def set_or_get(name,default):
+def set_or_get(name,value,default=None):
 	# if py.isno(default) or (default==None):
-	if not default:
+	if not py.isNo(value):
+		return set(name,value)
+	else:
 		r=get(name)
-		if not py.isno(r):return r
+		if py.isno(r):
+			if default==None:
+				raise py.ArgumentError('if not value, default cannot be {} when get {} == {}'.format( repr(default) ,name,repr(r) ))
+			return set(name,default)
 		else:
-			raise py.ArgumentError('default cannot be {} when get {} == {}'.format( repr(default) ,name,repr(r) ))
-	return set(name,default)
+			return r	
 setget=setGet=set_get=set_or_get
 #########################
 def one_in(vs,*t):
@@ -545,7 +549,9 @@ iterable 的元素,没有特殊处理
 p=print_
 # p(4,2,sep='9')
 # exit()
-def input(msg=''):
+def input(msg='',default=''):
+	import readline
+	
 	if py.is2():
 		return py.raw_input(msg)
 	else:
@@ -880,8 +886,8 @@ def cmd(*a,**ka):
 		return py.No('T.auto_decode err',e,r,a,ka)
 	# exit()
 # cmd('echo 23456|sub','3','')	
-
-def get_duplicated_kargs(ka,*keys,default=py.No('Not found matched kargs')):
+GET_DUPLICATED_KARGS_DEFAULT=py.No('Not found matched kargs')
+def get_duplicated_kargs(ka,*keys,default=GET_DUPLICATED_KARGS_DEFAULT):
 	'''
 def pop(d,k):
 	d.pop(k)
@@ -907,7 +913,7 @@ pop(_63,25)  #_63 has change
 	if py.len(r)==1:return r[0]
 	else:raise Exception('kargs matched keys len <> 1',ka,keys)
 
-get_ka=get_multi_ka=getKargsDuplicated=getKArgsDuplicated=get_kargs_duplicated=get_duplicated_kargs
+get_ka=get_multi_ka=getDuplicatedKargs=getKargsDuplicated=getKArgsDuplicated=get_kargs_duplicated=get_duplicated_kargs
 
 def sleep(asecond):
 	''' asecond: int or float'''
@@ -2647,7 +2653,7 @@ def getModulesByFile(fileName):
 	if not dr:return py.No('can not found {} in sys.modules __file__ '.format(fileName),dnf)
 	return dr
 	
-get_module_by_file=modulesByFile=getModsByFile=getModulesByFile
+mbf=modByFile=mod_by_file=getModByf=getModf=getModByF=getModF=getmbf=getmf=get_module_by_file=modulesByFile=getModsByFile=getModulesByFile
 	
 def getModsBy__all__(modPath=None):
 	r=[]
@@ -2990,7 +2996,7 @@ linux:
 
 	for i in  os.environ:
 		if i.upper()==name_upper:
-			return os.environ(i)
+			return os.environ[i]
 	return py.No('not found in os.environ',name)
 get_env_path=get_path_env=get_environ=get_env=getenv=getEnv=getEnviron
 	
@@ -3247,6 +3253,9 @@ def vscode(a='',lineno=0,auto_file_path=True,get_cmd=False,
 		executor = get('vscode_linux',level=gd_sync_level['system'])
 		if not executor:
 			vsbin=F.expanduser('~/.vscode-server/bin/')
+			if not F.exist(vsbin):#root用户 下可能没有
+				vsbin='/home/qgb/.vscode-server/bin/'#TODO auto find all user
+				if not F.exist(vsbin):raise py.EnvironmentError('not found ~/.vscode-server/bin/ ')
 			ctime=0
 			for f,stat in F.ll(vsbin,d=True,f=False,readable=False).items():
 				if stat[3]>ctime:
@@ -3344,13 +3353,14 @@ def getAST(mod):
 	return ast.parse(getSource(mod))
 getModAST=getAST
 
-def getSource(a):
+def get_source(a):
 	import inspect
 	if py.istr(a):
-		return F.read(a)
+		if F.exist(a):return F.read(a)
+		a=get_module_by_file(a)
 		# return #fileName
 	return inspect.getsource(a) # module, class, method, function, traceback, frame, or code object
-getsource=getSource
+getsource=get_mod_source=getSource=get_source
 
 def isSyntaxError(a):
 	import ast

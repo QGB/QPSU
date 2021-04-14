@@ -84,7 +84,7 @@ try:
 except:pass
 ####################################################
 
-def chr_string(chars,quote=quote,alphanumeric=alphanumeric_,chr_func=lambda c:'chr(%s)'%py.ord(c) ,):
+def chr_string(chars,alphanumeric=alphanumeric_,quote=quote,chr_func=lambda c:'chr(%s)'%py.ord(c) ,):
 	s=''
 	last='' #  alphan:a  oherchar:c
 	for c in chars:
@@ -364,9 +364,9 @@ def recursive_join(s,iter,prepend_layer=False,append_layer=False,format_layer=Fa
 
 recursiveJoin=recursive_join
 
-def join(iterable,**ka):#separator=','
+def join(iterable,separator=',',**ka):#separator=','
 	U=py.importU()
-	separator=U.get_duplicated_kargs(ka,'split','splitor','separator',default=',')
+	if not separator:separator=U.get_duplicated_kargs(ka,'split','splitor','separator',default='')
 	if py.istr(iterable):return iterable
 	return separator.join( string(i) for i in iterable )
 	
@@ -978,7 +978,7 @@ def StrToBytes(a,coding='ISO-8859-1'):
 		
 ###################
 gdBaseN={
-
+58:"123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz",
 62:alphanumeric,
 63:alphanumeric_,
 64:Az09+'+/',#注意 不是alphanumeric+'+/',即 azAZ09
@@ -1015,6 +1015,14 @@ b64_bytes=base64_to_bytes
 
 		
 def strToBaseN(a,base=64,symbols=None):
+	''' #TODO #BUG
+T.baseN_encode(b'http://klk')
+'BodHRwOi8wAAAr'
+
+T.baseN_decode(_)
+'http:/0\x00\x00+'
+
+'''	
 	if not symbols:symbols=gdBaseN[base]
 	r=parseInt(a,256)
 	return intToStr(r,base,symbols)

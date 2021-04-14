@@ -13,7 +13,8 @@ from requests import request as send_request
 from flask import Flask,request,make_response
 
 use_cache=True	
-ips=F.dill_load('ips') or []
+app=Flask(__name__)
+N.rpcServer(locals=globals(),globals=globals(),app=app,key='-')
 def config(target):
 	global cache_path,target_base_url,target_host
 	from six.moves.urllib.parse import urlsplit
@@ -21,14 +22,13 @@ def config(target):
 	target_host=up.netloc
 	target_base_url='{}://{}/'.format(up.scheme,target_host)
 	cache_path=F.mkdir(target_host) # in gst	
+	F.dill_dump(file='target_base_url',obj=target_base_url)
 	return cache_path,target_base_url,target_host
-
 target_base_url=F.dill_load('target_base_url') or ''
 if target_base_url:print( config(target_base_url) )
 
+ips=F.dill_load('ips') or []
 
-app=Flask(__name__)
-N.rpcServer(locals=globals(),globals=globals(),app=app,key='-')
 
 def target_to_response(target):
 	response=make_response()
@@ -47,6 +47,7 @@ def mirror_cache(*a,**ka):
 	# us=request.path.split('/')
 	ip=request.headers.get('X-Real-Ip',request.remote_addr) 
 	if ip not in ips:
+		F.
 		return ip+'\nNot allowed! ips'
 		
 	path=request.path[1:]
@@ -54,7 +55,7 @@ def mirror_cache(*a,**ka):
 	# fn=cache_path+method[:1]+T.url2fn(path+request.environ.get('HTTP_COOKIE','')[:99] )
 	url=T.sub(request.url,request.url_root ) 
 	fn=cache_path+method[:1]+T.url2fn(url)[:255-1-5]  
-#Linux OSError: [Errno 36] File name too long  path 不算长度内。filename 长度<= 255 OK
+#Linux OSError: [Errno 36] File name too long  path 不算长度内。filename+ext 长度<= 255 OK
 	
 	if use_cache:
 		target=F.dill_load(fn)

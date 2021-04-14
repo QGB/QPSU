@@ -56,7 +56,7 @@ U.v.requests.request(method=a.method,url=a.url,headers=a.headers,)
 	return requests.request(method=a.method, 
 		url=a.url, 
 		headers=a.headers, )
-copy_req=req_copy=request_copy=copy_request
+copy_req=req_copy=rebuild_request=request_copy=copy_request
 	
 
 def download_http_everthing(url,save_path=py.No('auto using pwd ?'),r=1,p=1):
@@ -1106,9 +1106,14 @@ autourl=autoUrl=autoURL=auto_url
 
 
 #setip 192.168  ,  2.2	
-def auto_ip(ip,ip2=192.168):
-	if py.isint(ip):
-		ip='{0}.2.{1}'.format(ip2,ip)
+def auto_ip(ip,ip2=py.No('192.168',no_raise=1),ip1=py.No('2',no_raise=1)):
+	global U
+	U=py.importU()
+	
+	ip2=U.set_or_get('auto_ip.2',ip2,default='192.168')
+	ip1=U.set_or_get('auto_ip.1',ip1,default=2)
+	if py.isint(ip):#TODO check ip_int < 256 ?
+		ip='{0}.{1}.{2}'.format(ip2,ip1,ip)
 	if py.isfloat(ip):
 		ip='{0}.{1}'.format(ip2,ip)		
 	return ip

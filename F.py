@@ -584,20 +584,28 @@ def detect_file_encoding(file,confidence=0.7,default=py.No('not have default enc
 	return c
 detect=detectEncoding=detect_encoding=detect_file_encoding
 	
-def read(file,mod='r',returnFile=False,encoding=''):
-	'''if returnFile:
+def read(file,encoding='',mod='r',return_filename=False,print_detect_encoding=True,**ka):
+	'''if return_filename:
 			return content,f.name
 			'''
-	# try:
 	file=autoPath(file)
+	if not encoding and print_detect_encoding:
+		U=py.importU()
+		_pde=U.get_duplicated_kargs(ka,'p_encoding','p','pde','pEncoding','p_decode')
+		if _pde!=U.GET_DUPLICATED_KARGS_DEFAULT:
+			print_detect_encoding=_pde
+	if not return_filename:
+		U=py.importU()
+		return_filename=U.get_duplicated_kargs(ka,'returnFile','rf','rfn','return_file','return_name',)
+		
 	if py.is2():f=py.open(file,mod)
 	else:#is3
-		encoding=encoding or detectEncoding(file,confidence=0.9,default='utf-8')
+		encoding=encoding or detectEncoding(file,confidence=0.9,default='utf-8',p=print_detect_encoding)
 		#utf-8 /site-packages/astropy/coordinates/builtin_frames/__init__.py  {'confidence': 0.73, 'encoding': 'Windows-1252'
 		f=py.open(file,mod,encoding=encoding)
 	s=f.read()
 	f.close()
-	if returnFile:
+	if return_filename:
 		return s,f.name
 	else:
 		return s
