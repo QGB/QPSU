@@ -12,30 +12,41 @@ U,T,N,F=py.importUTNF()
 from requests import request as send_request
 from flask import Flask,request,make_response
 
-use_cache=True	
+use_cache=True
+replace_domain=True
+gencoding='utf-8'
+base_host='' # flask_request.host
 app=Flask(__name__)
 N.rpcServer(locals=globals(),globals=globals(),app=app,key='-')
 def config(target):
-	global cache_path,target_base_url,target_host
+	global cache_path,target_base_url,target_host,btarget_host
 	from six.moves.urllib.parse import urlsplit
 	up=urlsplit(url=target)
 	target_host=up.netloc
+	btarget_host=target_host.encode(gencoding)
+	
 	target_base_url='{}://{}/'.format(up.scheme,target_host)
 	cache_path=F.mkdir(target_host) # in gst	
 	F.dill_dump(file='target_base_url',obj=target_base_url)
 	return cache_path,target_base_url,target_host
+	
 target_base_url=F.dill_load('target_base_url') or ''
 if target_base_url:print( config(target_base_url) )
 
 ips=F.dill_load('ips') or []
 ipsn=F.dill_load('ipsn') or []
 
-def target_to_response(target):
+def target_to_flask_response(target,flask_request=None):
+	global base_host
 	response=make_response()
 	response.status_code=target.status_code
 	response.headers._list=list(target.headers.items())
 	response.headers['Content-Security-Policy']=''
-	response.headers['Content-Encoding']='utf-8'
+	response.headers['Content-Encoding']=gencoding
+	b=target.content
+	if replace_domain:
+		if not base_host:base_host=flask_request.host.encode(gencoding)
+		b=b.replace(btarget_host,base_host)
 	response.set_data(target.content)
 	return response
 
@@ -63,7 +74,7 @@ def mirror_cache(*a,**ka):
 		if target:
 			# print()
 			# U.p('##',fn,file=sys.stderr,flush=True)
-			return target_to_response(target)
+			return target_to_flask_response(target,request)
 	print(U.stime(),path)	
 	send_headers={}
 	for k,v in request.headers.items():
@@ -76,9 +87,10 @@ def mirror_cache(*a,**ka):
 	target=send_request(method=method, 
 		url=target_base_url+path, 
 		params=request.args, headers=send_headers, )
-	response= target_to_response(target)
+		
+	flask_response= target_to_flask_response(target,request)
 	F.dill_dump(protocol=4,obj=target,file=fn)
-	return response
+	return flask_response
 	
 def run(target,port=1122,currentThread=True):
 	global app,thread
