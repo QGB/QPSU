@@ -28,7 +28,7 @@ target_base_url=F.dill_load('target_base_url') or ''
 if target_base_url:print( config(target_base_url) )
 
 ips=F.dill_load('ips') or []
-
+ipsn=F.dill_load('ipsn') or []
 
 def target_to_response(target):
 	response=make_response()
@@ -47,8 +47,9 @@ def mirror_cache(*a,**ka):
 	# us=request.path.split('/')
 	ip=request.headers.get('X-Real-Ip',request.remote_addr) 
 	if ip not in ips:
-		F.
-		return ip+'\nNot allowed! ips'
+		ipsn.append(ip)
+		F.dill_dump(obj=ipsn,file='ipsn')
+		return ip+'\nNot allowed!\n'+U.stime()
 		
 	path=request.path[1:]
 	method=request.method
