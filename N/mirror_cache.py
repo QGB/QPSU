@@ -47,7 +47,7 @@ def target_to_flask_response(target,flask_request=None):
 	if replace_domain:
 		if not base_host:base_host=flask_request.host.encode(gencoding)
 		b=b.replace(btarget_host,base_host)
-	response.set_data(target.content)
+	response.set_data(b)
 	return response
 
 @app.errorhandler(404)
