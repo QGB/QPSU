@@ -4861,17 +4861,13 @@ class IntCustomStrRepr(py.int):
 		self.ka=ka
 		return self
 		
-	def __repr__(self):return self.__str__()
-	def __str__(self):#super().__str__()
+	# def __str__(self):return self.__repr__()
+	def __repr__(self):#super().__str__()
 		'''
 		'''
 		if py.callable(self.target):
-			# try:
 			return self.target(*self.a,**self.ka)
-			# except Exception as e:
-				# print(self.a,self.ka)
-				# e.self=self
-				# raise e
+			
 		else:
 			if self.ka:
 				raise py.ArgumentError('when CustomStrRepr target not callable,must no keyword args!')

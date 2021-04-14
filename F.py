@@ -874,7 +874,7 @@ def list(ap='.',type='',t='',r=False,d=False,dir=False,f=False,file=False):
 	# else:return r3[1]+r3[2]
 ls=list
 
-def ll(ap='.',readable=True,type='',t='',r=False,d=False,dir=False,f=False,file=False,return_dict=True):
+def ll(ap='.',readable=True,type='',t='',r=False,d=False,dir=False,f=False,file=False,return_dict=True,**ka):
 	'''return {file : [size,atime,mtime,ctime,st_mode]}
 	readable is True: Size,Stime,..
 	linux struct stat: http://pubs.opengroup.org/onlinepubs/009695399/basedefs/sys/stat.h.html'''
@@ -952,7 +952,7 @@ def size(asf,int=py.No('ipython auto readable')):
 			size += sum([_p.getsize(_p.join(root, name)) for name in files])  	
 	U=py.importU()
 	# U.msgbox(U.is_ipy_cell())
-	if not int and U.is_ipy_cell():
+	if not int :#and U.is_ipy_cell():
 		size=U.IntSize(size)
 	return size 
 	
