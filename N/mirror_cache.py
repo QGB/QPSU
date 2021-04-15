@@ -54,6 +54,7 @@ def target_to_flask_response(target,flask_request=None):
 def mirror_cache(*a,**ka):
 	''' 
 # 'Content-Length': '',  pythonAnywhere 这一句 请求头， 会导致绝大数网站返回 400  错误
+
 '''	
 	# us=request.path.split('/')
 	ip=request.headers.get('X-Real-Ip',request.remote_addr) 

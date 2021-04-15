@@ -182,13 +182,13 @@ def dill_load_file(file,dill_ext='.dill'):
 			return dill.load(f)
 	except Exception as e:#TODO all  load save py.No
 		return py.No(file,e)
-dill_read=read_dill=dill_load=dill_load_file
+dl=dill_read=read_dill=dill_load=dill_load_file
 
 
 def dill_load_bytes(bytes):
 	import dill
 	return dill.loads(bytes)
-dill_loads=dill_load_byte=dill_load_bytes
+dls=dill_loads=dill_load_byte=dill_load_bytes
 
 def dill_dump_bytes(obj,file=None,protocol=None,dill_ext='.dill'):
 	'''
@@ -215,7 +215,7 @@ F.readableSize(len(F.dill_dump(protocol=4,obj=r)  ) )   #'13.694 KiB'
 		return file
 	else:
 		return dill.dumps(obj=obj,protocol=protocol)
-dill_write=write_dill=dill_dump=dill_dumps=dill_dump_bytes 
+dp=dill_write=write_dill=dill_dump=dill_dumps=dill_dump_bytes 
 
 def dill_dump_string(obj,**ka):
 	U=py.importU()
@@ -794,10 +794,13 @@ True
 		if len(fn)==2 and fn[-1]==':':fn+='/'
 		# raise NotImplementedError
 	if _p.exists(fn):
-		if _p.isdir(fn):return True
+		if _p.isdir(fn):
+			fn=fn.replace('\\','/')
+			if not fn.endswith('/'):fn+='/'
+			return fn
 		if _p.getsize(fn)<1 and not zero:
 			return False
-		return True
+		return fn
 	else:
 		return False
 isExist=exists=exist

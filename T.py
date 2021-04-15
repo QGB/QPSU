@@ -978,6 +978,8 @@ def StrToBytes(a,coding='ISO-8859-1'):
 		
 ###################
 gdBaseN={
+54:'abcdefghijkmnpqrstuvwyzABCDEFGHJKLMNPQRSTUVWYZ23456789',#T.replacey(T.alphanumeric,['0','1','l','o','O','I','x','X'],'')  
+56:'abcdefghijkmnpqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ23456789',#T.replacey(T.alphanumeric,['0','1','l','o','O','I'],'')  
 58:"123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz",
 62:alphanumeric,
 63:alphanumeric_,

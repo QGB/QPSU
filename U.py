@@ -1330,9 +1330,86 @@ def pwd(p=False,display=False):
 	return s+pwd.sp#带sp方便使用者拼接路径
 getCurrentPath=cwd=pwd
 	
-def random_choice(*a,**ka):
+def random_choice(seq,size=1,repeat=0,not_repeat_max_try=9999,**ka):
+	'''
+if not repeat: choice  (size+not_repeat_max_try)	times
+	
+random.choice(seq) #每次抽取都是独立的 多次调用可能重复
+	Choose a random element from a non-empty sequence.
+ 
+random.choices(population, weights=None, *, cum_weights=None, k=1)#可能重复
+	Return a k sized list of population elements chosen with replacement.
+
+ 
+random.choice(dict)
+ C:\QGB\Anaconda3\lib\random.py in choice(self, seq)
+    260         except ValueError:
+    261             raise IndexError('Cannot choose from an empty sequence') from None
+--> 262         return seq[i]
+    263
+    264     def shuffle(self, x, random=None):
+
+KeyError: 4
+
+#BUGfixed  U.random_choice(_145,4) .len  有次 ==3 ？ 
+In [178]: len(U.random_choice(_145,4))
+Out[178]: 2
+
+In [179]: len(U.random_choice(_145,4))
+Out[179]: 3
+
+In [180]: len(U.random_choice(_145,4))
+Out[180]: 3
+
+In [181]: len(U.random_choice(_145,4))
+Out[181]: 4
+
+In [182]: len(U.random_choice(_145,4))
+Out[182]: 4
+
+In [183]: len(U.random_choice(_145,4))
+Out[183]: 4
+
+In [184]: len(U.random_choice(_145,4))
+Out[184]: 3
+		# raise py.NotImplementedError('#TODO dict ')
+
+''' 
 	import random
-	return random.choice(*a,**ka)
+	_size=get_duplicated_kargs(ka,'len','k','length','SIZE','i')
+	if _size and py.isint(_size) and size==1:size=_size
+	
+	ids=py.set()
+	not_repeat_max_try=size+not_repeat_max_try
+	def yrc():
+		if repeat:
+			yield from random.choices(seq,k=size) 
+			return
+		times=0
+		# r=[]
+		while py.len(ids)<size:
+			v=random.choice(seq)
+			id=py.id(v)
+			if id not in ids:
+				ids.add(id)
+				yield v
+				# r.append(v)
+			times+=1
+			if times>not_repeat_max_try:
+				raise py.Exception('not_repeat_max_try reached ，seq中元素id是否有重复？，要不设置 repeat=False ?')
+		# return r
+		
+	if py.istr(seq):
+		return ''.join(yrc())
+	if py.isdict(seq):
+		d=seq
+		seq=py.list(d)
+		return {k:d[k] for k in yrc()}
+	# if py.islist(seq) or py.istuple:
+	r=[i for i in yrc()]
+	if size==1:return r[0]
+	return r
+random_choices=random_choice
 	
 def randomInt(min=0,max=IMAX):
 	'''random.randint(a, b)
@@ -2799,6 +2876,10 @@ def id(obj,*other):
 def type(obj,*other):
 	return FuncWrapForMultiArgs(f=py.type,args=(obj,other))
 
+def bin(obj,*other):
+	return FuncWrapForMultiArgs(f=py.bin,args=(obj,other))
+	
+	
 def FuncWrapForMultiArgs(f,args,default=None):
 	'''Exception return py.No'''
 	obj,other=args ########## other is tuple

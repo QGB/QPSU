@@ -150,6 +150,26 @@ paramiko.RSAKey.from_private_key(open_private_key(f),)  == <paramiko.rsakey.RSAK
 	return file	
 	
 def push_with_key(repo_path,remote="ssh://git@github.com:22/QGB/QPSU.git",private_key=U.gst+'id_rsa',refspecs='master',errstream=getattr(sys.stderr, 'buffer', None),private_key_password=None,):
+	'''
+push ... 2021-04-15__06.26.44__.288
+  File "C:/QGB/babun/cygwin/bin\qgb\git.py", line 106, in up
+    push_with_key(repo.path,url,**ka)
+  File "C:/QGB/babun/cygwin/bin\qgb\git.py", line 205, in push_with_key
+    progress=errstream.write)
+  File "C:\QGB\Anaconda3\lib\site-packages\dulwich\client.py", line 789, in send_pack
+    proto, unused_can_read, stderr = self._connect(b'receive-pack', path)
+  File "C:\QGB\Anaconda3\lib\site-packages\dulwich\client.py", line 1410, in _connect
+    **kwargs)
+  File "C:\QGB\Anaconda3\lib\site-packages\dulwich\contrib\paramiko_vendor.py", line 103, in run_command
+    client.connect(**connection_kwargs)
+  File "C:\QGB\Anaconda3\lib\site-packages\paramiko\client.py", line 349, in connect
+    retry_on_signal(lambda: sock.connect(addr))
+  File "C:\QGB\Anaconda3\lib\site-packages\paramiko\util.py", line 283, in retry_on_signal
+    return function()
+  File "C:\QGB\Anaconda3\lib\site-packages\paramiko\client.py", line 349, in <lambda>
+    retry_on_signal(lambda: sock.connect(addr))
+Out[26]: 'C:/QGB/babun/cygwin/bin/qgb/'
+'''	
 	from dulwich.contrib.paramiko_vendor import ParamikoSSHVendor
 	import dulwich.porcelain
 	from dulwich.protocol import (

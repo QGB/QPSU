@@ -706,11 +706,20 @@ def flask_image_response(response,image,format='png',**ka):
 
 def flask_screenshot_response(response,rect=py.No('rect=[x,y,x1,y1] or auto get clipboard or full_screen '),**ka):
 	''' rect (crop)  defining the left, upper, right, and lower pixel
+	
+Image.open(fp)	
+:param fp: A filename (string), pathlib.Path object or a file object.
+   The file object must implement `~file.read`,
+   `~file.seek`, and `~file.tell` methods,
+   and be opened in binary mode.	
 	'''
 	from PIL import ImageGrab,Image
 	U,T,N,F=py.importUTNF()
 	if rect:
-		if py.isinstance(rect,Image.Image):
+		if py.istr(rect) or py.isfile(rect):
+			# if F.exist(rect):
+			im=Image.open(rect)
+		elif py.isinstance(rect,Image.Image):
 			im=rect
 		elif U.len(rect)!=4:
 			raise py.ArgumentError('rect must be PIL Image or [ x0,y0,x1,y1 ]')
@@ -1078,7 +1087,7 @@ def getAllAdapter():
 getIP=getip=get_ip=getAllAdapter
 
 URL_SCHEME_CHARS=py.No('call N.auto_url will auto set')
-def auto_url(a,default_protocol='http'):
+def auto_url(a,default_protocol='http',p=0):
 	'''According to RFC 2396, Appendix A:
 scheme = alpha *( alpha | digit | "+" | "-" | "." )
 
@@ -1087,19 +1096,21 @@ Scheme names consist(组成) of a sequence of characters beginning with a lower 
 	global URL_SCHEME_CHARS
 	T=py.importT()
 	URL_SCHEME_CHARS=T.alphanumeric+'+.-'
+	# r=''
+	
 	if py.istr(a):
 		a=a.strip()
 		if  '://' in a:
-			i=0 # 放宽一点要求，不检查首位，有时出现全部大写的URL
-			while(a[i] in URL_SCHEME_CHARS):
-				i+=1
-			else:#elif ：SyntaxError: invalid syntax
-				if a[i:i+3]=='://':
-					return a
-				else:
-					raise py.ArgumentError('url SCHEME invalid',a,i)
-			return a
-		return default_protocol+'://'+a
+			 # 放宽一点要求 ?，不检查首位，有时出现全部大写的URL
+			for i,c in py.enumerate(a):
+				if c not in URL_SCHEME_CHARS:
+					if a[i:i+3]!='://':
+						raise py.ArgumentError('url SCHEME invalid',a,i)
+			r=a
+		else:
+			r=default_protocol+'://'+a
+		if p:print(r)	
+		return r
 	else:
 		raise Exception('url need string')
 autourl=autoUrl=autoURL=auto_url
