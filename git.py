@@ -169,7 +169,7 @@ push ... 2021-04-15__06.26.44__.288
   File "C:\QGB\Anaconda3\lib\site-packages\paramiko\client.py", line 349, in <lambda>
     retry_on_signal(lambda: sock.connect(addr))
 Out[26]: 'C:/QGB/babun/cygwin/bin/qgb/'
-'''	
+ '''
 	from dulwich.contrib.paramiko_vendor import ParamikoSSHVendor
 	import dulwich.porcelain
 	from dulwich.protocol import (
