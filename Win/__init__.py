@@ -339,7 +339,7 @@ def getAllWindows():
 		return [(i[0],i[1] ,get_pid_by_hwnd(i[0])) for i in mlst]
 EnumWindows=getAllWindow=getAllWindows
 
-def set_foreground(title=None,handle=None,pid=None,process_name='',raise_error=0,**ka):
+def SetForegroundWindow(title=None,handle=None,pid=None,process_name='',raise_error=0,retry=99,**ka):
 	U,T,N,F=py.importUTNF()
 	if not title:title=U.get_duplicated_kargs(ka,'t',)
 	if not handle:handle=U.get_duplicated_kargs(ka,'hwnd','h')
@@ -376,13 +376,22 @@ def set_foreground(title=None,handle=None,pid=None,process_name='',raise_error=0
 		win32gui.SetForegroundWindow(handle)
 	except Exception as e:
 #BUG 窗口在后台，通过 http_rpc 调用此函数，第一次总会出错：，第二次才成功？
-# error(0, 'SetForegroundWindow', 'No error message is available')		
+# error(0, 'SetForegroundWindow', 'No error message is available')
+		if 'No error message is available' in repr(e):
+			for i in py.range(1,retry):
+				try:
+					if i%9==1:U.sleep(0.01) # sleep一下有奇效，为什么？
+					win32gui.SetForegroundWindow(handle)
+					return U.IntCustomRepr(handle,repr='Win.set_foreground(%r) #retry:%s'% (handle,i) )
+				except:
+					pass
+			# return py.No(e,'')
 		if raise_error:raise
 		return py.No(e)
 		
 	return U.IntCustomRepr(handle,repr='Win.set_foreground(%r)'%handle)
 #U.system_actions
-popw=pop_window=forground=foreground=set_forground=pop_top=set_foreground
+fg=forw=popw=pop_window=forground=foreground=set_forground=pop_top=set_foreground=SetForegroundWindow
 	
 def get_pid_by_hwnd(hwnd):
 	try:
