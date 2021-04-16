@@ -1104,8 +1104,12 @@ Scheme names consist(组成) of a sequence of characters beginning with a lower 
 			 # 放宽一点要求 ?，不检查首位，有时出现全部大写的URL
 			for i,c in py.enumerate(a):
 				if c not in URL_SCHEME_CHARS:
-					if a[i:i+3]!='://':
-						raise py.ArgumentError('url SCHEME invalid',a,i)
+					if a[i:i+3]=='://':
+						break
+					else:
+						return py.No('url SCHEME invalid',a,i)
+						# raise py.ArgumentError('url SCHEME invalid',a,i)
+						
 			r=a
 		else:
 			r=default_protocol+'://'+a

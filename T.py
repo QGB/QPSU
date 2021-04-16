@@ -55,6 +55,9 @@ gError=None
 try:
 	from chardet import detect as _detect
 	def detect(abytes,confidence=0.7,default=py.No('default encoding "" ')  ):
+		'''
+T._detect( b'\x1b'*1)  ### {'encoding': None, 'confidence': 0.0, 'language': None}	
+		'''
 		r=_detect(abytes)
 		if r['encoding'] in ['Windows-1254' ]:
 			try:
@@ -72,7 +75,8 @@ try:
 		if r['confidence']>confidence:return r['encoding']
 		else:
 			if default:return default
-			raise Exception(
+			# raise Exception
+			return py.No(
 			'{0} encoding {1} confidence {2} less then {3}'.format(
 			abytes[:99],r['encoding'],r['confidence'],confidence)  )
 except Exception as ei:

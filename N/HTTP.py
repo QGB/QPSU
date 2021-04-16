@@ -86,6 +86,7 @@ def get(url,file='',
 	U,T,N,F=py.importUTNF()
 	url=N.auto_url(url)
 
+	show=U.get_duplicated_kargs(ka,'show','print','p','print_req')
 	proxies=U.get_duplicated_kargs(ka,'proxies','proxys','proxyes','proxy')
 	if proxies:
 		proxies=N.set_proxy(proxies)
@@ -105,6 +106,8 @@ def get(url,file='',
 	try:
 		import requests
 		r=requests.get(url,verify=False,timeout=timeout,headers=headers,proxies=proxies)
+		if show:
+			print(U.v.requests.get(url,verify=False,timeout=timeout,headers=U.StrRepr(U.pformat(headers)),proxies=proxies))
 		if file:return F.write(file,r.content)
 		#TODO decode
 		if 'text' in r.headers.get('Content-Type','').lower():
@@ -125,8 +128,8 @@ def get(url,file='',
 		return py.No(e)
 
 	try:
-		s= T.auto_decode(b[:999])
-		if not s and b:raise Exception('decode error')
+		encoding= T.detect(b[:9999])
+		if b and not encoding:raise Exception('decode error')
 		return s
 	except:
 		return b
