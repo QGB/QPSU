@@ -127,12 +127,12 @@ def get(url,file='',
 	except Exception as e:
 		return py.No(e)
 
-	try:
-		encoding= T.detect(b[:9999])
-		if b and not encoding:raise Exception('decode error')
-		return s
-	except:
-		return b
+	# try:
+	encoding= T.detect(b[:9999])
+	if b and encoding:
+		# raise Exception('decode error')
+		return b.decode(encoding)
+	return b
 	
 
 def head(url):
