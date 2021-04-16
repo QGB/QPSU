@@ -8,7 +8,7 @@ try:
 except Exception as err:
 	gError=err
 
-def get(p=0):
+def get(p=0,edit=0,**ka):
 	'''win32con.
 CF_DSPTEXT     ', 129],
 CF_OEMTEXT     ', 7],
@@ -20,11 +20,15 @@ CF_UNICODETEXT ', 13],
 	'''
 	U=py.importU()
 	if U.istermux():return U.cmd('termux-clipboard-get') 
+	if not p:p=U.get_duplicated_kargs(ka,'print_','show','PRINT')
+	if not edit:edit=U.get_duplicated_kargs(ka,'e','E','input_edit','input')
 	
 	w.OpenClipboard()
 	d = w.GetClipboardData(win32con.CF_UNICODETEXT)
 	w.CloseClipboard()
 	if p:U.pln(d)
+	if edit:
+		d=U.input(edit if py.istr(edit) else '',default=d)
 	return d
 
 def set(aString,p=0):

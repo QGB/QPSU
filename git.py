@@ -135,7 +135,7 @@ def log(max_entries=11,repo=None):
 	
 def open_private_key(f,):
 	''' 
-paramiko.RSAKey.from_private_key(open_private_key(f),)  == <paramiko.rsakey.RSAKey at 0x23218fda648>'''
+paramiko.RSAKey.from_private_key(open_private_key(f),)  == <paramiko.rsakey.RSAKey at 0x23218fda648> '''
 	if py.isfile(f):
 		file=f
 	elif not py.istr(f):
@@ -150,7 +150,10 @@ paramiko.RSAKey.from_private_key(open_private_key(f),)  == <paramiko.rsakey.RSAK
 	return file	
 	
 def push_with_key(repo_path,remote="ssh://git@github.com:22/QGB/QPSU.git",private_key=U.gst+'id_rsa',refspecs='master',errstream=getattr(sys.stderr, 'buffer', None),private_key_password=None,):
-	'''
+	r''' #important#	三引号string中不能出现 \util 这种字符（常见于路径）
+# 会导致 SyntaxError: (unicode error) 'unicodeescape' codec can't decode bytes in position 1-2: truncated \uXXXX escape 错误
+# 最好 引号前加r 强制用 raw-string
+	
 push ... 2021-04-15__06.26.44__.288
   File "C:/QGB/babun/cygwin/bin\qgb\git.py", line 106, in up
     push_with_key(repo.path,url,**ka)

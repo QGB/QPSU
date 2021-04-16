@@ -1081,8 +1081,13 @@ def parseInt(a,base=16,symbols=None):
 		
 		
 def literal_eval(str):
+	"""
+ast.literal_eval("\t'''\n\n '''",)	# *** IndentationError: unexpected indent
+#BUGFIXED 前面不能乱空格
+
+	"""
 	import ast
-	return ast.literal_eval(str)
+	return ast.literal_eval(str.strip())
 unrepr=ast_literal_eval=literal_eval
 
 def javascript_object_loads(s):
@@ -1257,7 +1262,10 @@ def replace_all_space(a,to='',target=r"\s+"):
 	return re.sub(target, to, a, flags=re.UNICODE)
 del_space=del_spaces=remove_all_space=replace_all_spaces=delAllSpace=removeAllSpaces=removeAllSpace=replace_all_space
 
-def replacey(a,olds,new):
+def replacey(a,olds,new,case_sensitive=False):
+	'''
+#TODO case_sensitive	
+	'''
 	if not py.istr(a):return py.No('a is not str',a)
 	# else:a=str(a)
 	# if(len(olds)<1):raise Exception('Target chars Null')

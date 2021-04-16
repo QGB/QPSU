@@ -129,11 +129,18 @@ def get(name='_',default=None,level=gd_sync_level['process']):
 			default=py.No('can not get name '+py.repr(name),no_raise=True)
 		return d.get(name,default)
 	#TODO
-
+	
+def input_and_set(name,default=py.No('auto get last',no_raise=1),**ka):
+	r=get(name)
+	if not py.isno(r) and py.isno(default):
+		default=r
+	return set(name,input('%s:'%name,default=default,**ka))
+set_and_input=set_input=input_set=input_or_set=input_and_set		
+	
 def get_or_set_input(name):
 	r=get(name)
 	if not py.isno(r):return r
-	return set(name,py.input('%r : '%name) )
+	return set(name,input('%r : '%name) )
 getInput=getOrInput=get_or_input=get_or_set_input
 
 def get_or_set(name,default):
@@ -549,13 +556,45 @@ iterable 的元素,没有特殊处理
 p=print_
 # p(4,2,sep='9')
 # exit()
-def input(msg='',default=''):
-	import readline
-	
+
+
+def input(prompt='', default='',type=py.str):
+	'''  '[U.input]:'
+default must be str ,auto convert to str !!
+	'''
+	if isWin():
+		import win32console
+		_stdin = win32console.GetStdHandle(win32console.STD_INPUT_HANDLE)
+		keys = []
+		default=str(default) # default must be str
+		for c in default:
+			evt = win32console.PyINPUT_RECORDType(win32console.KEY_EVENT)
+			evt.Char = c
+			evt.RepeatCount = 1
+			evt.KeyDown = True
+			keys.append(evt)
+
+		_stdin.WriteConsoleInput(keys)
+
 	if py.is2():
-		return py.raw_input(msg)
+		r= py.raw_input(prompt)
 	else:
-		return py.input(msg)
+		r= py.input(prompt)
+	return type(r)
+input_def=input
+
+def _useless_win_input(msg='',default='',type=py.str):
+	if default:
+		import readline
+		readline.set_startup_hook(lambda: readline.insert_text(default))
+	try:
+		if py.is2():
+			r=py.raw_input(msg)
+		else:
+			r=py.input(msg)
+		return type(r)
+	finally:
+		readline.set_startup_hook()
 
 def readStdin(size=-1):
 	'''size<0 read all, 
@@ -1378,7 +1417,9 @@ Out[184]: 3
 	import random
 	_size=get_duplicated_kargs(ka,'len','k','length','SIZE','i')
 	if _size and py.isint(_size) and size==1:size=_size
-	
+	len_seq=py.len(seq)
+	if not repeat and size > len_seq :
+		raise py.ArgumentError('size>%s'%len_seq)
 	ids=py.set()
 	not_repeat_max_try=size+not_repeat_max_try
 	def yrc():
@@ -3220,7 +3261,8 @@ def kill(a,caseSensitive=True,confirm=True):
 		if c.lower().startswith('n'):return
 	for i in r:
 		i.kill()
-def get_process_all_modules_by_pid(pid,only_name=0):
+
+def get_process_all_modules_by_pid(pid,only_name=0):
 	import psutil
 	try:
 		p = psutil.Process( pid )
@@ -3232,7 +3274,9 @@ def kill(a,caseSensitive=True,confirm=True):
 		r=[F.get_filename_from_full_path(i.path) for i in r] 
 	return r  
 	# for dll in p.memory_maps():
-	# print(dll.path)get_dlls=get_dll=getDLL=getDLLs=getDll=getDlls=getdlls=get_dll_list=get_process_dlls_by_pid=get_process_all_dlls_by_pid=get_process_all_modules_by_pid
+	# print(dll.path)
+get_dlls=get_dll=getDLL=getDLLs=getDll=getDlls=getdlls=get_dll_list=get_process_dlls_by_pid=get_process_all_dlls_by_pid=get_process_all_modules_by_pid
+
 def get_obj_file_lineno(a,lineno=0,auto_file_path=True):
 	T=py.importT()
 	args=py.getattr(a,'args',None)

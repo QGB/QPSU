@@ -278,9 +278,9 @@ def CommandLineToArgvW(cmd):
 	return args
 splitCmd=split_cmd=cmdSplit=cmd_split=shlex_split=split_cmd_str=CommandLineToArgvW
 
-def getCmdHandle():
+def GetConsoleWindow():
 	return kernel32.GetConsoleWindow()
-getcmdw=getCmdHandle
+get_current_cmd_windows=getcmdw=getCmdHandle=GetConsoleWindow
 	
 def getCmdLine(bytes=False):
 	'''------> k.GetCommandLineW()
@@ -347,6 +347,8 @@ def set_foreground(title=None,handle=None,pid=None,process_name='',raise_error=0
 	if not raise_error:raise_error=U.get_duplicated_kargs(ka,'err','error','exp','exception','Exception',
 'raise_err','raise_error','raiseError','raiseErr','raise_EnvironmentError','EnvironmentError','raiseEnvironmentError')
 
+	if not handle and not title and not pid and not process_name:
+		handle=get_current_cmd_windows()
 	if not handle:
 		from qgb import Win
 		for h,t,p in Win.getAllWindows():
@@ -373,11 +375,15 @@ def set_foreground(title=None,handle=None,pid=None,process_name='',raise_error=0
 	try:
 		win32gui.SetForegroundWindow(handle)
 	except Exception as e:
+#BUG 窗口在后台，通过 http_rpc 调用此函数，第一次总会出错：，第二次才成功？
+# error(0, 'SetForegroundWindow', 'No error message is available')		
 		if raise_error:raise
 		return py.No(e)
 		
 	return U.IntCustomRepr(handle,repr='Win.set_foreground(%r)'%handle)
-
+#U.system_actions
+popw=pop_window=forground=foreground=set_forground=pop_top=set_foreground
+	
 def get_pid_by_hwnd(hwnd):
 	try:
 		import win32process
