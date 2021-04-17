@@ -580,6 +580,8 @@ default must be str ,auto convert to str !!
 		r= py.raw_input(prompt)
 	else:
 		r= py.input(prompt)
+	if not py.callable(type):
+		type=py.str
 	return type(r)
 input_def=input
 
@@ -926,7 +928,7 @@ def cmd(*a,**ka):
 	# exit()
 # cmd('echo 23456|sub','3','')	
 GET_DUPLICATED_KARGS_DEFAULT=py.No('Not found matched kargs')
-def get_duplicated_kargs(ka,*keys,default=GET_DUPLICATED_KARGS_DEFAULT):
+def get_duplicated_kargs(ka,*keys,default=GET_DUPLICATED_KARGS_DEFAULT,no_pop=False):
 	'''
 def pop(d,k):
 	d.pop(k)
@@ -938,7 +940,9 @@ pop(_63,25)  #_63 has change
 	for i in keys:
 		if not py.istr(i):raise ArgumentError('keys should be a list of str,but get',i)
 		if i in ka:
-			r.append(ka.pop(i))
+			if no_pop:i=ka[i]
+			else:i=ka.pop(i)
+			r.append(i)
 			
 	if py.len(r)==0:return default
 	if py.len(r)>1:
@@ -5194,7 +5198,7 @@ U.StrRepr(b'3232',encoding='ascii')	[<class 'qgb.U.StrRepr'>, (b'3232',), {'enco
 		
 	def __repr__(self):return self.__str__()
 	def __str__(self) :
-		repr=get_duplicated_kargs(self.ka,'repr','str','s','st','__repr__','__str__')
+		repr=get_duplicated_kargs(self.ka,'repr','str','s','st','__repr__','__str__',no_pop=True)
 		if repr:
 			if py.callable(repr):
 				return repr( **self.ka )

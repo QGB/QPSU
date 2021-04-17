@@ -28,7 +28,12 @@ CF_UNICODETEXT ', 13],
 	w.CloseClipboard()
 	if p:U.pln(d)
 	if edit:
-		d=U.input(edit if py.istr(edit) else '',default=d)
+		edit_msg=U.get_duplicated_kargs(ka,'title','msg','edit_msg','promte','promot','promote')
+		type=U.get_duplicated_kargs(ka,'type','edit_type','t') 
+		if not edit_msg:
+			if py.istr(edit):edit_msg=edit
+			else:edit_msg=''
+		d=U.input(edit_msg,default=d,type=type)
 	return d
 
 def set(aString,p=0):

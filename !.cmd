@@ -1,1 +1,1 @@
-ws&cmd
+3ws&cmd

@@ -341,7 +341,7 @@ def diff(expected, actual,p=True):
 	diff=difflib.unified_diff(expected, actual)
 	r=''.join(diff)
 	if p:
-		print(r)
+		print(r,'\n diff_len:%s'%len(r))
 	else:
 		return r
 
