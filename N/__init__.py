@@ -1131,17 +1131,23 @@ def auto_ip(ip,ip2=py.No('192.168',no_raise=1),ip1=py.No('2',no_raise=1),**ka):
 	ip2=U.get_duplicated_kargs(ka,'ip_2','ab','AB','a_b',default=ip2)
 	if py.isint(ip2):
 		if ip1 or py.isint(ip1):raise py.ArgumentError('ip2 should be a.b format')
-		
-	
+		ip1=ip2
+		ip2=U.SET_NO_VALUE
 	
 	
 	ip1=U.set_or_get('auto_ip.1',ip1,default=2)
 	ip2=U.set_or_get('auto_ip.2',ip2,default='192.168')
 	
+	if py.istr(ip):
+		try:ip=py.float(ip)
+		except:			
+			try:ip=py.float(ip)
+			except:pass
 	if py.isint(ip):#TODO check ip_int < 256 ?
 		ip='{0}.{1}.{2}'.format(ip2,ip1,ip)
 	if py.isfloat(ip):
 		ip='{0}.{1}'.format(ip2,ip)		
+		
 	return ip
 
 def setIP(ip='',adapter='',gateway='',source='dhcp',mask='',ip2=192.168,dns=py.No('auto use gateway') ):

@@ -2,8 +2,6 @@
 gsImport='''
 from qgb import U,T
 '''
-true=True;false=False
-INT_MAX=gimax=IMAX=imax=2147483647;INT_MIN=gimin=IMIN=imin=-2147483648
 import sys
 stdin=sys.stdin;stdout=sys.stdout;stderr=sys.stderr
 gsdecode=decoding='utf-8';gsencode=gsencoding=encoding=stdout.encoding
@@ -91,6 +89,9 @@ except Exception as ei:
 aError=ArgsErr=argserr=argErr=argerr=argumentError=ArgumentException=py.ArgumentError	
 ArgumentUnsupported=py.ArgumentUnsupported
 ############
+true=True;false=False
+INT_MAX=gimax=IMAX=imax=2147483647;INT_MIN=gimin=IMIN=imin=-2147483648
+NoneType=py.type(None)
 module=py.module
 Class=py.Class
 instance=py.instance
@@ -107,12 +108,12 @@ gd_sync_level={
 'wan':4    ,# internet sync
 'all':5    ,
 }
-SET_VALUE_NO=py.No('U.set value=None',no_raise=True)
-def set(name,value=SET_VALUE_NO,level=gd_sync_level['process'],**ka):
+SET_NO_VALUE=py.No('U.set value=None',no_raise=True)
+def set(name,value=SET_NO_VALUE,level=gd_sync_level['process'],**ka):
 	if level>=gd_sync_level['process']:
 		import sys
 		d=py.getattr(sys,'_qgb_dict',{})
-		if value is SET_VALUE_NO: # py.No 比较不能用== ，no==0 ==None ==0.0 ...
+		if value is SET_NO_VALUE: # py.No 比较不能用== ，no==0 ==None ==0.0 ...
 			value=name
 			name='_'
 		d[name]=value
@@ -153,18 +154,19 @@ def get_or_set(name,default):
 	return set(name,default)
 getset=getSet=get_set=get_or_set
 
-def set_or_get(name,value,default=None):
+def set_or_get(name,value,default=SET_NO_VALUE):
 	# if py.isno(default) or (default==None):
 	if value or not py.isNo(value) :
 		return set(name,value)
 	else:
 		r=get(name)
-		if py.isno(r):
-			if default==None:
+		if r:
+			return r	
+		else:
+			if default==SET_NO_VALUE:
 				raise py.ArgumentError('if not value, default cannot be {} when get {} == {}'.format( repr(default) ,name,repr(r) ))
 			return set(name,default)
-		else:
-			return r	
+			
 setget=setGet=set_get=set_or_get
 #########################
 def one_in(vs,*t):
@@ -928,7 +930,7 @@ def cmd(*a,**ka):
 		return py.No('T.auto_decode err',e,r,a,ka)
 	# exit()
 # cmd('echo 23456|sub','3','')	
-GET_DUPLICATED_KARGS_DEFAULT=py.No('Not found matched kargs')
+GET_DUPLICATED_KARGS_DEFAULT=py.No('Not found matched kargs',no_raise=True)
 def get_duplicated_kargs(ka,*keys,default=GET_DUPLICATED_KARGS_DEFAULT,no_pop=False):
 	'''
 def pop(d,k):

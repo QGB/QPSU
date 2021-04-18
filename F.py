@@ -595,7 +595,7 @@ SyntaxError: invalid syntax
 	if not encoding and print_detect_encoding:
 		U=py.importU()
 		_pde=U.get_duplicated_kargs(ka,'p_encoding','p','pde','pEncoding','p_decode')
-		if not _pde is U.GET_DUPLICATED_KARGS_DEFAULT:
+		if not _pde is U.GET_DUPLICATED_KARGS_DEFAULT: #记住绝对不能用 ==
 			print_detect_encoding=_pde
 	if not return_filename:
 		U=py.importU()
