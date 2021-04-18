@@ -164,7 +164,7 @@ https://raw.githubusercontent.com/Banou26/chromium-issue-1178811/main/content-sc
 	
 graw=getraw=github_raw=raw_github=get_github_raw	
 
-def ping(addr,sum=5,timeout= 4,ttl=None,seq=0,size=56,interface=None,p=False):
+def ping(addr,sum=5,timeout= 4,ttl=None,seq=0,size=56,interface=None,p=False,r=True,**ka):
 	''' ping3.ping(
     dest_addr: str,
     timeout: int = 4,
@@ -188,10 +188,12 @@ C:\QGB\Anaconda3\lib\site-packages\ping3.py in send_one_ping(sock, dest_addr, ic
 OSError: [WinError 10051] 向一个无法连接的网络尝试了一个套接字操作。	
 '''
 	import ping3
-	addr=auto_ip(addr)
-	r=[];re=[]
+	U,T,N,F=py.importUTNF()
+	addr=auto_ip(addr,**ka)
+	sum=U.get_duplicated_kargs(ka,'times','n',default=sum)
+	
+	lr=[];re=[]
 	if p:
-		U,T,N,F=py.importUTNF()
 		sv=U.v(dest_addr=addr,timeout=timeout,unit='ms',ttl=ttl,seq=seq,size=size,interface=interface)[1:-2]
 		print(U.stime(),'%54s'%addr)
 		print(sv, )
@@ -205,11 +207,12 @@ OSError: [WinError 10051] 向一个无法连接的网络尝试了一个套接字
 			re.append(i)
 		if p:
 			print('%-5s'%i,'%-15s'%U.stime()[12:],'ms=',ms,)
-		r.append([i,ms])
+		if r:lr.append([i,ms])
+		else:ms #TODO count timeout rate, avg ms
 	if py.len(re)==sum:
 		return py.No('ping %s %s times all faild!'%(addr,sum),addr,timeout,ttl,seq,size,interface)
 	else:
-		return r
+		if r:return lr
 
 def range_http_server(port=2233,**ka):
 	'''
@@ -1121,12 +1124,20 @@ autourl=autoUrl=autoURL=auto_url
 
 
 #setip 192.168  ,  2.2	
-def auto_ip(ip,ip2=py.No('192.168',no_raise=1),ip1=py.No('2',no_raise=1)):
+def auto_ip(ip,ip2=py.No('192.168',no_raise=1),ip1=py.No('2',no_raise=1),**ka):
 	global U
 	U=py.importU()
+	ip1=U.get_duplicated_kargs(ka,'ip_1','c','C',default=ip1)
+	ip2=U.get_duplicated_kargs(ka,'ip_2','ab','AB','a_b',default=ip2)
+	if py.isint(ip2):
+		if ip1 or py.isint(ip1):raise py.ArgumentError('ip2 should be a.b format')
+		
 	
-	ip2=U.set_or_get('auto_ip.2',ip2,default='192.168')
+	
+	
 	ip1=U.set_or_get('auto_ip.1',ip1,default=2)
+	ip2=U.set_or_get('auto_ip.2',ip2,default='192.168')
+	
 	if py.isint(ip):#TODO check ip_int < 256 ?
 		ip='{0}.{1}.{2}'.format(ip2,ip1,ip)
 	if py.isfloat(ip):

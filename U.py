@@ -107,11 +107,12 @@ gd_sync_level={
 'wan':4    ,# internet sync
 'all':5    ,
 }
-def set(name,value=None,level=gd_sync_level['process'],**ka):
+SET_VALUE_NO=py.No('U.set value=None',no_raise=True)
+def set(name,value=SET_VALUE_NO,level=gd_sync_level['process'],**ka):
 	if level>=gd_sync_level['process']:
 		import sys
 		d=py.getattr(sys,'_qgb_dict',{})
-		if value==None:
+		if value is SET_VALUE_NO: # py.No 比较不能用== ，no==0 ==None ==0.0 ...
 			value=name
 			name='_'
 		d[name]=value
@@ -154,7 +155,7 @@ getset=getSet=get_set=get_or_set
 
 def set_or_get(name,value,default=None):
 	# if py.isno(default) or (default==None):
-	if not py.isNo(value):
+	if value or not py.isNo(value) :
 		return set(name,value)
 	else:
 		r=get(name)

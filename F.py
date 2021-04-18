@@ -587,12 +587,15 @@ detect=detectEncoding=detect_encoding=detect_file_encoding
 def read(file,encoding='',mod='r',return_filename=False,print_detect_encoding=True,**ka):
 	'''if return_filename:
 			return content,f.name
+1 not is 2
+	   ^
+SyntaxError: invalid syntax			
 			'''
 	file=autoPath(file)
 	if not encoding and print_detect_encoding:
 		U=py.importU()
 		_pde=U.get_duplicated_kargs(ka,'p_encoding','p','pde','pEncoding','p_decode')
-		if _pde!=U.GET_DUPLICATED_KARGS_DEFAULT:
+		if not _pde is U.GET_DUPLICATED_KARGS_DEFAULT:
 			print_detect_encoding=_pde
 	if not return_filename:
 		U=py.importU()
