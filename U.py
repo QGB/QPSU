@@ -136,8 +136,8 @@ def input_and_set(name,default=py.No('auto get last',no_raise=1),**ka):
 	r=get(name)
 	if not py.isno(r) and py.isno(default):
 		default=r
-	return set(name,input('%s:'%name,default=default,**ka))
-set_and_input=set_input=input_set=input_or_set=input_and_set		
+	return set(name,input('%s :'%name,default=default,**ka))
+inset=set_and_input=set_input=input_set=input_or_set=input_and_set		
 	
 def get_or_set_input(name):
 	r=get(name)
@@ -3241,33 +3241,46 @@ def getProcessPath(name='',pid=0):
 	else:
 		return ()
 psp=getProcessPath
-def kill(a,caseSensitive=True,confirm=True):
+def kill(*ps,caseSensitive=True,confirm=True,**ka):
 	'''TODO:use text Match if any
 	'''
 	import psutil,subprocess
-	if isinstance(a,subprocess.Popen):a=a.pid
+	if confirm:confirm=get_duplicated_kargs(ka,'ask','pause','yes','y','kill',default=True)
 		
-	ta=py.type(a)
 	r=[]
-	
-	if py.istr(a):
-		for i in psutil.process_iter():
-			if caseSensitive:
-				if i.name() == a:r.append(i)
-			else:
-				if i.name().lower() == a.lower():r.append(i)
-	elif py.isint(a):
-		if not psutil.pid_exists(a):
-			raise ArgumentError('pid %s not exist!'%a)
-		r=[psutil.Process(a)]
-	else:
-		raise ArgumentUnsupported()
+	if not ps:ps=py.importU().ps(**ka)
+	for a in ps:		
+		if isinstance(a,psutil.Process):
+			r.append(a)
+		elif isinstance(a,(subprocess.Popen,)):
+			r.append(psutil.Process(a.pid) )
+		elif py.istr(a):
+			for i in psutil.process_iter():
+				if caseSensitive:
+					if i.name() == a:r.append(i)
+				else:
+					if i.name().lower() == a.lower():r.append(i)
+				if confirm and a.lower() in i.name().lower():
+					r.append(i)
+		elif py.isint(a):
+			if not psutil.pid_exists(a):
+				return py.No('pid %s not exist!'%a)
+			r.append(psutil.Process(a) )
+		else:
+			raise ArgumentUnsupported()
+	if not r:return py.No(msg='Not found {},{}'.format(ps,ka))
 	if confirm:
 		pprint(r)
 		c=py.input('kill Process？(n cancel)')
 		if c.lower().startswith('n'):return
-	for i in r:
-		i.kill()
+	for n,i in py.enumerate(r):
+		try:
+			r[n]={i:i.kill()==None}
+		except Exception as e:
+			r[n]={i:py.No(e,msg=py.getattr(e,'msg','')[18:])}
+			
+	return r		
+			
 
 def get_process_all_modules_by_pid(pid,only_name=0):
 	import psutil
@@ -4822,7 +4835,7 @@ text直接传入 title 有问题 , T.html_encode fix it：
 	return  file
 qr=qrcode=svg_qrcode=get_svg_qrcode	
 
-def seach_image_on_screen(image_path=py.No('if not ,attempt to get clipBoard image'),format='png'):
+def search_image_on_screen(image_path=py.No('if not ,attempt to get clipBoard image'),format='png'):
 	try:
 		U,T,N,F=py.importUTNF()
 		ClipBoard=py.from_qgb_import('Clipboard')
@@ -4840,7 +4853,7 @@ def seach_image_on_screen(image_path=py.No('if not ,attempt to get clipBoard ima
 	ss=screen_search.Search(image_path)
 	x,y=ss.imagesearch()
 	return x,y
-find_image_on_screen=seach_image_on_screen	
+find_image_on_screen=seach_image_on_screen=search_image_on_screen
 
 def set_timed_task(func,every='day',time='05:09',unit=1):
 	'''U.set_timed_task(baidu_start,'2hour') 

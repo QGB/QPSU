@@ -42,6 +42,13 @@ def isNo(a):
 		False		#TO ADD...
 isno=isNo		
 gno2e=False
+
+def safe_repr(a):
+	try:return repr(a)
+	except Exception as e:return repr(e)
+
+GS_NO_MSG='\t\t###<py.No|%s>'	
+GS_NO='\t\t###<py.No|%s %s>'	
 class No:
 	''''is a None object with msg and raw args
 #TODO
@@ -49,32 +56,36 @@ class No:
 	
 no_raise=Ture  用法：  py.No 用于配置 . 并非预料之外的异常
 	'''
-	def __init__(s,msg=None,*a,no_raise=False):
-		if gno2e and not no_raise:raise Exception(msg,*a)
-		
+	def __init__(s,*a,msg='',no_raise=False):
+		if gno2e and not no_raise:raise Exception(*a)
+		import time as tMod
+		time=tMod.time()
+		s.time=tMod.strftime(' %Y-%m-%d__%H.%M.%S__',tMod.localtime(time )  )
 		if msg and istr(msg):s.msg=msg
 		else:
-			r=''
-			if isException(msg):
-				r+=repr(msg)
-			if a and  isException(a[0]):
-				r+=repr(a[0])
-			import time as tMod
-			time=tMod.time()
-			r+=tMod.strftime(' %Y-%m-%d__%H.%M.%S__',tMod.localtime(time )  )
-			if isfloat(time):
-				r+=str(round(time-int(time),3)  )[1:]
-			s.msg=r
-			a=(msg,)+a
-		s.a=a[0] if len(a)==1 else a
+			s.msg=''
+			# r=''
+			# if isException(msg):
+				# r+=repr(msg)
+			# if a and  isException(a[0]):
+				# r+=repr(a[0])
+			# r+=time
+			# if isfloat(time):
+				# r+=str(round(time-int(time),3)  )[1:]
+			# s.msg=r
+			# a=(msg,)+a
+		s.a=a
 	def __str__(s):return ''
 	def encode(s,encoding):
 		return b''
 	def decode(s,encoding):
 		return u''
 	def __repr__(s):
-		r=s.msg if s.msg.startswith('#') else '###<py.No| {0}>'.format(s.msg)
-		r='\t\t'+r
+		# r=s.msg if s.msg.startswith('#') else '###<py.No| {0}>'.format(s.msg)
+		if s.msg:
+			return GS_NO_MSG%s.msg
+		else:
+			return GS_NO%(','.join(safe_repr(i).strip() for i in s.a),s.time)
 		return r
 	def __len__(s):return 0
 	def __getitem__(s, key):

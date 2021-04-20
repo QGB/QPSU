@@ -164,7 +164,7 @@ https://raw.githubusercontent.com/Banou26/chromium-issue-1178811/main/content-sc
 	
 graw=getraw=github_raw=raw_github=get_github_raw	
 
-def ping(addr,sum=5,timeout= 4,ttl=None,seq=0,size=56,interface=None,p=False,r=True,**ka):
+def ping(addr,sum=5,sleep=0,timeout= 4,ttl=None,seq=0,size=56,interface=None,p=False,r=True,**ka):
 	''' ping3.ping(
     dest_addr: str,
     timeout: int = 4,
@@ -201,8 +201,9 @@ OSError: [WinError 10051] 向一个无法连接的网络尝试了一个套接字
 	for i in py.range(sum):
 		try:
 			ms=ping3.ping(dest_addr=addr,timeout=timeout,unit='ms',ttl=ttl,seq=seq,size=size,interface=interface)
-		except Exception as e:
-			return py.No(e)
+			if sleep:U.sleep(sleep)
+		except (KeyboardInterrupt,Exception) as e:#必须加括号，否则语法错误
+			return py.No(e,addr,size,)
 		if ms==None:
 			re.append(i)
 		if p:
@@ -768,7 +769,9 @@ def set_proxy(host='',port='',protocol='socks5',target_protocol=('http','https')
 		host=U.set('{}.proxy.host'.format(t),host)
 		port=U.set('{}.proxy.port'.format(t),port)
 		protocol=U.set('{}.proxy.protocol'.format(t),protocol)
-		if not host or not port or not protocol:continue
+		if not host or not port or not protocol:
+			# 跳过格式不对的代理
+			continue
 		d[t]="{}://{}:{}".format(protocol,host,port)
 	return d
 	# {'http': "socks5://myproxy:9191"}

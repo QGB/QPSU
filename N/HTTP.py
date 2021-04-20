@@ -21,6 +21,54 @@ else:
 		print(urllib,ei)
 		py.importU().repl()
 
+		
+		
+		
+		
+
+def download(url, file_path,headers=None):
+	import sys
+	import requests
+	import os
+
+	# 屏蔽warning信息
+	# requests.packages.urllib3.disable_warnings()
+	# 第一次请求是为了得到文件总大小
+	r1 = requests.get(url, stream=True, verify=False)
+	total_size = int(r1.headers['Content-Length'])
+
+	# 这重要了，先看看本地文件下载了多少
+	if os.path.exists(file_path):
+		temp_size = os.path.getsize(file_path)  # 本地已经下载的文件大小
+	else:
+		temp_size = 0
+	# 显示一下下载了多少   
+	print(temp_size,'/',total_size)
+	# 核心部分，这个是请求下载时，从本地文件已经下载过的后面下载
+	if not headers:
+		headers={}
+	headers['Range']= 'bytes=%d-' % temp_size
+	# 重新请求网址，加入新的请求头的
+	r = requests.get(url, stream=True, verify=False, headers=headers)
+
+	# 下面写入文件也要注意，看到"ab"了吗？
+	# "ab"表示追加形式写入文件
+	with open(file_path, "ab") as f:
+		for chunk in r.iter_content(chunk_size=1024):
+			if chunk:
+				temp_size += len(chunk)
+				f.write(chunk)
+				f.flush()
+
+				###这是下载实现进度显示####
+				done = int(50 * temp_size / total_size)
+				sys.stdout.write("\r[%s%s] %d%%" % ('█' * done, ' ' * (50 - done), 100 * temp_size / total_size))
+				sys.stdout.flush()
+	print()  # 避免上面\r 回车符
+
+		
+		
+		
 def post(url,**ka):
 	'''
 Signature: requests.post(url, data=None, json=None, **kwargs)
@@ -33,8 +81,8 @@ Sends a POST request.
 :param \*\*kwargs: Optional arguments that ``request`` takes.
 :return: :class:`Response <Response>` object
 :rtype: requests.Response
-File:      e:\qgb\anaconda3\lib\site-packages\requests\api.py
-Type:      function
+File:	  e:\qgb\anaconda3\lib\site-packages\requests\api.py
+Type:	  function
 '''	
 	U,T,N,F=py.importUTNF()
 
@@ -88,7 +136,7 @@ def get(url,file='',
 
 	show=U.get_duplicated_kargs(ka,'show','print','p','print_req')
 	proxies=U.get_duplicated_kargs(ka,'proxies','proxys','proxyes','proxy')
-	if proxies:
+	if proxies:#dict or str 均可
 		proxies=N.set_proxy(proxies)
 	else:
 		proxies=N.get_proxy()
@@ -129,8 +177,8 @@ def get(url,file='',
 
 	# try:
 	encoding= T.detect(b[:9999])
-	if b and encoding:
 		# raise Exception('decode error')
+	if b and encoding:
 		return b.decode(encoding)
 	return b
 	
