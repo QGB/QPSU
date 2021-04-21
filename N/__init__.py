@@ -304,16 +304,18 @@ def rpcSetVariable(*obj,base=py.No('auto history e.g. [http://]127.0.0.1:23571[/
 	if len(obj)==1 and ',' not in varname:
 		obj=obj[0]
 
-
-
+	if not base:
+		base=U.get_or_input('rpc_base',default='http://127.0.0.1:23571/')
+	else:
+		base=U.set('rpc_base',base)
 	url='{0}{1}=F.dill_loads(request.get_data());r=U.id({1});{2}'.format(base, varname,ext_cmd	)
 	# import requests,dill
 	# dill_loads=dill.loads
 	# post=requests.post
 	post=HTTP.post
-	dill_dump=F.dill_dump
-
-	b=post(url,verify=False,timeout=timeout,data=dill_dump(obj)) # data=list:TypeError: cannot unpack non-iterable int object
+	# dill_dump=F.dill_dump
+	print(base,url)
+	b=post(url,verify=False,timeout=timeout,data=F.dill_dump(obj)) # data=list:TypeError: cannot unpack non-iterable int object
 	if not b:return b
 	if not py.isbytes(b):
 		b=b.content
@@ -322,7 +324,7 @@ def rpcSetVariable(*obj,base=py.No('auto history e.g. [http://]127.0.0.1:23571[/
 	# if py.istr:
 	return url,b
 
-rpc_set=rpc_set_var=rpcSetVariable
+set_rpc=set_rpc_var=rpc_set=rpc_set_var=rpcSetVariable
 
 
 def rpcServer(port=23571,thread=True,ip='0.0.0.0',ssl_context=(),currentThread=False,app=None,key=None,
@@ -686,7 +688,9 @@ def flask_file_stream_response(response,file,):
 		# 不获取filename, 保存文件名是 D__test_7C_荣耀7C-LND-B202_8.0.zip
 		# 不进行url_encode,chrome ERR_RESPONSE_HEADERS_TRUNCATED
 		# response.headers['Content-Disposition'] = "inline; filename=" + T.url_encode(file)
-		response.headers['Content-Disposition'] = "inline; filename=" + T.url_encode(F.get_filename_from_full_path(file))
+		response.headers['Content-Disposition'] ="inline; filename=" + T.url_encode(F.get_filename_from_full_path(file))
+		response.headers['Content-Length'] =F.size(file)
+		
 	except Exception as e:
 		# r=T.pformat([e,U.get_tb_stack()],**U.get('pformat_kw',{}))
 		r=py.repr(e)

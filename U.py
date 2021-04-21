@@ -139,10 +139,10 @@ def input_and_set(name,default=py.No('auto get last',no_raise=1),**ka):
 	return set(name,input('%s :'%name,default=default,**ka))
 inset=set_and_input=set_input=input_set=input_or_set=input_and_set		
 	
-def get_or_set_input(name):
+def get_or_set_input(name,default=''):
 	r=get(name)
 	if not py.isno(r):return r
-	return set(name,input('%r : '%name) )
+	return set(name,input('%s : '%name,default=default) )
 getInput=getOrInput=get_or_input=get_or_set_input
 
 def get_or_set(name,default):
@@ -629,12 +629,13 @@ def flat(*a,**options):
 	a=py.list(a);r=[];i=0
 	while i<py.len(a):
 		# str has __iter__ in py3
-		if hasattr(a[i], '__iter__'):a.extend(a[i])
+		if py.istuple(a[i]) or py.islist(a[i]):a.extend(a[i])
 		else:
 			if noNone and not a[i]:pass
 			#TODO other condition
 			else:r.append(a[i])
 		i+=1
+		if i%10000==0:print(i,py.len(a),a[:5],a[-5:])
 	# repl()
 	return tuple(r)
 	
@@ -2605,7 +2606,10 @@ def traverseTime(start,stop=None,step='day'):
 	range(start, stop[, step])
 	datetime.timedelta(  days=0, seconds=0, microseconds=0,
 				milliseconds=0, minutes=0, hours=0, weeks=0)
-	step default: 1(day)  [1day ,2year,....]  [-1day not supported]'''
+	step default: 1(day)  [1day ,2year,....]  [-1day not supported]
+	
+a=-4 # relativedelta(months=+a) ==  relativedelta(months=-4)	
+	'''
 	import re,datetime as dt
 	sregex='([0-9]*)(micro|ms|milli|sec|minute|hour|day|month|year)'
 	timedeltaKW=('days', 'seconds', 'microseconds',
@@ -2623,7 +2627,17 @@ def traverseTime(start,stop=None,step='day'):
 		for i in timedeltaKW:
 			if i.startswith(step):
 				astep[i]=istep
-		tdelta=dt.timedelta(**astep)
+		if astep:tdelta=dt.timedelta(**astep)
+		
+		if one_in(['month','mouth'],step):
+			from dateutil.relativedelta import relativedelta
+			lsi=T.filter_int(step)
+			if lsi:
+				if py.len(lsi)!=1:raise py.ArgumentError('step=%r int must be none or one'%step)
+				step=py.int(lsi[0])
+			else:step=1
+			tdelta=relativedelta(months=+step,)
+			tdelta.total_seconds=lambda :60*60*24*30
 	elif py.type(step) in (py.int,py.long):
 		tdelta=dt.timedelta(days=step)
 	elif py.type(step) is py.type(dt.timedelta.min):
@@ -2632,11 +2646,14 @@ def traverseTime(start,stop=None,step='day'):
 	start=datetime(start)
 	if stop:stop=datetime(stop)
 	else:stop=dt.datetime.max
+	if tdelta.total_seconds()==0.0:
+		print("U.set('t3',",set('t3',[start,stop,tdelta]))
+		return start,stop,tdelta
 	while start<=stop:
 		start+=tdelta
 		yield start
 	# return i #SyntaxError: 'return' with argument inside generator
-rangeTime=timeRange=timeTraverser=timeTraversal=traverseTime	
+range_time=time_range=rangeTime=timeRange=timeTraverser=timeTraversal=traverseTime	
 
 def datetime(a,month=0, day=0,hour=0,minute=0,second=0,microsecond=0):
 	''' a : string
@@ -2660,6 +2677,11 @@ instance of a tzinfo subclass. The remaining arguments may be ints or longs.
 		if re.match('[0-9]{8}',a):
 			return dt(py.int(a[:4]),
 				py.int(a[4:6]),py.int(a[6:8]))
+		if re.match('[0-9]{6}',a):
+			return dt(py.int(a[:4]), py.int(a[4:6]),1)
+		if re.match('[0-9]{4}',a):
+			return dt(py.int(a[:4]),1,1)
+		raise py.ArgumentUnsupported(a)
 	elif py.type(a) in (py.float,py.int):
 		return dt.fromtimestamp(a)
 	else:
@@ -3554,7 +3576,7 @@ def parseDump(code,ident=2):
 	r+=rd
 	print(r)
 
-def parse(code,file='U.parse.file'):
+def parse_code(code,file='U.parse.file'):
 	from ast import parse,AST,iter_fields
 	body=parse(code).body
 	if py.len(body)==1:return body[0]
@@ -3588,7 +3610,7 @@ def parse(code,file='U.parse.file'):
 	pln(a,file=file)
 	file.flush()
 	return file.tell()
-	
+parse=parse_code	
 	
 def replaceModule(modName,new,package='',backup=True):
 	if package:
@@ -3882,6 +3904,10 @@ def get_dict_item(d,index=0):
 	return py.No('d[{}] out of range'.format(index) ,d,index)
 	# return d.items().__iter__().__next__()
 dict_item=dict_one_item=getDictItem=get_dict_item
+
+def get_dict_all_values(d,start=0,size=500):
+	return py.list(d.values())[start:start+size]
+get_dict_values=get_dict_all_values	
 
 def get_dict_value(d,index=0):
 	if index<0:index=py.len(d)+index
@@ -4800,7 +4826,7 @@ hotkey=hot_key=registe_hotkey=bind_hotkey=register_hotkey
 def get_svg_qrcode(text=py.No('auto get clipboard'),file=py.No('auto using text'),title=py.No('svg html title auto using text'),scale=8,browser=True):
 	'''Signature:
 q.svg(
-    file,
+    file, : stream_or_path 
     scale=1,
     module_color='#000',
     background=None,
@@ -4824,8 +4850,14 @@ text直接传入 title 有问题 , T.html_encode fix it：
 	U,T,N,F=py.importUTNF()
 	
 	if not text:text=U.pln(r=1,a=U.cbg())
-	if not file:file=U.gst+T.file_legalized(text)[-244:]
-	if not file.lower().endswith('.svg'):file+='.svg'
+	if py.istr(file):
+		if not file.lower().endswith('.svg'):file+='.svg'
+		file=U.gst+T.file_legalized(text)[-244:]
+	elif py.isfile(file):
+		pass
+	else:
+		raise py.ArgumentUnsupported(file)
+		
 	if py.isno(title) and 'auto ' in title.msg:title='U.qrcode '+text
 	if title:title=T.html_encode(title)
 	

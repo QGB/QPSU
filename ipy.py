@@ -29,8 +29,60 @@ gIn=gipy.user_ns['In'];gOut=gipy.user_ns['Out']
 version=py.float('{0}.{1}{2}\n{3}'.format(*IPython.version_info).splitlines()[0])
 # gipy.editor=U.npp()
 def sycn():
-	'''    '''
+	'''  #TODO  '''
 # __frame=sys._getframe().f_back	
+
+def format(obj):
+	'''
+Signature: format(obj, include=None, exclude=None)
+Docstring:
+Return a format data dict for an object.
+
+By default all format types will be computed.
+
+The following MIME types are usually implemented:
+
+* text/plain
+* text/html
+* text/markdown
+* text/latex
+* application/json
+* application/javascript
+* application/pdf
+* image/png
+* image/jpeg
+* image/svg+xml
+
+Parameters
+----------
+obj : object
+    The Python object whose format data will be computed.
+include : list, tuple or set; optional
+    A list of format type strings (MIME types) to include in the
+    format data dict. If this is set *only* the format types included
+    in this list will be computed.
+exclude : list, tuple or set; optional
+    A list of format type string (MIME types) to exclude in the format
+	
+C:\QGB\Anaconda3\lib\site-packages\IPython\core\formatters.py :89  '''
+	from IPython.core.interactiveshell import InteractiveShell
+	r= InteractiveShell.instance().display_formatter.format(obj)
+	if py.len(r)!=2 or py.len(r[1])!=0 or not py.isdict(r[0]):raise EnvironmentError()
+	return U.get_dict_value(r[0])
+pformat=format
+
+import _ast
+def trace_variable(code):
+	if py.istr(code):a=U.parse_code(code ) # one line return <_ast.Expr,_ast.For...,multi return [Assign,Expr,For..]
+	if getattr(code,'value',0):a=code
+	if isinstance(a,_ast.Expr):
+		a=a.value
+	if isinstance(a,_ast.Call):
+		a.args
+		a.keywords
+		
+	
+trace_code=trace_var=trace_variable
 
 def getIpyHistory(file='~/.ipython/profile_default/history.sqlite'):
 	F=py.importF()
