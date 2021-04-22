@@ -1,0 +1,147 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+
+<title>Python AST Visualizer</title>
+
+<link rel="stylesheet" href="css/vtree.css" type="text/css"/>
+<script src="js/vtree.min.js"></script>
+
+<script type="text/javascript">
+function enableTab(id) {
+    var el = document.getElementById(id);
+    el.onkeydown = function(e) {
+        if (e.keyCode === 9) {
+            var val = this.value,
+                start = this.selectionStart,
+                end = this.selectionEnd;
+            this.value = val.substring(0, start) + '\t' + val.substring(end);
+            this.selectionStart = this.selectionEnd = start + 1;
+            return false;
+
+        }
+    };
+}
+
+
+window.onload = function () {
+    var vt, d3_msg = d3.select( '#error-msg' );
+
+    enableTab( 'python-src' );
+
+    vt = vtree( document.getElementById( 'container' ) )
+
+    vt.mode( vt.MODE_PYTHON_AST )
+        .data( {"_PyType":"Module","body":[{"_PyType":"If","test":{"_PyType":"Compare","left":{"_PyType":"Name","id":"a","ctx":{"_PyType":"Load"}},"ops":[{"_PyType":"Eq"}],"comparators":[{"_PyType":"Num","n":3}]},"body":[{"_PyType":"Print","dest":null,"values":[{"_PyType":"Str","s":"hello"}],"nl":true}],"orelse":[]}]} )
+        .conf( 'showArrayNode', false )
+        .update();
+
+
+    function showHandler () {
+        vt.conf( this.value, this.checked )
+            .update();
+
+        if ( this.value === 'showColumn0' && this.checked === false ) {
+            document.getElementById( 'showColumn1' ).checked = true;
+        } else if ( this.value === 'showColumn1' && this.checked === false ) {
+            document.getElementById( 'showColumn0' ).checked = true;
+        }
+    };
+
+    document.getElementById( 'showArrayNode' ).onclick = showHandler;
+    document.getElementById( 'showLinkName' ).onclick = showHandler;
+    document.getElementById( 'showColumn0' ).onclick = showHandler;
+    document.getElementById( 'showColumn1' ).onclick = showHandler;
+
+
+    document.getElementById( 'visualize-button' ).onclick = function () {
+        d3.json( "../a=U.parse(q.values['pysrc'],body=1);r=ast.ast2json(a)" )
+            .header( 'Content-Type', 'application/x-www-form-urlencoded' )
+            .post( 'pysrc=' + encodeURIComponent( document.getElementById( 'python-src' ).value ) , function ( error, data ) {
+                var v;
+
+                if ( error ) {
+                    d3_msg.text( error );
+                    return;
+                }
+
+                d3_msg.text( '' );
+
+                try {
+                    v = parseInt( document.getElementById( 'maxNameLen' ).value );
+                    vt.conf( 'maxNameLen', v );
+                } catch ( err ) {
+                }
+
+                try {
+                    v = parseInt( document.getElementById( 'maxValueLen' ).value );
+                    vt.conf( 'maxValueLen', v );
+                } catch ( err ) {
+                }
+
+                vt.data( data );
+                vt.update();
+            } );
+    };
+};
+
+</script>
+
+</head>
+
+<body>
+
+<a href="http://vanya.jp.net">Home</a>
+
+<h1>Python AST Visualizer</h1>
+
+<p style="text-align: right;">Ver 0.0.7.2.1 <a href="https://github.com/ivan111/vpyast">github</a></p>
+
+<div>
+<textarea id="python-src" rows="8" cols="80">
+if a == 3:
+    print("hello")
+</textarea>
+</div>
+
+<p id="error-msg" style="color: red;"></p>
+
+<div>
+
+<fieldset>
+<legend>Functions</legend>
+<input id="visualize-button" type="button" value="Visualize">
+</fieldset>
+
+<fieldset>
+<legend>Visibility</legend>
+<input id="showArrayNode" type="checkbox" value="showArrayNode">Array Node&nbsp;&nbsp;</input>
+<input id="showLinkName" type="checkbox" value="showLinkName" checked>Link Name&nbsp;&nbsp;</input>
+<input id="showColumn0" type="checkbox" value="showColumn0" checked>Column 1&nbsp;&nbsp;</input>
+<input id="showColumn1" type="checkbox" value="showColumn1" checked>Column 2&nbsp;&nbsp;</input>
+</fieldset>
+
+<fieldset>
+<legend>Max Length</legend>
+<label>Column 1: 
+<input id="maxNameLen" type="number" min="1" max="256" step="10" size="3" value="32">
+</label>
+<label>Column 2: 
+<input id="maxValueLen" type="number" min="1" max="256" step="10" size="3" value="32">
+</label>
+</fieldset>
+
+</div>
+
+<div style="clear: both;">
+</div>
+
+<div id="container"></div>
+
+
+<!-- <p style="text-align: right;">Created Date: 2014-08-02</p> -->
+
+</body>
+
+</html>

@@ -132,10 +132,11 @@ def get(name='_',default=None,level=gd_sync_level['process']):
 		return d.get(name,default)
 	#TODO
 	
-def input_and_set(name,default=py.No('auto get last',no_raise=1),**ka):
+def input_and_set(name,default=py.No('auto get last',no_raise=1),default_function=lambda a:a,**ka):
 	r=get(name)
 	if not py.isno(r) and py.isno(default):
 		default=r
+		if py.callable(default_function):default=default_function(r)
 	return set(name,input('%s :'%name,default=default,**ka))
 inset=set_and_input=set_input=input_set=input_or_set=input_and_set		
 	
@@ -2609,6 +2610,9 @@ def traverseTime(start,stop=None,step='day'):
 	step default: 1(day)  [1day ,2year,....]  [-1day not supported]
 	
 a=-4 # relativedelta(months=+a) ==  relativedelta(months=-4)	
+
+from dateutil.relativedelta import relativedelta
+
 	'''
 	import re,datetime as dt
 	sregex='([0-9]*)(micro|ms|milli|sec|minute|hour|day|month|year)'
@@ -2865,7 +2869,7 @@ def get_qpsu_file_path(fn='',base='file/'):
 	qpsu=getModPath()+base
 	fn=qpsu+fn
 	return fn
-qpsu_file=get_qpsu_file_path=getQPSUFilePath=getQpsuFilePath=get_qpsu_file_path
+qpsu_file=get_qpsu_file=get_qpsu_file_path=getQPSUFilePath=getQpsuFilePath=get_qpsu_file_path
 
 def getModPath(mod=None,qgb=True,slash=True,backSlash=False,endSlash=True,endslash=True,trailingSlash=True):
 	'''不返回模块文件，返回模块目录
@@ -3019,7 +3023,7 @@ def simulate_system_actions(a=py.No("str[key|key_write ] or action list[['click'
 key='Win+D'  # mute  ,not min all window	
 	
 	
-Signature: keyboard.write(text, delay=0, restore_state_after=True, exact=None)
+Signature: keyboard.write(text, delay=0, restore_state_after=True, exact 精确=None)
 Docstring:
 Sends artificial keyboard events to the OS, simulating the typing of a given
 text. Characters not available on the keyboard are typed as explicit unicode
@@ -3576,10 +3580,12 @@ def parseDump(code,ident=2):
 	r+=rd
 	print(r)
 
-def parse_code(code,file='U.parse.file'):
+def parse_code(code,__file='U.parse.file',body=False,one=True):
 	from ast import parse,AST,iter_fields
+	if body:return parse(code)
+	
 	body=parse(code).body
-	if py.len(body)==1:return body[0]
+	if one and py.len(body)==1:return body[0]
 	else:return body
 	
 	a=parse(code)
@@ -3611,6 +3617,30 @@ def parse_code(code,file='U.parse.file'):
 	file.flush()
 	return file.tell()
 parse=parse_code	
+	
+def extract_variable(a,dsf=0,p=0):
+	''' exact:精确  extract[v.]提取
+'''
+	print(a)
+	import _ast
+	# if not isinstance(a,_ast.AST):
+	for k in a._fields:
+		v=getattr(a,k)
+		if py.istr(v):
+			# dict_key_count_plus_1(dsf,k)
+			add_dict_value_set(dsf,k,v)
+			yield v
+		if isinstance(v,_ast.AST):
+			yield from extract_variable(v,dsf,p=p)
+		if py.islist(v):
+			for n,iv in py.enumerate(v):
+				if p:print(k,iv)
+				if py.istr(iv):
+					yield iv
+				elif isinstance(iv,_ast.AST):
+					yield from extract_variable(iv,dsf,p=p)
+				else:
+					raise Exception(k,n,iv)
 	
 def replaceModule(modName,new,package='',backup=True):
 	if package:

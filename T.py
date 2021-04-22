@@ -11,7 +11,7 @@ az=a_z='abcdefghijklmnopqrstuvwxyz'
 AZ=A_Z=a_z.upper()
 
 azAZ=aZ=a_Z=a_z+A_Z
-AZaz=Az=A_z=a_z+A_Z
+AZaz=Az=A_z=A_Z+a_z
 character=aZ=azAZ###Do not Change
 
 num=s09=_09=number='0123456789'

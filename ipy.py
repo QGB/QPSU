@@ -133,12 +133,12 @@ def dill_dump(*vars):
 	for n,i in py.enumerate(dvars):
 		il=U.len(dvars[i])
 		if il:
-			if py.len(dvars)> 1:il='%-2s(%-4s)'%(n,il)
+			if py.len(dvars)> 1:il='%-2s:%s'%(n,il)
 			if py.len(dvars)==1:il='%-4s'%(il)
 		else:
 			il='%-2s'%n
 		r.append( [ i, il ] )
-	if py.len(r)> 1:f='(%s) = [%s]'
+	if py.len(r)> 1:f='(%s) = {%s}'
 	if py.len(r)==1:
 		f='%s-%s'
 		vars=vars[0]

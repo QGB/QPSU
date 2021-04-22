@@ -594,7 +594,7 @@ SyntaxError: invalid syntax
 	file=autoPath(file)
 	if not encoding and print_detect_encoding:
 		U=py.importU()
-		_pde=U.get_duplicated_kargs(ka,'p_encoding','p','pde','pEncoding','p_decode')
+		_pde=U.get_duplicated_kargs(ka,'print_encoding','p_encoding','p','pde','pEncoding','p_decode')
 		if not _pde is U.GET_DUPLICATED_KARGS_DEFAULT: #记住绝对不能用 ==
 			print_detect_encoding=_pde
 	if not return_filename:
@@ -631,7 +631,7 @@ Read and return up to n bytes.
 readb=readByte=readBytes=read_byte=read_bytes	
 
 
-def read_bytes_chunks(path,start=0,size = 8192):
+def read_bytes_chunks(path,start=0,chunk_size = 8192):
 	'''try this func
 except : StopIteration((PermissionError(13, 'Permission denied'), 'D:/',8192)
 	'''
@@ -641,15 +641,15 @@ except : StopIteration((PermissionError(13, 'Permission denied'), 'D:/',8192)
 			yield fd.read(0) # 让错误提前暴露。不会造成 500 Internal Server error
 			fd.seek(start)
 			while 1:
-				buf = fd.read(size)
+				buf = fd.read(chunk_size)
 				if buf:
 					yield buf
 				else:
 					break
 	except Exception as e:
-		# py.importU().print_tb_stack(path,size,e)
-		return (e,path,size)          #               
-		# return py.No(e,path,size)                         
+		# py.importU().print_tb_stack(path,chunk_size,e)
+		return (e,path,chunk_size)          #               
+		# return py.No(e,path,chunk_size)                         
 		# raise StopIteration(e)
 rbc=read_bytes_stream=read_as_stream=read_file_chunks=readBytesChunks=read_bytes_chunks
 			

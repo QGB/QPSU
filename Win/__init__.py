@@ -296,7 +296,7 @@ Out[9]: 'G'
 		return s
 get_cmd=get_cmdline=get_command_line=GetCommandLine=getCmd=getCmdLine
 	
-def getTitle(h=0,size=1024):
+def get_title(h=0,size=1024):
 	'''h:window Handle'''
 	if not h:h=getCmdHandle()
 	if py.is2():
@@ -308,19 +308,19 @@ def getTitle(h=0,size=1024):
 		title = ctypes.create_unicode_buffer(length)
 		user32.GetWindowTextW(h, title, length)
 	return title.value
-getitle=getTitle
+getitle=getTitle=get_title
 	
-def setTitle(st,h=0):
+def set_title(title,h=0):
 	'''在python内设置的，退出后 会还原  
 	py3 : SetWindowTextW
 '''
-	if type(st)!=str:st=str(st)
+	if not py.istr(title):title=py.str(title)
 	if not h:h=getCmdHandle()
 	if py.is3():
-		return user32.SetWindowTextW(h,st)
+		return user32.SetWindowTextW(h,title)
 	else:
-		return user32.SetWindowTextA(h,st)
-setitle=settitle=setTitle
+		return user32.SetWindowTextA(h,title)
+setitle=settitle=setTitle=set_title
 
 def EnumWindowsProc(hwnd, resultList):
 	if win32gui.IsWindowVisible(hwnd) and getitle(hwnd) != '':

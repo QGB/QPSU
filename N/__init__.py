@@ -41,6 +41,12 @@ else:
 	from SimpleHTTPServer import SimpleHTTPRequestHandler
 	from BaseHTTPServer import HTTPServer as _HTTPServer
 
+def pppoe():
+	'''
+506 192.168.2.1+192.168.1.1 073198799737 777124	
+
+'''
+	
 def copy_request(a,p=True):
 	import requests
 	U,T,N,F=py.importUTNF()
@@ -186,34 +192,47 @@ C:\QGB\Anaconda3\lib\site-packages\ping3.py in send_one_ping(sock, dest_addr, ic
     193
 
 OSError: [WinError 10051] 向一个无法连接的网络尝试了一个套接字操作。	
+OSError(10065, '套接字操作尝试一个无法连接的主机。', None, 10065, None),'192.168.2.1',56
+
 '''
 	import ping3
 	U,T,N,F=py.importUTNF()
 	addr=auto_ip(addr,**ka)
 	sum=U.get_duplicated_kargs(ka,'times','n',default=sum)
-	
+	def _return(msg,*a):
+		Win.set_title(title=_title)
+		if py.islist(msg):return msg
+		else:
+			return py.No(msg,*a)
 	lr=[];re=[]
 	if p:
 		sv=U.v(dest_addr=addr,timeout=timeout,unit='ms',ttl=ttl,seq=seq,size=size,interface=interface)[1:-2]
-		print(U.stime(),'%54s'%addr)
+		time=U.stime()
+		if U.isWin():
+			Win=py.from_qgb_import('Win')
+			_title=U.set('window_title',Win.get_title())
+			Win.set_title(title='ping '+sv+' '+time)
+		print(time,'%54s'%addr)
 		print(sv, )
 		print('-'*80)
 	for i in py.range(sum):
 		try:
+			if i and sleep and ms!=None:U.sleep(sleep)
 			ms=ping3.ping(dest_addr=addr,timeout=timeout,unit='ms',ttl=ttl,seq=seq,size=size,interface=interface)
-			if sleep:U.sleep(sleep)
+		except OSError as e:
+			ms=py.No(e)
 		except (KeyboardInterrupt,Exception) as e:#必须加括号，否则语法错误
-			return py.No(e,addr,size,)
-		if ms==None:
+			return _return(e,addr,size,)
+		if not py.isnumber(ms):
 			re.append(i)
 		if p:
-			print('%-5s'%i,'%-15s'%U.stime()[12:],'ms=',ms,)
+			print('%-5s'%i,'%-15s'%U.stime()[12:],'ms=%r'%ms,)
 		if r:lr.append([i,ms])
 		else:ms #TODO count timeout rate, avg ms
 	if py.len(re)==sum:
-		return py.No('ping %s %s times all faild!'%(addr,sum),addr,timeout,ttl,seq,size,interface)
+		return _return('ping %s %s times all faild!'%(addr,sum),addr,timeout,ttl,seq,size,interface)
 	else:
-		if r:return lr
+		if r:return _return(lr)
 
 def range_http_server(port=2233,**ka):
 	'''
@@ -578,24 +597,41 @@ def pdf2html(url,response=None,zoom=None,path=None,pw=None):
 	else:
 		return do_resp(F.read(html_file))
 
-def flask_html_response(response,html,remove_tag=(
+def flask_html_response(response,html='',file='',remove_tag=(
 		['<script','</script>'],
 ['<SCRIPT','</SCRIPT>'],'ondragstart=','oncopy=','oncut=','oncontextmenu=','"return false;"',
 	),encoding='utf-8',splitor='<hr>',**ka):
+	'''
+Resource interpreted as Stylesheet but transferred with MIME type text/html:
+不正确设置 type可能导致页面无法正常显示
+'''	
 	U,T,N,F=py.importUTNF()
-	if py.istr(html):
-		pass
-	elif py.isbyte(html):#TODO byte remove tag,no convert
-		html=html.decode(encoding)
-	elif U.iterable(html):#TODO byte remove tag,no convert
-		html=splitor.join( py.str(i) for i in html )
-	else:#if not py.istr(html):
-		html=py.str(html)
-		
 	if U.get_duplicated_kargs(ka,'remove_script','del_script','no_script'):
 		remove_tag=(
 ['<script','</script>'], ['<SCRIPT','</SCRIPT>'],
 		)
+		
+	content_type='text/html;charset=utf-8'
+	if not html and file:
+		import mimetypes
+		content_type = (
+             mimetypes.guess_type(file)[0] or "application/octet-stream"
+                )
+		# ext= T.subLast(file,'.').lower()
+		if 'text' in content_type:
+			fencoding=F.detect_encoding(file)
+			if not fencoding:fencoding=encoding
+			content_type+=';charset=%s'%(fencoding,)
+		html=F.read_bytes(file)
+	if py.istr(html):
+		pass
+	elif py.isbyte(html):#TODO byte remove tag,no convert
+		if remove_tag:html=html.decode(encoding)
+		pass
+	elif U.iterable(html):#TODO byte remove tag,no convert
+		html=splitor.join( py.str(i) for i in html )
+	else:#if not py.istr(html):
+		html=py.str(html)
 	
 	for itag in remove_tag:
 		if py.istr(itag):
@@ -608,7 +644,7 @@ def flask_html_response(response,html,remove_tag=(
 			s=T.sub(html,start,end)
 			if not s:break
 			html=html.replace(start+s+end,'')
-	response.headers['Content-Type']='text/html;charset=utf-8';
+	response.headers['Content-Type']=content_type;
 	response.set_data(html)
 html=htmlp=response_html=html_response=flask_html_response
 
@@ -638,7 +674,7 @@ def flask_media_stream_response(request,response,file=None,):
 	import re
 	range_header = request.headers.get('Range', None)
 	byte1, byte2 = 0, None
-	if range_header:
+	if  range_header:
 		match = re.search(r'(\d+)-(\d*)', range_header)
 		groups = match.groups()
 
@@ -665,8 +701,6 @@ def flask_media_stream_response(request,response,file=None,):
 		r=py.repr(e)
 		response.set_data(r)
 	return	
-		
-	
 
 	chunk, start, length, file_size = get_chunk(byte1, byte2)
 	resp = Response(chunk, 206, mimetype='video/mp4',
@@ -674,13 +708,16 @@ def flask_media_stream_response(request,response,file=None,):
 	resp.headers.add('Content-Range', 'bytes {0}-{1}/{2}'.format(start, start + length - 1, file_size))
 	return resp	
 	
-	
 mp4_response=media_response=flask_media_stream_response
 	
 def flask_file_stream_response(response,file,):
-	from flask import stream_with_context
+	from flask import stream_with_context,request
 	U,T,N,F=py.importUTNF()
 	# try:
+	range=get_request_range(request)
+	# request.headers.get('Range','')
+	# if range:
+		
 	gen=F.read_as_stream(file) # 这里不会出错，iter generator 才 服务器内部错误
 	try:
 		py.next(gen)
