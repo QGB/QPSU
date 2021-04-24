@@ -370,7 +370,7 @@ recursiveJoin=recursive_join
 
 def join(iterable,separator=',',**ka):#separator=','
 	U=py.importU()
-	if not separator:separator=U.get_duplicated_kargs(ka,'split','splitor','separator',default='')
+	if separator==',':separator=U.get_duplicated_kargs(ka,'split','splitor','separator',default=',')
 	if py.istr(iterable):return iterable
 	return separator.join( string(i) for i in iterable )
 	

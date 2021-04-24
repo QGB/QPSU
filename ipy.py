@@ -32,9 +32,19 @@ def sycn():
 	'''  #TODO  '''
 # __frame=sys._getframe().f_back	
 
-def format(obj):
+def format(obj,width=79):
 	'''
-Signature: format(obj, include=None, exclude=None)
+IPython.lib.pretty.pretty(
+    obj,
+    verbose=False,
+    max_width=79,
+    newline='\n',
+    max_seq_length=1000,
+)	
+	
+	
+	
+/IPython/core/formatters.py: format(obj, include=None, exclude=None)
 Docstring:
 Return a format data dict for an object.
 
@@ -65,6 +75,9 @@ exclude : list, tuple or set; optional
     A list of format type string (MIME types) to exclude in the format
 	
 C:\QGB\Anaconda3\lib\site-packages\IPython\core\formatters.py :89  '''
+	import IPython.lib.pretty
+	return IPython.lib.pretty.pretty(obj,max_width=width)
+	
 	from IPython.core.interactiveshell import InteractiveShell
 	r= InteractiveShell.instance().display_formatter.format(obj)
 	if py.len(r)!=2 or py.len(r[1])!=0 or not py.isdict(r[0]):raise EnvironmentError()

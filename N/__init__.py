@@ -221,7 +221,7 @@ OSError(10065, '套接字操作尝试一个无法连接的主机。', None, 1006
 			ms=ping3.ping(dest_addr=addr,timeout=timeout,unit='ms',ttl=ttl,seq=seq,size=size,interface=interface)
 		except OSError as e:
 			ms=py.No(e)
-		except (KeyboardInterrupt,Exception) as e:#必须加括号，否则语法错误
+		except (SystemExit,KeyboardInterrupt,Exception) as e:#必须加括号，否则语法错误
 			return _return(e,addr,size,)
 		if not py.isnumber(ms):
 			re.append(i)
@@ -524,13 +524,15 @@ def get_socket_req(PORT = 65432,HOST = '127.7.7.7'):
 		req, addr = s.accept()
 		return req, addr
 
-def get_rpc_request_a(request):
+def get_rpc_request_a(request=None):
 	''' 
 a=T.subr(u,T.u23)#'%23-'	
 
 pythonAnywhere : multi[ // or  %2F%2F%2F%2F%2F ] in url will auto convert to one / ,it can't bypass
 	'''
 	if py.istr(request):return request
+	if not request:
+		from flask import request
 	U,T,N,F=py.importUTNF()
 	u=request.url
 	if '%23=' in u:
@@ -600,7 +602,7 @@ def pdf2html(url,response=None,zoom=None,path=None,pw=None):
 def flask_html_response(response,html='',file='',remove_tag=(
 		['<script','</script>'],
 ['<SCRIPT','</SCRIPT>'],'ondragstart=','oncopy=','oncut=','oncontextmenu=','"return false;"',
-	),encoding='utf-8',splitor='<hr>',**ka):
+	),encoding='utf-8',splitor='<hr>',content_type='text/html;charset=utf-8',**ka):
 	'''
 Resource interpreted as Stylesheet but transferred with MIME type text/html:
 不正确设置 type可能导致页面无法正常显示
@@ -611,15 +613,14 @@ Resource interpreted as Stylesheet but transferred with MIME type text/html:
 ['<script','</script>'], ['<SCRIPT','</SCRIPT>'],
 		)
 		
-	content_type='text/html;charset=utf-8'
 	if not html and file:
 		import mimetypes
 		content_type = (
-             mimetypes.guess_type(file)[0] or "application/octet-stream"
+             mimetypes.guess_type(file)[0] or content_type #"application/octet-stream"
                 )
 		# ext= T.subLast(file,'.').lower()
 		if 'text' in content_type:
-			fencoding=F.detect_encoding(file)
+			fencoding=F.detect_encoding(file,print_detect_encoding=False)
 			if not fencoding:fencoding=encoding
 			content_type+=';charset=%s'%(fencoding,)
 		html=F.read_bytes(file)

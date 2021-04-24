@@ -1151,7 +1151,7 @@ def ipyEmbed():
 	import functools
 	return functools.partial(embed,**ka)# useless ?   ka不对？
 	return embed
-ipy=ipy_embed=embed=ipyEmbed
+ipy_repl=ipy=ipy_embed=embed=ipyEmbed
 '''
 try:
 	sys._path=sys.path[:]                 #  list.copy() method (available since python 3.3):
@@ -1233,6 +1233,8 @@ def reload(*mods):
 			# return
 			try:
 				if py.type(mod) is py.str:
+					if mod not in sys.modules:
+						return py.No('not found %r in sys.modules'%mod)
 					return reload(sys.modules[mod])
 				elif '_module' in py.dir(mod):
 					if not isModule(mod._module):raise Exception('instance._module is not module')
@@ -1570,11 +1572,18 @@ exec('r=xx') ;return r # this has been tested in 2&3
 		if py.istr(r):return r
 		if not pformat_kw:
 			pformat_kw=get('pformat_kw',{})
+		if isipy():
+			try:
+				ipy=py.from_qgb_import('ipy')
+				return ipy.pformat(r,**pformat_kw)# in U
+			except Exception as e:
+				return py.repr(e)
+		
 		try:return pformat(r,**pformat_kw)# in U
 		except:return py.repr(r)
 	else:
 		return 'can not found "r" variable after exec locals'+pformat(locals.keys())
-execReturnStr=execResult=execStrResult
+exec_return_str=exec_result=exec_str_result=execReturnStr=execResult=execStrResult
 
 def execHelp():
 	'''use py.execute(s,{g:},{l:})
@@ -2774,9 +2783,12 @@ def x(msg=None):
 	if(msg!=None):pln (msg)
 	sys.exit(235)
 	
-def exit(i=2357,msg=None):
+def exit(i=2357,msg=''):
 	'''terminate process,will not call atexit'''
-	if msg==None:msg='\n{} pid {} exit!'.format('#'*22,pid)
+	if not msg:
+		if py.istr(i):
+			msg,i=i,2357
+		msg='\n{} pid {} exit! {}'.format('#'*22,pid,msg)
 	print(msg)
 	os._exit(i)
 
@@ -3641,6 +3653,25 @@ def extract_variable(a,dsf=0,p=0):
 					yield from extract_variable(iv,dsf,p=p)
 				else:
 					raise Exception(k,n,iv)
+def get_ast_inner(node,n):
+	return
+get_ast=get_ast_inner
+	
+def iter_ast(node,*ns):
+	from _ast import AST
+	if not ns:ns=(StrRepr('~'),)
+	if isinstance( node, AST ):
+		key=StrRepr( T.join(ns,splitor='') )
+		d={key:StrRepr(node.__class__.__name__)}
+		for n,field in py.enumerate(node._fields):
+			try:
+				d[field]=iter_ast( py.getattr( node, field ),*ns,n )
+			except AttributeError:
+				pass		
+		return d
+	if py.islist(node):
+		return [iter_ast(i,*ns,[n]) for n,i in py.enumerate(node)]
+	return node	
 	
 def replaceModule(modName,new,package='',backup=True):
 	if package:
@@ -5180,7 +5211,7 @@ ValueOfAttr_NAMES=['__init__',
  '__repr__',
 '__v__',
 #  '__call__',
- ]
+ ] 
 class ValueOfAttr(py.object):
 	'''  '''
 	def __init__(self,parent=None):
@@ -5239,6 +5270,62 @@ class ValueOfAttr(py.object):
 		return self.__parent_str__()+self.__name__
 v=ValueOfAttr()
 
+class AttrCallNo:
+	def __init__(self,parent=None,name=''):
+		self.__parent__=parent
+		self.__child__=None
+		self.__name__=name	
+	def __getattribute__(self, name):
+		if name in SKIP_ATTR_NAMES:
+			return
+		if name in ValueOfAttr_NAMES:
+			try:
+				return py.object.__getattribute__(self, name)
+			except Exception as e:
+				if name=='__name__':return ''
+				raise e
+		# self.__name__=name		
+		self.__child__= AttrCallNo(parent=self,name=name)		
+		return self.__child__
+		
+	def __call__(self, *args, **kwargs):
+		s=''
+		while self.__parent__:
+			s='.'+self.__name__+s
+			self=self.__parent__
+		print(s,*args,kwargs)
+		return py.No(s,*args,kwargs) # 有问题，只能 a.b.c() 不能a().b()因为a()返回 No
+	# def __repr__(s):
+		# s=''
+		# while self.__parent__:
+			# s='.'+self.__name__+s
+			# self=self.__parent__
+		# return py.No(s)
+		
+	def __str__(s):return ''
+	def encode(s,encoding):
+		return b''
+	def decode(s,encoding):
+		return u''
+	def __len__(s):return 0
+	def __getitem__(s, key):
+		return py.No(s.msg+'[{}]'.format(key),s,key) 
+	def __iter__(self):return self
+	def __next__(self):raise StopIteration
+
+	def __contains__(s, key):return False# ('' in '') == True
+	def __hash__(s):return 0
+	
+	def __lt__(self, other):return 0 <	other#Todo:  user defined Constant 0
+	def __le__(self, other):return 0 <=	other
+	def __eq__(self, other):return 0 ==	other
+	def __ne__(self, other):return 0 !=	other
+	def __ge__(self, other):return 0 >=	other
+	def __gt__(self, other):return 0 >	other
+	
+	def upper(s):return s
+	def lower(s):return s	
+	
 class StrRepr(py.str):
 	''' padding_times=0,padding='\t'
 str(object='') -> str
