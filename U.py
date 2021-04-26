@@ -591,11 +591,12 @@ default must be str ,auto convert to str !!
 		if not py.callable(type):
 			type=py.str
 		return type(r)
-	except '#USEless'as e:
+	except Exception as e:  #except 233: TypeError: catching classes that do not inherit from BaseException is not allowed
 		return py.No(e)
 	finally:
 		import readline
 		readline.set_startup_hook()
+		
 input_def=input
 
 def _useless_win_input(msg='',default='',type=py.str):
