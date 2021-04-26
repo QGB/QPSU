@@ -14,6 +14,7 @@ from flask import Flask,request,make_response
 
 use_cache=True
 replace_domain=True
+gd
 gencoding='utf-8'
 base_host=b'' # bytes flask_request.host
 app=Flask(__name__)
@@ -47,6 +48,7 @@ def target_to_flask_response(target,flask_request=None):
 	if replace_domain:
 		if not base_host:base_host=flask_request.host.encode(gencoding)
 		b=b.replace(btarget_host,base_host)
+		
 	response.set_data(b)
 	return response
 
@@ -67,6 +69,7 @@ def mirror_cache(*a,**ka):
 	method=request.method
 	# fn=cache_path+method[:1]+T.url2fn(path+request.environ.get('HTTP_COOKIE','')[:99] )
 	url=T.sub(request.url,request.url_root ) 
+	if 
 	fn=cache_path+method[:1]+T.url2fn(url)[:255-1-5]  
 #Linux OSError: [Errno 36] File name too long  path 不算长度内。filename+ext 长度<= 255 OK
 	

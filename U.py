@@ -144,7 +144,7 @@ def get_or_set_input(name,default=''):
 	r=get(name)
 	if not py.isno(r):return r
 	return set(name,input('%s : '%name,default=default) )
-getInput=getOrInput=get_or_input=get_or_set_input
+get_input=getInput=getOrInput=get_or_input=get_or_set_input
 
 def get_or_set(name,default):
 	# if not default: # ipy module set {}
@@ -591,7 +591,7 @@ default must be str ,auto convert to str !!
 		if not py.callable(type):
 			type=py.str
 		return type(r)
-	except Exception as e:  #except 233: TypeError: catching classes that do not inherit from BaseException is not allowed
+	except Exception as e:  #except 233:语法没错，运行到此就 TypeError: catching classes that do not inherit from BaseException is not allowed
 		return py.No(e)
 	finally:
 		import readline
@@ -4332,7 +4332,13 @@ def	rename_dict_key(d,new,old={}):
 	return d
 		# del d[old]#这个可以删除item,py27
 renameDictKey=rename_dict_key
-def unique(iterable):
+def unique(iterable,d=False,**ka):
+	d=get_duplicated_kargs(ka,'dict','return_dict','rd','count','ct',default=d)
+	if d:
+		d={}
+		for i in iterable:
+			dict_key_count_plus_1(d,i)
+		return d
 	r=[]
 	for i in iterable:
 		if i not in r:r.append(i)
