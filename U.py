@@ -254,7 +254,7 @@ is_win=iswin=isWin
 def isLinux():return platform.system()=='Linux'
 islinux=isLinux
 def isMacOS():return platform.system()=='darwin'
-is_osx=isOSX=ismacos=isMacOS
+isMac=is_mac=is_osx=isOSX=ismacos=isMacOS
 	
 def is_termux():
 	return '/com.termux' in sys.executable
