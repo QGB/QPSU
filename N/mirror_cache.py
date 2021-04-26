@@ -80,9 +80,9 @@ def mirror_cache(*a,**ka):
 	send_headers={}
 	for k,v in request.headers.items():
 		v=v.replace(request.host,target_host)
-		if k=='Content-Length':
-			if v:print('### Content-Length',U.stime(),request.url,request.headers)
-			continue
+		if k in {'Content-Length','Content-Type'}:
+			if not v:continue
+			U.println('###',k,v,U.stime(),request.url,request.headers,file=sys.stderr)
 		send_headers[k]=v
 	
 	target=send_request(method=method, 

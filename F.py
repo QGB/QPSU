@@ -567,7 +567,9 @@ def append(file,data):
 	'''builtin afile.write() No breakLine'''
 	write(file,data,mod='a')
 	
-def detect_file_encoding(file,confidence=0.7,default=py.No('not have default encoding'),buffer_size=9999,p=True):
+def detect_file_encoding(file,confidence=0.7,default=py.No('not have default encoding'),buffer_size=9999,p=True,**ka):
+	U,T,N,F=py.importUTNF()
+	p=U.get_duplicated_kargs(ka,'print_file_encoding','print_detect_encoding','print',default=p,no_pop=True)
 	if py.istr(file):
 		with py.open(file,'rb') as f:
 			b=f.read(buffer_size)
