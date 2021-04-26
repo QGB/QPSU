@@ -583,14 +583,19 @@ default must be str ,auto convert to str !!
 		else:
 			import readline
 			readline.set_startup_hook(lambda: readline.insert_text(default))
-			
-	if py.is2():
-		r= py.raw_input(prompt)
-	else:
-		r= py.input(prompt)
-	if not py.callable(type):
-		type=py.str
-	return type(r)
+	try:		
+		if py.is2():
+			r= py.raw_input(prompt)
+		else:
+			r= py.input(prompt)
+		if not py.callable(type):
+			type=py.str
+		return type(r)
+	except '#USEless'as e:
+		return py.No(e)
+	finally:
+		import readline
+		readline.set_startup_hook()
 input_def=input
 
 def _useless_win_input(msg='',default='',type=py.str):
