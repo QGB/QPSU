@@ -333,7 +333,7 @@ def rpcSetVariable(*obj,base=py.No('auto history e.g. [http://]127.0.0.1:23571[/
 	# post=requests.post
 	post=HTTP.post
 	# dill_dump=F.dill_dump
-	print(base,url)
+	print(url)
 	b=post(url,verify=False,timeout=timeout,data=F.dill_dump(obj)) # data=list:TypeError: cannot unpack non-iterable int object
 	if not b:return b
 	if not py.isbytes(b):
@@ -759,8 +759,10 @@ Image.open(fp)
    `~file.seek`, and `~file.tell` methods,
    and be opened in binary mode.	
 	'''
-	from PIL import ImageGrab,Image
+	from PIL import Image
 	U,T,N,F=py.importUTNF()
+	if U.isWin() or U.isMac():
+		from PIL import ImageGrab
 	if rect:
 		if py.istr(rect) or py.isfile(rect):
 			# if F.exist(rect):

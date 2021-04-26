@@ -192,6 +192,8 @@ dls=dill_loads=dill_load_byte=dill_load_bytes
 
 def dill_dump_bytes(obj,file=None,protocol=None,dill_ext='.dill'):
 	'''
+#TODO file=0  Not write '../0.dill'	
+	
 	dill.dump(obj, file, protocol=None, byref=None, fmode=None, recurse=None)
 	dill.dumps(obj, protocol=None, byref=None, fmode=None, recurse=None)
 
