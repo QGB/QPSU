@@ -38,7 +38,7 @@ CF_UNICODETEXT ', 13],
 
 def set(aString,p=0):
 	U=py.importU()
-	if p:print(py.repr(aString))
+	if p:print("'''",aString,"'''")
 	if U.istermux():return U.cmd('termux-clipboard-set',input=aString) 
 	try:
 		w.OpenClipboard()

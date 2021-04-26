@@ -566,20 +566,24 @@ def input(prompt='', default='',type=py.str):
 	'''  '[U.input]:'
 default must be str ,auto convert to str !!
 	'''
-	if isWin():
-		import win32console
-		_stdin = win32console.GetStdHandle(win32console.STD_INPUT_HANDLE)
-		keys = []
+	if default:
 		default=str(default) # default must be str
-		for c in default:
-			evt = win32console.PyINPUT_RECORDType(win32console.KEY_EVENT)
-			evt.Char = c
-			evt.RepeatCount = 1
-			evt.KeyDown = True
-			keys.append(evt)
+		if isWin():
+			import win32console
+			_stdin = win32console.GetStdHandle(win32console.STD_INPUT_HANDLE)
+			keys = []
+			for c in default:
+				evt = win32console.PyINPUT_RECORDType(win32console.KEY_EVENT)
+				evt.Char = c
+				evt.RepeatCount = 1
+				evt.KeyDown = True
+				keys.append(evt)
 
-		_stdin.WriteConsoleInput(keys)
-
+			_stdin.WriteConsoleInput(keys)
+		else:
+			import readline
+			readline.set_startup_hook(lambda: readline.insert_text(default))
+			
 	if py.is2():
 		r= py.raw_input(prompt)
 	else:
