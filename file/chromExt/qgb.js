@@ -188,6 +188,16 @@ async function tab_remove(tab){
    })
 }
 
+async function get_cookies(filter){
+	return new Promise(function (resolve, reject) {
+		chrome.cookies.getAll(filter,function(cookies) { 
+			resolve(cookies)
+		})
+	})	
+}
+
+
+///////////   X.js  end ///////////////////////////
 async function get_urls_doc(
   query_url="https://okfw.net/r=B.next_id('https://item.taobao.com/item.htm?id={}')",
   post_url="https://okfw.net/r=B.receive(request)"){

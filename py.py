@@ -176,11 +176,10 @@ def isbasic(a,recursive=False):
 	'''
 	return istr(a) or isnum(a) or type(a) in (dict,tuple,list,set,bytes,bytearray) 
 		
-def istuple(a):
-	return isinstance(a,tuple)
-		
-def islist(a):
-	return isinstance(a,list)
+def isset(a):return isinstance(a,set)
+iset=isset
+def istuple(a):return isinstance(a,tuple)
+def islist (a):return isinstance(a,list)
 
 def isdict(a):
 	return isinstance(a,dict)

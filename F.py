@@ -235,6 +235,51 @@ def dill_load_string(s,**ka):
 	return dill_load_bytes(s.encode(encoding) )
 dill_load_str=dill_load_string
 
+TRY_MAX_LAYER=5
+def try_dill_dump_recursively(obj,*a,):
+	global U
+	if not U:U=py.importU()
+	if py.len(a)>TRY_MAX_LAYER:return 
+	try:
+		b=dill_dump_bytes(obj)
+		return (*a,U.size(b))
+	except Exception as e:
+		if py.islist(obj) or py.istuple(obj) or py.isset(obj):
+			r=[]
+			for n,v in py.enumerate(obj):
+				r.append([n,try_dill_dump_recursively(v,*a,n)])
+			return r
+		elif py.isdict(obj):
+			d={}
+			for n,(k,v) in py.enumerate( obj.items()):
+				d[n]=try_dill_dump_recursively(kv,*a,n)
+			return d
+		r=[]	
+		for n,k,v in U.dir(obj):
+			r.append([k,try_dill_dump_recursively(v,*a,k)])
+		
+tryDillDumpRecursively=recursive_try_dill_dump=try_dill_dump_recursively
+
+def test_dir_recursively(obj,*a):
+	U=py.importU()
+	if py.len(a)>TRY_MAX_LAYER:return 
+	r=U.dir(obj)
+	for n,k,v in r:
+		r[n][2]=test_dir_recursively(v,*a,k) or v
+	return r
+recursive_test_dir=test_dir_recursively
+
+def recursive_test_dp(r):
+	U=py.importU()
+	if not py.islist(r):return r
+	for n,k,v in r:
+		try:
+			b=dill_dump_bytes(v)
+			r[n][2]=U.size(b)
+		except Exception as e:
+			r[n][2]=recursive_test_dp(v)
+	return r
+	
 def load(file,):
 	''' '''
 	
