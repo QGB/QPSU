@@ -1148,25 +1148,26 @@ Scheme names consist(组成) of a sequence of characters beginning with a lower 
 	URL_SCHEME_CHARS=T.alphanumeric+'+.-'
 	# r=''
 	
-	if py.istr(a):
-		a=a.strip()
-		if  '://' in a:
-			 # 放宽一点要求 ?，不检查首位，有时出现全部大写的URL
-			for i,c in py.enumerate(a):
-				if c not in URL_SCHEME_CHARS:
-					if a[i:i+3]=='://':
-						break
-					else:
-						return py.No('url SCHEME invalid',a,i)
-						# raise py.ArgumentError('url SCHEME invalid',a,i)
-						
-			r=a
-		else:
-			r=default_protocol+'://'+a
-		if p:print(r)	
-		return r
+	if not py.istr(a):
+		raise py.ArgumentError('url need string')
+	a=a.strip()
+	if  '://' in a:
+		 # 放宽一点要求 ?，不检查首位，有时出现全部大写的URL
+		for i,c in py.enumerate(a):
+			if c not in URL_SCHEME_CHARS:
+				if a[i:i+3]=='://':
+					break
+				else:
+					return py.No('url SCHEME invalid',a,i)
+					# raise py.ArgumentError('url SCHEME invalid',a,i)
+					
+		r=a
+	
 	else:
-		raise Exception('url need string')
+		r=default_protocol+'://'+a
+	if p:print(r)	
+	return r
+
 autourl=autoUrl=autoURL=auto_url
 
 

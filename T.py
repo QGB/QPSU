@@ -87,6 +87,26 @@ try:
 	from pprint import pprint,pformat
 except:pass
 ####################################################
+def slice(a,start, stop=None, step=1):
+	''' not only for str '''
+	if py.isinstance(start,py.slice):
+		if stop==None and step==1:
+			start,stop,step=start.start,start.stop,start.step
+		else:
+			raise py.ArgumentError('conflict',start,stop,step)
+	if not py.isint(start):
+		len=py.len(start)
+		if len==1:start=start[0]
+		if len==2 and stop==None:start,stop=start
+		if len==2 and stop==None and step==1:
+			start,stop,step=start
+		
+	try:
+		return a[start:stop:step]
+	except Exception as e:
+		return py.No(e)
+get=char_at=charAt=get_char_at=slice		
+		
 def search_return_position(text,*targets,a=0,b=0,c=0,dict=False,**ka):
 	U=py.importU()
 	a=U.get_duplicated_kargs(ka,'A',default=a)
@@ -113,10 +133,10 @@ def search_return_position(text,*targets,a=0,b=0,c=0,dict=False,**ka):
 			else:
 				if a or b or c:
 					c0=py.max(i-a,0)
-					c1=i+b
+					c1=i+py.len(t)+b
 					if c:
 						c0=py.max(i-c,0)
-						c1=i+c
+						c1=i+py.len(t)+c
 					_append( t,i,text[c0:c1] )
 				else:
 					_append(t,i,)
