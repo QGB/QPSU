@@ -8,6 +8,45 @@ else:
 	from qgb import py
 U,T,N,F=py.importUTNF()
 
+def format(s,**ka):
+	ka={'{%s}'%k:v for k,v in ka.items()}
+	return T.replacey(s,ka)
+
+def textarea(response,name='textarea'):
+	"""
+	 <input type="text" name="t">
+	
+	"""
+	r='''
+<head>
+<style type="text/css">
+	input[type="submit"]{
+		width:100%;
+	}
+		
+</style> 
+</head>
+	
+<form method="post" enctype="multipart/form-data" action="/r=U.set(%(name)r,request.form)">
+	<input type="submit" />
+	<hr>
+	<input type="file" name="f">
+	<hr>
+	<div><small>%(name)s:</small></div >
+	<div style="height:60%;" > 
+		<textarea name="t" style="width:100%; height: 100%;" ></textarea>
+	</div>
+	
+	
+	<hr>
+	<input type="submit" />
+</form> 
+'''
+	r=format(r,name=name)
+	response.headers['Content-Type']='text/html;charset=utf-8';
+	return response.set_data(r)
+txt=text=textarea
+	
 def html_script(response,*urls,rpc_base=None,max_show_len=999):
 	if not rpc_base:rpc_base=U.get_or_set('rpc_base','/')
 	html=''

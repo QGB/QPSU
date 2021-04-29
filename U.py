@@ -629,27 +629,51 @@ def rindex(a,sub,start=0,end=-1):
 		 '))(rid(tnirp' 
  '''
 	return py.len(a)-a[::-1].index(sub)
-def flat(*a,**options):
-	'''Breadth-First Traversal'''
-	noNone=False
-	for o in options:
-		if 'nonone' in o.lower():noNone=options[o]
-		if one_in('isnone','hasnone', o.lower()):noNone=not options[o]
+def flat(*a,**ka,):
+	'''Breadth-First Traversal
+U.get('generator_types_tuple')	
+	
+# str has __iter__ in py3
+unpack_types=(py.list,py.tuple),skip_types=(py.str,py.bytes)	
+	'''
+	U=py.importU()
+	noNone=not U.get_duplicated_kargs(ka,'isnone','isN','hasnone','None','no','none',default=True)
+	noNone=U.get_duplicated_kargs(ka,'nonone','no_none','no_no',default=noNone)
+	
 		# repl()
-		
-	a=py.list(a);r=[];i=0
+	
+	# def try_yield(iterable):
+		# if py.istr(iterable) or py.isbytes(iterable):
+			# yield iterable
+		# try:
+			# for k in iterable:
+				# yield from try_yield(k)
+		# except:
+			# yield iterable
+			
+	a=py.list(a);
+	r=[];i=0
 	while i<py.len(a):
-		# str has __iter__ in py3
-		if py.istuple(a[i]) or py.islist(a[i]):a.extend(a[i])
+		# r.extend( py.list(try_yield(a[i]) ) )				
+		
+		if py.istuple(a[i]) or py.islist(a[i]) or py.isset(a[i]):
+			a.extend( a[i])
+		elif U.is_generator(a[i]):
+			a.extend(py.list(a[i]))
+			# a[i]=py.list(a[i])
+			# a[i].extend(a)
 		else:
 			if noNone and not a[i]:pass
-			#TODO other condition
-			else:r.append(a[i])
+			###TODO other condition
+			else:
+				r.append(a[i])
+			
 		i+=1
-		if i%10000==0:print(i,py.len(a),a[:5],a[-5:])
+		if i%10000==0:print(i,U.len(a,r),)
 	# repl()
-	return tuple(r)
-	
+	return r
+	# return tuple(r)
+flap=flat	
 # pln flat([[1,2,3], [5, 2, 8], [7,8,9]])
 ##(1, 2, 3, 5, 2, 8, 7, 8, 9)
 # pln flat([1,2,3,[4,5,[1,2],6]],['aaa'])
@@ -950,10 +974,10 @@ def pop(d,k):
 pop(_63,25)  #_63 has change
 
 '''
-	if not py.isdict(ka):raise ArgumentError('ka should be a dict,but get',ka)
+	if not py.isdict(ka):raise py.ArgumentError('ka should be a dict,but get',ka)
 	r=[]
 	for i in keys:
-		if not py.istr(i):raise ArgumentError('keys should be a list of str,but get',i)
+		if not py.istr(i):raise py.ArgumentError('keys should be a list of str,but get',i)
 		if i in ka:
 			if no_pop:i=ka[i]
 			else:i=ka.pop(i)
@@ -3992,14 +4016,14 @@ def setDictListValue(adict,key,value):
 		adict[key].append(value)
 	else:
 		adict[key]=[value]
-add_dict_value_list=set_dict_value_list=set_dict_list=setDictList=setDictListValue
+dict_value_list=dict_add_value_list=add_dict_value_list=set_dict_value_list=set_dict_list=setDictList=setDictListValue
 
 def setDictSetValue(adict,key,value):
 	if key in adict:
 		adict[key].add(value)
 	else:
 		adict[key]=py.set([value])
-add_dict_value_jihe=add_dict_value_set=set_dict_value_set=set_dict_set=setDictset=setDictSetValue
+dict_value_set=dict_add_value_set=add_dict_value_jihe=add_dict_value_set=set_dict_value_set=set_dict_set=setDictset=setDictSetValue
 
 def setDictValuePlusOne(adict,key):
 	if key in adict:
@@ -4927,9 +4951,10 @@ text直接传入 title 有问题 , T.html_encode fix it：
 	U,T,N,F=py.importUTNF()
 	
 	if not text:text=U.pln(r=1,a=U.cbg())
+	if not file:
+		file=U.gst+T.file_legalized(text)[-244:]
 	if py.istr(file):
 		if not file.lower().endswith('.svg'):file+='.svg'
-		file=U.gst+T.file_legalized(text)[-244:]
 	elif py.isfile(file):
 		pass
 	else:
@@ -5018,22 +5043,22 @@ def get_timed_task_list():
 	return schedule.jobs
 schedule_jobs=time_task=get_time_task=get_timed_task=get_timed_task_list
 	
-def iter_each_demensional_coordinate(*shape,**ka):
+def iter_each_demensional_coordinate(*shape):
 	'''args: *shape is the size of each dimension   (xM,yM,zM....) 
 return yield (0,0,0...)  ---  	(xM-1,yM-1,zM-1....) 
 	'''
+	if not shape:raise py.ArgumentError('must privide int s')
 	nd=py.len(shape)
-	im=nd-1
 	r=[0]*nd
 	
 	for size in shape:
 		if size<=0:raise py.ArgumentError(' size of each dimension must > 0 ')
 	
-	shape_indexs=py.list(py.range(im,-1,-1))
+	shape_indexes=py.list(py.range(nd-1,-1,-1))
 	while True:
 		yield r
 		r[-1]+=1
-		for i in shape_indexs:
+		for i in shape_indexes:
 			if r[i]>=shape[i]:
 				if i==0:return
 				r[i]=0
@@ -5068,7 +5093,29 @@ ValueError: no signature found for builtin type <class 'dict'>
 	except Exception as e:
 		return py.No(e)
 getargspec=getfullargspec
+
+def is_generator(a):
+	'''U.set('generator_types_tuple',	types_tuple);
+U.is_generator(U.OrderedDict(a=1).items() )==True
 	
+	'''
+	types_tuple=get('generator_types_tuple')
+	if types_tuple:
+		types_tuple=py.tuple(types_tuple)
+		return py.is_generator(a) or py.isinstance(a,types_tuple)
+	else:
+		types_tuple=(
+py.type({}.values()),  #can not dill_dump
+py.type({}.keys()),
+py.type({}.items()),
+py.type(py.range(1)),  #dill_dump  len 46,<80 B>
+
+		
+		)
+		set('generator_types_tuple',
+	types_tuple)
+		return is_generator(a)
+isgen=isGenerator=is_generator	
 ############## qgb type ######################	
 class FloatCustomStrRepr(py.float):
 	'''每添加一种 CustomStrRepr ，需要在 T.string 中添加相应的 str 代码

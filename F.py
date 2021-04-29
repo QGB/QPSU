@@ -271,7 +271,13 @@ recursive_test_dir=test_dir_recursively
 
 def recursive_test_dp(r):
 	U=py.importU()
-	if not py.islist(r):return r
+	if  py.isdict(r) or py.getattr(r,'items',0):
+		r=[[n,k,v] for n,(k,v) in py.enumerate(r.items()) ]
+
+	if py.islist(r) or py.isdict(r):
+		pass
+	else:return r
+	
 	for n,k,v in r:
 		try:
 			b=dill_dump_bytes(v)

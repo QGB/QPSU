@@ -116,7 +116,20 @@ def isbool(a):
 	return (a is True) or (a is False)
 
 def is_generator(a):
+	'''
+#BUGFIX is_generator( dict.values() == False
+
+if hasattr(a,'__iter__'):
+		try:# str matched!!
+			it=a.__iter__()
+			return hasattr(it,'__next__')
+		except:
+			return False
+	return False
+	
+'''	
 	return callable(getattr(a,'__next__',0))
+	
 	# import types
 	# if isinstance(a, types.GeneratorType):return True
 	# import itertools #itertools is native module,no py file

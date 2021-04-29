@@ -49,7 +49,7 @@ SQLITE='SELECT * FROM sqlite_master;'
 squote=quote="'"
 dquote=dQuote='"'
 
-import   re	
+import re	
 
 gError=None
 try:
@@ -87,6 +87,49 @@ try:
 	from pprint import pprint,pformat
 except:pass
 ####################################################
+def search_return_position(text,*targets,a=0,b=0,c=0,dict=False,**ka):
+	U=py.importU()
+	a=U.get_duplicated_kargs(ka,'A',default=a)
+	b=U.get_duplicated_kargs(ka,'B',default=b)
+	c=U.get_duplicated_kargs(ka,'C',default=c)
+	dict=U.get_duplicated_kargs(ka,'d','return_dict','rd',default=dict)
+	r=[]
+	d={}
+	def _append(t,i,sub=''):
+		if dict:
+			if sub:
+				U.dict_add_value_list(d,t,(i,sub))
+			else  :U.dict_add_value_list(d,t,i)
+		else:
+			if sub:
+				r.append([t,i,sub ])		
+			else  :r.append([t,i, ])
+			
+	for t in py.set(targets):
+		i=0
+		while True:
+			i=text.find(t,i)
+			if i==-1:break
+			else:
+				if a or b or c:
+					c0=py.max(i-a,0)
+					c1=i+b
+					if c:
+						c0=py.max(i-c,0)
+						c1=i+c
+					_append( t,i,text[c0:c1] )
+				else:
+					_append(t,i,)
+			i+=1 # 不然 死循环		
+	if r:return r
+	if d:return d
+	return py.No('Not found',targets,'in text',py.len(text))
+		
+find=find_n=search=search_return_position	
+	
+def regex_encode(a):
+	return re.escape(a)
+re_escape=regex_escape=regex_encode
 
 def chr_string(chars,alphanumeric=alphanumeric_,quote=quote,chr_func=lambda c:'chr(%s)'%py.ord(c) ,):
 	s=''
@@ -548,6 +591,7 @@ def html2text(html,baseurl='',ignore_images=True,ignore_links=True,):
 	h.ignore_images=ignore_images
 	h.ignore_links=ignore_links
 	return h.handle(html)
+h2t=html2txt=html_to_text=html2text
 
 def html_prettify(html, formatter="html5",p=py.No('auto')):
 	'''
@@ -1266,15 +1310,22 @@ def replace_all_space(a,to='',target=r"\s+"):
 	return re.sub(target, to, a, flags=re.UNICODE)
 del_space=del_spaces=remove_all_space=replace_all_spaces=delAllSpace=removeAllSpaces=removeAllSpace=replace_all_space
 
-def replacey(a,olds,new,case_sensitive=False):
+def replacey(a,olds,new='',case_sensitive=True):
 	'''
 #TODO case_sensitive	
 	'''
 	if not py.istr(a):return py.No('a is not str',a)
+	if py.isdict(olds):
+		if new:raise py.ArgumentError('replacey(a,dict) Conflict with new',new)
+		for k,v in olds.items():
+			a=a.replace(k,v)
 	# else:a=str(a)
 	# if(len(olds)<1):raise Exception('Target chars Null')
-	for i in olds:
-		a=a.replace(i,new)
+	else:
+		if not case_sensitive:
+			return re.sub('|'.join(re.escape(i) for i in olds),new,a,flags=re.IGNORECASE)
+		for i in olds:
+			a=a.replace(i,new)
 	return a
 	
 def replace_all(a,old,new):
@@ -1394,10 +1445,11 @@ def allAscii(a):
 		# U.pln( ord(i);break
 	return True
 	
-gszFinancial='''零壹贰叁肆伍陆柒捌玖拾佰仟萬億'''
+gzfn=zfn=zf09=gszFinancial='''零壹贰叁肆伍陆柒捌玖拾佰仟萬億'''
 #亿的后面 ，大写小写都是同一个。
 #参见https://zh.wikipedia.org/wiki/中文数字
-gsz09=gsZ09=gz09=z09='''〇一二三四五六七八九'''
+gsz09=gsZ09=gz09=z09=znumber=gzn=gszn=zn='''〇一二三四五六七八九'''
+gsz10=gsZ10=z10='''一二三四五六七八九十'''
 gszi=gsZI='''个、十、百、千、万、十万、百万、千万、亿、十亿、百亿、千亿、兆、十兆、百兆、千兆、京、十京、百京、千京、垓、十垓、百垓、千垓、秭、十秭、百秭、千秭、穰、十穰、百穰、千穰、沟、十沟、百沟、千沟、涧、十涧、百涧、千涧、正、十正、百正、千正、载、十载、百载、千载、极、十极、百极、千极'''
 gZi=gzi=glzi=gsZI.split('、')
 
