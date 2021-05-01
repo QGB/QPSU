@@ -28,6 +28,10 @@ gIn=gipy.user_ns['In'];gOut=gipy.user_ns['Out']
 # version='.'.join([str(i) for i in IPython.version_info if py.isnum(i)])  #(5, 1, 0, '') 5.1.0
 version=py.float('{0}.{1}{2}\n{3}'.format(*IPython.version_info).splitlines()[0])
 # gipy.editor=U.npp()
+def set_autocall(level=2)
+	gipy.autocall=level
+	return level
+	
 def sycn():
 	'''  #TODO  '''
 # __frame=sys._getframe().f_back	

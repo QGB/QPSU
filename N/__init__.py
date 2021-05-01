@@ -41,6 +41,45 @@ else:
 	from SimpleHTTPServer import SimpleHTTPRequestHandler
 	from BaseHTTPServer import HTTPServer as _HTTPServer
 
+def rpc_fifo_put_cmd(s,name='cmd',path=None):
+	''' Linux has os.mkfifo(fn)  
+Windows:AttributeError: module 'os' has no attribute 'mkfifo' 
+	'''
+	U,T,N,F=py.importUTNF()
+	if not path:path=U.gst+'fifo/'
+	if F.isabs(name):
+		fn=name
+	else:
+		path=F.mkdir(path)
+		fn=path+name
+	import os
+	if not F.exists(fn):os.mkfifo(fn)
+	t=U.itime()
+	with os.open(fn, os.O_SYNC | os.O_CREAT | os.O_RDWR) as f:
+		os.write(f, s)
+	return s,U.itime()-t
+def rpc_fifo_eval(cmd='cmd',result='result',path=None,**ka):
+	U,T,N,F=py.importUTNF()
+	if not path:path=U.gst+'fifo/'
+	def get_fn(name):
+		if F.isabs(name):
+			fn=name
+		else:
+			path=F.mkdir(path)
+			fn=path+name
+		if not F.exists(fn):os.mkfifo(fn)
+		return fn
+	t=[U.itime()]		
+	with os.open(get_fn(cmd), os.O_RDONLY) as rf:
+		s=os.read(rf, -1)
+	t.append(U.itime()-t[-1])	
+	r=U.execResult(s,**ka)
+	t.append(U.itime()-t[-1])	
+	with os.open(fn, os.O_SYNC | os.O_CREAT | os.O_RDWR) as f:
+		os.write(f, r)
+	t.append(U.itime()-t[-1])	
+	return r,t
+	
 def pppoe():
 	'''
 506 192.168.2.1+192.168.1.1 073198799737 777124	
@@ -1162,7 +1201,9 @@ Scheme names consist(组成) of a sequence of characters beginning with a lower 
 					# raise py.ArgumentError('url SCHEME invalid',a,i)
 					
 		r=a
-	
+	elif a.startswith('//'):
+		# if 
+		r=default_protocol+':'+a
 	else:
 		r=default_protocol+'://'+a
 	if p:print(r)	

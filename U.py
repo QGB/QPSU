@@ -5116,6 +5116,16 @@ py.type(py.range(1)),  #dill_dump  len 46,<80 B>
 	types_tuple)
 		return is_generator(a)
 isgen=isGenerator=is_generator	
+
+def get_image_pixel(image,x,y):
+	'''
+image.load()	
+:returns: An image access object.
+:rtype: :ref:`PixelAccess` or :py:class:`PIL.PyAccess`	
+'''	
+	a=image.load()
+	return a[x,y]
+	
 ############## qgb type ######################	
 class FloatCustomStrRepr(py.float):
 	'''每添加一种 CustomStrRepr ，需要在 T.string 中添加相应的 str 代码

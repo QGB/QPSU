@@ -71,8 +71,22 @@ try:
 	import win32gui
 except Exception as ei:pass
 
+def mkfifo(path):
+	'''
+os.mkfifo(path, mode=438, *, dir_fd=None)
+Docstring:
+Create a "fifo" (a POSIX named pipe).
+
+If dir_fd is not None, it should be a file descriptor open to a directory,
+  and path should be relative; path will then be relative to that directory.
+dir_fd may not be implemented on your platform.
+  If it is unavailable, using it will raise a NotImplementedError.
+'''
+	
+	
+
 def is_monitor_off():
-	''' 
+	''' #TODO msg loop
 只有这四种：
 'MONITORINFOF_PRIMARY',
 'MONITOR_DEFAULTTONEAREST',

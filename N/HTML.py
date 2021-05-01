@@ -27,7 +27,7 @@ def textarea(response,name='textarea'):
 </style> 
 </head>
 	
-<form method="post" enctype="multipart/form-data" action="/r=U.set(%(name)r,request.form)">
+<form method="post" enctype="multipart/form-data" action="/r=U.set('%(name)s',request.form),q.get_data()">
 	<input type="submit" />
 	<hr>
 	<input type="file" name="f">
@@ -41,8 +41,8 @@ def textarea(response,name='textarea'):
 	<hr>
 	<input type="submit" />
 </form> 
-'''
-	r=format(r,name=name)
+'''.replace('%(name)s',name)
+	# r=format(r,name=name)
 	response.headers['Content-Type']='text/html;charset=utf-8';
 	return response.set_data(r)
 txt=text=textarea
