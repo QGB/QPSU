@@ -721,9 +721,9 @@ def readableSizeText(text,sizeMultiple=1,p=True):
 	
 	
 	
-def regexCount(a,regex):
+def regex_count(a,regex):
 	return py.len(re.findall(regex, a))
-countRegex=regexCount
+countRegex=regexCount=count_regex=regex_count
 	
 def regexReplace(a,regex,str_or_func):
 	''' 

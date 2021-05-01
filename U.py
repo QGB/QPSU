@@ -142,7 +142,7 @@ inset=set_and_input=set_input=input_set=input_or_set=input_and_set
 	
 def get_or_set_input(name,default=''):
 	r=get(name)
-	if not py.isno(r):return r
+	if r:return r
 	return set(name,input('%s : '%name,default=default) )
 get_input=getInput=getOrInput=get_or_input=get_or_set_input
 
@@ -4121,6 +4121,8 @@ Create a slice object.  This is used for extended slicing (e.g. a[0:10:2]).
 
 	t=get_slice_range(*range,len=py.len(a))
 	if not t:
+		if index==False and key==True:
+			return py.list(a.items())
 		return py.No('empty get_slice_range( *{} )'.format(range))
 	else:
 		range=t
