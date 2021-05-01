@@ -3537,6 +3537,8 @@ in ipy , npp() not autoReload when U.r(), But U.npp()
 
 	if a:
 		f,lineno=get_obj_file_lineno(a,lineno=lineno,auto_file_path=auto_file_path)
+		if py.len(f)>250:
+			f=py.importF().nt_short_path(f)
 		return run(npath,f,'-n {0}'.format(lineno))
 	else:
 		if not get_cmd:run(npath)
@@ -3583,7 +3585,7 @@ def isSyntaxError(a):
 	import ast
 	try:
 		ast.parse(a)
-		return F
+		return False
 	except:
 		return True
 isyntaxError=iSyntaxError=isSyntaxError

@@ -1423,7 +1423,7 @@ not auto cut long string
 		r+=c
 	
 	return r
-fileName=filename=fileNameLegalized=file_legalized=filename_legalized
+fileName=filename=legalized_filename=fileNameLegalized=file_legalized=filename_legalized
 # filename.__str__=FILE_NAME	
 
 def pathname_legalized(a):

@@ -246,8 +246,9 @@ def save(file=None,lines=-1,tryExcept=False,out=False,columns=70,overide=True):
 	在没有ipython实例时，不能get_ipython()
 	当file被指定时，overide 参数无效'''
 	try:
-		if type(lines) in(int,long) and lines>0:
-			lsta,lend=0,lines
+		if py.isint(lines) and lines>0:
+			# lsta,lend=0,lines
+			lsta,lend=lines,-1
 		elif len(lines)==2:lsta,lend=lines
 		else:raise Exception
 	except:
@@ -297,8 +298,9 @@ def save(file=None,lines=-1,tryExcept=False,out=False,columns=70,overide=True):
 	#using single quote for cmd line
 	#-4 为了去除 /qgb
 	#ipython --InteractiveShellApp.exec_lines=['%qp%'] 不会改变In[0],始终为''
-	for i,v in enumerate(gIn):
-		if i==0:continue
+	for i,v in enumerate(gIn[lsta:lend]):
+		if i==0 and lsta==0:continue
+		i=lsta+i
 		v=v.strip()
 			# U.isSyntaxError(u'_{0}={1}'.format(i,v) ) :
 				# pass
@@ -330,6 +332,7 @@ def save(file=None,lines=-1,tryExcept=False,out=False,columns=70,overide=True):
 	# U.pln(gOut.keys()
 	
 	gdTimeName[U.time()]=file.name
+	file.close()
 	return '{0} {1} success!'.format(save.name,file.name)
 save.name='{0}.{1}'.format(__name__,save.__name__)
 

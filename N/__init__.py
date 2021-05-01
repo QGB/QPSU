@@ -59,8 +59,9 @@ Windows:AttributeError: module 'os' has no attribute 'mkfifo'
 		print(fn,e)
 	t=U.itime()
 	with os.fdopen(os.open(fn, os.O_SYNC | os.O_CREAT | os.O_RDWR)) as f:
-		# os.write(f, s)
-		f.write(s)
+		os.write(f.fileno, s)
+		
+		# f.write(s)
 	return s,U.itime()-t
 def rpc_fifo_eval(cmd='cmd',result='result',path=None,**ka):
 	U,T,N,F=py.importUTNF()
