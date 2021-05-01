@@ -783,22 +783,26 @@ def flask_file_stream_response(response,file,):
 file=stream_file=file_stream=read_as_stream=flask_file_stream_response
 
 def flask_image_response(response,image,format='png',**ka):
-	from io import BytesIO
-	img_io = BytesIO()
-	image.save(img_io, format)
-	img_io.seek(0)
-	# response.response=stream_with_context(gen)
+	if py.isbytes(image):
+		bytes=image
+	else:
+		from io import BytesIO
+		img_io = BytesIO()
+		image.save(img_io, format)
+		img_io.seek(0)
+		# response.response=stream_with_context(gen)
+		bytes=img_io.read(-1)
 	ctype='image/'+format
 	response.headers['Content-Type'] = ctype
 	response.headers['mimetype'] = ctype
-	bytes=img_io.read(-1)
 	response.set_data(bytes)
 	return U.v  # huawei Android 旧版 系统浏览器，如果url 不是 .png等 结尾。不会显示图像
 	# return response,image,bytes
 
 def flask_screenshot_response(response,rect=py.No('rect=[x,y,x1,y1] or auto get clipboard or full_screen '),**ka):
 	''' rect (crop)  defining the left, upper, right, and lower pixel
-	
+
+Image.open(io.BytesIO(b ))	
 Image.open(fp)	
 :param fp: A filename (string), pathlib.Path object or a file object.
    The file object must implement `~file.read`,
@@ -813,7 +817,7 @@ Image.open(fp)
 		if py.istr(rect) or py.isfile(rect):
 			# if F.exist(rect):
 			im=Image.open(rect)
-		elif py.isinstance(rect,Image.Image):
+		elif py.isinstance(rect,Image.Image) or py.isbytes(rect):
 			im=rect
 		elif U.len(rect)!=4:
 			raise py.ArgumentError('rect must be PIL Image or [ x0,y0,x1,y1 ]')

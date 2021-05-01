@@ -796,8 +796,9 @@ def autoDecode(abytes,confidence=0.7,default=py.No('default encoding "" ')  ):
 	if py.isunicode(abytes):return abytes
 	if not py.isbyte(abytes):
 		raise py.ArgumentError('is not bytes',abytes)
-
-	return abytes.decode( detect(abytes=abytes,confidence=confidence,default=default) )
+	encoding=detect(abytes=abytes,confidence=confidence,default=default)
+	if not encoding:return encoding
+	return abytes.decode( encoding )
 detect_decode=detectDecode=detectAndDecode=auto_decode=autoDecode
 
 def decode(abytes,codecs=('gb18030','utf-8','auto','latin' ) ):
