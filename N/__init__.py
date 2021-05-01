@@ -58,7 +58,7 @@ Windows:AttributeError: module 'os' has no attribute 'mkfifo'
 	except FileExistsError as e:
 		print(fn,e)
 	t=U.itime()
-	with os.open(fn, os.O_SYNC | os.O_CREAT | os.O_RDWR) as f:
+	with os.fdopen(os.open(fn, os.O_SYNC | os.O_CREAT | os.O_RDWR)) as f:
 		os.write(f, s)
 	return s,U.itime()-t
 def rpc_fifo_eval(cmd='cmd',result='result',path=None,**ka):
@@ -76,12 +76,12 @@ def rpc_fifo_eval(cmd='cmd',result='result',path=None,**ka):
 			print(fn,e)
 		return fn
 	t=[U.itime()]		
-	with os.open(get_fn(cmd), os.O_RDONLY) as rf:
+	with os.fdopen(os.open(get_fn(cmd), os.O_RDONLY)) as rf:
 		s=os.read(rf, -1)
 	t.append(U.itime()-t[-1])	
 	r=U.execResult(s,**ka)
 	t.append(U.itime()-t[-1])	
-	with os.open(fn, os.O_SYNC | os.O_CREAT | os.O_RDWR) as f:
+	with os.fdopen(os.open(fn, os.O_SYNC | os.O_CREAT | os.O_RDWR)) as f:
 		os.write(f, r)
 	t.append(U.itime()-t[-1])	
 	return r,t
