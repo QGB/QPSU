@@ -13,7 +13,7 @@ if py.is2():
 	grequest.urlopen=urllib.urlopen
 else:
 	import urllib
-	from urllib import request#  加了这句才不会 AttributeError: module 'urllib' has no attribute 'request
+	from urllib import request as _grequest #  加了这句才不会 AttributeError: module 'urllib' has no attribute 'request
 	try:
 		grequest = urllib.request.Request
 		grequest.urlopen=urllib.request.urlopen		
@@ -21,10 +21,30 @@ else:
 		print(urllib,ei)
 		py.importU().repl()
 
-		
-		
-		
-		
+gheaders=headers={'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/59.0.2171.95 Safari/537.36'}
+def random_headers():
+	import fake_headers
+	return fake_headers.Headers( headers=fake_headers.make_header() ).generate()
+	
+#8
+ghttp_methods=HTTP_METHODS=[
+'HEAD', 'GET', 'POST', 'OPTIONS', 'PUT', 'PATCH', 'DELETE']	
+def request(url,method='GET',headers=gheaders,verify=False,**ka):	
+	import requests
+	
+	if (py.istr(url) and url.upper() in HTTP_METHODS):
+		# ka.pop('method','')#D.pop(k[,d]) -> v,
+		ka['method']=url
+		url=ka['url'] # test url exists
+	elif method:
+		ka['method']=method
+	if headers:
+		ka['headers']=headers
+	ka['verify']=verify
+	
+	if url and 'url' not in ka:
+		ka['url']=url
+	return requests.request(**ka)
 
 def download(url, file_path,headers=None):
 	import sys
@@ -65,9 +85,6 @@ def download(url, file_path,headers=None):
 				sys.stdout.write("\r[%s%s] %d%%" % ('█' * done, ' ' * (50 - done), 100 * temp_size / total_size))
 				sys.stdout.flush()
 	print()  # 避免上面\r 回车符
-
-		
-		
 		
 def post(url,**ka):
 	'''
@@ -120,12 +137,6 @@ def get_bytes(url,	**ka ,):
 		return py.No(e)
 getb=getByte=getBytes=get_byte=get_bytes
 
-gheaders=headers={'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/59.0.2171.95 Safari/537.36'}
-
-def random_headers():
-	import fake_headers
-	return fake_headers.Headers( headers=fake_headers.make_header() ).generate()
-	
 def get(url,file='',
 		headers = gheaders,
 		timeout=9,

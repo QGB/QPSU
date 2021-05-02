@@ -3572,14 +3572,56 @@ def getAST(mod):
 	return ast.parse(getSource(mod))
 getModAST=getAST
 
+def argspec_to_str(a):
+	U=py.importU()
+	a=U.getfullargspec(a)
+fullargspec_to_str=argspec_to_str	
+
 def get_source(a):
 	import inspect
+	U=py.importU()
 	if py.istr(a):
-		if F.exist(a):return F.read(a)
-		a=get_module_by_file(a)
+		if F.exist(a):
+			if a.lower().endswith('.pyc'):
+				import uncompyle6,io
+				out=io.StringIO()
+				r=uncompyle6.decompile_file(a,outstream=out)
+				# U.get_or_set('uncompyle6.decompile_file return',{})[U.stime()]=r
+				return out.getvalue() 
+			return F.read(a)
+		a=U.get_module_by_file(a)
 		# return #fileName
+	f,n=U.get_obj_file_lineno(a)
+	# _a=a
+	if not F.exist(f):
+		if py.getattr(a,'__code__',0):
+			a=a.__code__
+		from xdis import iscode
+		if iscode(a):
+			import uncompyle6,io
+			##注释的是错误做法，改println造成结果不全，要想不显示，正确做法 out=
+			# if U.get_or_set('uncompyle6.semantics.pysource.SourceWalker.println',
+				# uncompyle6.semantics.pysource.SourceWalker.println,)==\
+					# uncompyle6.semantics.pysource.SourceWalker.println:
+				# uncompyle6.semantics.pysource.SourceWalker.println=U.AttrCallNo(p=0)
+			# s= uncompyle6.deparse_code2str(a,out=io.StringIO())
+			out=io.StringIO()
+			sw= uncompyle6.uncompyle6.code_deparse(a,out=out)
+			s=out.getvalue()
+			lines=s.splitlines()
+			if 'def ' not in lines[0] and lines[1][0] not in [T.tab,T.space] :
+				if [i for i in lines if i.startswith(T.tab)] :indent=T.tab
+				else:indent=T.space*4
+				# sw.indent_more()
+				# sw.gen_source( sw.ast,'qgb',{})
+				s='def %s(%s):\n'%(a.co_name,U.fullargspec_to_str(a))
+				for n,l in py.enumerate(lines):
+					s+=indent+l+T.eol
+				return s
+			return out.getvalue()+sw.text
+			return s
 	return inspect.getsource(a) # module, class, method, function, traceback, frame, or code object
-getsource=get_mod_source=getSource=get_source
+decompile=getsource=get_mod_source=getSource=get_source
 
 def isSyntaxError(a):
 	import ast
@@ -4928,7 +4970,7 @@ U.set('hotkey_f',f)
 hotkey=hot_key=registe_hotkey=bind_hotkey=register_hotkey	
 	
 	
-def get_svg_qrcode(text=py.No('auto get clipboard'),file=py.No('auto using text'),title=py.No('svg html title auto using text'),scale=8,browser=True):
+def get_svg_qrcode(text=py.No(msg='auto get clipboard'),file=py.No('auto using text'),title=py.No(msg='svg html title auto using text'),scale=8,browser=True,return_bytes=False,response=None,tb='',**ka):
 	'''Signature:
 q.svg(
     file, : stream_or_path 
@@ -4953,10 +4995,30 @@ text直接传入 title 有问题 , T.html_encode fix it：
 '''
 	import pyqrcode
 	U,T,N,F=py.importUTNF()
-	
-	if not text:text=U.pln(r=1,a=U.cbg())
+	return_bytes=U.get_duplicated_kargs(ka,'b','rb','byte','bytes',default=return_bytes)
+	response=U.get_duplicated_kargs(ka,'p','rp','resp','P',default=response)
+	if not text and tb:
+		t='https://item.taobao.com/item.htm?'
+		if py.istr(tb) and t in tb:
+			text=tb+'&fpChannel=9'
+		elif py.isint(tb) or U.all_in(tb,T._09):
+			text=it+'fpChannel=9&id=%s'%tb
+		if not title:
+			r=N.HTTP.request(text)
+			bs=T.beautifulSoup(r.text)
+			title=bs.select('title')
+			if title:
+				title=title[0].text
+				print(title)
+			else:title=U.stime()
+	if not text:
+		if p:raise py.ArgumentError('not get text',tb,response)
+		text=U.cbg(e=1)
 	if not file:
 		file=U.gst+T.file_legalized(text)[-244:]
+		if return_bytes or response:
+			import io
+			file=io.BytesIO()
 	if py.istr(file):
 		if not file.lower().endswith('.svg'):file+='.svg'
 	elif py.isfile(file):
@@ -4969,6 +5031,14 @@ text直接传入 title 有问题 , T.html_encode fix it：
 	
 	q=pyqrcode.create(text)
 	q.svg(file=file,scale=scale,title=title)  # None 
+	if return_bytes or response:
+		b=file.getvalue()
+		# b=b'<html> %s </html>' % b # useless
+		if response:
+			# response.headers['Content-Type']='text/html;charset=utf-8'
+			response.headers['Content-Type']='image/svg+xml;charset=utf-8'
+			response.set_data(b)
+		return b	
 	if browser:U.browser(file)
 	return  file
 qr=qrcode=svg_qrcode=get_svg_qrcode	
@@ -5070,7 +5140,7 @@ return yield (0,0,0...)  ---  	(xM-1,yM-1,zM-1....)
 
 range2d=rangen=rangeN=itern=iterN=iterdc=iter2d=iter3d=iternd=iterNd=iter_N_d=iter_all_coordinate=iter_coordinate=iter_high_demensional_coordinate=iter_each_demensional_coordinate
 
-def getfullargspec(callable):
+def getfullargspec(callable,no_raise=True):
 	'''
 In [1069]: inspect.getfullargspec(sb.run)
 Out[1069]: FullArgSpec(args=[], varargs='popenargs', varkw='kwargs', defaults=None, kwonlyargs=['input', 'capture_output', 'timeout', 'check'], kwonlydefaults={'input': None, 'capture_output': False, 'timeout': None, 'check': False}, annota
@@ -5093,8 +5163,11 @@ ValueError: no signature found for builtin type <class 'dict'>
 	'''
 	import inspect
 	try:
+		if py.isinstance(callable,(inspect.FullArgSpec,inspect.ArgSpec)):
+			return callable
 		return inspect.getfullargspec(callable)
 	except Exception as e:
+		if not no_raise:raise 
 		return py.No(e)
 getargspec=getfullargspec
 
@@ -5348,10 +5421,11 @@ class ValueOfAttr(py.object):
 v=ValueOfAttr()
 
 class AttrCallNo:
-	def __init__(self,parent=None,name=''):
+	def __init__(self,parent=None,name='',p=True):
 		self.__parent__=parent
 		self.__child__=None
 		self.__name__=name	
+		self.__v__=p
 	def __getattribute__(self, name):
 		if name in SKIP_ATTR_NAMES:
 			return
@@ -5370,7 +5444,7 @@ class AttrCallNo:
 		while self.__parent__:
 			s='.'+self.__name__+s
 			self=self.__parent__
-		print(s,*args,kwargs)
+		if self.__v__:print(s,*args,kwargs)
 		return py.No(s,*args,kwargs) # 有问题，只能 a.b.c() 不能a().b()因为a()返回 No
 	# def __repr__(s):
 		# s=''
@@ -5379,7 +5453,7 @@ class AttrCallNo:
 			# self=self.__parent__
 		# return py.No(s)
 		
-	def __str__(s):return ''
+	# def __str__(s):return ''
 	def encode(s,encoding):
 		return b''
 	def decode(s,encoding):

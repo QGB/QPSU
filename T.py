@@ -31,6 +31,7 @@ bytes256=byte256=b''.join( [py.byte(i) for i in range(256)  ] )
 CR='\r'
 LF=EOL=eol='\n'
 TAB=Tab=tab='\t'
+gspace=space=py.chr(0x20)
 ######### html ######
 hr='<hr>'
 br='<br>'
@@ -84,6 +85,8 @@ except Exception as ei:
 		raise Exception('#not install chardet Module')  # <no> is not callable ,see the source
 	pass
 try:
+	from io import StringIO
+	strio=StrIO=stringIO=StringIO
 	from pprint import pprint,pformat
 except:pass
 ####################################################
@@ -662,6 +665,9 @@ nice_html=htmlBeautify=html_beautify=html_prett=pretty_html=html_pretty=prettify
 
 def BeautifulSoup(html):
 	from bs4 import BeautifulSoup
+	t=py.str(py.type(html) )
+	if 'requests.models.Response' in t:
+		html=html.text
 	try:
 		import lxml
 		bs=BeautifulSoup(html,features='lxml' )	

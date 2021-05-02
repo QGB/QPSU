@@ -342,8 +342,9 @@ def get_or_set_rpc_base(base):
 	return U.set('N.rpc.base',base)	
 	
 def rpcGetVariable(varname,base=py.No('auto history e.g. [http://]127.0.0.1:23571[/../] '),
-		timeout=9,p=True):
+		timeout=9,p=True,return_bytes=False,**ka):
 	U,T,N,F=py.importUTNF()	
+	return_bytes=U.get_duplicated_kargs(ka,'return_byte','rb','B','b','raw','raw_bytes',default=return_bytes)
 	if not base:
 		base=U.get_or_input('N.rpc.base','http://127.0.0.1:23571/')
 	if not base:raise py.ArgumentError('need base=')
@@ -362,10 +363,15 @@ def rpcGetVariable(varname,base=py.No('auto history e.g. [http://]127.0.0.1:2357
 	if not py.isbytes(b):
 		b=b.content
 	if p:print('Loading...',U.stime()[15:20+2+4],'<%s B>'%py.len(b))
+	if return_bytes:return b
 	try:
-		return dill_loads(b)
+		v= dill_loads(b)
+		if p:print('Success !!',U.stime()[15:20+2+4],U.type(v),U.len(v))
+		return v
 	except Exception as e:
-		return py.No(e,url,b)
+		if p:print('LoadErr ##',U.stime()[15:20+2+4],repr(e))
+		else:
+			return py.No(e,url,b)
 rpc_get=rpc_get_var=rpcGetVariable
 
 def rpcSetVariable(*obj,base=py.No('auto history e.g. [http://]127.0.0.1:23571[/../] '),timeout=9,varname='v',**ka):
@@ -376,7 +382,7 @@ def rpcSetVariable(*obj,base=py.No('auto history e.g. [http://]127.0.0.1:23571[/
 		obj=obj[0]
 
 	if not base:
-		base=U.get_or_input('rpc_base',default='http://127.0.0.1:23571/')
+		base=U.get_or_input('N.rpc.base',default='http://127.0.0.1:23571/')
 	else:
 		base=U.set('rpc_base',base)
 	url='{0}{1}=F.dill_loads(request.get_data());r=U.id({1});{2}'.format(base, varname,ext_cmd	)
