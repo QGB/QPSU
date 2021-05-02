@@ -5038,9 +5038,9 @@ text直接传入 title 有问题 , T.html_encode fix it：
 			# response.headers['Content-Type']='text/html;charset=utf-8'
 			response.headers['Content-Type']='image/svg+xml;charset=utf-8'
 			response.set_data(b)
-		return b	
+		return b
 	if browser:U.browser(file)
-	return  file
+	return file
 qr=qrcode=svg_qrcode=get_svg_qrcode	
 
 def search_image_on_screen(image_path=py.No('if not ,attempt to get clipBoard image'),format='png'):
