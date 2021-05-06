@@ -29,7 +29,7 @@ def random_headers():
 #8
 ghttp_methods=HTTP_METHODS=[
 'HEAD', 'GET', 'POST', 'OPTIONS', 'PUT', 'PATCH', 'DELETE']	
-def request(url,method='GET',headers=gheaders,verify=False,**ka):	
+def request(url,method='GET',headers=gheaders,verify=False,no_raise=False,**ka):	
 	import requests
 	
 	if (py.istr(url) and url.upper() in HTTP_METHODS):
@@ -40,10 +40,21 @@ def request(url,method='GET',headers=gheaders,verify=False,**ka):
 		ka['method']=method
 	if headers:
 		ka['headers']=headers
+		for k in py.list(ka):
+			v=ka[k]
+			if py.istr(k) and py.istr(v):
+				if k[0].isupper():
+					ka.pop(k)
+					headers[k]=v
 	ka['verify']=verify
 	
 	if url and 'url' not in ka:
 		ka['url']=url
+	if no_raise:
+		try:
+			return requests.request(**ka)
+		except Exception as e:
+			return py.No(e,ka)
 	return requests.request(**ka)
 
 def download(url, file_path,headers=None):

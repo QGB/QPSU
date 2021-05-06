@@ -41,6 +41,7 @@ else:
 	from SimpleHTTPServer import SimpleHTTPRequestHandler
 	from BaseHTTPServer import HTTPServer as _HTTPServer
 
+
 def rpc_fifo_put_cmd(s,name='cmd',path=None):
 	''' Linux has os.mkfifo(fn)  
 Windows:AttributeError: module 'os' has no attribute 'mkfifo' 
@@ -808,7 +809,7 @@ def flask_image_response(response,image,format='png',**ka):
 	response.headers['Content-Type'] = ctype
 	response.headers['mimetype'] = ctype
 	response.set_data(bytes)
-	return U.v  # huawei Android 旧版 系统浏览器，如果url 不是 .png等 结尾。不会显示图像
+	return bytes  # huawei Android 旧版 系统浏览器，如果url 不是 .png等 结尾。不会显示图像
 	# return response,image,bytes
 
 def flask_screenshot_response(response,rect=py.No('rect=[x,y,x1,y1] or auto get clipboard or full_screen '),**ka):
@@ -1030,14 +1031,42 @@ map_location=address_coordinate
 	
 	
 	
+def jsonwhois_com(domain,key=py.No('get_or_input',no_raise=True),raw_response=False):
+	
+	import requests
+	U,T,N,F=py.importUTNF()
+	domain=T.get_fld(domain)
+	url="https://jsonwhois.com/api/v1/whois"
+	if not key:
+		key=U.get_or_input(url,type=py.str)
+	
+	response = requests.get(url,
+
+	   headers={
+		  "Accept": "application/json",
+			"Authorization": key
+		  },
+
+	   params={
+		   "domain": domain
+		})
+	if raw_response:return response
+	try:
+		return response.json()
+	except Exception as e:
+		return py.No(e,response.text[:26],response)
+
 def whois(domain,raw_response=False):
 	'''
+ 域名状态: clientTransferProhibited ( 禁止转移) renewPeriod ( 禁止自动续费). 
+ 
 In [59]: [i for i in dw if 'admin_name' not in dw[i] ] #58643
 ['csfangyi.com', 'xn--xuw24ggz9aile.cn', '06jd.com', 'yzy88.com', 'cshelong.com']
 
 ''' 
 	T=py.importT()
 	import requests
+	domain=T.get_fld(domain)
 	cookies = {	'st': '95f5609d7aaadb13806df43e2ca1961c',	}
 	headers = {
 		'Pragma': 'no-cache',
@@ -1056,13 +1085,15 @@ In [59]: [i for i in dw if 'admin_name' not in dw[i] ] #58643
 	}
 
 	data = {'domain': domain,  'isRefresh': '1'}
-	response=requests.post('http://whois.4.cn/api/main',headers=headers,cookies=cookies,data=data)
-	json=T.json_loads(response.content.decode('utf-8'))
-	response.close()
-	if raw_response:
-		json['raw_response']=response
-	return json
-	
+	try:
+		response=requests.post('http://whois.4.cn/api/main',headers=headers,cookies=cookies,data=data)
+		json=T.json_loads(response.content.decode('utf-8'))
+		response.close()
+		if raw_response:
+			json['raw_response']=response
+		return json
+	except Exception as e:
+		return py.No(e)
 	
 def bulk_whois(domain_list,args):
 	import requests,json,logging
@@ -1119,7 +1150,7 @@ def bulk_whois(domain_list,args):
 							data=json.dumps(data))
 	with open(args.output + '.json','w') as json_file:
 		json.dump(json.loads(response.text),json_file)
-
+		print(json_file)
 	# download csv data
 	time.sleep(args.interval)
 	with open(args.output + '.csv', 'wt') as csv_file:
@@ -1131,6 +1162,7 @@ def bulk_whois(domain_list,args):
 			# remove blank lines
 			if clear_line != '':
 				csv_file.write(clear_line + '\n')
+		print(csv_file)		
 ################### whois end #####################
 
 
@@ -1262,7 +1294,7 @@ def auto_ip(ip,ip2=py.No('192.168',no_raise=1),ip1=py.No('2',no_raise=1),**ka):
 		
 	return ip
 
-def setIP(ip='',adapter='',gateway='',source='dhcp',mask='',ip2=192.168,dns=py.No('auto use gateway') ):
+def setIP(ip='',adapter='',gateway='',source='dhcp',mask='',ip2=192.168,dns=py.No(msg='auto use gateway',no_raise=True) ):
 	'''配置的 DNS 服务器不正确或不存在。   # 其实已经设置好了，可以正常使用'''
 	U,T,N,F=py.importUTNF()
 	if U.islinux():
@@ -1316,10 +1348,14 @@ def setIP(ip='',adapter='',gateway='',source='dhcp',mask='',ip2=192.168,dns=py.N
 	else:
 		ip=''
 	r=[ 'netsh interface ip set address name={0} source={1} {2} {3} {4} '.format(adapter,source,ip,mask,gateway),
+		'netsh interface ip set dnsservers name={0} source=dhcp'.format(adapter,)
 		]
 	if dns:
 		dns='netsh interface ip set dnsservers name={0} source={1} {2}'.format(adapter,source,dns)
-		r.append(dns)
+		if 'dnsservers' in r[-1]:
+			r[-1]=dns
+		else:
+			r.append(dns)
 	import os
 	for i in r:
 		os.system(i)

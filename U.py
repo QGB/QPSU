@@ -131,19 +131,26 @@ def get(name='_',default=None,level=gd_sync_level['process']):
 			default=py.No('can not get name '+py.repr(name),no_raise=True)
 		return d.get(name,default)
 	#TODO
+def get_multi_return_list(*names,**ka):
+	r=[]
+	for name in names:
+		r.append( get(name) )
+	for name,default in ka.items():
+		r.append( get(name,default=default) )
+	return r	
 	
 def input_and_set(name,default=py.No('auto get last',no_raise=1),default_function=lambda a:a,**ka):
 	r=get(name)
 	if not py.isno(r) and py.isno(default):
 		default=r
 		if py.callable(default_function):default=default_function(r)
-	return set(name,input('%s :'%name,default=default,**ka))
+	return set(name, input('%s :'%name,default=default,**ka))
 inset=set_and_input=set_input=input_set=input_or_set=input_and_set		
 	
-def get_or_set_input(name,default=''):
+def get_or_set_input(name,default='',type=None):
 	r=get(name)
 	if r:return r
-	return set(name,input('%s : '%name,default=default) )
+	return set(name,input('%s :'%name,default=default,type=type) )
 get_input=getInput=getOrInput=get_or_input=get_or_set_input
 
 def get_or_set(name,default):
@@ -1832,13 +1839,17 @@ def add(*a):
 		else:
 			raise NotImplementedError('not num type')
 	return r		
-def max_len(*a):
+def max_len(*a,return_value=False):
 	'''  max( *map(len,U.col(lr,5)) ) '''
 	if py.len(a)==1:a=flat(a)
 	im=-1
 	for i in a:
-		i=len(i)
-		if i>im:im=i
+		n=len(i)
+		if n>im:
+			im=n
+			v=i
+	if return_value:
+		return v
 	return im
 maxLen=max_len	
 	
@@ -2398,7 +2409,7 @@ def getDate():
 	return datetime.now().date()
 date=getdate=getDate
 	
-def getFloaTail(a,**ka):
+def get_float_tail(a,**ka):
 	'''  ,ndigits=20,str=False,int=False  # default return float
 	
 	see help(round)
@@ -2430,46 +2441,109 @@ Out[79]: 0.296
 			return py.int(py.str(a)[2:])#
 		return a	#default
 	else:
-		return py.No('Not float')		
+		return py.No('Not float')	
+getFloaTail=get_float_tail
+		
 def stime_(time=None,ms=True):
 	r=getStime(time=time,ms=ms)
 	return T.regexReplace(r,'[^0-9_]','_')
 	
-gsTimeFormatFile='%Y-%m-%d__%H.%M.%S'
+gsTimeFormatFile=get_or_set('gsTimeFormatFile','%Y-%m-%d__%H.%M.%S')
 gsymd=gsYMD=gsTimeFormatYMD='%Y%m%d'
 gsTimeFormat='%Y-%m-%d %H:%M:%S'
 #ValueError: year=1 is before 1900; the datetime strftime() methods require year >= 1900
-
-def getStime(time=None,format=gsTimeFormatFile,ms=True):
+def str_to_datetime(a):
+	try:
+		import dateutil
+		return dateutil.parser.parse( a)
+	except ModuleNotFoundError as e:
+		print(e)
+	except Exception as e:
+		pass
+	###		
+	try:
+		import datefinder
+		r=py.list(datefinder.find_dates( a) )
+		
+		if py.len(r)==1:return r[0]
+		
+	except ModuleNotFoundError as e:
+		print(e)
+	except Exception as e:
+		pass
+	if '.' in a and '_' in a:
+		ms=0
+		if all_in(a[-4:],T._09+'.'):
+			ms=T.sub(a[-4:],'.')
+			n=0-py.len(ms) # .a[n] in 0-9
+			ms=py.int(ms)
+			while n<0:
+				n=n-1  
+				if a[n] in T._09:
+					break
+			else: #n >=0 aka n==0
+				n=py.len(a)
+			a=a[:n]
+		a=a.replace('.',':').replace('_',' ')
+		dt= str_to_datetime(a)
+		dt=dt.replace(microsecond=ms)
+		return dt
+		#datetime是不可变对象，要修改只能 dt.replace
+	# if py.len(a)>22:return str_to_datetime(a[:22])
+	raise py.ArgumentError(a)
+		
+try_parse_stime=str_to_datetime
+	
+def get_time_as_str(time=None,format=gsTimeFormatFile,ms=True):
 	'''http://python.usyiyi.cn/translate/python_278/library/time.html#time.strftime
-	TODO: 可以指定 ms'''
+	TODO: 可以指定 ms
+U.stime(0.0005)
+'1970-01-01__08.00.00__.001'
+
+U.stime(0.0004)
+'1970-01-01__08.00.00__.0'	
+	'''
 	if not py.istr(format):raise ValueError('format is str')
 	
 	import time as tMod
-	
-	# if ':' in format:format=gsTimeFormatFile.replace('.',':')
-	
-	if not py.isnum(time):time=getTimestamp()#TODO:  转换 字符串 或其他时间格式
-	if not time:time=0.000001
-	if py.type(time) is not py.float:time=py.float(time)
+	import datetime
+	ms_tail=0
+	if py.isinstance(time,tMod.struct_time):
+		pass
+	elif py.isinstance(time,datetime.datetime):
+		ms_tail=time.microsecond 
+		time=time.timetuple()
+	elif py.istr(time):
+		time=str_to_datetime(time).timetuple()
+	elif py.isnum(time):
+		if py.type(time) is not py.float:time=py.float(time)		
+		if time > IMAX:
+			time=time/1000
+		ms_tail=get_float_tail(time,ndigits=3,int=True)
+				
+		time=tMod.localtime(time) #return time.struct_time
+	elif not time:
+		time=getTimestamp()#TODO:  转换 字符串 或其他时间格式
+		return get_time_as_str(time)
+	else:
+		raise py.ArgumentUnsupported(time)
 	if format=='':return str(time)
 	
 	if '%' in format:
 		if time:
-			if time > IMAX:
-				time=time/1000
 				# print(type(time ),getFloaTail(time,ndigits=3,s=True) )
-			r=tMod.strftime(format,tMod.localtime(time))
+			r=tMod.strftime(format,time)
 #localtime: time.struct_time(tm_year=1970, tm_mon=1, tm_mday=1, tm_hour=8,....
-			if ms and py.isfloat(time):
+			if ms :
+				ms_tail='%03d'%ms_tail
 				if '__' in format:
-					if not r.endswith('__'):r+='__'
-				# else:#r endswith '.' 
-					# pass
-				r+=getFloaTail(time,ndigits=3,s=True)#include dot .
+					ms_tail='__.'+ms_tail
+				else:
+					ms_tail='.'+ms_tail
+				r+=ms_tail
 			return r
 		else:return tMod.strftime(format)
-stime=getCurrentTimeStr=timeToStr=getStime
+stime=getCurrentTimeStr=timeToStr=getStime=get_time_as_str
 
 def parse_time_str(a,format='%Y-%m-%d__%H.%M.%S'):
 	import time
@@ -2974,9 +3048,9 @@ def _len(obj):
 
 len_generator=generator_len=_len
 
-def len(obj,*other):
+def len(obj,*other,index=False):
 	'''Exception return py.No or [no...]'''
-	return FuncWrapForMultiArgs(f=_len,args=(obj,other) )# ,default=default
+	return FuncWrapForMultiArgs(f=_len,args=(obj,other),index=index )# ,default=default
 
 def _hash(obj):
 	if py.islist(obj):
@@ -3000,19 +3074,20 @@ def bin(obj,*other):
 	return FuncWrapForMultiArgs(f=py.bin,args=(obj,other))
 	
 	
-def FuncWrapForMultiArgs(f,args,default=None):
+def FuncWrapForMultiArgs(f,args,default=None,index=False):
 	'''Exception return py.No'''
 	obj,other=args ########## other is tuple
 	all=py.list(other)
 	all.insert(0,obj)
 	r=[]
-	for i in all:
+	for n,i in py.enumerate(all):
 		try:
 			r1=f(i)
 		except Exception as e:
 			if default!=None:
 				r1=default
 			r1=py.No(e)
+		if index:r1=(n,r1)
 		r.append(r1)
 	if other:
 		return r
@@ -3569,7 +3644,7 @@ sdate=stoday=getdatestr=getDateStr
 # sys.argv=['display=t','pressKey=t','clipboard=f']
 def getAST(mod):
 	import ast,inspect
-	return ast.parse(getSource(mod))
+	return ast.parse(inspect.getsource(mod))
 getModAST=getAST
 
 def argspec_to_str(a):
@@ -4970,7 +5045,10 @@ U.set('hotkey_f',f)
 hotkey=hot_key=registe_hotkey=bind_hotkey=register_hotkey	
 	
 	
-def get_svg_qrcode(text=py.No(msg='auto get clipboard'),file=py.No('auto using text'),title=py.No(msg='svg html title auto using text'),scale=8,browser=True,return_bytes=False,response=None,tb='',**ka):
+def get_svg_qrcode(text=py.No(msg='auto get clipboard',no_raise=True),
+	file=py.No('auto using text',no_raise=True),
+	title=py.No(msg='svg html title auto using text',no_raise=True),
+	scale=8,browser=True,return_bytes=False,response=None,tb='',**ka):
 	'''Signature:
 q.svg(
     file, : stream_or_path 
@@ -5000,17 +5078,22 @@ text直接传入 title 有问题 , T.html_encode fix it：
 	if not text and tb:
 		t='https://item.taobao.com/item.htm?'
 		if py.istr(tb) and t in tb:
-			text=tb+'&fpChannel=9'
-		elif py.isint(tb) or U.all_in(tb,T._09):
-			text=it+'fpChannel=9&id=%s'%tb
+			# text=tb+'&fpChannel=9'
+			tb=T.regexMatchOne(tb,r'(?<=[\?\&]id=)\d{6,}','\d{6,}')
+		if py.isint(tb) or U.all_in(tb,T._09):
+			text=t+'fpChannel=9&id=%s'%tb
 		if not title:
-			r=N.HTTP.request(text)
-			bs=T.beautifulSoup(r.text)
-			title=bs.select('title')
-			if title:
-				title=title[0].text
-				print(title)
-			else:title=U.stime()
+			r=N.HTTP.request(text.replace('://item.','://www.'),Host='item.taobao.com',no_raise=True)
+			if r:
+				bs=T.beautifulSoup(r.text)
+				title=bs.select('meta[name="keywords"]')
+				if title:
+					title=title[0].get('content')
+					print('tb:[',title,']')
+				else:
+					# title=py.repr([r,r.text])
+					title='##Unexpect '+U.stime()
+			else:title=T.pformat(r.a)
 	if not text:
 		if p:raise py.ArgumentError('not get text',tb,response)
 		text=U.cbg(e=1)
@@ -5033,10 +5116,27 @@ text直接传入 title 有问题 , T.html_encode fix it：
 	q.svg(file=file,scale=scale,title=title)  # None 
 	if return_bytes or response:
 		b=file.getvalue()
-		# b=b'<html> %s </html>' % b # useless
+		if tb:
+			b=b.decode('utf-8')
+			# title=T.html_encode(title)
+			b=r'''<html>
+<head><title>%(title)s</title></head> 
+<body> 
+	<script>
+		var url=window.location.href
+		var i=url.indexOf('\4523-') // N.geta '\45'
+		if(i!=-1){
+			window.history.pushState('state', 'title', url.substring(0,i+4)+"%(text)s")
+		}
+	</script>
+	<h5 style="color:red;margin: 0;"> %(title)s </h6>
+	%(b)s
+</body></html>''' % py.locals()
+			# i=b.find(b'<path ')
+			# b=b[:i]+b'<text fill="red" x="0" y="20" >'+title.encode('utf-8')+b'</text>'+b[i:]
 		if response:
-			# response.headers['Content-Type']='text/html;charset=utf-8'
-			response.headers['Content-Type']='image/svg+xml;charset=utf-8'
+			if tb:response.headers['Content-Type']='text/html;charset=utf-8'
+			else :response.headers['Content-Type']='image/svg+xml;charset=utf-8'
 			response.set_data(b)
 		return b
 	if browser:U.browser(file)

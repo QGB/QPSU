@@ -188,9 +188,12 @@ async function tab_remove(tab){
    })
 }
 
-async function get_cookies(filter){
+async function get_cookies(filter={},target=chrome.cookies.getAll){
+	if(typeof filter==='string'){
+		filter={'domain':filter}
+	}
 	return new Promise(function (resolve, reject) {
-		chrome.cookies.getAll(filter,function(cookies) { 
+		target(filter,function(cookies) { 
 			resolve(cookies)
 		})
 	})	

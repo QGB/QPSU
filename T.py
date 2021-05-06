@@ -411,13 +411,23 @@ def diff_bytes(b1,b2,p=True):
 	return rf
 diffb=diffBytes=diff_bytes
 
-def diff(expected, actual,p=True):
+def diff(expected, actual,p=True,pformat=False):
 	"""
 	Compare two sequences of lines; generate the delta as a unified diff.
 	Helper function. Returns a string containing the unified diff of two multiline strings.
 	"""
 
 	import difflib
+	if pformat:
+		U,T,N,F=py.importUTNF()
+		pformat=T.pformat
+		try:
+			pformat=py.from_qgb_import('ipy').pformat
+		except:pass
+		if not py.istr(expected):
+			expected=pformat(expected)
+		if not py.istr(actual):
+			actual=pformat(actual)
 	expected=expected.splitlines(1)
 	actual=actual.splitlines(1)
 
@@ -562,7 +572,12 @@ Out[513]:
 
 def getFLD(url_or_domain,fix_protocol=True):
 	"""Extract the first level domain.
-	
+# Source path of Mozilla's effective TLD names file.
+NAMES_SOURCE_URL = 'http://mxr.mozilla.org/mozilla/source/netwerk/dns/src/' \
+                   'effective_tld_names.dat?raw=1'
+
+# Relative path to store the local copy of Mozilla's effective TLD names file.
+NAMES_LOCAL_PATH = 'res/effective_tld_names.dat.txt'	
 	"""
 	import tld
 	try:
@@ -664,6 +679,7 @@ def html_prettify(html, formatter="html5",p=py.No('auto')):
 nice_html=htmlBeautify=html_beautify=html_prett=pretty_html=html_pretty=prettify_html=html_prettify
 
 def BeautifulSoup(html):
+	if not html:return html
 	from bs4 import BeautifulSoup
 	t=py.str(py.type(html) )
 	if 'requests.models.Response' in t:
@@ -1239,6 +1255,7 @@ json_dump=json_dumps
 
 def string(a,decode=''):
 	'''return unicode'''
+	# if py.istr(a):return a # 
 	if py.is2():
 		if py.type(a) is py.str and decode:return a.decode(decode)
 		U=py.importU()
@@ -1298,18 +1315,22 @@ istr=isStr=isString
 
 def sub_head(s,s1,s2=''):
 	if(s==None):return ()
-	if not istr(s):s=str(s)
+	if py.isbytes(s):
+		null=b''
+	else:
+		s= string(s)
+		null=''	
 	i1=s.find(s1)
-	if(s2==''):
+	if not s2:
 		i2=s.__len__()
 	else:
 		i2=s.find(s2,i1+len(s1))
 	if(-1==i1 or -1==i2):
-		return ''
+		return null
 	i1+=len(s1)
 	# U.pln( i1,i2
 	return s[i1:i2]
-subLeft=subl=sub=sub_head
+subh=sub_left=subLeft=sub=sub_head
 
 def sub_tail(s,s1,s2=''):
 	'''
@@ -1317,21 +1338,24 @@ T.subLast('C:/test/list_bought_items.htm/10_15_知乎周源_list_bought_items.ht
 应该等于 	知乎周源
 '''	
 	if(s==None):return ()
-	if not py.istr(s):
-		s=str(s)
+	if py.isbytes(s):
+		null=b''
+	else:
+		s= string(s) # def string(a
+		null=''
 	i1=0
 	if s2:
 		i2=s.rfind(s2)
-		if i2==-1:return ''
+		if i2==-1:return null
 		if s1:
 			i1=s[:i2].rfind(s1)
-			if i1==-1:return ''
+			if i1==-1:return null
 			i1+=len(s1)
 		else:
 			i1=0
 	else:
 		i1=s.rfind(s1)
-		if i1==-1:return ''
+		if i1==-1:return null
 		i1+=len(s1)
 		i2=s.__len__()
 	return s[i1:i2] 
@@ -1345,7 +1369,7 @@ T.subLast('C:/test/list_bought_items.htm/10_15_知乎周源_list_bought_items.ht
 	# i1+=len(s1)
 	# U.pln( i1,i2
 	# return s[i1:i2]
-sub_last=subLast=subr=subRight=sub_tail
+subt=sub_last=subLast=subr=sub_right=subRight=sub_tail
 	
 def replace_all_space(a,to='',target=r"\s+"):
 	'''  多个连续空白字符会 缩减成 一个空格

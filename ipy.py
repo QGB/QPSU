@@ -241,7 +241,7 @@ if getattr(U,'Win',0):
 #is2 py:2.713 ipy:5.1 at[2018-05-13 10:26:35.049] G:/test/ipy/   #len 57
 #is3 py:3.63 ipy:6.1 at[2018-05-13 10:32:01.078] G:/test/ipy/    #56
 
-def save(file=None,lines=-1,tryExcept=False,out=False,columns=70,overide=True):
+def save(file=None,lines=-1,tryExcept=False,out=False,columns=70,overide=True,del_other=False):
 	'''file is str or (mod a)
 	在没有ipython实例时，不能get_ipython()
 	当file被指定时，overide 参数无效'''
@@ -330,9 +330,15 @@ def save(file=None,lines=-1,tryExcept=False,out=False,columns=70,overide=True):
 	# gipy.magic(u'save save.py 0-115')
 	# U.pln(gIn
 	# U.pln(gOut.keys()
-	
-	gdTimeName[U.time()]=file.name
 	file.close()
+	gdTimeName[U.time()]=file.name
+	
+	
+	if del_other:
+		for t,f in gdTimeName.items():			
+			if f == file.name:continue
+			print('del:',U.stime(t),F.delete(f) or [f,False])
+			
 	return '{0} {1} success!'.format(save.name,file.name)
 save.name='{0}.{1}'.format(__name__,save.__name__)
 
@@ -374,3 +380,6 @@ def _seq_pprinter_factory(start, end, basetype):
 	return inner
 
 
+def test(*a,**ka):
+	co=sys._getframe().f_back.f_code
+	return co
