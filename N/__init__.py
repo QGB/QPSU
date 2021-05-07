@@ -375,9 +375,10 @@ def rpcGetVariable(varname,base=py.No('auto history e.g. [http://]127.0.0.1:2357
 			return py.No(e,url,b)
 rpc_get=rpc_get_var=rpcGetVariable
 
-def rpcSetVariable(*obj,base=py.No('auto history e.g. [http://]127.0.0.1:23571[/../] '),timeout=9,varname='v',**ka):
+def rpcSetVariable(*obj,base=py.No('auto history e.g. [http://]127.0.0.1:23571[/../] '),timeout=9,varname='v',ext_cmd='',pr=False,**ka):
 	U,T,N,F=py.importUTNF()
-	ext_cmd=U.get_duplicated_kargs(ka,'ext_cmd','cmd','extCmd','other_cmd')
+	ext_cmd=U.get_duplicated_kargs(ka,'ext_cmd','cmd','extCmd','other_cmd',default=ext_cmd)
+	varname=U.get_duplicated_kargs(ka,'v','V','name','var_name','var',default=varname)
 	
 	if len(obj)==1 and ',' not in varname:
 		obj=obj[0]
@@ -394,6 +395,8 @@ def rpcSetVariable(*obj,base=py.No('auto history e.g. [http://]127.0.0.1:23571[/
 	# dill_dump=F.dill_dump
 	print(url)
 	b=post(url,verify=False,timeout=timeout,data=F.dill_dump(obj)) # data=list:TypeError: cannot unpack non-iterable int object
+	if pr:
+		print(U.v.N.HTTP.post(url,verify=False,timeout=timeout,data=U.v.F.dill_dump(obj)) )
 	if not b:return b
 	if not py.isbytes(b):
 		b=b.content

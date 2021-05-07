@@ -71,6 +71,48 @@ try:
 	import win32gui
 except Exception as ei:pass
 
+
+def win32_shellcopy(src, dest):
+	"""
+	Copy files and directories using Windows shell.
+
+	:param src: Path or a list of paths to copy. Filename portion of a path
+				(but not directory portion) can contain wildcards ``*`` and
+				``?``.
+	:param dst: destination directory.
+	:returns: ``True`` if the operation completed successfully,
+			  ``False`` if it was aborted by user (completed partially).
+	:raises: ``WindowsError`` if anything went wrong. Typically, when source
+			 file was not found.
+
+	.. seealso:
+		`SHFileperation on MSDN <http://msdn.microsoft.com/en-us/library/windows/desktop/bb762164(v=vs.85).aspx>`
+	"""
+	from win32com.shell import shell, shellcon
+	U,T,N,F=py.importUTNF()
+	if py.istr(src):  # in Py3 replace basestring with str
+		src = F.abspath(src).replace('/','\\')
+	else:  # iterable
+		src = '\0'.join(F.abspath(path) for path in src)
+
+	result, aborted = shell.SHFileOperation((
+		0,
+		shellcon.FO_COPY,
+		src,
+		F.abspath(dest).replace('/','\\'),
+		shellcon.FOF_NOCONFIRMMKDIR,  # flags
+		None,
+		None))
+
+	if not aborted and result != 0:
+		# Note: raising a WindowsError with correct error code is quite
+		# difficult due to SHFileOperation historical idiosyncrasies.
+		# Therefore we simply pass a message.
+		raise WindowsError('SHFileOperation failed: 0x%08x' % result)
+
+	return not aborted	
+copy=win32_shellcopy
+
 def mkfifo(path):
 	'''
 os.mkfifo(path, mode=438, *, dir_fd=None)

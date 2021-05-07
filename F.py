@@ -308,7 +308,7 @@ def getMode(file):
 		return py.No(e)
 getmode=	getMode
 	
-def copy(src,dst):
+def copy(src,dst,src_base='',skip=''):
 	r''' src : sFilePath , list ,or \n strs
 dst:sPath
 	'''
@@ -318,16 +318,41 @@ dst:sPath
 		if '\n' in src:
 			src=src.splitlines()
 			return copy(src,dst)
-		return _copy(src,dst)
+		if src[-1] in ['/','\\']:
+			src=F.ls(src,r=1)
+		else:
+			return _copy(src,dst)
+	if not src_base:
+		U,T,N,F=py.importUTNF()
+		dl=U.unique(U.len(*src),ct=1)
+		min=py.min(*dl)
+		f=[i for i in src if py.len(i)==min][0]
+		if f[-1] in ['/','\\']:f=f[:-1]
+		# Path(f).absolute().parent.absolute().__str__()
+		src_base=f[:py.len(T.sub_last(f.replace('\\','/'),'','/') )+1]
+		src_base_len=py.len(src_base)
+	print('src_base: %r'%src_base,'len(src)==%s'%py.len(src))
+	while dst[-1] not in ['/','\\']:
+		dst=U.input('not dir! rewrite dst:',default=dst)
 	if py.iterable(src):
 		fns=[]
+		skips=[]
 		for i in src:
-			fn=getName(i)
-			if fn in fns:
-				fn=T.fileName(i)
+			if skip and skip in i:
+				skips.append(i)
+				continue
+			# fn=getName(i)
+			# if fn in fns:
+				# fn=T.fileName(i)
+			fn=i[src_base_len:]
+			if fn[-1] in ['/','\\']:
+				mkdir(dst+fn)
+			else:	
+				_copy(i,dst+fn)
 			fns.append(fn)
-			_copy(i,getPath(dst)+fn)
+		if skips:return skips,fns	
 		return fns
+	raise py.ArgumentUnsupported(src)
 def modPathInSys(mod=None):
 	if mod:
 		if not py.istr(mod):mod=mod.__file__
@@ -1249,7 +1274,7 @@ write success, read failed ?
 			fn=u"\\\\?\\" + fn    
 	return fn
 	
-def abs(file):
+def abs_path(file):
 	'''In [165]: gs ###notice Users/Admin
 Out[165]: '\\\\?\\C:\\Users/Administrator\\.gradle\\caches\\3.3\\scripts-remappe
 d\\sync_local_repo10406_a5s4kku7mncoj5pzsbgck2y4v\\6oxfw7eb7mpz692y3xnywccj1\\in
@@ -1263,7 +1288,8 @@ ed\\sync_local_repo10406_a5s4kku7mncoj5pzsbgck2y4v\\6oxfw7eb7mpz692y3xnywccj1\\i
 nit1efd45104ffa2d33563b85b9edda76e3\\classes\\sync_local_repo10406_a5s4kku7mncoj
 5pzsbgck2y4v$_run_closure1$_closure2$_closure4$_closure5.class'''
 	return _p.abspath(file).replace('\\','/')
-		
+abs=abspath=abs_path		
+
 def isAbs(file):
 	'''in cygwin:
 In [43]: U.path.isabs( 'M:/Program Files/.babun/cygwin/lib/python2.7/qgb/file/attr.html')
@@ -1303,7 +1329,9 @@ def dir(a):
 	#TODO a 为文件夹 应该直接返回
 	return _p.dirname(a)
 	# exit()
-
+def get_parent_dir(a):
+	return
+	
 # def open(file, mode='r', buffering=-1, encoding=None, errors=None, newline=None, closefd=True, opener=None):
 	'''py2 from io import open
 ----> 1 open(file, mode='r', buffering=-1, encoding=None, errors=None, newline=None, closefd=True, opener=None)

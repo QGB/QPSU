@@ -4525,7 +4525,7 @@ def get_2D_list_max_min_wcswidth(lr):
 		tj.append([i,min,max,imin,imax,lr[imin][i],lr[imax][i] ])
 	return tj
 
-def pip_install(modName,args=[' -i', 'http://pypi.douban.com/simple', '--trusted-host', 'pypi.douban.com']):
+def pip_install(modName,args=[' -i', 'http://pypi.douban.com/simple', '--trusted-host', 'pypi.douban.com'],pip_main=None):
 	''' #TODO 在同一个进程内 pipInstall 只能运行一次
 	
 清华大学 :https://pypi.tuna.tsinghua.edu.cn/simple/
@@ -4553,10 +4553,11 @@ Could not install packages due to an EnvironmentError: [Errno 2] No such file or
 Out[81]: 1
 #######################
 '''
-	from pip.__main__ import _main as pip
-	if py.version>3.9 or py.len(py.str(py.version))>4:
-		from pip._internal.cli.main import main as pip
-	return pip(['install',*args,modName])
+	if not pip_main and (py.version>3.9 or py.len(py.str(py.version))>4 ):
+		from pip._internal.cli.main import main as pip_main
+	if not pip_main:	
+		from pip.__main__ import _main as pip_main
+	return pip_main(['install',*args,modName])
 pip=pipInstall=pip_install
 	
 def pip_clean_cache():
