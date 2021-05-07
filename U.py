@@ -2453,6 +2453,8 @@ gsymd=gsYMD=gsTimeFormatYMD='%Y%m%d'
 gsTimeFormat='%Y-%m-%d %H:%M:%S'
 #ValueError: year=1 is before 1900; the datetime strftime() methods require year >= 1900
 def str_to_datetime(a):
+	''' #TODO:  转换 字符串 或其他时间格式
+	''' 	 
 	try:
 		import dateutil
 		return dateutil.parser.parse( a)
@@ -2523,7 +2525,7 @@ U.stime(0.0004)
 				
 		time=tMod.localtime(time) #return time.struct_time
 	elif not time:
-		time=getTimestamp()#TODO:  转换 字符串 或其他时间格式
+		time=getTimestamp()
 		return get_time_as_str(time)
 	else:
 		raise py.ArgumentUnsupported(time)
@@ -4523,7 +4525,7 @@ def get_2D_list_max_min_wcswidth(lr):
 		tj.append([i,min,max,imin,imax,lr[imin][i],lr[imax][i] ])
 	return tj
 
-def pip_install(modName):
+def pip_install(modName,args=[' -i', 'http://pypi.douban.com/simple', '--trusted-host', 'pypi.douban.com']):
 	''' #TODO 在同一个进程内 pipInstall 只能运行一次
 	
 清华大学 :https://pypi.tuna.tsinghua.edu.cn/simple/
@@ -4552,13 +4554,9 @@ Out[81]: 1
 #######################
 '''
 	from pip.__main__ import _main as pip
-
-	return pip(['install',
-' -i',
-'http://pypi.douban.com/simple',
-'--trusted-host',
-'pypi.douban.com',	
-	modName])
+	if py.version>3.9 or py.len(py.str(py.version))>4:
+		from pip._internal.cli.main import main as pip
+	return pip(['install',*args,modName])
 pip=pipInstall=pip_install
 	
 def pip_clean_cache():
@@ -5490,7 +5488,10 @@ class ValueOfAttr(py.object):
 
 		self.__child__= ValueOfAttr(parent=self)
 		return self.__child__
-
+	def __getitem__(self, key):
+		self.__name__='[%r]'%key
+		self.__child__= ValueOfAttr(parent=self)
+		return self.__child__
 	def __call__(self, *args, **kwargs):
 		# return print_stack()
 		r='('
@@ -5517,7 +5518,11 @@ class ValueOfAttr(py.object):
 		# return stime()
 		# if self.__name__=
 		# log([self.__parent_str__(),self.__name__])
-		return self.__parent_str__()+self.__name__
+		sp=self.__parent_str__()
+		if self.__name__.startswith('[') and sp.endswith('.'):
+			sp=sp[:-1]
+		return sp+self.__name__
+	
 v=ValueOfAttr()
 
 class AttrCallNo:

@@ -13,7 +13,12 @@ from requests import request as send_request
 from flask import Flask,request,make_response
 
 use_cache=True
+dump=True
 replace_domain=True
+skip_response_headers={
+	'Transfer-Encoding': 'chunked',
+	'transfer-encoding': 'chunked',
+}
 gdreplace={}
 gencoding='utf-8'
 base_host=b'' # bytes flask_request.host
@@ -37,15 +42,19 @@ if target_base_url:print( config(target_base_url) )
 ips=F.dill_load('ips') or []
 ipsn=F.dill_load('ipsn') or []
 
-def target_to_flask_response(target,flask_request=None):
+def target_to_flask_response(target,response=None,flask_request=None):
 	global base_host
-	response=make_response()
+	if not response:response=make_response()
 	response.status_code=target.status_code
-	response.headers._list=list(target.headers.items())
+	for k,v in target.headers.items():
+		if k in skip_response_headers:
+			continue
+		response.headers[k]=v
+	# response.headers._list=list(target.headers.items())
 	response.headers['Content-Security-Policy']=''
 	response.headers['Content-Encoding']=gencoding
 	b=target.content
-	if replace_domain:
+	if replace_domain and flask_request:
 		if not base_host:base_host=flask_request.host.encode(gencoding)
 		b=b.replace(btarget_host,base_host)
 		
@@ -78,7 +87,7 @@ def mirror_cache(*a,**ka):
 		if target:
 			# print()
 			# U.p('##',fn,file=sys.stderr,flush=True)
-			return target_to_flask_response(target,request)
+			return target_to_flask_response(target,flask_request=request)
 	print(U.stime(),path)	
 	send_headers={}
 	for k,v in request.headers.items():
@@ -92,8 +101,8 @@ def mirror_cache(*a,**ka):
 		url=target_base_url+path, 
 		params=request.args, headers=send_headers, )
 		
-	flask_response= target_to_flask_response(target,request)
-	F.dill_dump(protocol=4,obj=target,file=fn)
+	flask_response= target_to_flask_response(target,flask_request=request)
+	if dump:F.dill_dump(protocol=4,obj=target,file=fn)
 	return flask_response
 	
 def run(target,port=1122,currentThread=True):
