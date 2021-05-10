@@ -3124,9 +3124,9 @@ def getCallExpression(*a,**ka):
 	return r
 getCallExpr=getCallExpression
 
-def simulate_key_write(astr, delay=0,restore_state_after=True, exact=None):
+def simulate_key_write(astr, delay=0,restore_state_after=True, exact=None,**ka):
 	import keyboard
-	if not delay:delay=get_kargs_duplicated(ka,'Delay','sleep','pause','wait')
+	delay=get_kargs_duplicated(ka,'Delay','sleep','pause','wait',default=delay)
 	keyboard.write(text=astr, delay=delay, restore_state_after=restore_state_after, exact=exact)
 	return StrRepr(astr,repr='U.simulate_key_write(%r)'%astr)
 text_key=text_key_write=keyboard_write=simulate_key_write	
@@ -3606,7 +3606,7 @@ in ipy , npp() not autoReload when U.r(), But U.npp()
 	if not os.path.exists(npath):	
 		npath=getModPath()[:3]+r'QGB'+'/npp/notepad++.exe'
 	if not os.path.exists(npath):
-		npath=driverPath(r":\Program Files"+nppexe)#如果最后没有匹配到，则为 空.....
+		npath=find_driver_path(r":\Program Files"+nppexe)#如果最后没有匹配到，则为 空.....
 	if DEBUG:pln (repr(npath),nppexe)
 	# npath='"%s"'%npath
 	# print(233333333333)  # add this work?

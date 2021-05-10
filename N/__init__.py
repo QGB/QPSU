@@ -380,6 +380,11 @@ def rpcSetVariable(*obj,base=py.No('auto history e.g. [http://]127.0.0.1:23571[/
 	ext_cmd=U.get_duplicated_kargs(ka,'ext_cmd','cmd','extCmd','other_cmd',default=ext_cmd)
 	varname=U.get_duplicated_kargs(ka,'v','V','name','var_name','var',default=varname)
 	
+	if ext_cmd:
+		if '%s'     in ext_cmd:ext_cmd=ext_cmd%varname
+		if '{0}'    in ext_cmd:ext_cmd=ext_cmd.format(varname)
+		if '{name}' in ext_cmd:ext_cmd=ext_cmd.format(name=varname)
+		
 	if len(obj)==1 and ',' not in varname:
 		obj=obj[0]
 
@@ -404,9 +409,10 @@ def rpcSetVariable(*obj,base=py.No('auto history e.g. [http://]127.0.0.1:23571[/
 		b= b.decode('utf-8')
 	# if py.istr:
 	return url,b
-
 set_rpc=set_rpc_var=rpc_set=rpc_set_var=rpcSetVariable
 
+def rpc_set_file(obj,filename,name='v',**ka):
+	return rpc_set_var(obj,name=name,ext_cmd='r=F.write({filename!r},%s)'.format(filename=filename),**ka)
 
 def rpcServer(port=23571,thread=True,ip='0.0.0.0',ssl_context=(),currentThread=False,app=None,key=None,
 execLocals=None,locals=None,globals=None,
@@ -729,6 +735,23 @@ def get_chunk(full_path,byte1, byte2=None,):
 		chunk = f.read(length)
 	return chunk, start, length, file_size
 
+def get_request_range(request):
+	import re
+	range_header = request.headers.get('Range', None)
+	if not range_header:
+		range_header = request.headers.get('range', None)
+	byte1, byte2 = 0, None
+	if range_header:
+		match = re.search(r'(\d+)-(\d*)', range_header)
+		groups = match.groups()
+
+		if groups[0]:
+			byte1 = int(groups[0])
+		if groups[1]:
+			byte2 = int(groups[1])
+	return byte1,byte2
+	# raise py.ArgumentError(request)
+	
 def flask_media_stream_response(request,response,file=None,):		
 	from flask import stream_with_context
 	U,T,N,F=py.importUTNF()

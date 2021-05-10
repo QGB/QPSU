@@ -1146,7 +1146,7 @@ def makeDirs(ap,isFile=False,cd=0):
 		py.importU().log('F.md(str,isFile={})'.format(repr(isFile)))
 	if py.is3():
 		from pathlib import Path
-		p=Path(ap)
+		p=Path(ap).absolute()
 		
 		if isFile:
 			return makeDirs(p.parent,isFile=False)
