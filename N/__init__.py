@@ -247,8 +247,15 @@ OSError(10065, '套接字操作尝试一个无法连接的主机。', None, 1006
 	U,T,N,F=py.importUTNF()
 	addr=auto_ip(addr,**ka)
 	sum=U.get_duplicated_kargs(ka,'times','n',default=sum)
+	if U.isWin():
+		Win=py.from_qgb_import('Win')
+		_title=U.set('window_title',Win.get_title())
+		set_title=Win.set_title
+	else:
+		_title=''
+		set_title=lambda *a,**ka:None
 	def _return(msg,*a):
-		nonlocal set_title,_title
+		# nonlocal set_title,_title
 		set_title(title=_title)
 		if py.islist(msg):return msg
 		else:
@@ -257,13 +264,6 @@ OSError(10065, '套接字操作尝试一个无法连接的主机。', None, 1006
 	if p:
 		sv=U.v(dest_addr=addr,timeout=timeout,unit='ms',ttl=ttl,seq=seq,size=size,interface=interface)[1:-2]
 		time=U.stime()
-		if U.isWin():
-			Win=py.from_qgb_import('Win')
-			_title=U.set('window_title',Win.get_title())
-			set_title=Win.set_title
-		else:
-			_title=''
-			set_title=lambda *a,**ka:None
 		set_title(title='ping '+sv+' '+time)	
 		print(time,'%54s'%addr)
 		print(sv, )
