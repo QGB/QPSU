@@ -178,7 +178,14 @@ def get(url,file='',
 		r=requests.get(url,verify=False,timeout=timeout,headers=headers,proxies=proxies)
 		if show:
 			print(U.v.requests.get(url,verify=False,timeout=timeout,headers=U.StrRepr(U.pformat(headers)),proxies=proxies))
-		if file:return F.write(file,r.content)
+		if file:
+			u=T.url_split(url).path
+			u=T.sub_last(u,'/')
+			if py.isbool(file):
+				file=u
+			elif F.isdir(file):
+				file=file+u
+			return F.write(file,r.content)
 		#TODO decode
 		if 'text' in r.headers.get('Content-Type','').lower():
 			return T.autoDecode(r.content)

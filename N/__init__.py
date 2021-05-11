@@ -259,7 +259,11 @@ OSError(10065, '套接字操作尝试一个无法连接的主机。', None, 1006
 		if U.isWin():
 			Win=py.from_qgb_import('Win')
 			_title=U.set('window_title',Win.get_title())
-			Win.set_title(title='ping '+sv+' '+time)
+			set_title=Win.set_title
+		else:
+			_title=''
+			set_title=lambda *a,**ka:None
+		set_title(title='ping '+sv+' '+time)	
 		print(time,'%54s'%addr)
 		print(sv, )
 		print('-'*80)
@@ -1457,7 +1461,93 @@ def scanPorts(host,threadsMax=33,from_port=1,to_port=65535,callback=None,ip2=192
 		# return callback
 	[x.join() for x in threads]
 	return [counting_open,counting_close,errors]
-	
+
+def traceroute(target,maxttl=60):
+	''' '''
+	from scapy.layers.inet import traceroute
+	from scapy.layers.inet import traceroute_map
+
+	# ans,unans = answered,unanswered packets list
+	# They are of type TracerouteResult defined in scapy/inet.py
+	# each entry in ans is a 2-entry tuple = send,recv packet
+	ans,unans = traceroute(target, maxttl=maxttl, verbose=0)
+	index = len(ans)
+	for i,v in enumerate(ans):
+		if v[0].dst == v[1].src:
+			index = i
+			break
+
+	# scapy parallelly sends requests for all TTL's and stores results from them.
+	# Removing redundant entries after the packet reaches destination
+	ans = ans[0:index+1]
+
+
+	print("List of answered packets:")
+	if ans:
+		print()
+		print("Target: {}:".format(ans[0][0].dst))
+	for s,d in ans:
+		src = s.sprintf("Hop: %03s,IP.ttl%")
+		city,country = get_location(d.src)
+		dst = d.sprintf(", Address: %15s,IP.src%, Location: "+city+","+country)
+		print(src+dst)
+
+
+	print("Thee are {} unanswered packets.".format(len(unans)))
+
+	if len(unans) != 0:
+		print("List of unanswered packets:")
+		print()
+		print("TTL  Source IP      Port")
+		for s in unans:
+			print(s.sprintf("%-03s,IP.ttl%  %IP.dst%  {TCP:%ir,TCP.dport%}{UDP:udp%ir,UDP.dport%}"))	
+	return ans,unans
+
+
+
+def Tracert_one(dst,dport,ttl_no):#发一个Traceroute包，参数需要目的地址，目的端口，TTL。
+	from scapy.all import sr1
+	import time,struct,re
+
+	send_time = time.time()#记录发送时间
+	Tracert_one_reply = sr1(IP(dst=dst, ttl=ttl_no)/UDP(dport=dport)/b'traceroute!!!', timeout = 1, verbose=False)
+	try:
+		if Tracert_one_reply.getlayer(ICMP).type == 11 and Tracert_one_reply.getlayer(ICMP).code == 0:
+			#如果收到TTL超时
+			hop_ip = Tracert_one_reply.getlayer(IP).src
+			received_time = time.time()
+			time_to_passed = (received_time - send_time) * 1000
+			return 1, hop_ip, time_to_passed #返回1表示并未抵达目的地
+		elif Tracert_one_reply.getlayer(ICMP).type == 3 and Tracert_one_reply.getlayer(ICMP).code == 3:
+			#如果收到端口不可达
+			hop_ip = Tracert_one_reply.getlayer(IP).src
+			received_time = time.time()
+			time_to_passed = (received_time - send_time) * 1000
+			return 2, hop_ip, time_to_passed #返回2表示抵达目的地
+	except Exception as e:
+		if re.match('.*NoneType.*',str(e)):
+			return None #测试失败返回None
+
+def Tracert(dst,hops):
+	# from scapy.all import *
+	import time,struct,re
+
+	dport = 33434 #Traceroute的目的端口从33434开始计算
+	hop = 0
+	while hop < hops:
+		dport = dport + hop
+		hop += 1
+		Result = Tracert_one(dst,dport,hop)
+		if Result == None:#如果测试失败就打印‘*’
+			print(str(hop) + ' *',flush=True)
+		elif Result[0] == 1:#如果未抵达目的，就打印这一跳和消耗的时间
+			time_to_pass_result = '%4.2f' % Result[2]
+			print(str(hop) + ' ' + str(Result[1]) + ' ' + time_to_pass_result + 'ms')
+		elif Result[0] == 2:#如果抵达目的，就打印这一跳和消耗的时间，并且跳出循环！
+			time_to_pass_result = '%4.2f' % Result[2]
+			print(str(hop) + ' ' + str(Result[1]) + ' ' + time_to_pass_result + 'ms')
+			break
+		time.sleep(1)
 
 if __name__=='__main__':
 	rpcServer(currentThread=True)

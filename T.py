@@ -32,6 +32,8 @@ CR='\r'
 LF=EOL=eol='\n'
 TAB=Tab=tab='\t'
 gspace=space=py.chr(0x20)
+slash='/'
+back_slash=backslash='\\'
 ######### html ######
 hr='<hr>'
 br='<br>'

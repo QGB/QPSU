@@ -109,6 +109,7 @@ gd_sync_level={
 'all':5    ,
 }
 SET_NO_VALUE=py.No('U.set value=None',no_raise=True)
+GET_NO_VALUE=py.No('U.get ',no_raise=True)
 def set(name,value=SET_NO_VALUE,level=gd_sync_level['process'],**ka):
 	if level>=gd_sync_level['process']:
 		import sys
@@ -122,13 +123,13 @@ def set(name,value=SET_NO_VALUE,level=gd_sync_level['process'],**ka):
 		import sqlite3
 	return value
 
-def get(name='_',default=None,level=gd_sync_level['process']):
+def get(name='_',default=GET_NO_VALUE,level=gd_sync_level['process']):
 	if level>=gd_sync_level['process']:
 		import sys
 		d=py.getattr(sys,'_qgb_dict',{})
 		#TODO 对于不存在的 name ，可以记录最后访问时间为 py.No，方便排查
-		if default==None:
-			default=py.No('can not get name '+py.repr(name),no_raise=True)
+		# if default==None:
+			# default=py.No('can not get name '+py.repr(name),no_raise=True)
 		return d.get(name,default)
 	#TODO
 def get_multi_return_list(*names,**ka):
@@ -138,6 +139,13 @@ def get_multi_return_list(*names,**ka):
 	for name,default in ka.items():
 		r.append( get(name,default=default) )
 	return r	
+def get_multi_return_exist_one(*names,default=GET_NO_VALUE,no_raise=True):
+	for name in names:
+		v=get(name,default=default)
+		if not (v is default):return v
+	if not no_raise:
+		raise Exception('can not U.get names:',names)
+	return default	
 	
 def input_and_set(name,default=py.No('auto get last',no_raise=1),default_function=lambda a:a,**ka):
 	r=get(name)
@@ -1322,10 +1330,13 @@ C=c=cls=clear
 
 
 def chdir(ap=gst,*a,**ka):
-	global CD_HISTORY
+	# global CD_HISTORY
 	if not ap:ap=gst
 	if not py.istr(ap):raise py.ArgumentError('ap must be str Not:{0}'.format(ap))
-	ap=path.join(ap,*a)
+	ap=os.path.join(ap,*a) # win auto add '\\'
+	ap=ap.replace('\\','/')
+	if ap[-1] not in ['\\','/']:
+		ap+='/'
 	
 	show_path=get_duplicated_kargs(ka,'p','show_path','print','print_')
 
@@ -1338,14 +1349,14 @@ def chdir(ap=gst,*a,**ka):
 	# if path.abspath(CD_HISTORY) != pwd():
 	CD_HISTORY.append(pwd())
 	
-	if path.isdir(ap):
+	if os.path.isdir(ap):
 		if show_path:
 			U=py.importU()
 			U.pln(ap)
 		os.chdir(ap);return ap#True
 	
-	app=path.dirname(ap)
-	if path.isdir(app):return chdir(app)
+	app=os.path.dirname(ap)
+	if os.path.isdir(app):return chdir(app)
 	else:pass
 		
 	if iswin() or iscyg():
@@ -1392,9 +1403,15 @@ def cdpm():
 	return cd('e:/pm')
 	
 def cdbabun(a=''):
-	s=r'C:\QGB\babun\cygwin\home\qgb/'
-	s=driverPath(s[1:])
-	return cd(s+a)
+	s=r'C:\QGB\babun\cygwin\home'+'\\'
+	# s=r'C:\QGB\babun\cygwin'+'\\'
+	s=find_driver_path(s[1:])#driverPath
+	return cd(s,a)
+def cdgit(a=''):
+	U,T,N,F=py.importUTNF()
+	p=U.get_multi_return_exist_one('git_exe','git.exe',no_raise=False)
+	p=F.dir(p)
+	return cd(p,a)
 	
 def get_current_file_dir():
 	frame=sys._getframe().f_back
@@ -3022,7 +3039,7 @@ def getModPath(mod=None,qgb=True,slash=True,backSlash=False,endSlash=True,endsla
 	else:sp=sp.replace('\\','/')
 
 	return sp
-get_qpsu_path=getQPSUPath=getQpsuPath=get_qpsu_dir=getQPSUDir=get_module_dir=get_module_path=getModPath
+get_qpsu_path=getQPSUPath=getQpsuPath=get_qpsu_dir=getQPSUDir=get_mod_dir=get_module_dir=get_module_path=getModPath
 
 def len_return_string(a,*other):
 	return py.repr(len(a,*other) )
@@ -3257,6 +3274,10 @@ def set_env_path(append=[],delete=[]):
 	os.environ['PATH']=os.pathsep.join(ps)		
 	return ps
 
+def set_env(name,value):
+	os.environ[name]=value
+	return value
+	
 def getEnviron(name='PATH'):
 	'''
 linux:
