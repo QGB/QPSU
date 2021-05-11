@@ -248,7 +248,7 @@ OSError(10065, '套接字操作尝试一个无法连接的主机。', None, 1006
 	addr=auto_ip(addr,**ka)
 	sum=U.get_duplicated_kargs(ka,'times','n',default=sum)
 	def _return(msg,*a):
-		Win.set_title(title=_title)
+		set_title(title=_title)
 		if py.islist(msg):return msg
 		else:
 			return py.No(msg,*a)
