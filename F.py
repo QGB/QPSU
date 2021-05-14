@@ -353,6 +353,8 @@ dst:sPath
 		if skips:return skips,fns	
 		return fns
 	raise py.ArgumentUnsupported(src)
+cp=copy
+	
 def modPathInSys(mod=None):
 	if mod:
 		if not py.istr(mod):mod=mod.__file__
@@ -904,7 +906,7 @@ return tuple(ap,dir_list,file_list )
 	else:
 		return _os.walk(ap).__next__()
 		
-def list(ap='.',type='',t='',r=False,d=False,dir=False,f=False,file=False):
+def list(ap='.',type='',t='',r=False,d=False,dir=False,f=False,file=False,include='',exclude='',**ka):
 	'''Parms:bool r recursion
 			 str (type,t) '(d,f,a,r)'
 	default return all'''
@@ -956,6 +958,8 @@ def list(ap='.',type='',t='',r=False,d=False,dir=False,f=False,file=False):
 			
 	if f:rls.extend(r3[2])
 	
+	if include:rls=[i for i in rls if include in i]
+	if exclude:rls=[i for i in rls if exclude not in i]
 	return rls
 	# else:return r3[1]+r3[2]
 ls=list
@@ -1118,12 +1122,21 @@ def mdcd(ap):
 	return py.importU().cd(makeDirs(ap))
 
 def move(source,target):
+	''' * in target == source
+? in target == 	source_fn
+| in target == 	
+
+	'''
 	F=py.importF()
 	source=F.autoPath(source)
 	target=F.autoPath(target)
+	source_fn=F.get_filename_from_full_path(source)
 	if target.endswith('/'):
-		n=F.getName(source)
-		target+=n
+		target+=source_fn
+	# if '*' in target:
+	target=target.replace('*',source)
+	target=target.replace('?',source_fn)
+		
 	import os
 	try:
 		os.rename(source, target)

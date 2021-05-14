@@ -5,7 +5,8 @@ else:#['T','__main__']
 	import py
 FILE_NAME=fileChars=FILE_CHARS="!#$%&'()+,-0123456789;=@ABCDEFGHIJKLMNOPQRSTUVWXYZ[]^_`abcdefghijklmnopqrstuvwxyz{}~"+' .'
 PATH_NAME=pathChars=PATH_CHARS='/\\:'+FILE_NAME# include space, dot
-NOT_FILE_NAME=r'"*/:<>?\|'
+gsNOT_FILE_NAME=NOT_FILE_NAME=r'"*/:<>?\|'
+gsNOT_FILE_NAME_LINUX=NOT_FILE_NAME_LINUX='/'+py.chr(92) # \
 
 az=a_z='abcdefghijklmnopqrstuvwxyz'
 AZ=A_Z=a_z.upper()
@@ -24,7 +25,7 @@ Hex=gshex='0123456789abcdef'
 HEX=gshex.upper()
 
 #0x20-0x7E ,32-126,len=95
-visAscii=printAscii=asciiPrint=' !"#$%&\'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~'
+visAscii=print_ascii=printAscii=asciiPrint=' !"#$%&\'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~'
 char256=''.join([chr(i) for i in range(256)])
 bytes256=byte256=b''.join( [py.byte(i) for i in range(256)  ] )
 
@@ -890,7 +891,7 @@ def netloc(url):
 		url='http://'+url
 	up=urlsplit(url=url)
 	return up.netloc
-host_name=get_url_netloc=netloc
+hostname=host_name=get_url_netloc=netloc
 
 def url_split(url):
 	from six.moves.urllib.parse import urlsplit
@@ -993,14 +994,19 @@ def regex_match_one(a,*regexs,**ka):
 	for regex in regexs:
 		r=regexMatchGroups(a,regex)
 		if r:
-			if py.len(r)>1:
+			while py.len(r)>1:
+			#T.matchRegexOne('http://3.3.32.3',T.RE_IP)==['3.3.32.3', None]
+				rt=[i for i in r if i]
+				if r!=rt:
+					r=rt
+					continue # 如果 去除 None后 len ==1 。 自动跳出while，否则 下面
 				print('#TODO :fix regex_match_one return all match list')
 				return r
 			return r[0]		
 	if raise_exception:
 		raise Exception('Not match regexs in a',a,regexs)
 	return ''
-matchRegexOne=regexMatch=regexMatchOne=regex_match_one
+match=match_one=matchRegexOne=regexMatch=regexMatchOne=regex_match_one
 
 def re_search(regex,a):
 	'''不是 research 研究 ！,跟 match()  只有参数顺序不同，方便 re.search 改写'''
@@ -1404,6 +1410,17 @@ def replace_all(a,old,new):
 		a=a.replace(old,new)
 	return a
 replaceAll=replace_all
+
+def replace_once(a,old,new):
+	''' s.replace(old, new, count=-1, /)
+s.replace('lan','==',count=1) ###  TypeError: replace() takes no keyword arguments	
+s.replace('lan','==',1) ### OK
+	'''
+	if not old:return a
+	# i=a.index(old) # raise ValueError: substring not found
+	i=a.find(old) # -1
+	if i==-1:return a
+	return a[:i]+new+a[i+py.len(old):]
 
 def index_of_multi(a,*target):
 	'''return one of target index in a

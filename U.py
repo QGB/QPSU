@@ -2455,7 +2455,9 @@ Out[79]: 0.296
 		if str:
 			return py.str(a)[1:]
 		if int:
-			return py.int(py.str(a)[2:])#
+			r=py.str(a)[2:]
+			m=ndigits-py.len(r)
+			return py.int(r)*(10**m)#
 		return a	#default
 	else:
 		return py.No('Not float')	
@@ -3158,7 +3160,7 @@ def simulate_key_press(akey, delay=0,restore_state_after=True, exact=None,**ka):
 	return StrRepr(akey,repr='U.simulate_key_press(%r)'%akey)
 system_key=pressKey=keyPress=press_key=key_press=simulate_key_press
 
-def simulate_system_actions(a=py.No("str[key|key_write ] or action list[['click',xy],[foreground,title|handle],['k','sss'],['t','text']]"),key='', delay=py.No('using _DELAY'),restore_state_after=True, exact=None,raise_error=False,**ka):
+def simulate_system_actions(a=py.No("str[key|key_write ] or action list[['click',xy],['move',xy],[foreground,title|handle],['k','sss'],['t','text']]"),key='', delay=py.No('using _DELAY'),restore_state_after=True, exact=None,raise_error=False,**ka):
 	'''pip install keyboard
 key='Win+D'  # mute  ,not min all window	
 	
@@ -3228,6 +3230,11 @@ File:      c:\qgb\anaconda3\lib\site-packages\keyboard\__init__.py'''
 						row.append(Win.get_cursor_pos())
 					Win.click(*row[1])
 					r.append(['click',row[1]])
+					_sleep(delay)
+					continue
+				elif one_in(['move','mv_cur','move_cur','mv','set_cur_pos'],action):
+					Win.set_cur_pos(*row[1])
+					r.append(['move',row[1]])
 					_sleep(delay)
 					continue
 				elif one_in(['set_window','top','front','window','for','forground','foreground','win32gui.setforegroundwindow','setforegroundwindow','forward'],action):
@@ -4142,9 +4149,12 @@ def get_dict_item(d,index=0):
 	# return d.items().__iter__().__next__()
 dict_item=dict_one_item=getDictItem=get_dict_item
 
-def get_dict_all_values(d,start=0,size=500):
+def get_dict_all_values(d,start=0,size=500): 
+	if not py.isdict(d):
+		# try:
+		return [v for k,v in d]
 	return py.list(d.values())[start:start+size]
-get_dict_values=get_dict_all_values	
+dict_values=dict_value_list=get_dict_values=get_dict_all_values	
 
 def get_dict_value(d,index=0):
 	if index<0:index=py.len(d)+index
@@ -4158,7 +4168,7 @@ def setDictListValue(adict,key,value):
 		adict[key].append(value)
 	else:
 		adict[key]=[value]
-dict_value_list=dict_add_value_list=add_dict_value_list=set_dict_value_list=set_dict_list=setDictList=setDictListValue
+dict_add_value_list=add_dict_value_list=set_dict_value_list=set_dict_list=setDictList=setDictListValue
 
 def setDictSetValue(adict,key,value):
 	if key in adict:
@@ -5163,24 +5173,80 @@ text直接传入 title 有问题 , T.html_encode fix it：
 	return file
 qr=qrcode=svg_qrcode=get_svg_qrcode	
 
-def search_image_on_screen(image_path=py.No('if not ,attempt to get clipBoard image'),format='png'):
+def search_image(image,precision=0.9,gray=True,background=py.No('screenshot',no_raise=True),):
+	r''' if not gray:
+error: OpenCV(4.5.1) C:\Users\appveyor\AppData\Local\Temp\1\pip-req-build-oduouqig\opencv\modules\imgproc\src\templmatch.cpp:1163: 
+  error: (-215:Assertion failed) (depth == CV_8U || depth == CV_32F) && type == _templ.type() && _img.dims() <= 2 in function 'cv::matchTemplate'
+'''
+	U,T,N,F=py.importUTNF()
+	import numpy,cv2
+	if U.isWin() or U.isMac():
+		from PIL import ImageGrab
+	# im = pyautogui.screenshot()
+	if not background:
+		background=ImageGrab.grab()	
+	if U.DEBUG==True:
+		im.save('testarea.png')# usefull for debugging purposes, this will save the captured region as "testarea.png"
+	background = numpy.array(background)
+	if gray:
+		background = cv2.cvtColor(background, cv2.COLOR_BGR2GRAY)
+	template = cv2.imread(image, 0)
+	template.shape[::-1]
+
+	res = cv2.matchTemplate(background, template, cv2.TM_CCOEFF_NORMED)
+	min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(res)
+	if max_val < precision:
+		return [-1,-1]
+	return max_loc
+image_search=imagesearch=search_image
+
+def search_image_on_screen(image_path=py.No('if not ,attempt to get clipBoard image'),*a,precision=0.9,save_path=None,format='png',return_raw=False):
+	'''
+thunder_start :  light :	!min_val, max_val, min_loc, max_loc
+(-0.35922059416770935, 0.9710590243339539, (207, 372), (122, 46))
+图形不变 颜色 fade :
+(-0.36415544152259827, 0.8675098419189453, (14, 681), (122, 46))
+	
+'''	
 	try:
 		U,T,N,F=py.importUTNF()
 		ClipBoard=py.from_qgb_import('Clipboard')
-		from screen_search import  screen_search
+		# from screen_search import  screen_search
 	except Exception as e:
 		return py.No(e)
-		
+
 	if not image_path:
-		image_path=ClipBoard.get_image(U.stime())
-	if not F.exist(image_path):
-		image_path+='.'+format
-	if not F.exist(image_path):
-		return py.No('image_path Not Exist!%r'%image_path)
-		# return py.No('image_path Not Exist! '+('%r'%image_path).strip())
-	ss=screen_search.Search(image_path)
-	x,y=ss.imagesearch()
-	return x,y
+		if not save_path:save_path=U.stime()
+		image_path=ClipBoard.get_image(save_path)
+		if not image_path:
+			return image_path
+		print('U.search_image_on_screen(%r)'%image_path)
+	
+	a=py.list(a)
+	if py.istr(image_path) or 0 : #TODO is image
+		a.append(image_path)
+	else:
+		a.extend(image_path)
+		
+	for n,i in py.enumerate(a):
+		if not F.exist(i):
+			i+='.'+format
+		if not F.exist(i):
+			# continue
+			return py.No('image_path Not Exist!%r'%image_path)
+		a[n]=i
+	for i in a:
+		x,y=search_image(i,precision=precision)
+		if -1 in [x,y]:
+			continue
+		return x,y
+	return py.No('Not found on screen',a)	
+			
+	# return py.No('image_path Not Exist! '+('%r'%image_path).strip())
+	# ss=screen_search.Search(image_path)
+	# ss.precision=precision
+	# x,y=ss.imagesearch()
+	
 find_image_on_screen=seach_image_on_screen=search_image_on_screen
 
 def set_timed_task(func,every='day',time='05:09',unit=1):

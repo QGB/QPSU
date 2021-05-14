@@ -7,6 +7,7 @@ else:
 	if gsqp not in sys.path:sys.path.append(gsqp)#py3 works
 	from qgb import py
 	# import py  #'py': <module 'py' from '..\\py.py'>,
+RPC_BASE_REMOTE='N.RPC_BASE_REMOTE'
 U,T,N,F=None,None,None,None
 # __all__=['N','HTTPServer']
 
@@ -332,30 +333,60 @@ def uploadServer(port=1122,host='0.0.0.0',dir='./',url='/up'):
 			return r
 	app.run(host=host,port=port,debug=0,threaded=True)	
 
-def get_or_set_rpc_base(base):
+def set_remote_rpc_base(base=py.No('if not base:input',no_raise=1),change=True):
+	U,T,N,F=py.importUTNF()	
 	if not base:
-		base=U.get_or_set('N.rpc.base','http://127.0.0.1:23571/')
+		default=U.get(RPC_BASE_REMOTE)
+		if default:
+			if not change:
+				base=default
+		else:
+			default='https://'
+		while not base:
+			base=default=U.input(RPC_BASE_REMOTE+' :',default=default)
+			base=T.matchRegexOne(base,T.RE_URL)
+		# base=U.get_or_set(RPC_BASE_REMOTE,'http://127.0.0.1:23571/')
 	if not py.istr(base):
-		if py.isfloat(base):
-			base='http://192.168.{}:23571/'.format(base)
+		if py.isfloat(base) or py.isint(base):
+			default=U.get(RPC_BASE_REMOTE)
+			if not default:default='http://127.0.0.1:23571/'
+			netloc=T.netloc(default) # '192.168.43.162:2357' include port
+			i=default.index(netloc)  #TODO if netloc=='http'  
+			n=netloc.find(':')
+			if base<0:
+				history
+			if base>255:
+				if  ':' in netloc:
+					template=default.replace(netloc,netloc[:n+1]+'{}',1)
+				else:
+					i+=py.len(netloc)
+					template=default[:i]+':{}'+default[i:]	
+				# change_port
+			else:
+				if  ':' in netloc:
+					netloc=netloc[:n]
+				template=default[:i]+'{}'+default[i+py.len(netloc):]
+				base=N.auto_ip(base)
+			base=template.format(base)
 		else:
 			raise py.ArgumentUnsupported('rpc base_url:',base)
 
-	if not base.endswith('/'):
-		if ':' not in base:
-			base=base+':23571'
-		base+='/'
-	return U.set('N.rpc.base',base)	
+	# if not base.endswith('/'):
+		# if ':' not in base:
+			# base=base+':23571'
+		# base+='/'
+	return U.set(RPC_BASE_REMOTE,base)	
+rpc_base=change_rpc_base=get_or_set_rpc_base=set_rpc_base_remote=get_remote_rpc_base=set_remote_rpc_base
 	
-def rpcGetVariable(varname,base=py.No('auto history e.g. [http://]127.0.0.1:23571[/../] '),
+def rpcGetVariable(varname,base=py.No('auto history e.g. [http://]127.0.0.1:23571[/../] ',no_raise=1),
 		timeout=9,p=True,return_bytes=False,**ka):
 	U,T,N,F=py.importUTNF()	
 	return_bytes=U.get_duplicated_kargs(ka,'return_byte','rb','B','b','raw','raw_bytes',default=return_bytes)
 	if not base:
-		base=U.get_or_input('N.rpc.base','http://127.0.0.1:23571/')
-	if not base:raise py.ArgumentError('need base=')
-	if T.regexMatchOne(base,':\d*$') or T.regex_count(base,'/')==2:base+='/'
-	U.set('N.rpc.base',base)
+		base=get_remote_rpc_base(change=False)
+	# if not base:raise py.ArgumentError('need base=')
+	# if T.regexMatchOne(base,':\d*$') or T.regex_count(base,'/')==2:base+='/'
+	# U.set(RPC_BASE_ REMOTE,base)
 	
 	url='{0}response.set_data(F.dill_dump({1}))'.format(base,varname)
 	# import requests,dill
@@ -380,6 +411,21 @@ def rpcGetVariable(varname,base=py.No('auto history e.g. [http://]127.0.0.1:2357
 			return py.No(e,url,b)
 rpc_get=rpc_get_var=rpcGetVariable
 
+# grpc_base=''
+
+# class RPC:
+	# def __init__(self,parent=None,name='',p=True):
+		# self.__parent__=parent
+		# self.__child__=None
+		# self.__name__=name	
+		# self.__v__=p
+	# def __getattribute__(self, name):
+		# U=py.importU()
+		# if name in U.SKIP_ATTR_NAMES:
+			# return
+		# print(self,name)
+		# return 
+		
 def rpcSetVariable(*obj,base=py.No('auto history e.g. [http://]127.0.0.1:23571[/../] '),timeout=9,varname='v',ext_cmd='',pr=False,**ka):
 	U,T,N,F=py.importUTNF()
 	ext_cmd=U.get_duplicated_kargs(ka,'ext_cmd','cmd','extCmd','other_cmd',default=ext_cmd)
@@ -394,9 +440,9 @@ def rpcSetVariable(*obj,base=py.No('auto history e.g. [http://]127.0.0.1:23571[/
 		obj=obj[0]
 
 	if not base:
-		base=U.get_or_input('N.rpc.base',default='http://127.0.0.1:23571/')
+		base=get_remote_rpc_base(change=False)
 	else:
-		base=U.set('rpc_base',base)
+		base=set_remote_rpc_base(base)
 	url='{0}{1}=F.dill_loads(request.get_data());r=U.id({1});{2}'.format(base, varname,ext_cmd	)
 	# import requests,dill
 	# dill_loads=dill.loads
@@ -416,7 +462,13 @@ def rpcSetVariable(*obj,base=py.No('auto history e.g. [http://]127.0.0.1:23571[/
 	return url,b
 set_rpc=set_rpc_var=rpc_set=rpc_set_var=rpcSetVariable
 
-def rpc_set_file(obj,filename,name='v',**ka):
+def rpc_set_file(obj,filename=py.No('if obj exists: auto '),name='v',**ka):
+	U,T,N,F=py.importUTNF()
+	if py.istr(obj) and py.len(obj)<999 and F.exists(obj):
+		if not filename:
+			filename=F.get_filename_from_full_path(obj)
+		obj=F.read_bytes(obj)
+		
 	return rpc_set_var(obj,name=name,ext_cmd='r=F.write({filename!r},%s)'.format(filename=filename),**ka)
 
 def rpcServer(port=23571,thread=True,ip='0.0.0.0',ssl_context=(),currentThread=False,app=None,key=None,

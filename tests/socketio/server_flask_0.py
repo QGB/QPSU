@@ -36,6 +36,23 @@ def index():
 
 
 
+@socketio.event
+def connect():
+	global thread
+	with thread_lock:
+		if thread is None:
+			thread = socketio.start_background_task(background_thread)
+	emit('my_response', {'data': 'Connected', 'count': 0})
+
+@socketio.on('disconnect')
+def test_disconnect():
+	print('Client disconnected', request.sid)
+
+@socketio.on('echo')
+def echo(msg):
+	emit('r',msg)
+	print("msg:" ,U.execResult(msg,locals=locals(),globals=globals()) )
+	
 @socketio.on('message')
 def print_message(*a,**ka):
 	## When we receive a new event of type
@@ -44,25 +61,6 @@ def print_message(*a,**ka):
 	print(request.sid,"len:%s "%U.len(a,ka) ,a,ka)
 	emit('r', {'data': 'qgb print', 'count': 0})
 	print('='*88)
-
-
-
-import socket
-socket._LOCALHOST='192.168.43.162'
-from tornado.wsgi import WSGIContainer
-from tornado.httpserver import HTTPServer
-from tornado.ioloop import IOLoop
-import logging
-
-if __name__ == '__main__':
-	logging.basicConfig(level=logging.INFO)
-	HOST = '0.0.0.0'
-	http_server = HTTPServer(WSGIContainer(app))
-	http_server.listen(8080)
-	IOLoop.instance().start()
-
-
-
 	
 if __name__ == '__main__':
 	# socketio.run(app,host='192.168.43.162',port=8080)

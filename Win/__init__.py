@@ -393,7 +393,7 @@ def getAllWindows():
 		return [(i[0],i[1].decode('mbcs'),get_pid_by_hwnd(i[0])) for i in mlst]
 	else:
 		return [(i[0],i[1] ,get_pid_by_hwnd(i[0])) for i in mlst]
-EnumWindows=getAllWindow=getAllWindows
+EnumWindows=get_all_windows=getAllWindow=getAllWindows
 
 def SetForegroundWindow(title=None,handle=None,pid=None,process_name='',raise_error=0,retry=99,**ka):
 	U,T,N,F=py.importUTNF()
@@ -553,7 +553,7 @@ def set_cursor_pos(x,y):
 	x,y=py.int(x),py.int(y)
 	user32.SetCursorPos(x,y)
 	return x,y
-setMousePos=setCursorPos=SetCursorPos=setCurPos=set_mouse_pos=set_cur_pos=set_cursor_pos
+move_cur=mv_cur=setMousePos=setCursorPos=SetCursorPos=setCurPos=set_mouse_pos=set_cur_pos=set_cursor_pos
 
 def mouse_click(x=None,y=None,*a,_1=False):
 	''' click(*xy+(2,3)) == click(x,y,2,3) == click(x+2,y+3)
