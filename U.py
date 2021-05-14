@@ -3374,14 +3374,18 @@ def get_all_process_value_list(**ka):
 	da={}
 	da['pid']=U.get_duplicated_kargs(ka,'pid','PID','p',default=1)
 	da['ppid']=U.get_duplicated_kargs(ka,'ppid','PPID',default=1)
-	da['_create_time']=U.get_duplicated_kargs(ka,'_create_time','t','time',default=1)
+	da['_create_time']=U.get_duplicated_kargs(ka,'_create_time','t','time',default=26+1)
 
 	da['cmd']=U.get_duplicated_kargs(ka,'cmd','CMD','cmdline','command','c',default=1) # cmd 每行最后		
 	###########
 	if U.get_duplicated_kargs(ka,'title','tips','tip','t',default=1):
 		title=[]
 		for k,v in da.items():
-			if v:title.append(U.StrRepr(k,size=size))
+			if v:
+				if py.isint(v) and v>1:
+					title.append(U.StrRepr(k,size=v))
+				else:
+					title.append(U.StrRepr(k,size=size))
 		r=[title]			
 	else:
 		r=[]
@@ -3397,7 +3401,7 @@ def get_all_process_value_list(**ka):
 					if py.isint(pv):
 						pv=U.IntRepr(pv,size=size)
 					if py.isfloat(pv) and ('time' in k):
-						pv=U.stime(pv)
+						pv=U.StrRepr( U.stime(pv) )
 					row.append(pv)
 
 				except Exception as e:
