@@ -1124,19 +1124,24 @@ def mdcd(ap):
 def move(source,target):
 	''' * in target == source
 ? in target == 	source_fn
-| in target == 	
+// in target == path(exclude source_fn)
 
 	'''
 	F=py.importF()
 	source=F.autoPath(source)
-	target=F.autoPath(target)
+	
 	source_fn=F.get_filename_from_full_path(source)
+	source_path=source[:-py.len(source_fn)]
+	
 	if target.endswith('/'):
 		target+=source_fn
 	# if '*' in target:
 	target=target.replace('*',source)
 	target=target.replace('?',source_fn)
-		
+	target=target.replace('//',source_path)
+	
+	target=F.autoPath(target)	
+	
 	import os
 	try:
 		os.rename(source, target)

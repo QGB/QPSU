@@ -2428,6 +2428,8 @@ date=getdate=getDate
 	
 def get_float_tail(a,**ka):
 	'''  ,ndigits=20,str=False,int=False  # default return float
+if str: return '.xxx'
+if int: return xxx	
 	
 	see help(round)
  0.1**5
@@ -3372,6 +3374,7 @@ def get_all_process_value_list(**ka):
 	da={}
 	da['pid']=U.get_duplicated_kargs(ka,'pid','PID','p',default=1)
 	da['ppid']=U.get_duplicated_kargs(ka,'ppid','PPID',default=1)
+	da['_create_time']=U.get_duplicated_kargs(ka,'_create_time','t','time',default=1)
 
 	da['cmd']=U.get_duplicated_kargs(ka,'cmd','CMD','cmdline','command','c',default=1) # cmd 每行最后		
 	###########
@@ -3393,6 +3396,8 @@ def get_all_process_value_list(**ka):
 						pv=pv()
 					if py.isint(pv):
 						pv=U.IntRepr(pv,size=size)
+					if py.isfloat(pv) and ('time' in k):
+						pv=U.stime(pv)
 					row.append(pv)
 
 				except Exception as e:

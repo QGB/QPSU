@@ -699,12 +699,16 @@ def readableTimeText(txt,browser=False):
 	U=py.importU()
 	def ref(a):
 		a=a.group()
-		it=py.int(a)
-		if py.len(a)==13:
-			it=it/1000
-		return U.stime(it)
+		if '.' in a:
+			a=py.float(a)
+		else:
+			it=py.int(a)
+			if py.len(a)==13:
+				it=it/1000
+			a=it	
+		return U.stime(a)
 
-	r= regexReplace(txt , r'\d{10,}',ref)
+	r= regexReplace(txt , r'\d{10,}[.\d]{0,4}',ref)
 	if browser:
 		U.browserObj(r)
 	else:
