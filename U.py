@@ -3369,13 +3369,13 @@ def get_all_process_value_list(**ka):
 	''' ka : title=True  : return [  [pid      , ppid     , cmd      ] ...] 
 	'''
 	U=py.importU()
+	filter=U.get_duplicated_kargs(ka,'filter','ps',default={})
 	size=9
-
 	da={}
 	da['pid']=U.get_duplicated_kargs(ka,'pid','PID','p',default=1)
-	da['ppid']=U.get_duplicated_kargs(ka,'ppid','PPID',default=1)
-	da['_create_time']=U.get_duplicated_kargs(ka,'_create_time','t','time',default=26+1)
-
+	da['ppid']=U.get_duplicated_kargs(ka,'ppid','PPID','pp',default=1)
+	da['_create_time']=U.get_duplicated_kargs(ka,'_create_time','t','time',default=26)
+	
 	da['cmd']=U.get_duplicated_kargs(ka,'cmd','CMD','cmdline','command','c',default=1) # cmd 每行最后		
 	###########
 	if U.get_duplicated_kargs(ka,'title','tips','tip','t',default=1):
@@ -3390,7 +3390,7 @@ def get_all_process_value_list(**ka):
 	else:
 		r=[]
 	###########
-	for p in get_all_process_list():
+	for p in get_all_process_list(**filter):
 		row=[]
 		for k,v in da.items():
 			if v:
@@ -3398,10 +3398,16 @@ def get_all_process_value_list(**ka):
 					pv=py.getattr(p,k)
 					if py.callable(pv):
 						pv=pv()
-					if py.isint(pv):
+					if v=='raw':
+						pass
+					elif py.callable(v):
+						pv=v(pv)
+					elif py.isint(pv):
 						pv=U.IntRepr(pv,size=size)
-					if py.isfloat(pv) and ('time' in k):
+					elif py.isfloat(pv) and ('time' in k):
 						pv=U.StrRepr( U.stime(pv) )
+					elif py.istr(pv) and py.islist(v):
+						pv=U.StrRepr( pv[v[0]:v[1]],size=U.get_slice_len(*v) )
 					row.append(pv)
 
 				except Exception as e:
@@ -4239,11 +4245,47 @@ def dict_value_hash_count(adict,):
 			d[l]=IntWithObj(1,k)
 		# setDictValuePlusOne(d,l)
 	return d
+	
+def is_slice(a):
+	return py.type(a) in [py.range,py.slice]
 
+def get_slice_len(*a):
+	a=py.list(a)
+	if py.len(a)==1 :
+		if is_slice(a[0]):#stop不可能None
+			range=[   a[0].start or 0   ,   a[0].stop    ,   a[0].step or 1   ]
+		if py.islist(a[0]) or py.istuple(a[0]):
+			a=[*a[0]]
+		if py.isint(a[0]):
+			range=[0,a[0],1]
+		else:
+			raise py.ArgumentError(a[0])
+	if py.len(a)==2 :
+		if a[0]==None:
+			if a[1] <0:
+				return -1
+			a[0]=0
+		if a[1]==None:
+			if a[0]<0:
+				return -1*a[0]
+			return -1 # can not count 剩余长度
+		return a[1]-a[0]
+	if py.len(a)==3 :
+		if a[2]==1:
+			return get_slice_len(a[0],a[1])
+		return todo_count_step
+		#TODO
+	raise py.ArgumentUnsupported(a)
+	# if py.isint(a)
+	
 def get_slice_range(*a,len=0):
-	''' slice to [all index list]
+	'''len : to-slice-obj len ,must privide. I don't konw to-slice-obj info here.
+return:  slice to [all index list]
+
 	'''
-	if (not a)  or  (not len) or (not py.isint(len) ) or (len < 1) :return []
+	if (not a)  or  (not len) or (not py.isint(len) ) or (len < 1) :
+		raise py.ArgumentError('to-slice-obj len ,must privide  get_slice_range(x,.. ,len=n )')
+		return []
 	_len=-1 * len
 	if py.len(a)==1 :
 		if py.type(a[0]) in [py.range,py.slice]:#stop不可能None
