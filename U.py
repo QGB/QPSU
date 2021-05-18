@@ -161,6 +161,24 @@ def get_or_set_input(name,default='',type=None):
 	return set(name,input('%s :'%name,default=default,type=type) )
 get_input=getInput=getOrInput=get_or_input=get_or_set_input
 
+def parse_str_auto_type(s):
+	U=py.importU()
+	ss=s.strip()
+	if U.all_in(ss,'.0123456789') and U.unique(ss,ct=1).get('.',0)==1:
+		try:return py.float(ss)
+		except:pass
+	if U.all_in(ss,'0123456789') or ss.lower().startswith('0x'):
+		try:return py.int(ss)
+		except:pass
+	
+	# if (ss.startswith('[') and ss.endswith(']')) or :
+	T=py.importT()		
+	try:return T.unrepr(s)
+	except:pass
+	
+	return s
+	
+auto_type=input_auto_type=parse_str_auto_type
 def get_or_set(name,default):
 	# if not default: # ipy module set {}
 	if py.isno(default) or (default==None):
@@ -261,13 +279,12 @@ platform.architecture()     ('64bit', 'WindowsPE')    ('32bit', 'WindowsPE')
 '''
 	return [i for i in glnix if i in platform.system().lower()]
 	
-def isWin():
-	if platform.system().startswith('Windows'):return True
-	else:return False
-is_win=iswin=isWin
+def is_windows():
+	return platform.system().startswith('Windows')	
+is_win=iswin=isWin=is_windows
 
-def isLinux():return platform.system()=='Linux'
-islinux=isLinux
+def is_linux():return platform.system()=='Linux'
+islinux=isLinux=is_linux
 def isMacOS():return platform.system()=='darwin'
 isMac=is_mac=is_osx=isOSX=ismacos=isMacOS
 	
@@ -278,7 +295,7 @@ istermux=isTermux=is_termux
 def iscyg():
 	return 'cygwin' in  platform.system().lower()
 # gipy=None#这个不是qgb.ipy, 是否与U.F U.T 这样的风格冲突？
-def isipy(**ka): # e=False
+def is_ipython(**ka): # e=False
 	# global gipy
 	raise_EnvironmentError=get_duplicated_kargs(ka,
 'raise_err','raise_error','raiseError','raiseErr','raise_EnvironmentError','EnvironmentError','raiseEnvironmentError')
@@ -300,7 +317,8 @@ def isipy(**ka): # e=False
 			# pass
 		# f=f.f_back	
 	# return ipy
-get_ipy=get_ipython=getipy=isIpy=is_ipy=isipy
+get_ipy=get_ipython=getipy=isIpy=is_ipy=isipy=is_ipython
+
 def is_ipy_cell():
 	''' 和 getArgsDict 一样，最多向上找两层，防止影响到意料之外的代码
 f.f_back  ~= None
@@ -612,7 +630,7 @@ default must be str ,auto convert to str !!
 		import readline
 		readline.set_startup_hook()
 		
-input_def=input
+input_default=input_with_default=input
 
 def _useless_win_input(msg='',default='',type=py.str):
 	if default:
@@ -3548,6 +3566,8 @@ def get_obj_file_lineno(a,lineno=0,auto_file_path=True):
 	else:
 		# if py.getattr(a,'__module__',None):  
 		# #最后的情况，不要判断 get_module 会自动raise ArgumentUnsupported
+		if py.callable( py.getattr(a,'__init__',None) ):
+			return get_obj_file_lineno(a=a.__init__,lineno=lineno,auto_file_path=auto_file_path)
 		a=get_obj_module(a)#python无法获取class行数？https://docs.python.org/2/library/inspect.html
 		return get_obj_file_lineno(a=a,lineno=lineno,auto_file_path=auto_file_path)
 	
@@ -3743,14 +3763,14 @@ def get_source(a):
 	return inspect.getsource(a) # module, class, method, function, traceback, frame, or code object
 decompile=getsource=get_mod_source=getSource=get_source
 
-def isSyntaxError(a):
+def is_SyntaxError(a):
 	import ast
 	try:
 		ast.parse(a)
 		return False
 	except:
 		return True
-isyntaxError=iSyntaxError=isSyntaxError
+isyntaxError=iSyntaxError=isSyntaxError=is_SyntaxError
 
 def setattr_not_exists(a,name,value):
 	if not py.hasattr(a,name):
@@ -4245,6 +4265,16 @@ def dict_value_hash_count(adict,):
 			d[l]=IntWithObj(1,k)
 		# setDictValuePlusOne(d,l)
 	return d
+def is_builtin_function(a):
+	'''
+object.__init__ not 	(types.BuiltinFunctionType,types.BuiltinMethodType)
+	'''
+	if not py.callable(a):return False
+	import types
+	if py.isinstance(a,(types.BuiltinFunctionType,types.BuiltinMethodType)):
+		return True
+	
+isBuiltinFunction=isBuiltinFunctionType=is_builtin_function	
 	
 def is_slice(a):
 	return py.type(a) in [py.range,py.slice]
@@ -5200,8 +5230,15 @@ text直接传入 title 有问题 , T.html_encode fix it：
 		if tb:
 			b=b.decode('utf-8')
 			# title=T.html_encode(title)
-			b=r'''<html>
-<head><title>%(title)s</title></head> 
+			html=r'''<html>
+<head><title>%(title)s</title>
+	<style type="text/css">
+		 html, body ,svg{
+		  width: 100%;
+		  height: 100%;
+		}
+	</style>	
+</head> 
 <body> 
 	<script>
 		var url=window.location.href
@@ -5212,7 +5249,8 @@ text直接传入 title 有问题 , T.html_encode fix it：
 	</script>
 	<h5 style="color:red;margin: 0;"> %(title)s </h6>
 	%(b)s
-</body></html>''' % py.locals()
+</body></html>''' 
+			b=html % py.locals()
 			# i=b.find(b'<path ')
 			# b=b[:i]+b'<text fill="red" x="0" y="20" >'+title.encode('utf-8')+b'</text>'+b[i:]
 		if response:

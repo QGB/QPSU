@@ -42,7 +42,45 @@ else:
 	from SimpleHTTPServer import SimpleHTTPRequestHandler
 	from BaseHTTPServer import HTTPServer as _HTTPServer
 
-
+def ftp_client(cwd=py.No('history or /',no_raise=1),
+	host=py.No('auto get ftp.host',no_raise=1),port=3721,user='', passwd='', acct='',
+                 timeout=None,response=None,request=None,**ka):
+	'''
+	'''
+	import ftplib     
+	U,T,N,F=py.importUTNF()
+	response=U.get_duplicated_kargs(ka,'resp','rsp','p',default=response)
+	if not host:
+		host=U.get_or_set_input('ftp.host',type=U.auto_type)
+	host=auto_ip(host) 
+	uk='ftp.host={user}{host}:{port}'.format(
+		host=host,port=port,user= user+'@' if user else user)
+	self=U.get(uk)
+	if self:
+		try:
+			pwd=self.pwd()
+		except Exception as e:
+			self.close()
+			U.set(uk,py.No(e))
+			return ftp_client(host=host,port=3721,user='', passwd='', acct='',
+                 timeout=None,response=None,request=None)
+			# print(e)
+	else:
+		if port==3721 and not user:
+			user=U.input_and_set('ftp.user.android_es','need_user_to_login')
+		from socket import _GLOBAL_DEFAULT_TIMEOUT
+		if not timeout:timeout=_GLOBAL_DEFAULT_TIMEOUT
+		ftp=self=ftplib.FTP(timeout=timeout)
+		self.host=host
+		self.port=port
+		
+		self.connect(host)
+		if user:
+			self.login(user, passwd, acct)
+	return self	
+FTP=ftp=ftp_client	
+# def ftp_list_file(host)
+	
 def rpc_fifo_put_cmd(s,name='cmd',path=None):
 	''' Linux has os.mkfifo(fn)  
 Windows:AttributeError: module 'os' has no attribute 'mkfifo' 

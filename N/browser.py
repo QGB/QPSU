@@ -13,7 +13,7 @@ if not ids:raise EnvironmentError('need ids set')
 ids=py.set(ids)
 cache_path=F.mkdir(f'{U.gst}ids-{len(ids)}')
 gid=None
-def next_id(templete='{}'):
+def next_id(template='{}'):
 	'''
 set().pop() #KeyError: 'pop from an empty set'  ,pop no args
 
@@ -21,7 +21,7 @@ set().pop() #KeyError: 'pop from an empty set'  ,pop no args
 	global gid
 	for id in ids.difference(did):
 		gid=id
-		return templete.format(id)
+		return template.format(id)
 	return ''
 	
 def receive(request):

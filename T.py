@@ -5,7 +5,8 @@ else:#['T','__main__']
 	import py
 FILE_NAME=fileChars=FILE_CHARS="!#$%&'()+,-0123456789;=@ABCDEFGHIJKLMNOPQRSTUVWXYZ[]^_`abcdefghijklmnopqrstuvwxyz{}~"+' .'
 PATH_NAME=pathChars=PATH_CHARS='/\\:'+FILE_NAME# include space, dot
-gsNOT_FILE_NAME=NOT_FILE_NAME=r'"*/:<>?\|'
+gsNOT_FILE_NAME_WINDOWS=gsNOT_FILE_NAME=NOT_FILE_NAME_WINDOWS=NOT_FILE_NAME=r'"*/:<>?\|'
+gsNOT_PATH_NAME_WINDOWS=gsNOT_PATH_NAME=NOT_PATH_NAME_WINDOWS=NOT_PATH_NAME=r'"*:<>?|'
 gsNOT_FILE_NAME_LINUX=NOT_FILE_NAME_LINUX='/'+py.chr(92) # \
 
 az=a_z='abcdefghijklmnopqrstuvwxyz'
@@ -93,6 +94,12 @@ try:
 	from pprint import pprint,pformat
 except:pass
 ####################################################
+def LF_to_CRLF(text):
+	if py.istr(text):return regex_replace(text,r'(?<!\r)\n','\r\n')
+	if py.isbytes(text):return regex_replace(text,br'(?<!\r)\n',b'\r\n')
+	raise py.ArgumentUnsupported(text)
+lf2crlf=LF2CRLF=lf_to_crlf=LF_to_CRLF
+
 def get_string_image(text,size=48,w=None,h=None):
 	'''
 ('simsunb.ttf',48) a[5+1行][0:5+37+5]==【5个0，37个1，5个0】  
@@ -754,8 +761,8 @@ def regex_count(a,regex):
 	return py.len(re.findall(regex, a))
 countRegex=regexCount=count_regex=regex_count
 	
-def regexReplace(a,regex,str_or_func):
-	''' 
+def regex_replace(a,regex,str_or_func):
+	''' str_or_bytes_or_func
 func( a: <_sre.SRE_Match object; span=(2388, 2396), match='21758465'>  ):
 	match==a.group()	
 	
@@ -764,7 +771,7 @@ func( a: <_sre.SRE_Match object; span=(2388, 2396), match='21758465'>  ):
 	class SRE_Match():
 			yield SRE_Match(self)	
 	'''
-	if py.istr(str_or_func):
+	if py.istr(str_or_func) or py.isbyte(str_or_func):
 		def func(_a):
 			#   <_sre.SRE_Match object; span=(2388, 2396), match='21758465'>
 			# match==a.group()	
@@ -773,11 +780,12 @@ func( a: <_sre.SRE_Match object; span=(2388, 2396), match='21758465'>  ):
 		func=str_or_func
 	if not py.callable(func):raise py.ArgumentError('str_or_func',str_or_func)
 	
-	if py.istr(regex):
+	if py.istr(regex) or py.isbyte(regex):
 		p=re.compile(regex)
 	else:
 		p=regex
 	return p.sub(func,a)
+regexReplace=regex_replace
 ##################  regex end  ############################
 def iter_detect(b,range=[]):
 	'''
@@ -1434,6 +1442,113 @@ def index_of_multi(a,*target):
 		if i>0:return i
 	return -1
 indexOf=index_of=index_of_multi
+
+def eval_or_exec_return_str_result(s,locals=None,globals=None,raise_SyntaxError=True,pformat_kw=None):
+	def modify_traceback_str(st):
+		T=py.importT()
+		sub=T.sub(st,'eval_or_exec_return_str_result',' File ')
+		if 'globals' in st and 'locals' in st:
+			i=st.find('eval_or_exec_return_str_result',0)+1
+			i=st.find(' File ',i)-1 # -1 为了对齐
+			return st[i:]
+		else:
+			return st
+	if not s:return '' #py.No('s is empty')	
+	expression= False
+	# filename='<>'
+	try:
+		code= compile(s, '<eval>', 'eval')
+		expression=True
+	except SyntaxError:
+		try:
+			code= compile(s, '<exec>', 'exec')
+			expression=False
+		except (SyntaxError,IndentationError) as e:
+			if raise_SyntaxError:raise
+			return py.No(e)
+		except Exception as e:
+			raise
+	except IndentationError as e:
+		if raise_SyntaxError:raise
+		r= traceback.format_exc() 
+		return modify_traceback_str(r)
+	# if not width:
+		# width=U.get_or_set('pformat_kw',{'width':144})['width']
+		
+	import traceback
+	# from io import StringIO
+
+	if locals==None :locals ={}
+	if globals==None:globals={}
+		
+	if expression:
+		try:
+			r=py.eval(code,globals,locals)
+		except Exception as e:
+			r= traceback.format_exc() 
+			r=modify_traceback_str(r)
+	else:
+		try:
+			exec(code,globals,locals)
+			if 'r' in locals:
+				r=locals['r']
+			else:
+				r=py.No('can not find r in exec locals',source)
+		except Exception as e:
+			r= traceback.format_exc() 
+			r=modify_traceback_str(r)
+	if py.istr(r):
+		return r
+	else:
+		U=py.importU()
+		if not pformat_kw:
+			pformat_kw=U.get_or_set('pformat_kw',{'width':144})
+		if U.isipy():
+			try:
+				ipy=py.from_qgb_import('ipy')
+				return ipy.pformat(r,**pformat_kw)# in U
+			except Exception as e:
+				return py.repr(e)
+		
+		try:return pformat(r,**pformat_kw)# in U
+		except:return py.repr(r)
+		
+def html_template(s,locals=None,globals=None,delimiter='$',raise_SyntaxError=True,**ka):
+	def find_delimiter():
+		return
+	if py.istr(delimiter):
+		delimiter
+		pass
+	elif py.callable(py.getattr(rn,'finditer',0)):
+		pass
+	   	
+	i=s.find(delimiter,0)
+	rs=s[:i]
+	i2=s.find(delimiter,i+1)
+	
+	rd={}
+	while i!=-1 and i2!=-1:
+		# i=i+1
+		code=s[i+1:i2]
+		ri=eval_or_exec_return_str_result(code,locals=locals,globals=globals,raise_SyntaxError=raise_SyntaxError)
+		# s=s[:i]+ri+s[i2:]
+		# if U.is_SyntaxError(code):
+		# if skip_parse_error:
+			# continue
+			# raise SyntaxError(code,i,i2)
+			
+		
+		# r.append([ code,i,i2])
+		i=s.find(delimiter,i2+1)
+		#如果此时 i==-1 ,【也没关系。仔细看看】
+		rd[(i,i2)]=(ri,s[i2+1:i])
+		
+		
+		i2=s.find(delimiter,i+1)
+	for (ri,seg) in rd.values():
+		rs+=ri+seg
+	return rs+s[i2]
+html_format=template=html_templete=html_template	
 
 def format(s,**ka):
 	''' 解决 python 自带format 不能跳过 未指定的 {name} 的问题 （ HTML-CSS  格式化）

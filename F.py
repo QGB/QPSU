@@ -422,7 +422,7 @@ def getPaths(a):
 		return rlist
 	else:
 		raise NotImplementedError('*nux')
-	
+		
 def get_filename_from_full_path(a):
 	''' if a.endswith('/'):return ''
 	'''
@@ -860,7 +860,7 @@ def isDir(file):
 	return _p.isdir(file)
 is_folder=isFolder=is_dir=isdir=isDir
 	
-def exist(fn,zero=False):
+def exists(fn,zero=False):
 	''': path.exist('c:')
 Out[57]: False
 
@@ -887,8 +887,8 @@ True
 			return False
 		return fn
 	else:
-		return False
-isExist=exists=exist
+		return py.No(fn,'not exists')
+isExist=exist=exists
 
 def glob(path, pattern='**/*'):
 	'''pattern='**/*'   : all files
@@ -932,7 +932,8 @@ def list(ap='.',type='',t='',r=False,d=False,dir=False,f=False,file=False,includ
 		if isDir(ap):
 			ap+='/'
 		else:
-			return [abs(ap)]
+			
+			return exists(ap)
 		# if not ap.endswith('/'):ap+='/'
 		# else:ap+='\\'
 	
@@ -1120,16 +1121,21 @@ join=joinPath=path_join=join_path
 
 def mdcd(ap):
 	return py.importU().cd(makeDirs(ap))
-
-def move(source,target):
+def move_back(target,source,**ka):
+	return move(source,target,**ka)
+def move(source,target,edit_target=False,mkdir=True,remove_invalid_char=True,**ka):
 	''' * in target == source
 ? in target == 	source_fn
 // in target == path(exclude source_fn)
 
+# os.rename(source, target) #OSError: [WinError 17] 系统无法将文件移到不同的磁盘驱动器。: 'C:
 	'''
-	F=py.importF()
+	U,T,N,F=py.importUTNF()
+	edit_target=U.get_duplicated_kargs(ka,'e','edit','editarget',default=edit_target)
+	remove_invalid_char=U.get_duplicated_kargs(ka,'remove_char','delChar',
+'del_char','remove_illegal','del__illegal','del_invalid','remove_invalid',
+'del_invalid_char','del__illegal_char','remove_illegal_char',default=remove_invalid_char)
 	source=F.autoPath(source)
-	
 	source_fn=F.get_filename_from_full_path(source)
 	source_path=source[:-py.len(source_fn)]
 	
@@ -1142,15 +1148,27 @@ def move(source,target):
 	
 	target=F.autoPath(target)	
 	
-	import os
+	if edit_target:target=U.input(default=target)
+	if remove_invalid_char:
+		if U.is_windows():
+			target=T.replacey(target,T.NOT_PATH_NAME_WINDOWS,'')
+	if not target.endswith('/') and F.isDir(target):
+		target=target+'/'
+	# if mkdir:F.mkdir(source_path) # 要先有文件夹，不然shutil.move有可能找不到
+	import shutil
 	try:
-		os.rename(source, target)
-		if not target.endswith('/') and F.isDir(target):
-			target=target+'/'
-		return target
+		return shutil.move(source, target) 
+		# return target
 	except (FileNotFoundError,FileExistsError) as e: # parentheses required, otherwise invalid syntax
 		return py.No(e,source,target)
-
+		
+	if F.isDir(target):
+		r=target+source_fn
+	else:
+		r=target
+	
+	return F.exist(r)	
+	
 	# if not F.exist(target):
 	# 	return py.No('moved to '+ target+' ,But not exist',source)
 	# import shutil
@@ -1159,6 +1177,10 @@ def move(source,target):
 mv=move
 
 def makeDirs(ap,isFile=False,cd=0):
+	''' 访问移动硬盘时，可能出现已经创建成功，但是 F.ls 看不到的情况。
+	用explorer访问后又正常
+	
+	'''
 	ap=autoPath(ap)
 	if not py.isbool(isFile) and not py.isint(isFile):
 		py.importU().log('F.md(str,isFile={})'.format(repr(isFile)))
@@ -1229,40 +1251,43 @@ def makeDirs(ap,isFile=False,cd=0):
 md=mkdir=makeDirs		
 
 gbAutoPath=True
-def autoPath(fn,ext='',default='',dir=False):
+def autoPath(fn,ext='',default='',dir=False,p=False):
 	''' default is U.gst 
 if fn.startswith("."): 如果路径中所有文件夹存在，则可以写入读取。否则无法写入读取。file io 都是这个规则吧
 FileNotFoundError: [Errno 2] No such file or directory: '.
 
 	'''
 	U=py.importU()
-	if not gbAutoPath:return fn
-	if default:
-		default=default.replace('\\','/')
-		if not default.endswith('/'):default+='/'
+	if not gbAutoPath:
+		pass
 	else:
-		default=U.set_test_path(U.gst) # 防止 U.gst 被改变没被保存
-	fn=str(fn)
-	fn=fn.replace('\\','/')
-	if ext and not ext.startswith('.'):ext='.'+ext
-	if not fn.lower().endswith(ext.lower()):fn+=ext
-	if fn.startswith("~/"):
-		import os
-		if U.isnix():
-			home=os.getenv('HOME')
+		if default:
+			default=default.replace('\\','/')
+			if not default.endswith('/'):default+='/'
 		else:
-			home=os.getenv('USERPROFILE')# 'C:/Users/Administrator'  not  cyg home os.getenv('HOME')
-		# else:		home=os.getenv('HOMEPATH')#  HOMEPATH=\Users\Administrator
-		fn= home+fn[1:];
+			default=U.set_test_path(U.gst) # 防止 U.gst 被改变没被保存
+		fn=str(fn)
+		fn=fn.replace('\\','/')
+		if ext and not ext.startswith('.'):ext='.'+ext
+		if not fn.lower().endswith(ext.lower()):fn+=ext
+		if fn.startswith("~/"):
+			import os
+			if U.isnix():
+				home=os.getenv('HOME')
+			else:
+				home=os.getenv('USERPROFILE')# 'C:/Users/Administrator'  not  cyg home os.getenv('HOME')
+			# else:		home=os.getenv('HOMEPATH')#  HOMEPATH=\Users\Administrator
+			fn= home+fn[1:];
 
-	#TODO to avoid dos max_path ,  must \ full path 2019年12月19日 不记得什么意思？ 
-	if (not fn.startswith(".")) and (not isAbs(fn)) :
-		while fn.startswith('/'):fn=fn[1:]
-		fn= default + fn
-	
-	if py.len(fn)>=260 and U.iswin():
-		fn=nt_path(fn)
-	if(dir and not fn.endswith('/')):fn+='/'
+		#TODO to avoid dos max_path ,  must \ full path 2019年12月19日 不记得什么意思？ 
+		if (not fn.startswith(".")) and (not isAbs(fn)) :
+			while fn.startswith('/'):fn=fn[1:]
+			fn= default + fn
+		
+		if py.len(fn)>=260 and U.iswin():
+			fn=nt_path(fn)
+		if(dir and not fn.endswith('/')):fn+='/'
+	if p:print(fn)
 	return fn
 autofn=auto_filename=autoFileName=auto_file_path=auto_path=autoPath
 
@@ -1343,10 +1368,14 @@ def name(a):
 		if U.inMuti(a,'/','\\',f=str.startswith):return a[1:]
 		else:return a
 		
-def dir(a):
-	#TODO a 为文件夹 应该直接返回
+def get_dirname_from_full_path(a):
+	#TODO 判断 磁盘上a 为文件夹 应该直接返回
+	if a[-1] in ['/','\\']:
+		return a
 	return _p.dirname(a)
 	# exit()
+get_dir=dirname=dir=get_path_from_full_path=get_dirname_from_full_path
+
 def get_parent_dir(a):
 	return
 	

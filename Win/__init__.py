@@ -72,6 +72,17 @@ try:
 except Exception as ei:pass
 
 
+def get_text(h):
+	import win32gui,win32con
+	
+	control = win32gui.FindWindowEx(h, 0, "static", None)
+	return win32gui.GetWindowText(control)
+	
+	buf = " " * 255
+	length = win32gui.SendMessage(h, win32con.WM_GETTEXT, 255, buf)
+	return buf,length
+	result = buf[:length]
+
 def win32_shellcopy(src, dest):
 	"""
 	Copy files and directories using Windows shell.
