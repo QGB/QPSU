@@ -94,6 +94,13 @@ try:
 	from pprint import pprint,pformat
 except:pass
 ####################################################
+def is_contains(text,target):
+	try:
+		return target in text
+	except Exception as e:
+		return py.No(e)
+is_include=include=contains=is_contains
+		
 def LF_to_CRLF(text):
 	if py.istr(text):return regex_replace(text,r'(?<!\r)\n','\r\n')
 	if py.isbytes(text):return regex_replace(text,br'(?<!\r)\n',b'\r\n')

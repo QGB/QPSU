@@ -717,6 +717,20 @@ def read_bytes_chunks(path,start=0,chunk_size = 8192):
 	'''try this func
 except : StopIteration((PermissionError(13, 'Permission denied'), 'D:/',8192)
 	'''
+	if py.isfile(path):
+		fd=path
+		try:
+			fd.read(0) #让错误提前暴露。
+			fd.seek(start)
+			while 1:
+				buf = fd.read(chunk_size)
+				if buf:
+					yield buf
+				else:
+					break	
+			return			
+		except Exception as e:
+			return (e,path,chunk_size)  
 	path=auto_file_path(path)
 	try:
 		with open(path, 'rb') as fd:
@@ -733,7 +747,7 @@ except : StopIteration((PermissionError(13, 'Permission denied'), 'D:/',8192)
 		return (e,path,chunk_size)          #               
 		# return py.No(e,path,chunk_size)                         
 		# raise StopIteration(e)
-rbc=read_bytes_stream=read_as_stream=read_file_chunks=readBytesChunks=read_bytes_chunks
+rbc=read_bytes_stream=read_file_as_stream=read_as_stream=read_file_chunks=readBytesChunks=read_bytes_chunks
 			
 def read_json(file,encoding=None):
 	''' '''
@@ -995,7 +1009,7 @@ def ll(ap='.',readable=True,type='',t='',r=False,d=False,dir=False,f=False,file=
 
 SUFFIXES = {1000: ['KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'],
 			1024: ['KiB', 'MiB', 'GiB', 'TiB', 'PiB', 'EiB', 'ZiB', 'YiB']}
-def numToSize(size, b1024=True):
+def int_to_size_str(size,b1024=True,zero='0 B',less_than_zero='%s', ):
 	'''Convert a file size to human-readable form.
 	Keyword arguments:
 	size -- file size in bytes
@@ -1008,8 +1022,16 @@ def numToSize(size, b1024=True):
 	if py.istr(size) or py.isbyte(size):
 		size=U.len(size)
 	size=py.int(size)
-	if size <= 0:
-		return size
+	if size < 0:
+		if py.callable(less_than_zero):
+			return less_than_zero(size)
+		if py.istr(less_than_zero):
+			if '%' in less_than_zero:
+				return less_than_zero%size
+			if '{' in less_than_zero and '}' in less_than_zero:
+				return less_than_zero.format(size)
+		return less_than_zero
+	if size==0:return zero
 		# raise ValueError('number must be non-negative')
 
 	multiple = 1024.0 if b1024 else 1000.0 #another if statement style
@@ -1021,7 +1043,7 @@ def numToSize(size, b1024=True):
 		if size < multiple:
 			return '{0:.3f} {1}'.format(size, suffix)
 	raise ValueError('number too large')
-ssize=readable_size=readableSize=numToSize
+ssize=readable_size=readableSize=numToSize=int_to_size=int_to_size_str
 
 def size(asf,int=py.No('ipython auto readable')): 
 	'''file or path return byte count
@@ -1377,6 +1399,7 @@ def get_dirname_from_full_path(a):
 get_dir=dirname=dir=get_path_from_full_path=get_dirname_from_full_path
 
 def get_parent_dir(a):
+	raise py.NotImplementedError()
 	return
 	
 # def open(file, mode='r', buffering=-1, encoding=None, errors=None, newline=None, closefd=True, opener=None):

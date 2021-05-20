@@ -1641,6 +1641,8 @@ exec('r=xx') ;return r # this has been tested in 2&3
 	try:
 		exec(source, globals, locals)
 	except Exception as e:
+		import traceback
+		return traceback.format_exc() 
 		return py.repr(e)
 		
 	if 'r' in locals:
@@ -3712,9 +3714,22 @@ def getAST(mod):
 	return ast.parse(inspect.getsource(mod))
 getModAST=getAST
 
+def rebuild_function_call_self_args_str(a,cbs=False):
+	U=py.importU()
+	r=a.__name__+'(' # lambda : '<lambda>'
+	a=U.getfullargspec(a)
+	for s in a.args:
+		r+='{0}={0},'.format(s)
+	# if a.varargs: # 如果args指定了名称 TypeError: ft() got multiple values for argument 'q'，不指定名称 按顺序调用没事
+	if a.varkw:r+='**%s,'%a.varkw
+	r=r+')'
+	if cbs:U.cbs(r) 
+	return U.StrRepr(r)
+get_function_call_self_args=generate_function_call_self_args=rebuild_function_call_self_args=rebuild_function_call_self_args_str	
 def argspec_to_str(a):
 	U=py.importU()
 	a=U.getfullargspec(a)
+	
 fullargspec_to_str=argspec_to_str	
 
 def get_source(a):

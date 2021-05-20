@@ -43,41 +43,182 @@ else:
 	from BaseHTTPServer import HTTPServer as _HTTPServer
 
 def ftp_client(cwd=py.No('history or /',no_raise=1),
-	host=py.No('auto get ftp.host',no_raise=1),port=3721,user='', passwd='', acct='',
-                 timeout=None,response=None,request=None,**ka):
+	host=py.No('auto get ftp.host',no_raise=1),port=3721,user='', passwd='',ftp_encoding='utf-8', acct='',
+                 timeout=None,retry=3,response=None,request=None,text_encoding='',**ka):
 	'''
 	'''
 	import ftplib     
 	U,T,N,F=py.importUTNF()
 	response=U.get_duplicated_kargs(ka,'resp','rsp','p',default=response)
+	request=U.get_duplicated_kargs(ka,'req','q','REQ',default=request)
+	return_raw=U.get_duplicated_kargs(ka,'raw','return_raw','RAW',default=None)
+	
+	ftp_encoding=U.get_duplicated_kargs(ka,'ftpe','fe','encoding','list_encoding',default=ftp_encoding)
+	text_encoding=U.get_duplicated_kargs(ka,'txte','te','txt_encoding',default=text_encoding)
+	
+	def set_user_passwd_host_port_cwd(url):
+		nonlocal host,port,user,passwd,cwd
+		netloc=T.netloc(url)
+		if not netloc:raise py.ArgumentError(cwd)
+		user_pw=T.sub(netloc,'','@')
+		if user_pw:
+			if ':' in user_pw:
+				user_pw=user_pw.split(':')
+				if not user:user=user_pw[0]
+				if not passwd:passwd=user_pw[1]
+			else:
+				if not user:user=user_pw
+			host_port=T.sub(netloc,'@')
+			set_host_port(host_port)
+		else:
+			set_host_port(netloc)
+		if not cwd:cwd=T.sub(cwd,netloc)
+		
+	def set_host_port(host_port):
+		nonlocal host,port
+		if ':' in host_port:
+			host_port=host_port.split(':')
+			if not host:host=host_port[0]
+			if port==3721:port=host_port[1]
+		else:
+			if not host:host=host_port
+			if port==3721:port=21
+	
+	if not cwd and N.geta(request):
+		cwd=N.geta(request)		
+
+	if py.istr(cwd):
+		if cwd.startswith('ftp://') :
+			cwd,url='',cwd
+			#warnning
+			set_user_passwd_host_port_cwd(url)
+		# or ('@' in host and ':' in cwd):
+		# if not host and ':' in cwd:
+			
+			
 	if not host:
-		host=U.get_or_set_input('ftp.host',type=U.auto_type)
+		if (py.isnumber(cwd) and cwd>0):
+			host,cwd=cwd,''	
+			#warnning
+		if not host:host=U.get_or_set_input('ftp.host[default]',type=U.auto_type)
+	if py.istr(host):
+		if host.startswith('ftp://') or ('@' in host):
+			host,url='',host
+			set_user_passwd_host_port_cwd(url)
+		elif ':' in host:
+			set_host_port(host)
+		
 	host=auto_ip(host) 
-	uk='ftp.host={user}{host}:{port}'.format(
+	
+	uk='ftp.FTP[netloc={user}{host}:{port}]'.format(
 		host=host,port=port,user= user+'@' if user else user)
 	self=U.get(uk)
-	if self:
-		try:
-			pwd=self.pwd()
-		except Exception as e:
-			self.close()
-			U.set(uk,py.No(e))
-			return ftp_client(host=host,port=3721,user='', passwd='', acct='',
-                 timeout=None,response=None,request=None)
-			# print(e)
-	else:
+	if not self:
+		if not cwd:cwd='/'
 		if port==3721 and not user:
-			user=U.input_and_set('ftp.user.android_es','need_user_to_login')
-		from socket import _GLOBAL_DEFAULT_TIMEOUT
-		if not timeout:timeout=_GLOBAL_DEFAULT_TIMEOUT
+			user=U.input_and_set('ftp.user[port=3721]','if_is_es_need_user_to_login')
+		if not timeout:
+			from socket import _GLOBAL_DEFAULT_TIMEOUT
+			timeout=U.get_or_set('ftp.timeout', _GLOBAL_DEFAULT_TIMEOUT)
 		ftp=self=ftplib.FTP(timeout=timeout)
 		self.host=host
 		self.port=port
+		self.encoding=ftp_encoding
+		try:
+			self.connect(host)
+			if user:
+				self.login(user, passwd, acct)
+		except Exception as e:
+			if retry>0:retry-=1
+			else:raise	
+			return ftp_client(cwd=cwd,host=host,port=port,user=user,passwd=passwd,ftp_encoding=ftp_encoding,acct=acct,timeout=timeout,retry=retry,response=response,request=request,text_encoding=text_encoding,**ka,)
+	self.encoding=ftp_encoding			
+	try:
+		pwd=self.pwd()
+	except Exception as e:
+		self.close()
+		U.set(uk,py.No(e))
+		if retry>0:retry-=1
+		else:raise	
+		return ftp_client(cwd=cwd,host=host,port=port,user=user,passwd=passwd,ftp_encoding=ftp_encoding,acct=acct,timeout=timeout,retry=retry,response=response,request=request,text_encoding=text_encoding,**ka,)
+		# print(e)
+	U.set(uk,self) ### set ftp obj
+	if not cwd:cwd=pwd
+	try:
+		self.cwd(cwd)
+	except Exception as e:
+		from io import BytesIO
+		bio=BytesIO()
+		filename=F.get_filename_from_full_path(cwd)
+		self.retrbinary("RETR " + filename ,bio.write)
+		if response:
+			from flask import stream_with_context
+			gen=F.read_file_as_stream(bio)
+			response.response=stream_with_context(gen)
+			response.headers['Content-Disposition'] ="inline; filename=" + T.url_encode(filename)
+			if text_encoding:
+				if 'auto' in text_encoding.lower():
+					text_encoding=T.detect(bio.getvalue()[:2999])
+				response.headers['Content-Type']='text/plain;charset='+text_encoding;
+		return bio
+	if not cwd.endswith('/'):cwd+='/'	
+	rd={}
+	# hs=[]
+	html=''
+	dir_size=U.IntRepr(-1,repr='<-1 FTP_DIR_>')
+	try:
+		mlsd=self.mlsd()
+	except ftplib.error_reply as e:#error_reply: 200 Command okay.
+		if e.args[0]!='200 Command okay.':raise
+		self.passiveserver=0
+		mlsd=self.mlsd()
 		
-		self.connect(host)
-		if user:
-			self.login(user, passwd, acct)
-	return self	
+	mlsd=py.list(mlsd)
+	if not mlsd:#3721
+		fs=self.nlst()
+		ls=[]
+		self.retrlines("LIST",callback=ls.append)		
+		nf,nl=U.len(fs,ls)
+		if nf!=nl:raise py.EnvironmentError(nf,nl,fs,ls)
+		mlsd=[[fs[i],ls[i]] for i in py.range(nf)]
+	if return_raw:return mlsd
+	for fd in mlsd:
+		f,d=fd
+		# if py.len(d)>4:raise py.EnvironmentError(f,d)
+		# if d['type']=='dir':
+		# size=py.int( d.get('size',-1)	)
+		if (py.istr(d) and d.startswith('d')) or (py.isdict(d) and d.get('type','')=='dir'):
+			# if size!=-1 :raise py.EnvironmentError(f,d)
+			# size=dir_size
+			if not f.endswith('/'):f+='/'
+		rd[f]=d
+		# else:
+			# size=F.IntSize(size)
+		# rd[f]=[size,
+				# U.StrRepr(d['modify'],repr=U.stime(d['modify'])),
+				# U.StrRepr(d['create'],repr=U.stime(d['create'])),
+				# ]
+		if response:
+			h='<a href="./{0}">{1}</a>{2!r}<br>\n'.format(T.html_encode(f),T.padding(f,size=44,char=chr(65440)),d)
+			html=html+h
+	if response:
+		response.headers['Content-Type']='text/html;charset=utf-8';
+		response.set_data(html)
+	return rd
+		# html=T.html_template('''$
+# '<a href=>'		
+		# $''',globals=py.globals(),locals=py.locals())
+	# fs=self.nlst()
+	# def line_callback(line):
+		
+	# self.retrlines("LIST",callback=line_callback)		
+	flask_html_response(response,html='<a href="/{0}">{0}</a>',remove_tag=[])
+		# try:
+			
+		# except Exception as rbe:
+			# e
+			
+	return U.set(uk,self)
 FTP=ftp=ftp_client	
 # def ftp_list_file(host)
 	
@@ -696,8 +837,11 @@ pythonAnywhere : multi[ // or  %2F%2F%2F%2F%2F ] in url will auto convert to one
 	if py.istr(request):return request
 	if not request:
 		from flask import request
+	try:
+		u=request.url
+	except RuntimeError as e:
+		return py.No(e)
 	U,T,N,F=py.importUTNF()
-	u=request.url
 	if '%23=' in u:
 		a=T.sub_tail(u,'%23=')
 	elif '%23-' in u:
@@ -762,6 +906,21 @@ def pdf2html(url,response=None,zoom=None,path=None,pw=None):
 	else:
 		return do_resp(F.read(html_file))
 
+def flask_text_response(response,data='',encoding=py.No('auto',no_raise=1),file='',):
+	U,T,N,F=py.importUTNF()
+	if py.istr(data):
+		response.headers['Content-Type']='text/plain;charset=utf-8'	
+	elif py.isbyte(data):
+		if not encoding:encoding=T.detect(data[:9999])
+		response.headers['Content-Type']='text/plain;charset=%s'%(
+			encoding if encoding else 'latin')
+	else:
+		data=T.pformat(data)
+		response.headers['Content-Type']='text/plain;charset=utf-8'	
+	response.set_data(data)
+	return response
+txt=text=flask_text_response
+	
 def flask_html_response(response,html='',file='',remove_tag=(
 		['<script','</script>'],
 ['<SCRIPT','</SCRIPT>'],'ondragstart=','oncopy=','oncut=','oncontextmenu=','"return false;"',
@@ -808,6 +967,8 @@ Resource interpreted as Stylesheet but transferred with MIME type text/html:
 			s=T.sub(html,start,end)
 			if not s:break
 			html=html.replace(start+s+end,'')
+	if not response:
+		return html
 	response.headers['Content-Type']=content_type;
 	response.set_data(html)
 html=htmlp=response_html=html_response=flask_html_response
@@ -899,7 +1060,7 @@ def flask_file_stream_response(response,file,):
 	# request.headers.get('Range','')
 	# if range:
 		
-	gen=F.read_as_stream(file) # 这里不会出错，iter generator 才 服务器内部错误
+	gen=F.read_file_as_stream(file) # 这里不会出错，iter generator 才 服务器内部错误
 	try:
 		py.next(gen)
 		response.response=stream_with_context(gen)
@@ -914,7 +1075,7 @@ def flask_file_stream_response(response,file,):
 		r=py.repr(e)
 		response.set_data(r)
 
-file=stream_file=file_stream=read_as_stream=flask_file_stream_response
+file=stream_file=file_stream=read_as_stream=read_file_as_stream=flask_file_stream_response
 
 def flask_image_response(response,image,format='png',**ka):
 	if py.isbytes(image):
