@@ -215,7 +215,7 @@ Out[26]: 'C:/QGB/babun/cygwin/bin/qgb/'
 		pkey=paramiko.RSAKey.from_private_key(fpkey, password=private_key_password)
 
 		if 'git@' not in repo_path:
-			raise py.NotImplementedError("'git@' not in repo_path")
+			# raise py.NotImplementedError("'git@' not in repo_path")
 			repo_path
 		
 		client, path=dulwich.client.get_transport_and_path( remote, vendor=ParamikoSSHVendor(pkey=pkey))
