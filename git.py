@@ -149,7 +149,7 @@ paramiko.RSAKey.from_private_key(open_private_key(f),)  == <paramiko.rsakey.RSAK
 		file=StringIO(f)
 	return file	
 	
-def push_with_key(repo_path,remote="ssh://git@github.com:22/QGB/QPSU.git",private_key=U.gst+'id_rsa',refspecs='master',errstream=getattr(sys.stderr, 'buffer', None),private_key_password=None,):
+def push_with_key(repo_path,remote="ssh://git@github.com:22/QGB/QPSU.git",private_key='',refspecs='master',errstream=getattr(sys.stderr, 'buffer', None),private_key_password=None,):
 	r''' #important#	三引号string中不能出现 \util 这种字符（常见于路径）
 # 会导致 SyntaxError: (unicode error) 'unicodeescape' codec can't decode bytes in position 1-2: truncated \uXXXX escape 错误
 # 最好 引号前加r 强制用 raw-string
@@ -195,7 +195,8 @@ Out[26]: 'C:/QGB/babun/cygwin/bin/qgb/'
 	DEFAULT_ENCODING = 'utf-8'	
 	selected_refs = []
 	
-	
+	if not private_key:
+		private_key=U.get_or_set('id_rsa',U.gst+'id_rsa')
 	
 	
 	with open_private_key(private_key) as fpkey, dulwich.porcelain.open_repo_closing(repo_path) as r:
@@ -214,6 +215,7 @@ Out[26]: 'C:/QGB/babun/cygwin/bin/qgb/'
 		pkey=paramiko.RSAKey.from_private_key(fpkey, password=private_key_password)
 
 		if 'git@' not in repo_path:
+			raise py.NotImplementedError("'git@' not in repo_path")
 			repo_path
 		
 		client, path=dulwich.client.get_transport_and_path( remote, vendor=ParamikoSSHVendor(pkey=pkey))

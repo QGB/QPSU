@@ -975,7 +975,10 @@ def cmd(*a,**ka):
 		# r=sb.check_out(a,**ka)
 		#pythonAnywhere  IPython[py2.7] REPL  sb.run does not exist
 		#pythonAnywhere  web[py3.6]  TypeError("__init__() got an unexpected keyword argument 'capture_output'",
-		if not py.getattr(sb,'run',0) or 'capture_output' not in getfullargspec(sb.run).kwonlyargs: 
+		if not py.getattr(sb,'run',0) or (
+			('capture_output' not in getfullargspec(sb.run).kwonlyargs) and
+			('capture_output' not in sb.run.__doc__)
+			): 
 			#pythonAnywhere T
 			ka['stderr']=sb.STDOUT
 			r= sb.check_output(a,**ka) # bytes

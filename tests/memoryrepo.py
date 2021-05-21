@@ -19,7 +19,8 @@ local_repo.refs.set_symbolic_ref(b'HEAD', b'refs/heads/master')
 print(local_repo.refs.as_dict())
 
 porcelain.fetch(local_repo, remote_url)
-local_repo['refs/heads/master'] = local_repo['refs/remotes/origin/master']
+
+local_repo[b'refs/heads/master'] = local_repo[b'refs/remotes/origin/master']
 
 last_tree = local_repo[local_repo['HEAD'].tree]
 new_blob = Blob.from_string(b'Some contents')
