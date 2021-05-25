@@ -21,7 +21,11 @@ def setErr(ae):
 ###################
 class IntSize(py.int):
 	def __new__(cls, *a, **ka):
-		return py.int.__new__(cls, *a, **ka)
+	#int() argument must be a string, a bytes-like object or a number, not 
+		if py.istr(a[0]) or py.isbyte(a[0]) or py.isnumber(a[0]):
+			return py.int.__new__(cls, *a, **ka)
+		else:
+			return a[0]
 	def __repr__(self):
 		return '<{}>'.format(numToSize(self) )
 		# return '<{}={}>'.format(super().__repr__(),F.ssize(self) )
