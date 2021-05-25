@@ -972,14 +972,14 @@ def regexMatchAll(a,regex):
 	return [i.group() for i in re.finditer(regex,a)]
 matchRegex=matchRegexAll=regexMatchAll
 		
-def regexMatchGroups(a,regex):
+def regexMatchGroups(a,regex,flags=0):
 	''' return [list of re.search group [s]]
 re.search(pattern, string, flags=0)
 pattern	匹配的正则表达式
 string	要匹配的字符串。
 flags	标志位，用于控制正则表达式的匹配方式，如：是否区分大小写，多行匹配等等。
 	'''
-	r= re.search(regex,a)
+	r= re.search(regex,a,flags=flags)
 	if r:
 		if r.groups():#返回一个包含所有小组字符串的元组，从 1 到 所含的小组号。
 			r=[r.group()]+py.list(r.groups())

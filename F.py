@@ -920,7 +920,8 @@ return tuple(ap,dir_list,file_list )
 	else:
 		return _os.walk(ap).__next__()
 		
-def list(ap='.',type='',t='',r=False,d=False,dir=False,f=False,file=False,include='',exclude='',**ka):
+def list(ap='.',type='',t='',r=False,d=False,dir=False,f=False,
+	file=False,include='',exclude='',timeout=None,**ka):
 	'''Parms:bool r recursion
 			 str (type,t) '(d,f,a,r)'
 	default return all'''
@@ -947,7 +948,7 @@ def list(ap='.',type='',t='',r=False,d=False,dir=False,f=False,file=False,includ
 			ap+='/'
 		else:
 			
-			return exists(ap)
+			return [exists(ap)]
 		# if not ap.endswith('/'):ap+='/'
 		# else:ap+='\\'
 	
