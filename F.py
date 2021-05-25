@@ -874,7 +874,7 @@ def isDir(file):
 	return _p.isdir(file)
 is_folder=isFolder=is_dir=isdir=isDir
 	
-def exists(fn,zero=False):
+def exists(fn,zero=True):
 	''': path.exist('c:')
 Out[57]: False
 
@@ -898,7 +898,7 @@ True
 			if not fn.endswith('/'):fn+='/'
 			return fn
 		if _p.getsize(fn)<1 and not zero:
-			return False
+			return zero
 		return fn
 	else:
 		return py.No(fn,'not exists')
@@ -947,7 +947,7 @@ def list(ap='.',type='',t='',r=False,d=False,dir=False,f=False,
 		if isDir(ap):
 			ap+='/'
 		else:
-			
+
 			return [exists(ap)]
 		# if not ap.endswith('/'):ap+='/'
 		# else:ap+='\\'
