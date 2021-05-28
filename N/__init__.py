@@ -563,6 +563,9 @@ def rpcGetVariable(varname,base=py.No('auto history e.g. [http://]127.0.0.1:2357
 	return_bytes=U.get_duplicated_kargs(ka,'return_byte','rb','B','b','raw','raw_bytes',default=return_bytes)
 	if not base:
 		base=get_remote_rpc_base(change=False)
+	if base.lower() in ['input','modify','change']:
+		base=get_remote_rpc_base(change=True)
+		
 	# if not base:raise py.ArgumentError('need base=')
 	# if T.regexMatchOne(base,':\d*$') or T.regex_count(base,'/')==2:base+='/'
 	# U.set(RPC_BASE_ REMOTE,base)
@@ -716,6 +719,7 @@ key compatibility :  key='#rpc\n'==chr(35)+'rpc'+chr(10)
 	
 	if py.istr(key):
 		if py.len(key)<1:return py.No('key length < 1',key)
+		U.set('rpc.server.base','/'+key,level=1) # 1 py,process
 		# for i in key:
 			# if i not in T.alphanumeric:
 				# return py.No('key char must in T.alphanumeric',key)
@@ -724,6 +728,7 @@ key compatibility :  key='#rpc\n'==chr(35)+'rpc'+chr(10)
 			methods=['GET', 'POST', 'OPTIONS', 'PUT', 'DELETE', 'HEAD', 'PATCH'])
 		def flaskEval(*a,**ka):return _flaskEval()
 	else:
+		U.set('rpc.server.base','/',level=1) # 1 py,process
 		@app.errorhandler(404)
 		def flaskEval(*a,**ka):return _flaskEval()
 		
@@ -835,8 +840,7 @@ a=T.subr(u,T.u23)#'%23-'
 pythonAnywhere : multi[ // or  %2F%2F%2F%2F%2F ] in url will auto convert to one / ,it can't bypass
 	'''
 	if py.istr(request):return request
-	if not request:
-		from flask import request
+	if not request:from flask import request
 	try:
 		u=request.url
 	except RuntimeError as e:

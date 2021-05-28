@@ -123,6 +123,14 @@ def set(name,value=SET_NO_VALUE,level=gd_sync_level['process'],**ka):
 		import sqlite3
 	return value
 
+def set_multi(**ka):
+	import sys
+	# d=py.getattr(sys,'_qgb_dict',{})
+	sys._qgb_dict.update(ka)
+	# for name,value in ka.items():
+		# d[name]=value	
+	return ka
+set_named=set_multi	
 def get(name='_',default=GET_NO_VALUE,level=gd_sync_level['process']):
 	if level>=gd_sync_level['process']:
 		import sys
@@ -132,11 +140,11 @@ def get(name='_',default=GET_NO_VALUE,level=gd_sync_level['process']):
 			# default=py.No('can not get name '+py.repr(name),no_raise=True)
 		return d.get(name,default)
 	#TODO
-def get_multi_return_list(*names,**ka):
+def get_multi_return_list(*names,**defaults):
 	r=[]
 	for name in names:
 		r.append( get(name) )
-	for name,default in ka.items():
+	for name,default in defaults.items():
 		r.append( get(name,default=default) )
 	return r	
 def get_multi_return_exist_one(*names,default=GET_NO_VALUE,no_raise=True):
@@ -5497,6 +5505,58 @@ image.load()
 	return a[x,y]
 	
 ############## qgb type ######################	
+def object_custom_repr(obj, *a, **ka):
+	'''
+In [1306]: float U.obj_repr(2.3,repr=3)
+Out[1306]: 2.3
+
+In [1307]: int U.obj_repr(4,repr=3)
+Out[1307]: 4
+
+In [1308]: bytes U.obj_repr(b'42ew',repr=3)
+Out[1308]: b'42ew'
+
+In [1309]: dict U.obj_repr({1:3},repr=3)
+Out[1309]: {}
+
+In [1310]: list U.obj_repr([1,2],repr=43)
+Out[1310]: []
+
+In [1312]: list U.obj_repr(set([1,2,3]),repr=43)
+Out[1312]: []
+'''	
+	# if py.len(a)<1:raise py.ArgumentError('')
+	target=get_duplicated_kargs(ka,'f','target','repr','__repr__','func','function','custom','custom_repr',default=None)
+	if target==None:
+		return obj
+	t=py.type(obj)
+	class QGB_REPR_SUBTYPE(t):
+		def __repr__(self):return self.__qgb_custom_repr__()
+		def __str__(self) :return self.__qgb_custom_repr__()
+		def __qgb_custom_repr__(self):#super().__str__()
+			'''
+			'''
+			if py.callable(self._qgb_repr):
+				return self._qgb_repr(self,**self._qgb_ka)
+			else:
+				if py.getattr(self,'_qgb_ka',None):
+					raise py.ArgumentError('when CustomStrRepr target not callable,must no keyword args!')
+				if py.istr(self._qgb_repr):
+					return self._qgb_repr
+				return py.repr(self._qgb_repr)
+	d=get_or_set('QGB_REPR_SUBTYPE.mapping',{})			
+	if t in d:QGB_REPR_SUBTYPE=d[t]
+	else     :d[t]=QGB_REPR_SUBTYPE
+	#####
+	
+	self=t.__new__(QGB_REPR_SUBTYPE,obj,*a,**ka)
+	self._qgb_a=a
+	self._qgb_ka=ka
+	self._qgb_repr=target
+	
+	return self
+ObjectRepr=objectRepr=obj_repr=object_repr=object_custom_repr	
+
 class FloatCustomStrRepr(py.float):
 	'''每添加一种 CustomStrRepr ，需要在 T.string 中添加相应的 str 代码
 	或者用 self.raw 来保存 # 不行，直接保存参数 类型不对

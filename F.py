@@ -984,7 +984,8 @@ def list(ap='.',type='',t='',r=False,d=False,dir=False,f=False,
 	# else:return r3[1]+r3[2]
 ls=list
 
-def ll(ap='.',readable=True,type='',t='',r=False,d=False,dir=False,f=False,file=False,return_dict=True,**ka):
+def ll(ap='.',readable=True,type='',t='',r=False,d=False,dir=False,f=False,file=False,
+	return_dict=True,no_raise=True,**ka):
 	'''return {file : [size,atime,mtime,ctime,st_mode]}
 	readable is True: Size,Stime,..
 	linux struct stat: http://pubs.opengroup.org/onlinepubs/009695399/basedefs/sys/stat.h.html'''
@@ -999,12 +1000,19 @@ def ll(ap='.',readable=True,type='',t='',r=False,d=False,dir=False,f=False,file=
 		if readable:
 			U=py.importU()
 			IntSize,FloatTime,IntOct=U.IntSize,U.FloatTime,U.IntOct
-			dr[i]=[ IntSize(size(i)),
-					FloatTime(s.st_atime),
-					FloatTime(s.st_mtime),
-					FloatTime(s.st_ctime),
-					IntOct (s.st_mode ),
-				]
+			try:
+				dr[i]=[ IntSize(size(i)),
+						FloatTime(s.st_atime),
+						FloatTime(s.st_mtime),
+						FloatTime(s.st_ctime),
+						IntOct (s.st_mode ),
+					]
+			except Exception as e:
+				if no_raise:
+					dr[i]=py.No(e)
+				else:
+					raise
+				
 		else:
 			dr[i]=[size(i),s.st_atime,s.st_mtime,s.st_ctime,s.st_mode]
 	if return_dict:
@@ -1319,9 +1327,9 @@ FileNotFoundError: [Errno 2] No such file or directory: '.
 autofn=auto_filename=autoFileName=auto_file_path=auto_path=autoPath
 
 
-def get_nt_short_path_name(long_name):
+def get_nt_short_path_name(long_name,max=250):
 	import win32api
-	if py.len(long_name)<250:return long_name
+	if py.len(long_name)<max:return long_name
 	if not long_name.startswith( u"\\\\?\\"):
 		long_name=u"\\\\?\\"+long_name
 	return win32api.GetShortPathName(long_name)

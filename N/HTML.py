@@ -12,12 +12,44 @@ def format(s,**ka):
 	ka={'{%s}'%k:v for k,v in ka.items()}
 	return T.replacey(s,ka)
 
-def textarea(response,name='textarea'):
+def flask_get_all_upload_files(upload_dir=py.No('U.gst/upload_dir',no_raise=1),save_size=py.importF().IntSize(1024*1024*8),request=None,):
+	'''save_size <=0 : save_all
+	'''
+	from shutil import copyfileobj
+	# U,T
+	if not request:from flask import request
+	if not upload_dir:
+		upload_dir=U.get_or_set('rpc.server.upload_dir',U.gst+'upload_dir/')
+	else:
+		upload_dir=U.set('rpc.server.upload_dir',upload_dir)
+	F.mkdir(upload_dir)
+	d={}
+	for k,f in request.files.items():
+		b=f.stream.read(save_size)
+		if py.len(b)<save_size:
+			if py.len(b)>99:
+				sr="b{0}'{1}...{2}'".format(len(b),repr(b[:50])[2:-1],repr(b[-60:])[2:-1])  
+				d[f]=U.object_custom_repr(b,repr=sr)
+			else:
+				d[f]=b
+		else:
+			fn=upload_dir+f.filename
+			with py.open(fn,'wb') as fp:
+				fp.write(b)
+				copyfileobj(f.stream, fp)
+			d[f]=fn
+			
+	return d
+		# f.save(f.name)
+flask_save_all_upload_files=flask_get_all_upload_files	
+	
+def textarea(response,name='t',upload_dir=py.No('U.gst/upload_dir',no_raise=1),):
 	"""
 	 <input type="text" name="t">
 	
 	"""
-	r='''
+	
+	r=T.html_template(globals=globals(),locals=locals(),s='''
 <head>
 <style type="text/css">
 	input[type="submit"]{
@@ -27,21 +59,31 @@ def textarea(response,name='textarea'):
 </style> 
 </head>
 	
-<form method="post" enctype="multipart/form-data" action="/r=U.set('%(name)s',request.form),q.get_data()">
+<form method="post" enctype="multipart/form-data" action="/r=U.set_multi($name$_form=request.form,$name$_files=N.HTML.flask_get_all_upload_files(),$name$_data=q.get_data(),);">
 	<input type="submit" />
 	<hr>
 	<input type="file" name="f">
 	<hr>
-	<div><small>%(name)s:</small></div >
+	<div><small>$name$:</small></div >
 	<div style="height:60%;" > 
 		<textarea name="t" style="width:100%; height: 100%;" ></textarea>
 	</div>
 	
-	
 	<hr>
 	<input type="submit" />
+	<input id=url type="text" name="url" value="%23-">
 </form> 
-'''.replace('%(name)s',name)
+<script> 
+var input = document.querySelector('input#url');
+var form  = document.querySelector('form');
+var original_action=form.getAttribute('action');
+function updateValue(e) {
+	form.setAttribute('action',original_action+e.srcElement.value)
+	console.log(form.getAttribute('action'))
+}
+input.addEventListener('input', updateValue);
+</script>
+''',)
 	# r=format(r,name=name)
 	response.headers['Content-Type']='text/html;charset=utf-8';
 	return response.set_data(r)

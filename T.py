@@ -6,7 +6,7 @@ else:#['T','__main__']
 FILE_NAME=fileChars=FILE_CHARS="!#$%&'()+,-0123456789;=@ABCDEFGHIJKLMNOPQRSTUVWXYZ[]^_`abcdefghijklmnopqrstuvwxyz{}~"+' .'
 PATH_NAME=pathChars=PATH_CHARS='/\\:'+FILE_NAME# include space, dot
 gsNOT_FILE_NAME_WINDOWS=gsNOT_FILE_NAME=NOT_FILE_NAME_WINDOWS=NOT_FILE_NAME=r'"*/:<>?\|'
-gsNOT_PATH_NAME_WINDOWS=gsNOT_PATH_NAME=NOT_PATH_NAME_WINDOWS=NOT_PATH_NAME=r'"*:<>?|'
+gsNOT_PATH_NAME_WINDOWS=gsNOT_PATH_NAME=NOT_PATH_NAME_WINDOWS=NOT_PATH_NAME=r'"*<>?|' # : is
 gsNOT_FILE_NAME_LINUX=NOT_FILE_NAME_LINUX='/'+py.chr(92) # \
 
 az=a_z='abcdefghijklmnopqrstuvwxyz'

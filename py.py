@@ -148,8 +148,10 @@ def isunicode(a):
 	else    :return isinstance(a,str)
 	
 def isbyte(a):
-	if is2():return type(a) in (str,bytearray,bytes)
-	else    :return type(a) in (bytearray,bytes)
+	if is2():
+		return isinstance(a, (bytearray,bytes,str) ,)
+	else    :
+		return isinstance(a, (bytearray,bytes) ,)
 isbytes=isbyte
 	
 def istr(a):
