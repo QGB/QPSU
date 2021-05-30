@@ -721,15 +721,30 @@ flap=flat
 ##(1, 2, 3, 5, 2, 8, 7, 8, 9)
 # pln flat([1,2,3,[4,5,[1,2],6]],['aaa'])
 ##  (1, 2, 3, 'aaa', 4, 5, 6, 1, 2)
+
+def sha256(bytes=b'',file=''):
+	return hashlib_hash(bytes=bytes,file=file,hash_func='sha256')
 	
-def md5(a='',file=''):
+def md5(bytes=b'',file=''):
 	'''[a] : string or buffer
 	[file]:fileName
 	return 32 hex(lowerCase) str'''
-	import hashlib   
+	return hashlib_hash(bytes=bytes,file=file,hash_func='md5')
 	
+def hashlib_hash(bytes=b'',file='',hash_func='sha256'):
+	'''hashlib.algorithms_guaranteed=
+{'sha3_224', 'shake_256', 'sha3_256', 'sha256', 'sha1', 'sha224', 'md5', 'sha3_512', 'blake2s', 'blake2b', 'sha3_384', 'shake_128', 'sha384', 'sha512'} # len 14	
+
+一个集合，其中包含此模块在所有平台上都保证支持的哈希算法的名称。 请注意 'md5' 也在此清单中，虽然某些上游厂商提供了一个怪异的排除了此算法的 "FIPS 兼容" Python 编译版本。
+
+hashlib.algorithms_available 一个集合，其中包含在所运行的 Python 解释器上可用的哈希算法的名称。 将这些名称传给 new() 时将可被识别。 algorithms_guaranteed 将总是它的一个子集。 同样的算法在此集合中可能以不同的名称出现多次（这是 OpenSSL 的原因）
+
+
+注解 如果你想找到 adler32 或 crc32 哈希函数，它们在 zlib 模块中。
+	'''
+	import hashlib   
+	myhash = getattr(hashlib,hash_func)()
 	if file:
-		myhash = hashlib.md5()
 		f = py.open(file,'rb')
 		while True:
 			b = f.read(8096)
@@ -740,9 +755,9 @@ def md5(a='',file=''):
 		return myhash.hexdigest()
 	
 	
-	md5 = hashlib.md5()   
-	md5.update(a)	
-	return md5.hexdigest()  
+	# md5 = hashlib.md5()   
+	myhash.update(bytes)	
+	return myhash.hexdigest()  
 
 	
 def inMuti(a,*la,**func):
@@ -2788,7 +2803,7 @@ def get_int_multiplication_expression(a,factor=1024,use_pow=True,add_symbol=' + 
 		fs.append(factor)
 	join_m(a,fs)
 	return T.join(ts,separator=add_symbol)
-int_exp=get_int_exp=get_multiply_exp=get_int_multiplication_expression
+num_exp=number_exp=number_expression=int_exp=get_int_exp=get_multiply_exp=get_int_multiplication_expression
 		
 		
 def product_of_integers(*a):
