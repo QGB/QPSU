@@ -187,8 +187,10 @@ def parse_str_auto_type(s):
 	return s
 	
 auto_type=input_auto_type=parse_str_auto_type
-def get_or_set(name,default):
+def get_or_set(name,default=None,lazy_default=None):
 	# if not default: # ipy module set {}
+	if py.callable(lazy_default) and not default:
+		default=lazy_default()
 	if py.isno(default) or (default==None):
 		raise py.ArgumentError('default cannot be {}'.format( repr(default) ))
 	r=get(name)
@@ -2754,6 +2756,41 @@ https://stackoverflow.com/questions/51533621/prime-factorization-with-large-numb
 factors=integer_factorization=prime_factorization
 # (1917141215419419171412154194191714)
 # [2, 3, 13, 449941L, 54626569996995593878495243L]
+def get_int_multiplication_expression(a,factor=1024,use_pow=True,add_symbol=' + ',mul_symbol='*'):
+	''' 12/3 = 4 的英文说法是12 divided by 3 is 4， 除出来的结果称为「商」，就是quotient，而余数是remainder
+	'''
+	if not factor or py.abs(factor)==1:
+		raise py.ArgumentError(a,factor)
+	if not a:return a
+	
+	def join_m(a,fs):
+		if a==0 :
+			return
+		lfs= py.len(fs)
+		if use_pow and lfs>1:
+			fs=['%s**%s'%(factor,lfs) ]
+		# else:
+			
+		if a==1:
+			if fs:
+				ts.insert(0,T.join(*fs,separator=mul_symbol))
+			else:
+				ts.insert(0,a)
+		else:
+			ts.insert(0,T.join(a,*fs,separator=mul_symbol))
+	ts=[]
+	fs=[]
+	while a>=factor:
+		quotient,remainder=py.divmod(a,factor) #if isint(a): return int tuple ;float return float
+		a=quotient
+		# if remainder:
+		join_m(remainder,fs) 
+		fs.append(factor)
+	join_m(a,fs)
+	return T.join(ts,separator=add_symbol)
+int_exp=get_int_exp=get_multiply_exp=get_int_multiplication_expression
+		
+		
 def product_of_integers(*a):
 	r=1
 	for i in a:
@@ -2762,7 +2799,12 @@ def product_of_integers(*a):
 multiplication=product_of_integers
 
 def multiply_by_multiples(iterable,times):
-	''' r=a,b,c=list(map((2).__mul__, [1, 2, 3]))
+	''' 对 iterable 中每个元素 乘以 times.
+return list_float
+In [1566]: U.multiply_by_multiples(U.range(9),2)
+Out[1566]: [0.0, 2.0, 4.0, 6.0, 8.0, 10.0, 12.0, 14.0, 16.0]
+	
+	r=a,b,c=list(map((2).__mul__, [1, 2, 3]))
 	'''
 	if py.iterable(times):
 		iterable,time=time,iterable
@@ -3579,8 +3621,11 @@ def get_obj_file_lineno(a,lineno=0,auto_file_path=True):
 	else:
 		# if py.getattr(a,'__module__',None):  
 		# #最后的情况，不要判断 get_module 会自动raise ArgumentUnsupported
+		if is_builtin_function(a):
+			return py.No('is_builtin_function',a)
 		if py.callable( py.getattr(a,'__init__',None) ):
-			return get_obj_file_lineno(a=a.__init__,lineno=lineno,auto_file_path=auto_file_path)
+			r=get_obj_file_lineno(a=a.__init__,lineno=lineno,auto_file_path=auto_file_path)
+			if r:return r
 		a=get_obj_module(a)#python无法获取class行数？https://docs.python.org/2/library/inspect.html
 		return get_obj_file_lineno(a=a,lineno=lineno,auto_file_path=auto_file_path)
 	
@@ -3982,8 +4027,13 @@ pln({0})
 			pln(ei)
 def explorer(path='.'):
 	''' exp can not open g:/qgb '''
-	if not path or path=='.':path=pwd(p=False)
-	path=F.auto_path(path)
+	U,T,N,F=py.importUTNF()
+	if not path or path=='.':path=U.pwd(p=False)
+	pt=F.auto_path(path)
+	if F.exist(pt):
+		path=pt
+	else:
+		path=F.auto_path(path,default=U.pwd())
 
 	# path=path.replace('/','\\')
 	ps='# Not impl in this system'
@@ -4293,13 +4343,40 @@ def dict_value_hash_count(adict,):
 	return d
 def is_builtin_function(a):
 	'''
+dict,list,tuple  should is_builtin_function?  now is False	
 object.__init__ not 	(types.BuiltinFunctionType,types.BuiltinMethodType)
 	'''
 	if not py.callable(a):return False
 	import types
 	if py.isinstance(a,(types.BuiltinFunctionType,types.BuiltinMethodType)):
+		return True	
+	bms=get_or_set('builtin_methods',lazy_default=lambda:[
+py.object.__class__,
+py.object.__delattr__,
+py.object.__dir__,
+py.object.__eq__,
+py.object.__format__,
+py.object.__ge__,
+py.object.__getattribute__,
+py.object.__gt__,
+py.object.__hash__,
+py.object.__init__,
+py.object.__init_subclass__,
+py.object.__le__,
+py.object.__lt__,
+py.object.__ne__,
+py.object.__new__,
+py.object.__reduce__,
+py.object.__reduce_ex__,
+py.object.__repr__,
+py.object.__setattr__,
+py.object.__sizeof__,
+py.object.__str__,
+py.object.__subclasshook__,
+	])
+	if a in bms:
 		return True
-	
+	return one_in(['<built-in function ','builtin_function_or_method'],py.repr(a))
 isBuiltinFunction=isBuiltinFunctionType=is_builtin_function	
 	
 def is_slice(a):
@@ -5308,7 +5385,7 @@ error: OpenCV(4.5.1) C:\Users\appveyor\AppData\Local\Temp\1\pip-req-build-oduouq
 	template = cv2.imread(image, 0)
 	template.shape[::-1]
 
-	res = cv2.matchTemplate(background, template, cv2.TM_CCOEFF_NORMED)
+	res = cv2.matchTemplate(background, template, method=cv2.TM_CCOEFF_NORMED,mask=None)
 	min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(res)
 	if max_val < precision:
 		return [-1,-1]
@@ -5335,8 +5412,10 @@ thunder_start :  light :	!min_val, max_val, min_loc, max_loc
 		image_path=ClipBoard.get_image(save_path)
 		if not image_path:
 			return image_path
-		print('U.search_image_on_screen(%r)'%image_path)
-	
+	# else:
+		# if not F.is_abs(image_path):
+	image_path=F.auto_path(image_path,default=U.get('clipboard.dir'),)
+	print('U.search_image_on_screen(%r)'%image_path)
 	a=py.list(a)
 	if py.istr(image_path) or 0 : #TODO is image
 		a.append(image_path)
@@ -5363,6 +5442,13 @@ thunder_start :  light :	!min_val, max_val, min_loc, max_loc
 	# x,y=ss.imagesearch()
 	
 find_image_on_screen=seach_image_on_screen=search_image_on_screen
+
+def bytes_to_pil_image(b):
+	from PIL import Image
+	import io
+	bio=io.BytesIO(b)  
+	return Image.open(bio)
+b2im=b2img=bytes_to_pil_image
 
 def set_timed_task(func,every='day',time='05:09',unit=1):
 	'''U.set_timed_task(baidu_start,'2hour') 
@@ -5503,7 +5589,14 @@ image.load()
 '''	
 	a=image.load()
 	return a[x,y]
-	
+get_pixel_from_image=get_image_pixel	
+
+def try_call_function(function,*a,**ka):
+	try:
+		return function(*a,**ka)
+	except Exception as e:
+		return py.No(e,function,a,ka)
+try_call =try_call_function	
 ############## qgb type ######################	
 def object_custom_repr(obj, *a, **ka):
 	'''

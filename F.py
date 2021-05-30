@@ -1286,7 +1286,7 @@ def makeDirs(ap,isFile=False,cd=0):
 md=mkdir=makeDirs		
 
 gbAutoPath=True
-def autoPath(fn,ext='',default='',dir=False,p=False):
+def auto_path(fn,ext='',default='',is_dir=False,p=False):
 	''' default is U.gst 
 if fn.startswith("."): 如果路径中所有文件夹存在，则可以写入读取。否则无法写入读取。file io 都是这个规则吧
 FileNotFoundError: [Errno 2] No such file or directory: '.
@@ -1321,10 +1321,10 @@ FileNotFoundError: [Errno 2] No such file or directory: '.
 		
 		if py.len(fn)>=260 and U.iswin():
 			fn=nt_path(fn)
-		if(dir and not fn.endswith('/')):fn+='/'
+		if(is_dir and not fn.endswith('/')):fn+='/'
 	if p:print(fn)
 	return fn
-autofn=auto_filename=autoFileName=auto_file_path=auto_path=autoPath
+autofn=auto_filename=autoFileName=auto_file_path=autoPath=auto_path
 
 
 def get_nt_short_path_name(long_name,max=250):

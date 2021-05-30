@@ -12,7 +12,7 @@ def format(s,**ka):
 	ka={'{%s}'%k:v for k,v in ka.items()}
 	return T.replacey(s,ka)
 
-def flask_get_all_upload_files(upload_dir=py.No('U.gst/upload_dir',no_raise=1),save_size=py.importF().IntSize(1024*1024*8),request=None,):
+def flask_get_all_upload_files(upload_dir=py.No('U.gst/upload_dir',no_raise=1),save_size=py.No('8 MB',no_raise=1),request=None,):
 	'''save_size <=0 : save_all
 	'''
 	from shutil import copyfileobj
@@ -23,12 +23,17 @@ def flask_get_all_upload_files(upload_dir=py.No('U.gst/upload_dir',no_raise=1),s
 	else:
 		upload_dir=U.set('rpc.server.upload_dir',upload_dir)
 	F.mkdir(upload_dir)
+	if not save_size:
+		save_size= U.get('rpc.server.upload.save_size',1024*1024*8)
+	save_size=F.IntSize(py.int(save_size))	
+	U.set('rpc.server.upload.save_size',save_size)	
+	
 	d={}
-	for k,f in request.files.items():
+	for k,f in request.files.items(multi=True):# 默认multi=False，始终只能获取一个，坑！
 		b=f.stream.read(save_size)
 		if py.len(b)<save_size:
 			if py.len(b)>99:
-				sr="b{0}'{1}...{2}'".format(len(b),repr(b[:50])[2:-1],repr(b[-60:])[2:-1])  
+				sr="<{0} >'{1}...{2}'".format(F.readable_size(b),repr(b[:50])[2:-1],repr(b[-50:])[2:-1])  
 				d[f]=U.object_custom_repr(b,repr=sr)
 			else:
 				d[f]=b
@@ -55,14 +60,16 @@ def textarea(response,name='t',upload_dir=py.No('U.gst/upload_dir',no_raise=1),)
 	input[type="submit"]{
 		width:100%;
 	}
-		
+	input.url{
+		width:49%; /*50% break line*/
+	}	
 </style> 
 </head>
 	
-<form method="post" enctype="multipart/form-data" action="/r=U.set_multi($name$_form=request.form,$name$_files=N.HTML.flask_get_all_upload_files(),$name$_data=q.get_data(),);">
+<form method="post" enctype="multipart/form-data" action="$U.get_or_set('rpc.server.base','/')$r=U.set_multi($name$_form=request.form,$name$_files=N.HTML.flask_get_all_upload_files(),$name$_data=q.get_data(),);">
 	<input type="submit" />
 	<hr>
-	<input type="file" name="f">
+	<input type="file" multiple name="f">
 	<hr>
 	<div><small>$name$:</small></div >
 	<div style="height:60%;" > 
@@ -71,17 +78,29 @@ def textarea(response,name='t',upload_dir=py.No('U.gst/upload_dir',no_raise=1),)
 	
 	<hr>
 	<input type="submit" />
-	<input id=url type="text" name="url" value="%23-">
+	<input id=url_start class=url type="text" name="url_start" 
+		value="U.set('rpc.server.upload.save_size',$U.int_exp(U.get('rpc.server.upload.save_size',8*1024*1024),1024)$);">
+	<input id=url_end   class=url type="text" name="url_end" value="%23-">
 </form> 
 <script> 
-var input = document.querySelector('input#url');
 var form  = document.querySelector('form');
 var original_action=form.getAttribute('action');
-function updateValue(e) {
+original_action=original_action.substr($len(U.get('rpc.server.base') )$) 
+// if(original_action.startsWith('/')){
+//}
+document.querySelector('input#url_start').addEventListener('input', function(e){
+	if(!e.srcElement.value.endsWith(';')){
+		e.srcElement.value+=';'
+	}
+	
+	form.setAttribute('action',e.srcElement.value+original_action)
+	console.log(form.getAttribute('action'))
+});
+document.querySelector('input#url_end').addEventListener('input', function(e){
 	form.setAttribute('action',original_action+e.srcElement.value)
 	console.log(form.getAttribute('action'))
-}
-input.addEventListener('input', updateValue);
+});
+
 </script>
 ''',)
 	# r=format(r,name=name)

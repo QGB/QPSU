@@ -1,7 +1,8 @@
 #coding=utf-8
 try:from . import py
 except:import py
-# 因为 Clipboard 在 qgb.U 中 较早加载，此时又引入其他模块 容易造成循环引用 引起 其他问题。
+U,T,N,F=py.importUTNF()
+
 try:
 	import win32clipboard as w
 	import win32con
@@ -55,27 +56,27 @@ setr=setRepr=set_repr
 def close():
 	w.CloseClipboard()
 
-
+gsdir=U.get_or_set('clipboard.dir',lazy_default=lambda :F.md(U.gst+'clipboard'))
 def get_image(file=None,format='png'):
 	''' :param fp: A filename (string), pathlib.Path object or file object.
 
 KeyError: '.PNG'  [format not contains . ]
 	'''
-	global gsdir
-	U,T,N,F=py.importUTNF()
+	# global gsdir
+	
 	from PIL import ImageGrab,Image
 	im = ImageGrab.grabclipboard()
 	if im and file:
 		# if not im:
-			# return 
+			# return 			
 		if not F.isAbs(file):
-			gsdir=F.md(U.gst+'clipboard')
 			file=gsdir+file
 		if not file.lower().endswith(format.lower()):
 			file=file+'.'+format
 		im.save(file,format)
+		
 		return file
-	if not im:
+	elif not im:
 		return py.No('can not get clipboard image')
 	return im
 get_img=get_image

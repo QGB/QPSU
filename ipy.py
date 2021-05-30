@@ -293,7 +293,7 @@ def save(file=None,lines=-1,tryExcept=False,out=False,columns=70,overide=True,de
 		if not 'from qgb import' in gsexec_lines:
 			gsqgb='{0}\n{1}'.format(gsqgb,gsexec_lines)
 		else:gsqgb=gsexec_lines
-	U.pln(gsqgb,file=file  )
+	U.pln(gsqgb+'\n',file=file  )
 	# print >>file,'import sys;sys.path.append('{0}');from qgb import *'.format(gspath)
 	#using single quote for cmd line
 	#-4 为了去除 /qgb

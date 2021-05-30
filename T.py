@@ -478,10 +478,29 @@ def recursive_join(s,iter,prepend_layer=False,append_layer=False,format_layer=Fa
 
 recursiveJoin=recursive_join
 
-def join(iterable,separator=',',**ka):#separator=','
+def join(*iterable,separator=',',**ka):#separator=','
+	'''T.join( ###<py.No )==''  
+In [1612]: T.join(1)
+Out[1612]: '1'
+
+In [1613]: T.join(1,2)
+Out[1613]: '1,2'
+
+In [1614]: T.join(765432)
+Out[1614]: '765432'
+
+In [1615]: T.join(range(43))
+Out[1615]: '0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,1
+'''	
 	U=py.importU()
 	if separator==',':separator=U.get_duplicated_kargs(ka,'split','splitor','separator',default=',')
+	if py.len(iterable)<1:
+		raise py.ArgumentError('need iterable')
+	if py.len(iterable)==1:
+		iterable=iterable[0]
 	if py.istr(iterable):return iterable
+	if (not U.is_generator(iterable)) and (not py.iterable(iterable)):
+		return string(iterable)
 	return separator.join( string(i) for i in iterable )
 	
 def intToHex(number,uppercase=True):
@@ -730,7 +749,9 @@ def readableTimeText(txt,browser=False):
 timeText=readableTimeText
 
 RE_IP= re.compile('''(?:(?:2(?:[0-4][0-9]|5[0-5])|[0-1]?[0-9]?[0-9])\.){3}(?:(?:2([0-4][0-9]|5[0-5])|[0-1]?[0-9]?[0-9]))''')
-def ipLocationText(text,location_format=' [{0}] ',reverse_ip=True,p=True):
+def ipLocationText(text,location_format=' [{0}] ',reverse_ip=True,**ka):
+	''' p='deprecated'
+	'''
 	U=py.importU()
 	N=py.importN()
 	
@@ -742,8 +763,9 @@ def ipLocationText(text,location_format=' [{0}] ',reverse_ip=True,p=True):
 		return location
 
 	r=regexReplace(text,RE_IP,fr)
-	if p:U.pln(r)
-	else:return r
+	# if p:U.pln(r)
+	# else:return r
+	return U.StrRepr(r)
 readableIPLocationText=ipLocationText
 
 	
@@ -1521,6 +1543,9 @@ def eval_or_exec_return_str_result(s,locals=None,globals=None,raise_SyntaxError=
 		except:return py.repr(r)
 		
 def html_template(s,locals=None,globals=None,delimiter='$',raise_SyntaxError=True,**ka):
+	''' $[ ]$ 不行，有歧义，返回一个 空list  
+[$ $]   <$ $>    {$ $}    ($ $)
+	'''
 	def find_delimiter():
 		return
 	if py.istr(delimiter):
