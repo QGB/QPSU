@@ -221,7 +221,7 @@ date=U.getDateStr()
 gshead='#coding=utf-8'
 gspath=U.getModPath(qgb=False,endSlash=False)
 gsTryExcept=u'''try:{1}
-except Exception as _e{0}:U.pln {0},_e{0}'''
+except Exception as _e{0}:U.pln({0},_e{0})'''
 #用print >>输出会自动换行,format 的参数应该与文本标记一致，
 #否则出现IndexError: tuple index out of range
 # gs_ipy_save_file_list_name=
@@ -299,33 +299,40 @@ def save(file=None,lines=-1,tryExcept=False,out=False,columns=70,overide=True,de
 	#-4 为了去除 /qgb
 	#ipython --InteractiveShellApp.exec_lines=['%qp%'] 不会改变In[0],始终为''
 	for i,v in enumerate(gIn[lsta:lend]):
+		skip=False
 		if i==0 and lsta==0:continue
 		i=lsta+i
 		v=v.strip()
 			# U.isSyntaxError(u'_{0}={1}'.format(i,v) ) :
 				# pass
-		if i in gOut.keys():
+		if i in gOut:
 			if i==1 and py.istr(gOut[1]) and gOut[1].endswith(':/QGB/babun/cygwin/lib/python2.7/'):
 				pass
 			else:
 				v=u'_{0}={1}'.format(i,v)
-			if out:
-				U.pln('"""#{0}'.format(i),file=file )
-				U.pln(gOut[i],file=file )
-				U.pln('"""',file=file )
+	
 		if U.isSyntaxError(v) or U.multin(gIgnoreIn,v):
 		# or u'from qgb import *' in v or sum(map(lambda a:v.startswith(a),gIgnoreStart) ):
 			v=u'#'+v		
+			skip=True
 				
-		if tryExcept:
+		if tryExcept and (not skip):
 			v='#########################\n\t'+v
 			if py.is2():v=gsTryExcept.format(i,v).encode('utf-8')
 			else:v=gsTryExcept.format(i,v)
-			U.pln(v,file=file )
+			U.p(v,file=file )
 		else:
 			if py.is2():v=v.encode('utf-8')
 			else:pass
-			U.pln(v,' '*(columns-len(v.splitlines()[-1])),'#',i,file=file )
+			U.p(v,' '*(columns-len(v.splitlines()[-1])),file=file )
+			
+		if out and (i in gOut) and (not skip):
+			U.pln(';"""#{0}'.format(i),file=file )
+			# U.pln('"""',file=file )
+			U.pln(pformat(gOut[i]),file=file )
+			U.pln('"""',file=file )	
+		else:
+			U.pln('#',i,file=file )
 		# if i in [14]:import pdb;pdb.set_trace()#U.repl()	
 	# gipy.magic(u'save save.py 0-115')
 	# U.pln(gIn

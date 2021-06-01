@@ -144,11 +144,12 @@ def slice(a,start, stop=None, step=1):
 		return py.No(e)
 get=char_at=charAt=get_char_at=slice		
 		
-def search_return_position(text,*targets,a=0,b=0,c=0,dict=False,**ka):
+def search_return_position(text,*targets,case_sensitive=True,a=0,b=0,c=0,dict=False,**ka):
 	U=py.importU()
 	a=U.get_duplicated_kargs(ka,'A',default=a)
 	b=U.get_duplicated_kargs(ka,'B',default=b)
 	c=U.get_duplicated_kargs(ka,'C',default=c)
+	case_sensitive=U.get_duplicated_kargs(ka,'cs','case','upper','caseSensitive',default=case_sensitive)
 	dict=U.get_duplicated_kargs(ka,'d','return_dict','rd',default=dict)
 	r=[]
 	d={}
@@ -164,6 +165,8 @@ def search_return_position(text,*targets,a=0,b=0,c=0,dict=False,**ka):
 			
 	for t in py.set(targets):
 		i=0
+		re.finditer(re.escape)
+		
 		while True:
 			i=text.find(t,i)
 			if i==-1:break
@@ -493,7 +496,7 @@ In [1615]: T.join(range(43))
 Out[1615]: '0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,1
 '''	
 	U=py.importU()
-	if separator==',':separator=U.get_duplicated_kargs(ka,'split','splitor','separator',default=',')
+	if separator==',':separator=U.get_duplicated_kargs(ka,'s','split','splitor','separator',default=',')
 	if py.len(iterable)<1:
 		raise py.ArgumentError('need iterable')
 	if py.len(iterable)==1:
