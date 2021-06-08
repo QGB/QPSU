@@ -60,7 +60,7 @@ def get_public_ip(methods=['myip.ipip.net','ipinfo.io', 'icanhazip.com', 'ifconf
 		d[u]=HTTP.get(u,timeout=3,proxies=proxy)
 		if py.istr(d[u]) and py.len(d[u])>77:
 			d[u]=U.object_custom_repr(d[u],repr='{}#s.len:{}'.format(
-					T.regexMatchAll(d[u],T.RE_IP) ,len(d[u]),  
+					T.regexMatchAll(d[u],T.RE_IP) ,py.len(d[u]),  
 				)    
 			)
 		mutex.acquire()

@@ -151,7 +151,11 @@ def get_bytes(url,	**ka ,):
 
 	import requests
 	try:
-		return requests.get(url,**ka).content
+		b= requests.get(url,**ka).content
+		f=repr(b[:77])[2:-1]
+		if file:
+			f=F.write(file,b)
+		return U.object_custom_repr(b,repr='{}B{}'.format(len(b),f))
 	except Exception as e:
 		return py.No(e)
 getb=getByte=getBytes=get_byte=get_bytes
