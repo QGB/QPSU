@@ -2442,7 +2442,7 @@ def strTimeStamp():
 	return py.str(getTimestamp())
 stimestamp=strTimeStamp	
 	
-def getTimestamp(a=py.No('auto current timestamp(float)')):
+def get_float_us_time(a=py.No('auto current timestamp(float)')):
 	'''return: float
 --------> U.time()
 Out[304]: 1490080570.265625
@@ -2462,7 +2462,7 @@ Out[305]: 1490080571.125
 		raise py.ArgumentUnsupported(a)
 		
 	return a
-ftime=timestamp=getTimeStamp=getTimestamp
+ftime=float_time=get_float_time=timestamp=getTimeStamp=getTimestamp=get_float_us_time
 
 def getTime():
 	from datetime import datetime
@@ -2885,7 +2885,7 @@ from dateutil.relativedelta import relativedelta
 		start+=tdelta
 		yield start
 	# return i #SyntaxError: 'return' with argument inside generator
-range_time=time_range=rangeTime=timeRange=timeTraverser=timeTraversal=traverseTime	
+iter_time=range_time=time_range=rangeTime=timeRange=timeTraverser=timeTraversal=traverseTime	
 
 def datetime(a,month=0, day=0,hour=0,minute=0,second=0,microsecond=0):
 	''' a : string
@@ -3296,10 +3296,11 @@ File:      c:\qgb\anaconda3\lib\site-packages\keyboard\__init__.py'''
 		for index,row in py.enumerate(a):
 			if py.istr(row):
 				try:
+					import keyboard
 					keyboard.parse_hotkey(row) #将 parsed传入 将会再次parse_hotkey，导致无按键效果
 					simulate_key_press(row)
 					r.append(['key',row])
-				except:
+				except Exception as e:
 					simulate_key_write(row)
 					r.append(['txt',row])
 				_sleep(delay)
@@ -4722,15 +4723,20 @@ def unique(iterable,d=False,**ka):
 	return r
 
 def get_column_from_2D_list(matrix, *col_index):
+	if not col_index:raise py.ArgumentError('need *col_index ')
 	r=[]
+	m=py.len(col_index)
 	for row in matrix:
-		l=[]
-		for i in col_index:
-			l.append(row[i])
+		if m==1:
+			l=row[col_index[0]]
+		else:
+			l=[]
+			for i in col_index:
+				l.append(row[i])
 		r.append(l)
 	return r	
 	# return [ for row in matrix]
-col=column=get_2D_list_column=get_2d_list_column=get_column_from_2D_list	
+col=column=get_col=get_column=get_2D_list_column=get_2d_list_column=get_column_from_2D_list	
 
 def get_2D_list_shape(a):
 	import numpy as np

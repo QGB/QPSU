@@ -94,6 +94,41 @@ try:
 	from pprint import pprint,pformat
 except:pass
 ####################################################
+def split_to_2d_list(text,col=re.compile('\s+'),row='\n',strip=True,StrRepr=False):
+	'''
+numpy.loadtxt("myfile.txt")[:, 1]	
+ fname : file, str, or pathlib.Path
+        File, filename, or generator to read.  If the filename extension is
+        ``.gz`` or ``.bz2``, the file is first decompressed. Note that
+        generators should return byte strings for Python 3k.
+		
+ '1\r\n2\r\n4'.splitlines()
+ ['1', '2', '4']
+ 
+ '1\n2\r\n4'.splitlines()
+ ['1', '2', '4']
+ 
+'''		
+	U=py.importU()
+	if row in ['\n','\r\n']:
+		r=text.splitlines()
+	else:
+		r=text.split(row)
+	for i,v in py.enumerate(r):
+		if strip:v=v.strip()
+		cs=re.split(col,v)
+		if StrRepr:
+			StrRepr_ka={}
+			if py.isint(StrRepr) and StrRepr>1:
+				StrRepr_ka['size']=StrRepr
+			r[i]=[U.StrRepr(i,**StrRepr_ka) for i in cs]
+		else:
+			r[i]=cs
+	return r
+	# import numpy as np
+	# np.loadtxt("myfile.txt")[:, 1]
+	# return [ ]
+
 def is_contains(text,target):
 	try:
 		return target in text

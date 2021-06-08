@@ -1,7 +1,7 @@
 #coding=utf-8
 try:from . import py
 except:import py
-U,T,N,F=py.importUTNF()
+# 因为 Clipboard 在 qgb.U 中 较早加载，此时又引入其他模块 容易造成循环引用 引起 其他问题。
 
 try:
 	import win32clipboard as w
@@ -36,7 +36,8 @@ CF_UNICODETEXT ', 13],
 			else:edit_msg=''
 		d=U.input(edit_msg,default=d,type=type)
 	return d
-
+U.cbg=get
+	
 def set(aString,p=0):
 	U=py.importU()
 	if p:print("'''",aString,"'''")
@@ -48,7 +49,8 @@ def set(aString,p=0):
 		w.SetClipboardText(aString)
 	finally:
 		w.CloseClipboard()
-
+U.cbs=set
+		
 def set_repr(a):
 	return set(repr(a))
 setr=setRepr=set_repr
@@ -56,13 +58,15 @@ setr=setRepr=set_repr
 def close():
 	w.CloseClipboard()
 
-gsdir=U.get_or_set('clipboard.dir',lazy_default=lambda :F.md(U.gst+'clipboard'))
+gsdir=''
 def get_image(file=None,format='png'):
 	''' :param fp: A filename (string), pathlib.Path object or file object.
 
 KeyError: '.PNG'  [format not contains . ]
 	'''
-	# global gsdir
+	global gsdir
+	if not gsdir:
+		gsdir=U.get_or_set('clipboard.dir',lazy_default=lambda :F.md(U.gst+'clipboard'))
 	
 	from PIL import ImageGrab,Image
 	im = ImageGrab.grabclipboard()

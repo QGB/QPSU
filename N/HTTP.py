@@ -57,11 +57,18 @@ def request(url,method='GET',headers=gheaders,verify=False,no_raise=False,**ka):
 			return py.No(e,ka)
 	return requests.request(**ka)
 
-def download(url, file_path,headers=None):
-	import sys
-	import requests
-	import os
-
+def download(url, file_path='',default_dir=py.No('set_input',no_raise=1),headers=None):
+	import requests,sys,os
+	U,T,N,F=py.importUTNF()
+	if not F.isabs(file_path) and not default_dir:
+		default_dir='D:/'
+		if U.is_linux() or U.is_mac():
+			default_dir=U.gst+'download/'
+		default_dir=U.get_or_input('download.default_dir',default=default_dir)
+	
+	if not file_path:
+		file_path=default_dir+ T.filename_legalized( url.split('/')[-1] )
+		print('save_to:',file_path)
 	# 屏蔽warning信息
 	# requests.packages.urllib3.disable_warnings()
 	# 第一次请求是为了得到文件总大小
@@ -135,6 +142,7 @@ def get_bytes(url,	**ka ,):
 
 	url=N.auto_url(url)
 	proxies=U.get_duplicated_kargs(ka,'proxies','proxy')
+	file=U.get_duplicated_kargs(ka,'file','f','filename')
 	if proxies:
 		proxies=N.set_proxy(proxy)
 	else:
@@ -148,20 +156,32 @@ def get_bytes(url,	**ka ,):
 		return py.No(e)
 getb=getByte=getBytes=get_byte=get_bytes
 
+AUTO_GET_PROXY=py.No(msg='auto get_proxy',no_raise=1)
 def get(url,file='',
 		headers = gheaders,
 		timeout=9,
+		proxies=AUTO_GET_PROXY,
 		**ka ,
 	):
 	U,T,N,F=py.importUTNF()
 	url=N.auto_url(url)
 
 	show=U.get_duplicated_kargs(ka,'show','print','p','print_req')
-	proxies=U.get_duplicated_kargs(ka,'proxies','proxys','proxyes','proxy')
+	proxies=U.get_duplicated_kargs(ka,'proxies','proxys','proxyes','proxy',default=proxies)
 	if proxies:#dict or str 均可
-		proxies=N.set_proxy(proxies)
+		pr=N.set_proxy(proxies)
+		if not pr:
+			if py.istr(proxies) and 'auto' in proxies.lower():
+				proxies=N.get_proxy(target_protocol=('http','https'),)
+			else:
+				raise py.ArgumentError('proxy format error {}://{}:{}',proxies)
+		else:
+			proxies=pr
 	else:
-		proxies=N.get_proxy()
+		if (proxies is AUTO_GET_PROXY) or (py.isNo(proxies) and 'auto get_proxy' in proxies.msg):
+			proxies=N.get_proxy(target_protocol=('http','https'),)
+		else:
+			proxies={}
 
 
 	def writeFile():

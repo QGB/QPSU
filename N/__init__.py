@@ -42,6 +42,36 @@ else:
 	from SimpleHTTPServer import SimpleHTTPRequestHandler
 	from BaseHTTPServer import HTTPServer as _HTTPServer
 
+def get_public_ip_by_dnspod(methods=['']):
+	import socket; sock=socket.create_connection(('ns1.dnspod.net',6666))
+	bip=sock.recv(16)
+	sock.close()
+	return bip
+def get_public_ip(methods=['myip.ipip.net','ipinfo.io', 'icanhazip.com', 'ifconfig.me', 'ip.appspot.com', 'api.ipify.org', 'ipecho.net/plain', 'ipcalf.com', 'www.trackip.net'],proxy=False):
+	from threading import Thread, Lock
+	mutex = Lock()
+	U,T,N,F=py.importUTNF()
+	d={}
+	def new_thread(u):
+		mutex.acquire()
+		print(U.stime(),'fetching...',[methods.index(u)],u)  #list tuple all have index
+		mutex.release()
+		
+		d[u]=HTTP.get(u,timeout=3,proxies=proxy)
+		if py.istr(d[u]) and py.len(d[u])>77:
+			d[u]=U.object_custom_repr(d[u],repr='{}#s.len:{}'.format(
+					T.regexMatchAll(d[u],T.RE_IP) ,len(d[u]),  
+				)    
+			)
+		mutex.acquire()
+		print(U.stime(),'received:  ',[methods.index(u)],U.StrRepr(u,size=17),repr(d[u])[:77])
+		mutex.release()
+
+	for u in methods:
+		Thread(target=new_thread,args=(u,)).start()
+	U.sleep(3.4)
+	return d
+	
 def ftp_client(cwd=py.No('history or /',no_raise=1),
 	host=py.No('auto get ftp.host',no_raise=1),port=3721,user='', passwd='',ftp_encoding='utf-8', acct='',
                  timeout=None,retry=3,response=None,request=None,text_encoding='',**ka):
@@ -1159,12 +1189,12 @@ def set_proxy(host='',port='',protocol='socks5',target_protocol=('http','https')
 		target_protocol=[target_protocol]
 	for t in target_protocol:
 		# if not ip:
-		host=U.set('{}.proxy.host'.format(t),host)
-		port=U.set('{}.proxy.port'.format(t),port)
-		protocol=U.set('{}.proxy.protocol'.format(t),protocol)
 		if not host or not port or not protocol:
 			# 跳过格式不对的代理
 			continue
+		host=U.set('{}.proxy.host'.format(t),host)
+		port=U.set('{}.proxy.port'.format(t),port)
+		protocol=U.set('{}.proxy.protocol'.format(t),protocol)
 		d[t]="{}://{}:{}".format(protocol,host,port)
 	return d
 	# {'http': "socks5://myproxy:9191"}

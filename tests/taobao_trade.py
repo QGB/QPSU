@@ -512,9 +512,11 @@ JS_QGB=F.read(U.get_qpsu_file_path('chromExt/qgb.js') )
 QGB_JS_FUNCTION_LIST=['post', 'rpc_sleep', 'xpath', 'xpath_all']
 JS_ONLOAD='''
 () => {
-	Object.defineProperty(navigator, 'webdriver', {
-		get: () => undefined
-	})
+	if(navigator.webdriver){
+		Object.defineProperty(navigator, 'webdriver', {
+			get: () => undefined
+		})	
+	}
 		
 %s
 
@@ -601,6 +603,26 @@ js_trade_list_id_wu='''async function js_trade_list(){
 	return r
 }'''
 
+js_trade_list_id_tk='''async function js_trade_list_tk(){
+	var es=xpath_all("//table[contains(., '订单号')]")
+	var r=[]
+	for(var n in es){
+		var i=es[n]
+		var id=xpath("//span[contains(., '订单号')]/following-sibling::span[1+1]",i).innerText
+		tks=[]
+		for(var j of i.querySelectorAll('tbody>tr')
+					){
+					
+			var tk=xpath("//a[contains(@href, 'refund2.taobao.com/dispute/applyRouter.htm')]",j)
+			//tks.push([tk.href,tk.outerHTML])
+			tks.push([j+'',tk+''])
+			
+		}
+		r.push([id,tks])
+	}
+	return r
+
+}'''
 
 def parse_row(h,parse_wuliu_detail_file=False):
 	et=T.xpath(h,'//span[contains(@class,"create-time")]')[0] #
