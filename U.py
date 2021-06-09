@@ -722,16 +722,80 @@ flap=flat
 # pln flat([1,2,3,[4,5,[1,2],6]],['aaa'])
 ##  (1, 2, 3, 'aaa', 4, 5, 6, 1, 2)
 
-def crc32(bytes=b'',file=''):
+def crc32(bytes=b'',file='',chunk_size=8096):
 	import zlib
 	if file:
 		prev = 0
-		for eachLine in py.open(file,"rb"):
-			prev = zlib.crc32(eachLine, prev)
+		with py.open(file,"rb") as f:
+			while True:
+				b = f.read(chunk_size)
+				if not b :
+					break
+				prev = zlib.crc32(b, prev)
 	else:
 		prev = zlib.crc32(bytes)
 	return "%x"%(prev & 0xFFFFFFFF)
+
+def sha3_256(bytes=b'',file=''):
+	return hashlib_hash(bytes=bytes,file=file,hash_func='sha3_256')
+
+def sha3_384(bytes=b'',file=''):
+	return hashlib_hash(bytes=bytes,file=file,hash_func='sha3_384')
+
+def blake2b(bytes=b'',file=''):
+	return hashlib_hash(bytes=bytes,file=file,hash_func='blake2b')
+
+def blake2s(bytes=b'',file=''):
+	return hashlib_hash(bytes=bytes,file=file,hash_func='blake2s')
+
+def sha384(bytes=b'',file=''):
+	return hashlib_hash(bytes=bytes,file=file,hash_func='sha384')
+
+def sha1(bytes=b'',file=''):
+	return hashlib_hash(bytes=bytes,file=file,hash_func='sha1')
+
+def sha3_224(bytes=b'',file=''):
+	return hashlib_hash(bytes=bytes,file=file,hash_func='sha3_224')
+
+def sha224(bytes=b'',file=''):
+	return hashlib_hash(bytes=bytes,file=file,hash_func='sha224')
+
+def shake_128(bytes=b'',file='',length=64):
+	'''return.length == length*2  
+TypeError: hexdigest() takes exactly one argument (0 given)
+<built-in method hexdigest of _sha3.shake_128 object at 0x00000168F6021330>
+https://github.com/python/cpython/blob/main/Modules/_sha3/sha3module.c#L673
+/*[clinic input]
+_sha3.shake_128.hexdigest
+    length: unsigned_long
+    /
+Return the digest value as a string of hexadecimal digits.
+[clinic start generated code]*/	
 	
+	'''
+	return hashlib_hash(bytes=bytes,file=file,hash_func='shake_128',hexdigest_args=(length,))  
+
+def shake_256(bytes=b'',file='',length=64):
+	'''return.length == length*2  
+3.6 新版功能: SHA3 (Keccak) 和 SHAKE 构造器 sha3_224(), sha3_256(), sha3_384(), sha3_512(), shake_128(), shake_256().
+
+SHAKE 可变长度摘要
+shake_128() 和 shake_256() 算法提供安全的 length_in_bits//2 至 128 或 256 位可变长度摘要。 为此，它们的摘要需指定一个长度。 SHAKE 算法不限制最大长度。
+
+shake.digest(length)
+返回当前已传给 update() 方法的数据摘要。 这是一个大小为 length 的字节串对象，字节串中可包含 0 to 255 的完整取值范围。
+
+shake.hexdigest(length)
+类似于 digest() 但摘要会以两倍长度字符串对象的形式返回，其中仅包含十六进制数码。 这可以被用于在电子邮件或其他非二进制环境中安全地交换数据值。
+'''	
+	return hashlib_hash(bytes=bytes,file=file,hash_func='shake_256',hexdigest_args=(length,))
+
+def sha512(bytes=b'',file=''):
+	return hashlib_hash(bytes=bytes,file=file,hash_func='sha512')
+
+def sha3_512(bytes=b'',file=''):
+	return hashlib_hash(bytes=bytes,file=file,hash_func='sha3_512')
+
 def sha256(bytes=b'',file=''):
 	return hashlib_hash(bytes=bytes,file=file,hash_func='sha256')
 	
@@ -741,7 +805,7 @@ def md5(bytes=b'',file=''):
 	return 32 hex(lowerCase) str'''
 	return hashlib_hash(bytes=bytes,file=file,hash_func='md5')
 	
-def hashlib_hash(bytes=b'',file='',hash_func='sha256'):
+def hashlib_hash(bytes=b'',file='',hash_func='sha256',chunk_size=8096,**ka):
 	'''hashlib.algorithms_guaranteed=
 {'sha3_224', 'shake_256', 'sha3_256', 'sha256', 'sha1', 'sha224', 'md5', 'sha3_512', 'blake2s', 'blake2b', 'sha3_384', 'shake_128', 'sha384', 'sha512'} # len 14	
 
@@ -753,21 +817,22 @@ hashlib.algorithms_available 一个集合，其中包含在所运行的 Python �
 注解 如果你想找到 adler32 或 crc32 哈希函数，它们在 zlib 模块中。
 	'''
 	import hashlib   
+	hexdigest_args=get_duplicated_kargs(ka,'hexdigest_args',default=[])
 	myhash = getattr(hashlib,hash_func)()
 	if file:
 		f = py.open(file,'rb')
 		while True:
-			b = f.read(8096)
+			b = f.read(chunk_size)
 			if not b :
 				break
 			myhash.update(b)
 		f.close()
-		return myhash.hexdigest()
+		return myhash.hexdigest(*hexdigest_args)
 	
 	
 	# md5 = hashlib.md5()   
 	myhash.update(bytes)	
-	return myhash.hexdigest()  
+	return myhash.hexdigest(*hexdigest_args)  
 
 	
 def inMuti(a,*la,**func):
