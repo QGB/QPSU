@@ -47,7 +47,7 @@ def get_public_ip_by_dnspod(methods=['']):
 	bip=sock.recv(16)
 	sock.close()
 	return bip
-def get_public_ip(methods=['myip.ipip.net','ipinfo.io', 'icanhazip.com', 'ifconfig.me', 'ip.appspot.com', 'api.ipify.org', 'ipecho.net/plain', 'ipcalf.com', 'www.trackip.net'],proxy=False):
+def get_public_ipv4(methods=['myip.ipip.net','ipinfo.io', 'icanhazip.com', 'ifconfig.me', 'ip.appspot.com', 'api.ipify.org', 'ipecho.net/plain', 'ipcalf.com', 'www.trackip.net','https://www.google.com/search?q=my+ip'],proxy=False):
 	from threading import Thread, Lock
 	mutex = Lock()
 	U,T,N,F=py.importUTNF()
@@ -71,7 +71,8 @@ def get_public_ip(methods=['myip.ipip.net','ipinfo.io', 'icanhazip.com', 'ifconf
 		Thread(target=new_thread,args=(u,)).start()
 	U.sleep(3.4)
 	return d
-	
+get_public_ip=get_public_ipv4
+
 def ftp_client(cwd=py.No('history or /',no_raise=1),
 	host=py.No('auto get ftp.host',no_raise=1),port=3721,user='', passwd='',ftp_encoding='utf-8', acct='',
                  timeout=None,retry=3,response=None,request=None,text_encoding='',**ka):

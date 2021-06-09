@@ -722,6 +722,16 @@ flap=flat
 # pln flat([1,2,3,[4,5,[1,2],6]],['aaa'])
 ##  (1, 2, 3, 'aaa', 4, 5, 6, 1, 2)
 
+def crc32(bytes=b'',file=''):
+	import zlib
+	if file:
+		prev = 0
+		for eachLine in py.open(file,"rb"):
+			prev = zlib.crc32(eachLine, prev)
+	else:
+		prev = zlib.crc32(bytes)
+	return "%x"%(prev & 0xFFFFFFFF)
+	
 def sha256(bytes=b'',file=''):
 	return hashlib_hash(bytes=bytes,file=file,hash_func='sha256')
 	
