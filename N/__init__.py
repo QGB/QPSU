@@ -1698,10 +1698,10 @@ def scanPorts(host,threadsMax=33,from_port=1,to_port=65535,callback=None,ip2=192
 	# host = raw_input('host > ')
 	# from_port = input('start scan from port > ')
 	# to_port = input('finish scan to port > ')   
-	counting_open = []
-	counting_close = []
-	errors=[]
-	threads = []
+	counting_open = U.set('scanPorts.open'[])
+	counting_close = U.set('scanPorts.close'[])
+	errors=U.set('scanPorts.error'[])
+	threads = U.set('scanPorts.threads'[])
 	if isinstance(host,py.float):host='{0}.{1}'.format(ip2,host)
 	
 	def scan(port):
@@ -1721,7 +1721,7 @@ def scanPorts(host,threadsMax=33,from_port=1,to_port=65535,callback=None,ip2=192
 		except Exception as e:
 			errors.append({port:e})
 	def newThread(port):
-		t = Thread(target=scan, args=(i,))		
+		t = Thread(name='scanPorts %s:%s'%(host,port),target=scan, args=(port,))		
 		threads.append(t)
 		try:
 			t.start()
@@ -1747,7 +1747,7 @@ def scanPorts(host,threadsMax=33,from_port=1,to_port=65535,callback=None,ip2=192
 	# if callback:
 		# return callback
 	[x.join() for x in threads]
-	return [counting_open,counting_close,errors]
+	return counting_open,counting_close,errors
 
 def traceroute(target,maxttl=60):
 	''' '''
