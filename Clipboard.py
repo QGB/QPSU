@@ -36,7 +36,7 @@ CF_UNICODETEXT ', 13],
 			else:edit_msg=''
 		d=U.input(edit_msg,default=d,type=type)
 	return d
-U.cbg=get
+
 	
 def set(aString,p=0):
 	U=py.importU()

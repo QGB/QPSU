@@ -761,7 +761,7 @@ def sha224(bytes=b'',file=''):
 	return hashlib_hash(bytes=bytes,file=file,hash_func='sha224')
 
 def shake_128(bytes=b'',file='',length=64):
-	'''return.length == length*2  
+	'''return.length == length*2  ### 128
 TypeError: hexdigest() takes exactly one argument (0 given)
 <built-in method hexdigest of _sha3.shake_128 object at 0x00000168F6021330>
 https://github.com/python/cpython/blob/main/Modules/_sha3/sha3module.c#L673
@@ -776,7 +776,7 @@ Return the digest value as a string of hexadecimal digits.
 	return hashlib_hash(bytes=bytes,file=file,hash_func='shake_128',hexdigest_args=(length,))  
 
 def shake_256(bytes=b'',file='',length=64):
-	'''return.length == length*2  
+	'''return.length == length*2  ### 128  
 3.6 新版功能: SHA3 (Keccak) 和 SHAKE 构造器 sha3_224(), sha3_256(), sha3_384(), sha3_512(), shake_128(), shake_256().
 
 SHAKE 可变长度摘要
