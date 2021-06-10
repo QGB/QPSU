@@ -36,7 +36,7 @@ CF_UNICODETEXT ', 13],
 			else:edit_msg=''
 		d=U.input(edit_msg,default=d,type=type)
 	return d
-
+# U.cbg=get
 	
 def set(aString,p=0):
 	U=py.importU()
@@ -49,7 +49,7 @@ def set(aString,p=0):
 		w.SetClipboardText(aString)
 	finally:
 		w.CloseClipboard()
-U.cbs=set
+# U.cbs=set
 		
 def set_repr(a):
 	return set(repr(a))
