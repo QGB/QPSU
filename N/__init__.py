@@ -1698,10 +1698,10 @@ def scanPorts(host,threadsMax=33,from_port=1,to_port=65535,callback=None,ip2=192
 	# host = raw_input('host > ')
 	# from_port = input('start scan from port > ')
 	# to_port = input('finish scan to port > ')   
-	counting_open = U.set('scanPorts.open'[])
-	counting_close = U.set('scanPorts.close'[])
-	errors=U.set('scanPorts.error'[])
-	threads = U.set('scanPorts.threads'[])
+	counting_open = U.set('scanPorts.open',[])
+	counting_close = U.set('scanPorts.close',[])
+	errors=U.set('scanPorts.error',[])
+	threads = U.set('scanPorts.threads',[])
 	if isinstance(host,py.float):host='{0}.{1}'.format(ip2,host)
 	
 	def scan(port):
