@@ -1738,7 +1738,7 @@ def scanPorts(host,threadsMax=33,from_port=1,to_port=65535,callback=None,ip2=192
 			newThread(i)
 		else:
 			for x in threads:
-				if x.isAlive():
+				if x.is_alive():
 					x.join()
 					newThread(i)
 				else:
