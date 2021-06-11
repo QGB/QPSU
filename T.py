@@ -1018,7 +1018,7 @@ def strValue(a):
 	try:return py.tuple(a)
 	except:pass
 
-def matchWildcard(a,exp):
+def match_wildcard(a,exp):
 	'''Wildcard character'''
 	import fnmatch
 	exp=fnmatch.translate(exp)
@@ -1027,7 +1027,28 @@ def matchWildcard(a,exp):
 		return exp.match(a).group()	
 	except:
 		return ''
+wildcard=matchWildcard=match_wildcard
 
+def regex_match_named_return_dict(a,regex):
+	''' #not    ,**defaults
+re.search('(?P<name>.*) (?P<phone>.*)', 'John 123456').group('name')=='John'
+#py3.7 ka的顺序与调用顺序一致	
+'''
+	regex = re.compile(regex)
+	if not regex.groupindex:
+		raise py.ArgumentError(regex,'need (?P<name>regex) ... ')
+	d={}
+	r= re.search(regex,a) # if not match return None
+	if not r:
+		return py.No('NotMatch:',regex,a)
+	# 一组没匹配到 {'protocol': None} 与 匹配到空 {'aaa':''}  是不一样的
+	return r.groupdict()
+	# for name,v in r.items():
+		
+	
+	re.search(a,regex)
+regex_groupdict=regex_named=named_regex_match=regex_match_named=match_regex_named=regex_match_named_return_dict
+	
 def regexMatchAll(a,regex):
 	return [i.group() for i in re.finditer(regex,a)]
 matchRegex=matchRegexAll=regexMatchAll

@@ -140,6 +140,8 @@ def get(name='_',default=GET_NO_VALUE,level=gd_sync_level['process']):
 			# default=py.No('can not get name '+py.repr(name),no_raise=True)
 		return d.get(name,default)
 	#TODO
+def get_multi_return_dict():
+	return
 def get_multi_return_list(*names,**defaults):
 	r=[]
 	for name in names:
@@ -4326,21 +4328,6 @@ def jDictValue(a,b):
 	return	r
 jdv=jDictValue
 
-def get_nested_value(a,*key):
-	'''safely get nested  a[k1][k2][...]
-	
-setErr( gError 还是要保留，像这种 出错 是正常流程的一部分，但是又想把错误记录下来
-#todo
-	'''
-	if py.len(key)==0:raise ArgumentError('need at least one key')
-	if py.len(key)==1:
-		try:return a[key[0]]
-		except Exception as e:return py.No(e)
-	else:
-		try:return get_nested_value(a[key[0]],*key[1:]) 
-		except Exception as e:return py.No(e)
-getDictNestedValue=getNestedValue=get_nested_value
-
 def get_dict_item(d,index=0):
 	if index<0:index=py.len(d)+index
 	for n,k in py.enumerate(d):
@@ -4571,6 +4558,70 @@ Create a slice object.  This is used for extended slicing (e.g. a[0:10:2]).
 	return r
 dict_items=get_dict_items=getDictItems
 	
+def get_nested_one_value(a,*key):
+	'''safely get nested  a[k1][k2][...]
+	
+setErr( gError 还是要保留，像这种 出错 是正常流程的一部分，但是又想把错误记录下来
+#todo
+	'''
+	if py.len(key)==0:raise ArgumentError('need at least one key')
+	if py.len(key)==1:
+		try:return a[key[0]]
+		except Exception as e:return py.No(e)
+	else:
+		try:return get_nested_value(a[key[0]],*key[1:]) 
+		except Exception as e:return py.No(e)
+getDictNestedValue=getNestedValue=get_nested_value=get_nested_one_value
+	
+	
+def dict_get_nested_multi_keys_return_dict(d,*keys,**defaults):
+	'''( k,[k0,v[k0_0,...]],)
+	# if py.istr(d) or py.isbyte()
+	'''
+	if not (isgen(d) or py.islist(d) or py.istuple(d) or py.isdict(d)) or not keys:
+		return d
+	dr={}
+	default = py.No('default')
+	for k in keys:
+		# default = py.No(k)
+		if py.islist(k):
+			if py.len(k)==0:
+				raise py.ArgumentError('[k..] can not == []',k)
+			# if 
+			if py.islist(k[-1]):
+				if py.len(k)==2:
+					dr[k[0]]=dict_get_multi_return_dict(d[k[0]],*k[1])
+					continue
+				else:
+					raise py.ArgumentError('len [k,[...]] must ==2',k)
+			dr.update(dict_get_multi_return_dict(d,*k))
+			continue
+				# dr[StrRepr('[%r].keys()'%k)]=py.list(d[k[0]) 
+			
+			
+			
+			# else:
+				# for ki in k:					
+					# dr[k[0]]=dict_get_multi_return_dict(d[k[0]],*k[1:])
+					# continue
+				# dr[StrRepr('[%r].keys()'%k)]=py.list(default) 
+			
+				# default=d.get(ki,py.No("[%r]"%ki) )
+				# v=dict_get_multi_return_dict()
+				
+				# if py.isdict(default):
+					# dr[StrRepr('[%r].keys()'%k)]=py.list(default) 
+					# continue
+				# dr[k]=d.get(k,defaults.get(k,py.No('default:',k,'keys')))
+		try:
+			dr[k]=d[k]
+		except Exception as e:
+			dr[k]=py.No(e,k)
+				
+		# dr[k]=d.get(k,defaults.get(k,default)) # .get also raise TypeError: unhashable type:
+	return dr
+get_multi_dict_keys=get_dict_multi_keys=dict_get_multi=dict_get_multi_keys=dict_multi_get=dict_multi_get_keys=dict_get_multi_return_dict=dict_get_multi_keys_return_dict=dict_get_nested_multi_keys_return_dict
+
 def dict_multi_pop(adict,*keys,default=py.No('key not in dict')):
 	dr={}
 	for k in keys:

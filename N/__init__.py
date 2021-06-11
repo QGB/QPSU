@@ -41,7 +41,42 @@ if py.is3():
 else:
 	from SimpleHTTPServer import SimpleHTTPRequestHandler
 	from BaseHTTPServer import HTTPServer as _HTTPServer
+	
+def github_release(url):
+	'''    "url": "https://api.github.com/repos/octocat/Hello-World/releases/1",
+    "html_url": "https://github.com/octocat/Hello-World/releases/v1.0.0",
+    "assets_url": "https://api.github.com/repos/octocat/Hello-World/releases/1/assets",
+    "upload_url": "https://uploads.github.com/repos/octocat/Hello-World/releases/1/assets{?name,label}",
+	
+	(?P<name>.*)
+'''
+	r'((git|ssh|http(s)?)|(git@[\w\.]+))(:(//)?)([\w\.@\:/\-~]+)(\.git)(/)?'
+	
+	r'((?P<protocol>git|ssh|http(s)?)|(git@[\w\.]+))(:(//)?)([\w\@\.\:\/~]*)([\w]+)/([\w]+)(\.git)?(/)?'
 
+def get_github_raw(q):
+	''' 
+	api='https://api.github.com/repos/{0}/{1}/contents/'
+	
+https://github.com/nobodywasishere/SGH-I537_NA_LL_Opensource/blob/d731152178585788b45d6fd9c0168412ced4bfd8/Platform/vendor/samsung/common/packages/apps/SBrowser/src/chrome/test/data/extensions/api_test/webrequest_sendmessage/background.html
+
+https://github.com/nobodywasishere/SGH-I537_NA_LL_Opensource/blob/master/Platform/vendor/samsung/common/packages/apps/SBrowser/src/chrome/test/data/extensions/api_test/webrequest_sendmessage/background.html
+
+https://github.com/Banou26/chromium-issue-1178811/raw/main/content-script.js
+
+https://raw.githubusercontent.com/Banou26/chromium-issue-1178811/main/content-script.js
+'''	
+	a=get_flask_request_a(q)
+	sa=a.split('/')
+	if '://github.com/' in a:
+		n0=-1
+		for n,i in py.enumerate(sa):
+			if i=='github.com':
+				n0=n
+	
+graw=getraw=github_raw=raw_github=get_github_raw	
+	
+	
 def get_public_ip_by_dnspod(methods=['']):
 	import socket; sock=socket.create_connection(('ns1.dnspod.net',6666))
 	bip=sock.recv(16)
@@ -406,28 +441,6 @@ def zhihu_question(url,response=None):
 		response.set_data(r)
 	return r
 zhihu=zhihu_question	
-
-def get_github_raw(q):
-	''' 
-https://github.com/nobodywasishere/SGH-I537_NA_LL_Opensource/blob/d731152178585788b45d6fd9c0168412ced4bfd8/Platform/vendor/samsung/common/packages/apps/SBrowser/src/chrome/test/data/extensions/api_test/webrequest_sendmessage/background.html
-
-https://github.com/nobodywasishere/SGH-I537_NA_LL_Opensource/blob/master/Platform/vendor/samsung/common/packages/apps/SBrowser/src/chrome/test/data/extensions/api_test/webrequest_sendmessage/background.html
-
-https://github.com/Banou26/chromium-issue-1178811/raw/main/content-script.js
-
-https://raw.githubusercontent.com/Banou26/chromium-issue-1178811/main/content-script.js
-'''	
-	a=get_flask_request_a(q)
-	sa=a.split('/')
-	if '://github.com/' in a:
-		n0=-1
-		for n,i in py.enumerate(sa):
-			if i=='github.com':
-				n0=n
-				
-	
-	
-graw=getraw=github_raw=raw_github=get_github_raw	
 
 def ping(addr,sum=5,sleep=0,timeout= 4,ttl=None,seq=0,size=56,interface=None,p=False,r=True,**ka):
 	''' ping3.ping(
@@ -1730,7 +1743,7 @@ def scanPorts(host,threadsMax=33,from_port=1,to_port=65535,callback=None,ip2=192
 	im=py.float(to_port-from_port+1)
 	percent=0.0
 	for i in range(from_port, to_port+1):
-		if (i/im>percent):
+		if ((i-from_port)/im>percent):
 			U.pln( 'Scanning  %.0f%%' % (percent*100), len(threads)	 )
 			percent+=0.01
 			
