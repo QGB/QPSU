@@ -4581,9 +4581,7 @@ def dict_get_nested_multi_keys_return_dict(d,*keys,**defaults):
 	if not (isgen(d) or py.islist(d) or py.istuple(d) or py.isdict(d)) or not keys:
 		return d
 	dr={}
-	default = py.No('default')
 	for k in keys:
-		# default = py.No(k)
 		if py.islist(k):
 			if py.len(k)==0:
 				raise py.ArgumentError('[k..] can not == []',k)
@@ -4596,23 +4594,6 @@ def dict_get_nested_multi_keys_return_dict(d,*keys,**defaults):
 					raise py.ArgumentError('len [k,[...]] must ==2',k)
 			dr.update(dict_get_multi_return_dict(d,*k))
 			continue
-				# dr[StrRepr('[%r].keys()'%k)]=py.list(d[k[0]) 
-			
-			
-			
-			# else:
-				# for ki in k:					
-					# dr[k[0]]=dict_get_multi_return_dict(d[k[0]],*k[1:])
-					# continue
-				# dr[StrRepr('[%r].keys()'%k)]=py.list(default) 
-			
-				# default=d.get(ki,py.No("[%r]"%ki) )
-				# v=dict_get_multi_return_dict()
-				
-				# if py.isdict(default):
-					# dr[StrRepr('[%r].keys()'%k)]=py.list(default) 
-					# continue
-				# dr[k]=d.get(k,defaults.get(k,py.No('default:',k,'keys')))
 		try:
 			dr[k]=d[k]
 		except Exception as e:
