@@ -239,8 +239,45 @@ def getPyVersion():
 	r=r[0]+'.'+r[1:]
 	return float(r)
 	
-
-import platform
+def platform_system():
+	'''Traceback (most recent call last):
+  File "/var/www/contextlib.py", line 21, in <module>
+    from qgb import U
+  File "/home/qmm/qgb/U.py", line 356, in <module>
+    if iswin() or iscyg():
+  File "/home/qmm/qgb/U.py", line 295, in is_windows
+    return platform.system().startswith('Windows')
+  File "/usr/lib/python3.8/platform.py", line 891, in system
+    return uname().system
+  File "/usr/lib/python3.8/platform.py", line 857, in uname
+    processor = _syscmd_uname('-p', '')
+  File "/usr/lib/python3.8/platform.py", line 613, in _syscmd_uname
+    output = subprocess.check_output(('uname', option),
+  File "/usr/lib/python3.8/subprocess.py", line 411, in check_output
+    return run(*popenargs, stdout=PIPE, timeout=timeout, check=True,
+  File "/usr/lib/python3.8/subprocess.py", line 489, in run
+    with Popen(*popenargs, **kwargs) as process:
+  File "/usr/lib/python3.8/subprocess.py", line 854, in __init__
+    self._execute_child(args, executable, preexec_fn, close_fds,
+  File "/usr/lib/python3.8/subprocess.py", line 1650, in _execute_child
+    self._close_pipe_fds(p2cread, p2cwrite,
+  File "/usr/lib/python3.8/subprocess.py", line 1104, in _close_pipe_fds
+    with contextlib.ExitStack() as stack:
+AttributeError: partially initialized module 'contextlib' has no attribute 'ExitStack' (most likely due to a circular import)
+'''
+	import platform
+	try:
+		return platform.system()
+	except Exception as e:
+		e
+	p=py.getattr(sys,'platform','')	
+	if p:return p
+	
+	if sys.executable.endswith('.exe'):
+		return 'Windows .exe'
+	else:
+		return 'linux qgb_default'
+		
 glnix=['nix','linux','darwin']
 def isnix():
 	'''
@@ -289,15 +326,16 @@ platform.machine()          x86_64                    i686
 platform.architecture()     ('64bit', 'WindowsPE')    ('32bit', 'WindowsPE')
 
 '''
-	return [i for i in glnix if i in platform.system().lower()]
+	return [i for i in glnix if i in platform_system().lower()]
 	
 def is_windows():
-	return platform.system().startswith('Windows')	
+	p=platform_system().lower()
+	return p.startswith('windows') or p.startswith('win32')#sys.platform=='win32'
 is_win=iswin=isWin=is_windows
 
-def is_linux():return platform.system()=='Linux'
+def is_linux():return platform_system()=='Linux'
 islinux=isLinux=is_linux
-def isMacOS():return platform.system()=='darwin'
+def isMacOS():return platform_system()=='darwin'
 isMac=is_mac=is_osx=isOSX=ismacos=isMacOS
 	
 def is_termux():
@@ -305,7 +343,7 @@ def is_termux():
 istermux=isTermux=is_termux
 
 def iscyg():
-	return 'cygwin' in  platform.system().lower()
+	return 'cygwin' in  platform_system().lower()
 # gipy=None#这个不是qgb.ipy, 是否与U.F U.T 这样的风格冲突？
 def is_ipython(**ka): # e=False
 	# global gipy
