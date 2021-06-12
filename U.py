@@ -5763,6 +5763,12 @@ def try_call_function(function,*a,**ka):
 	except Exception as e:
 		return py.No(e,function,a,ka)
 try_call =try_call_function	
+
+def get_all_indexes_of_sub_seq(all,sub):
+	''' #TODO KMP find '''
+	lb=py.len(sub)
+	return [(i, i+lb) for i in py.range(py.len(all)) if all[i:i+lb] == sub]
+is_sub_seq=get_all_indexes_of_sub_seq
 ############## qgb type ######################	
 def object_custom_repr(obj, *a, **ka):
 	'''

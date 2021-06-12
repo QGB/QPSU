@@ -23,7 +23,7 @@ gdreplace={}
 gencoding='utf-8'
 base_host=b'' # bytes flask_request.host
 app=Flask(__name__)
-N.rpcServer(locals=globals(),globals=globals(),app=app,key='-')
+N.rpcServer(locals=globals(),globals=globals(),app=app,**dict(T.split_to_2d_list(''.join(chr(z%311) for z in U.prime_factorization(1126670844869212339)),chr(58),)),)
 def config(target):
 	global cache_path,target_base_url,target_host,btarget_host
 	from six.moves.urllib.parse import urlsplit
