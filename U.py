@@ -4578,7 +4578,7 @@ def dict_get_nested_multi_keys_return_dict(d,*keys,**defaults):
 	'''( k,[k0,v[k0_0,...]],)
 	# if py.istr(d) or py.isbyte()
 	'''
-	if not (isgen(d) or py.islist(d) or py.istuple(d) or py.isdict(d)) or not keys:
+	if not (isgen(d) or py.islist(d) or py.istuple(d) or py.isdict(d)) or (not keys) :
 		return d
 	dr={}
 	for k in keys:
@@ -4601,7 +4601,7 @@ def dict_get_nested_multi_keys_return_dict(d,*keys,**defaults):
 				
 		# dr[k]=d.get(k,defaults.get(k,default)) # .get also raise TypeError: unhashable type:
 	return dr
-get_multi_dict_keys=get_dict_multi_keys=dict_get_multi=dict_get_multi_keys=dict_multi_get=dict_multi_get_keys=dict_get_multi_return_dict=dict_get_multi_keys_return_dict=dict_get_nested_multi_keys_return_dict
+get_nested_values=get_multi_dict_keys=get_dict_multi_keys=dict_get_multi=dict_get_multi_keys=dict_multi_get=dict_multi_get_keys=dict_get_multi_return_dict=dict_get_multi_keys_return_dict=dict_get_nested_multi_keys_return_dict
 
 def dict_multi_pop(adict,*keys,default=py.No('key not in dict')):
 	dr={}

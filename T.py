@@ -1671,6 +1671,8 @@ def varname(a):
 def filename_legalized(a,space=' '):
 	'''  # 多个连续空白字符会 缩减成 一个 space
 not auto cut long string
+
+OSError: [Errno 22] Invalid argument: 'C:/test/clipboard/林文\n===\n.png'
 	'''
 	if not py.istr(a):a=string(a)
 	a=replace_all_space(a.strip(),space)
@@ -1686,11 +1688,11 @@ fileName=filename=legalized_filename=fileNameLegalized=file_legalized=filename_l
 # filename.__str__=FILE_NAME	
 
 def pathname_legalized(a):
-	F=py.importF()
-	a=F.auto_path(a)
+	if not py.istr(a):a=string(a)
+	a=replace_all_space(a.strip(),space)
 	r=''
 	for n,c in py.enumerate(a.strip()):
-		if  (c in r'"*<>?|') or (c==':' and n!=1):
+		if  (c in NOT_PATH_NAME) or (c==':' and n!=1):
 			r+=py.chr(py.ord(c)+0XFEE0)
 		else:r+=c
 	return r

@@ -1281,7 +1281,7 @@ gn_qqwry=['上海', '云南', '内蒙古', '北京', '南京', '吉林', '四川
 # 203.14.187.0-255 ('电信', ' CZ88.NET')
 
 	
-def ip_location_qqwry(ip,dat_path=py.importU().gst+'qqwry.dat'):
+def ip_location_qqwry(ip,dat_path=py.No('auto get or gst',no_raise=1),):
 	'''return ('地区' , '运营商')
 if want update qqwry.dat , reloa N module,and call this with dat_path !!!
 warnning: NOT thread safe !!!
@@ -1290,12 +1290,17 @@ pip install qqwry-py3
 
 pip install qqwry  # Not have cz88update
 	'''	
+	
 	if ('q' not in ip_location_qqwry.__dict__):
+		import qqwry
 		U=py.importU()
 		F=py.importF()
-		import qqwry
 		
+		dat_path=U.set_or_get('qqwry.dat',dat_path) # value or not py.isNo(value) :
 		if not dat_path:
+			# fgst=py.importU().gst+'qqwry.dat'
+			# if F.exist( fgst ):
+				# dat_path=fgst
 			if U.isWin():
 				qqwry_path=r'C:\Program Files (x86)\cz88.net\ip\qqwry.dat'
 				if F.exist(qqwry_path):
@@ -1308,6 +1313,7 @@ pip install qqwry  # Not have cz88update
 			
 		ip_location_qqwry.q = qqwry.QQwry()
 		ip_location_qqwry.q.load_file(dat_path,loadindex=True)
+		U.set('qqwry.dat',dat_path)
 	
 	return ip_location_qqwry.q.lookup(ip)  #('北京市', '联通')
 
