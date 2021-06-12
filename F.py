@@ -312,6 +312,24 @@ def getMode(file):
 		return py.No(e)
 getmode=	getMode
 	
+def copy_with_src_dir_struct(abs_src_dir,abs_dst_dir):
+	from shutil import copy as _copy
+	U,T,N,F=py.importUTNF()
+	if U.isWin():raise NotImplementedError()
+	
+	if abs_src_dir[-1] != '/':abs_src_dir+='/'
+	if not F.exist(abs_src_dir):return F.exist(abs_src_dir)
+	
+	if abs_dst_dir[-1] != '/':abs_dst_dir+='/'
+	if not F.exist(abs_dst_dir):return F.exist(abs_dst_dir)
+	
+	if not abs_dst_dir.endswith(abs_src_dir):
+		# if abs_src_dir.startswith('')
+		abs_dst_dir+=abs_src_dir
+		abs_dst_dir=abs_dst_dir.replace('//','/')
+	return _copy(abs_src_dir,abs_dst_dir)
+copy_src_dir_struct=copy_with_src_dir_struct
+	
 def copy(src,dst,src_base='',skip=''):
 	r''' src : sFilePath , list ,or \n strs
 dst:sPath
