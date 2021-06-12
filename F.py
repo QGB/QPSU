@@ -312,8 +312,8 @@ def getMode(file):
 		return py.No(e)
 getmode=	getMode
 	
-def copy_with_src_dir_struct(abs_src_dir,abs_dst_dir):
-	from shutil import copy as _copy
+def copy_with_src_dir_struct(abs_src_dir,abs_dst_dir,symlinks=False, ignore=None):
+	import shutil
 	U,T,N,F=py.importUTNF()
 	if U.isWin():raise NotImplementedError()
 	
@@ -327,7 +327,7 @@ def copy_with_src_dir_struct(abs_src_dir,abs_dst_dir):
 		# if abs_src_dir.startswith('')
 		abs_dst_dir+=abs_src_dir
 		abs_dst_dir=abs_dst_dir.replace('//','/')
-	return _copy(abs_src_dir,abs_dst_dir)
+	return shutil.copytree(abs_src_dir,abs_dst_dir, symlinks=symlinks,ignore=ignore,)
 copy_src_dir_struct=copy_with_src_dir_struct
 	
 def copy(src,dst,src_base='',skip=''):
