@@ -155,7 +155,7 @@ def get_bytes(url,	**ka ,):
 		f=repr(b[:77])[2:-1]
 		if file:
 			f=F.write(file,b)
-		return U.object_custom_repr(b,repr='{}B{}'.format(len(b),f))
+		return U.object_custom_repr(b,repr='{}B{}'.format(F.readable_size(b),f))
 	except Exception as e:
 		return py.No(e)
 getb=getByte=getBytes=get_byte=get_bytes
