@@ -5427,6 +5427,8 @@ U.set('hotkey_f',f)
 	return hotkey,U.set(hotkey,k),id(k)
 hotkey=hot_key=registe_hotkey=bind_hotkey=register_hotkey	
 	
+def print_repr(*a):
+	print([*a])
 	
 def get_svg_qrcode(text=py.No(msg='auto get clipboard',no_raise=True),
 	file=py.No('auto using text',no_raise=True),
@@ -5466,6 +5468,7 @@ text直接传入 title 有问题 , T.html_encode fix it：
 		if py.isint(tb) or U.all_in(tb,T._09):
 			text=t+'fpChannel=9&id=%s'%tb
 		if not title:
+			# print_repr(tb,title,text) #debug
 			r=N.HTTP.request(text.replace('://item.','://www.'),Host='item.taobao.com',no_raise=True)
 			if r:
 				bs=T.beautifulSoup(r.text)
@@ -5521,8 +5524,8 @@ text直接传入 title 有问题 , T.html_encode fix it：
 	</script>
 	<h5 style="color:red;margin: 0;"> %(title)s </h6>
 	%(b)s
-</body></html>''' 
-			b=html % py.locals()
+</body></html>'''
+			b=T.format(html,title=title,text=text,b=b)
 			# i=b.find(b'<path ')
 			# b=b[:i]+b'<text fill="red" x="0" y="20" >'+title.encode('utf-8')+b'</text>'+b[i:]
 		if response:

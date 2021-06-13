@@ -1651,8 +1651,11 @@ TypeError: format requires a mapping
 '%(1)s %("")s'%{'1':1,'""':54353}  # dict key必须为str，%()s支持任意字符串？，dict-key只能多，不能少
 	'''
 	for k,v in ka.items():
-		k='{%s}'%k
-		s=s.replace(k,v)
+		
+		s=s.replace('%({0})s'.format(k),v)
+		
+		# k=
+		s=s.replace('{%s}'%k,v)
 	return s
 
 #############  str ops end ########3
