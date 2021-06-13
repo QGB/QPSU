@@ -56,6 +56,9 @@ try:
 	import os;path=os.path
 	from threading import Thread
 	thread=Thread
+	from threading import Lock as threading_lock
+	mutex=threadingLock=threading_lock
+	
 	from multiprocessing import Process;process=Process
 	from collections import OrderedDict
 	from concurrent.futures import ThreadPoolExecutor
