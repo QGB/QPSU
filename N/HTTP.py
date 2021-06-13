@@ -143,6 +143,7 @@ def get_bytes(url,	**ka ,):
 	url=N.auto_url(url)
 	proxies=U.get_duplicated_kargs(ka,'proxies','proxy')
 	file=U.get_duplicated_kargs(ka,'file','f','filename')
+	write_zero=U.get_duplicated_kargs(ka,'write0','w0','write_zero','zero',default=False)
 	if proxies:
 		proxies=N.set_proxy(proxy)
 	else:
@@ -153,9 +154,9 @@ def get_bytes(url,	**ka ,):
 	try:
 		b= requests.get(url,**ka).content
 		f=repr(b[:77])[2:-1]
-		if file:
+		if file and (b or write_zero):
 			f=F.write(file,b)
-		return U.object_custom_repr(b,repr='{}{}'.format(F.readable_size(b),f))
+		return U.object_custom_repr(b,repr='{}{}'.format(F.readable_size(b),f)  )
 	except Exception as e:
 		return py.No(e)
 getb=getByte=getBytes=get_byte=get_bytes
