@@ -1,4 +1,4 @@
-# coding=utf-8
+# coding=utf-8	
 #考虑qgb 位于另一个包内的情况
 if __name__.endswith('qgb.T'):from . import py
 else:#['T','__main__']
@@ -1532,6 +1532,7 @@ def index_of_multi(a,*target):
 indexOf=index_of=index_of_multi
 
 def eval_or_exec_return_str_result(s,locals=None,globals=None,raise_SyntaxError=True,pformat_kw=None):
+	import traceback
 	def modify_traceback_str(st):
 		T=py.importT()
 		sub=T.sub(st,'eval_or_exec_return_str_result',' File ')
@@ -1563,7 +1564,6 @@ def eval_or_exec_return_str_result(s,locals=None,globals=None,raise_SyntaxError=
 	# if not width:
 		# width=U.get_or_set('pformat_kw',{'width':144})['width']
 		
-	import traceback
 	# from io import StringIO
 
 	if locals==None :locals ={}
@@ -1678,7 +1678,7 @@ OSError: [Errno 22] Invalid argument: 'C:/test/clipboard/林文\n===\n.png'
 	a=replace_all_space(a.strip(),space)
 	r=''
 	for c in a:
-		if c in NOT_FILE_NAME:
+		if c in NOT_FILE_NAME_WINDOWS:
 			r+=py.chr(py.ord(c)+0XFEE0)
 			continue
 		r+=c

@@ -256,10 +256,11 @@ def save(file=None,lines=-1,tryExcept=False,out=False,columns=70,overide=True,de
 	if file:#当指定file 名时，总是 overide
 		if T.istr(file):
 			file=T.filename(file)[:255-3]# 如果用 pathname 不好处理 含有 /斜杠的问题
+			if U.is_linux():
+				while py.len(file.encode('utf-8'))> 256:
+					file=file[:-1]
 			file=F.autoPath(file,ext='.py',default=gsavePath)
 #255-3(.py)  防止文件名过长 OSError: [Errno 22] Invalid argument: "\\\\?\\C:\\test			
-			if U.is_linux():#TODO better 
-				file=gsavePath+file[py.len(gsavePath):py.len(gsavePath)+256]
 			F.new(file)
 			if py.is2():file=open(file,'a')
 			else:file=open(file,'a',encoding="utf8")
