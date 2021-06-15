@@ -1207,7 +1207,7 @@ def move(source,target,edit_target=False,mkdir=True,remove_invalid_char=True,**k
 			target=T.replacey(target,T.NOT_PATH_NAME_WINDOWS,'')
 	if not target.endswith('/') and F.isDir(target):
 		target=target+'/'
-	# if mkdir:F.mkdir(source_path) # 要先有文件夹，不然shutil.move有可能找不到
+	if mkdir:F.mkdir(F.get_dir(target)) # 要先有文件夹，不然shutil.move有可能找不到
 	import shutil
 	try:
 		return shutil.move(source, target) 
@@ -1229,12 +1229,12 @@ def move(source,target,edit_target=False,mkdir=True,remove_invalid_char=True,**k
 	# os.replace(source, target)
 mv=move
 
-def makeDirs(ap,isFile=False,cd=0):
+def makeDirs(ap,isFile=False,cd=0,no_auto_path=False):
 	''' 访问移动硬盘时，可能出现已经创建成功，但是 F.ls 看不到的情况。
 	用explorer访问后又正常
 	
 	'''
-	ap=autoPath(ap)
+	if not no_auto_path:ap=autoPath(ap)
 	if not py.isbool(isFile) and not py.isint(isFile):
 		py.importU().log('F.md(str,isFile={})'.format(repr(isFile)))
 	if py.is3():
@@ -1258,7 +1258,8 @@ def makeDirs(ap,isFile=False,cd=0):
 		except Exception as e:
 			r=e
 		if p.exists():
-			sp=autoPath(p)
+			if not no_auto_path:sp=autoPath(p)
+			else:sp=py.str(p.absolute()).replace('\\','/')
 			if p.is_dir() and not sp.endswith('/'):
 				sp+='/'
 			r=sp

@@ -65,6 +65,7 @@ def get_image(file=None,format='png'):
 KeyError: '.PNG'  [format not contains . ]
 	'''
 	global gsdir
+	U,T,N,F=py.importUTNF()
 	if not gsdir:
 		gsdir=U.get_or_set('clipboard.dir',lazy_default=lambda :F.md(U.gst+'clipboard'))
 	

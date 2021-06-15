@@ -152,6 +152,8 @@ def get_multi_return_list(*names,**defaults):
 	for name,default in defaults.items():
 		r.append( get(name,default=default) )
 	return r	
+multi_get=get_multi=get_multi_return_list
+
 def get_multi_return_exist_one(*names,default=GET_NO_VALUE,no_raise=True):
 	for name in names:
 		v=get(name,default=default)
@@ -531,9 +533,12 @@ gst=gsTestPath=get_test_path()
 
 def set_test_path(sp):
 	global gst,gsTestPath
+	F=py.importF()
+	sp=F.mkdir(sp,no_auto_path=True)
 	sp=sp.replace('\\','/')
-	if not sp.endswith('/'):
-		sp+='/'
+	# if not sp.endswith('/'):
+		# sp+='/'
+		
 	gst=gsTestPath=set('U.gst',sp)
 	return gst
 setgst=set_gst=setTestPath=set_test_path
@@ -2757,15 +2762,11 @@ def float(x):
 			break
 	return r
 
-def int(a,default=None):
-	# if not a:return default
-	try:
-		return py.int(a)
-	except Exception as e:
-		if default!=None:
-			return default
-		return py.No(e)
-
+def int_with_default(obj,*other,default=None):
+	''' FuncWrapForMultiArgs: if default!=None:'''
+	return FuncWrapForMultiArgs(f=py.int,args=(obj,other),default=default)
+int=int_with_default	
+	
 def least_common_multiple(x,y):
 	'''最大公因数（英语：highest common factor，hcf）也称最大公约数（英语：greatest common divisor，gcd）
 least common multiple , lcm 最小公倍数
@@ -3303,7 +3304,7 @@ def bin(obj,*other):
 	return FuncWrapForMultiArgs(f=py.bin,args=(obj,other))
 	
 	
-def FuncWrapForMultiArgs(f,args,default=None,index=False):
+def FuncWrapForMultiArgs(f,args,default=None,index=False,f_ka={}):
 	'''Exception return py.No'''
 	obj,other=args ########## other is tuple
 	all=py.list(other)
@@ -3311,7 +3312,7 @@ def FuncWrapForMultiArgs(f,args,default=None,index=False):
 	r=[]
 	for n,i in py.enumerate(all):
 		try:
-			r1=f(i)
+			r1=f(i,**f_ka)
 		except Exception as e:
 			if default!=None:
 				r1=default
@@ -3763,6 +3764,13 @@ def get_obj_file_lineno(a,lineno=0,auto_file_path=True):
 		a=get_obj_module(a)#python无法获取class行数？https://docs.python.org/2/library/inspect.html
 		return get_obj_file_lineno(a=a,lineno=lineno,auto_file_path=auto_file_path)
 	
+def get_net_io_bytes():
+	# global F
+	# if not 
+	import psutil
+	c=psutil.net_io_counters()
+	m=c.bytes_sent+c.bytes_recv
+	return F.IntSize(m)
 		
 def vscode(a='',lineno=0,auto_file_path=True,get_cmd=False,
 	editor_path=py.No('config this system editor_path'),):
@@ -5428,6 +5436,7 @@ U.set('hotkey_f',f)
 hotkey=hot_key=registe_hotkey=bind_hotkey=register_hotkey	
 	
 def print_repr(*a):
+	return print(*[py.repr(i) for i in a])
 	print([*a])
 	
 def get_svg_qrcode(text=py.No(msg='auto get clipboard',no_raise=True),

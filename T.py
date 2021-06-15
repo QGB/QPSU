@@ -94,6 +94,8 @@ try:
 	from pprint import pprint,pformat
 except:pass
 ####################################################
+# def 
+
 def split_to_2d_list(text,col=re.compile('\s+'),row='\n',strip=True,StrRepr=False):
 	'''
 numpy.loadtxt("myfile.txt")[:, 1]	
@@ -200,7 +202,7 @@ def search_return_position(text,*targets,case_sensitive=True,a=0,b=0,c=0,dict=Fa
 			
 	for t in py.set(targets):
 		i=0
-		re.finditer(re.escape)
+		# re.finditer(re.escape)
 		
 		while True:
 			i=text.find(t,i)

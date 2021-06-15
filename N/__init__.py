@@ -709,6 +709,7 @@ flaskArgs=None,
 key compatibility :  key='#rpc\n'==chr(35)+'rpc'+chr(10)	
 	ssl_context default use https port=443 
 	
+#TODO 分析请求代码中的变量，如果使用到了 p,response 才去赋值。没用到就不干扰	
 	'''
 	from threading import Thread
 	U=py.importU()

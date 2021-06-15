@@ -307,7 +307,7 @@ def iter_max_list(*a,round=2,c1=[]):
 			# if len(lr)<=i:break
 			# r.append(lr[i])
 	return U.sort(r,column=1)
-	
+cou_dan=coudan=凑单=iter_max_list
 	
 	
 def iter_max(y,max,layer=0):

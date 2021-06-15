@@ -174,7 +174,7 @@ async def get_browser(browserURL='http://127.0.0.1:9222',browserWSEndpoint='',
     
 	return U.set( uk,browser)
 
-async def new_page(url='https://intoli.com/blog/not-possible-to-block-chrome-headless/chrome-headless-test.html'):
+async def new_page(url='https://intoli.com/blog/not-possible-to-block-chrome-headless/chrome-headless-test.html',timeout=30*1000):
 	''' Go to the ``url``.
 
 :arg string url: URL to navigate page to. The url should include
@@ -211,7 +211,7 @@ The ``Page.goto`` will raise errors if:
 		url='https://'+url
 	if '#' not in url:
 		url+='#'+U.stime()
-	await page.goto(url)
+	await page.goto(url,timeout=timeout)
 	return page
 	
 async def _get_page_by_url(browser,url):
@@ -297,9 +297,77 @@ async def scroll_page_bottom(page):
 	return await page.evaluate('window.scrollTo(0, document.body.scrollHeight || document.documentElement.scrollHeight);')
 page_scroll_bottom=scroll_page_bottom	
 
+async def get_or_new_page(url,timeout=30*1000):
+	tb=taobao_trade
+	pa=await tb.get_page(url)
+	if not pa:
+		pa=await tb.new_page(url,timeout=timeout)
+	return pa
+	
+# async def   (url):
 ######### taobao  start ########
+async def save_item_html_and_sku(url,close=False,timeout=30*1000):
+	tb=taobao_trade
+	f=T.filename_legalized(url)[:250]
+	if not f.endswith('.html'):f+='.html'
+	if F.exist(U.gst+f[:-5]+'.dill'):
+		return py.No('exist',f)	
+	# return	py.pdb()()
+	pa=await tb.get_or_new_page(url,timeout=timeout)
+	nspeed=1024*99
+	while nspeed > 1024*80:
+		nt,nm=U.ftime(),U.get_net_io_bytes()
+		await A.sleep(1)
+		nspeed=F.IntSize( (U.get_net_io_bytes()-nm)/(U.ftime()-nt) )
+		
+	
+	h=await pa.evaluate("document.documentElement.outerHTML") 
+	f=F.write(f,h)
+	try:
+		sku=await pa.evaluate(''' [window.Hub,KISSY.Env.mods["item-detail/promotion/index"].exports.get("promoData") ] ''')   
+		if not sku or not sku[1]:
+			sku=await pa.evaluate(''' window.Hub ''')
+			sku.append(await pa.evaluate(''' KISSY.Env.mods["item-detail/promotion/index"].exports  ''') )
+			
+	except Exception as e:
+		sku=e
+	fd=F.dp(obj=sku,file=f[:-5])   
+	if close:await pa.close()
+	return pa,f,fd
+
+async def get_current_buyertrade_json(page_or_url=None):
+	pa=await tb.get_page(page_or_url)
+	h=await pa.evaluate("document.documentElement.outerHTML") 
+	return T.json_loads( eval("'%s'"% T.sub(h,"JSON.parse('","');") ) )
+	
+async def get_current_dianpu_goods_list_tmall(url=None):
+	return
+async def get_current_dianpu_goods_list_taobao(page_or_url=None):
+	tb=taobao_trade
+	if not page_or_url:page_or_url="orderType=price_"
+	pa=await tb.get_page(page_or_url)
+	page_info=await pa.evaluate("document.querySelector('span.page-info').textContent")
+	ds=await pa.evaluate('''
+async function(){
+	var ds=document.querySelectorAll('div[class*=shop-hesper-bd]  dl[class*=item]')	
+	r=[]
+	for(var i of ds){
+		var u=i.querySelector('a[href*="item.taobao.com/item.htm"]').href
+		var title=i.querySelector('a[class*="item-name"]').text.trim()
+		var c_price=i.querySelector('[class="c-price"]').textContent.trim()
+		var img=i.querySelector('img[src*="alicdn.com"]').src
+		var sale=i.querySelector('[class="sale-area"]').textContent.trim() 
+		var comment=i.querySelector('a[href*="on_comment=1"]').textContent
+		r.push([u,title,c_price,img,sale,comment])
+	}
+	return r
+}	
+	''')
+	return ds, page_info
+
+
 def taobao_login(user,pw,user_input_xy=(1050, 383)):
-	return U.simulate_system_actions([('for','login.taobao'),user_input_xy,'ctrl+a','backspace',user,'tab',pw,'Enter']) 
+	return U.simulate_system_actions([('for','淘宝网 - 淘！我喜欢'),user_input_xy,'ctrl+a','backspace',user,'tab',pw,'Enter']) 
 login=taobao_login
 	
 async def buy_item_sku(id,sku):
