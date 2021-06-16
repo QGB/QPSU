@@ -79,7 +79,7 @@ def textarea(response,name='t',upload_dir=py.No('U.gst/upload_dir',no_raise=1),)
 	<hr>
 	<input type="submit" />
 	<input id=url_start class=url type="text" name="url_start" 
-commt="/-                         U.set('rpc.server.upload.save_size',$code$ "
+commt="/-                         U.set('rpc.server.upload.save_size',...code... "
 value="$U.get('rpc.server.base')#$U.set('rpc.server.upload.save_size',$U.int_exp(U.get('rpc.server.upload.save_size',8*1024*1024),1024)#$);">
 	<input id=url_end   class=url type="text" name="url_end" value="%23-">
 </form> 
