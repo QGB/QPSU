@@ -241,15 +241,20 @@ if getattr(U,'Win',0):
 #is2 py:2.713 ipy:5.1 at[2018-05-13 10:26:35.049] G:/test/ipy/   #len 57
 #is3 py:3.63 ipy:6.1 at[2018-05-13 10:32:01.078] G:/test/ipy/    #56
 
-def save(file=None,lines=-1,tryExcept=False,out=False,columns=70,overide=True,del_other=False):
+def save(file=None,lines=-1,tryExcept=False,out=False,columns=70,overide=True,del_other=False,**ka):
 	'''file is str or (mod a)
 	在没有ipython实例时，不能get_ipython()
 	当file被指定时，overide 参数无效'''
+	del_other=U.get_duplicated_kargs(ka,'delOther','delete','delattr',default=del_other)
+	if ka:raise py.ArgumentError('没有处理这个ka，是不是多传了参数',ka)
+	
 	try:
 		if py.isint(lines) and lines>0:
 			# lsta,lend=0,lines
 			lsta,lend=lines,-1
-		elif len(lines)==2:lsta,lend=lines
+		elif len(lines)==2:
+			lsta,lend=lines
+			lsta=lsta if lsta>0 else 0
 		else:raise Exception
 	except:
 		lsta,lend=0,gIn.__len__()

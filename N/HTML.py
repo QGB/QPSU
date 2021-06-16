@@ -79,13 +79,14 @@ def textarea(response,name='t',upload_dir=py.No('U.gst/upload_dir',no_raise=1),)
 	<hr>
 	<input type="submit" />
 	<input id=url_start class=url type="text" name="url_start" 
-		value="U.set('rpc.server.upload.save_size',$U.int_exp(U.get('rpc.server.upload.save_size',8*1024*1024),1024)$);">
+commt="/-                         U.set('rpc.server.upload.save_size',$code$ "
+value="$U.get('rpc.server.base')#$U.set('rpc.server.upload.save_size',$U.int_exp(U.get('rpc.server.upload.save_size',8*1024*1024),1024)#$);">
 	<input id=url_end   class=url type="text" name="url_end" value="%23-">
 </form> 
 <script> 
 var form  = document.querySelector('form');
 var original_action=form.getAttribute('action');
-original_action=original_action.substr($len(U.get('rpc.server.base') )$) 
+original_action=original_action.substr($len(U.get('rpc.server.base'))#$) 
 // if(original_action.startsWith('/')){
 //}
 document.querySelector('input#url_start').addEventListener('input', function(e){

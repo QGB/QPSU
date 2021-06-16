@@ -3359,14 +3359,15 @@ def simulate_key_write(astr, delay=0,restore_state_after=True, exact=None,**ka):
 	return StrRepr(astr,repr='U.simulate_key_write(%r)'%astr)
 text_key=text_key_write=keyboard_write=simulate_key_write	
 
-def simulate_key_press(akey, delay=0,restore_state_after=True, exact=None,**ka):
+def simulate_key_press(*akey, delay=0,restore_state_after=True, exact=None,**ka):
 	# parsed=keyboard.parse_hotkey(akey)
 	# if py.len(parsed)>1: #如果 多个组合键中间想要delay,使用 action_list 
 	import keyboard
 	if not delay:delay=get_kargs_duplicated(ka,'Delay','sleep','pause','wait')
-	keyboard.press_and_release(akey, do_press=True, do_release=True)
-	if delay and delay>0:sleep(delay)
-	return StrRepr(akey,repr='U.simulate_key_press(%r)'%akey)
+	for k in akey:
+		keyboard.press_and_release(k, do_press=True, do_release=True)
+		if delay and delay>0:sleep(delay)
+	return StrRepr(akey,repr='U.simulate_key_press(*{!r})'.format(akey)) # 不要用%r,如果传入一个tuple类型，TypeError: not all arguments converted during string formatting
 system_key=pressKey=keyPress=press_key=key_press=simulate_key_press
 
 def simulate_system_actions(a=py.No("str[key|key_write ] or action list[['click',xy],['move',xy],[foreground,title|handle],['k','sss'],['t','text']]"),key='', delay=py.No('using _DELAY'),restore_state_after=True, exact=None,raise_error=False,**ka):
