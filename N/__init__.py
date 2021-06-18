@@ -42,6 +42,42 @@ else:
 	from SimpleHTTPServer import SimpleHTTPRequestHandler
 	from BaseHTTPServer import HTTPServer as _HTTPServer
 	
+	
+def get_tornado_rpc_handler(key='/-',locals=None,globals=None):
+	'''return tornado.web.Application([
+	(r"/-(.*)", N.get_tornado_rpc_handler(key='/-')),
+])	
+	'''
+	import tornado.web
+	import tornado.gen
+	U,T,N,F=py.importUTNF()
+	
+	class RPCHandlerTornado(tornado.web.RequestHandler):
+		''' def prepare(self):  # 405: Method Not Allowed '''
+		@tornado.gen.coroutine
+		def options(self, *args, **kwargs):
+			self.set_status(200)
+			self.set_header('content-type', 'text/plain')
+			if not self.request.uri.startswith(key):
+				return
+			# py.pdb()()
+			try:
+				s=T.url_decode(self.request.uri[py.len(key):])
+			except Exception as urlDecodeErr:
+				U.print_traceback_in_except()
+				s=self.request.uri[py.len(key):]
+			if not locals:locals=py.locals()
+			if not globals:globals=py.globals()	
+				
+			self.write(U.execResult(
+				s,locals=locals,globals=globals
+			)   )
+		get=head=post=delete=patch=put=options
+	return RPCHandlerTornado
+# except Exception as e:
+	# setErr(e)
+tornado_rpc_handler=RPCHandlerTornado=get_tornado_rpc_handler
+	
 def github_release(url):
 	'''    "url": "https://api.github.com/repos/octocat/Hello-World/releases/1",
     "html_url": "https://github.com/octocat/Hello-World/releases/v1.0.0",

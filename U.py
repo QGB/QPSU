@@ -2848,11 +2848,18 @@ def isPrime(n, k=5): # miller-rabin
 is_prime=isPrime
 
 def prime_factorization(n, b2=-1, b1=10000): # 2,3,5-wheel, then rho
-	'''
+	''' Notice：TimeOut ！ 分解大数时可能会消耗较长的时间
+	
 https://stackoverflow.com/questions/51533621/prime-factorization-with-large-numbers-in-python 
 	'''
 	if not py.isnum(n):raise ArgumentError(n)
 	n=py.int(n)
+	try:
+		import sympy.ntheory
+		return sympy.ntheory.factorint(n) # time may out, 下面的朴素实现耗时更长
+	except Exception as e:
+		setErr(e)
+	
 	def gcd(a,b): # euclid's algorithm
 		if b == 0: return a
 		return gcd(b, a%b)
@@ -2887,7 +2894,7 @@ https://stackoverflow.com/questions/51533621/prime-factorization-with-large-numb
 		h, t, g, c = 1, 1, 1, c+1
 	n=py.int(n)
 	return insertSorted(n, fs)
-factors=integer_factorization=prime_factorization
+factorint=factors=integer_factorization=prime_factorization
 # (1917141215419419171412154194191714)
 # [2, 3, 13, 449941L, 54626569996995593878495243L]
 def get_int_multiplication_expression(a,factor=1024,use_pow=True,add_symbol=' + ',mul_symbol='*'):
@@ -4393,7 +4400,7 @@ def get_dict_all_values(d,start=0,size=500):
 		# try:
 		return [v for k,v in d]
 	return py.list(d.values())[start:start+size]
-dict_values=dict_value_list=get_dict_values=get_dict_all_values	
+get_dict_value_list=dict_values=get_dict_values=get_dict_all_values	
 
 def get_dict_value(d,index=0):
 	if index<0:index=py.len(d)+index
@@ -4407,14 +4414,14 @@ def setDictListValue(adict,key,value):
 		adict[key].append(value)
 	else:
 		adict[key]=[value]
-dict_add_value_list=add_dict_value_list=set_dict_value_list=set_dict_list=setDictList=setDictListValue
+dict_value_list=dict_value_add_list=dict_add_value_list=add_dict_value_list=set_dict_value_list=set_dict_list=setDictList=setDictListValue
 
 def setDictSetValue(adict,key,value):
 	if key in adict:
 		adict[key].add(value)
 	else:
 		adict[key]=py.set([value])
-dict_value_set=dict_add_value_set=add_dict_value_jihe=add_dict_value_set=set_dict_value_set=set_dict_set=setDictset=setDictSetValue
+dict_value_add_set=dict_value_set=dict_add_value_set=add_dict_value_jihe=add_dict_value_set=set_dict_value_set=set_dict_set=setDictset=setDictSetValue
 
 def setDictValuePlusOne(adict,key):
 	if key in adict:
