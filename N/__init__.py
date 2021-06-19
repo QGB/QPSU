@@ -1179,7 +1179,7 @@ def flask_image_response(response,image,format='png',**ka):
 	return bytes  # huawei Android 旧版 系统浏览器，如果url 不是 .png等 结尾。不会显示图像
 	# return response,image,bytes
 
-def flask_screenshot_response(response,rect=py.No('rect=[x,y,x1,y1] or auto get clipboard or full_screen '),**ka):
+def flask_screenshot_response(response,rect=py.No('rect=[x,y,x1,y1] or auto get clipboard or full_screen '),transform_function=None,transform_function_ka={},**ka):
 	''' rect (crop)  defining the left, upper, right, and lower pixel
 
 Image.open(io.BytesIO(b ))	
@@ -1191,6 +1191,8 @@ Image.open(fp)
 	'''
 	from PIL import Image
 	U,T,N,F=py.importUTNF()
+	transform_function=U.get_duplicated_kargs(ka,
+		'f','func','function','operator','transform','transformation_function',default=transform_function)#TODO 名称长的别名应该在前，这样匹配时先详细后模糊
 	if U.isWin() or U.isMac():
 		from PIL import ImageGrab
 	if rect:
@@ -1207,6 +1209,9 @@ Image.open(fp)
 		im = ImageGrab.grabclipboard()
 		if not im:
 			im=ImageGrab.grab()
+	if py.isinstance(im,Image.Image) and py.callable(transform_function):
+		im=transform_function(im,**transform_function_ka)
+			
 	return flask_image_response(response,im)
 img= screenshot_response=flask_screenshot_response
 	

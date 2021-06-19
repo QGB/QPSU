@@ -73,7 +73,7 @@ def textarea(response,name='t',upload_dir=py.No('U.gst/upload_dir',no_raise=1),)
 	<hr>
 	<div><small>$name$:</small></div >
 	<div style="height:60%;" > 
-		<textarea name="t" style="width:100%; height: 100%;" ></textarea>
+		<textarea name="t" style="width:100%; height: 100%;" >$U.get('t_form',{}).get('t','')$</textarea>
 	</div>
 	
 	<hr>
