@@ -53,7 +53,8 @@ def textarea(response,name='t',upload_dir=py.No('U.gst/upload_dir',no_raise=1),)
 	 <input type="text" name="t">
 	
 	"""
-	
+	if not U.all_in(name,T.aZ+'_'):
+		raise py.ArgumentError(name,'must be alphabet_')
 	r=T.html_template(globals=globals(),locals=locals(),s='''
 <head>
 <style type="text/css">
@@ -66,14 +67,14 @@ def textarea(response,name='t',upload_dir=py.No('U.gst/upload_dir',no_raise=1),)
 </style> 
 </head>
 	
-<form method="post" enctype="multipart/form-data" action="$U.get_or_set('rpc.server.base','/')$r=U.set_multi($name$_form=request.form,$name$_files=N.HTML.flask_get_all_upload_files(),$name$_data=q.get_data(),);">
+<form method="post" enctype="multipart/form-data" action="$U.get_or_set('rpc.server.base','/')$r=U.set_multi($name$_form=request.form,$name$_files=N.HTML.flask_get_all_upload_files(),$name$_data=q.get_data(),);F.dp(request.form,'$name$_form');">
 	<input type="submit" />
 	<hr>
 	<input type="file" multiple name="f">
 	<hr>
 	<div><small>$name$:</small></div >
 	<div style="height:60%;" > 
-		<textarea name="t" style="width:100%; height: 100%;" >$U.get('t_form',{}).get('t','')$</textarea>
+		<textarea name="t" style="width:100%; height: 100%;" >$(F.dl('t_form') or U.get('t_form') or {}).get('t','')$</textarea>
 	</div>
 	
 	<hr>
