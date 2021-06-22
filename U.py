@@ -2212,46 +2212,63 @@ def dirValue(a=None,filter='',type=None,recursion=False,depth=2,timeout=6,__ai=0
 	return r
 DirValue=getdir=getDirValue=dirValue
 
-def search_iterable(a,filter='',type=None,depth=2,ai=0,si=''):
+def search_iterable(a,filter='',type=None,depth=2,out_limit=99,ai=0,si='a'):
 	'''iterable
 	# typo deepth
 	'''
-	if py.isnum(a):
-		return a if a==filter else []
-	if py.istr(a):
-		return a if filter in a else []
-	if ai>depth:return
+	if not (py.islist(a) or py.istuple(a) or py.isdict(a)):
+		if filter==a:
+			return '%r in %s'%(a,si)
+		if (py.istr(a) and filter in a):
+			return '%r in %r#%s'%(filter,a,si)
+		return ''
+	# if py.isnum(a):
+		# return a if a==filter else []
+	# if py.istr(a):
+		# return a if filter in a else []
+	if ai>depth:return None
 	r=[]
 	if py.isdict(a):
-		for k,v in a.items():
-			try:
-				if filter in k:
-					r.append(k)
-			except:pass
-			try:
-				if filter in v:
-					r.append('[%r]'%k)
-			except:pass
-			ri=searchIterable(a=[k,v],filter=filter,type=type,depth=depth,ai=ai+1,si=si+'[%r]'%k,)
-			if ri:
-				r.append(ri)
-				
+		its=a.items()
+	# if py.islist(a):
 	else:
-		for n,i in enumerate(a):
-			try:
-				if filter in i:
-					r.append([n,i])
-					# if ai==0:continue
-					# else:break
-			except:pass
-
-			ri=searchIterable(a=i,filter=filter,type=type,depth=depth,ai=ai+1,si=si,)
-			if ri:
-				r.append([n,ri])
-					
-	return r	
+		its=py.enumerate(a)
+	# def return_(st):
+		# return st
+		
+	for k,v in its:
+		# try:
+		ri=''
+		if filter==k:
+			ri='%r in %s'%(k,si+'[%r] '%k)
+		if (py.istr(k) and filter in k):
+			ri='{filter!r} in {k!r}\tand {k!r}\tin {si} '.format(filter=filter,k=k,si=si)
+				# r.append(k)
+		# except:pass
+		try:
+			if filter in v:
+				nfv=v.index(filter)
+				# c0=py.max(nfv-50,0)
+				# c1=nfv+py.len(filter)+50
+				ri='%r in %s[%r]\t#%r '%(filter,si,k,v[py.max(nfv-50,0):nfv+py.len(filter)+50])
+		except:pass
+		if not ri:
+			ri=search_iterable(a=v,filter=filter,type=type,depth=depth,out_limit=out_limit,ai=ai+1,si=si+'[%r]'%k,)
+		if ri:
+			if py.islist(ri):
+				r.extend(ri)
+			else:
+				r.append(ri)
+			if py.len(r)>out_limit:
+				r=r[:out_limit]+['...']
+				break
+				# return ri		
+	if ai==0:
+		return [StrRepr(i) for i in py.sorted(r)]
+	else:
+		return r
 # searchIterable.r=[]
-findIterable=iterableSearch=searchIterable=search_iterable
+dict_search=dict_list_search=search_dict_list=findIterable=iterableSearch=searchIterable=search_iterable
 
 def isinstance(obj,Class):
 	'''isinstance(obj, class_or_tuple, /)
