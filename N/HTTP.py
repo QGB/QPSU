@@ -166,6 +166,7 @@ def get(url,file='',
 		headers = gheaders,
 		timeout=9,
 		proxies=AUTO_GET_PROXY,
+		encoding='',
 		**ka ,
 	):
 	U,T,N,F=py.importUTNF()
@@ -213,7 +214,7 @@ def get(url,file='',
 			return F.write(file,r.content)
 		#TODO decode
 		if 'text' in r.headers.get('Content-Type','').lower():
-			return T.autoDecode(r.content)
+			return r.content.decode(encoding or T.detect(r.content[:9999]) or 'utf-8')
 			# try:return r.content.decode('gb18030')
 			# except:pass
 			# return r.text

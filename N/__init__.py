@@ -1338,7 +1338,7 @@ pip install qqwry  # Not have cz88update
 		U=py.importU()
 		F=py.importF()
 		
-		dat_path=U.set_or_get('qqwry.dat',dat_path) # value or not py.isNo(value) :
+		dat_path=dat_path or U.get('qqwry.dat') # value or not py.isNo(value) :
 		if not dat_path:
 			# fgst=py.importU().gst+'qqwry.dat'
 			# if F.exist( fgst ):

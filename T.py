@@ -12,8 +12,8 @@ gsNOT_FILE_NAME_LINUX=NOT_FILE_NAME_LINUX='/'+py.chr(92) # \
 az=a_z='abcdefghijklmnopqrstuvwxyz'
 AZ=A_Z=a_z.upper()
 
-azAZ=aZ=a_Z=a_z+A_Z
-AZaz=Az=A_z=A_Z+a_z
+alphabet=alphabeT=azAZ=aZ=a_Z=a_z+A_Z # The English Alphabet Has 52 Letters
+Alphabet=AZaz=Az=A_z=A_Z+a_z
 character=aZ=azAZ###Do not Change
 
 num=s09=_09=number='0123456789'
@@ -1323,7 +1323,7 @@ def jsonToDict(a):
 	return ast.literal_eval(a.replace('false','False').replace('true','True'))
 js2py=jsonToDict
 	
-def json_load(astr='',file=None,**ka):
+def json_load(astr='',file=None,comment=lambda s:re.sub("//.*","",s,flags=re.MULTILINE),**ka):
 	import json
 	if not (astr or file):
 		return py.No('either astr or file, but not any') #一个也没有 不用 both not
@@ -1344,6 +1344,9 @@ def json_load(astr='',file=None,**ka):
 			except Exception as e:
 				return py.No(e,file)	
 	#######			
+	if comment and py.callable(comment):
+		astr=comment(astr)
+		
 	try:
 		return json.loads(astr,**ka)
 	except Exception as e:
@@ -1479,7 +1482,7 @@ T.subLast('C:/test/list_bought_items.htm/10_15_知乎周源_list_bought_items.ht
 	# i1+=len(s1)
 	# U.pln( i1,i2
 	# return s[i1:i2]
-subt=sub_last=subLast=subr=sub_right=subRight=sub_tail
+sublast=subt=sub_last=subLast=subr=sub_right=subRight=sub_tail
 	
 def replace_all_space(a,to='',target=r"\s+"):
 	'''  多个连续空白字符会 缩减成 一个空格

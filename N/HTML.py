@@ -72,7 +72,22 @@ def textarea(response,name='t',upload_dir=py.No('U.gst/upload_dir',no_raise=1),)
 	<hr>
 	<input type="file" multiple name="f">
 	<hr>
-	<div><small>$name$:</small></div >
+	<div>
+		<small style="
+			padding: 22;
+		">$name$:</small>
+		<button  type="button" style="
+			height: 33;
+			width: 99;
+		" onclick="
+var event = document.createEvent('TextEvent');
+event.initTextEvent('textInput', true, true, null, '' );
+document.querySelector('textarea').dispatchEvent(event); // fire the event on the the textarea
+
+		">clear txt</button>
+	</div>
+	
+	
 	<div style="height:60%;" > 
 		<textarea name="t" style="width:100%; height: 100%;" >$(F.dl('t_form') or U.get('t_form') or {}).get('t','')$</textarea>
 	</div>

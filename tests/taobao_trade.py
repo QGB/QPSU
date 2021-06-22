@@ -297,11 +297,13 @@ async def scroll_page_bottom(page):
 	return await page.evaluate('window.scrollTo(0, document.body.scrollHeight || document.documentElement.scrollHeight);')
 page_scroll_bottom=scroll_page_bottom	
 
-async def get_or_new_page(url,timeout=30*1000):
+async def get_or_new_page(url,select_tab=True,timeout=30*1000):
 	tb=taobao_trade
 	pa=await tb.get_page(url)
 	if not pa:
 		pa=await tb.new_page(url,timeout=timeout)
+	if select_tab:
+		await pa.bringToFront()
 	return pa
 	
 # async def   (url):
@@ -336,7 +338,8 @@ async def save_item_html_and_sku(url,close=False,timeout=30*1000):
 	return pa,f,fd
 
 async def get_current_buyertrade_json(page_or_url=None):
-	pa=await tb.get_page(page_or_url)
+	tb=taobao_trade
+	pa=await tb.get_or_new_page(page_or_url)
 	h=await pa.evaluate("document.documentElement.outerHTML") 
 	return T.json_loads( eval("'%s'"% T.sub(h,"JSON.parse('","');") ) )
 	

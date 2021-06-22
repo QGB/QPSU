@@ -2212,22 +2212,47 @@ def dirValue(a=None,filter='',type=None,recursion=False,depth=2,timeout=6,__ai=0
 	return r
 DirValue=getdir=getDirValue=dirValue
 
-def searchIterable(a,filter='',type=None,depth=2,ai=0):
+def search_iterable(a,filter='',type=None,depth=2,ai=0,si=''):
 	'''iterable
 	# typo deepth
 	'''
+	if py.isnum(a):
+		return a if a==filter else []
+	if py.istr(a):
+		return a if filter in a else []
 	if ai>depth:return
 	r=[]
-	for i in a:
-		try:
-			if filter in i or searchIterable(i,filter,type,depth,ai+1):
-				r.append(i)
-				if ai==0:continue
-				else:break
-		except:pass
+	if py.isdict(a):
+		for k,v in a.items():
+			try:
+				if filter in k:
+					r.append(k)
+			except:pass
+			try:
+				if filter in v:
+					r.append('[%r]'%k)
+			except:pass
+			ri=searchIterable(a=[k,v],filter=filter,type=type,depth=depth,ai=ai+1,si=si+'[%r]'%k,)
+			if ri:
+				r.append(ri)
+				
+	else:
+		for n,i in enumerate(a):
+			try:
+				if filter in i:
+					r.append([n,i])
+					# if ai==0:continue
+					# else:break
+			except:pass
+
+			ri=searchIterable(a=i,filter=filter,type=type,depth=depth,ai=ai+1,si=si,)
+			if ri:
+				r.append([n,ri])
+					
 	return r	
-searchIterable.r=[]
-findIterable=iterableSearch=searchIterable
+# searchIterable.r=[]
+findIterable=iterableSearch=searchIterable=search_iterable
+
 def isinstance(obj,Class):
 	'''isinstance(obj, class_or_tuple, /)
 	#3:isinstance(None, None)#False
@@ -3931,7 +3956,7 @@ def rebuild_function_call_self_args_str(a,cbs=False):
 	r=r+')'
 	if cbs:U.cbs(r) 
 	return U.StrRepr(r)
-get_function_call_self_args=generate_function_call_self_args=rebuild_function_call_self_args=rebuild_function_call_self_args_str	
+get_function_call_self_str=get_function_call_self_args=generate_function_call_self_args=rebuild_function_call_self_args=rebuild_function_call_self_args_str	
 def argspec_to_str(a):
 	U=py.importU()
 	a=U.getfullargspec(a)
@@ -4624,7 +4649,11 @@ setErr( gError 还是要保留，像这种 出错 是正常流程的一部分，
 	if py.len(key)==0:raise ArgumentError('need at least one key')
 	if py.len(key)==1:
 		try:return a[key[0]]
-		except Exception as e:return py.No(e)
+		except Exception as e:
+			try:
+				return a[key]
+			except Exception as e2:
+				return py.No(e2)
 	else:
 		try:return get_nested_value(a[key[0]],*key[1:]) 
 		except Exception as e:return py.No(e)
