@@ -94,7 +94,20 @@ try:
 	from pprint import pprint,pformat
 except:pass
 ####################################################
-# def 
+def parse_cookie_str_to_dict(s):
+	T=py.importT()
+	dc={}
+	for n,l in enumerate(s.split(';')):
+		l=l.strip()
+		name=T.sub(l,'','=')
+		v=l[len(name)+1:]
+		if name in dc:raise py.Exception('cookie name conflict?',name)
+		dc[name]=v
+		#print(l)
+		# print(n,name,v)
+		#break	
+	return dc
+c2d=parse_cookie=parse_cookie_str=parse_cookie_to_dict=parse_cookie_str_to_dict	
 
 def split_to_2d_list(text,col=re.compile('\s+'),row='\n',strip=True,StrRepr=False):
 	'''

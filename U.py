@@ -2252,7 +2252,7 @@ def search_iterable(a,filter='',type=None,depth=2,out_limit=99,ai=0,si='a'):
 				# c1=nfv+py.len(filter)+50
 				ri='%r in %s[%r]\t#%r '%(filter,si,k,v[py.max(nfv-50,0):nfv+py.len(filter)+50])
 		except:pass
-		if not ri:
+		if not ri:## notice a=v
 			ri=search_iterable(a=v,filter=filter,type=type,depth=depth,out_limit=out_limit,ai=ai+1,si=si+'[%r]'%k,)
 		if ri:
 			if py.islist(ri):

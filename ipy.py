@@ -127,7 +127,7 @@ def dill_load(filename):
 	gipy.user_ns[varname]=F.dill_load(filename)
 	return r
 load=dill_load	
-def dill_dump(*vars):
+def dill_dump(*vars,len=True):
 	'''	'''
 	T=py.importT()
 	import ast
@@ -146,6 +146,8 @@ def dill_dump(*vars):
 				for i,var in py.enumerate(e.value.args):
 					# if py.isinstance( var,(ast.Name,ast.Subscript) ):# var : Name(lineno=1, col_offset=12, id='In', ctx=Load()),
 					dvars[U.ast_to_code(var,EOL=False) ]=vars[i]
+	if py.len(vars)==1 and not len:
+		return F.dill_dump(obj=vars[0],file=py.list(dvars)[0])
 	r=[]
 	for n,i in py.enumerate(dvars):
 		il=U.len(dvars[i])

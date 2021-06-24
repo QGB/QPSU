@@ -171,14 +171,14 @@ async def get_browser(browserURL='http://127.0.0.1:9222',browserWSEndpoint='',
 		# if is_chrome_process_exists(): # 会自动开一个 全新环境
 			# ret
 		browser=await pyppeteer.launcher.launch({'executablePath': executablePath, 'headless': False, 'slowMo': 30})
-    
+	
 	return U.set( uk,browser)
 
 async def new_page(url='https://intoli.com/blog/not-possible-to-block-chrome-headless/chrome-headless-test.html',timeout=30*1000):
 	''' Go to the ``url``.
 
 :arg string url: URL to navigate page to. The url should include
-                 scheme, e.g. ``https://``.
+				 scheme, e.g. ``https://``.
 
 Available options are:
 
@@ -193,9 +193,9 @@ Available options are:
   * ``load``: when ``load`` event is fired.
   * ``domcontentloaded``: when the ``DOMContentLoaded`` event is fired.
   * ``networkidle0``: when there are no more than 0 network connections
-    for at least 500 ms.
+	for at least 500 ms.
   * ``networkidle2``: when there are no more than 2 network connections
-    for at least 500 ms.
+	for at least 500 ms.
 
 The ``Page.goto`` will raise errors if:
 
@@ -308,6 +308,47 @@ async def get_or_new_page(url,select_tab=True,timeout=30*1000):
 	
 # async def   (url):
 ######### taobao  start ########
+async def delay_trade_time():
+	pa=await tb.get_or_new_page('https://buyertrade.taobao.com/trade/itemlist/list_bought_items.htm?action=itemlist%2FBoughtQueryAction&event_submit_do_query=1&tabCode=waitSend')
+	cks=await tb.get_all_cookies()
+	dck={}
+	for c in cks:
+		if 'taobao.com' in c['domain'] and not U.one_in(['login.','airunit.','cart.',], c['domain']):
+			dck[c['name'] ]=c['value']
+			print(U.ct(py.id(_i)),'%-15s'%c['name'],c['domain'])
+	await pa.evaluate('''document.querySelector('[class="pagination-item pagination-item-%s"]').click()   '''%U.set_input('page-n',type=int))
+
+	ids=await pa.evaluate('''(function(){
+  var xa=xpath_all("//span[contains(., '订单号')]/following-sibling::span[1+1]")
+  r=[]
+  for(var i of xa){
+	  r.push(i.textContent)
+  }
+   return r
+})()''')
+	print(ids,U.len(dck,ids,didr,didrg ))
+	didr=U.get_or_set('id-resp',{})
+	didrg=U.get_or_set('id-resp_g',{})
+	for n,id in enumerate(ids):
+		if id in didr:
+			print('# skip',n,id)
+			continue
+		data = {  'bizType': '200',
+	'bizOrderId': id,
+	'stepNo': '0'
+	}
+		resp=response = requests.post('https://trade.taobao.com/trade/sellerDelayConsignmentTimeHandler.do', headers=headers,cookies=dck,data=data)
+		print(n,resp,resp.text[:99])
+		didr[id]=resp
+
+		resp_g = requests.get(resp.json()['callBackUrl'], headers=headers ,cookies=dck)
+		print(resp_g,resp_g.text[:99])
+		didrg[id]=resp_g
+
+	return
+	
+
+
 async def save_item_html_and_sku(url,close=False,timeout=30*1000):
 	tb=taobao_trade
 	f=T.filename_legalized(url)[:250]
