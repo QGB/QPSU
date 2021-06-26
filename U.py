@@ -5215,23 +5215,46 @@ def git_init(remote_url='',git_exe=None):
 		
 	return
 
-def get_git_exe(git_exe=''):
+def get_git_exe(git_exe='',win_git_list=(
+'C:/Program Files/Zerynth/python/Library/cmd/git.exe',
+r"D:\Program Files\Git\bin\git.exe"
+r"C:\Program Files\Git\bin\git.exe"
+,)
+	):
 	U,T,N,F=py.importUTNF()
-	if not git_exe:
+	if not git_exe: # U.get('git_exe')
 		if U.isWin():
-			git_exe=U.get_or_set('git_exe',r"D:\Program Files\Git\bin\git.exe")
+			for g in win_git_list:
+				if F.exist(g):
+					git_exe=U.get_or_set('git_exe',g)
+					break
 		if U.isLinux():
 			git_exe=U.get_or_set('git_exe',r"/usr/bin/git")
 	if not F.exist(git_exe):
 		raise py.EnvironmentError(git_exe,'not exists!')
 	return U.set('git_exe',git_exe)
 
-def get_args_dict_from_format_string(s,locals,regex=r'\{\w+\}'):
+def get_args_dict_from_format_string(text,locals,regex=r'\{\w+\}'):
 	'''raise KeyError '''
-	return {i[1:-1]:py.locals()[i[1:-1]] for i in U.unique(T.regexMatchAll(s,regex)) }
+	U,T,N,F=py.importUTNF()
+	ks=[i[1:-1] for i in U.unique(T.regexMatchAll(text,regex)) ]
+	if not ks:return {}
+	if not U.all_in(ks,locals):
+		print('text.ks:',ks)
+		print('locals.keys:',py.list(locals))
+	#debug	
+	if 'git_exe' in ks and locals['git_exe'	]==None:
+		py.pdb()()
+	####	
+	return {i:locals[i] for i in ks}
 	
 def git_commit(commit_msg=None,dir='.',
 	git_exe=None, user_email='qgbcs1@gmail.com', user_name='qgb',):
+	U,T,N,F=py.importUTNF()
+	U.cd(dir)
+	U.pwd(p=1)
+	git_exe=get_git_exe(git_exe)
+
 	cmd=r'''   
 "   "{git_exe}" config --global user.email {user_email}
 "{git_exe}" config --global user.name {user_name}
@@ -5244,10 +5267,7 @@ echo 	 git config done
 "{git_exe}" add -A
 "{git_exe}" commit -m "{commit_msg}"
 echo 	 git commit "{commit_msg}" done   "
-'''
-	U,T,N,F=py.importUTNF()
-	U.cd(dir)
-	U.pwd(p=1)
+''' ##代码顺序不能乱，先赋值所有变量，再尝试 格式化
 	ipy=U.get_ipy(raise_EnvironmentError=False)
 	if ipy:
 		system=ipy.system
@@ -5257,7 +5277,8 @@ echo 	 git commit "{commit_msg}" done   "
 		import os
 		system=os.system
 		
-	git_exe=get_git_exe(git_exe)
+	
+	
 	cmd=T.replace_all(cmd.strip(),'\n\n','\n')
 	cmd=cmd.replace('\n',' & ')
 	return system(cmd),cmd
