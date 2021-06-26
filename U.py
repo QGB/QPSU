@@ -5200,11 +5200,12 @@ def get_objects(type,len=None):
 	return r
 find_objects=get_obj=get_objects
 
-def git_init(remote_url='',git_exe=None):
-	cmd=r'''   
+def git_init(remote_url='',git_exe=None,**ka):
+	cmd=r'''  
 	'''
 	U,T,N,F=py.importUTNF()
 	U.pwd(p=1)
+	commit_msg=U.get_duplicated_kargs(ka,'commit_msg','commit','cmsg','msg','s')
 	git_exe=get_git_exe(git_exe)
 	ipy=U.get_ipy(raise_EnvironmentError=False)
 	if ipy:
@@ -5250,11 +5251,6 @@ def get_args_dict_from_format_string(text,locals,regex=r'\{\w+\}'):
 	
 def git_commit(commit_msg=None,dir='.',
 	git_exe=None, user_email='qgbcs1@gmail.com', user_name='qgb',):
-	U,T,N,F=py.importUTNF()
-	U.cd(dir)
-	U.pwd(p=1)
-	git_exe=get_git_exe(git_exe)
-
 	cmd=r'''   
 "   "{git_exe}" config --global user.email {user_email}
 "{git_exe}" config --global user.name {user_name}
@@ -5267,7 +5263,14 @@ echo 	 git config done
 "{git_exe}" add -A
 "{git_exe}" commit -m "{commit_msg}"
 echo 	 git commit "{commit_msg}" done   "
-''' ##代码顺序不能乱，先赋值所有变量，再尝试 格式化
+''' 
+	U,T,N,F=py.importUTNF()
+	U.cd(dir)
+	U.pwd(p=1)
+	if not commit_msg:commit_msg=U.stime()
+	git_exe=get_git_exe(git_exe)
+	
+	##代码顺序不能乱，先赋值所有变量，再尝试 格式化
 	ipy=U.get_ipy(raise_EnvironmentError=False)
 	if ipy:
 		system=ipy.system
