@@ -455,10 +455,11 @@ async def alipay_buy(pa,pw_file='130_pw.txt'):
 	
 	if not pa:return pa
 	await pa.bringToFront()
+	Win.set_foreground(title='支付宝 - 网上支付 安全快速！ - Cent Browser')
 	# x,y=await tb.get_abs_xy(pa,'label[class=ui-label]')#(x+222,y+5)
 	x,y=await tb.get_abs_xy(pa,'a[seed="sc_edit_forgetPwd"]')#(x-180,y+5)
 	
-	s,[x,y]=await tb.press_keys(pa,F.read(pw_file),xy= (x-180,y+5))
+	s,[x,y]=await tb.press_keys(pa,F.read(pw_file),xy= (x-160,y+5))
 	await A.sleep(0.6)#sec
 	Win.click(x,y+67)
 	

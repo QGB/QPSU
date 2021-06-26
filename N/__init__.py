@@ -42,6 +42,25 @@ else:
 	from SimpleHTTPServer import SimpleHTTPRequestHandler
 	from BaseHTTPServer import HTTPServer as _HTTPServer
 	
+def dns_lookup(domain,rdtype='A'):
+	'''其中，qname参数为查询的域名。rdtype参数用来指定RR资源的类型，常用的有以下几种：
+（1）A记录：将主机名转换为IP地址；
+（2）MX记录：邮件交换记录，定义邮件服务器的域名；
+（3）CNAME记录：别名记录，实现域名间的映射；
+（4）NS记录：标记区域的授权服务器及授权子域；
+（5）PTR记录：反向解析，与A记录相反，将IP转换成主机名；
+（6）SOA记录：SOA标记，一个起始授权区的定义；
+'''
+	# domain = "google.com" 
+	import dns.resolver
+	return py.list(dns.resolver.resolve(domain , rdtype) )	
+	# resolver = dns.resolver.Resolver(); 
+	# answer = 
+	# return answer
+	# resultant_str=''
+	# for item in :
+	return resultant_str
+resolveDNS=dns_lookup			
 	
 def get_tornado_rpc_handler(key='/-',locals=None,globals=None):
 	'''return tornado.web.Application([
@@ -80,9 +99,9 @@ tornado_rpc_handler=RPCHandlerTornado=get_tornado_rpc_handler
 	
 def github_release(url):
 	'''    "url": "https://api.github.com/repos/octocat/Hello-World/releases/1",
-    "html_url": "https://github.com/octocat/Hello-World/releases/v1.0.0",
-    "assets_url": "https://api.github.com/repos/octocat/Hello-World/releases/1/assets",
-    "upload_url": "https://uploads.github.com/repos/octocat/Hello-World/releases/1/assets{?name,label}",
+	"html_url": "https://github.com/octocat/Hello-World/releases/v1.0.0",
+	"assets_url": "https://api.github.com/repos/octocat/Hello-World/releases/1/assets",
+	"upload_url": "https://uploads.github.com/repos/octocat/Hello-World/releases/1/assets{?name,label}",
 	
 	(?P<name>.*)
 '''
@@ -146,7 +165,7 @@ get_public_ip=get_public_ipv4
 
 def ftp_client(cwd=py.No('history or /',no_raise=1),
 	host=py.No('auto get ftp.host',no_raise=1),port=3721,user='', passwd='',ftp_encoding='utf-8', acct='',
-                 timeout=None,retry=3,response=None,request=None,text_encoding='',**ka):
+				 timeout=None,retry=3,response=None,request=None,text_encoding='',**ka):
 	'''
 	'''
 	import ftplib     
@@ -480,24 +499,24 @@ zhihu=zhihu_question
 
 def ping(addr,sum=5,sleep=0,timeout= 4,ttl=None,seq=0,size=56,interface=None,p=False,r=True,**ka):
 	''' ping3.ping(
-    dest_addr: str,
-    timeout: int = 4,
-    unit: str = 's', ##unit: The unit of returned value. "s" for seconds, "ms" for milliseconds. (default "s")
-    src_addr: str = None,
-    ttl: int = None,
-    seq: int = 0,
-    size: int = 56,
-    interface: str = None,
+	dest_addr: str,
+	timeout: int = 4,
+	unit: str = 's', ##unit: The unit of returned value. "s" for seconds, "ms" for milliseconds. (default "s")
+	src_addr: str = None,
+	ttl: int = None,
+	seq: int = 0,
+	size: int = 56,
+	interface: str = None,
 ) -> float 
 Returns:
-    The delay in seconds/milliseconds or None on timeout. # qgb return ms
+	The delay in seconds/milliseconds or None on timeout. # qgb return ms
 	
 C:\QGB\Anaconda3\lib\site-packages\ping3.py in send_one_ping(sock, dest_addr, icmp_id, seq, size)
-    189     _debug("Sent ICMP Payload:", icmp_payload)
-    190     packet = icmp_header + icmp_payload
+	189     _debug("Sent ICMP Payload:", icmp_payload)
+	190     packet = icmp_header + icmp_payload
 --> 191     sock.sendto(packet, (dest_addr, 0))  # addr = (ip, port). Port is 0 respectively the OS default behavior will be used.
-    192
-    193
+	192
+	193
 
 OSError: [WinError 10051] 向一个无法连接的网络尝试了一个套接字操作。	
 OSError(10065, '套接字操作尝试一个无法连接的主机。', None, 10065, None),'192.168.2.1',56
@@ -738,7 +757,8 @@ execLocals=None,locals=None,globals=None,
 qpsu='py,U,T,N,F',importMods='sys,os',request=True,
 flaskArgs=None,
 	):
-	'''
+	'''N.rpcServer(globals=globals(),locals=locals(),)
+	
 	locals : execLocals
 	if app : port useless
 	key char must in T.alphanumeric
@@ -1023,8 +1043,8 @@ Resource interpreted as Stylesheet but transferred with MIME type text/html:
 	if not html and file:
 		import mimetypes
 		content_type = (
-             mimetypes.guess_type(file)[0] or content_type #"application/octet-stream"
-                )
+			 mimetypes.guess_type(file)[0] or content_type #"application/octet-stream"
+				)
 		# ext= T.subLast(file,'.').lower()
 		if 'text' in content_type:
 			fencoding=F.detect_encoding(file,print_detect_encoding=False)

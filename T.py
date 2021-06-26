@@ -7,7 +7,7 @@ FILE_NAME=fileChars=FILE_CHARS="!#$%&'()+,-0123456789;=@ABCDEFGHIJKLMNOPQRSTUVWX
 PATH_NAME=pathChars=PATH_CHARS='/\\:'+FILE_NAME# include space, dot
 gsNOT_FILE_NAME_WINDOWS=gsNOT_FILE_NAME=NOT_FILE_NAME_WINDOWS=NOT_FILE_NAME=r'"*/:<>?\|'
 gsNOT_PATH_NAME_WINDOWS=gsNOT_PATH_NAME=NOT_PATH_NAME_WINDOWS=NOT_PATH_NAME=r'"*<>?|' # : is
-gsNOT_FILE_NAME_LINUX=NOT_FILE_NAME_LINUX='/'+py.chr(92) # \
+gsNOT_FILE_NAME_LINUX=NOT_FILE_NAME_LINUX='/'+py.chr(92) # \ chr(0x5C)
 
 az=a_z='abcdefghijklmnopqrstuvwxyz'
 AZ=A_Z=a_z.upper()
@@ -34,8 +34,8 @@ CR='\r'
 LF=EOL=eol='\n'
 TAB=Tab=tab='\t'
 gspace=space=py.chr(0x20)
-slash='/'
-back_slash=backslash='\\'
+slash='/'   # chr(0x2F)
+back_slash=backslash='\\' # chr(0x5C)
 ######### html ######
 hr='<hr>'
 br='<br>'
@@ -1064,9 +1064,9 @@ re.search('(?P<name>.*) (?P<phone>.*)', 'John 123456').group('name')=='John'
 	re.search(a,regex)
 regex_groupdict=regex_named=named_regex_match=regex_match_named=match_regex_named=regex_match_named_return_dict
 	
-def regexMatchAll(a,regex):
+def regex_match_all(a,regex):
 	return [i.group() for i in re.finditer(regex,a)]
-matchRegex=matchRegexAll=regexMatchAll
+matchRegex=matchRegexAll=regexMatchAll=regex_match_all
 		
 def regexMatchGroups(a,regex,flags=0):
 	''' return [list of re.search group [s]]
@@ -1716,6 +1716,8 @@ def pathname_legalized(a):
 		if  (c in NOT_PATH_NAME) or (c==':' and n!=1):
 			r+=py.chr(py.ord(c)+0XFEE0)
 		else:r+=c
+	r=replace_all(r,'//','/')	
+	r=replace_all(r,chr(0x5C)+chr(0x5C),chr(0x5C))	
 	return r
 pathName=pathname=path_legalized=pathname_legalized
 
