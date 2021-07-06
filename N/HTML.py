@@ -12,6 +12,13 @@ def format(s,**ka):
 	ka={'{%s}'%k:v for k,v in ka.items()}
 	return T.replacey(s,ka)
 
+def flask_ls(response,request=None):
+	if not request:from flask import request
+	r=T.html_template(globals=py.globals(),locals=py.locals(),s='''
+<a href=></a>
+	
+	''',)
+	
 def flask_get_all_upload_files(upload_dir=py.No('U.gst/upload_dir',no_raise=1),save_size=py.No('8 MB',no_raise=1),request=None,):
 	'''save_size <=0 : save_all
 	'''

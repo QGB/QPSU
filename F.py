@@ -22,12 +22,26 @@ def setErr(ae):
 class IntSize(py.int):
 	def __new__(cls, *a, **ka):
 	#int() argument must be a string, a bytes-like object or a number, not 
+		
 		if py.istr(a[0]) or py.isbyte(a[0]) or py.isnumber(a[0]):
-			return py.int.__new__(cls, *a, **ka)
+			self= py.int.__new__(cls, *a)
 		else:
-			return a[0]
+			self= a[0]
+		self.ka=ka
+		return self
 	def __repr__(self):
-		return '<{}>'.format(numToSize(self) )
+		U=py.importU()
+		s='<{}'.format(numToSize(self) )
+		
+		repr=U.get_duplicated_kargs(self.ka,'repr','str','s','st','__repr__','__str__',no_pop=True)
+		if repr:
+			if py.callable(repr):
+				return repr(self, **self.ka )
+			else:
+				return py.str(repr)
+			
+		return T.justify(s,**self.ka)+'>'
+		# return 
 		# return '<{}={}>'.format(super().__repr__(),F.ssize(self) )
 
 def test_long_filename():
@@ -943,11 +957,13 @@ return tuple(ap,dir_list,file_list )
 		return _os.walk(ap).__next__()
 		
 def list(ap='.',type='',t='',r=False,d=False,dir=False,f=False,
-	file=False,include='',exclude='',timeout=None,**ka):
+	file=False,include='',exclude='',timeout=None,print_result=False,**ka):
 	'''Parms:bool r recursion
 			 str (type,t) '(d,f,a,r)'
 	default return all'''
 	U=py.importU()
+	print_result=U.get_duplicated_kargs(ka,'print_r','print','p',default=print_result)
+	
 	if dir:d=True
 	if file:f=True
 	if t and not type:type=t
@@ -998,6 +1014,8 @@ def list(ap='.',type='',t='',r=False,d=False,dir=False,f=False,
 	
 	if include:rls=[i for i in rls if include in i]
 	if exclude:rls=[i for i in rls if exclude not in i]
+	if print_result:
+		U.pprint(rls)
 	return rls
 	# else:return r3[1]+r3[2]
 ls=list

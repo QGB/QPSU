@@ -80,7 +80,7 @@ try:
 	IntSize=F.IntSize
 	F.fileName=F.filename=T.filename_legalized
 
-	from pprint import pprint,pformat
+	from pprint import pformat
 	if __name__.endswith('qgb.U'):from . import Clipboard
 	else:                         import Clipboard
 	clipboard=cb=Clipboard#  
@@ -467,6 +467,16 @@ u1604:  IPython repl  ok	,  bash python -c error  ?
 		
 	
 ########################## end init #############################################
+def pprint(object, stream=None, indent=1, width=133, depth=None, *,
+           compact=False):
+	try:
+		ipy=py.from_qgb_import('ipy')
+		return print(ipy.format(object),file=stream)
+	except:pass
+	
+	from pprint import pprint as _pprint
+	_pprint(object=object,stream=stream,indent=indent,width=width,depth=depth,)
+
 def retry( exceptions,times=3,sleep_second=0):
 
 
@@ -1522,7 +1532,8 @@ def chdir(ap=gst,*a,**ka):
 		if show_path:
 			U=py.importU()
 			U.pln(ap)
-		os.chdir(ap);return ap#True
+		os.chdir(ap);
+		return pwd() #ap#True
 	
 	app=os.path.dirname(ap)
 	if os.path.isdir(app):return chdir(app)
@@ -5201,7 +5212,8 @@ def get_objects(type,len=None):
 find_objects=get_obj=get_objects
 
 def git_init(remote_url='',git_exe=None,**ka):
-	cmd=r'''  
+	cmd=r''' 
+"{git_exe}"
 	'''
 	U,T,N,F=py.importUTNF()
 	U.pwd(p=1)
@@ -5211,8 +5223,10 @@ def git_init(remote_url='',git_exe=None,**ka):
 	if ipy:
 		system=ipy.system
 	else:
+		args_dict=get_args_dict_from_format_string(cmd,py.locals())
+		cmd=cmd.format(**args_dict)
 		import os
-		system=os.system	
+		system=os.system
 		
 	return
 
@@ -5706,7 +5720,6 @@ thunder_start :  light :	!min_val, max_val, min_loc, max_loc
 	# else:
 		# if not F.is_abs(image_path):
 	image_path=F.auto_path(image_path,default=U.get('clipboard.dir'),)
-	print('U.search_image_on_screen(%r)'%image_path)
 	a=py.list(a)
 	if py.istr(image_path) or 0 : #TODO is image
 		a.append(image_path)
@@ -5721,6 +5734,7 @@ thunder_start :  light :	!min_val, max_val, min_loc, max_loc
 			return py.No('image_path Not Exist!%r'%image_path)
 		a[n]=i
 	for i in a:
+		print('U.search_image_on_screen(%r)'%i)
 		x,y=search_image(i,precision=precision)
 		if -1 in [x,y]:
 			continue
@@ -6267,7 +6281,7 @@ U.StrRepr(b'3232',encoding='ascii')	[<class 'qgb.U.StrRepr'>, (b'3232',), {'enco
 		repr=get_duplicated_kargs(self.ka,'repr','str','s','st','__repr__','__str__',no_pop=True)
 		if repr:
 			if py.callable(repr):
-				return repr( **self.ka )
+				return repr(self, **self.ka ) # try fix：传入 self
 			else:
 				return py.str(repr)
 			

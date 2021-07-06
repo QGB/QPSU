@@ -556,6 +556,22 @@ def msgbox(s='',st='title',*a):
 	else:
 		return user32.MessageBoxW(0, str(s), str(st), 0)		
 
+def mouse_drag(x,y,x2=0,y2=0,time=1.1):
+	import pyautogui
+	U=py.importU()
+	if U.len(x)==2:
+		if U.len(y)==2:
+			if x2 or y2:
+				raise py.ArgumentError('duplicated x2,y2',x2,y2)
+			x2,y2=y
+		x,y=x
+	pyautogui.moveTo(x, y)
+	pyautogui.mouseDown(button='left')
+	pyautogui.dragTo(x2, y2, 1, button='left')
+	U.sleep(time)
+	pyautogui.mouseUp(button='left')	
+drag=mouse_drag	
+		
 def get_cursor_pos():
 	from ctypes import Structure,c_ulong,byref
 	class POINT(Structure):

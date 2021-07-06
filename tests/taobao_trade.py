@@ -8,7 +8,7 @@ from qgb import A
 taobao_trade=U.getMod(__name__)
 URL_WULIU_BY_TRADE_ID='https://buyertrade.taobao.com/trade/json/transit_step.do?bizOrderId='
 URL_TRADE_LIST='https://buyertrade.taobao.com/trade/itemlist/list_bought_items.htm'
-
+URL_WebDriver_DETECT=URL_WEBDRIVER_DETECT='https://intoli.com/blog/not-possible-to-block-chrome-headless/chrome-headless-test.html'
 us=zu=F.dill_load('C:/test/zu-67.dill')  
 
 def _registed_click_pop_cart():
@@ -56,11 +56,12 @@ async def get_element_absolute_position_of_system_screen(page,selector,green=Fal
 	
 get_xy=get_abs_xy=get_element_xy=get_element_absolute_position_of_system_screen	
 	 
-async def evaluate(page,code):
+async def try_evaluate(page,code):
 	try:
 		return await page.evaluate(code)
 	except Exception as e:
 		return py.No(e)
+try_eval=evaluate=try_evaluate
 
 u_key_defs='pyppeteer.us_keyboard_layout.keyDefinitions'
 async def press_keys(page,*s,xy=(None,None)):
@@ -83,14 +84,19 @@ async def press_keys(page,*s,xy=(None,None)):
 	
 async def backup_cookie(user=0,page=py.No('auto last -1')):
 	if not user:
-		user=await page.evaluate(taobao_trade.js_get_user)
+		user=await get_taobao_user()
 	if not page:page=await get_page()
 	ck=await get_all_cookies(page)
-	print('get_all_cookies len:',len(ck))
+	print('get_all_cookies len:',py.len(ck))
+	if not ck:return ck
+	
+	f=F.dill_dump(obj=ck,file=f'{user}-{len(ck)}-cookies') 
+	
 	await page.deleteCookie(*ck)
-	print('deleteCookie','done !')
+	cks=await get_all_cookies(page)
+	print('deleteCookie','done !','now len == %s'%py.len(cks))
 
-	return F.dill_dump(obj=ck,file=f'{user}-{len(ck)}-cookies') 
+	return f
 
 async def get_all_cookies(page=py.No('auto last -1')):
 	if not page:page=await get_page()
@@ -98,7 +104,7 @@ async def get_all_cookies(page=py.No('auto last -1')):
 	return r['cookies']
 	
 async def del_cookies(ck,page=py.No('auto last -1')):
-	if not page:page=await get_page()
+	page=await get_or_new_page(page)
 	if py.islist(ck):
 		await page.deleteCookie(*ck)
 	if py.isdict(ck):
@@ -127,10 +133,6 @@ async def set_viewport(pages=py.No('auto all pages'),**ka):
 	for page in pages:
 		await page.setViewport(a)
 	return len(pages),ka
-
-async def get_user(page=None):
-	if not page:page=await get_page()
-	return await page.evaluate(taobao_trade.js_get_user)
 
 def is_chrome_process_exists():
 	if U.iswin():
@@ -174,6 +176,15 @@ async def get_browser(browserURL='http://127.0.0.1:9222',browserWSEndpoint='',
 	
 	return U.set( uk,browser)
 
+	
+	
+async def get_all_pages():
+	ps=await browser.pages()
+	# r=[]
+	for n,pa in py.enumerate(ps):
+		t=await pa.title()
+		print(fr'{n:>02d} {t[:33]:33} {pa.url[33:]:33} {py.repr(pa)[-11:] }' )
+	return ps
 async def new_page(url='https://intoli.com/blog/not-possible-to-block-chrome-headless/chrome-headless-test.html',timeout=30*1000):
 	''' Go to the ``url``.
 
@@ -239,9 +250,10 @@ async def get_page(page=None,url=py.No(URL_TRADE_LIST),wait=None,browser=None):
 	# py.pdb()()
 	if py.istr(page) and not url: # and ('://' in page) 
 		url,page=page,None
-
-	if not url:url=URL_TRADE_LIST
 	if not browser:browser=await get_browser()
+	if not page and not url:
+		return (await browser.pages())[-1]
+	if not url:url=URL_TRADE_LIST
 	if not wait and not page:
 		page=await _get_page_by_url(browser,url)
 	if wait and not page:
@@ -307,28 +319,60 @@ async def get_or_new_page(url,select_tab=True,timeout=30*1000):
 	return pa
 	
 # async def   (url):
-######### taobao  start ########
-async def delay_trade_time():
-	pa=await tb.get_or_new_page('https://buyertrade.taobao.com/trade/itemlist/list_bought_items.htm?action=itemlist%2FBoughtQueryAction&event_submit_do_query=1&tabCode=waitSend')
+######### taobao  start ######################################################
+######### taobao  start ######################################################
+
+async def get_taobao_user(page=None):
+	if page:
+		return await page.evaluate(taobao_trade.js_get_user)
+	ps=await browser.pages()
+	 # r=[]
+	for n,pa in py.enumerate(ps):
+		u=await try_evaluate(pa,taobao_trade.js_get_user)
+		if u:
+			t=await pa.title()
+			print(n,(t+'\t'+pa.url)[:99])
+			return u
+	raise NotFound_taobao_user
+get_user=get_taobao_user
+	
+async def delay_trade_time(ipage_or_ids):
+	import requests
+	tb=taobao_trade
+	headers={'authority': 'trade.taobao.com',
+ 'accept': '*/*',
+ 'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/86.0.4240.198 Safari/537.36',
+ 'content-type': 'application/x-www-form-urlencoded',
+ 'origin': 'https://trade.taobao.com',
+ 'sec-fetch-site': 'same-origin',
+ 'sec-fetch-mode': 'cors',
+ 'sec-fetch-dest': 'empty',
+ 'referer': 'https://trade.taobao.com/trade/sellerDelayConsignmentTime.htm',
+ 'accept-language': 'zh-CN,zh;q=0.9'}
 	cks=await tb.get_all_cookies()
 	dck={}
-	for c in cks:
+	for n,c in py.enumerate(cks):
 		if 'taobao.com' in c['domain'] and not U.one_in(['login.','airunit.','cart.',], c['domain']):
 			dck[c['name'] ]=c['value']
-			print(U.ct(py.id(_i)),'%-15s'%c['name'],c['domain'])
-	await pa.evaluate('''document.querySelector('[class="pagination-item pagination-item-%s"]').click()   '''%U.set_input('page-n',type=int))
+			print(n,'%-15s'%c['name'],c['domain'])
+	##########		
+	if py.isint(ipage_or_ids):
+		pa=await tb.get_or_new_page('https://buyertrade.taobao.com/trade/itemlist/list_bought_items.htm?action=itemlist%2FBoughtQueryAction&event_submit_do_query=1&tabCode=waitSend')
+		await pa.evaluate('''document.querySelector('[class*="pagination-item pagination-item-%s"]').click()   '''%ipage_or_ids)
 
-	ids=await pa.evaluate('''(function(){
-  var xa=xpath_all("//span[contains(., '订单号')]/following-sibling::span[1+1]")
-  r=[]
-  for(var i of xa){
-	  r.push(i.textContent)
-  }
-   return r
-})()''')
-	print(ids,U.len(dck,ids,didr,didrg ))
+		ids=await pa.evaluate('''(function(){
+	  var xa=xpath_all("//span[contains(., '订单号')]/following-sibling::span[1+1]")
+	  r=[]
+	  for(var i of xa){
+		  r.push(i.textContent)
+	  }
+	   return r
+	})()''')
+	else:
+		ids=py.list(ipage_or_ids)
 	didr=U.get_or_set('id-resp',{})
 	didrg=U.get_or_set('id-resp_g',{})
+	print(ids,U.len(dck,ids,didr,didrg ))
 	for n,id in enumerate(ids):
 		if id in didr:
 			print('# skip',n,id)
@@ -338,14 +382,14 @@ async def delay_trade_time():
 	'stepNo': '0'
 	}
 		resp=response = requests.post('https://trade.taobao.com/trade/sellerDelayConsignmentTimeHandler.do', headers=headers,cookies=dck,data=data)
-		print(n,resp,resp.text[:99])
+		print('[%s]  '%n,id,resp,resp.text[:99])
 		didr[id]=resp
 
 		resp_g = requests.get(resp.json()['callBackUrl'], headers=headers ,cookies=dck)
-		print(resp_g,resp_g.text[:99])
+		print('[%s]  '%n,id,resp_g,resp_g.text[:99])
 		didrg[id]=resp_g
 
-	return
+	return ids,U.len(ids,didr,didrg )
 	
 
 
@@ -410,7 +454,7 @@ async function(){
 	return ds, page_info
 
 
-def taobao_login(user,pw,user_input_xy=(1050, 383)):
+def taobao_login(user,pw,user_input_xy=(1050, 383+9)):#incorrect tips + 9
 	return U.simulate_system_actions([('for','淘宝网 - 淘！我喜欢'),user_input_xy,'ctrl+a','backspace',user,'tab',pw,'Enter']) 
 login=taobao_login
 	

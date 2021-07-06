@@ -41,7 +41,44 @@ if py.is3():
 else:
 	from SimpleHTTPServer import SimpleHTTPRequestHandler
 	from BaseHTTPServer import HTTPServer as _HTTPServer
+
+def send_smtp_email(mail_from,mail_to,txt,title='',password='',smtp_server='',**ka):
+	from email.mime.text import MIMEText
+	from email.header import Header
+	import smtplib
+	U,T,N,F=py.importUTNF()
+	mail_from=U.get_duplicated_kargs(ka,'mail','email','address','email_address',default=mail_from)
+	user,domain= mail_from.split('@')
+	if not smtp_server:
+		smtp_server='smtp.'+domain
+		
+	password==U.get_duplicated_kargs(ka,'passwd','pw','p',default=password)	
+	if not password:
+		password=U.set_input(mail_from)
+	if not title:
+		title=U.stime()+txt[:99]
+	mail_message = f'''
+From: {mail_from}
+To: {mail_to}
+Subject: {title}
+
+{txt}
+'''	
+	# msg = MIMEText(title, 'plain', 'utf-8')
+	# msg['From'] = _format_addr('您的好友<%s>' % mail_from)
+	# msg['To'] = _format_addr('管理员<%s>' % verify_addr)
+	# msg['Subject'] = Header(txt, 'utf-8').encode()
+	s=U.get(smtp_server)
+	if not s:
+		s = smtplib.SMTP(smtp_server, 25)
+		U.set(smtp_server,s)
+	s.starttls()
+	s.login(mail_from, password)
+	return s.sendmail(mail_from, mail_to, title, mail_message)
 	
+	
+send_email=send_smtp_email	
+
 def dns_lookup(domain,rdtype='A'):
 	'''其中，qname参数为查询的域名。rdtype参数用来指定RR资源的类型，常用的有以下几种：
 （1）A记录：将主机名转换为IP地址；
@@ -75,6 +112,7 @@ def get_tornado_rpc_handler(key='/-',locals=None,globals=None):
 		''' def prepare(self):  # 405: Method Not Allowed '''
 		@tornado.gen.coroutine
 		def options(self, *args, **kwargs):
+			nonlocal locals,globals,U,T,N,F
 			self.set_status(200)
 			self.set_header('content-type', 'text/plain')
 			if not self.request.uri.startswith(key):
