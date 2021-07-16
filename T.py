@@ -508,7 +508,7 @@ def diff(expected, actual,p=True,pformat=False):
 	else:
 		return r
 
-def recursive_join(s,iter,prepend_layer=False,append_layer=False,format_layer=False,_layer=0):
+def join_recursively(s,iter,prepend_layer=False,append_layer=False,format_layer=False,_layer=0):
 	if py.istr(iter):
 		return iter
 	else:
@@ -529,8 +529,14 @@ def recursive_join(s,iter,prepend_layer=False,append_layer=False,format_layer=Fa
 				) for i in iter])
 		return s.join([recursive_join(s.format(_layer),i,_layer=_layer+1, ) for i in iter])
 
-recursiveJoin=recursive_join
+recursiveJoin=recursive_join=join_recursively
 
+def join_eol(*iterable,separator=EOL,**ka):
+	r= join(*iterable,separator=separator,**ka)
+	U=py.importU()
+	return U.StrRepr(r)
+eol_join=join_eol
+	
 def join(*iterable,separator=',',**ka):#separator=','
 	'''T.join( ###<py.No )==''  
 In [1612]: T.join(1)
@@ -728,7 +734,10 @@ def filter_html(text):
 html_filter=filter_html
 
 def html2text(html,baseurl='',ignore_images=True,ignore_links=True,):
-	from html2text import HTML2Text
+	try:
+		from html2text import HTML2Text
+	except:
+		return re.sub('<[^<>]+>', '', html)
 	if not html:return html
 	
 	h=HTML2Text(baseurl=baseurl)
@@ -1661,6 +1670,7 @@ html_format=template=html_templete=html_template
 
 def format(s,**ka):
 	''' 解决 python 自带format 不能跳过 未指定的 {name} 的问题 （ HTML-CSS  格式化）
+只有【'%02d'%4】这种用法 '%0-2d'%4 == '4 '	不会用0填充右边
 	
  >  '%(a)s %(b)s'%(3,2)
 TypeError: format requires a mapping  

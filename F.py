@@ -1252,9 +1252,10 @@ def makeDirs(ap,isFile=False,cd=0,no_auto_path=False):
 	用explorer访问后又正常
 	
 	'''
+	U=py.importU()
 	if not no_auto_path:ap=autoPath(ap)
 	if not py.isbool(isFile) and not py.isint(isFile):
-		py.importU().log('F.md(str,isFile={})'.format(repr(isFile)))
+		U.log('F.md(str,isFile={})'.format(repr(isFile)))
 	if py.is3():
 		from pathlib import Path
 		p=Path(ap).absolute()
@@ -1266,12 +1267,17 @@ def makeDirs(ap,isFile=False,cd=0,no_auto_path=False):
 		r=py.No('unexpected err')
 		try:
 			p.mkdir()
-		except (FileNotFoundError,):
-			r=makeDirs(p.parent,isFile=False)
-			if r:p.mkdir() # 建立父目录后，再次尝试创建本目录 
+		except (FileNotFoundError,) as e:
+			if p.parent==p:# 'D:\\' 驱动器不存在
+				r=e
+			else:
+				r=makeDirs(p.parent,isFile=False)
+				if r:p.mkdir() # 建立父目录后，再次尝试创建本目录 
+				else:return r
 			# else:return r
 			#但是如果父目录本来是个文件，再mkdir则FileNotFoundError: [WinError 3] 系统找不到指定的路径。
 		except FileExistsError:
+				
 			pass
 		except Exception as e:
 			r=e
@@ -1283,7 +1289,7 @@ def makeDirs(ap,isFile=False,cd=0,no_auto_path=False):
 			r=sp
 		else:
 			r=py.No(r,p)
-		if r and cd:py.importU().cd(r)
+		if r and cd:U.cd(r)
 		return r
 
 	# if py.is2():		#########################################	

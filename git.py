@@ -196,8 +196,8 @@ Out[26]: 'C:/QGB/babun/cygwin/bin/qgb/'
 	selected_refs = []
 	
 	if not private_key:
-		private_key=U.get_or_set('id_rsa',U.gst+'id_rsa')
-	
+		private_key=U.get_or_set('id_rsa',F.get_home()+'.ssh/id_rsa' )
+	private_key=U.set('id_rsa',private_key)
 	
 	with open_private_key(private_key) as fpkey, dulwich.porcelain.open_repo_closing(repo_path) as r:
 		def update_refs(refs):

@@ -55,15 +55,9 @@ def flask_get_all_upload_files(upload_dir=py.No('U.gst/upload_dir',no_raise=1),s
 		# f.save(f.name)
 flask_save_all_upload_files=flask_get_all_upload_files	
 	
-def textarea(response,name='t',upload_dir=py.No('U.gst/upload_dir',no_raise=1),):
-	"""
-	 <input type="text" name="t">
-	
-	"""
-	if not U.all_in(name,T.aZ+'_'):
-		raise py.ArgumentError(name,'must be alphabet_')
-	r=T.html_template(globals=globals(),locals=locals(),s='''
+ghtml_txt='''
 <head>
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 <style type="text/css">
 	input[type="submit"]{
 		width:100%;
@@ -71,6 +65,12 @@ def textarea(response,name='t',upload_dir=py.No('U.gst/upload_dir',no_raise=1),)
 	input.url{
 		width:49%; /*50% break line*/
 	}	
+	button.edit_btn{
+		height: 33;
+		width: 44;
+		padding: 0 0 0 0;		
+		margin: 0 0 0 0;		
+	}
 </style> 
 </head>
 	
@@ -83,20 +83,31 @@ def textarea(response,name='t',upload_dir=py.No('U.gst/upload_dir',no_raise=1),)
 		<small style="
 			padding: 22;
 		">$name$:</small>
-		<button  type="button" style="
-			height: 33;
-			width: 99;
-		" onclick="
-var event = document.createEvent('TextEvent');
-event.initTextEvent('textInput', true, true, null, '' );
-document.querySelector('textarea').dispatchEvent(event); // fire the event on the the textarea
+<!-- indent outdent 无效 -->
+<button type="button" class="edit_btn" onclick="edit(this.innerText)">indent</button>
+<button type="button" class="edit_btn" onclick="edit(this.innerText)">outdent</button>
 
-		">clear txt</button>
+<button type="button" class="edit_btn" onclick="edit(this.innerText)">forwardDelete</button>
+<button type="button" class="edit_btn" onclick="edit(this.innerText)">delete</button>
+<button type="button" class="edit_btn" onclick="edit('selectAll');edit('delete')">del all</button>
+<!-- \n 不行，语法错误，被onclick转义了一次 -->
+<button type="button" class="edit_btn" onclick="edit('insertText','\\n')">Enter</button>
+
+<button type="button" class="edit_btn" onclick="edit(this.innerText)">selectAll</button>
+<button type="button" class="edit_btn" onclick="edit(this.innerText)">paste</button>
+<button type="button" class="edit_btn" onclick="edit(this.innerText)">copy</button>
+<button type="button" class="edit_btn" onclick="edit(this.innerText)">cut</button>
+
+<button type="button" class="edit_btn" onclick="edit(this.innerText)">undo</button>
+<button type="button" class="edit_btn" onclick="edit(this.innerText)">redo</button>
+
+
+
 	</div>
 	
 	
 	<div style="height:60%;" > 
-		<textarea name="t" style="width:100%; height: 100%;" >$(F.dl('t_form') or U.get('t_form') or {}).get('t','')$</textarea>
+		<textarea id="textarea" name="t" style="width:100%; height: 100%;" >$(F.dl('t_form') or U.get('t_form') or {}).get('t','')$</textarea>
 	</div>
 	
 	<hr>
@@ -107,6 +118,11 @@ value="$U.get('rpc.server.base')#$U.set('rpc.server.upload.save_size',$U.int_exp
 	<input id=url_end   class=url type="text" name="url_end" value="%23-">
 </form> 
 <script> 
+function edit(command,text){
+	document.querySelector('textarea#textarea').focus()
+	return document.execCommand(command, true,text);
+}
+
 var form  = document.querySelector('form');
 var original_action=form.getAttribute('action');
 original_action=original_action.substr($len(U.get('rpc.server.base'))#$) 
@@ -126,7 +142,16 @@ document.querySelector('input#url_end').addEventListener('input', function(e){
 });
 
 </script>
-''',)
+'''	
+def textarea(response,name='t',upload_dir=py.No('U.gst/upload_dir',no_raise=1),):
+	"""
+	 <input type="text" name="t">
+	
+	"""
+	U.r(N.HTML)
+	if not U.all_in(name,T.aZ+'_'):
+		raise py.ArgumentError(name,'must be alphabet_')
+	r=T.html_template(globals=globals(),locals=locals(),s=ghtml_txt,)
 	# r=format(r,name=name)
 	response.headers['Content-Type']='text/html;charset=utf-8';
 	return response.set_data(r)

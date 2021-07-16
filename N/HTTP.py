@@ -22,6 +22,7 @@ else:
 		py.importU().repl()
 
 gheaders=headers={'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/59.0.2171.95 Safari/537.36'}
+AUTO_GET_PROXY=py.No(msg='auto get_proxy',no_raise=1)
 def random_headers():
 	import fake_headers
 	return fake_headers.Headers( headers=fake_headers.make_header() ).generate()
@@ -137,22 +138,49 @@ def get_str(url,**ka ,):
 	return T.auto_decode(  get_bytes(url,**ka)  )
 gets=getStr=get_str
 
-def get_bytes(url,	**ka ,):
+def get_bytes(url,file='',
+		headers = gheaders,
+		timeout=9,
+		proxies=AUTO_GET_PROXY,
+		verify=False,
+		show=False,
+		**ka ,):
+	'''
+url格式不对时：
+C:\QGB\Anaconda3\lib\site-packages\socks.py in _write_SOCKS5_address(self, addr, file)
+    574                                            socket.SOCK_STREAM,
+    575                                            socket.IPPROTO_TCP,
+--> 576                                            socket.AI_ADDRCONFIG)
+    577             # We can't really work out what IP is reachable, so just pick the
+    578             # first.
+
+C:\QGB\Anaconda3\lib\socket.py in getaddrinfo(host, port, family, type, proto, flags)
+    746     # and socket type values to enum constants.
+    747     addrlist = []
+--> 748     for res in _socket.getaddrinfo(host, port, family, type, proto, flags):
+    749         af, socktype, proto, canonname, sa = res
+    750         addrlist.append((_intenum_converter(af, AddressFamily),
+
+UnicodeError: encoding with 'idna' codec failed (UnicodeError: label too long)
+
+'''	
 	U,T,N,F=py.importUTNF()
 
 	url=N.auto_url(url)
 	proxies=U.get_duplicated_kargs(ka,'proxies','proxy')
-	file=U.get_duplicated_kargs(ka,'file','f','filename')
+	file=U.get_duplicated_kargs(ka,'file','f','filename',default=file)
 	write_zero=U.get_duplicated_kargs(ka,'write0','w0','write_zero','zero',default=False)
+	show=U.get_duplicated_kargs(ka,'show','print','p','print_req',default=show)
 	if proxies:
-		proxies=N.set_proxy(proxy)
+		proxies=N.set_proxy(proxies)
 	else:
 		proxies=N.get_proxy()
 	ka['proxies']=proxies
 
 	import requests
 	try:
-		b= requests.get(url,**ka).content
+		if show:print(U.v.requests.get(url,verify=verify,timeout=timeout,headers=U.StrRepr(U.pformat(headers)),proxies=proxies))
+		b= requests.get(url,verify=verify,timeout=timeout,headers=headers,proxies=proxies).content
 		f=repr(b[:77])[2:-1]
 		if file and (b or write_zero):
 			f=F.write(file,b)
@@ -161,18 +189,19 @@ def get_bytes(url,	**ka ,):
 		return py.No(e)
 getb=getByte=getBytes=get_byte=get_bytes
 
-AUTO_GET_PROXY=py.No(msg='auto get_proxy',no_raise=1)
 def get(url,file='',
 		headers = gheaders,
 		timeout=9,
 		proxies=AUTO_GET_PROXY,
 		encoding='',
+		show=False,
+		verify=False,
 		**ka ,
 	):
 	U,T,N,F=py.importUTNF()
 	url=N.auto_url(url)
 
-	show=U.get_duplicated_kargs(ka,'show','print','p','print_req')
+	show=U.get_duplicated_kargs(ka,'show','print','p','print_req',default=show)
 	proxies=U.get_duplicated_kargs(ka,'proxies','proxys','proxyes','proxy',default=proxies)
 	if proxies:#dict or str 均可
 		pr=N.set_proxy(proxies)
@@ -201,9 +230,8 @@ def get(url,file='',
 	b=b''
 	try:
 		import requests
-		r=requests.get(url,verify=False,timeout=timeout,headers=headers,proxies=proxies)
-		if show:
-			print(U.v.requests.get(url,verify=False,timeout=timeout,headers=U.StrRepr(U.pformat(headers)),proxies=proxies))
+		r=requests.get(url,verify=verify,timeout=timeout,headers=headers,proxies=proxies)
+		if show:print(U.v.requests.get(url,verify=verify,timeout=timeout,headers=U.StrRepr(U.pformat(headers)),proxies=proxies))
 		if file:
 			u=T.url_split(url).path
 			u=T.sub_last(u,'/')

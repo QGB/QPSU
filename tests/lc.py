@@ -83,8 +83,11 @@ def get_app_id(rsignin):
 	}
 
 	ra = requests.get('https://us-w1-console-api.leancloud.app/1.1/clients/self/apps', headers=headers_apps,cookies=rsignin.cookies)
-	app_id=ra.json()[0]['app_id']
-	return app_id
+	try:
+		return ra.json()[0]['app_id']
+	except Exception as e:
+		return py.No(ra,rsignin,msg=ra.text,)
+	 
 get_apps=get_app_id	
 
 def get_all_traffic(*rs):
@@ -178,3 +181,17 @@ def get_net_traffic(rsignin,app_id=''):
 		sl.append( [s,F.IntSize(v)] )
  
 	return sl
+	
+def load(s):
+	ls=[i.strip() for i in s.split(',')]
+	print(ls)
+	r=[]
+	for i in ls:
+		if not i:continue
+		f=r'C:/test/{}@qgbcs.uu.me.dill'.format(i)
+		q=F.dill_load(f)
+		if not q:
+			print('#Err',f,repr(q))
+			raise q
+		r.append(q)
+	return r	

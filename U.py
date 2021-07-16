@@ -541,7 +541,7 @@ def get_test_path():
 get_gst=getTestPath=get_test_path
 gst=gsTestPath=get_test_path()
 
-def set_test_path(sp):
+def set_test_path(sp,cd=False):
 	global gst,gsTestPath
 	F=py.importF()
 	sp=F.mkdir(sp,no_auto_path=True)
@@ -550,6 +550,7 @@ def set_test_path(sp):
 		# sp+='/'
 		
 	gst=gsTestPath=set('U.gst',sp)
+	if cd:chdir(gst)
 	return gst
 setgst=set_gst=setTestPath=set_test_path
 
@@ -2223,9 +2224,10 @@ def dirValue(a=None,filter='',type=None,recursion=False,depth=2,timeout=6,__ai=0
 	return r
 DirValue=getdir=getDirValue=dirValue
 
-def search_iterable(a,filter='',type=None,depth=2,out_limit=99,ai=0,si='a'):
+def search_iterable(a,filter='',type=None,depth=2,out_limit=99,_i_depth=0,si='a',return_value=False):
 	'''iterable
 	# typo deepth
+#TODO return_value	当前v 或者 上一级 v 。没有想到很好办法去描述
 	'''
 	if not (py.islist(a) or py.istuple(a) or py.isdict(a)):
 		if filter==a:
@@ -2237,7 +2239,7 @@ def search_iterable(a,filter='',type=None,depth=2,out_limit=99,ai=0,si='a'):
 		# return a if a==filter else []
 	# if py.istr(a):
 		# return a if filter in a else []
-	if ai>depth:return None
+	if _i_depth>depth:return None
 	r=[]
 	if py.isdict(a):
 		its=a.items()
@@ -2264,7 +2266,7 @@ def search_iterable(a,filter='',type=None,depth=2,out_limit=99,ai=0,si='a'):
 				ri='%r in %s[%r]\t#%r '%(filter,si,k,v[py.max(nfv-50,0):nfv+py.len(filter)+50])
 		except:pass
 		if not ri:## notice a=v
-			ri=search_iterable(a=v,filter=filter,type=type,depth=depth,out_limit=out_limit,ai=ai+1,si=si+'[%r]'%k,)
+			ri=search_iterable(a=v,filter=filter,type=type,depth=depth,out_limit=out_limit,_i_depth=_i_depth+1,si=si+'[%r]'%k,)
 		if ri:
 			if py.islist(ri):
 				r.extend(ri)
@@ -2274,7 +2276,7 @@ def search_iterable(a,filter='',type=None,depth=2,out_limit=99,ai=0,si='a'):
 				r=r[:out_limit]+['...']
 				break
 				# return ri		
-	if ai==0:
+	if _i_depth==0:
 		return [StrRepr(i) for i in py.sorted(r)]
 	else:
 		return r
