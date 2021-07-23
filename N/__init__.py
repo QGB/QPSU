@@ -1256,6 +1256,11 @@ Image.open(fp)
 	if rect:
 		if py.istr(rect) or py.isfile(rect):
 			# if F.exist(rect):
+			image=rect
+			if py.istr(image) and image.startswith('data:image'):
+				response.headers['Content-Type'] = 'text/html'
+				response.set_data('''<img src="{}"></img>'''.format(image) )
+				return image
 			im=Image.open(rect)
 		elif py.isinstance(rect,Image.Image) or py.isbytes(rect):
 			im=rect

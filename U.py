@@ -545,6 +545,7 @@ def set_test_path(sp,cd=False):
 	global gst,gsTestPath
 	F=py.importF()
 	sp=F.mkdir(sp,no_auto_path=True)
+	if not sp:return sp
 	sp=sp.replace('\\','/')
 	# if not sp.endswith('/'):
 		# sp+='/'
@@ -3024,6 +3025,7 @@ from dateutil.relativedelta import relativedelta
 
 	'''
 	import re,datetime as dt
+	U=py.importU()
 	sregex='([0-9]*)(micro|ms|milli|sec|minute|hour|day|month|year)'
 	timedeltaKW=('days', 'seconds', 'microseconds',
  'milliseconds', 'minutes', 'hours', 'weeks')
@@ -3032,7 +3034,7 @@ from dateutil.relativedelta import relativedelta
 		rm=re.match(sregex,step)
 		if not rm or not step.startswith(rm.group()):
 			raise Exception('Invalid argument step '+py.repr(step))
-		istep,step=int(rm.group(1),default=1,),rm.group(2)
+		istep,step=U.int(rm.group(1),default=1,),rm.group(2)
 		if step.startswith('year'):
 			istep,step=365*istep,'day'#没考虑闰年
 		if step.startswith('ms'):step='milliseconds'
@@ -3378,7 +3380,8 @@ def FuncWrapForMultiArgs(f,args,default=None,index=False,f_ka={}):
 		except Exception as e:
 			if default!=None:
 				r1=default
-			r1=py.No(e)
+			else:
+				r1=py.No(e)
 		if index:r1=(n,r1)
 		r.append(r1)
 	if other:

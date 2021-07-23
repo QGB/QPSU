@@ -227,11 +227,11 @@ def get(url,file='',
 			# else:
 				# return py.No('response.content is Null!')
 			
+	if show:print(U.v.requests.get(url,verify=verify,timeout=timeout,headers=U.StrRepr(U.pformat(headers)),proxies=proxies))
 	b=b''
 	try:
 		import requests
 		r=requests.get(url,verify=verify,timeout=timeout,headers=headers,proxies=proxies)
-		if show:print(U.v.requests.get(url,verify=verify,timeout=timeout,headers=U.StrRepr(U.pformat(headers)),proxies=proxies))
 		if file:
 			u=T.url_split(url).path
 			u=T.sub_last(u,'/')
