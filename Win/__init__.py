@@ -408,6 +408,8 @@ EnumWindows=get_all_windows=getAllWindow=getAllWindows
 
 def SetForegroundWindow(title=None,handle=None,pid=None,process_name='',raise_error=0,retry=99,**ka):
 	U,T,N,F=py.importUTNF()
+	if py.isint(title) and not handle:
+		handle,title=title,''
 	if not title:title=U.get_duplicated_kargs(ka,'t',)
 	if not handle:handle=U.get_duplicated_kargs(ka,'hwnd','h')
 	if not process_name:process_name=U.get_duplicated_kargs(ka,'name','pn','process')
@@ -442,9 +444,10 @@ def SetForegroundWindow(title=None,handle=None,pid=None,process_name='',raise_er
 		
 	try:
 		# win32gui.SetForegroundWindow(handle)
-		import win32gui, win32com.client
+		import win32gui, win32com.client,win32con
 		shell=win32com.client.Dispatch("WScript.Shell")#pywintypes.com_error: (-2147221008, '尚未调用 CoInitialize。', None, None)
 		shell.SendKeys('%')
+		win32gui.ShowWindow(handle,win32con.SW_SHOW)
 		win32gui.SetForegroundWindow(handle)
 	except Exception as e:
 #BUG 窗口在后台，通过 http_rpc 调用此函数，第一次总会出错：，第二次才成功？

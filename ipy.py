@@ -36,7 +36,7 @@ def sycn():
 	'''  #TODO  '''
 # __frame=sys._getframe().f_back	
 
-def format(obj,width=79):
+def format(obj,width=79,max_seq_length=py.No('auto get-set',no_raise=1)):
 	'''
 IPython.lib.pretty.pretty(
     obj,
@@ -80,7 +80,10 @@ exclude : list, tuple or set; optional
 	
 C:\QGB\Anaconda3\lib\site-packages\IPython\core\formatters.py :89  '''
 	import IPython.lib.pretty
-	return IPython.lib.pretty.pretty(obj,max_width=width)
+	if not max_seq_length:
+		max_seq_length=U.get_or_set('ipy.pformat.max_seq_length',2000)
+	U.set('ipy.pformat.max_seq_length',max_seq_length)
+	return IPython.lib.pretty.pretty(obj,max_width=width,max_seq_length=max_seq_length)
 	
 	from IPython.core.interactiveshell import InteractiveShell
 	r= InteractiveShell.instance().display_formatter.format(obj)
