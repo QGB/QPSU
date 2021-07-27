@@ -1603,8 +1603,13 @@ def get_current_file_dir():
 	__file__=g['__file__']
 	import pathlib
 	p=pathlib.Path(__file__)
-	sp=p.root#win '\\'  linux '/'
-	return p.parent.absolute().__str__() +sp
+	spath=p.parent.absolute().__str__()
+	sp=p.root#win '\\'  linux '/' ## == '' why?
+	if not sp:
+		if '\\' in spath:sp='\\'
+		elif '/' in spath:sp='/'
+		else:raise py.ArgumentError(spath,p,file,sp)
+	return spath +sp
 	
 getCurrentFilePath=get_file_dir=get_current_file_dir
 	
@@ -3425,6 +3430,11 @@ def simulate_key_write(astr, delay=0,restore_state_after=True, exact=None,**ka):
 text_key=text_key_write=keyboard_write=simulate_key_write	
 
 def simulate_key_press(*akey, delay=0,restore_state_after=True, exact=None,**ka):
+	'''
+U.simulate_key_press('shift+s')    # OK  
+U.simulate_key_press(['shift+s'])  #ValueError: ("Key 'shift+s' is not mapped to any known key.", ValueError("Key name 'shift+s' is not mapped to any known key."))
+'''	
+	
 	# parsed=keyboard.parse_hotkey(akey)
 	# if py.len(parsed)>1: #如果 多个组合键中间想要delay,使用 action_list 
 	import keyboard
