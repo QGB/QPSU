@@ -389,7 +389,7 @@ async def delay_trade_time(ipage_or_ids):
 		print('[%s]  '%n,id,resp_g,resp_g.text[:99])
 		didrg[id]=resp_g
 
-	return ids,U.len(ids,didr,didrg )
+	return ids,F.dp(U.get_multi_return_list('id-resp','id-resp_g'),'[didr,didrg]'+U.stime()),U.len(ids,didr,didrg )
 	
 
 

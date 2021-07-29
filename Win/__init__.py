@@ -444,8 +444,9 @@ def SetForegroundWindow(title=None,handle=None,pid=None,process_name='',raise_er
 		
 	try:
 		# win32gui.SetForegroundWindow(handle)
-		import win32gui, win32com.client,win32con
-		shell=win32com.client.Dispatch("WScript.Shell")#pywintypes.com_error: (-2147221008, '尚未调用 CoInitialize。', None, None)
+		import win32gui, win32com.client,win32con,pythoncom
+		pythoncom.CoInitialize()#加上这句解决 #pywintypes.com_error: (-2147221008, '尚未调用 CoInitialize。', None, None)
+		shell=win32com.client.Dispatch("WScript.Shell")
 		shell.SendKeys('%')##For ALT   prefix with %
 		win32gui.ShowWindow(handle,win32con.SW_SHOW)
 		win32gui.SetForegroundWindow(handle)

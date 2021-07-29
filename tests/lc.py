@@ -6,7 +6,7 @@ from qgb import py
 U,T,N,F=py.importUTNF()
 
 # rsignin=None
-def sign_in(email,pw,dill_file=py.No('auto use email')):
+def sign_in(email,pw,dill_file=py.No('auto use email'),set_app_id=False):
 	# global rsignin
 	if '@' not in email and not dill_file:
 		raise py.ArgumentError('email',email)
@@ -46,6 +46,8 @@ def sign_in(email,pw,dill_file=py.No('auto use email')):
 	print(rsignin,rsignin.text[:99])
 	if 'XSRF-TOKEN' not in rsignin.cookies or not rsignin.cookies['XSRF-TOKEN']:
 		return py.No(rsignin,rsignin.text,)
+	if set_app_id:
+		rsignin.app_id=get_app_id(rsignin)
 	f=F.dill_dump(obj=rsignin,file=dill_file)
 	return rsignin,f
 login=signin=sign_in
@@ -195,3 +197,23 @@ def load(s):
 			raise q
 		r.append(q)
 	return r	
+	
+async def set_cookies(rsignin):
+	from qgb.tests import taobao_trade,lc;tb=taobao_trade  	
+	cks=await tb.get_all_cookies()  
+	for k,v in rsignin.cookies.items():
+		d={'name': k,
+		  'value': v,
+		  'domain': '.leancloud.app',
+		  'path': '/',
+		  'expires': U.itime()+3600*24*22,
+		  'size': 24,
+		  'httpOnly': False,
+		  'secure': False,
+		  'session': False,
+		  'priority': 'Medium'}
+		if d not in cks: 
+			cks.append(d) 
+			
+	await tb.set_cookies(cks) 		
+	U.search_iterable(cks,'lean')	

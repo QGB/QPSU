@@ -563,7 +563,7 @@ OSError(10065, '套接字操作尝试一个无法连接的主机。', None, 1006
 	import ping3
 	U,T,N,F=py.importUTNF()
 	addr=auto_ip(addr,**ka)
-	sum=U.get_duplicated_kargs(ka,'times','n',default=sum)
+	sum=U.get_duplicated_kargs(ka,'times','count','n','ct',default=sum)
 	if U.isWin():
 		Win=py.from_qgb_import('Win')
 		_title=U.set('window_title',Win.get_title())
