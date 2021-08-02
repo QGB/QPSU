@@ -23,6 +23,21 @@ else:
 
 gheaders=headers={'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/59.0.2171.95 Safari/537.36'}
 AUTO_GET_PROXY=py.No(msg='auto get_proxy',no_raise=1)
+def auto_proxy_for_requests(proxies,ka):
+	''' proxies:#dict or str 均可 '''
+	U,T,N,F=py.importUTNF()
+	proxies=U.get_duplicated_kargs(ka,'proxies','proxy',default=proxies)
+	if proxies:
+		proxies=N.set_proxy(proxies)
+	else:
+		if (proxies is AUTO_GET_PROXY) or (py.isNo(proxies) and 'auto get_proxy' in proxies.msg):
+			proxies=N.get_proxy(target_protocol=('http','https'),)
+		else:
+			proxies={}
+	ka['proxies']=proxies
+	return proxies,ka
+auto_proxy=auto_proxy_for_requests	
+	
 def random_headers():
 	import fake_headers
 	return fake_headers.Headers( headers=fake_headers.make_header() ).generate()
@@ -30,8 +45,14 @@ def random_headers():
 #8
 ghttp_methods=HTTP_METHODS=[
 'HEAD', 'GET', 'POST', 'OPTIONS', 'PUT', 'PATCH', 'DELETE']	
-def request(url,method='GET',headers=gheaders,verify=False,no_raise=False,**ka):	
+def request(url,method='GET',headers=gheaders,
+	proxies=AUTO_GET_PROXY,verify=False,no_raise=False,print_req=False,**ka):	
+	''' 
+'''
 	import requests
+	U,T,N,F=py.importUTNF()
+	proxies,ka=auto_proxy(proxies,ka)
+	print_req=U.get_duplicated_kargs(ka,'show','print','p','print_req',default=print_req)
 	
 	if (py.istr(url) and url.upper() in HTTP_METHODS):
 		# ka.pop('method','')#D.pop(k[,d]) -> v,
@@ -51,6 +72,9 @@ def request(url,method='GET',headers=gheaders,verify=False,no_raise=False,**ka):
 	
 	if url and 'url' not in ka:
 		ka['url']=url
+
+	if print_req:print(U.v.requests.request(**ka))
+		
 	if no_raise:
 		try:
 			return requests.request(**ka)
@@ -58,9 +82,13 @@ def request(url,method='GET',headers=gheaders,verify=False,no_raise=False,**ka):
 			return py.No(e,ka)
 	return requests.request(**ka)
 
-def download(url, file_path='',default_dir=py.No('set_input',no_raise=1),headers=None):
+def download(url, file_path='',default_dir=py.No('set_input',no_raise=1),headers=None,proxies=AUTO_GET_PROXY,**ka):
 	import requests,sys,os
 	U,T,N,F=py.importUTNF()
+	proxies,ka=auto_proxy(proxies,ka)
+	if not headers:
+		headers={}
+	
 	if not F.isabs(file_path) and not default_dir:
 		default_dir='D:/'
 		if U.is_linux() or U.is_mac():
@@ -73,7 +101,7 @@ def download(url, file_path='',default_dir=py.No('set_input',no_raise=1),headers
 	# 屏蔽warning信息
 	# requests.packages.urllib3.disable_warnings()
 	# 第一次请求是为了得到文件总大小
-	r1 = requests.get(url, stream=True, verify=False)
+	r1 = requests.get(url, stream=True, verify=False,headers=headers,proxies=proxies,)
 	total_size = int(r1.headers['Content-Length'])
 
 	# 这重要了，先看看本地文件下载了多少
@@ -84,11 +112,9 @@ def download(url, file_path='',default_dir=py.No('set_input',no_raise=1),headers
 	# 显示一下下载了多少   
 	print(temp_size,'/',total_size)
 	# 核心部分，这个是请求下载时，从本地文件已经下载过的后面下载
-	if not headers:
-		headers={}
 	headers['Range']= 'bytes=%d-' % temp_size
 	# 重新请求网址，加入新的请求头的
-	r = requests.get(url, stream=True, verify=False, headers=headers)
+	r = requests.get(url, stream=True, verify=False,headers=headers,proxies=proxies,)
 
 	# 下面写入文件也要注意，看到"ab"了吗？
 	# "ab"表示追加形式写入文件
@@ -105,7 +131,7 @@ def download(url, file_path='',default_dir=py.No('set_input',no_raise=1),headers
 				sys.stdout.flush()
 	print()  # 避免上面\r 回车符
 		
-def post(url,**ka):
+def post(url,proxies=AUTO_GET_PROXY,**ka):
 	'''
 Signature: requests.post(url, data=None, json=None, **kwargs)
 Docstring:
@@ -123,12 +149,7 @@ Type:	  function
 	U,T,N,F=py.importUTNF()
 
 	url=N.auto_url(url)
-	proxies=U.get_duplicated_kargs(ka,'proxies','proxy')
-	if proxies:
-		proxies=N.set_proxy(proxy)
-	else:
-		proxies=N.get_proxy()
-	ka['proxies']=proxies
+	proxies,ka=auto_proxy(proxies,ka)
 	
 	import requests
 	return requests.post(url,**ka)
@@ -143,7 +164,7 @@ def get_bytes(url,file='',
 		timeout=9,
 		proxies=AUTO_GET_PROXY,
 		verify=False,
-		show=False,
+		print_req=False,
 		**ka ,):
 	'''
 url格式不对时：
@@ -167,19 +188,15 @@ UnicodeError: encoding with 'idna' codec failed (UnicodeError: label too long)
 	U,T,N,F=py.importUTNF()
 
 	url=N.auto_url(url)
-	proxies=U.get_duplicated_kargs(ka,'proxies','proxy')
 	file=U.get_duplicated_kargs(ka,'file','f','filename',default=file)
 	write_zero=U.get_duplicated_kargs(ka,'write0','w0','write_zero','zero',default=False)
-	show=U.get_duplicated_kargs(ka,'show','print','p','print_req',default=show)
-	if proxies:
-		proxies=N.set_proxy(proxies)
-	else:
-		proxies=N.get_proxy()
-	ka['proxies']=proxies
+	print_req=U.get_duplicated_kargs(ka,'show','print','p','print_req',default=print_req)
+	
+	proxies,ka=auto_proxy(proxies,ka)
 
 	import requests
 	try:
-		if show:print(U.v.requests.get(url,verify=verify,timeout=timeout,headers=U.StrRepr(U.pformat(headers)),proxies=proxies))
+		if print_req:print(U.v.requests.get(url,verify=verify,timeout=timeout,headers=U.StrRepr(U.pformat(headers)),proxies=proxies))
 		b= requests.get(url,verify=verify,timeout=timeout,headers=headers,proxies=proxies).content
 		f=repr(b[:77])[2:-1]
 		if file and (b or write_zero):
@@ -202,22 +219,7 @@ def get(url,file='',
 	url=N.auto_url(url)
 
 	show=U.get_duplicated_kargs(ka,'show','print','p','print_req',default=show)
-	proxies=U.get_duplicated_kargs(ka,'proxies','proxys','proxyes','proxy',default=proxies)
-	if proxies:#dict or str 均可
-		pr=N.set_proxy(proxies)
-		if not pr:
-			if py.istr(proxies) and 'auto' in proxies.lower():
-				proxies=N.get_proxy(target_protocol=('http','https'),)
-			else:
-				raise py.ArgumentError('proxy format error {}://{}:{}',proxies)
-		else:
-			proxies=pr
-	else:
-		if (proxies is AUTO_GET_PROXY) or (py.isNo(proxies) and 'auto get_proxy' in proxies.msg):
-			proxies=N.get_proxy(target_protocol=('http','https'),)
-		else:
-			proxies={}
-
+	proxies,ka=auto_proxy(proxies,ka)
 
 	def writeFile():
 		if file:
@@ -273,8 +275,8 @@ def options(url):
 	return dict(method(url,'options').info().items() )['allow']
 
 		
-def method(url,amethod='get',*args):
-	r'''#TODO: post etc need args'''
+def method(url,amethod='get',proxies=AUTO_GET_PROXY,*args):
+	r'''#TODO: post etc need args  # proxies '''
 	U,T,N,F=py.importUTNF()
 	try:
 		url=N.auto_url(url)

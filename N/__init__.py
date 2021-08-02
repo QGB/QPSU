@@ -231,14 +231,14 @@ def ftp_client(cwd=py.No('history or /',no_raise=1),
 			set_host_port(host_port)
 		else:
 			set_host_port(netloc)
-		if not cwd:cwd=T.sub(cwd,netloc)
+		if not cwd:cwd=T.sub(url,netloc)
 		
 	def set_host_port(host_port):
 		nonlocal host,port
 		if ':' in host_port:
 			host_port=host_port.split(':')
 			if not host:host=host_port[0]
-			if port==3721:port=host_port[1]
+			if port==3721:port=py.int( host_port[1])
 		else:
 			if not host:host=host_port
 			if port==3721:port=21
@@ -309,6 +309,10 @@ def ftp_client(cwd=py.No('history or /',no_raise=1),
 		from io import BytesIO
 		bio=BytesIO()
 		filename=F.get_filename_from_full_path(cwd)
+		self.cwd(T.sub_last(cwd,'',filename))
+		bio.path=self.pwd()
+		bio.filename=bio.name=filename
+		U.log(host,port,self.pwd(),filename,'fetching..')
 		self.retrbinary("RETR " + filename ,bio.write)
 		if response:
 			from flask import stream_with_context

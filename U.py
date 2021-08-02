@@ -2238,7 +2238,7 @@ def search_iterable(a,filter='',type=None,depth=2,out_limit=99,_i_depth=0,si='a'
 	if not (py.islist(a) or py.istuple(a) or py.isdict(a)):
 		if filter==a:
 			return '%r in %s'%(a,si)
-		if (py.istr(a) and filter in a):
+		if (py.istr(a) and py.istr(filter) and filter in a):
 			return '%r in %r#%s'%(filter,a,si)
 		return ''
 	# if py.isnum(a):
@@ -4256,7 +4256,9 @@ def explorer(path='.'):
 	# path=path.replace('/','\\')
 	ps='# Not impl in this system'
 	if iswin():
-		ps=r'''C:/Windows/System32/WindowsPowerShell/v1.0/powershell.exe -Command ii {}.'''.format(path)
+		if path.startswith('///') or path.startswith(T.back_slash*3):
+			path=path[3:]
+		ps=r'''C:/Windows/System32/WindowsPowerShell/v1.0/powershell.exe -Command ii {!r}'''.format(path)
 		if Win.getVersionNumber()<=6.0:#vista
 			ps='explorer.exe '+path
 		os.system(ps)

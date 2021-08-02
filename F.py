@@ -740,6 +740,10 @@ f.read(size=-1, /)
 Read and return up to n bytes.
 	
 	'''
+	import io
+	if isinstance(file, io.BytesIO):
+		file.seek(0)
+		return file.read(-1)
 	file=autoPath(file)
 	try:
 		with py.open(file,'rb') as f:
@@ -1334,6 +1338,8 @@ def auto_path(fn,ext='',default='',is_dir=False,p=False):
 if fn.startswith("."): 如果路径中所有文件夹存在，则可以写入读取。否则无法写入读取。file io 都是这个规则吧
 FileNotFoundError: [Errno 2] No such file or directory: '.
 
+#TODO #BUG# F.auto_path('\\\\\\C:\\test\\clipboard',default='C:/test/',)== '///C:/test/clipboard'   
+
 	'''
 	U=py.importU()
 	if not gbAutoPath:
@@ -1468,17 +1474,22 @@ TypeError: open() takes at most 7 arguments (8 given)
 '''
 
 
-def readlines(a,EOL=True,encoding=None):
+def readlines(a,EOL=True,encoding=None,str_repr=False):
 	a=autoPath(a)
 	if not encoding:
 		encoding=detectEncoding(a)
-	r=[]
+	def _return(lines):
+		if str_repr:
+			U=py.importU()
+			return [U.StrRepr(i) for i in lines]
+		return lines
 	try:
 		if EOL:
+			r=[]
 			for i in py.open(a,encoding=encoding):r.append(i)
-			return r
 		else:
-			return read(a,encoding=encoding).splitlines()
+			r=read(a,encoding=encoding).splitlines()
+		return _return(r)
 	except Exception as e:
 		return py.No(e)
 # F.isFileName('g:/a')
