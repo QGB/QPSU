@@ -194,17 +194,27 @@ def parse_str_auto_type(s):
 	return s
 	
 auto_type=input_auto_type=parse_str_auto_type
+
 def get_or_set(name,default=None,lazy_default=None):
 	# if not default: # ipy module set {}
-	if py.callable(lazy_default) and not default:
-		default=lazy_default()
-	if py.isno(default) or (default==None):
-		raise py.ArgumentError('default cannot be {}'.format( repr(default) ))
+	if (py.isno(default) or (default==None)) and not py.callable(lazy_default) :
+		raise py.ArgumentError('default cannot be {},lazy_default must callable'.format( repr(default) ))
 	r=get(name)
-	if not py.isno(r):return r
+	if not py.isno(r):
+		return r
+	else:
+		if py.callable(lazy_default) and not default:
+			default=lazy_default()
 	return set(name,default)
 getset=getSet=get_set=get_or_set
 
+def get_or_set_and_dill_dump(name,default=None,lazy_default=None):
+	o=get_or_set(name=name,default=default,lazy_default=lazy_default)
+	U,T,N,F=py.importUTNF()
+	print(U.stime(),F.dp(file=name,obj=o),U.len(o))
+	return o
+get_set_dp=get_or_set_dp=get_or_set_and_dill_dump
+	
 def set_or_get(name,value,default=SET_NO_VALUE):
 	# if py.isno(default) or (default==None):
 	if value or not py.isNo(value) :
@@ -5976,7 +5986,7 @@ Out[1312]: []
 	self._qgb_repr=target
 	
 	return self
-ObjectRepr=objectRepr=obj_repr=object_repr=object_custom_repr	
+ObjectRepr=objectRepr=obj_repr=object_repr=custom_object_repr=object_custom_repr	
 
 class FloatCustomStrRepr(py.float):
 	'''每添加一种 CustomStrRepr ，需要在 T.string 中添加相应的 str 代码
