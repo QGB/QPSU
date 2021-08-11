@@ -792,7 +792,7 @@ def rpc_set_file(obj,filename=py.No('if obj exists: auto '),name='v',**ka):
 			filename=F.get_filename_from_full_path(obj)
 		obj=F.read_bytes(obj)
 		
-	return rpc_set_var(obj,name=name,ext_cmd='r=F.write({filename!r},%s)'.format(filename=filename),**ka)
+	return rpc_set_var(obj,name=name,ext_cmd='r=F.write({filename!r},%s,mkdir=True)'.format(filename=filename),**ka)
 
 def rpcServer(port=23571,thread=True,ip='0.0.0.0',ssl_context=(),currentThread=False,app=None,key=None,
 execLocals=None,locals=None,globals=None,
@@ -976,8 +976,8 @@ def get_socket_req(PORT = 65432,HOST = '127.7.7.7'):
 		req, addr = s.accept()
 		return req, addr
 
-def get_rpc_request_a(request=None):
-	''' 
+def get_rpc_request_a(request=None,raise_err=False):
+	''' #TODO raise_err
 a=T.subr(u,T.u23)#'%23-'	
 
 pythonAnywhere : multi[ // or  %2F%2F%2F%2F%2F ] in url will auto convert to one / ,it can't bypass

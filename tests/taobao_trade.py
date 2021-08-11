@@ -384,6 +384,11 @@ async def delay_trade_time(ipage_or_ids):
 		resp=response = requests.post('https://trade.taobao.com/trade/sellerDelayConsignmentTimeHandler.do', headers=headers,cookies=dck,data=data)
 		print('[%s]  '%n,id,resp,resp.text[:99])
 		didr[id]=resp
+		try:resp.json()
+		except Exception as e:
+			print(id,e,resp.content)
+			continue
+			
 
 		resp_g = requests.get(resp.json()['callBackUrl'], headers=headers ,cookies=dck)
 		print('[%s]  '%n,id,resp_g,resp_g.text[:99])

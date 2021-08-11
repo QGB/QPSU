@@ -169,7 +169,7 @@ def isnum(a):
 		6 其他类型'''
 	if is2():return type(a) in (int,long,float,complex) or isint(a) or isfloat(a)#isinstance better?
 	else    :return type(a) in (int,float,complex) or isint(a) or isfloat(a)
-isnumber=isnum
+isnumeric=isnumber=isnum
 
 def isint(a):
 	if is2():return type(a) in (int,long)

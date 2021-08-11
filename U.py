@@ -203,9 +203,10 @@ def get_or_set(name,default=None,lazy_default=None):
 	if not py.isno(r):
 		return r
 	else:
+		# if default:
 		if py.callable(lazy_default) and not default:
 			default=lazy_default()
-	return set(name,default)
+		return set(name,default)
 getset=getSet=get_set=get_or_set
 
 def get_or_set_and_dill_dump(name,default=None,lazy_default=None):

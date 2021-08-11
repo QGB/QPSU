@@ -1001,7 +1001,7 @@ def url_split(url):
 	return urlsplit(url=url)  # obj
 urlsplit=url_split	
 
-def urlEncode(a,safe='/', encoding=None, errors=None):
+def urlEncode(a,safe='/:', encoding=None, errors=None,**ka):
 	''' a : str_or_bytes
 	#todo 	convert Non-string objects
 #TODO 重复调用 会出现 "%252525252525...."	
@@ -1010,6 +1010,8 @@ quote real path
  'C:\\QGB\\Anaconda3\\lib\\urllib\\parse.py',
  '-n 782'	
 	'''
+	U=py.importU()
+	safe=U.get_duplicated_kargs(ka,'skip','ignore',default=safe)
 	from six.moves.urllib.parse import quote
 	return quote(a,safe=safe, encoding=encoding, errors=errors) # if a is function: TypeError: quote_from_bytes() expected bytes
 urlencode=url_encode=urlEncode
