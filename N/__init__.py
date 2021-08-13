@@ -1251,12 +1251,16 @@ Image.open(fp)
    `~file.seek`, and `~file.tell` methods,
    and be opened in binary mode.	
 	'''
-	from PIL import Image
 	U,T,N,F=py.importUTNF()
+	try:
+		from PIL import Image
+		if U.isWin() or U.isMac():
+			from PIL import ImageGrab
+	except Exception as e:
+		U.log(e)
+		Image=None
 	transform_function=U.get_duplicated_kargs(ka,
 		'f','func','function','operator','transform','transformation_function',default=transform_function)#TODO 名称长的别名应该在前，这样匹配时先详细后模糊
-	if U.isWin() or U.isMac():
-		from PIL import ImageGrab
 	if rect:
 		if py.istr(rect) or py.isfile(rect):
 			# if F.exist(rect):
@@ -1266,7 +1270,7 @@ Image.open(fp)
 				response.set_data('''<img src="{}"></img>'''.format(image) )
 				return image
 			im=Image.open(rect)
-		elif py.isinstance(rect,Image.Image) or py.isbytes(rect):
+		elif Image and (py.isinstance(rect,Image.Image) or py.isbytes(rect) ):
 			im=rect
 		elif U.len(rect)!=4:
 			raise py.ArgumentError('rect must be PIL Image or [ x0,y0,x1,y1 ]')
@@ -1276,9 +1280,8 @@ Image.open(fp)
 		im = ImageGrab.grabclipboard()
 		if not im:
 			im=ImageGrab.grab()
-	if py.isinstance(im,Image.Image) and py.callable(transform_function):
+	if Image and py.isinstance(im,Image.Image) and py.callable(transform_function):
 		im=transform_function(im,**transform_function_ka)
-			
 	return flask_image_response(response,im)
 img= screenshot_response=flask_screenshot_response
 	
