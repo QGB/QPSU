@@ -4436,7 +4436,7 @@ def difference(a,b):
 	return py.list(a-b)
 cj=diff=difference	
 	
-def j(a,b):
+def intersection(a,b):
 	'''intersection 交集
 	
 	TypeError: unhashable type: 'dictproxy' #TODO
@@ -4454,7 +4454,8 @@ def j(a,b):
 			
 	return r
 	# return py.set(a).intersection(py.set(b))
-
+j=intersection
+	
 def jDictValue(a,b):
 	'''
 	'''
