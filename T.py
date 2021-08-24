@@ -576,13 +576,17 @@ gURL_unreserved_mark=('-','_','.','!','~','*',"'",'(',')')
 gURL_reserved=(';','/','?',':','@','&','=','+','$',',')
 gsURL_not_escaped=gURL_not_escaped='-0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ_abcdefghijklmnopqrstuvwxyz.'
 
-def parse_url_arg(url):
+def parse_url_arg(url,list_len_one=False):
 	if py.is2():
 		from urlparse import urlparse,parse_qs
 	else:
 		from urllib.parse import urlparse,parse_qs
 	o = urlparse(url)
-	return parse_qs(o.query)
+	r= parse_qs(o.query)
+	for k,v in r.items():
+		if not list_len_one and py.islist(v) and py.len(v)==1:
+			r[k]=v[0]
+	return r
 parse_qs=parse_url_arg
 
 def get_url_arg(url,arg_name):
