@@ -586,6 +586,10 @@ def parse_url_arg(url,list_len_one=False):
 	for k,v in r.items():
 		if not list_len_one and py.islist(v) and py.len(v)==1:
 			r[k]=v[0]
+	try:
+		U=py.importU()
+		return U.DictAttr(r)
+	except:pass
 	return r
 parse_qs=parse_url_arg
 
@@ -1245,13 +1249,15 @@ def bytesToBase64(a):
 	else:
 		return base64.b64encode(a)
 
-def base64_to_str(a):
+def base64_to_str(a,return_bytes=False):
 	import base64
+	if return_bytes or py.isbyte(a):
+		if not py.isbyte(a):
+			a=a.encode('ascii')
+		return base64.b64decode(a) #type bytes
 	if py.istr(a):
 		return detectAndDecode(base64.b64decode(a))
-	if py.isbyte(a):
-		return base64.b64decode(a) #type bytes
-base64decode=b64_str=base64_to_str	
+base64Decode=base64_decode=base64decode=b64_str=base64_to_str	
 
 def base64_to_bytes(a):
 	import base64

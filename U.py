@@ -6317,8 +6317,12 @@ U.StrRepr(b'3232',encoding='ascii')	[<class 'qgb.U.StrRepr'>, (b'3232',), {'enco
 		return T.justify(super().__str__(),**self.ka)
 	# return (self.padding*self.padding_times)+ super().__str__() +(self.padding*self.padding_times)
 	
-
-
+class DictAttr(dict):
+	def __init__(self, *args, **kwargs):
+		super(DictAttr, self).__init__(*args, **kwargs)
+		self.__dict__ = self
+AttrDict=DictAttr
+		
 #############################
 def main(display=True,pressKey=False,clipboard=False,
 	ipyArgs=False,escape=False,

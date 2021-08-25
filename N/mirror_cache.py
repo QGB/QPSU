@@ -41,6 +41,7 @@ if target_base_url:print( config(target_base_url) )
 
 ips=F.dill_load('ips') or []
 ipsn=F.dill_load('ipsn') or []
+gblock_ip,gwrite_req=F.dill_load('gblock_ip,gwrite_req') or (False,True)
 
 def target_to_flask_response(target,response=None,flask_request=None):
 	global base_host
@@ -69,11 +70,12 @@ def mirror_cache(*a,**ka):
 '''	
 	# us=request.path.split('/')
 	ip=request.headers.get('X-Real-Ip',request.remote_addr) 
-	if ip not in ips:
+	if gblock_ip and ip not in ips:
 		ipsn.append(ip)
 		F.dill_dump(obj=ipsn,file='ipsn')
 		return ip+'\nNot allowed!\n'+U.stime()
-		
+	if gwrite_req:
+		F.write(U.gst+'q/{}-{}.txt'.format(ip,U.stime()),U.dir(request),mkdir=True)
 	path=request.path[1:]
 	method=request.method
 	# fn=cache_path+method[:1]+T.url2fn(path+request.environ.get('HTTP_COOKIE','')[:99] )
