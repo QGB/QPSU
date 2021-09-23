@@ -5449,7 +5449,7 @@ def python(args='-V',*a,**ka):
 		else:
 			raise NotImplementedError(sys.executable)
 			
-	a=[i.strip() for i in a]
+	a=[py.str(i).strip() for i in a]
 	print(U.v.U.cmd(a,**ka) )
 	return U.cmd(a,**ka)
 python_v=python_V=python
