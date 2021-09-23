@@ -1219,9 +1219,9 @@ def flask_file_stream_response(response,file,):
 		
 	except Exception as e:
 		# r=T.pformat([e,U.get_tb_stack()],**U.get('pformat_kw',{}))
+		response.status_code=500
 		r=py.repr(e)
 		response.set_data(r)
-
 file=stream_file=file_stream=read_as_stream=read_file_as_stream=flask_file_stream_response
 
 def flask_image_response(response,image,format='png',**ka):

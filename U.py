@@ -1726,13 +1726,15 @@ Return a random integer N such that a <= N <= b.'''
 	return random.randint(min, max)
 randint=ramdomInt=randomInt
 
-def sort(a,column=None, cmp=None, key=None, reverse=False):
+def sort(a,column=None, cmp=None, key=None, reverse=False,**ka):
 	''' py2&py3  sorted _3 ,key=lambda i:len(i)        按长度从小到大排序
 	在python2.x  sorted _5,cmp=lambda a,b:len(a)-len(b) 实现同上功能， 一般不用cmp 参数
 	sorted中cmp参数指定的函数用来进行元素间的比较。此函数需要2个参数，然后返回负数表示小于，0表示等于，正数表示大于。
 	#这句可能写错了 a:item of sort list   |  *a: (item,) 
 	'''
 	repr=py.repr
+	column=get_duplicated_kargs(ka,'col','C','c',default=column)
+	
 	
 	def key_func(ai,size=99,is_column=True):# ai :  item of a
 		
@@ -5440,8 +5442,13 @@ def python(args='-V',*a,**ka):
 	elif py.iterable(args):
 		a=py.list(args)+a
 	if 'python' not in a[0].lower():
-		a.insert(0,sys.executable)
-
+		if 'python' in sys.executable:
+			a.insert(0,sys.executable)
+		elif 'uwsgi' in sys.executable: # PythonAnyWhere
+			a.insert(0,F.home()+'.local/bin/python')
+		else:
+			raise NotImplementedError(sys.executable)
+			
 	a=[i.strip() for i in a]
 	print(U.v.U.cmd(a,**ka) )
 	return U.cmd(a,**ka)

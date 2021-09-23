@@ -22,6 +22,52 @@ else:
 		py.importU().repl()
 
 gheaders=headers={'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/59.0.2171.95 Safari/537.36'}
+
+def thread_pool_request(targets,max_workers=None,request_ka={},print_log=False,**ka):
+	'''
+	def __init__(self, max_workers=None, thread_name_prefix='',
+                 initializer=None, initargs=()):
+        """Initializes a new ThreadPoolExecutor instance.
+
+        Args:
+            max_workers: The maximum number of threads that can be used to
+                execute the given calls.
+            thread_name_prefix: An optional name prefix to give our threads.
+            initializer: A callable used to initialize worker threads.
+            initargs: A tuple of arguments to pass to the initializer.
+        """
+        if max_workers is None:
+            # Use this number because ThreadPoolExecutor is often
+            # used to overlap I/O instead of CPU work.
+            max_workers = (os.cpu_count() or 1) * 5
+			
+timeout			
+'''			
+	import concurrent.futures
+	U,T,N,F=py.importUTNF()
+	r=[]
+	max_workers=U.get_duplicated_kargs(ka,'max_thread','threads','thread_count',default=max_workers)
+	print_log=U.get_duplicated_kargs(ka,'P','print','p',default=print_log)
+	
+	pool=U.get_or_set('U.ThreadPoolExecutor',lazy_default=lambda:U.ThreadPoolExecutor())
+	if print_log:U.pprint(pool._threads)
+	pool._threads.clear()
+	pool._shutdown=False 
+	# pool._max_workers=max_workers
+	
+	with pool:
+		future_to_url = {pool.submit(request, url, **request_ka): url for url in targets}
+		for future in concurrent.futures.as_completed(future_to_url):
+			url = future_to_url[future]
+			try:
+				data = future.result()
+				r.append([U.StrRepr(url,size=15),data,data.elapsed.total_seconds()])
+			except Exception as exc:
+				if print_log:print('### %r %s' % (url, exc))
+			else:
+				if print_log:print('%r %s' % (url, data))			print(U.stime(),'### len',U.len(targets,r))
+	return r
+	
 AUTO_GET_PROXY=py.No(msg='auto get_proxy',no_raise=1)
 def auto_proxy_for_requests(proxies,ka):
 	''' proxies:#dict or str 均可 '''
@@ -72,7 +118,8 @@ def request(url,method='GET',headers=gheaders,
 	
 	if url and 'url' not in ka:
 		ka['url']=url
-
+	ka['url']=N.auto_url(ka['url'])
+		
 	if print_req:print(U.v.requests.request(**ka))
 		
 	if no_raise:
