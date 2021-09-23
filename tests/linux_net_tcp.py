@@ -2,6 +2,9 @@
 import re
 import sys
 
+net_tcp=sys.argv[1] if len(sys.argv)>1 else '/proc/net/tcp'
+if not [i for i in net_tcp if i not in '0123456789']:
+	net_tcp='/proc/{}/net/tcp'.format(net_tcp)
 
 def process_file(procnet):
     sockets = procnet.split('\n')[1:-1]
@@ -25,7 +28,7 @@ def convert_linux_netaddr(address):
 def format_line(data):
     return (("%(seq)-4s %(uid)5s %(local)25s %(remote)25s %(timeout)8s %(inode)8s" % data) + "\n")
 
-with open('/proc/net/tcp') as f:
+with open(net_tcp) as f:
     sockets = process_file(f.read())
 
 columns = ("seq", "uid", "inode", "local", "remote", "timeout")
