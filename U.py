@@ -3985,6 +3985,8 @@ in ipy , npp() not autoReload when U.r(), But U.npp()
 	if not os.path.exists(npath):	
 		npath=getModPath()[:3]+r'QGB'+'/npp/notepad++.exe'
 	if not os.path.exists(npath):
+		npath=find_driver_path(r':\QGB'+'/npp/notepad++.exe')		
+	if not os.path.exists(npath):
 		npath=find_driver_path(r":\Program Files"+nppexe)#如果最后没有匹配到，则为 空.....
 	if DEBUG:pln (repr(npath),nppexe)
 	# npath='"%s"'%npath
