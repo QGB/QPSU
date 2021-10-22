@@ -3029,6 +3029,33 @@ Out[1566]: [0.0, 2.0, 4.0, 6.0, 8.0, 10.0, 12.0, 14.0, 16.0]
 	return py.list(r)
 mul=mutiply_iterable=mutiply_list=mutiply_tuple=multiply_by_multiples
 
+def tuple_operator(a,b,operator,operator_ka={}):
+	''' 对两个长度相等的（tuple，list，...） 操作
+如果只对一个tuple操作，可以这样用：  t=U.tuple_operator(t,t,U.StrRepr)	
+
+	'''
+	r=[]
+	for n,v in enumerate(a):
+		if py.istr(operator):
+			r.append( py.getattr(v,operator)(b[n]) )
+		elif py.callable(operator):
+			r.append( operator(v,**operator_ka) )
+		else:
+			raise NotImplementedError('operator type')
+	return r
+	
+def tuple_add(a,b):return tuple_operator(a,b,operator='__add__')
+add_two_tuple=tuple_add
+
+def tuple_minus(a,b):return tuple_operator(a,b,operator='__sub__')
+minus=tuple_minus
+
+def tuple_multiply(a,b):return tuple_operator(a,b,operator='__mul__')
+mul=multiply_two_tuple=tuple_multiply
+
+def tuple_div(a,b):return tuple_operator(a,b,operator='__truediv__')
+div=div_two_tuple=tuple_div
+
 def traverseTime(start,stop=None,step='day'):
 	'''
 	#TODO ipy 自动化测试框架 ， 解决 ipy3 兼容问题

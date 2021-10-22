@@ -1808,6 +1808,25 @@ gszi=gsZI='''个、十、百、千、万、十万、百万、千万、亿、十�
 gZi=gzi=glzi=gsZI.split('、')
 
 def readNumber(a,split=4,p=True):
+	'''
+T.readNumber(2**172)
+5986极3107载0650正7378涧3529沟6229穰3074秭8058垓9524京8510兆6996亿9602万9696
+
+In [134]: T.readNumber 2**173
+IndexError                                Traceback (most recent call last)
+<ipython-input-134-e87d6523ae23> in <module>
+----> 1 T.readNumber(2**173)
+
+C:/QGB/babun/cygwin/bin\qgb\T.py in readNumber(a, split, p)
+   1830                 if i%split==0:
+   1831                         w=b[i:i+split]
+-> 1832                         s=w[::-1]+zh[iz]+s
+   1833                         iz+=1
+   1834                         # U.pln(  i,
+
+IndexError: list index out of range
+'''	
+	
 	if split<1:return ''
 	zh=gZi[::split]
 	if py.isnum(a):a=py.int(a)#py2 ok
