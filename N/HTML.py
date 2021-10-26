@@ -12,6 +12,104 @@ def format(s,**ka):
 	ka={'{%s}'%k:v for k,v in ka.items()}
 	return T.replacey(s,ka)
 
+def eng_audio(response,word):
+	f='google_translate_tts/%s.dill'%word
+	F.mkdir(U.gst+F.dir(f))
+	q=F.dill_load(f)
+	if not q:
+		q=F.dill_load('google_translate_tts/%s.dill'%U.StrRepr(word,size=15) )
+	if not q:
+	
+		if N.check_port(21080):
+			proxy='socks5://127.0.0.1:21080'
+		else:	
+			proxy=None
+	
+		try:
+			u='https://translate.googleapis.com/translate_tts?client=gtx&ie=UTF-8&tl=en&tk=775040.775040&q='+T.url_encode(word)
+			q=N.HTTP.request(u,proxy=proxy)
+			b=q.content
+			F.dill_dump(file=f,obj=q)
+		except Exception as e:
+			return py.No(e)
+	if response:	
+		return N.copy_request_to_flask_response(q,response)
+	else:
+		return q
+	
+def eng_list(response,a):
+	'''
+
+<meta name="viewport" content="width=device-width, initial-scale=0.5, minimum-scale=0.5, maximum-scale=1.0,user-scalable=1" cmt=禁止缩放/> 
+
+'''    	
+	main=''
+	if len(a[0])==3:
+		for n,en,zh in a:
+			main+=r'''
+<tr>
+	<th class="num">{n}</th>
+	<th class=en onclick="play('{en}')"> <a>{en}</a>		</th>
+	<th class=zh>{zh}</th>
+</tr> 	
+'''.format(n=n,en=en,zh=zh)
+
+	r=T.html_template(globals=py.globals(),locals=py.locals(),s=r'''
+
+
+<meta name="viewport" content="width=device-width,initial-scale=0.6, user-scalable=0" cmt=禁止缩放/> 	
+	
+<style type="text/css">
+
+table,th,td,textarea{
+	padding:0px;
+	margin:0px;
+	border:1px solid #00000022;/*修复调整 textarea大小导致下分割线消失的问题*/
+	border-spacing: 0px;
+	font-size: 3.5vh;
+}
+.num{
+	width:5%;  
+}
+.en{
+	width:45%;  
+}
+.zh{
+	width:45%;  
+}
+
+</style>	
+
+<script>
+function play(word){
+	console.log(word)
+	var audio = new Audio();
+	audio.src ="https://vfvf.cf/a=N.geta();N.HTML.eng_audio(response,a)%23-" + encodeURI(word);
+	audio.play();
+}
+</script>
+
+<button style="height:33; width: 77%; " id=btn onclick="document.getElementById('btn').innerText=(window.outerWidth - 8) / window.innerWidth"></button>
+
+<table id="mytable" style=" width: 100%; ">
+<thead>
+	<tr>
+		<th class="num">NO.</th>
+		<th class=en>English		</th>
+		<th class=zh>Zh</th>
+	</tr> 	
+	  
+</thead>
+    <tbody>
+
+$main$
+	
+	</tbody>
+  </table>	
+	
+	''')
+	response.headers['Content-Type']='text/html;charset=utf-8';
+	return response.set_data(r)
 def flask_ls(response,request=None):
 	if not request:from flask import request
 	r=T.html_template(globals=py.globals(),locals=py.locals(),s='''

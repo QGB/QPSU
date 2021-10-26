@@ -42,6 +42,17 @@ else:
 	from SimpleHTTPServer import SimpleHTTPRequestHandler
 	from BaseHTTPServer import HTTPServer as _HTTPServer
 
+
+def check_socket( port,host='127.0.0.1'):
+	import socket
+	from contextlib import closing
+	with closing(socket.socket(socket.AF_INET, socket.SOCK_STREAM)) as sock:
+		if sock.connect_ex((host, port)) == 0:
+			return True
+		else:
+			return False
+check_port=check_socket
+			
 def send_smtp_email(mail_from,mail_to,txt,title='',password='',smtp_server='',**ka):
 	from email.mime.text import MIMEText
 	from email.header import Header
@@ -437,6 +448,26 @@ def pppoe():
 506 192.168.2.1+192.168.1.1 073198799737 777124	
 
 '''
+skip_response_headers={
+	'Transfer-Encoding': 'chunked',
+	'transfer-encoding': 'chunked',
+}
+def copy_request_to_flask_response(target,response=None):
+	
+	if not response:
+		from flask import make_response
+		response=make_response()
+	response.status_code=target.status_code
+	for k,v in target.headers.items():
+		if k in skip_response_headers:
+			continue
+		response.headers[k]=v	
+	response.headers['Content-Security-Policy']=''
+	#response.headers['Content-Encoding']=gencoding
+	b=target.content
+	
+	response.set_data(b)
+	return response
 	
 def copy_request(a,p=True):
 	import requests
