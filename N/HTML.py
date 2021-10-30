@@ -42,6 +42,10 @@ def eng_list(response,a):
 
 <meta name="viewport" content="width=device-width, initial-scale=0.5, minimum-scale=0.5, maximum-scale=1.0,user-scalable=1" cmt=禁止缩放/> 
 
+
+
+<button style="height:33; width: 77%; " id=btn onclick="document.getElementById('btn').innerText=(window.outerWidth - 8) / window.innerWidth"></button>
+
 '''    	
 	main=''
 	if len(a[0])==3:
@@ -57,7 +61,6 @@ def eng_list(response,a):
 	r=T.html_template(globals=py.globals(),locals=py.locals(),s=r'''
 
 
-<meta name="viewport" content="width=device-width,initial-scale=0.6, user-scalable=0" cmt=禁止缩放/> 	
 	
 <style type="text/css">
 
@@ -80,16 +83,6 @@ table,th,td,textarea{
 
 </style>	
 
-<script>
-function play(word){
-	console.log(word)
-	var audio = new Audio();
-	audio.src ="https://vfvf.cf/a=N.geta();N.HTML.eng_audio(response,a)%23-" + encodeURI(word);
-	audio.play();
-}
-</script>
-
-<button style="height:33; width: 77%; " id=btn onclick="document.getElementById('btn').innerText=(window.outerWidth - 8) / window.innerWidth"></button>
 
 <table id="mytable" style=" width: 100%; ">
 <thead>
@@ -106,6 +99,60 @@ $main$
 	
 	</tbody>
   </table>	
+	
+	
+<div style=" position:fixed; left:0px; bottom:0px; width:100%; height:5vh; background-color:#00aa00BB; z-index:9999;">
+<input id="find" type="text" style=" display: inline-block;width:80%; height:100%;font-size: 4vh; color:red; background-color:#00aa0011;" onchange="find()">
+
+<button style="    float:right;  width:20%; height:100%; color:blue;" onclick="window.location.reload(true);"> R </button>
+</input>
+
+</div>
+
+<script>
+function play(word){
+	console.log(word)
+	var audio = new Audio();
+	audio.src ="$U.get_or_set('rpc.server.base','/')$a=N.geta();N.HTML.eng_audio(response,a)%23-" + encodeURI(word);
+	audio.play();
+}
+
+function find(){
+	var t=document.getElementById('find').value
+	
+	e=xpath("//th[@class='en' and contains( .,'"+t+"')]")
+	
+	e.scrollIntoView()
+	e.setAttribute('style','color:yellow')
+	e.click()
+	scrollBy(0,-99)
+	setTimeout(function(){
+		e.setAttribute('style','color:black')
+	
+	},666)
+	
+	// document.getElementById('find').innerText=new Date()
+}
+
+function xpath(sp,ele){
+    //var sp = "//a[text()='SearchingText']";
+	if(ele){
+		if(!sp.startsWith('.')){
+			sp='.'+sp
+		}
+	}else{
+		ele=document//直接重新赋值参数不用加 var
+	}
+    return document.evaluate(sp, ele, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue;
+}//end xpath
+
+
+var metaTag=document.createElement('meta');
+metaTag.name = "viewport"
+metaTag.content = "width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0"
+document.getElementsByTagName('head')[0].appendChild(metaTag);
+
+</script>
 	
 	''')
 	response.headers['Content-Type']='text/html;charset=utf-8';
