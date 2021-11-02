@@ -452,8 +452,9 @@ if isnix():
 u1604:  IPython repl  ok	,  bash python -c error  ?
 	
 	'''
-	def isroot():
+	def is_root():
 		return os.getuid()==0
+	isroot=isRoot=is_root
 	
 	def sudo(cmd,password=py.No('auto get_or_input')):
 		'''cmd can use pipe 'id|cut -c 2-22'
