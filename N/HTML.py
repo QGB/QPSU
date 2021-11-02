@@ -103,9 +103,11 @@ $main$
 	
 <div style=" position:fixed; left:0px; bottom:0px; width:100%; height:5vh; background-color:#00aa00BB; z-index:9999;">
 <input id="find" type="text" style=" display: inline-block;width:80%; height:100%;font-size: 4vh; color:red; background-color:#00aa0011;" onchange="find()">
-
-<button style="    float:right;  width:20%; height:100%; color:blue;" onclick="window.location.reload(true);"> R </button>
 </input>
+
+<button style="    float:right;  width:20%; height:100%; color:blue;" onclick="window.location.reload(true);font-size:33vh;"> Z </button>
+
+<button style="    float:right;  width:20%; height:100%; color:blue;" onclick="window.location.reload(true);font-size:33vw;"> S </button>
 
 </div>
 
@@ -117,10 +119,30 @@ function play(word){
 	audio.play();
 }
 
+var dtx = new Map() //{} //Uncaught TypeError: dtx.get is not a function
+var dtn = new Map() 
+
 function find(){
 	var t=document.getElementById('find').value
+	var sx="//th[@class='en' and contains( .,'"+t+"')]"
+	// if(var x=) Uncaught SyntaxError: Unexpected token var
+	if(x=dtx.get(t)){ 
+		
+	}else{
+		var x=document.evaluate("//th[@class='en' and contains( .,'"+t+"')]", document, null, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE, null)
+		dtx.set(t,x)
+	}
 	
-	e=xpath("//th[@class='en' and contains( .,'"+t+"')]")
+	if(x.snapshotLength){
+	
+	}else{
+		
+	
+	}
+	
+	
+	
+	e=xpath(sx)
 	
 	e.scrollIntoView()
 	e.setAttribute('style','color:yellow')
@@ -147,10 +169,17 @@ function xpath(sp,ele){
 }//end xpath
 
 
-var metaTag=document.createElement('meta');
-metaTag.name = "viewport"
-metaTag.content = "width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0"
-document.getElementsByTagName('head')[0].appendChild(metaTag);
+function disable_scale(){
+	var metaTag=document.createElement('meta');
+	metaTag.name = "viewport"
+	metaTag.content = "width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0"
+	document.getElementsByTagName('head')[0].appendChild(metaTag);
+
+
+}
+
+//setTimeout(,3333)
+
 
 </script>
 	

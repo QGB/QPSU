@@ -1308,13 +1308,18 @@ Image.open(fp)
 		else:
 			im = ImageGrab.grab(rect)
 	else:	
-		im = ImageGrab.grabclipboard()
-		if not im:
-			im=ImageGrab.grab()
+		if U.is_termux():
+			f=U.gst+'screencap.png'
+			U.cmd('/system/bin/screencap','-p',f)
+			im=F.read_bytes(f)
+		else:
+			im = ImageGrab.grabclipboard()
+			if not im:
+				im=ImageGrab.grab()
 	if Image and py.isinstance(im,Image.Image) and py.callable(transform_function):
 		im=transform_function(im,**transform_function_ka)
 	return flask_image_response(response,im)
-img= screenshot_response=flask_screenshot_response
+img=screenshot=screenshot_response=flask_screenshot_response
 	
 def is_flask_request(q):
 	from werkzeug.local import LocalProxy
