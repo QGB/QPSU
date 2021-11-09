@@ -552,9 +552,13 @@ In [1615]: T.join(range(43))
 Out[1615]: '0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,1
 '''	
 	U=py.importU()
-	if separator==',':separator=U.get_duplicated_kargs(ka,'s','split','splitor','separator',default=',')
+	if separator==',':separator=U.get_duplicated_kargs(ka,'s','sep','split','splitor','separator',default=separator)
 	if py.len(iterable)<1:
 		raise py.ArgumentError('need iterable')
+	if iterable[0]==separator:
+		U.warn('T.join(*a,separator=',')  not T.join(separator,*a)')
+	
+		
 	if py.len(iterable)==1:
 		iterable=iterable[0]
 	if py.istr(iterable):return iterable

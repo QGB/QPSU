@@ -34,7 +34,7 @@ def _registed_click_pop_cart():
 		Win.click(ox,oy)
 		return ox,oy
 
-def registe_click_pop_cart_hotkey(hotkey='alt+z',callback=_registed_click_pop_cart):
+def registe_click_pop_cart_hotkey(hotkey='alt+c',callback=_registed_click_pop_cart):
 	k=U.get(hotkey)
 	# if k:
 		# print(U.stime(),'using registed hotkey',hotkey)
@@ -82,7 +82,7 @@ async def press_keys(page,*s,xy=(None,None)):
 		await page.keyboard.press(k)
 	return s,xy
 	
-async def backup_cookie(user=0,page=py.No('auto last -1')):
+async def backup_cookie(user='',page=py.No('auto last -1')):
 	if not user:
 		user=await get_taobao_user()
 	if not page:page=await get_page()
@@ -175,17 +175,33 @@ async def get_browser(browserURL='http://127.0.0.1:9222',browserWSEndpoint='',
 		browser=await pyppeteer.launcher.launch({'executablePath': executablePath, 'headless': False, 'slowMo': 30})
 	
 	return U.set( uk,browser)
-
 	
+async def get_current_front_page():
+	pv=[(pa,await pa.evaluate("document.visibilityState")) for pa in await taobao_trade.get_all_pages()]
+	r=[]
+	for pa,v in pv:
+		if pa.url.startswith('devtools://'):
+			continue
+		if v=='visible':
+			r.append(pa)
+	if not r:
+		return py.No('no visible page?')
+	if py.len(r)>1:
+		return py.No('multi visible page?',pv,r)
+		
+	return r[0]
+current_front_page=get_current_front_page
 	
-async def get_all_pages():
+async def get_all_pages(browser=None):
+	if not browser:
+		browser=await get_browser()
 	ps=await browser.pages()
 	# r=[]
 	for n,pa in py.enumerate(ps):
 		t=await pa.title()
 		print(fr'{n:>02d} {t[:33]:33} {pa.url[33:]:33} {py.repr(pa)[-11:] }' )
 	return ps
-async def new_page(url='https://intoli.com/blog/not-possible-to-block-chrome-headless/chrome-headless-test.html',timeout=30*1000):
+async def new_page(url='https://intoli.com/blog/not-possible-to-block-chrome-headless/chrome-headless-test.html',timeout=30*1000,browser=None):
 	''' Go to the ``url``.
 
 :arg string url: URL to navigate page to. The url should include
@@ -214,7 +230,8 @@ The ``Page.goto`` will raise errors if:
 * target URL is invalid
 * the ``timeout`` is exceeded during navigation
 '''
-	browser=await get_browser()
+	if not browser:
+		browser=await get_browser()
 	page=await browser.newPage()
 	await page.setViewport(VIEW_PORT)
 	await page.evaluateOnNewDocument(JS_ONLOAD)
@@ -336,6 +353,14 @@ async def get_taobao_user(page=None):
 	raise NotFound_taobao_user
 get_user=get_taobao_user
 	
+async def get_taobao_cookies():
+	cks=await taobao_trade.get_all_cookies()
+	dck={}
+	for n,c in py.enumerate(cks):
+		if 'taobao.com' in c['domain'] and not U.one_in(['login.','airunit.','cart.',], c['domain']):
+			dck[c['name'] ]=c['value']
+			print(n,'%-15s'%c['name'],c['domain'])	
+	return dck
 async def delay_trade_time(ipage_or_ids):
 	import requests
 	tb=taobao_trade
@@ -349,12 +374,7 @@ async def delay_trade_time(ipage_or_ids):
  'sec-fetch-dest': 'empty',
  'referer': 'https://trade.taobao.com/trade/sellerDelayConsignmentTime.htm',
  'accept-language': 'zh-CN,zh;q=0.9'}
-	cks=await tb.get_all_cookies()
-	dck={}
-	for n,c in py.enumerate(cks):
-		if 'taobao.com' in c['domain'] and not U.one_in(['login.','airunit.','cart.',], c['domain']):
-			dck[c['name'] ]=c['value']
-			print(n,'%-15s'%c['name'],c['domain'])
+	dck=await tb.get_taobao_cookies()
 	##########		
 	if py.isint(ipage_or_ids):
 		pa=await tb.get_or_new_page('https://buyertrade.taobao.com/trade/itemlist/list_bought_items.htm?action=itemlist%2FBoughtQueryAction&event_submit_do_query=1&tabCode=waitSend')
@@ -397,7 +417,33 @@ async def delay_trade_time(ipage_or_ids):
 	return ids,F.dp(U.get_multi_return_list('id-resp','id-resp_g'),'[didr,didrg]'+U.stime()),U.len(ids,didr,didrg )
 	
 
+async def get_taobao_sku(page=None):
+	'''
+#dict_keys(['config', 'mods', 'loadCSS', 'add', 'fire', 'listeners', 'fired'])
+# ['config', 'get', 'set']
+#dict_keys(['sku', 'desc', 'async_dc', 'support', 'async_sys', 'video'])
+	
+'''
 
+	if not page:
+		page=await taobao_trade.get_current_front_page()
+		if not page or 'item.taobao.com/item.htm' not in page.url:
+			page=await taobao_trade.get_page('item.taobao.com/item.htm')
+	sku_raw=await page.evaluate(''' [window.Hub,KISSY.Env.mods["item-detail/promotion/index"].exports.get("promoData") ] ''')  # [{..},None]
+	d,none=sku_raw
+	dc=d['config']['config']
+	# sku,desc=U.get_dict_multi_values_return_list(dc,'sku', 'desc')
+	sku=dc['sku']
+	valItemInfo=sku['valItemInfo']
+	skuMap,propertyMemoMap=U.get_dict_multi_values_return_list(
+							valItemInfo,'skuMap','propertyMemoMap')
+	r=[]
+	for i,d in skuMap.items():
+		row=[ d['price'],d['stock'],propertyMemoMap[i[1:-1]],d['skuId'],d['oversold'] ]
+		r.append(row)
+	return r
+get_sku_list=get_taobao_sku
+	
 async def save_item_html_and_sku(url,close=False,timeout=30*1000):
 	tb=taobao_trade
 	f=T.filename_legalized(url)[:250]

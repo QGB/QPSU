@@ -125,7 +125,23 @@ def set(name,value=SET_NO_VALUE,level=gd_sync_level['process'],**ka):
 	if level>=gd_sync_level['system']:
 		import sqlite3
 	return value
-
+def unset(*names,level=gd_sync_level['process'],**ka):
+	if level>=gd_sync_level['process']:
+		import sys
+		d=sys._qgb_dict
+		r=[]
+		for name in names:
+			if name in d:
+				r.append(d.pop(name))
+			else:
+				r.append(py.No('%r not found to unset'%name))
+		if py.len(r)==1:
+			return r[0]
+		else:
+			return r
+del_set=delete_set=unset			
+			
+	
 def set_multi(**ka):
 	import sys
 	# d=py.getattr(sys,'_qgb_dict',{})
@@ -1890,7 +1906,12 @@ def _ct_clear():
 	return {k:v for k,v in r.items() if k.startswith('_count')}
 calltimes.clear=_ct_clear
 
-
+def warning(msg,tag='qgb.default.logger',**ka):
+	import logging
+	logger=logging.getLogger(tag)
+	return logger.warning(msg,**ka)
+warn=warning
+	
 def set_log_level(level=False,logger=None):
 	''' logging.CRITICAL #50
 	return level<int>
@@ -2821,7 +2842,9 @@ def parse_time_str(a,format='%Y-%m-%d__%H.%M.%S'):
 	# return parser.parse(a)
 parse_time=stime2time=stime_to_time=parse_stime=parse_time_str	
 
-def float(x):
+
+
+def better_float(x):
 	''' float(x=0, /)  Subclasses:     float64
 0.07999999999999999  hangs	
 	'''
@@ -2836,6 +2859,11 @@ def float(x):
 		else:
 			break
 	return r
+
+def float_with_default(obj,*other,default=None):
+	''' FuncWrapForMultiArgs: if default!=None:'''
+	return FuncWrapForMultiArgs(f=better_float,args=(obj,other),default=default)
+float=float_with_default	
 
 def int_with_default(obj,*other,default=None):
 	''' FuncWrapForMultiArgs: if default!=None:'''
@@ -3344,13 +3372,31 @@ def get_qpsu_file_path(fn='',base='file/'):
 	return fn
 qpsu_file=get_qpsu_file=get_qpsu_file_path=getQPSUFilePath=getQpsuFilePath=get_qpsu_file_path
 
-def getModPath(mod=None,qgb=True,slash=True,backSlash=False,endSlash=True,endslash=True,trailingSlash=True):
+def getModPath(mod=None,qgb=True,slash=True,backSlash=False,end_slash=True,trailingSlash=True,**ka):
 	'''不返回模块文件，返回模块目录
 	@English The leading and trailing slash shown in the code 代码中的首尾斜杠'''
 	# if mod:
 		# sp=os.path.abspath(mod.__file__)
-	if mod:sp=os.path.abspath(getMod(mod).__file__)
-	else:sp=__file__
+	end_slash=get_duplicated_kargs(ka,'endslash','endSlash',default=end_slash)	
+	if mod:
+		m=getMod(mod)
+		if not m:
+			if '/' in mod:
+				if not end_slash and not mod.startswith('/'):
+					mod='/'+mod
+				if end_slash:
+					if mod.startswith('/'):mod=mod[1:]
+					if mod.startswith('./'):mod=mod[2:] #这个输入不应该存在
+					
+				sp=__file__	
+			else:
+				return py.No('can not get mod:',mod)
+		else:		
+			sp=os.path.abspath(m.__file__)
+			mod=''
+	else:
+		sp=__file__
+		mod=''
 	sp=os.path.abspath(sp)
 	sp=os.path.dirname(sp)
 	sp=os.path.join(sp,'')
@@ -3361,7 +3407,7 @@ def getModPath(mod=None,qgb=True,slash=True,backSlash=False,endSlash=True,endsla
 	if not qgb:
 		sp=sp[:-4]
 	
-	if not endslash or not endSlash:trailingSlash=False
+	if not end_slash:trailingSlash=False
 	if trailingSlash:
 		if sp[-1] not in ('/','\\'):sp+='/'
 	else:
@@ -3372,7 +3418,7 @@ def getModPath(mod=None,qgb=True,slash=True,backSlash=False,endSlash=True,endsla
 		sp=sp.replace('/','\\')
 	else:sp=sp.replace('\\','/')
 
-	return sp
+	return sp+mod
 get_qpsu_path=getQPSUPath=getQpsuPath=get_qpsu_dir=getQPSUDir=get_mod_dir=get_module_dir=get_module_path=getModPath
 
 def len_return_string(a,*other):
@@ -4390,6 +4436,15 @@ In [157]: for i in g:print(i);break
 	# 	return r#[1:]
 
 gen_copy=copy_gen=generator_copy=copy_generator=tee=itertools_tee
+try:
+	import itertools	
+	gen_multi_iter=iter_multi_gen=iter_multiple_generator=itertools_chain=itertools.chain
+	'''
+		chain(*iterables) --> chain object
+	'''
+except:pass
+	
+
 
 def get_one_from_iterable(iterable,index=0): #TODO start, stop[, step])
 	if not py.isint(index):
@@ -4789,7 +4844,7 @@ def dict_get_nested_multi_keys_return_dict(d,*keys,**defaults):
 				
 		# dr[k]=d.get(k,defaults.get(k,default)) # .get also raise TypeError: unhashable type:
 	return dr
-get_nested_values=get_multi_dict_keys=get_dict_multi_keys=dict_get_multi=dict_get_multi_keys=dict_multi_get=dict_multi_get_keys=dict_get_multi_return_dict=dict_get_multi_keys_return_dict=dict_get_nested_multi_keys_return_dict
+get_nested_values=get_multi_dict_keys=get_dict_multi_values_by_keys=dict_get_multi=dict_get_multi_keys=dict_multi_get=dict_multi_get_keys=dict_get_multi_return_dict=dict_get_multi_keys_return_dict=dict_get_nested_multi_keys_return_dict
 
 def dict_multi_pop(adict,*keys,default=py.No('key not in dict')):
 	dr={}
@@ -4797,6 +4852,27 @@ def dict_multi_pop(adict,*keys,default=py.No('key not in dict')):
 		dr[k]=adict.pop(k,default)
 	return dr	
 dict_pop=pop_dict_multi_key=dict_pop_multi_key=dict_multi_pop
+	
+GET_DICT_MULTI_VALUES_RETURN_LIST_DEFAULT_DEFAULT=get_dict_multi_values_return_list_DEFAULT_DEFAULT=get_or_set('get_dict_multi_values_return_list_DEFAULT_DEFAULT',lazy_default=lambda:py.No('can not get key'),)
+
+def get_dict_multi_values_return_list(d,*keys,default_dict={},default_default=GET_DICT_MULTI_VALUES_RETURN_LIST_DEFAULT_DEFAULT,**ka):
+	default=get_duplicated_kargs(ka,'default')
+	if default is GET_DUPLICATED_KARGS_DEFAULT:
+		pass
+	else:
+		if py.isdict(default) and not default_dict:
+			default_dict=default
+		else:
+			default_default=default
+	r=[]
+	for k in keys:
+		if k in default_dict:
+			v=d.get(k,default_dict[k])
+		else:
+			v=d.get(k,default_default)
+		r.append(v)
+	return r
+get_multi_dict_values=get_dict_multi_values=get_dict_multi_values_return_list
 	
 def split_list(alist,sub_size):
 	n=py.int(sub_size)
@@ -5411,12 +5487,17 @@ config -l  == config --list --global
 		a=py.list(args)+a
 		
 	ipy=get_ipy(raise_EnvironmentError=True)
-	if git_exe and F.exist(git_exe):
-		U.set('git_exe',git_exe)
-	elif isWin():
-		git_exe=get_or_set('git_exe',r"D:\Program Files\Git\bin\git.exe")
-	elif isLinux():
-		git_exe=get_or_set('git_exe',r"/usr/bin/git")
+	# if git_exe and F.exist(git_exe):
+		# U.set('git_exe',git_exe)
+	# elif isWin():
+		# git_exe=get_or_set('git_exe',*r"""D:\Program Files\Git\bin\git.exe
+# C:\Program Files\Zerynth\python\Library\cmd\git.exe
+# C:\QGB\babun\cygwin\bin\git.exe
+# C:\Program Files (x86)\SparkleShare\msysgit\bin\git.exe""".splitlines())
+	# elif isLinux():
+		# git_exe=get_or_set('git_exe',r"/usr/bin/git")
+		
+	git_exe=get_git_exe(git_exe=git_exe)
 	cmd=f'''"{git_exe}" {' '.join(a)} '''
 	if p:U.pln(cmd)
 	ipy.system(cmd)
@@ -5429,6 +5510,19 @@ def git_clone(*a,depth=1,git_exe=None,p=1):
 		a.append('--depth=%s'%depth)
 	return git('clone',*a,git_exe=git_exe,p=p)
 	
+def get_or_set_exist_path(name,*sps,no_raise=False):
+	r=''
+	for s in sps:
+		if F.exist(s):
+			r=s
+			break
+	if not r:
+		ea=('no path exists!',name,sps)
+		if no_raise:
+			return py.No(*ea)
+		raise py.EnvironmentError(*ea)
+	return get_or_set(name,r)
+	
 def git_upload(commit_msg=None,repo='QPSU',repo_path=get_qpsu_dir(),
 			git_remotes=['https://qgbcs@gitee.com/qgbcs/',
 				# 'https://git.coding.net/qgb/',
@@ -5440,12 +5534,7 @@ def git_upload(commit_msg=None,repo='QPSU',repo_path=get_qpsu_dir(),
 
 		):
 	ipy=get_ipy(raise_EnvironmentError=True)
-	if not git_exe:
-		if isWin():
-			git_exe=get_or_set('git_exe',r"D:\Program Files\Git\bin\git.exe")
-		if isLinux():
-			git_exe=get_or_set('git_exe',r"/usr/bin/git")
-
+	git_exe=get_git_exe(git_exe=git_exe)
 	if not commit_msg:commit_msg=stime()
 	commit_msg=T.replacey(commit_msg,['"'],'')
 
@@ -5609,7 +5698,16 @@ def iter_screen_colors(xrange=[855,1311],yrange=[],default_step=3,set_cur_pos=Fa
 	return rd
 color_iter_screen=color_iter=iter_screen_colors
 	
-def register_hotkey	(callback=lambda:U.get('hotkey_f')(),hotkey='alt+z',unregister_all=True):
+def _hotkey_callback():
+	try:
+		get('hotkey_f')()
+	except Exception as e:
+		print(stime(),e,)
+	except BaseException as e:
+		print('#BaseException',stime(),e,)
+		# py.traceback()
+	
+def register_hotkey	(callback=_hotkey_callback,hotkey='alt+c',unregister_all=True,**ka):
 	'''  
 def f():
     print(23)
@@ -5620,6 +5718,8 @@ U.set('hotkey_f',f)
 	'''
 	import keyboard
 	U,T,N,F=py.importUTNF()
+	hotkey=U.get_duplicated_kargs(ka,'key','hot_key','k',default=hotkey)
+	
 	if unregister_all:
 		try:
 			keyboard.unhook_all_hotkeys() #
@@ -5636,7 +5736,9 @@ U.set('hotkey_f',f)
 
 	k=keyboard.add_hotkey(hotkey, callback)
 	return hotkey,U.set(hotkey,k),id(k)
-hotkey=hot_key=registe_hotkey=bind_hotkey=register_hotkey	
+on_key_pressed=key_listener=hotkey=hot_key=registe_hotkey=bind_hotkey=register_hotkey	
+
+
 	
 def print_repr(*a):
 	return print(*[py.repr(i) for i in a])
@@ -5888,9 +5990,62 @@ def get_timed_task_list():
 	return schedule.jobs
 schedule_jobs=time_task=get_time_task=get_timed_task=get_timed_task_list
 	
-def iter_each_demensional_coordinate(*shape):
+def iter_2d_from_start_to_stop(stop,start_point_xy=(0,0),step_xy=(1,1),x_limit=(0,7680+1),y_limit=py.No('auto use y'),**ka):
+	'''
+range(stop) 
+range(start, stop[, step]) 
+
+		y_limit[0]
+x_limit[0]	start .......... x_limit[1]
+............................
+............................
+............................ x_limit[1]
+.....stop 
+		y_limit[1]
+		
+'''
+	U,T,N,F=py.importUTNF()
+	start_point_xy=U.get_duplicated_kargs(ka,'start','start_point',	'start_xy',default=start_point_xy)
+	stop_point_xy=U.get_duplicated_kargs(ka,'stop','stop_point','stop_xy','end','end_point','end_xy',default=stop)
+	step_xy=U.get_duplicated_kargs(ka,'step','step_point',default=start_point_xy)
+	if step_xy[0]<0 or step_xy[1]<0:
+		raise NotImplementedError('TODO')
+	
+	
+	if not y_limit:
+		y_limit=(start_point_xy[1],stop_point_xy[1])
+	is_start=False
+	
+	for y in py.range(y_limit[0],y_limit[1],step_xy[1]):
+		for x in py.range(x_limit[0],x_limit[1],step_xy[0]):
+			if x>=start_point_xy[0] and  y>=start_point_xy[1]:
+				if not is_start:
+					is_start=True
+					yield (x,y)
+					continue
+			if is_start:				
+				if (y+step_xy[1])>stop_point_xy[1] and x>stop_point_xy[0]:
+					break
+				elif y>stop_point_xy[1]:
+					break
+				else:
+					yield (x,y)
+					
+			
+		
+	
+iter2d_start_end=iter_2d_from_start_to_end=iter_2d_from_start_to_stop
+	
+def iter_each_demensional_coordinate(*shape,step=1):
 	'''args: *shape is the size of each dimension   (xM,yM,zM....) 
 return yield (0,0,0...)  ---  	(xM-1,yM-1,zM-1....) 
+
+#BUG #TODO
+list(U.iter2d(2,2))==[[2,0],[2,0],[2,0],[2,0]]
+				not  [[0,0],[0,1],[1,0],[1,1]]
+for x,y in U.iter2d(2,2):#这样正常
+    U.p('[{},{}],'.format(x,y))				
+
 	'''
 	if not shape:raise py.ArgumentError('must privide int s')
 	nd=py.len(shape)
@@ -5902,12 +6057,12 @@ return yield (0,0,0...)  ---  	(xM-1,yM-1,zM-1....)
 	shape_indexes=py.list(py.range(nd-1,-1,-1))
 	while True:
 		yield r
-		r[-1]+=1
+		r[-1]+=step
 		for i in shape_indexes:
 			if r[i]>=shape[i]:
 				if i==0:return
 				r[i]=0
-				r[i-1]+=1
+				r[i-1]+=step
 
 range2d=rangen=rangeN=itern=iterN=iterdc=iter2d=iter3d=iternd=iterNd=iter_N_d=iter_all_coordinate=iter_coordinate=iter_high_demensional_coordinate=iter_each_demensional_coordinate
 

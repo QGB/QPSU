@@ -128,7 +128,8 @@ def request(url,method='GET',headers=gheaders,
 		except Exception as e:
 			return py.No(e,ka)
 	return requests.request(**ka)
-
+requests=request
+	
 def download(url, file_path='',default_dir=py.No('set_input',no_raise=1),headers=None,proxies=AUTO_GET_PROXY,**ka):
 	import requests,sys,os
 	U,T,N,F=py.importUTNF()

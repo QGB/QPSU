@@ -28,6 +28,24 @@ gIn=gipy.user_ns['In'];gOut=gipy.user_ns['Out']
 # version='.'.join([str(i) for i in IPython.version_info if py.isnum(i)])  #(5, 1, 0, '') 5.1.0
 version=py.float('{0}.{1}{2}\n{3}'.format(*IPython.version_info).splitlines()[0])
 # gipy.editor=U.npp()
+
+def jupyter_password(passphrase='',salt='0'*12,algorithm='sha1'):
+	import hashlib
+	from ipython_genutils.py3compat import cast_bytes,str_to_bytes
+	if py.isbytes(salt):
+		bsalt=salt
+		salt=bsalt.decode('ascii')
+	elif py.istr(salt):
+		bsalt=str_to_bytes(salt, 'ascii')
+	else:
+		raise py.ArgumentError(salt)
+	
+	h=hashlib.new(algorithm)
+	h.update(cast_bytes(passphrase, 'utf-8') + bsalt)
+
+	return ':'.join((algorithm, salt, h.hexdigest()))
+jpw=jupyter_passwd=jupyter_password
+	
 def set_autocall(level=2):
 	gipy.autocall=level
 	return level

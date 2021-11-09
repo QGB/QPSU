@@ -1308,7 +1308,7 @@ Image.open(fp)
 		else:
 			im = ImageGrab.grab(rect)
 	else:	
-		if U.is_termux():
+		if U.is_termux() and U.is_root():
 			f=U.gst+'screencap.png'
 			U.cmd('/system/bin/screencap','-p',f)
 			im=F.read_bytes(f)
