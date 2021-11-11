@@ -116,19 +116,19 @@ GET_NO_VALUE=py.No('U.get ',no_raise=True)
 def set(name,value=SET_NO_VALUE,level=gd_sync_level['process'],**ka):
 	if level>=gd_sync_level['process']:
 		import sys
-		d=py.getattr(sys,'_qgb_dict',{})
+		d=sys._qgb_dict=py.getattr(sys,'_qgb_dict',{})# 统一用这句
 		if value is SET_NO_VALUE: # py.No 比较不能用== ，no==0 ==None ==0.0 ...
 			value=name
 			name='_'
 		d[name]=value
-		sys._qgb_dict=d
+		# sys._qgb_dict=d
 	if level>=gd_sync_level['system']:
 		import sqlite3
 	return value
 def unset(*names,level=gd_sync_level['process'],**ka):
 	if level>=gd_sync_level['process']:
 		import sys
-		d=sys._qgb_dict
+		d=sys._qgb_dict=py.getattr(sys,'_qgb_dict',{})
 		r=[]
 		for name in names:
 			if name in d:
@@ -144,7 +144,7 @@ del_set=delete_set=unset
 	
 def set_multi(**ka):
 	import sys
-	# d=py.getattr(sys,'_qgb_dict',{})
+	d=sys._qgb_dict=py.getattr(sys,'_qgb_dict',{})
 	sys._qgb_dict.update(ka)
 	# for name,value in ka.items():
 		# d[name]=value	
@@ -153,7 +153,7 @@ set_named=set_multi
 def get(name='_',default=GET_NO_VALUE,level=gd_sync_level['process']):
 	if level>=gd_sync_level['process']:
 		import sys
-		d=py.getattr(sys,'_qgb_dict',{})
+		d=sys._qgb_dict=py.getattr(sys,'_qgb_dict',{})
 		#TODO 对于不存在的 name ，可以记录最后访问时间为 py.No，方便排查
 		# if default==None:
 			# default=py.No('can not get name '+py.repr(name),no_raise=True)
@@ -6036,8 +6036,8 @@ x_limit[0]	start .......... x_limit[1]
 	
 iter2d_start_end=iter_2d_from_start_to_end=iter_2d_from_start_to_stop
 	
-def iter_each_demensional_coordinate(*shape,step=1):
-	'''args: *shape is the size of each dimension   (xM,yM,zM....) 
+def iter_each_demensional_coordinate(*shape,step=1,start=0):
+	'''args: *shape is a max  list (max of each dimension)   (xM,yM,zM....) 
 return yield (0,0,0...)  ---  	(xM-1,yM-1,zM-1....) 
 
 #BUG #TODO
@@ -6049,10 +6049,16 @@ for x,y in U.iter2d(2,2):#这样正常
 	'''
 	if not shape:raise py.ArgumentError('must privide int s')
 	nd=py.len(shape)
-	r=[0]*nd
+	if py.isnum(start):
+		r=[start]*nd
+	elif len(start)== nd:
+		r=py.list(start)
+	else:
+		r=[0]*nd
+	start=r.copy()
 	
-	for size in shape:
-		if size<=0:raise py.ArgumentError(' size of each dimension must > 0 ')
+	for n,size in py.enumerate(shape):
+		if size<=start[n]:raise py.ArgumentError(' size of each dimension must > start ')
 	
 	shape_indexes=py.list(py.range(nd-1,-1,-1))
 	while True:
@@ -6061,7 +6067,7 @@ for x,y in U.iter2d(2,2):#这样正常
 		for i in shape_indexes:
 			if r[i]>=shape[i]:
 				if i==0:return
-				r[i]=0
+				r[i]=start[i]
 				r[i-1]+=step
 
 range2d=rangen=rangeN=itern=iterN=iterdc=iter2d=iter3d=iternd=iterNd=iter_N_d=iter_all_coordinate=iter_coordinate=iter_high_demensional_coordinate=iter_each_demensional_coordinate
