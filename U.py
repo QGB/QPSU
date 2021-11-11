@@ -5612,7 +5612,7 @@ def rgb_tuple_to_integer(rgb):
 	return rgb[2]*256*256+rgb[1]*256+rgb[0]
 color2int=color_to_int=rgb2i=rgb_to_int=rgb_to_integer=rgb_tuple_to_integer
 
-def rgb_name(r,g=None,b=None):
+def rgb_name(r,g=None,b=None,hex_format='0x%02x_%02x_%02x',color_comment=True):
 	if not py.isint(r):
 		if g==None and b==None:
 			if py.istr(r):
@@ -5627,13 +5627,15 @@ def rgb_name(r,g=None,b=None):
 	if py.isint(r) and g==None and b==None:
 			r,g,b=integer_to_rgb_tuple(r)
 	rgb=(r,g,b)
-	hex='0x%02x_%02x_%02x '%rgb#TypeError: %i format: a number is required, not list
+	hex=hex_format%rgb#TypeError: %i format: a number is required, not list
 		#rgb 必须用tuple ，不能用list
-	import webcolors
-	try:
-		name=hex+'#'+webcolors.rgb_to_name(rgb)
-	except ValueError:
-		name=hex  
+	name=hex  	
+	if color_comment:
+		import webcolors
+		try:
+			name=hex+' #'+webcolors.rgb_to_name(rgb)
+		except ValueError:
+			pass
 	return name
 i2srgb=int2srgb=int_to_srgb=rgb_name			
 	
