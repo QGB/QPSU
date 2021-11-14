@@ -353,13 +353,13 @@ async def get_taobao_user(page=None):
 	raise NotFound_taobao_user
 get_user=get_taobao_user
 	
-async def get_taobao_cookies():
+async def get_taobao_cookies(p=False):
 	cks=await taobao_trade.get_all_cookies()
 	dck={}
 	for n,c in py.enumerate(cks):
 		if 'taobao.com' in c['domain'] and not U.one_in(['login.','airunit.','cart.',], c['domain']):
 			dck[c['name'] ]=c['value']
-			print(n,'%-15s'%c['name'],c['domain'])	
+			if p:print(n,'%-15s'%c['name'],c['domain'])	
 	return dck
 async def delay_trade_time(ipage_or_ids):
 	import requests
@@ -417,13 +417,14 @@ async def delay_trade_time(ipage_or_ids):
 	return ids,F.dp(U.get_multi_return_list('id-resp','id-resp_g'),'[didr,didrg]'+U.stime()),U.len(ids,didr,didrg )
 	
 
-async def get_taobao_sku(page=None):
+async def get_taobao_sku(page=None,return_item_id=False,**ka):
 	'''
 #dict_keys(['config', 'mods', 'loadCSS', 'add', 'fire', 'listeners', 'fired'])
 # ['config', 'get', 'set']
 #dict_keys(['sku', 'desc', 'async_dc', 'support', 'async_sys', 'video'])
 	
 '''
+	return_item_id=U.get_duplicated_kargs(ka,'id','item_id',default=return_item_id)
 
 	if not page:
 		page=await taobao_trade.get_current_front_page()
@@ -441,6 +442,9 @@ async def get_taobao_sku(page=None):
 	for i,d in skuMap.items():
 		row=[ d['price'],d['stock'],propertyMemoMap[i[1:-1]],d['skuId'],d['oversold'] ]
 		r.append(row)
+	if return_item_id:
+		return T.url_get_arg(page.url,'id'),r
+		
 	return r
 get_sku_list=get_taobao_sku
 	
@@ -566,7 +570,53 @@ async def next_page_trade_list(page=0):
 	return await page.evaluate(taobao_trade.js_trade_list_next)
 next=next_page_trade_list
 
-async def add_cart(id,sku=py.No('click all')):
+async def add_cart_item(item_id,skuid,cookies=None,c3=None):
+	import requests
+	item_id,skuid=U.tuple_operator((item_id,skuid),operator=str)
+	if not cookies:
+		cookies=await taobao_trade.get_taobao_cookies()
+	if not c3:
+		c3=U.get_or_dill_load(await taobao_trade.get_user()+'.c3')
+	if not c3:
+		need_c3 #U.set(await tb.get_user()+'.c3',_592)                       
+	headers = {
+		'authority': 'cart.taobao.com',
+		'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/86.0.4240.198 Safari/537.36',
+		'accept': '*/*',
+		'sec-fetch-site': 'same-site',
+		'sec-fetch-mode': 'no-cors',
+		'sec-fetch-dest': 'script',
+		'referer': 'https://item.taobao.com/item.htm?id={}'.format(item_id),
+		'accept-language': 'zh-CN,zh;q=0.9',
+	}
+
+	params = [
+		('item_id', item_id),
+		('outer_id', skuid),
+		('outer_id_type', '2'),
+		('quantity', '1'),
+		('opp', ''),
+		# ('nekot', '1636440805284'),
+		# ('ct', '79dc2b83edef763f0981fe039467e21a'),
+		# ('_tb_token_', '5011bbe7d1931'),
+		('deliveryCityCode', '430104'),
+		('frm', ''),
+		('buyer_from', ''),
+		('item_url_refer', ''),
+		('root_refer', ''),
+		('flushingPictureServiceId', ''),
+		# ('spm', '2013.1.20140002.d2.undefined'),
+		('ybhpss', ''),
+	]
+	
+	if py.isdict(c3):c3=c3.items()
+	params.extend(c3)
+
+	response = requests.get('https://cart.taobao.com/add_cart_item.htm', headers=headers, params=params,cookies=cookies)
+	# print(response,response.text[:222])
+	return response
+
+async def add_cart_by_gui(id,sku=py.No('click all')):
 	'''  
 await post('https://okfw.net/b=q.get_data();s=T.json_loads(b);r=len(s)',$0.innerHTML)
 	'''

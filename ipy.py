@@ -149,7 +149,9 @@ def dill_load(filename):
 	return r
 load=dill_load	
 def dill_dump(*vars,len=True):
-	'''	'''
+	'''
+pip install astor
+	'''
 	T=py.importT()
 	import ast
 	co=sys._getframe().f_back.f_code

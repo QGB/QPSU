@@ -225,6 +225,30 @@ def get_or_set(name,default=None,lazy_default=None):
 		return set(name,default)
 getset=getSet=get_set=get_or_set
 
+def get_or_dill_load(name):
+	o=get(name)
+	if not o:
+		o=F.dill_load(file=name)
+	return o
+get_dl=get_or_dl=get_or_dill_load	
+
+def get_or_dill_load_and_set(name):
+	o=get(name)
+	if not o:
+		o=F.dill_load(file=name)
+	if not o:
+		return o
+		# raise EnvironmentError('can not dill_load',name)
+	else:
+		U=py.importU()
+		U.set(name,o)
+	return o
+get_or_dill_load_set=get_or_dill_load_and_set
+
+def set_and_dill_dump(name,value):
+	return set(name,value),F.dill_dump(file=name,obj=value)
+set_dp=set_and_dp=set_and_dill_dump
+	
 def get_or_set_and_dill_dump(name,default=None,lazy_default=None):
 	o=get_or_set(name=name,default=default,lazy_default=lazy_default)
 	U,T,N,F=py.importUTNF()
@@ -5608,7 +5632,9 @@ def RGBAfromInt(argb_int):
 	alpha = (argb_int >> 24) & 255
 	return (red, green, blue, alpha)
 
-def rgb_tuple_to_integer(rgb):
+def rgb_tuple_to_integer(rgb,g=None,b=None):
+	if py.isint(rgb) and py.isint(g) and py.isint(b):
+		rgb=(rgb,g,b)
 	return rgb[2]*256*256+rgb[1]*256+rgb[0]
 color2int=color_to_int=rgb2i=rgb_to_int=rgb_to_integer=rgb_tuple_to_integer
 
