@@ -806,11 +806,15 @@ def write_json(file,obj):
 
 writeJSON=json_dump=write_json
 
-def read_csv(file,encoding=None):
+def read_csv(file,encoding=None,delimiter=',',keep_default_na=False,):
+	''' keep_default_na : use float nan ,not empty string ''
+the  na_filter=False can change your columns type to object
+	
+	'''
 	file=autoPath(file)
 	if not encoding:encoding=detectEncoding(file)
 	import pandas as pd
-	df = pd.read_csv(file, delimiter=',',encoding=encoding)
+	df = pd.read_csv(file, delimiter=delimiter,encoding=encoding,keep_default_na=keep_default_na)
 	r=[]
 	is1=False
 	if py.len(df.columns)==1:is1=True

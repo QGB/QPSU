@@ -114,7 +114,9 @@ float(U.float_max+float(U.float_float_max))==1.7976931348623157e+308,
 float(U.float_max+float(U.float_float_max+1))==U.inf
 
 
->>> t,fs=(['0.24999999999999998612221219218554324470460414886474609374'], 'float(2**1024-2**970-1+ float(2**970-2**916-1+ float(2**916-2**862-1+ float(2**862-2**808-1+ float(2**808-2**754-1+ float(2**754-2**700-1+ float(2**700-2**646-1+ float(2**646-2**592-1+ float(2**592-2**538-1+ float(2**538-2**484-1+ float(2**484-2**430-1+ float(2**430-2**376-1+ float(2**376-2**322-1+ float(2**322-2**268-1+ float(2**268-2**214-1+ float(2**214-2**160-1+ float(2**160-2**106-1+ float(2**106-2**52-1+ float(2**52-1+0.749999999999999944488848768742172978818416595458984374+ 0.24999999999999998612221219218554324470460414886474609374+%s ) ))))))))))))))))))')
+>>> t,fs=(['0.24999999999999998612221219218554324470460414886474609374'], '
+float(2**1024-2**970-1+ float(2**970-2**916-1+ float(2**916-2**862-1+ float(2**862-2**808-1+ float(2**808-2**754-1+ float(2**754-2**700-1+ float(2**700-2**646-1+ float(2**646-2**592-1+ float(2**592-2**538-1+ float(2**538-2**484-1+ float(2**484-2**430-1+ float(2**430-2**376-1+ float(2**376-2**322-1+ float(2**322-2**268-1+ float(2**268-2**214-1+ float(2**214-2**160-1+ float(2**160-2**106-1+ float(2**106-2**52-1+ float(2**52-1+0.749999999999999944488848768742172978818416595458984374+ 0.24999999999999998612221219218554324470460414886474609374+%s ) ))))))))))))))))))
+')
 >>> eval(fs%'+'.join(t*31368))
 1.7976931348623157e+308
 >>> eval(fs%'+'.join(t*31369))
@@ -4918,10 +4920,14 @@ get_nested_values=get_multi_dict_keys=get_dict_multi_values_by_keys=dict_get_mul
 
 def dict_multi_pop(adict,*keys,default=py.No('key not in dict')):
 	dr={}
+	islist=py.islist(adict)
 	for k in keys:
-		dr[k]=adict.pop(k,default)
+		if islist:
+			dr[k]=adict.pop(k)#TypeError: pop() takes at most 1 argument (2 given)
+		else:	
+			dr[k]=adict.pop(k,default)
 	return dr	
-dict_pop=pop_dict_multi_key=dict_pop_multi_key=dict_multi_pop
+dict_pop=pop_list_multi_index=pop_dict_multi_key=dict_pop_multi_key=dict_multi_pop
 	
 GET_DICT_MULTI_VALUES_RETURN_LIST_DEFAULT_DEFAULT=get_dict_multi_values_return_list_DEFAULT_DEFAULT=get_or_set('get_dict_multi_values_return_list_DEFAULT_DEFAULT',lazy_default=lambda:py.No('can not get key'),)
 
