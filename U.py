@@ -1651,49 +1651,49 @@ def chdir(ap=gst,*a,**ka):
 cd=chdir
 
 CD_HISTORY=get_or_set('CD_HISTORY',[])
-def cdBack(index=-1,p=0):
+def cdBack(index=-1,p=0,**ka):
 	'''False: cd path list []'''
 	if CD_HISTORY:
-		return cd(CD_HISTORY[index],p=p)
+		return cd(CD_HISTORY[index],p=p,**ka)
 	else:
 		return False
 cdb=cdBack
 
-def cdCurrentFile(*a):
+def cdCurrentFile(*a,**ka):
 	f=sys._getframe().f_back.f_globals
 	if '__file__' in f:
 		sp=os.path.abspath(f['__file__'])
 		sp=os.path.dirname(sp)
-		return cd(sp,*a)
+		return cd(sp,*a,**ka)
 	return False
 cd__file__=cdc=cdCurrent=cdcf=cdCurrentFile
 
-def cdTest(a=''):
-	return cd(gst+a)
+def cdTest(a='',**ka):
+	return cd(gst+a,**ka)
 cdt=cdTest
 	
-def cdQPSU(a=''):
-	return cd(getModPath()+a)
+def cdQPSU(a='',**ka):
+	return cd(getModPath()+a,**ka)
 # @property
 cdq=cdqp=cdqpsu=cdQPSU
 	
-def cdWShell(a=''):
-	return cd(gsWShell+a)
+def cdWShell(a='',**ka):
+	return cd(gsWShell+a,**ka)
 cds=cdws=cdWShell
 
 def cdpm():
 	return cd('e:/pm')
 	
-def cdbabun(a=''):
+def cdbabun(a='',**ka):
 	s=r'C:\QGB\babun\cygwin\home'+'\\'
 	# s=r'C:\QGB\babun\cygwin'+'\\'
 	s=find_driver_path(s[1:])#driverPath
-	return cd(s,a)
-def cdgit(a=''):
+	return cd(s,a,**ka)
+def cdgit(a='',**ka):
 	U,T,N,F=py.importUTNF()
 	p=U.get_multi_return_exist_one('git_exe','git.exe',no_raise=False)
 	p=F.dir(p)
-	return cd(p,a)
+	return cd(p,a,**ka)
 	
 def get_current_file_dir():
 	frame=sys._getframe().f_back

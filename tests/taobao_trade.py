@@ -190,7 +190,7 @@ async def get_current_front_page():
 		return py.No('multi visible page?',pv,r)
 		
 	return r[0]
-current_front_page=get_current_front_page
+get_front_page=current_front_page=get_current_front_page
 	
 async def get_all_pages(browser=None):
 	if not browser:
@@ -201,7 +201,7 @@ async def get_all_pages(browser=None):
 		t=await pa.title()
 		print(fr'{n:>02d} {t[:33]:33} {pa.url[33:]:33} {py.repr(pa)[-11:] }' )
 	return ps
-async def new_page(url='https://intoli.com/blog/not-possible-to-block-chrome-headless/chrome-headless-test.html',timeout=30*1000,browser=None):
+async def new_page(url='https://intoli.com/blog/not-possible-to-block-chrome-headless/chrome-headless-test.html',timeout=30*1000,browser=None,url_add_timestamp=True):
 	''' Go to the ``url``.
 
 :arg string url: URL to navigate page to. The url should include
@@ -237,7 +237,7 @@ The ``Page.goto`` will raise errors if:
 	await page.evaluateOnNewDocument(JS_ONLOAD)
 	if '://' not in url:
 		url='https://'+url
-	if '#' not in url:
+	if '#' not in url and url_add_timestamp:
 		url+='#'+U.stime()
 	await page.goto(url,timeout=timeout)
 	return page
@@ -430,6 +430,7 @@ async def get_taobao_sku(page=None,return_item_id=False,**ka):
 		page=await taobao_trade.get_current_front_page()
 		if not page or 'item.taobao.com/item.htm' not in page.url:
 			page=await taobao_trade.get_page('item.taobao.com/item.htm')
+	
 	sku_raw=await page.evaluate(''' [window.Hub,KISSY.Env.mods["item-detail/promotion/index"].exports.get("promoData") ] ''')  # [{..},None]
 	d,none=sku_raw
 	dc=d['config']['config']
@@ -439,9 +440,17 @@ async def get_taobao_sku(page=None,return_item_id=False,**ka):
 	skuMap,propertyMemoMap=U.get_dict_multi_values_return_list(
 							valItemInfo,'skuMap','propertyMemoMap')
 	r=[]
-	for i,d in skuMap.items():
-		row=[ d['price'],d['stock'],propertyMemoMap[i[1:-1]],d['skuId'],d['oversold'] ]
-		r.append(row)
+	html=''
+	try:
+		for i,d in skuMap.items():
+			str_name=propertyMemoMap.get(i[1:-1],'')
+			if not str_name:
+				if not html:html=await page.evaluate("document.documentElement.outerHTML")  		
+				str_name=T.sub(html,i[1:-1]+'" class="tb-txt">\n                            <a href="javascript:;">\n                                <span>','</span>')
+			row=[ d['price'],d['stock'],str_name,d['skuId'],d['oversold'] ]
+			r.append(row)
+	except Exception as e:
+		return py.No(e,sku_raw,skuMap,page)
 	if return_item_id:
 		return T.url_get_arg(page.url,'id'),r
 		
@@ -509,7 +518,11 @@ async function(){
 	return ds, page_info
 
 
-def taobao_login(user,pw,user_input_xy=(1050, 383+9)):#incorrect tips + 9
+def taobao_login(user,pw=py.No('auto load'),user_input_xy=(1050, 383+9)):#incorrect tips + 9
+	if not pw:
+		pw=U.get_or_dill_load_and_set(user+'.pw')
+	if not pw:return pw
+		
 	return U.simulate_system_actions([('for','淘宝网 - 淘！我喜欢'),user_input_xy,'ctrl+a','backspace',user,'tab',pw,'Enter']) 
 login=taobao_login
 	

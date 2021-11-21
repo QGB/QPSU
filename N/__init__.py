@@ -1149,6 +1149,7 @@ Resource interpreted as Stylesheet but transferred with MIME type text/html:
 		return html
 	response.headers['Content-Type']=content_type;
 	response.set_data(html)
+	return response
 html=htmlp=response_html=html_response=flask_html_response
 
 def get_chunk(full_path,byte1, byte2=None,):

@@ -84,6 +84,12 @@ def mirror_cache(*a,**ka):
 	fn=cache_path+method[:1]+T.url2fn(url)[:255-1-5]  
 #Linux OSError: [Errno 36] File name too long  path 不算长度内。filename+ext 长度<= 255 OK
 	
+	if 'qgb_static' in path:#z_202111
+		# py.pdb()()
+		return N.flask_html_response(response=make_response(),file=cache_path+path,remove_tag=(),)
+		
+	
+	
 	if use_cache:
 		target=F.dill_load(fn)
 		if target:
@@ -97,6 +103,8 @@ def mirror_cache(*a,**ka):
 		if k in {'Content-Length','Content-Type'}:
 			if not v:continue
 			U.println('###',k,v,U.stime(),request.url,request.headers,file=sys.stderr)
+		if k=='Host' and U.one_in(['uploads','.jpg','.png','skin/'],path):continue # z_202111
+		
 		send_headers[k]=v
 	
 	target=send_request(method=method, 
