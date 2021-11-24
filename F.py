@@ -229,6 +229,9 @@ F.readableSize(len(F.dill_dump(protocol=4,obj=r)  ) )   #'13.694 KiB'
 	'''
 	import dill
 	if file:
+		if py.istr(obj) and py.len(obj)<333 and '.dill' in obj:
+			if not py.istr(file) or '.dill' not in file:
+				file,obj=obj,file
 		file=auto_path(file,ext=dill_ext)
 		with py.open(file,'wb') as f:
 			dill.dump(obj=obj,file=f,protocol=protocol)		

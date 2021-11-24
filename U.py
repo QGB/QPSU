@@ -2599,7 +2599,7 @@ def enumerate(a,start=0,ignoreNull=False,n=False):#todo 设计一个 indexList�
 		r.append( (start,v) )
 		start+=1
 	return r
-il=ilist=indexList=enumerate
+il=ilist=indexList=enu=enumerate
 
 def map(*a):
 	'''TypeError: map() takes no keyword arguments
@@ -3156,6 +3156,8 @@ def tuple_operator(a,operator,b=None,operator_ka={},skip_AttributeError=False):
 			if not skip_AttributeError:raise
 			else:
 				r.append(v)
+	if py.istuple(a):
+		return py.tuple(r)
 	return r
 	
 def tuple_add(a,b):return tuple_operator(a=a,b=b,operator='__add__')

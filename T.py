@@ -649,9 +649,7 @@ def urlToFileName(url):
 	for i,c in enumerate(url):
 		if c not in '%'+gsURL_not_escaped[1:] :
 			url[i]='%{0:02X}'.format( py.ord(c) ) 
-	
 	return ''.join(url).replace('%','-')
-	
 url2fn=url2file=url2fileName=url_to_filename=urlToFileName
 
 

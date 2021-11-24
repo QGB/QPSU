@@ -149,7 +149,7 @@ paramiko.RSAKey.from_private_key(open_private_key(f),)  == <paramiko.rsakey.RSAK
 		file=StringIO(f)
 	return file	
 	
-def push_with_key(repo_path,remote="ssh://git@github.com:22/QGB/QPSU.git",private_key='',refspecs='master',errstream=getattr(sys.stderr, 'buffer', None),private_key_password=None,):
+def push_with_key(repo_path,remote="ssh://git@github.com:22/QGB/QPSU.git",private_key='',refspecs='master',errstream=getattr(sys.stderr, 'buffer', None),private_key_password=None,retry=3):
 	r''' #important#	三引号string中不能出现 \util 这种字符（常见于路径）
 # 会导致 SyntaxError: (unicode error) 'unicodeescape' codec can't decode bytes in position 1-2: truncated \uXXXX escape 错误
 # 最好 引号前加r 强制用 raw-string
