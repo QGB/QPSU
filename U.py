@@ -2152,17 +2152,22 @@ def add(*a):
 		else:
 			raise NotImplementedError('not num type')
 	return r		
-def max_len(*a,return_value=False):
+def max_len(*a,return_value=False,return_index=False):
 	'''  max( *map(len,U.col(lr,5)) ) '''
 	if py.len(a)==1:a=flat(a)
 	im=-1
-	for i in a:
+	v=c_index=py.No('a is empty?',no_raise=1)
+	for index,i in enumerate(a):
 		n=len(i)
 		if n>im:
 			im=n
 			v=i
+			c_index=index
+		
 	if return_value:
 		return v
+	if return_index:
+		return c_index
 	return im
 maxLen=max_len	
 	
@@ -3521,9 +3526,10 @@ def _len(obj):
 
 len_generator=generator_len=_len
 
-def len(obj,*other,index=False):
+def len(obj,*other,return_index=False,**ka):
 	'''Exception return py.No or [no...]'''
-	return FuncWrapForMultiArgs(f=_len,args=(obj,other),index=index )# ,default=default
+	return_index=get_duplicated_kargs(ka,'index','i','n','enumerate',default=return_index)
+	return FuncWrapForMultiArgs(f=_len,args=(obj,other),index=return_index )# ,default=default
 
 def _hash(obj):
 	if py.islist(obj):
@@ -5430,14 +5436,18 @@ def gc():
 	return gc.collect()
 
 def get_objects(type,len=None):
+	'''
+0==False  # True
+0 is False# False	
+	'''
 	import gc
 	isinstance= py.isinstance
 	r=[]
 	for o in gc.get_objects():
-		if isinstance(o,type):
+		if isinstance(o,type) or o is type:
 			r.append(o)
 	return r
-find_objects=get_obj=get_objects
+search_object=search_objects=find_objects=get_obj=get_objects
 
 def git_init(remote_url='',git_exe=None,**ka):
 	cmd=r''' 

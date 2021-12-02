@@ -684,7 +684,7 @@ def uploadServer(port=1122,host='0.0.0.0',dir='./',url='/up'):
 			return r
 	app.run(host=host,port=port,debug=0,threaded=True)	
 
-def set_remote_rpc_base(base=py.No('if not base:input',no_raise=1),change=True):
+def set_remote_rpc_base(base=py.No('if not base:input',no_raise=1),change=True,ka=None):
 	U,T,N,F=py.importUTNF()	
 	if not base:
 		default=U.get(RPC_BASE_REMOTE)
@@ -728,6 +728,29 @@ def set_remote_rpc_base(base=py.No('if not base:input',no_raise=1),change=True):
 		# base+='/'
 	return U.set(RPC_BASE_REMOTE,base)	
 rpc_base=change_rpc_base=get_or_set_rpc_base=set_rpc_base_remote=get_remote_rpc_base=set_remote_rpc_base
+	
+	
+def rpc_copy_single_file(source,target,base):
+	return
+def rpc_copy_files(source_list_or_dict,target='',target_path_base=py.No('U.gst'),base=py.No('auto'),source_max_size=8*1024*1024,skip_empty_file=True,**ka):
+	U,T,N,F=py.importUTNF()	
+	base=get_remote_rpc_base(base,ka=ka)
+	source=U.get_duplicated_kargs(ka,'a','s','source',default=source_list_or_dict)
+	d={}
+	if py.istr(source) and py.istr(target):
+		d={source:target}
+	elif py.isdict(source) and not target:
+		d=source
+	elif U.len(source)==U.len(target) and U.len(source)>1 :
+		for n,i in py.enumerate(source):
+			d[i]=target[n]
+	else:
+		raise py.ArgumentUnsupported(source,target)
+	
+	F.read_multi_files(return_all_bytes=1)
+	
+	return
+rpc_copy=rpc_copy_file=rpc_copy_files
 	
 def rpcGetVariable(varname,base=py.No('auto history e.g. [http://]127.0.0.1:23571[/../] ',no_raise=1),
 		timeout=9,p=True,return_bytes=False,**ka):

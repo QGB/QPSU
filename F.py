@@ -737,6 +737,27 @@ SyntaxError: invalid syntax
 		# return f,e
 		# if 'f' in py.dir() and f:f.close()
 		# return ()
+def read_multi_files_return_bytes_list(*fs,max_size=8*1024*1024,return_all_bytes=False):
+	r=[]
+	def append(a):	
+		if return_all_bytes and not a:
+			return r.append(b'')
+		r.append(a)
+		
+	for f in fs:
+		s=size_single_file(f)
+		if not s :
+			append(s)
+			continue
+		if s>max_size:
+			append(py.No('f > max_size',f,max_size))
+			continue
+		with py.open(f,'rb') as fp:
+			b=fp.read(max_size)
+			append(b)
+	return r		
+read_multi_files=read_multi_file=read_multi_files_return_bytes=read_multi_files_return_bytes_list		
+		
 def read_bytes(file,size=-1,):
 	'''is2 rb return str
 f.read(size=-1, /)
@@ -1105,6 +1126,24 @@ def int_to_size_str(size,b1024=True,zero='0 B',less_than_zero='%s', ):
 	raise ValueError('number too large')
 ssize=readable_size=readableSize=numToSize=int_to_size=int_to_size_str
 
+def size_single_file(f):
+	f=nt_path(f)
+	size =0 #0L  SyntaxError in 3
+	if not _p.exists(f):
+		return py.No('{} NOT EXISTS!'.format(f))
+	if _p.isdir(f):
+		# if f==''  , _p use pwd
+		return py.No('{} is dir !'.format(f))
+	
+	try:
+		size= _p.getsize(f)
+		if size<=0:
+			size=py.len(read_bytes(f))
+	except Exception as e:
+		return py.No('unexcept err',e,f)
+		
+get_single_file_size=single_file_size=size_single_file
+	
 def size(asf,int=py.No('ipython auto readable')): 
 	'''file or path return byte count
 	not exist return -1'''
@@ -1116,7 +1155,7 @@ def size(asf,int=py.No('ipython auto readable')):
 	if not _p.isdir(asf):
 		size= _p.getsize(asf)
 		if size<=0:
-			try:size=len(read(asf))
+			try:size=len(read_bytes(asf))
 			except Exception as e:
 				return py.No('unexcept err',e,asf)
 		# return size
@@ -1463,7 +1502,11 @@ def get_dirname_from_full_path(a):
 	#TODO 判断 磁盘上a 为文件夹 应该直接返回
 	if a[-1] in ['/','\\']:
 		return a
-	return _p.dirname(a)
+	r= _p.dirname(a)
+	if r in ['/','\\']:
+		return r
+	else:
+		return r+'/'
 	# exit()
 get_dir=dirname=dir=get_path_from_full_path=get_dirname_from_full_path
 

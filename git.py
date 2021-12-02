@@ -103,7 +103,8 @@ porcelain.push(repo.path,"https://http://e.coding.net/...",'master',username='co
 	try:
 		#repo.path == 'C:/QGB/babun/cygwin/bin/qgb/'
 		if 'git@' in url:
-			push_with_key(repo.path,url,**ka)
+			rp=push_with_key(repo.path,url,**ka)
+			if not rp:return rp
 		else:
 			dulwich.porcelain.push(repo.path, url , **ka )
 		
