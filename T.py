@@ -1723,6 +1723,18 @@ def varname(a):
 	# return replacey(a,'_',':','.','\\','/','-','"',' ','\n','\r','\t','[',']')
 # U.pln( varname(i09)
 
+def filename_unlegalized(a,):
+	''' '''
+	r=''
+	charset=[py.chr(py.ord(c)+0XFEE0) for c in NOT_FILE_NAME_WINDOWS]
+	for c in a:
+		if c in charset:
+			r+=py.chr(py.ord(c)-0XFEE0)
+		else:
+			r+=c
+	return r
+unfilename=unlegalized_filename=filename_unlegalized
+
 def filename_legalized(a,space=' '):
 	'''  # 多个连续空白字符会 缩减成 一个 space
 not auto cut long string
