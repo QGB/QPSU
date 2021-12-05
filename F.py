@@ -29,7 +29,7 @@ class IntSize(py.int):
 			self= a[0]
 		self.ka=ka
 		return self
-	def __repr__(self):
+	def __str__(self):
 		U=py.importU()
 		s='<{}'.format(numToSize(self) )
 		
@@ -43,7 +43,8 @@ class IntSize(py.int):
 		return T.justify(s,**self.ka)+'>'
 		# return 
 		# return '<{}={}>'.format(super().__repr__(),F.ssize(self) )
-
+	def __repr__(self):return self.__str__()
+	
 def test_long_filename():
 	'''
 245

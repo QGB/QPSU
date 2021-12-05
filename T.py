@@ -310,7 +310,7 @@ def wcswidth(pwcs, n=None):
 		else:
 			width += wcw
 	return width  #py.No return 0
-display_width=get_str_display_width=wcswidth
+length_display=char_display_width=display_width=get_display_width=get_str_display_width=wcswidth
 
 
 def get_javascript_function(source,function_name):

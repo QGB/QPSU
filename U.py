@@ -191,9 +191,10 @@ del_set=delete_set=unset
 			
 	
 def set_multi(**ka):
+	surfix=get_duplicated_kargs(ka,'__surfix','_surfix',default='')
 	import sys
 	d=sys._qgb_dict=py.getattr(sys,'_qgb_dict',{})
-	sys._qgb_dict.update(ka)
+	sys._qgb_dict.update({surfix+k:v for k,v in ka.items()})
 	# for name,value in ka.items():
 		# d[name]=value	
 	return ka
@@ -2153,8 +2154,15 @@ def add(*a):
 			raise NotImplementedError('not num type')
 	return r		
 def max_len(*a,return_value=False,return_index=False):
-	'''  max( *map(len,U.col(lr,5)) ) '''
-	if py.len(a)==1:a=flat(a)
+	'''  max( *map(len,U.col(lr,5)) ) 
+max_len(dict)==max_len(dict.keys())	
+	'''
+	if py.len(a)==1:
+		a=a[0]
+		if py.isdict(a):
+			a=py.list(a.keys())
+		else:
+			a=flat(a)
 	im=-1
 	v=c_index=py.No('a is empty?',no_raise=1)
 	for index,i in enumerate(a):
@@ -5424,6 +5432,7 @@ def sha256_fingerprint_from_pub_key(pubkey_str):
 	return "SHA256:" + encoded.decode('utf-8')
 
 def sizeof_one_obj(obj):
+	''' IntRepr'''
 	from pympler.asizeof import asizeof
 	return F.IntSize(asizeof(obj))
 
