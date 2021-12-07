@@ -57,6 +57,27 @@ def up(url,path=None,commit_msg=None,username=None,password=None,branch='master'
 porcelain.push(repo.path,"https://wrong_name@e.coding.net/...",'master',username='correct_name',password=_) ## 也会GitProtocolError: unexpected http resp 401 for
 
 porcelain.push(repo.path,"https://http://e.coding.net/...",'master',username='correct_name',password=_)  #  OK!	
+
+
+C:/QGB/babun/cygwin/bin/qgb/ adding ... 2021-12-07__13.20.51__.479
+commit ... 2021-12-07__13.20.51__.559
+push ... 2021-12-07__13.20.51__.573
+  File "C:/QGB/babun/cygwin/bin\qgb\git.py", line 106, in up
+    rp=push_with_key(repo.path,url,**ka)
+  File "C:/QGB/babun/cygwin/bin\qgb\git.py", line 231, in push_with_key
+    progress=errstream.write)
+  File "C:\QGB\Anaconda3\lib\site-packages\dulwich\client.py", line 789, in send_pack
+    proto, unused_can_read, stderr = self._connect(b'receive-pack', path)
+  File "C:\QGB\Anaconda3\lib\site-packages\dulwich\client.py", line 1410, in _connect
+    **kwargs)
+  File "C:\QGB\Anaconda3\lib\site-packages\dulwich\contrib\paramiko_vendor.py", line 103, in run_command
+    client.connect(**connection_kwargs)
+  File "C:\QGB\Anaconda3\lib\site-packages\paramiko\client.py", line 349, in connect
+    retry_on_signal(lambda: sock.connect(addr))
+  File "C:\QGB\Anaconda3\lib\site-packages\paramiko\util.py", line 283, in retry_on_signal
+    return function()
+  File "C:\QGB\Anaconda3\lib\site-packages\paramiko\client.py", line 349, in <lambda>
+    retry_on_signal(lambda: sock.connect(addr))
 	'''
 	global grepo
 	if ':' not in url:
