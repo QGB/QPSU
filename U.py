@@ -3185,7 +3185,7 @@ mul=multiply_two_tuple=tuple_multiply
 def tuple_div(a,b):return tuple_operator(a=a,b=b,operator='__truediv__')
 div=div_two_tuple=tuple_div
 
-def traverseTime(start,stop=None,step='day'):
+def traverseTime(start,stop=None,step='day',**ka):
 	'''
 	#TODO ipy 自动化测试框架 ， 解决 ipy3 兼容问题
 	range(start, stop[, step])
@@ -3203,6 +3203,9 @@ from dateutil.relativedelta import relativedelta
 	sregex='([0-9]*)(micro|ms|milli|sec|minute|hour|day|month|year)'
 	timedeltaKW=('days', 'seconds', 'microseconds',
  'milliseconds', 'minutes', 'hours', 'weeks')
+	
+	
+	
 	if py.istr(step):
 		step=step.lower()
 		rm=re.match(sregex,step)
@@ -3242,7 +3245,7 @@ from dateutil.relativedelta import relativedelta
 		start+=tdelta
 		yield start
 	# return i #SyntaxError: 'return' with argument inside generator
-iter_time=range_time=time_range=rangeTime=timeRange=timeTraverser=timeTraversal=traverseTime	
+time_delta=timeDelta=iter_time=range_time=time_range=rangeTime=timeRange=timeTraverser=timeTraversal=traverseTime	
 
 def datetime(a,month=0, day=0,hour=0,minute=0,second=0,microsecond=0):
 	''' a : string

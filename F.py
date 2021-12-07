@@ -619,9 +619,9 @@ def writeIterable(file,data,end='\n',overwrite=True,encoding=None):
 	for i in data:
 		f.write(py.str(i)+end)
 	f.close()
-	return f.name
-
-def write(file,data,mod='w',encoding='',mkdir=False,autoArgs=True,pretty=True):
+	return f.name	
+	
+def write(file,data,mod='w',encoding='',mkdir=False,autoArgs=True,pretty=True,seek=None):
 	'''py3  open(file, mode='r', buffering=-1, encoding=None, errors=None, newline=None, closefd=True, opener=None)
 	   py2  open(name[, mode[, buffering]])
 pretty=True        Format a Python object into a pretty-printed representation.
@@ -643,11 +643,14 @@ pretty=True        Format a Python object into a pretty-printed representation.
 	
 	if 'b' not in mod and isinstance(data,py.bytes):mod+='b'# 自动检测 data与 mod 是否匹配
 	
-	if 'b' not in mod:
-		mod+='b'
+	# if 'b' not in mod: #这一句不重复了吗，不记得当时怎么想的	
+		# mod+='b'
 	f=py.open(file,mod)
 		#f.write(强制unicode) 本来只适用 py.is3() ，但 py2 中 有 from io import open
-	# with open(file,mod) as f:
+
+	if py.isint(seek):
+		f.seek(seek)
+	# with open(file,mod) as f:	
 	if py.isbyte(data):#istr(data) or (py.is3() and py.isinstance(data,py.bytes) )	:
 		f.write(data)
 	elif (py.is2() and py.isinstance(data,py.unicode)) or (py.is3() and py.istr(data)):
@@ -682,10 +685,23 @@ def write_auto_filename(*a,**ka):
 	return rf
 writeA=write_auto_args=write_args=write_auto_filename
 
-
+def insert_head_line(file,data,char_index=0):
+	''' 没有很好的办法，除了 先全部读出再写入
+	'''
+	raise NotImplementedError()
+    # f = fileinput.input(file, inplace=1)
+    # for xline in f:
+		# if f.isfirstline():
+			# print line_to_prepend.rstrip('\r\n') + '\n' + xline,
+		# else:
+			# print xline,
+	return
+line_pre_adder=insert=insert_head_line
+	
+	
 def append(file,data):
 	'''builtin afile.write() No breakLine'''
-	write(file,data,mod='a')
+	return write(file,data,mod='a')
 	
 def detect_file_encoding(file,confidence=0.7,default=py.No('not have default encoding'),buffer_size=9999,p=True,**ka):
 	U,T,N,F=py.importUTNF()
