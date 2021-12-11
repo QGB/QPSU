@@ -1351,7 +1351,7 @@ def javascript_object_loads(s):
 	import demjson 
 	return demjson.decode(s)
 
-load_js=loads_js=load_js_obj=load_js_object=js_loads=js_obj_loads=javascript_object_loads
+load_js=loads_js=load_js_obj=load_js_object=js_load=js_loads=js_obj_loads=javascript_object_loads
 
 def jsonToDict(a):
 	'''py2: 不同于 json_loads ，不会自动转换 到unicode'''

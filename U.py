@@ -995,6 +995,25 @@ hashlib.algorithms_available 一个集合，其中包含在所运行的 Python �
 	myhash.update(bytes)	
 	return myhash.hexdigest(*hexdigest_args)  
 
+def DES_encrypt_return_bytes(byte_or_ascii,password,password_max_length=24):
+	''' 'a 16 or 24 byte password' 
+	
+ValueError: pyDes can only work with encoded strings, not Unicode.	
+	'''
+	from pyDes import triple_des # pyDes if installed from pip
+	password=T.padding(password,size=password_max_length)[:password_max_length]
+	ciphertext = triple_des(password).encrypt(byte_or_ascii, padmode=2)  #plain-text usually needs padding, but padmode = 2 handles that automatically
+	return ciphertext
+	# ')\xd8\xbfFn#EY\xcbiH\xfa\x18\xb4\xf7\xa2'  #gibberish	
+jiami=encrypt_DES=des_encrypt=DES_encrypt=DES_encrypt_return_bytes
+
+def DES_decrypt_return_bytes(byte_or_ascii,password,password_max_length=24):
+	from pyDes import triple_des
+	password=T.padding(password,size=password_max_length)[:password_max_length]
+	bytes = triple_des(password).decrypt(byte_or_ascii, padmode=2)
+	return  bytes
+jiemi=decrypt_DES=des_decrypt=DES_decrypt=DES_decrypt_return_bytes
+	
 	
 def inMuti(a,*la,**func):
 	'''bool a.func(la[i])'''

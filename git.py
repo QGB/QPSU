@@ -53,7 +53,7 @@ def clone(url,path=None):
 	return path,r
 
 def up(url,path=None,commit_msg=None,username=None,password=None,branch='master',**ka):
-	'''
+	r'''
 porcelain.push(repo.path,"https://wrong_name@e.coding.net/...",'master',username='correct_name',password=_) ## 也会GitProtocolError: unexpected http resp 401 for
 
 porcelain.push(repo.path,"https://http://e.coding.net/...",'master',username='correct_name',password=_)  #  OK!	
