@@ -131,7 +131,7 @@ def getIpyHistory(file='~/.ipython/profile_default/history.sqlite'):
 # session,line,  autocall ,    raw_input
 	return [ i[2] for i in his ]
 	
-def dill_load(filename):
+def dill_load(filename,return_value=False,set_user_ns=True):
 	# F=py.importF()
 	if not filename.lower().endswith('.dill'):
 		for f in F.ls(U.gst,f=1,d=0):
@@ -139,14 +139,26 @@ def dill_load(filename):
 				py.input('continue or ctrl+c  using: '+f)
 				filename=f
 				break
-	varname=''
-	for c in F.getNameWithoutExt(filename):
-		if c not in T.alphanumeric_:break
-		varname+=c
-	r=[varname,filename]
+	vars=[]
+	dnv={}
+	if U.all_in([',','='],filename):
+		vars=T.regex_match_all(F.getNameWithoutExt(filename),T.RE_vars_separated_by_commas)[0].split(',')
+	if vars:
+		for n,v in py.enumerate(F.dill_load(filename)):
+			dnv[vars[n]]=v
+	else:
+		varname=''
+		for c in F.getNameWithoutExt(filename):
+			if c not in T.alphanumeric_:break
+			varname+=c
+		dnv[varname]=F.dill_load(filename)
+	r=[py.list(dnv),filename]
 	U.pln(r)
-	gipy.user_ns[varname]=F.dill_load(filename)
-	return r
+	if set_user_ns:
+		for name,v in dnv.items():
+			gipy.user_ns[name]=v
+	if return_value:
+		return r
 load=dill_load	
 def dill_dump(*vars,len=True):
 	'''
