@@ -3390,7 +3390,7 @@ def exit(i=2357,msg=''):
 	print(msg)
 	os._exit(i)
 
-def getModulesByFile(fileName):
+def getModulesByFile(fileName,return_list=False):
 	'''
 	return dict {sname:mod ...}
 	
@@ -3412,6 +3412,8 @@ def getModulesByFile(fileName):
 			dr[name]=mod
 	# if py.len(r)==1:return r[0]
 	if not dr:return py.No('can not found {} in sys.modules __file__ '.format(fileName),dnf)
+	if return_list:
+		return py.list(dr.values())
 	return dr
 	
 mbf=modByFile=mod_by_file=getModByf=getModf=getModByF=getModF=getmbf=getmf=get_module_by_file=modulesByFile=getModsByFile=getModulesByFile
