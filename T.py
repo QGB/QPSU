@@ -1245,14 +1245,17 @@ gs09AZ=number+AZ
 for i in range(2,37):
 	gdBaseN[i]=gs09AZ[:i]
 ###################
-def bytesToBase64(a):
+def bytes_to_base64(a,encoding='utf-8'):
 	'''return str'''
 	import base64
+	if py.istr(a):
+		a=a.encode(encoding)
 	if py.is3():
 		return base64.b64encode(a).decode('ascii')
 	else:
 		return base64.b64encode(a)
-
+b64encode=base64_encode=bytesToBase64=bytes_to_base64
+		
 def base64_to_str(a,return_bytes=False):
 	import base64
 	if return_bytes or py.isbyte(a):

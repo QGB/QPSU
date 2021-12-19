@@ -684,8 +684,27 @@ def uploadServer(port=1122,host='0.0.0.0',dir='./',url='/up'):
 			return r
 	app.run(host=host,port=port,debug=0,threaded=True)	
 
-def set_remote_rpc_base(base=py.No('if not base:input',no_raise=1),change=True,ka=None):
+RPC_BASE_REMOTE_DEFAULT=py.No('if not base:input',no_raise=1)
+def is_remote_rpc_base(base):
+	if (not base) or (not py.istr(base)):return py.No(base,'must be str')
+	if '://' in base:
+		return base
+	else:
+		return py.No(base,'format error!')
+is_rpc_base=is_rpc_base_remote=is_remote_rpc_base
+		
+def set_remote_rpc_base(base=RPC_BASE_REMOTE_DEFAULT,change=True,ka=None):
 	U,T,N,F=py.importUTNF()	
+	if py.istr(base):
+		if base.lower() in ['set','reset','modify','change']:
+			change=True
+			base=''
+		
+		if base.lower() in ['get','last','no_change']:
+			change=False
+			base=''
+			
+			
 	if not base:
 		default=U.get(RPC_BASE_REMOTE)
 		if default:
@@ -693,7 +712,7 @@ def set_remote_rpc_base(base=py.No('if not base:input',no_raise=1),change=True,k
 				base=default
 		else:
 			default='https://'
-		while not base:
+		while not is_remote_rpc_base(base):
 			base=default=U.input(RPC_BASE_REMOTE+' :',default=default)
 			base=T.matchRegexOne(base,T.RE_URL)
 		# base=U.get_or_set(RPC_BASE_REMOTE,'http://127.0.0.1:23571/')
@@ -727,12 +746,18 @@ def set_remote_rpc_base(base=py.No('if not base:input',no_raise=1),change=True,k
 			# base=base+':23571'
 		# base+='/'
 	return U.set(RPC_BASE_REMOTE,base)	
-rpc_base=change_rpc_base=get_or_set_rpc_base=set_rpc_base_remote=get_remote_rpc_base=set_remote_rpc_base
+rpc_base=change_rpc_base=get_or_set_rpc_base=get_rpc_base_remote=get_remote_rpc_base=set_rpc_base_remote=set_remote_rpc_base
 	
 	
-def rpc_copy_single_file(source,target,base):
-	return
-def rpc_copy_files(source_list_or_dict,target='',target_path_base=py.No('U.gst'),base=py.No('auto'),source_max_size=8*1024*1024,skip_empty_file=True,**ka):
+def rpc_copy_single_file(source,target='',base=RPC_BASE_REMOTE_DEFAULT,**ka):
+	U,T,N,F=py.importUTNF()
+	base=get_remote_rpc_base(base,ka=ka)
+	b=F.read_bytes(source)
+	# if not F.isabs()
+	r=N.HTTP.post(base+'b=request.get_data();rpc_copy_filename=%r;r=F.write(rpc_copy_filename,b)'%target,verify=False,timeout=9,proxy='',data=b).text
+	
+	return U.StrRepr(r)
+def rpc_copy_files(source_list_or_dict,target='',target_path_base=py.No('U.gst'),base=RPC_BASE_REMOTE_DEFAULT,source_max_size=8*1024*1024,skip_empty_file=True,proxy='',**ka):
 	U,T,N,F=py.importUTNF()	
 	base=get_remote_rpc_base(base,ka=ka)
 	source=U.get_duplicated_kargs(ka,'a','s','source',default=source_list_or_dict)
@@ -749,10 +774,10 @@ def rpc_copy_files(source_list_or_dict,target='',target_path_base=py.No('U.gst')
 	
 	F.read_multi_files(return_all_bytes=1)
 	
-	return
+	return  
 rpc_copy=rpc_copy_file=rpc_copy_files
 	
-def rpcGetVariable(varname,base=py.No('auto history e.g. [http://]127.0.0.1:23571[/../] ',no_raise=1),
+def rpcGetVariable(varname,base=py.No('auto history e.g. [http://]127.0.0.1:23571[/../] ',no_raise=1,),
 		timeout=9,p=True,return_bytes=False,**ka):
 	U,T,N,F=py.importUTNF()	
 	return_bytes=U.get_duplicated_kargs(ka,'return_byte','rb','B','b','raw','raw_bytes',default=return_bytes)
