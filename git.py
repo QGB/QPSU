@@ -52,7 +52,7 @@ def clone(url,path=None):
 	r.close()
 	return path,r
 
-def up(url,path=None,commit_msg=None,username=None,password=None,branch='master',**ka):
+def up(url,path=None,commit_msg=None,username=None,password=None,branch='master',retry=3,**ka):
 	r'''
 porcelain.push(repo.path,"https://wrong_name@e.coding.net/...",'master',username='correct_name',password=_) ## 也会GitProtocolError: unexpected http resp 401 for
 
@@ -124,7 +124,7 @@ push ... 2021-12-07__13.20.51__.573
 	try:
 		#repo.path == 'C:/QGB/babun/cygwin/bin/qgb/'
 		if 'git@' in url:
-			rp=push_with_key(repo.path,url,**ka)
+			rp=push_with_key(repo_path=repo.path,remote=url,retry=retry,**ka)
 			if not rp:return rp
 		else:
 			dulwich.porcelain.push(repo.path, url , **ka )

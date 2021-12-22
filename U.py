@@ -4990,6 +4990,16 @@ def get_dict_multi_values_return_list(d,*keys,default_dict={},default_default=GE
 	return r
 get_multi_dict_values=get_dict_multi_values=get_dict_multi_values_return_list
 	
+def dict_contains_dict(d,dsub):
+	for k,v in dsub.items():
+		if k not in d:
+			return py.No('k not in d',k,d,dsub)
+		else:
+			if d[k]!=v:
+				return py.No(' d[k]!=v ',k,d,dsub,v)
+	return True
+dind=dict_in_dict=dict_contains_dict	
+	
 def split_list(alist,sub_size):
 	n=py.int(sub_size)
 	return [alist[i:i+n] for i in py.range(0, py.len(alist), n)]

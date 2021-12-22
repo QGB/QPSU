@@ -1367,9 +1367,9 @@ js2py=jsonToDict
 def json_load(astr='',file=None,comment=lambda s:re.sub("//.*","",s,flags=re.MULTILINE),**ka):
 	import json
 	if not (astr or file):
-		return py.No('either astr or file, but not any') #一个也没有 不用 both not
+		return py.No('either astr or file, but not any',astr,file) #一个也没有 不用 both not
 	if (astr and file):
-		return py.No('either str or file, but not both') # not all 可以吗
+		return py.No('either str or file, but not both',astr,file) # not all 可以吗
 	
 	if file:
 		if py.istr(file):
