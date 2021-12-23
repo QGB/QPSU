@@ -1063,10 +1063,20 @@ pythonAnywhere : multi[ // or  %2F%2F%2F%2F%2F ] in url will auto convert to one
 	'''
 	if py.istr(request):return request
 	if not request:from flask import request
-	try:
-		u=request.url
-	except RuntimeError as e:
-		return py.No(e)
+	if py.islist(request):
+		try:
+			for index,name,value in request:
+				if name=='url':
+					u=value
+					break
+		except Exception as e:
+			return py.No(e)
+	else:
+		try:
+			u=request.url
+		except RuntimeError as e:
+			return py.No(e)
+		
 	U,T,N,F=py.importUTNF()
 	if '%23=' in u:
 		a=T.sub_tail(u,'%23=')

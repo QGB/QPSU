@@ -96,6 +96,53 @@ try:
 	from pprint import pprint,pformat
 except:pass
 ####################################################
+def format_dict(d,):
+	U,T,N,F=py.importUTNF()
+	r={}
+	max_k,max_v=0,0
+	
+	id0=0
+	id_1=0
+	def fk(a,*aa,**ka):
+		nonlocal max_k
+		# py.pdb()()
+		# U.get_or_set('fk',[]).append([a,py.id(a)])
+		
+		r=T.padding(py.repr(a._qgb_obj),size=max_k)
+		if py.id(a._qgb_obj)==id0:
+			r="\n"+r
+		return r
+	def fv(a):
+		nonlocal max_v
+		# U.get_or_set('fv',[]).append([a,py.id(a._qgb_obj)])
+		r=T.padding(py.repr(a._qgb_obj),size=max_v)
+		if py.id(a._qgb_obj)==id_1:
+			r=r+",\n\n" #TODO '一个\n 在IPython 中显示不出来。'
+		return r
+		
+	for n,(k,v) in py.enumerate(d.items()):
+		s=py.repr(k)
+		nk=T.wcswidth(s)
+		if nk>max_k:
+			max_k=nk
+		
+		sv=py.repr(v)
+		nv=T.wcswidth(sv)
+		if nv>max_v:
+			max_v=nv
+		
+		
+		if n==0:
+			id0=py.id(k)
+			# print('id0:',id0)
+		r[U.object_custom_repr(k,repr=fk)]=U.object_custom_repr(v,repr=fv)
+	else:#只有break后才不执行else
+		id_1=py.id(v)
+		# print(n,k,v,id_1)
+			
+		# r[U.StrRepr(k,repr=s)]=U.StrRepr(v,repr=T.padding(1,size=3))
+			
+	return r
 def parse_cookie_str_to_dict(s):
 	T=py.importT()
 	dc={}
@@ -312,7 +359,7 @@ def wcswidth(pwcs, n=None):
 		else:
 			width += wcw
 	return width  #py.No return 0
-length_display=char_display_width=display_width=get_display_width=get_str_display_width=wcswidth
+length_display=char_display_width=display_width=get_display_width=get_str_display_width=wcsize=wcslength=wcswidth
 
 
 def get_javascript_function(source,function_name):

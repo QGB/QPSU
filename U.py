@@ -4752,6 +4752,12 @@ def dict_value_len_count(adict,show_key_len_range=py.range(-1,-1) ):
 				setDictListValue(d,'%s-len'%l,k)							
 	return d
 	
+def dict_replace_value(adict,key_map_dict):
+	rd={}
+	for ka,kr in key_map_dict.items():
+		rd[kr]=adict[ka]
+	return rd
+	
 def dict_value_hash_count(adict,):
 	'''
 	return {v_hash:count}
@@ -4770,6 +4776,15 @@ def dict_value_hash_count(adict,):
 			d[l]=IntWithObj(1,k)
 		# setDictValuePlusOne(d,l)
 	return d
+
+def dict_swap_key_value(d):
+	return {v:k for k,v in d.items()}
+	r={}
+	for k,v in d.items:
+		r[v]=k
+	return r
+swap_dict_key_value=dict_key_value_swap=dict_swap_key_value
+	
 def is_builtin_function(a):
 	'''
 dict,list,tuple  should is_builtin_function?  now is False	
@@ -6329,6 +6344,7 @@ Out[1312]: []
 	#####
 	
 	self=t.__new__(QGB_REPR_SUBTYPE,obj,*a,**ka)
+	self._qgb_obj=obj
 	self._qgb_a=a
 	self._qgb_ka=ka
 	self._qgb_repr=target
