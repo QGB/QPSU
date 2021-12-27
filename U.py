@@ -4755,8 +4755,12 @@ def dict_value_len_count(adict,show_key_len_range=py.range(-1,-1) ):
 def dict_replace_value(adict,key_map_dict):
 	rd={}
 	for ka,kr in key_map_dict.items():
-		rd[kr]=adict[ka]
+		if py.islist(kr):
+			rd[ka]=kr[0]
+		else:
+			rd[ka]=adict[kr]
 	return rd
+dict_copy=replace_dict_value=dict_replace_value
 	
 def dict_value_hash_count(adict,):
 	'''
@@ -5185,7 +5189,7 @@ def set_system_volume(a):
 	else:
 		raise py.ArgumentUnsupported(a)
 	return nircmd( 'setsysvolume',a )
-vol=setVol=setVolume=et_vol=set_volumn=set_volume=set_system_volumn=set_system_volume
+vol=changesysvolume=setVol=setVolume=et_vol=set_volumn=set_volume=set_system_volumn=set_system_volume
 
 def save(a,name=0):
 	if not iswin():raise NotImplementedError()

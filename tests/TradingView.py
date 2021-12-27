@@ -5,11 +5,24 @@ if gsqp not in sys.path:sys.path.append(gsqp)#py3 works
 from qgb import py
 U,T,N,F=py.importUTNF()
 
+k2k={
+'time'      : 'timestamp',
+'open'      : 'open'     ,
+'close'     : 'close'    ,
+'low'       : 'low'      ,
+'high'      : 'high'     ,
+'volumefrom': 'volume'   ,
+'volumeto'  : 'volume'   ,
+'conversionSymbol': [''],
+'conversionType': ['force_direct'],
+}
+
 def getBars():
 	from flask import request
 	U.get_or_set('tv',[]).append(U.dir(request))
 	a=N.geta()
 	d=T.parse_url_arg(a)
+	
 	
 	return a
 	

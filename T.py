@@ -131,7 +131,6 @@ def format_dict(d,):
 		if nv>max_v:
 			max_v=nv
 		
-		
 		if n==0:
 			id0=py.id(k)
 			# print('id0:',id0)
@@ -140,9 +139,10 @@ def format_dict(d,):
 		id_1=py.id(v)
 		# print(n,k,v,id_1)
 			
-		# r[U.StrRepr(k,repr=s)]=U.StrRepr(v,repr=T.padding(1,size=3))
-			
+		# r[U.StrRepr(k,repr=s)]=U.StrRepr(v,repr=T.padding(1,size=3))	
 	return r
+dict_format=format_dict	
+	
 def parse_cookie_str_to_dict(s):
 	T=py.importT()
 	dc={}
