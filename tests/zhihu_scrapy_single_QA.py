@@ -9,7 +9,7 @@ thread,server=N.rpcServer(port=2345,locals=globals())
 c=item=html=0
 next_url=[]
 answers=[]
-def zhihu_question(id):
+def zhihu_question(id,debug=0):
 	global c,next_url,answers,html
 	###
 	import urllib3;urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)###
@@ -35,6 +35,9 @@ def zhihu_question(id):
 	for url in next_url:
 		try:
 			html = requests.get(url, headers=headers,verify=False)
+			if debug:
+				f=F.dill_dump(obj=html,file='C:/test/zhihu/'+T.url2fn(url)[-250:])
+				print(U.stime(),f)
 			html.encoding = html.apparent_encoding
 			soup = BeautifulSoup(html.text, "lxml")
 			content = str(soup.p).split("<p>")[1].split("</p>")[0]

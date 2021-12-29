@@ -5185,11 +5185,11 @@ def set_system_volume(a):
 			if 0<=a<=100:
 				a=655*a
 			else:
-				raise py.ArgumentError('vol int shoud in [0,100]  or [0,65534]')
+				raise py.ArgumentError('vol int shoud in [0,100]  or [655,65534]')
 	else:
 		raise py.ArgumentUnsupported(a)
 	return nircmd( 'setsysvolume',a )
-vol=changesysvolume=setVol=setVolume=et_vol=set_volumn=set_volume=set_system_volumn=set_system_volume
+vol=volume=volume_change=changesysvolume=setVol=setVolume=et_vol=setvolumn=set_volumn=set_volume=set_system_volumn=set_system_volume
 
 def save(a,name=0):
 	if not iswin():raise NotImplementedError()

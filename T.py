@@ -530,15 +530,48 @@ def diff_bytes(b1,b2,p=True):
 	return rf
 diffb=diffBytes=diff_bytes
 
+def diff_char(expected, actual,p=True,enumerate=True,eol=True,**ka):
+	import difflib
+	U,T,N,F=py.importUTNF()
+	enumerate=U.get_duplicated_kargs(ka,'n','index',default=enumerate)
+	def tolist(a):
+		r=[]
+		if enumerate:
+			for i,c in py.enumerate(a):
+				if eol:
+					r.append('{}:{}\n'.format(i,c))
+				else:
+					r.append('{}:{}'.format(i,c))
+		else:
+			if eol:
+				r=[c+'\n' for c in a]
+			else:
+				r=py.list(a)
+		return r
+	expected=tolist(expected)
+	actual=tolist(actual)
+		
+	# diff=difflib.unified_diff(enumerate(expected), enumerate(actual))
+	diff=difflib.unified_diff(expected, actual)
+	r=''.join(diff)
+	if p:
+		print(r,'\n diff_len:%s'%len(r))
+		return U.StrRepr(r,repr='#T.diff(p=1) result,len:%s'%py.len(r))
+	else:
+		return r
+
 def diff(expected, actual,p=True,pformat=False):
 	"""
 	Compare two sequences of lines; generate the delta as a unified diff.
 	Helper function. Returns a string containing the unified diff of two multiline strings.
+	
+	
+s.splitlines(keepends=False)	
 	"""
 
 	import difflib
+	U,T,N,F=py.importUTNF()
 	if pformat:
-		U,T,N,F=py.importUTNF()
 		pformat=T.pformat
 		try:
 			pformat=py.from_qgb_import('ipy').pformat
@@ -547,13 +580,14 @@ def diff(expected, actual,p=True,pformat=False):
 			expected=pformat(expected)
 		if not py.istr(actual):
 			actual=pformat(actual)
-	expected=expected.splitlines(1)
-	actual=actual.splitlines(1)
+	expected=expected.splitlines(True)
+	actual=actual.splitlines(True)
 
 	diff=difflib.unified_diff(expected, actual)
 	r=''.join(diff)
 	if p:
 		print(r,'\n diff_len:%s'%len(r))
+		return U.StrRepr(r,repr='#T.diff(p=1) result,len:%s'%py.len(r))
 	else:
 		return r
 
