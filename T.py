@@ -530,7 +530,7 @@ def diff_bytes(b1,b2,p=True):
 	return rf
 diffb=diffBytes=diff_bytes
 
-def diff_char(expected, actual,p=True,enumerate=True,eol=True,**ka):
+def diff_chars(expected, actual,p=True,enumerate=True,eol=True,**ka):
 	import difflib
 	U,T,N,F=py.importUTNF()
 	enumerate=U.get_duplicated_kargs(ka,'n','index',default=enumerate)
@@ -559,9 +559,10 @@ def diff_char(expected, actual,p=True,enumerate=True,eol=True,**ka):
 		return U.StrRepr(r,repr='#T.diff(p=1) result,len:%s'%py.len(r))
 	else:
 		return r
+diffc=diffChar=diffChars=diff_char=diff_chars
 
 def diff(expected, actual,p=True,pformat=False):
-	"""
+	"""https://docs.python.org/zh-cn/3/library/difflib.html
 	Compare two sequences of lines; generate the delta as a unified diff.
 	Helper function. Returns a string containing the unified diff of two multiline strings.
 	

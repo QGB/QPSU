@@ -42,7 +42,32 @@ else:
 	from SimpleHTTPServer import SimpleHTTPRequestHandler
 	from BaseHTTPServer import HTTPServer as _HTTPServer
 
+def curl_return_bytes(url,verbose=True):
+	'''
 
+	'''
+	global U,T,N,F
+	U,T,N,F=py.importUTNF()
+	import pycurl
+	c = pycurl.Curl()
+	c.setopt(c.URL, url)
+	c.setopt(c.VERBOSE,verbose)
+	from io import BytesIO
+	f=BytesIO()
+	c.setopt(c.WRITEDATA, f)
+	#c.setopt(c.CAINFO, certifi.where())
+	c.perform()
+	#c.close()
+	f.seek(0)
+	b=f.read()
+	# print(len(b),b)
+	# b.decode()
+	if py.len(b)>99:
+		return U.object_custom_repr(b,repr='{}...#{}'.format(b[:99],F.readable_size(b) )  )
+	else:
+		return b
+curl=curlb=curl_return_bytes	
+	
 def check_socket( port,host='127.0.0.1'):
 	import socket
 	from contextlib import closing
@@ -54,10 +79,11 @@ def check_socket( port,host='127.0.0.1'):
 check_port=check_socket
 			
 def send_smtp_email(mail_from,mail_to,txt,title='',password='',smtp_server='',**ka):
+	global U,T,N,F
+	U,T,N,F=py.importUTNF()
 	from email.mime.text import MIMEText
 	from email.header import Header
 	import smtplib
-	U,T,N,F=py.importUTNF()
 	mail_from=U.get_duplicated_kargs(ka,'mail','email','address','email_address',default=mail_from)
 	user,domain= mail_from.split('@')
 	if not smtp_server:

@@ -4,7 +4,12 @@ if __name__.endswith('qgb.F'):from . import py
 else:import py
 T=py.importT()
 import os as _os
-try:from pathlib import Path
+try:
+	from io import BytesIO
+	from io import BytesIO as bytesIO
+	from io import BytesIO as bio
+	from io import BytesIO as BIO
+	from pathlib import Path
 except:pass
 
 gError=[]
