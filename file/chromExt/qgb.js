@@ -55,8 +55,23 @@ async function post(url,data){
     });
 }//end post
 
+async function http_get_bytes(url,data){
+    if(typeof a!='string')data=JSON.stringify(data)
 
-async function rpc_sleep(aisec){
+    return new Promise(function (resolve, reject) {
+        var xhr = new XMLHttpRequest();
+        xhr.open('GET', url, true);
+        // xhr.responseType = 'document';
+        xhr.onload = function () {
+            resolve(xhr.response);
+        };
+        xhr.send(data)
+    });
+}//end http_get_bytes
+var get=get_bytes=getb=getBytes=http_get_bytes
+
+
+async function rpc_sleep(aisec){468
     if(!aisec){
         aisec="U.get('rpc_sleep',1)"
     }

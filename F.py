@@ -244,7 +244,7 @@ F.readableSize(len(F.dill_dump(protocol=4,obj=r)  ) )   #'13.694 KiB'
 		return file
 	else:
 		return dill.dumps(obj=obj,protocol=protocol)
-dp=dill_write=write_dill=dill_dump=dill_dumps=dill_dump_bytes 
+dp=dumps=dill_write=write_dill=dill_dump=dill_dumps=dill_dump_bytes 
 
 def dill_dump_string(obj,**ka):
 	U=py.importU()
