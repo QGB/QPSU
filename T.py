@@ -192,6 +192,7 @@ numpy.loadtxt("myfile.txt")[:, 1]
 	# import numpy as np
 	# np.loadtxt("myfile.txt")[:, 1]
 	# return [ ]
+split2d=split2dlist=split_to_2d_list
 
 def is_contains(text,target):
 	try:

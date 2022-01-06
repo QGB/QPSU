@@ -994,12 +994,13 @@ True
 		return py.No(fn,'not exists')
 isExist=exist=exists
 
-def glob(path, pattern='**/*'):
+def glob(path='./', pattern='**/*'):
 	'''pattern='**/*'   : all files
 	'**/*.txt'   : all txt files'''
 	import pathlib
-	return py.list(pathlib.Path('./').glob(pattern))
-
+	return py.list(pathlib.Path(path).glob(pattern))
+wildcard_find=find_file_wildcard=glob
+	
 def walk(ap):
 	'''
 return tuple(ap,dir_list,file_list )
