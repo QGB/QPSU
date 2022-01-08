@@ -96,6 +96,11 @@ try:
 	from pprint import pprint,pformat
 except:pass
 ####################################################
+def format_list(a,):
+	U,T,N,F=py.importUTNF()
+	r=[]
+	maxs=[0]
+	
 def format_dict(d,):
 	U,T,N,F=py.importUTNF()
 	r={}

@@ -269,8 +269,8 @@ gsavePath=U.gst+'ipy/'
 # U.cd('ipy')
 # U.pln U.pwd()
 F.md(gsavePath)
-gstitle='ipy:{1} py:{0} at[{2}] {3}'.format(
-	U.getPyVersion(),version,U.stime(format='%Y-%m-%d %H:%M:%S'),gsavePath
+gstitle='{pid} ipy:{1} py:{0} at[{2}] {3}'.format(
+	U.getPyVersion(),version,U.stime(format='%Y-%m-%d %H:%M:%S'),gsavePath,pid=U.pid
 	)
 U.pln(gstitle)
 if getattr(U,'Win',0):
