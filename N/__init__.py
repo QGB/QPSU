@@ -179,10 +179,10 @@ def github_release(url):
 	"upload_url": "https://uploads.github.com/repos/octocat/Hello-World/releases/1/assets{?name,label}",
 	
 	(?P<name>.*)
+#useless r'((git|ssh|http(s)?)|(git@[\w\.]+))(:(//)?)([\w\.@\:/\-~]+)(\.git)(/)?'
 '''
-	r'((git|ssh|http(s)?)|(git@[\w\.]+))(:(//)?)([\w\.@\:/\-~]+)(\.git)(/)?'
-	
-	r'((?P<protocol>git|ssh|http(s)?)|(git@[\w\.]+))(:(//)?)([\w\@\.\:\/~]*)([\w]+)/([\w]+)(\.git)?(/)?'
+	U,T,N,F=py.importUTNF()
+	url=T.regex_match_all(url,T.RE_GIT)[0]
 
 def get_github_raw(q):
 	''' 

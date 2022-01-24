@@ -32,6 +32,7 @@ bytes256=byte256=b''.join( [py.byte(i) for i in range(256)  ] )
 
 CR='\r'
 LF=EOL=eol='\n'
+EOLS='\n'+'='*44+'\n'
 TAB=Tab=tab='\t'
 gspace=space=py.chr(0x20)
 slash='/'   # chr(0x2F)
@@ -48,7 +49,8 @@ RE_YMD=r"(19|20)[0-9]{2}[- /.](0[1-9]|1[012])[- /.](0[1-9]|[12][0-9]|3[01])"
 RE_WhiteSpace=r'\s+'
 RE_VAR=RE_variable_name=RE_python_variable_name=r'[_a-zA-Z]\w*'
 #如果不小心用（注意大小写）A-z Matches a character in the range "A" to "z" (char code 65 to 122). Case sensitive.
-RE_vars_separated_by_commas=r'VAR(?:\s*,\s*VAR)+'.replace('VAR',RE_VAR)
+RE_VARS_COMMAS=RE_vars_separated_by_commas=r'VAR(?:\s*,\s*VAR)+'.replace('VAR',RE_VAR)
+RE_GIT=RE_GIT_URL=RE_URL_GIT=r'((?P<protocol>git|ssh|http(s)?)|(git@[\w\.]+))(:(//)?)([\w\@\.\:\/~]*)([\w]+)/([\w]+)(\.git)?(/)?'
 ###############
 SQLITE='SELECT * FROM sqlite_master;'
 
@@ -96,10 +98,21 @@ try:
 	from pprint import pprint,pformat
 except:pass
 ####################################################
+def git_convert_ssh(a):
+	''' '''
+	U,T,N,F=py.importUTNF()
+	u=T.regex_match_all(a,T.RE_GIT)[0]
+	us=u.split('/')
+	user,repo=us[-2],us[-1]
+	return 'git@github.com:'+user+'/'+repo
+git=get_git_ssh=git_convert_ssh
+	
 def format_list(a,):
 	U,T,N,F=py.importUTNF()
 	r=[]
-	maxs=[0]
+	row_lens=U.len(*a)
+	maxs=[0]* py.max(row_lens)
+	return
 	
 def format_dict(d,):
 	U,T,N,F=py.importUTNF()
@@ -1612,6 +1625,9 @@ T.subLast('C:/test/list_bought_items.htm/10_15_知乎周源_list_bought_items.ht
 	# U.pln( i1,i2
 	# return s[i1:i2]
 sublast=subt=sub_last=subLast=subr=sub_right=subRight=sub_tail
+	
+def del_sub(a,x,y,start=0,end=-1):
+	return a[start:x]+a[y:end]
 	
 def replace_all_space(a,to='',target=r"\s+"):
 	'''  多个连续空白字符会 缩减成 一个空格

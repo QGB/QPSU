@@ -185,9 +185,13 @@ def get_net_traffic(rsignin,app_id=''):
 	return sl
 	
 def load(s):
-	ls=[i.strip() for i in s.split(',')]
+	if py.istr(s):
+		ls=[i.strip() for i in s.split(',')]
+	if py.islist(s):
+		ls=s
 	print(ls)
 	r=[]
+	dlogin=U.get_or_set('lc.login',{})
 	for i in ls:
 		if not i:continue
 		f=r'C:/test/{}@qgbcs.uu.me.dill'.format(i)
@@ -195,6 +199,7 @@ def load(s):
 		if not q:
 			print('#Err',f,repr(q))
 			raise q
+		dlogin[i]=q	
 		r.append(q)
 	return r	
 	
