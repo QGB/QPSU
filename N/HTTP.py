@@ -130,6 +130,10 @@ def request(url,method='GET',headers=gheaders,
 	return requests.request(**ka)
 requests=request
 	
+def download_seq(url_format,min=0,max=99,headers={},**ka):
+	for n in range(min,max):
+		
+
 def download(url, file_path='',default_dir=py.No('set_input',no_raise=1),headers=None,proxies=AUTO_GET_PROXY,**ka):
 	import requests,sys,os
 	U,T,N,F=py.importUTNF()

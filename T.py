@@ -756,7 +756,7 @@ def urlToFileName(url):
 url2fn=url2file=url2fileName=url_to_filename=urlToFileName
 
 
-def get_domain_parts_by_url(url_or_domain,**ka):
+def get_domain_parts_by_url(url_or_domain,return_str=True,**ka):
 	'''(url,
                 fail_silently=False,
                 fix_protocol=True,#False,
@@ -776,8 +776,12 @@ Out[513]:
 		ka['fix_protocol']=True
 	
 	import tld
-	return tld.utils.process_url(url=url_or_domain,**ka)[0]
-
+	r= tld.utils.process_url(url=url_or_domain,**ka)[0]
+	if return_str:
+		return '.'.join(r)
+	else:
+		return r
+		
 def getFLD(url_or_domain,fix_protocol=True):
 	"""Extract the first level domain.
 # Source path of Mozilla's effective TLD names file.

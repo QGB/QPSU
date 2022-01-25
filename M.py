@@ -54,6 +54,14 @@ try:
 except:pass
 
 def ifconfig():
+	'''network.STA_IF==0 
+0 : ('0.0.0.0', '0.0.0.0', '0.0.0.0', '208.67.222.222')
+1 : ('192.168.4.1', '255.255.255.0', '192.168.4.1', '208.67.222.222')
+2 : TypeError: function missing 1 required positional arguments
+3 : 重启 卡死	
+	'''
+	return __import__('network').WLAN(0).ifconfig(),__import__('network').WLAN(1).ifconfig()
+	# import network;return network.WLAN(0).ifconfig(),network.WLAN(1).ifconfig()
 	n=network.WLAN(network.STA_IF)
 	return n.ifconfig()
 ip=ipconfig=ifconfig
@@ -124,6 +132,8 @@ def reload(m='M'):
 r=reload
 	
 def reboot():
+	''' 重启串口卡住： Advanced Seral setings > Flow control 改成 None'''
+	return __import__('machine').reset()
 	import machine
 	return machine.reset()
 reset=restart=reboot

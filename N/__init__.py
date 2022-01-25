@@ -212,7 +212,9 @@ def get_public_ip_by_dnspod(methods=['']):
 	bip=sock.recv(16)
 	sock.close()
 	return bip
-def get_public_ipv4(methods=['myip.ipip.net','ipinfo.io', 'icanhazip.com', 'ifconfig.me', 'ip.appspot.com', 'api.ipify.org', 'ipecho.net/plain', 'ipcalf.com', 'www.trackip.net','https://www.google.com/search?q=my+ip'],proxy=False):
+def get_public_ipv4(methods=['myip.ipip.net','ipinfo.io', 'icanhazip.com', 'ifconfig.me', 'ip.appspot.com', 'api.ipify.org', 'ipecho.net/plain', 'ipcalf.com', 'www.trackip.net','https://www.google.com/search?q=my+ip'],
+http_external_kargs={'ipinfo.io':{'encoding':'utf-8'},},
+	proxy=False,wait=3.4,return_list=True):
 	from threading import Thread, Lock
 	mutex = Lock()
 	U,T,N,F=py.importUTNF()
@@ -222,7 +224,7 @@ def get_public_ipv4(methods=['myip.ipip.net','ipinfo.io', 'icanhazip.com', 'ifco
 		print(U.stime(),'fetching...',[methods.index(u)],u)  #list tuple all have index
 		mutex.release()
 		
-		d[u]=HTTP.get(u,timeout=3,proxies=proxy)
+		d[u]=N.HTTP.get(u,timeout=3,proxies=proxy,**http_external_kargs.get(u,{}) ,)
 		if py.istr(d[u]) and py.len(d[u])>77:
 			d[u]=U.object_custom_repr(d[u],repr='{}#s.len:{}'.format(
 					T.regexMatchAll(d[u],T.RE_IP) ,py.len(d[u]),  
@@ -234,7 +236,20 @@ def get_public_ipv4(methods=['myip.ipip.net','ipinfo.io', 'icanhazip.com', 'ifco
 
 	for u in methods:
 		Thread(target=new_thread,args=(u,)).start()
-	U.sleep(3.4)
+	for i in py.range(py.int(py.max(1,wait))):
+		U.sleep(wait)
+		if py.len(d)==py.len(methods):
+			break
+	
+	if return_list:
+		r=[]
+		re=[]
+		for k,v in d.items():
+			if v:
+				r.append((k,v))
+			else:
+				re.append((k,v))  # 超时3.4 还未得到结果 的不会返回 
+		return re+r
 	return d
 get_public_ip=get_public_ipv4
 
