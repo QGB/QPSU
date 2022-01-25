@@ -596,6 +596,16 @@ def zhihu_question(url,response=None):
 	return r
 zhihu=zhihu_question	
 
+def dns_resolve(domain,rdtype='A'):
+	import dns.resolver   
+	try:
+		r=dns.resolver.resolve(domain,rdtype)
+		return r.rrset
+		# return r.rrset.items
+	except Exception as e:
+		return py.No(e)
+dns=get_ip_from_domain=resolve_domain=dns_resolve
+		
 def ping(addr,sum=5,sleep=0,timeout= 4,ttl=None,seq=0,size=56,interface=None,p=False,r=True,**ka):
 	''' ping3.ping(
 	dest_addr: str,
@@ -1797,7 +1807,7 @@ def getAllAdapter():
 	if U.iswin():
 		from qgb import Win
 		return Win.getAllNetworkInterfaces()
-getIP=getip=get_ip=getAllAdapter
+getLAN_IP=getlanip=get_lan_ip=getAllAdapter
 
 URL_SCHEME_CHARS=py.No('call N.auto_url will auto set')
 def auto_url(a,default_protocol='http',p=0):
