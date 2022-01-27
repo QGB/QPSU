@@ -6080,15 +6080,8 @@ thunder_start :  light :	!min_val, max_val, min_loc, max_loc
 	# ss=screen_search.Search(image_path)
 	# ss.precision=precision
 	# x,y=ss.imagesearch()
-	
 find_image_on_screen=seach_image_on_screen=search_image_on_screen
 
-def bytes_to_pil_image(b):
-	from PIL import Image
-	import io
-	bio=io.BytesIO(b)  
-	return Image.open(bio)
-b2im=b2img=bytes_to_pil_image
 
 def set_timed_task(func,every='day',time='05:09',unit=1):
 	'''U.set_timed_task(baidu_start,'2hour') 

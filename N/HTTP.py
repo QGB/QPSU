@@ -131,9 +131,41 @@ def request(url,method='GET',headers=gheaders,
 requests=request
 	
 def download_seq(url_format,min=0,max=99,headers={},**ka):
+	import requests 
+	U,T,N,F=py.importUTNF()
+	
+	while '{' not in url_format or '}' not in url_format:
+		url_format=U.set_input('download_seq.url_format',default=url_format)
+	
+	if U.isWin() and U.gst!='C:/test/':
+		U.gst=U.set_input('U.gst',default=U.gst)
+	domain=T.get_domain_parts_by_url(url_format)
+	file_ext=T.sub_last(url_format,'.')
+	if file_ext.lower() not in ['jpg','png','jpeg']:
+		file_ext=U.set_input(url_format+' file_ext[NO DOT]',default=file_ext)
+	if '.' in file_ext:raise Exception(file_ext)
+	
 	for n in range(min,max):
+		url=url_format.format(n)
+		file=T.sub(url,domain)
+		if file.startswith('/'):file=file[1:]
+		f=r'{gst}{domain}/{file}'.format(gst=U.gst,domain=domain,file=T.filename_legalized(file) , )
 		
-
+		if F.size(f):
+			print('#'*9,'Exist',f)
+			continue
+		response = N.HTTP.requests(url,headers=headers,verify=False,no_raise=1) 
+		if not response	or response.status_code!=200:
+			print(repr(response).strip(),py.getattr(response,'url',' No'))
+			return response
+		
+		b=response.content
+		print(U.sizeof(b),F.write(f,b,mkdir=1))#
+		
+		
+			
+			
+			
 def download(url, file_path='',default_dir=py.No('set_input',no_raise=1),headers=None,proxies=AUTO_GET_PROXY,**ka):
 	import requests,sys,os
 	U,T,N,F=py.importUTNF()
