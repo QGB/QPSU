@@ -1369,12 +1369,16 @@ def flask_image_response(response,image,format='png',**ka):
 	if py.isbytes(image):
 		bytes=image
 	else:
-		from io import BytesIO
-		img_io = BytesIO()
-		image.save(img_io, format)
-		img_io.seek(0)
-		# response.response=stream_with_context(gen)
-		bytes=img_io.read(-1)
+		if py.type(image).__module__=='numpy':
+			from qgb import pil
+			bytes=pil.cv2_image_to_bytes(image)
+		else:
+			from io import BytesIO
+			img_io = BytesIO()
+			image.save(img_io, format)
+			img_io.seek(0)
+			# response.response=stream_with_context(gen)
+			bytes=img_io.read(-1)
 	ctype='image/'+format
 	response.headers['Content-Type'] = ctype
 	response.headers['mimetype'] = ctype
@@ -1402,7 +1406,7 @@ Image.open(fp)
 		Image=None
 	transform_function=U.get_duplicated_kargs(ka,
 		'f','func','function','operator','transform','transformation_function',default=transform_function)#TODO 名称长的别名应该在前，这样匹配时先详细后模糊
-	if rect:
+	if U.is_numpy_ndarray(rect) or rect:
 		if py.istr(rect) or py.isfile(rect):
 			# if F.exist(rect):
 			image=rect
@@ -1411,12 +1415,13 @@ Image.open(fp)
 				response.set_data('''<img src="{}"></img>'''.format(image) )
 				return image
 			im=Image.open(rect)
-		elif Image and (py.isinstance(rect,Image.Image) or py.isbytes(rect) ):
-			im=rect
-		elif U.len(rect)!=4:
-			raise py.ArgumentError('rect must be PIL Image or [ x0,y0,x1,y1 ]')
-		else:
+		# elif Image and (py.isinstance(rect,Image.Image) or py.isbytes(rect) ):
+			# im=rect
+		elif (py.istuple(rect) or py.islist(rect)) and U.len(rect)==4:
 			im = ImageGrab.grab(rect)
+			# raise py.ArgumentError('rect must be PIL Image or [ x0,y0,x1,y1 ]')
+		else:
+			im=rect
 	else:	
 		if U.is_termux() and U.is_root():
 			f=U.gst+'screencap.png'

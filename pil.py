@@ -82,6 +82,9 @@ def bytes_to_cv2_image(b):
 	
 def new_cv2_image(width,height,color=(255,255,255)):
 	''' (255,0,0)      # (B, G, R)
+	
+(height,width,3)
+长 宽 高	
 	'''
 	import numpy as np
 	blank_image = np.zeros((height,width,3), np.uint8)

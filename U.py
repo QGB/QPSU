@@ -6273,16 +6273,10 @@ py.type(py.range(1)),  #dill_dump  len 46,<80 B>
 		return is_generator(a)
 isgen=isGenerator=is_generator	
 
-def get_image_pixel(image,x,y):
-	'''
-image.load()	
-:returns: An image access object.
-:rtype: :ref:`PixelAccess` or :py:class:`PIL.PyAccess`	
-'''	
-	a=image.load()
-	return a[x,y]
-get_pixel_from_image=get_image_pixel	
-
+def is_numpy_ndarray(a):
+	return py.type(a).__module__=='numpy'
+isNumpy=is_numpy=isnumpy=is_numpy_ndarray	
+	
 def try_call_function(function,*a,**ka):
 	try:
 		return function(*a,**ka)
