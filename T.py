@@ -47,7 +47,8 @@ RE_IMG_URL=r'(((http://www)|(http://)|(www))[-a-zA-Z0-9@:%_\+.~#?&//=]+)\.(jpg|j
 RE_URL=r'http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\(\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+'
 RE_YMD=r"(19|20)[0-9]{2}[- /.](0[1-9]|1[012])[- /.](0[1-9]|[12][0-9]|3[01])"
 RE_WhiteSpace=r'\s+'
-RE_VAR=RE_variable_name=RE_python_variable_name=r'[_a-zA-Z]\w*'
+RE_VAR=RE_variable_name=RE_python_variable_name=r'[_a-zA-Z]\w*'#
+#\w 一共有 127073个字符，其中有816个不在sv中。sv一共有128490个非空字符。2233个不在\w中。交集有 126257个
 #如果不小心用（注意大小写）A-z Matches a character in the range "A" to "z" (char code 65 to 122). Case sensitive.
 RE_VARS_COMMAS=RE_vars_separated_by_commas=r'VAR(?:\s*,\s*VAR)+'.replace('VAR',RE_VAR)
 RE_GIT=RE_GIT_URL=RE_URL_GIT=r'((?P<protocol>git|ssh|http(s)?)|(git@[\w\.]+))(:(//)?)([\w\@\.\:\/~]*)([\w]+)/([\w]+)(\.git)?(/)?'
@@ -98,6 +99,26 @@ try:
 	from pprint import pprint,pformat
 except:pass
 ####################################################
+def text_to_varname(a):
+	''' '''
+	RE_VAR
+	return
+to_varname=text_to_varname
+	
+def html_table_to_list(html_or_url,**ka):
+	'''
+pandas.read_html first argument "io" : str, path object or file-like object
+    A URL, a file-like object, or a raw string containing HTML. Note that
+    lxml only accepts the http, ftp and file url protocols. If you have a
+    URL that starts with ``'https'`` you might try removing the ``'s'``.
+	
+	'''
+	U,T,N,F=py.importUTNF()
+	if html_or_url.startswith('https://'):
+		html_or_url=N.HTTP.get(html_or_url)
+	import pandas
+	return pandas.read_html(html_or_url) # return list of tables
+	
 def git_convert_ssh(a):
 	''' '''
 	U,T,N,F=py.importUTNF()

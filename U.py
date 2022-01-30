@@ -321,7 +321,10 @@ def set_or_get(name,value,default=SET_NO_VALUE):
 setget=setGet=set_get=set_or_get
 #########################
 def one_in(vs,*t):
-	'''(1,2,3,[t])	or	([vs].[t])'''
+	'''(1,2,3,[t])	or	([vs].[t])
+char in s :  这个效率较高	
+char in list:比s至少慢了几十 上百倍？	
+	'''
 	if not hasattr(vs, '__iter__'):vs=[vs]#  is3 str has __iter__  while  is2 not
 	if len(t)==1:
 		t=t[0]
@@ -5021,6 +5024,14 @@ def dict_contains_dict(d,dsub):
 				return py.No(' d[k]!=v ',k,d,dsub,v)
 	return True
 dind=dict_in_dict=dict_contains_dict	
+
+def dict_pop_by_index(d,index):
+	if index<0:index=py.len(d)+index
+	for n,(k,v) in py.enumerate(d.items()):
+		if n==index:
+			return k,d.pop(k)
+	return py.No('not found match index in dict',d,index)
+pop_dict_index=pop_dict_by_index=dict_pop_by_index	
 	
 def split_list(alist,sub_size):
 	n=py.int(sub_size)

@@ -113,6 +113,8 @@ Out[471]:
  ('FONT_HERSHEY_TRIPLEX', 4),
  ('FONT_ITALIC', 16)]
 
+0-9 char not  break bottom
+[ ] char will break bottom
 '''	
 	import cv2
 	xy=U.get_duplicated_kargs(ka,'bottomLeftCornerOfText','xy','coordinate','coordi',default=xy)
