@@ -1369,7 +1369,8 @@ def flask_image_response(response,image,format='png',**ka):
 	if py.isbytes(image):
 		bytes=image
 	else:
-		if py.type(image).__module__=='numpy':
+		U,T,N,F=py.importUTNF()
+		if U.is_numpy_ndarray(image):
 			from qgb import pil
 			bytes=pil.cv2_image_to_bytes(image)
 		else:
@@ -1406,7 +1407,8 @@ Image.open(fp)
 		Image=None
 	transform_function=U.get_duplicated_kargs(ka,
 		'f','func','function','operator','transform','transformation_function',default=transform_function)#TODO 名称长的别名应该在前，这样匹配时先详细后模糊
-	if U.is_numpy_ndarray(rect) or rect:
+#fix numpy.ndarray ValueError: The truth value of an array with more than one element is ambiguous. Use a.any() or a.all()
+	if U.is_numpy_ndarray(rect) or rect: 
 		if py.istr(rect) or py.isfile(rect):
 			# if F.exist(rect):
 			image=rect

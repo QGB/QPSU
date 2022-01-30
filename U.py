@@ -3172,7 +3172,10 @@ def tuple_operator(a,operator,b=None,operator_ka={},skip_AttributeError=False):
 		try:
 			if py.istr(operator):
 				if b:
-					r.append( py.getattr(v,operator)(b[n]) )
+					if py.isnum(b):
+						r.append( py.getattr(v,operator)(b) )
+					else:
+						r.append( py.getattr(v,operator)(b[n]) )
 				else:
 					r.append( py.getattr(v,operator)()     )
 					
@@ -5742,8 +5745,38 @@ def python_m(*a,**ka):
 def python_c(*a,**ka):
 	return python('-c',*a,**ka)
 
+def color_to_bgr_tuple(a):
+	r,g,b=color_to_rgb_tuple(a)
+	return b,g,r
+def color_to_rgb_tuple(a):
+	'''
+ImageColor.colormap = {
+    # X11 colour table from https://drafts.csswg.org/css-color-4/, with
+    # gray/grey spelling issues fixed.  This is a superset of HTML 4.0
+    # colour names used in CSS 1.
+'''	
+	U,T,N,F=py.importUTNF()
+	if py.istr(a):
+		try:
+			from PIL import ImageColor
+			rgb=ImageColor.getcolor(a, "RGB") 
+		except py.ImportError as e:pass
+		try:
+			import matplotlib.colors
+			rgb=matplotlib.colors.to_rgb(a) # max 1.0 return (1.0,0,0)
+			rgb=U.tuple_multiply(rgb,255)
+			rgb=U.tuple_operator(rgb,operator=py.int)
+		except py.ImportError as e:pass
+		
+	elif py.isint(a):
+		rgb=integer_to_rgb_tuple(a)
+	elif U.len(a)==3:
+		r,g,b=a 
+		rgb=r,g,b
+	else:
+		raise py.ArgumentError()
+	return rgb
 	
-
 def integer_to_rgb_tuple(RGBint):
 	blue =  RGBint & 255
 	green = (RGBint >> 8) & 255
@@ -5761,8 +5794,13 @@ def RGBAfromInt(argb_int):
 def rgb_tuple_to_integer(rgb,g=None,b=None):
 	if py.isint(rgb) and py.isint(g) and py.isint(b):
 		rgb=(rgb,g,b)
+	elif py.istr(rgb) and not g and not b:
+		import matplotlib.colors
+		rgb=matplotlib.colors.to_rgb(rgb)
+	else:
+		raise py.ArgumentError()
 	return rgb[2]*256*256+rgb[1]*256+rgb[0]
-color2int=color_to_int=rgb2i=rgb_to_int=rgb_to_integer=rgb_tuple_to_integer
+color2int=color_to_int=color3_to_int=rgb2i=rgb_to_int=rgb_to_integer=rgb_tuple_to_integer
 
 def rgb_name(r,g=None,b=None,hex_format='0x%02x_%02x_%02x',color_comment=True):
 	if not py.isint(r):

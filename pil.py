@@ -1,6 +1,7 @@
 import sys;'qgb.U' in sys.modules or sys.path.append('C:/QGB/babun/cygwin/bin/');from qgb import *
 import PIL
 from PIL import Image
+from PIL.ImageColor import colormap
 import PIL.ExifTags
 import PIL.ImageGrab
 def read_exif(img):
@@ -80,13 +81,47 @@ def bytes_to_cv2_image(b):
 	img_np = cv2.imdecode(nparr, cv2.IMREAD_COLOR)	
 	return img_np
 	
-def new_cv2_image(width,height,color=(255,255,255)):
-	''' (255,0,0)      # (B, G, R)
+def new_numpy_image(width,height,color=(255,255,255)):
+	''' (255,0,0)      # (B, G, R)  color_bgr
 	
 (height,width,3)
 长 宽 高	
 	'''
 	import numpy as np
 	blank_image = np.zeros((height,width,3), np.uint8)
-	blank_image[:]=color
+	blank_image[:]=U.color_to_bgr_tuple(color)
 	return blank_image
+new_cv2_image=new_numpy_image	
+	
+def cv2_draw_text(img,text,
+xy = (0,50),#x,y+font_height
+font                   = U.IntRepr(0,repr='cv2.FONT_HERSHEY_SIMPLEX'),
+fontScale              = 1                       ,
+fontColor              = (255,255,255)           ,
+thickness              = 1                       ,
+lineType               = 2                       ,
+								**ka):
+	'''[(i,getattr(cv2,i),) for i in dir(cv2) if i.startswith('FONT_')]
+Out[471]:
+[('FONT_HERSHEY_COMPLEX', 3),
+ ('FONT_HERSHEY_COMPLEX_SMALL', 5),
+ ('FONT_HERSHEY_DUPLEX', 2),
+ ('FONT_HERSHEY_PLAIN', 1),
+ ('FONT_HERSHEY_SCRIPT_COMPLEX', 7),
+ ('FONT_HERSHEY_SCRIPT_SIMPLEX', 6),
+ ('FONT_HERSHEY_SIMPLEX', 0),
+ ('FONT_HERSHEY_TRIPLEX', 4),
+ ('FONT_ITALIC', 16)]
+
+'''	
+	import cv2
+	xy=U.get_duplicated_kargs(ka,'bottomLeftCornerOfText','xy','coordinate','coordi',default=xy)
+	
+	cv2.putText(img,text, 
+		xy, 
+		font, 
+		fontScale,
+		fontColor,
+		thickness,
+		lineType)
+	return img
