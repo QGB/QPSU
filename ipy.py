@@ -152,7 +152,10 @@ def dill_load(filename,return_value=False,set_user_ns=True):
 			if c not in T.alphanumeric_:break
 			varname+=c
 		dnv[varname]=F.dill_load(filename)
-	r=[py.list(dnv),filename]
+	if py.len(dnv)==1:	
+		r=[py.list(dnv)[0],filename]
+	else:
+		r=[py.list(dnv),filename]
 	U.pln(r)
 	if set_user_ns:
 		for name,v in dnv.items():

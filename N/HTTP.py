@@ -139,7 +139,7 @@ def download_seq(url_format,min=0,max=99,headers={},**ka):
 	
 	if U.isWin() and U.gst!='C:/test/':
 		U.gst=U.set_input('U.gst',default=U.gst)
-	domain=T.get_domain_parts_by_url(url_format)
+	domain=T.get_domain_from_url(url_format)
 	file_ext=T.sub_last(url_format,'.')
 	if file_ext.lower() not in ['jpg','png','jpeg']:
 		file_ext=U.set_input(url_format+' file_ext[NO DOT]',default=file_ext)

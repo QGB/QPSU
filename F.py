@@ -626,7 +626,7 @@ def writeIterable(file,data,end='\n',overwrite=True,encoding=None):
 	f.close()
 	return f.name	
 	
-def write(file,data,mod='w',encoding='',mkdir=False,autoArgs=True,pretty=True,seek=None):
+def write(file,data,mod='w',encoding='utf-8',mkdir=False,autoArgs=True,pretty=True,seek=None):
 	'''py3  open(file, mode='r', buffering=-1, encoding=None, errors=None, newline=None, closefd=True, opener=None)
 	   py2  open(name[, mode[, buffering]])
 pretty=True        Format a Python object into a pretty-printed representation.
@@ -646,10 +646,10 @@ pretty=True        Format a Python object into a pretty-printed representation.
 	
 	if mkdir:makeDirs(file,isFile=True)
 	
-	if 'b' not in mod and isinstance(data,py.bytes):mod+='b'# 自动检测 data与 mod 是否匹配
+	# if 'b' not in mod and py.isbytes(data):mod+='b'# 自动检测 data与 mod 是否匹配
 	
-	# if 'b' not in mod: #这一句不重复了吗，不记得当时怎么想的	
-		# mod+='b'
+	if 'b' not in mod: #强制以 byte 写入
+		mod+='b'
 	f=py.open(file,mod)
 		#f.write(强制unicode) 本来只适用 py.is3() ，但 py2 中 有 from io import open
 
@@ -658,8 +658,12 @@ pretty=True        Format a Python object into a pretty-printed representation.
 	# with open(file,mod) as f:	
 	if py.isbyte(data):#istr(data) or (py.is3() and py.isinstance(data,py.bytes) )	:
 		f.write(data)
-	elif (py.is2() and py.isinstance(data,py.unicode)) or (py.is3() and py.istr(data)):
+	elif (py.is2() and py.isinstance(data,py.unicode)) :
 		f.write(data.encode(encoding))
+	elif (py.is3() and py.istr(data)):	
+		# if 'b' in mod.lower():
+		f.write(data.encode(encoding))
+		# else:f.write(data)#*** UnicodeEncodeError: 'gbk' codec can't encode character '\xa9' in
 	else:
 		# if py.is2():print >>f,data
 		# else:

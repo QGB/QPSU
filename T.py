@@ -780,7 +780,7 @@ def urlToFileName(url):
 url2fn=url2file=url2fileName=url_to_filename=urlToFileName
 
 
-def get_domain_parts_by_url(url_or_domain,return_str=True,**ka):
+def get_domain_parts_by_url_using_tld(url_or_domain,return_str=True,**ka):
 	'''(url,
                 fail_silently=False,
                 fix_protocol=True,#False,
@@ -1127,7 +1127,7 @@ html_unescape=htmlDecode=html_decoded=html_decode
 
 # data = "U.S. Adviser&#8217;s Blunt Memo on Iraq: Time &#8216;to Go Home&#8217;"
 # print decode_unicode_references(data)
-def netloc(url):
+def get_url_netloc(url):
 	''' return "ip:port" '''
 	from six.moves.urllib.parse import urlsplit
 	url=url.strip()
@@ -1135,7 +1135,7 @@ def netloc(url):
 		url='http://'+url
 	up=urlsplit(url=url)
 	return up.netloc
-hostname=host_name=get_url_netloc=netloc
+hostname=host_name=get_domain_parts_by_url=get_domain_from_url=netloc=get_url_netloc
 
 def url_split(url):
 	from six.moves.urllib.parse import urlsplit

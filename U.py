@@ -198,7 +198,7 @@ def set_multi(**ka):
 	# for name,value in ka.items():
 		# d[name]=value	
 	return ka
-set_named=set_multi	
+set_ka=set_named=set_multi	
 def get(name='_',default=GET_NO_VALUE,level=gd_sync_level['process']):
 	if level>=gd_sync_level['process']:
 		import sys
@@ -1896,7 +1896,7 @@ def sortDictV(ad,key=lambda item:item[1],des=True):
 def dictToList(a):
 	return py.list(a.items())
 
-def eval_safely(source, globals=None, locals=None,noErr=False):
+def eval_safely(source, globals=None, locals=None,noErr=True):
 	''' '''
 	if globals==locals==None:
 		f=sys._getframe().f_back
@@ -2530,6 +2530,16 @@ def ast_parse(source):
 def getArgsTest(a,b,c,d=2,**ka):
 	return getArgsDict()
 
+def inspect_getframeinfo(*a,**ka):
+	import inspect
+	return inspect.getframeinfo(*a,**ka)	
+getframeinfo=inspect_getframeinfo	
+
+def inspect_findsource(*a,**ka):
+	import inspect
+	return inspect.findsource(*a,**ka)	
+findsource=inspect_findsource	
+
 def get_caller_args_dict(*args,**kwargs):
 	''' MUST BE FIRST LINE in caller 
 	
@@ -2541,7 +2551,7 @@ inspect.getargspec(tf) # raise \
 ValueError: Function has keyword-only parameters or annotations, use getfullargspec() API which can support them	
 	'''
 	import inspect,ast
-	F=py.importF()
+	U,T,N,F=py.importUTNF()
 	frame=inspect.currentframe()
 	if args or kwargs:
 		rd=py.dict(kwargs)

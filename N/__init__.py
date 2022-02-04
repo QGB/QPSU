@@ -42,6 +42,22 @@ else:
 	from SimpleHTTPServer import SimpleHTTPRequestHandler
 	from BaseHTTPServer import HTTPServer as _HTTPServer
 
+def get_all_pid_equal_port():
+	global U,T,N,F
+	U,T,N,F=py.importUTNF()
+	import psutil
+	ns=psutil.net_connections()
+	r=[]
+	for sconn in ns:
+		if sconn.pid==sconn.laddr.port:
+			p=psutil.Process(pid=sconn.pid)
+			t=U.object_custom_repr(p._create_time,repr=psutil._pprint_secs(p._create_time),)
+			
+			r.append([t,sconn])
+			# r.append([t,p,sconn])
+	return r
+get_rpc_port_list=get_pid_equal_port=get_port_equal_pid=get_all_pid_equal_port	
+	
 def curl_return_bytes(url,verbose=True):
 	'''
 
