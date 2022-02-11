@@ -440,6 +440,21 @@ async def get_taobao_sku(page=None,return_item_id=False,debug=False,**ka):
 	valItemInfo=sku['valItemInfo']
 	skuMap,propertyMemoMap=U.get_dict_multi_values_return_list(
 							valItemInfo,'skuMap','propertyMemoMap')
+	if not propertyMemoMap:
+		propertyMemoMap=await page.evaluate('''
+function get_sku_id_text(){
+	var lis=document.querySelectorAll('ul.J_TSaleProp>li')
+	var r=[]
+	var d=new Map()
+	for(var i of lis){
+		var id=i.getAttribute('data-value')
+		var text=i.querySelector('a').textContent.trim()
+		d[id]=text
+		//r.push([i.getAttribute('data-value'),i.querySelector('a').textContent.trim()])
+	}
+	return d
+}		''')#颜色分类
+		
 	r=[]
 	html=''
 	try:
@@ -450,7 +465,8 @@ async def get_taobao_sku(page=None,return_item_id=False,debug=False,**ka):
 				str_name=T.sub(html,i[1:-1]+'" class="tb-txt">\n                            <a href="javascript:;">\n                                <span>','</span>')
 			if not str_name and debug:
 				return html,d,dc,sku,skuMap,propertyMemoMap
-			row=[ d['price'],d['stock'],str_name,d['skuId'],d['oversold'] ]
+			sp=d['price']	
+			row=[U.FloatRepr(py.float(sp),repr=sp,size=6) ,d['stock'],str_name,d['oversold'],d['skuId'] ]
 			r.append(row)
 	except Exception as e:
 		return py.No(e,sku_raw,skuMap,page)
@@ -505,7 +521,7 @@ async def get_current_dianpu_goods_list_taobao(page_or_url=None):
 	ds=await pa.evaluate('''
 async function(){
 	var ds=document.querySelectorAll('div[class*=shop-hesper-bd]  dl[class*=item]')	
-	r=[]
+	var r=[]
 	for(var i of ds){
 		var u=i.querySelector('a[href*="item.taobao.com/item.htm"]').href
 		var title=i.querySelector('a[class*="item-name"]').text.trim()

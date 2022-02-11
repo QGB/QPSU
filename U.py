@@ -6471,6 +6471,10 @@ class FloatCustomStrRepr(py.float):
 			return self.target(self,**self.ka)
 		else:
 			if self.ka:
+				size=self.ka.get('size',None)
+				#没判断target是否为 str
+				if py.len(self.ka)==1 and size:
+					return T.padding(self.target,size=size)
 				raise py.ArgumentError('when CustomStrRepr target not callable,must no keyword args!')
 			if py.istr(self.target):
 				return self.target
