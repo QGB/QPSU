@@ -6,6 +6,7 @@ U,T,N,F=py.importUTNF()
 from qgb import A
 
 taobao_trade=U.getMod(__name__)
+RPC_BASE=U.get_or_input(__name__+N.RPC_BASE_REMOTE[1:],default='https://okfw.net/')
 URL_WULIU_BY_TRADE_ID='https://buyertrade.taobao.com/trade/json/transit_step.do?bizOrderId='
 URL_TRADE_LIST='https://buyertrade.taobao.com/trade/itemlist/list_bought_items.htm'
 URL_WebDriver_DETECT=URL_WEBDRIVER_DETECT='https://intoli.com/blog/not-possible-to-block-chrome-headless/chrome-headless-test.html'
@@ -417,7 +418,7 @@ async def delay_trade_time(ipage_or_ids):
 	return ids,F.dp(U.get_multi_return_list('id-resp','id-resp_g'),'[didr,didrg]'+U.stime()),U.len(ids,didr,didrg )
 	
 
-async def get_taobao_sku(page=None,return_item_id=False,**ka):
+async def get_taobao_sku(page=None,return_item_id=False,debug=False,**ka):
 	'''
 #dict_keys(['config', 'mods', 'loadCSS', 'add', 'fire', 'listeners', 'fired'])
 # ['config', 'get', 'set']
@@ -443,10 +444,12 @@ async def get_taobao_sku(page=None,return_item_id=False,**ka):
 	html=''
 	try:
 		for i,d in skuMap.items():
-			str_name=propertyMemoMap.get(i[1:-1],'')
+			str_name=propertyMemoMap.get(T.sub_last(i,';',';'),'')
 			if not str_name:
 				if not html:html=await page.evaluate("document.documentElement.outerHTML")  		
 				str_name=T.sub(html,i[1:-1]+'" class="tb-txt">\n                            <a href="javascript:;">\n                                <span>','</span>')
+			if not str_name and debug:
+				return html,d,dc,sku,skuMap,propertyMemoMap
 			row=[ d['price'],d['stock'],str_name,d['skuId'],d['oversold'] ]
 			r.append(row)
 	except Exception as e:
@@ -833,12 +836,12 @@ js_trade_list='''async function js_trade_list(){
 	var en=xpath_all("//li[contains(@class, 'active')]")[0]
 	var n=Number.parseInt(en.textContent)    
 	
-	var r=await post("https://okfw.net/r=taobao_trade.write(request)",
+	var r=await post("$RPC_BASE$r=taobao_trade.write(request)",
 		{user:user,max:max, n:n,ts:ts, } )
 	
 	console.log(ts.length,n,r)
 	return r
-}'''
+}'''.replace('$RPC_BASE$',RPC_BASE)
 
 js_trade_list_id_wu='''async function js_trade_list(){
 	var user=xpath('//a[@class="site-nav-login-info-nick "]').textContent

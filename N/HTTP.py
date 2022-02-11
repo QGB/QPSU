@@ -129,6 +129,11 @@ def request(url,method='GET',headers=gheaders,
 			return py.No(e,ka)
 	return requests.request(**ka)
 requests=request
+
+def download_one_page_list(url,headers={},**ka):
+	U,T,N,F=py.importUTNF()
+	
+	return
 	
 def download_seq(url_format,min=0,max=99,headers={},**ka):
 	import requests 

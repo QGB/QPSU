@@ -571,6 +571,25 @@ u1604:  IPython repl  ok	,  bash python -c error  ?
 		
 	
 ########################## end init #############################################
+def multiprocess_pool(*a,**ka):
+	'''multiprocess.Pool(
+    processes=None,
+    initializer=None,
+    initargs=(),
+    maxtasksperchild=None,
+)
+原生multiprocessing模块在使用 IPython 时有一个主要限制：
+
+此包中的功能要求__main__子模块可以导入该模块。[...]这意味着某些示例，例如multiprocessing.pool.Pool示例将无法在交互式解释器中运行。[来自文档]
+
+幸运的是，有一个multiprocessing的fork 模块 multiprocess，它使用dill代替pickle进行序列化，并方便地克服了这个问题。
+
+只需在您的导入中安装multiprocess和替换：
+https://stackoverflow.com/a/65001152/6239815
+'''
+	import multiprocess.pool
+	return multiprocess.Pool(*a,**ka)
+
 def pprint(object, stream=None, indent=1, width=133, depth=None, *,
            compact=False):
 	try:
@@ -1838,7 +1857,7 @@ Return a random integer N such that a <= N <= b.'''
 	return random.randint(min, max)
 randint=ramdomInt=randomInt
 
-def sort(a,column=None, cmp=None, key=None, reverse=False,**ka):
+def sort(a,column=None, cmp=None, key=None, reverse=False,add_index=False,**ka):
 	''' py2&py3  sorted _3 ,key=lambda i:len(i)        按长度从小到大排序
 	在python2.x  sorted _5,cmp=lambda a,b:len(a)-len(b) 实现同上功能， 一般不用cmp 参数
 	sorted中cmp参数指定的函数用来进行元素间的比较。此函数需要2个参数，然后返回负数表示小于，0表示等于，正数表示大于。
@@ -1846,6 +1865,7 @@ def sort(a,column=None, cmp=None, key=None, reverse=False,**ka):
 	'''
 	repr=py.repr
 	column=get_duplicated_kargs(ka,'col','C','c',default=column)
+	reverse=get_duplicated_kargs(ka,'rervese','revese','rev',default=reverse)
 	
 	
 	def key_func(ai,size=99,is_column=True):# ai :  item of a
@@ -2402,7 +2422,7 @@ def search_iterable(a,filter='',type=None,depth=2,out_limit=99,_i_depth=0,si='a'
 		ri=''
 		if filter==k:
 			ri='%r in %s'%(k,si+'[%r] '%k)
-		if (py.istr(k) and filter in k):
+		if (py.istr(k) and py.istr(filter) and filter in k):
 			ri='{filter!r} in {k!r}\tand {k!r}\tin {si} '.format(filter=filter,k=k,si=si)
 				# r.append(k)
 		# except:pass
@@ -2628,20 +2648,23 @@ SyntaxError: invalid syntax
 			return default
 			
 #npp funcList 不索引注释
-def enumerate(a,start=0,ignoreNull=False,n=False):#todo 设计一个 indexList类，返回 repr 中带有index，用下标访问与普通list一样
+def enumerate(a,start=0,ignore_no=False,index_size=0,**ka):#todo 设计一个 indexList类，返回 repr 中带有index，用下标访问与普通list一样
 	'''enumerate(iterable[, start]) -> iterator for index, value of iterable
 	
 	list <enumerate at 0x6a58d00>
-	ignoreNull : return if a[i]
+	ignore_no : return if a[i]
 	
 	'''
-	if n:ignoreNull=True
+	ignore_no=get_duplicated_kargs(ka,'n','ignore_none','ignoreNull',default=ignore_no)
 	r=[]
 	# index=start
 	for i,v in py.enumerate(a):
-		if ignoreNull:
+		if ignore_no:
 			if not v:continue
-		r.append( (start,v) )
+		if index_size:
+			r.append( (IntRepr(start,size=index_size),v) )
+		else:
+			r.append( (start,v) )
 		start+=1
 	return r
 il=ilist=indexList=enu=enumerate
@@ -3574,11 +3597,6 @@ def _len(obj):
 
 len_generator=generator_len=_len
 
-def len(obj,*other,return_index=False,**ka):
-	'''Exception return py.No or [no...]'''
-	return_index=get_duplicated_kargs(ka,'index','i','n','enumerate',default=return_index)
-	return FuncWrapForMultiArgs(f=_len,args=(obj,other),index=return_index )# ,default=default
-
 def _hash(obj):
 	if py.islist(obj):
 		try:
@@ -3587,19 +3605,29 @@ def _hash(obj):
 			return py.No(e)
 	return py.hash(obj)
 
+def len(obj,*other,return_index=False,**ka):
+	'''Exception return py.No or [no...]'''
+	return_index=get_duplicated_kargs(ka,'index','i','n','enumerate',default=return_index)
+	return FuncWrapForMultiArgs(f=_len,args=(obj,other),index=return_index )# ,default=default
+
 def hash(obj,*other):
 	'''Exception return py.No or [no...]'''
 	return FuncWrapForMultiArgs(f=_hash,args=(obj,other))
 
-def id(obj,*other):
-	return FuncWrapForMultiArgs(f=py.id,args=(obj,other))
+# def id(obj,*other):
+	# return FuncWrapForMultiArgs(f=py.id,args=(obj,other))
 	
-def type(obj,*other):
-	return FuncWrapForMultiArgs(f=py.type,args=(obj,other))
+# def type(obj,*other):
+	# return FuncWrapForMultiArgs(f=py.type,args=(obj,other))
 
-def bin(obj,*other):
-	return FuncWrapForMultiArgs(f=py.bin,args=(obj,other))
-	
+# def bin(obj,*other):
+	# return FuncWrapForMultiArgs(f=py.bin,args=(obj,other))
+# 'complex','float','int','len','hash','repr',
+for builtin_function_name in ['bin','bool','callable','chr','hex','id','max','min','oct','ord','type',
+		]:
+	py.execute('''
+def {0}(obj,*other):return FuncWrapForMultiArgs(f=py.{0},args=(obj,other))
+	'''.format(builtin_function_name) )		
 	
 def FuncWrapForMultiArgs(f,args,default=None,index=False,f_ka={}):
 	'''Exception return py.No'''
@@ -3820,10 +3848,11 @@ linux:
 	return py.No('not found in os.environ',name)
 get_env_path=get_path_env=get_environ=get_env=getenv=getEnv=getEnviron
 	
-def getParentPid():
+def getParentPid(pid=pid):
+	''' os.getpid() '''
 	import psutil
-	return psutil.Process(os.getpid()).ppid()
-getppid=getParentPid	
+	return psutil.Process(pid).ppid()
+ppid=getppid=get_ppid=getParentPid	
 	
 def getParentCmdLine():
 	import psutil
@@ -4588,7 +4617,7 @@ def get_one_from_iterable(iterable,index=0): #TODO start, stop[, step])
 		if n==index:
 			return v
 	return py.No('iterable index out of range',iterable,index,)
-get_one_from_set=get_from_set=get_jihe=get_from_jihe=getIterable=get_iterable=get_one_from_iterable
+get_one_from_set=get_from_set=get_jihe=get_from_jihe=getIterable=get_iterable=get_iterable_item=get_one_from_iterable
 
 def sub(a,len='default return len 9',start=0,step=1):
 	'''sub dict,list,tuple....iterable
@@ -5119,7 +5148,7 @@ Type:      function
 	if py.getattr(obj,'__class__',None):
 		return inspect.getmro(obj.__class__)
 	return ()
-getclassInherit=getClassHierarchy
+get_obj_hierarchy=get_object_hierarchy=getclassInherit=getClassHierarchy
 
 def get_file_by_object(a):
 	import inspect
@@ -5957,6 +5986,26 @@ def print_repr(*a):
 	return print(*[py.repr(i) for i in a])
 	print([*a])
 	
+def taobao_url_unshorten(a=py.No('auto use clipBoard'),edit_clipboard=0,**ka):
+	U,T,N,F=py.importUTNF()
+	if not a:
+		edit_clipboard=U.get_duplicated_kargs(ka,'e','edit',default=edit_clipboard)
+		a=U.cbg(p=1,edit_clipboard=edit_clipboard)
+		
+	u=T.regex_match_one(a,T.RE_URL)
+	if not u:
+		return py.No('Not found url in a or clipBoard')
+	r=N.HTTP.request(u)
+	t=r.text
+	atb='https://a.m.taobao.com/i' # case 0
+	if atb in t:
+		id=T.sub(t,atb,'.htm')
+		if id:
+			return 'https://item.taobao.com/item.htm?id='+id
+	#TODO case 1,2....		
+	return py.No(r,a,u,t)		
+tb_url=tb_item_url=taobao_url=taobao_url_unshorten
+
 def get_svg_qrcode(text=py.No(msg='auto get clipboard',no_raise=True),
 	file=py.No('auto using text',no_raise=True),
 	title=py.No(msg='svg html title auto using text',no_raise=True),

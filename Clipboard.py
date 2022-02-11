@@ -9,7 +9,7 @@ try:
 except Exception as err:
 	gError=err
 
-def get(p=0,edit=0,**ka):
+def get(p=0,edit=0,edit_msg='',only_edit_firstline=True,**ka):
 	'''win32con.
 CF_DSPTEXT     ', 129],
 CF_OEMTEXT     ', 7],
@@ -21,19 +21,23 @@ CF_UNICODETEXT ', 13],
 	'''
 	U=py.importU()
 	if U.istermux():return U.cmd('termux-clipboard-get') 
-	if not p:p=U.get_duplicated_kargs(ka,'print_','show','PRINT')
-	if not edit:edit=U.get_duplicated_kargs(ka,'e','E','input_edit','input')
+	p=U.get_duplicated_kargs(ka,'print_','show','PRINT',default=p)
+	edit=U.get_duplicated_kargs(ka,'e','E','input_edit','input',default=edit)
 	
 	w.OpenClipboard()
 	d = w.GetClipboardData(win32con.CF_UNICODETEXT)
 	w.CloseClipboard()
 	if p:U.pln(d)
 	if edit:
-		edit_msg=U.get_duplicated_kargs(ka,'title','msg','edit_msg','promte','promot','promote')
 		type=U.get_duplicated_kargs(ka,'type','edit_type','t') 
+		edit_msg=U.get_duplicated_kargs(ka,'title','msg','edit_msg','edit_clipboard','promte','promot','promote',default=edit_msg)
+		only_edit_firstline=U.get_duplicated_kargs(ka,'edit_firstline','firstline',
+		'line0','l0',default=only_edit_firstline)
 		if not edit_msg:
 			if py.istr(edit):edit_msg=edit
 			else:edit_msg=''
+		if only_edit_firstline:
+			d=d.splitlines()[0]
 		d=U.input(edit_msg,default=d,type=type)
 	return d
 # U.cbg=get

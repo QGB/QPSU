@@ -54,7 +54,7 @@ def sycn():
 	'''  #TODO  '''
 # __frame=sys._getframe().f_back	
 
-def format(obj,width=79,max_seq_length=py.No('auto get-set',no_raise=1)):
+def format(obj,width=79,max_seq_length=py.No("auto get-set 'ipy.pformat.max_seq_length' ",no_raise=1)):
 	'''
 IPython.lib.pretty.pretty(
     obj,
@@ -265,7 +265,7 @@ except Exception as _e{0}:U.pln({0},_e{0})'''
 #用print >>输出会自动换行,format 的参数应该与文本标记一致，
 #否则出现IndexError: tuple index out of range
 # gs_ipy_save_file_list_name=
-gdTimeName=U.get_or_set(__name__+'.save_file_list',{})
+gsavelist=gsave_dict=gsave_list=gdTimeName=U.get_or_set(__name__+'.save_file_list',{})
 gIgnoreIn=[ u'from qgb import *',u'ipy.',u'get_ipython()']
 # U.cdt()
 gsavePath=U.gst+'ipy/'
