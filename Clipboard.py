@@ -9,7 +9,7 @@ try:
 except Exception as err:
 	gError=err
 
-def get(p=0,edit=0,edit_msg='',only_edit_firstline=True,**ka):
+def get(p=0,edit=0,edit_prompt='',only_edit_firstline=True,**ka):
 	'''win32con.
 CF_DSPTEXT     ', 129],
 CF_OEMTEXT     ', 7],
@@ -18,11 +18,13 @@ CF_TEXT        ', 1],
 CF_UNICODETEXT ', 13],
 	
 	in py3 win32con.CF_TEXT return b' '
+prompt 提示 ;
+promte 提升
 	'''
 	U=py.importU()
 	if U.istermux():return U.cmd('termux-clipboard-get') 
 	p=U.get_duplicated_kargs(ka,'print_','show','PRINT',default=p)
-	edit=U.get_duplicated_kargs(ka,'e','E','input_edit','input',default=edit)
+	edit=U.get_duplicated_kargs(ka,'e','E','input_edit','input','edit_clipboard',default=edit)
 	
 	w.OpenClipboard()
 	d = w.GetClipboardData(win32con.CF_UNICODETEXT)
@@ -30,15 +32,15 @@ CF_UNICODETEXT ', 13],
 	if p:U.pln(d)
 	if edit:
 		type=U.get_duplicated_kargs(ka,'type','edit_type','t') 
-		edit_msg=U.get_duplicated_kargs(ka,'title','msg','edit_msg','edit_clipboard','promte','promot','promote',default=edit_msg)
+		edit_prompt=U.get_duplicated_kargs(ka,'title','msg','edit_msg','edit_prompt','prompt','promte','promot','promote',default=edit_prompt)
 		only_edit_firstline=U.get_duplicated_kargs(ka,'edit_firstline','firstline',
 		'line0','l0',default=only_edit_firstline)
-		if not edit_msg:
-			if py.istr(edit):edit_msg=edit
-			else:edit_msg=''
+		if not edit_prompt:
+			if py.istr(edit):edit_prompt=edit
+			else:edit_prompt=''
 		if only_edit_firstline:
 			d=d.splitlines()[0]
-		d=U.input(edit_msg,default=d,type=type)
+		d=U.input(edit_prompt,default=d,type=type)
 	return d
 # U.cbg=get
 	
