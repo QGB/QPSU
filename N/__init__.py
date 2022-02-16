@@ -1572,9 +1572,10 @@ pip install qqwry-py3
 pip install qqwry  # Not have cz88update
 	'''	
 	
-	if ('q' not in ip_location_qqwry.__dict__):
-		import qqwry
-		U=py.importU()
+	import qqwry
+	U=py.importU()
+	QQwry=U.get('QQwry')
+	if not QQwry:
 		F=py.importF()
 		
 		dat_path=dat_path or U.get('qqwry.dat') # value or not py.isNo(value) :
@@ -1592,11 +1593,12 @@ pip install qqwry  # Not have cz88update
 		if not F.exist(dat_path):
 			U.log(['updateQQwry length:', qqwry.updateQQwry(dat_path)] )
 			
-		ip_location_qqwry.q = qqwry.QQwry()
-		ip_location_qqwry.q.load_file(dat_path,loadindex=True)
+		QQwry = qqwry.QQwry()
+		QQwry.load_file(dat_path,loadindex=True)
+		U.set('QQwry',QQwry)
 		U.set('qqwry.dat',dat_path)
 	
-	return ip_location_qqwry.q.lookup(ip)  #('北京市', '联通')
+	return QQwry.lookup(ip)  #('北京市', '联通')
 
 ###################  qqwry end ###########################
 def address_coordinate(address,raw_response=True):
@@ -1885,11 +1887,12 @@ autourl=autoUrl=autoURL=auto_url
 
 
 #setip 192.168  ,  2.2	
-def auto_ip(ip,ip2=py.No('192.168',no_raise=1),ip1=py.No('2',no_raise=1),**ka):
+def auto_ip(ip,ip2=py.No('192.168',no_raise=1),ip1=py.No('2',no_raise=1),print_ip=False,**ka):
 	global U
 	U=py.importU()
 	ip1=U.get_duplicated_kargs(ka,'ip_1','c','C',default=ip1)
 	ip2=U.get_duplicated_kargs(ka,'ip_2','ab','AB','a_b',default=ip2)
+	print_ip=U.get_duplicated_kargs(ka,'p','print','print_','_print',default=print_ip)
 	if py.isint(ip2):
 		if ip1 or py.isint(ip1):raise py.ArgumentError('ip2 should be a.b format')
 		ip1=ip2
@@ -1908,7 +1911,8 @@ def auto_ip(ip,ip2=py.No('192.168',no_raise=1),ip1=py.No('2',no_raise=1),**ka):
 		ip='{0}.{1}.{2}'.format(ip2,ip1,ip)
 	if py.isfloat(ip):
 		ip='{0}.{1}'.format(ip2,ip)		
-		
+	if print_ip:
+		U.pln(ip)
 	return ip
 
 def setIP(ip='',adapter='',gateway='',source='dhcp',mask='',ip2=192.168,dns=py.No(msg='auto use gateway',no_raise=True) ):

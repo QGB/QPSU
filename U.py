@@ -2,10 +2,6 @@
 gsImport='''
 from qgb import U,T
 '''
-import sys
-stdin=sys.stdin;stdout=sys.stdout;stderr=sys.stderr
-gsdecode=decoding='utf-8';gsencode=gsencoding=encoding=stdout.encoding
-modules=sys.modules
 try:
 	import py
 	if not py.istr:raise Exception('not qgb.py')
@@ -23,7 +19,7 @@ def __getattr__(name: str) -> Any:
 '''
 gbPrintErr=True
 gbLogErr=True
-
+import sys
 gbDebug=DEBUG=sys.flags.debug or False#gbDebug只在这里出现一次
 def debug(a=False):
 	# global gbDebug,DEBUG
@@ -49,9 +45,12 @@ def setErr(ae,msg='#Error '):
 		gError=ae
 	if gbPrintErr:print (msg,ae)# U.
 	
-if 'qgb.U' in modules:modules['_U']=modules['qgb.U']
-elif 'U' in modules:modules['_U']=modules['U']
+if 'qgb.U' in sys.modules:sys.modules['_U']=sys.modules['qgb.U']
+elif 'U' in sys.modules:sys.modules['_U']=sys.modules['U']
 ################  import python lib  #######################
+stdin=sys.stdin;stdout=sys.stdout;stderr=sys.stderr
+gsdecode=decoding='utf-8';gsencode=gsencoding=encoding=py.getattr(stdout,'encoding','utf-8')#AttributeError: 'IDAPythonStdOut' object has no attribute 'encoding'
+modules=sys.modules
 try:
 	import os;path=os.path
 	from threading import Thread

@@ -9,7 +9,7 @@ try:
 except Exception as err:
 	gError=err
 
-def get(p=0,edit=0,edit_prompt='',only_edit_firstline=True,**ka):
+def get(p=False,edit=False,edit_prompt='',only_edit_firstline=True,**ka):
 	'''win32con.
 CF_DSPTEXT     ', 129],
 CF_OEMTEXT     ', 7],
@@ -18,12 +18,12 @@ CF_TEXT        ', 1],
 CF_UNICODETEXT ', 13],
 	
 	in py3 win32con.CF_TEXT return b' '
-prompt 提示 ;
+prompt [präm(p)t 不发音p] 提示 ;
 promte 提升
 	'''
 	U=py.importU()
 	if U.istermux():return U.cmd('termux-clipboard-get') 
-	p=U.get_duplicated_kargs(ka,'print_','show','PRINT',default=p)
+	p=U.get_duplicated_kargs(ka,'_print','print_','show','PRINT',default=p)
 	edit=U.get_duplicated_kargs(ka,'e','E','input_edit','input','edit_clipboard',default=edit)
 	
 	w.OpenClipboard()
