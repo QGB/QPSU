@@ -119,7 +119,7 @@ def get_all_traffic(*rs):
 		r[n].insert(0,size_len)
 		r[n].insert(0,'%-17s:%-17s'%(email,app_id ))
 	return r
-def flat_traffic(r):
+def flap_traffic(r):
 	m=py.len(r)
 	rm=[]
 	
@@ -145,6 +145,8 @@ def flat_traffic(r):
 	return rm		
 	# for n,rn in py.enumerate(r):
 		# for 
+flat_traffic=flap_traffic
+
 	
 def get_net_traffic(rsignin,app_id=''):
 	if not app_id:
@@ -184,7 +186,7 @@ def get_net_traffic(rsignin,app_id=''):
  
 	return sl
 	
-def load(s):
+def load(s,skip_err_load=0):
 	if py.istr(s):
 		ls=[i.strip() for i in s.split(',')]
 	if py.islist(s):
@@ -198,7 +200,10 @@ def load(s):
 		q=F.dill_load(f)
 		if not q:
 			print('#Err',f,repr(q))
-			raise q
+			if skip_err_load:
+				continue
+			else:
+				raise q
 		dlogin[i]=q	
 		r.append(q)
 	return r	

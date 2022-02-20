@@ -284,13 +284,22 @@ if getattr(U,'Win',0):
 def save(file=None,lines=-1,tryExcept=False,out=False,columns=70,overide=True,del_other=False,**ka):
 	'''file is str or (mod a)
 	在没有ipython实例时，不能get_ipython()
-	当file被指定时，overide 参数无效'''
+	当file被指定时，overide 参数无效
+#BUG #TODO
+出现输入记录不同步的现象，应该添加一个报警
+In [302]: _i265
+Out[302]: '[i for i in sku if i[0] in [0.03, 0.04, 0.05, 0.06, 0.07, 0.18] ]'
+
+In [303]: In[265]
+Out[303]: 'page=pa=await tb.get_or_new_page(U.cbg(e=1))'
+	
+	'''
 	del_other=U.get_duplicated_kargs(ka,'delOther','delete','delattr',default=del_other)
 	if ka:raise py.ArgumentError('没有处理这个ka，是不是多传了参数',ka)
 	
 	try:
 		if py.isint(lines) and lines>0:
-			# lsta,lend=0,lines
+			# lsta,lend=0,lines 
 			lsta,lend=lines,-1
 		elif len(lines)==2:
 			lsta,lend=lines

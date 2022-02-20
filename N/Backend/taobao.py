@@ -281,9 +281,9 @@ def iter_max_list(*a,round=2,c1=[]):
 		lr=[]
 		for i in r:
 			sum=py.round(py.sum(i),round)
-			s='%s Sum:'%(len(i),)
-			s=U.IntCustomRepr(len(i),str='Len:'+s.rjust(7))
-			lr.append([s,sum,*i])
+			s='%s Unique:'%(len(i),)
+			s=U.IntCustomRepr(len(i),str='Len:'+s.rjust(6+1+4))
+			lr.append([s,len(U.unique(i)),sum,*i])
 		return lr
 	nc=-1
 	y,max,*_=a

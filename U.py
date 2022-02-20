@@ -172,6 +172,7 @@ def set(name,value=SET_NO_VALUE,level=gd_sync_level['process'],**ka):
 	if level>=gd_sync_level['system']:
 		import sqlite3
 	return value
+	
 def unset(*names,level=gd_sync_level['process'],**ka):
 	if level>=gd_sync_level['process']:
 		import sys
@@ -1615,7 +1616,7 @@ def reload(*mods):
 					
 					# if mod.__name__ in modules:#'qgb.ipy'
 				else:
-					return py.No('instance._module not exists, It is not a module ?')
+					return py.No('instance._module not exists, U.reload arg is not a module ?')
 			except Exception as em:
 				raise em
 			
@@ -3847,9 +3848,11 @@ linux:
 	return py.No('not found in os.environ',name)
 get_env_path=get_path_env=get_environ=get_env=getenv=getEnv=getEnviron
 	
-def getParentPid(pid=pid):
+def getParentPid(pid=None):
 	''' os.getpid() '''
 	import psutil
+	if not pid:
+		pid=globals()['pid']
 	return psutil.Process(pid).ppid()
 ppid=getppid=get_ppid=getParentPid	
 	
@@ -4608,7 +4611,9 @@ def get_one_from_iterable(iterable,index=0): #TODO start, stop[, step])
 	
 	if py.isgen(iterable):
 		iterable,i2=copy_generator(iterable)
-
+	else:
+		i2=iterable
+		
 	if index<0:
 		index,raw_index=_len(i2)+index,index
 

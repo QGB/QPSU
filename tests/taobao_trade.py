@@ -327,11 +327,11 @@ async def scroll_page_bottom(page):
 	return await page.evaluate('window.scrollTo(0, document.body.scrollHeight || document.documentElement.scrollHeight);')
 page_scroll_bottom=scroll_page_bottom	
 
-async def get_or_new_page(url,select_tab=True,timeout=30*1000):
+async def get_or_new_page(url,select_tab=True,timeout=30*1000,url_add_timestamp=False):
 	tb=taobao_trade
 	pa=await tb.get_page(url)
 	if not pa:
-		pa=await tb.new_page(url,timeout=timeout)
+		pa=await tb.new_page(url,timeout=timeout,url_add_timestamp=url_add_timestamp)
 	if select_tab:
 		await pa.bringToFront()
 	return pa
