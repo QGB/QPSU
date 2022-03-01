@@ -3001,7 +3001,9 @@ def better_float(x):
 	return r
 
 def float_with_default(obj,*other,default=None):
-	''' FuncWrapForMultiArgs: if default!=None:'''
+	''' FuncWrapForMultiArgs: if default!=None:
+# FloatRepr	
+	'''
 	return FuncWrapForMultiArgs(f=better_float,args=(obj,other),default=default)
 float=float_with_default	
 
@@ -3873,7 +3875,7 @@ def get_process_name_by_pid(pid):
 	import psutil
 	return psutil.Process(pid).name()						
 						
-def get_all_process_list(name='',cmd='',pid=0):
+def get_all_process_list(name='',cmd='',pid=0,ppid=None):
 	'''if err return [r, {i:err}  ]
 _62.name()#'fontdrvhost.exe'
 _62.cmdline()#AccessDenied: psutil.AccessDenied (pid=8, name='fontdrvhost.exe')
@@ -3889,9 +3891,12 @@ pid=0, name='System Idle Process', cmdline=[]
 		except Exception as e:
 			i.cmd=py.No(e) #NoneObj #TODO 需要一个 空字符 类，携带出错或其他信息				
 
-		if pid:
+		if py.isint(pid) and pid>=0:
 			if pid==i.pid:r.append(i)
 			continue# 找到 找不到 ，都下一条
+		if py.isint(ppid) and ppid>=0:
+			if ppid==i.ppid():r.append(i)
+			continue
 		if cmd:
 			if cmd in i.cmd:r.append(i)
 			continue			
@@ -4780,16 +4785,17 @@ def count_hashable_in_iterable(iter):
 	return d
 ct_iter=count_iter=count_list=count_hashable=count_in_iterable=count_hashable_in_iterable
 
-def dict_value_len(adict):
+def dict_value_len(adict,return_list=False,):
 	'''
 	range(-1) = range(0, -1)
 	'''
 	d={}
 	for k,v in adict.items():
-		d[k]=len(v)						
+		d[k]=len(v)	
+	if return_list:return py.list(d.items())
 	return d
 dictvlen=dictValueLen=dict_value_len
-def dict_value_len_count(adict,show_key_len_range=py.range(-1,-1) ):
+def dict_value_len_count(adict,show_key_len_range=py.range(-1,-1),return_list=False, ):
 	'''
 	range(-1) = range(0, -1)
 	'''
@@ -4798,7 +4804,10 @@ def dict_value_len_count(adict,show_key_len_range=py.range(-1,-1) ):
 		l=len(v)#U.len
 		setDictValuePlusOne(d,l)
 		if l and (l in show_key_len_range):
-				setDictListValue(d,'%s-len'%l,k)							
+				setDictListValue(d,'%s-len'%l,k)
+
+	if return_list:return py.list(d.items())
+		
 	return d
 	
 def dict_replace_value(adict,key_map_dict):
@@ -6496,7 +6505,8 @@ class IntCustomStrRepr(py.int):
 			# raise py.ArgumentError('only need one intable arg,but get {}'.format(py.len(a)))
 		self= py.int.__new__(cls, a[0])
 		self.target=get_duplicated_kargs(ka,'f','target','func','function',
-		'repr','__repr__','str','__str__','custom',default=T.justify)
+		'repr','__repr__','str','__str__','custom',default=None)
+		
 		
 		# if not self.target:
 		# 	self.target=

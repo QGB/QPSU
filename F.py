@@ -1277,6 +1277,8 @@ def move(source,target,edit_target=False,mkdir=True,remove_invalid_char=True,**k
 // in target == path(exclude source_fn)
 
 # os.rename(source, target) #OSError: [WinError 17] 系统无法将文件移到不同的磁盘驱动器。: 'C:
+ os.rename target文件名（包不包括路径都没关系）包括扩展名，最大不能超过241
+
 	'''
 	U,T,N,F=py.importUTNF()
 	edit_target=U.get_duplicated_kargs(ka,'e','edit','editarget',default=edit_target)

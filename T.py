@@ -99,6 +99,14 @@ try:
 	from pprint import pprint,pformat
 except:pass
 ####################################################
+
+def similarity_difflib(a,b,isjunk_function=None):
+	''' '''
+	import difflib
+	seq = difflib.SequenceMatcher(isjunk=isjunk_function, a=a,b=b)
+	ratio = seq.ratio()	
+	return ratio
+	
 def char_to_unicode_literal_repr(a,):
 	repr=a.encode("unicode_escape").decode('ascii')
 	# if StrRepr:
