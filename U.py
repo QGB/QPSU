@@ -4221,6 +4221,12 @@ in ipy , npp() not autoReload when U.r(), But U.npp()
 		f,lineno=get_obj_file_lineno(a,lineno=lineno,auto_file_path=auto_file_path)
 		if py.len(f)>250:
 			f=py.importF().nt_short_path(f)
+			
+		if 'notepad++.exe' in npath.lower():#参数不要分开
+			line_arg='{} {}'.format(line_arg,lineno)
+			lineno=''
+		if 'emeditor.exe' in npath.lower():#参数要分开
+			pass# 这是c:\qgb\anaconda3\lib\subprocess.py:769默认行为
 		return run(npath,f,line_arg,lineno)
 	else:
 		if not get_cmd:run(npath)
