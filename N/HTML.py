@@ -37,6 +37,40 @@ def eng_audio(response,word):
 	else:
 		return q
 	
+def eng_dwi(response,dwi,ecdict,sort_kw={},**ka):
+	sort_kw=U.get_duplicated_kargs(ka,'skw',default=sort_kw)
+	K_deci='deci-%s'%py.id(ecdict)
+	deci=U.get(K_deci)
+	if not deci:
+		deci=U.get_or_set(K_deci,{i.word:n for n,i in enumerate(ecdict)},)
+		
+		
+	def get3(w,count=0):
+		row=ecdict[deci[w]]
+		zh=row.translation.replace('\\n','\n')
+		return count or dwi[w],w,zh
+	r=[]
+	re=[]
+	rw=[]
+	for w,count in dwi.items():
+		if w in deci:
+			rw.append(w)
+			r.append(get3(w),)
+		else:
+			re.append(w)
+	ree=[]		
+	for w in re:
+		wl=w.lower()
+		if wl in deci and wl not in rw:
+			r.append(get3(wl,count=dwi[w]),)
+		else:
+			ree.append(w)
+			
+	U.set('eng_dwi.ree',ree)		
+	U.set('eng_dwi.dree',{w:dwi[w] for w in ree})		
+	if sort_kw:
+		r=U.sort(r,**sort_kw)
+	return eng_list(response,r)		
 def eng_list(response,a):
 	'''
 
@@ -48,9 +82,18 @@ def eng_list(response,a):
 
 '''    	
 	main=''
-	if len(a[0])==3:
-		for n,en,zh in a:
-			main+=r'''
+	la0=len(a[0])
+	is_namedtuple=py.getattr(a[0],'_fields',None)
+	n=-1
+	for row in a:
+		# n,en,zh=-1,'',''
+		if la0!=3:n+=1
+		if la0==2:  en,zh=row
+		if la0==3:n,en,zh=row
+		if is_namedtuple:# len==13
+			en=row.word
+			zh=row.translation.replace('\\n','\n')
+		main+=r'''
 <tr>
 	<th class="num">{n}</th>
 	<th class=en onclick="play('{en}')"> <a>{en}</a>		</th>
@@ -185,7 +228,8 @@ function disable_scale(){
 	
 	''')
 	response.headers['Content-Type']='text/html;charset=utf-8';
-	return response.set_data(r)
+	response.set_data(r)
+	return a
 def flask_ls(response,request=None):
 	if not request:from flask import request
 	r=T.html_template(globals=py.globals(),locals=py.locals(),s='''

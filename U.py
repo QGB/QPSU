@@ -187,7 +187,7 @@ def unset(*names,level=gd_sync_level['process'],**ka):
 			return r[0]
 		else:
 			return r
-del_set=delete_set=unset			
+delset=del_set=delete_set=unset			
 			
 	
 def set_multi(**ka):
@@ -1865,7 +1865,7 @@ def sort(a,column=None, cmp=None, key=None, reverse=False,add_index=False,**ka):
 	'''
 	repr=py.repr
 	column=get_duplicated_kargs(ka,'col','C','c',default=column)
-	reverse=get_duplicated_kargs(ka,'rervese','revese','rev',default=reverse)
+	reverse=get_duplicated_kargs(ka,'rervese','revese','rev','re','r',default=reverse)
 	
 	
 	def key_func(ai,size=99,is_column=True):# ai :  item of a
@@ -2399,7 +2399,7 @@ def search_iterable(a,filter='',type=None,depth=2,out_limit=99,_i_depth=0,si='a'
 	'''
 	if not (py.islist(a) or py.istuple(a) or py.isdict(a)):
 		if filter==a:
-			return '%r in %s'%(a,si)
+			return '%r == %s'%(a,si)
 		if (py.istr(a) and py.istr(filter) and filter in a):
 			return '%r in %r#%s'%(filter,a,si)
 		return ''
@@ -4771,11 +4771,12 @@ def setDictSetValue(adict,key,value):
 		adict[key]=py.set([value])
 dict_value_add_set=dict_value_set=dict_add_value_set=add_dict_value_jihe=add_dict_value_set=set_dict_value_set=set_dict_set=setDictset=setDictSetValue
 
-def setDictValuePlusOne(adict,key):
-	if key in adict:
-		adict[key]+=1
-	else:
-		adict[key]=1
+def setDictValuePlusOne(adict,*keys):
+	for key in keys:
+		if key in adict:
+			adict[key]+=1
+		else:
+			adict[key]=1
 dict_key_count=dict_key_count_plus_1=dict_key_count_plus_one=count_dict_key=set_dict_plus_one=set_dict_plus_1=set_dict_value_plus_1=setDictPlusOne=setDictValuePlusOne		
 
 def count_hashable_in_iterable(iter):
@@ -6518,6 +6519,8 @@ class IntCustomStrRepr(py.int):
 	def __repr__(self):#super().__str__()
 		'''
 		'''
+		if not self.target:
+			self.target=T.padding
 		if py.callable(self.target):
 			return self.target(*self.a,**self.ka)
 			

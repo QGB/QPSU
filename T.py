@@ -99,6 +99,30 @@ try:
 	from pprint import pprint,pformat
 except:pass
 ####################################################
+def string_index(a,line_max=122,escape_eol=('\r','\n'),):
+	U,T,N,F=py.importUTNF()
+	r=[[],[],[]]
+	w10=0
+	for n,c in py.enumerate(a):
+		if (n+1)%line_max==0:
+			r
+			# r[2].append('\n'*4)
+		if escape_eol and c in escape_eol:
+			c=py.repr(c)[1:-1]
+			w=T.wcswidth(c)
+		else:
+			w=T.wcswidth(c)
+			
+		w10+=w
+		r[1].append(T._09[n%10]+' '*(w-1))
+		if n%10==9:
+			s10=py.str(n//10)
+			r[0].append(s10+' '*(w10-py.len(s10)))
+			w10=0	
+		r[2].append(c)
+		
+	return '\n'.join([''.join(r[0]),''.join(r[1]),''.join(r[2]),])
+sindex=str_index=string_index	
 
 def similarity_difflib(a,b,isjunk_function=None):
 	''' '''

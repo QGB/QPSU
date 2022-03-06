@@ -1447,6 +1447,8 @@ Image.open(fp)
 			im=F.read_bytes(f)
 		else:
 			im = ImageGrab.grabclipboard()
+#wechat img copy: ['C:\\Users\\qgb\\AppData\\Local\\Temp\\WeChat Files\\8ed1d25c76c76c2ef4f2e53deee64d0.jpg']
+			if py.islist(im):im=im[0]
 			if not im:
 				im=ImageGrab.grab()
 	if Image and py.isinstance(im,Image.Image) and py.callable(transform_function):

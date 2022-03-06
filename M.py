@@ -15,6 +15,9 @@ def count(a=0):
 	return gct[a]
 ct=count
 
+def write(f,text):
+	with open(f,'w') as _:
+		return _.write(text)
 def read(f):
 	with open(f) as _:
 		return _.read(-1)
@@ -85,7 +88,7 @@ def wifi_scan(p=1):
 			r.append(row)
 	gc()
 	if not p:return r
-wl=lw=wifi_ls=ls_wifi=wifi_list=ws=get_wifi_list=wifi_scan
+wl=lw=wifi_ls=ls_wifi=wifi_list=ws=get_wifi_list=scanw=scan_wifi=wifi_scan
 
 def is_wifi_connected():
 	global STA_IF
@@ -281,7 +284,7 @@ def upip_install(pkg_name):
 	return upip.install(pkg_name)
 pip=pip_install=upip_install	
 
-def pwm(pin=17,freq=1,duty=0.5):
+def pwm(pin=17,freq=1,duty=1023):
 	''' machine.Pin.OUT == 3
 
 p=M.pwm()
@@ -292,8 +295,29 @@ f=p.freq
 	from machine import Pin,PWM
 	if duty<1:
 		duty=round(duty*1024) #1023
-	pin=Pin(17,3)
-	p=PWM(pin, freq=freq, duty=duty)
-	return p
+	try:	
+		pin=Pin(pin,Pin.OUT)
+		p=PWM(pin, freq=freq, duty=duty)
+		return p
+	except Exception as e:
+		return pin,e
 
+def lpwm(p,):
+	import M
+	d={}
+	for i in range(1024):         
+		p.duty(i);
+		p.duty(i);
+		p.duty(i);
+		p.duty(i);
+		p.duty(i);
+		
+		s=repr(p);
+		n=int(s[s.index('duty=')+5:s.index(',',24)])           
+		if n in d:d[n].append(i)
+		else:d[n]=[i]   
+		if i%200==0:M.gc();print(i,M.info())
+	with open('d.txt','w') as f:
+		return f.write(repr(d))
+		
 # def fs()	

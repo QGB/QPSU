@@ -884,6 +884,11 @@ def read_qpsu_file(file,prefix='file/'):
 	return read(U.getModPath()+prefix+file)
 qpsufile=qpsuFile=readqp=readqpsu=readQPSU=read_qpsu=read_qpsu_file
 
+def open_xlsx(file):
+	from openpyxl import load_workbook
+	wb = load_workbook(file)
+	return wb
+
 def write_xlsx(file,a):
 	import openpyxl
 	file=autoPath(file)
@@ -903,6 +908,36 @@ def write_xlsx(file,a):
 	outwb.save(file)  # 一定要记得保存
 	return file
 	
+def read_xlsx(file,sheet=0):
+	''' 加载一个8M多xlsx文件，很慢,'''
+	import openpyxl
+	if py.isinstance(file,openpyxl.workbook.workbook.Workbook):
+		wb=file
+	elif py.istr(file):
+		wb = openpyxl.load_workbook(file)# 这句很耗时
+	else:
+		raise py.ArgumentUnsupported(file)
+		
+	if py.isint(sheet):
+		ws=wb[wb.sheetnames[sheet]]
+	elif py.istr(sheet):
+		ws=wb[sheet]
+	else:raise py.ArgumentError('sheet is index or sheet_names')	
+	r=[]
+	for row in ws.values:#<Worksheet "1 lemmas">
+		ri=[]
+		for value in row:
+			ri.append(value)
+		r.append(ri)	
+	return r
+		
+def read_xlsx_sheets_name(file):
+	''' 加载一个8M多xlsx文件，很慢,用了32秒
+	'''
+	from openpyxl import load_workbook
+	wb = load_workbook(file)# 这句很耗时
+	return wb.sheetnames
+		
 def write_xls(file,a):
 	'''ValueError: row index was 65536, not allowed by .xls format'''
 	import xlwt
@@ -915,7 +950,7 @@ def write_xls(file,a):
 			sheet.write(i, j, col)
 	xldoc.save(file)
 	return file
-	
+
 def read_xls(file,sheetIndex=0):
 	''' return [ [colValue...]  .. ]  #No type description
 	'''
@@ -923,12 +958,15 @@ def read_xls(file,sheetIndex=0):
 	w=xlrd.open_workbook(file)           
 	sh=w.sheets()[sheetIndex]
 	return sh._cell_values
-	
+		
 def read_xls_sheets_name(file):
+	''' XLRDError: Excel xlsx file; not supported'''
 	import xlrd                         
 	w=xlrd.open_workbook(file)           
 	return py.list(py.enumerate( w.sheet_names() )  )
 get_xls_sheets_name=read_xls_sheets_name
+	
+	
 	
 def read_sqlite(file,table='',sql="SELECT * FROM {};"):
 	file=autoPath(file)
