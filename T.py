@@ -2001,7 +2001,7 @@ def allAscii(a):
 		# U.pln( ord(i);break
 	return True
 	
-gzfn=zfn=zf09=gszFinancial='''零壹贰叁肆伍陆柒捌玖拾佰仟萬億'''
+z09_finance=gzfn=zfn=zf09=gszFinancial='''零壹贰叁肆伍陆柒捌玖拾佰仟萬億'''
 #亿的后面 ，大写小写都是同一个。
 #参见https://zh.wikipedia.org/wiki/中文数字
 gsz09=gsZ09=gz09=z09=znumber=gzn=gszn=zn='''〇一二三四五六七八九'''

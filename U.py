@@ -4184,7 +4184,7 @@ def vscode(a='',lineno=0,auto_file_path=True,get_cmd=False,
 code=vsc=VSCode=vsCode=vscode
 
 def notePadPlusPlus(a='',lineno=0,auto_file_path=True,editor_path=py.No('config this system editor_path'),
-	get_cmd=False,):
+	get_cmd=False,line_arg='-n',):
 	'''
 --------> os.system('"M:\\Program Files\\Notepad++\\notepad++.exe" "IP.py"')
 'M:\Program' 不是内部或外部命令，也不是可运行的程序
@@ -4197,21 +4197,21 @@ Out[115]: 0
 in ipy , npp() not autoReload when U.r(), But U.npp()
 '''
 	if editor_path:
-		#TODO
-		raise NotImplementedError
-	nppexe='/Notepad++/notepad++.exe'.lower()
-	npath=''	
-		# if Win.getVersionNumber()>=6.1:#win7
-		# appdata=os.getenv('appdata') or ''#win10 not have appdata  ?
-		# npath=appdata.replace('\\','/')+nppexe
-	if not os.path.exists(npath):	
-		npath=getModPath()[:3]+r'QGB'+nppexe
-	if not os.path.exists(npath):	
-		npath=getModPath()[:3]+r'QGB'+'/npp/notepad++.exe'
-	if not os.path.exists(npath):
-		npath=find_driver_path(r':\QGB'+'/npp/notepad++.exe')		
-	if not os.path.exists(npath):
-		npath=find_driver_path(r":\Program Files"+nppexe)#如果最后没有匹配到，则为 空.....
+		npath=editor_path
+	else:
+		nppexe='/Notepad++/notepad++.exe'.lower()
+		npath=''	
+			# if Win.getVersionNumber()>=6.1:#win7
+			# appdata=os.getenv('appdata') or ''#win10 not have appdata  ?
+			# npath=appdata.replace('\\','/')+nppexe
+		if not os.path.exists(npath):	
+			npath=getModPath()[:3]+r'QGB'+nppexe
+		if not os.path.exists(npath):	
+			npath=getModPath()[:3]+r'QGB'+'/npp/notepad++.exe'
+		if not os.path.exists(npath):
+			npath=find_driver_path(r':\QGB'+'/npp/notepad++.exe')		
+		if not os.path.exists(npath):
+			npath=find_driver_path(r":\Program Files"+nppexe)#如果最后没有匹配到，则为 空.....
 	if DEBUG:pln (repr(npath),nppexe)
 	# npath='"%s"'%npath
 	# print(233333333333)  # add this work?
@@ -4221,7 +4221,7 @@ in ipy , npp() not autoReload when U.r(), But U.npp()
 		f,lineno=get_obj_file_lineno(a,lineno=lineno,auto_file_path=auto_file_path)
 		if py.len(f)>250:
 			f=py.importF().nt_short_path(f)
-		return run(npath,f,'-n {0}'.format(lineno))
+		return run(npath,f,line_arg,lineno)
 	else:
 		if not get_cmd:run(npath)
 		return npath 
