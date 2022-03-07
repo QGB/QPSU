@@ -418,8 +418,44 @@ async def delay_trade_time(ipage_or_ids):
 	return ids,F.dp(U.get_multi_return_list('id-resp','id-resp_g'),'[didr,didrg]'+U.stime()),U.len(ids,didr,didrg )
 	
 
-async def get_taobao_sku(page=None,return_item_id=False,debug=False,**ka):
-	'''
+async def get_tmall_sku(page=None,return_item_id=False,debug=False,padding_name=30,**ka):
+	if not page:
+		page=await taobao_trade.get_current_front_page()
+	if not page or 'detail.tmall.com/item.htm' not in page.url:
+		page=await taobao_trade.get_page('detail.tmall.com/item.htm')
+		
+	skuMap=await page.evaluate(r""" KISSY.Env.mods['malldetail/sku/cspu'].exports['skuMap'] """)
+	
+	propertyMemoMap=await page.evaluate('''
+function get_tmall_sku_id_text(){
+	var lis=document.querySelectorAll("#J_DetailMeta > div.tm-clear > div.tb-property > div > div.tb-key > div > div > dl.tb-prop.tm-sale-prop.tm-clear.tm-img-prop > dd > ul > li")
+	var d=new Map()
+	for(var i of lis){
+		var id=i.getAttribute('data-value')
+		var t=i.getAttribute('title')
+		d[id]=t
+	}
+	return d
+}
+''')
+	if debug:return propertyMemoMap
+	r=[]
+	for i,d in skuMap.items():
+		id=T.sub_last(i,';',';')
+		if padding_name:
+				str_name=U.StrRepr(propertyMemoMap.get(id,''),size=padding_name)
+		else:str_name=propertyMemoMap.get(id,'')
+		priceCent=d['priceCent'];sp=d['price'];stock=d['stock'];skuId=d['skuId']
+		
+		row=[U.FloatRepr(py.float(sp),repr=sp,size=6) ,stock,str_name,skuId,id]
+		r.append(row)
+	return r	
+get_sku_tmall=get_tmall_sku	
+	
+async def get_taobao_sku(page=None,return_item_id=False,debug=False,padding_name=30,**ka):
+	'''return 【 [0.10  , '2', 'M4*5*7', False, '3802079080101']。。】
+	
+	
 #dict_keys(['config', 'mods', 'loadCSS', 'add', 'fire', 'listeners', 'fired'])
 # ['config', 'get', 'set']
 #dict_keys(['sku', 'desc', 'async_dc', 'support', 'async_sys', 'video'])
@@ -444,7 +480,7 @@ async def get_taobao_sku(page=None,return_item_id=False,debug=False,**ka):
 		propertyMemoMap=await page.evaluate('''
 function get_sku_id_text(){
 	var lis=document.querySelectorAll('ul.J_TSaleProp>li')
-	var r=[]
+	//var r=[]
 	var d=new Map()
 	for(var i of lis){
 		var id=i.getAttribute('data-value')
@@ -459,7 +495,10 @@ function get_sku_id_text(){
 	html=''
 	try:
 		for i,d in skuMap.items():
-			str_name=propertyMemoMap.get(T.sub_last(i,';',';'),'')
+			id=T.sub_last(i,';',';')
+			if padding_name:
+				str_name=U.StrRepr(propertyMemoMap.get(id,''),size=padding_name)
+			else:str_name=propertyMemoMap.get(id,'')
 			if not str_name:
 				if not html:html=await page.evaluate("document.documentElement.outerHTML")  		
 				str_name=T.sub(html,i[1:-1]+'" class="tb-txt">\n                            <a href="javascript:;">\n                                <span>','</span>')
@@ -474,7 +513,7 @@ function get_sku_id_text(){
 		return T.url_get_arg(page.url,'id'),r
 		
 	return r
-get_sku_list=get_taobao_sku
+get_sku_list=get_sku_tb=get_sku_taobao=get_taobao_sku
 	
 async def save_item_html_and_sku(url,close=False,timeout=30*1000):
 	tb=taobao_trade
