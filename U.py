@@ -571,6 +571,14 @@ u1604:  IPython repl  ok	,  bash python -c error  ?
 		
 	
 ########################## end init #############################################
+def list_del_multi_indexs(a,*ins):
+	ins=py.sorted(ins,reverse=1)
+	d={}
+	for i in ins:
+		d[i]=a.pop(i)
+	return d
+del_list_multi_indexs=list_del_multi_indexs
+
 def multiprocess_pool(*a,**ka):
 	'''multiprocess.Pool(
     processes=None,
