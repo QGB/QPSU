@@ -38,7 +38,7 @@ promte 提升
 		if not edit_prompt:
 			if py.istr(edit):edit_prompt=edit
 			else:edit_prompt=''
-		if only_edit_firstline:
+		if only_edit_firstline and py.len(d.splitlines())>0:
 			d=d.splitlines()[0]
 		d=U.input(edit_prompt,default=d,type=type)
 	return d

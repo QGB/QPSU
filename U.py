@@ -3875,7 +3875,7 @@ def get_process_name_by_pid(pid):
 	import psutil
 	return psutil.Process(pid).name()						
 						
-def get_all_process_list(name='',cmd='',pid=0,ppid=None):
+def get_all_process_list(name='',cmd='',pid=None,ppid=None):
 	'''if err return [r, {i:err}  ]
 _62.name()#'fontdrvhost.exe'
 _62.cmdline()#AccessDenied: psutil.AccessDenied (pid=8, name='fontdrvhost.exe')
