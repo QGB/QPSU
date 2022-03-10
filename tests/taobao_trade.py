@@ -418,7 +418,7 @@ async def delay_trade_time(ipage_or_ids):
 	return ids,F.dp(U.get_multi_return_list('id-resp','id-resp_g'),'[didr,didrg]'+U.stime()),U.len(ids,didr,didrg )
 	
 
-async def get_tmall_sku(page=None,return_item_id=False,debug=False,padding_name=30,**ka):
+async def get_tmall_sku(page=None,return_item_id=False,debug=False,padding_name=40,**ka):
 	if not page:
 		page=await taobao_trade.get_current_front_page()
 	if not page or 'detail.tmall.com/item.htm' not in page.url:
@@ -426,28 +426,57 @@ async def get_tmall_sku(page=None,return_item_id=False,debug=False,padding_name=
 		
 	skuMap=await page.evaluate(r""" KISSY.Env.mods['malldetail/sku/cspu'].exports['skuMap'] """)
 	
-	propertyMemoMap=await page.evaluate('''
+	rd=await page.evaluate('''
 function get_tmall_sku_id_text(){
-	var lis=document.querySelectorAll("#J_DetailMeta > div.tm-clear > div.tb-property > div > div.tb-key > div > div > dl.tb-prop.tm-sale-prop.tm-clear.tm-img-prop > dd > ul > li")
+	var rd=new Map()
 	var d=new Map()
-	for(var i of lis){
+	for(var i of document.querySelectorAll('ul[data-property="颜色分类"] > li')){
 		var id=i.getAttribute('data-value')
 		var t=i.getAttribute('title')
 		d[id]=t
 	}
-	return d
+	rd["颜色分类"]=d
+	
+	var d=new Map()
+	for(var i of document.querySelectorAll('ul[data-property="规格"] > li')){
+		var id=i.getAttribute('data-value')
+		var t=i.querySelector('span').textContent
+		d[id]=t
+	}
+	rd["规格"]=d
+	return rd
 }
 ''')
-	if debug:return propertyMemoMap
+	if debug:return skuMap,rd
+	def get_name(aid,only_name=1):
+		r3=[]
+		for sc,d in rd.items():
+			for id,t in d.items():
+				if id in aid:
+					if only_name:
+						if padding_name:
+							r3.append(U.StrRepr(t,size=padding_name))
+						else:r3.append(t)
+						continue
+					if padding_name:
+						r3.append([U.StrRepr(id,size=17),U.StrRepr(t,size=padding_name),sc])
+					else:r3.append([id,t,sc])
+					# name
+		return r3			
+		if padding_name:
+				str_name=U.StrRepr(name,size=padding_name)
+		else:str_name=name
+		return str_name
 	r=[]
 	for i,d in skuMap.items():
-		id=T.sub_last(i,';',';')
-		if padding_name:
-				str_name=U.StrRepr(propertyMemoMap.get(id,''),size=padding_name)
-		else:str_name=propertyMemoMap.get(id,'')
+		# id=T.sub_last(i,';',';')
 		priceCent=d['priceCent'];sp=d['price'];stock=d['stock'];skuId=d['skuId']
-		
-		row=[U.FloatRepr(py.float(sp),repr=sp,size=6) ,stock,str_name,skuId,id]
+		# r3=get_name(id)
+		row=[U.FloatRepr(py.float(sp),repr=sp,size=6) ,stock,
+		# str_name,
+		skuId, U.StrRepr(i[1:-1],size=34),
+		get_name(i),
+		]
 		r.append(row)
 	return r	
 get_sku_tmall=get_tmall_sku	
