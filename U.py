@@ -1211,7 +1211,7 @@ def which(cmd):
 	return r
 where=which
 
-def join_as_cmd_str(args,*a):
+def join_as_cmd_str(args,*a,quote=True):
 	a=py.list(a)
 	if py.istr(args):
 		a.insert(0,args)
@@ -1223,7 +1223,9 @@ def join_as_cmd_str(args,*a):
 
 	# abandon      #不是 abundant
 	import shlex
-	return ' '.join(shlex.quote(x) for x in a)
+	if quote:
+		a=[shlex.quote(x) for x in a]
+	return ' '.join(a)
 joinCmd=join_cmd=cmdJoin=cmd_join=shlex_join=join_as_cmd_str
 
 def split_cmd_str(a):
@@ -6812,6 +6814,7 @@ U.StrRepr(b'3232',encoding='ascii')	[<class 'qgb.U.StrRepr'>, (b'3232',), {'enco
 			
 		return T.justify(super().__str__(),**self.ka)
 	# return (self.padding*self.padding_times)+ super().__str__() +(self.padding*self.padding_times)
+T.sreol=T.RLF=T.reol=T.REOL=StrRepr(T.EOL)
 	
 class DictAttr(dict):
 	def __init__(self, *args, **kwargs):

@@ -426,7 +426,7 @@ async def get_tmall_sku(page=None,return_item_id=False,debug=False,padding_name=
 		
 	skuMap=await page.evaluate(r""" KISSY.Env.mods['malldetail/sku/cspu'].exports['skuMap'] """)
 	
-	rd=await page.evaluate('''
+	rd=await page.evaluate(r"""
 function get_tmall_sku_id_text(){
 	var rd=new Map()
 	var d=new Map()
@@ -446,7 +446,7 @@ function get_tmall_sku_id_text(){
 	rd["规格"]=d
 	return rd
 }
-''')
+""")
 	if debug:return skuMap,rd
 	def get_name(aid,only_name=1):
 		r3=[]

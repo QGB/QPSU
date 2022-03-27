@@ -573,11 +573,15 @@ F.bin(1.0)=='0b00111111100000000000000000000000'  # （大端）
 	else:
 		raise py.ArgumentUnsupported('#TODO type',a)
 	return r
-def intToBytes(a):
+def int_to_bytes(a):
 	T=py.importU().T
 	a=T.intToStr(a)
 	return hexToBytes(a)
-i2b=intToBytes
+i2b=intToBytes=int_to_byte=int_to_bytes
+
+def byte_to_int(a):
+	return py.ord(a)
+b2i=byte_to_int	
 
 def bytesToHex(a,split=''):
 	'''如果 len(split)是奇数，肯定返回 （奇数+偶数）=奇数

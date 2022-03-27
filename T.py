@@ -28,11 +28,12 @@ HEX=gshex.upper()
 #0x20-0x7E ,32-126,len=95
 visAscii=print_ascii=printAscii=asciiPrint=' !"#$%&\'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~'
 char256=''.join([chr(i) for i in range(256)])
-bytes256=byte256=b''.join( [py.byte(i) for i in range(256)  ] )
-
+bytes256_list=byte256_list=[py.byte(i) for i in range(256)  ]
+bytes256=byte256=b''.join( bytes256_list )
 CR='\r'
 LF=EOL=eol='\n'
-EOLS='\n'+'='*44+'\n'
+EOLS=EOL+'='*44+EOL
+
 TAB=Tab=tab='\t'
 gspace=space=py.chr(0x20)
 slash='/'   # chr(0x2F)

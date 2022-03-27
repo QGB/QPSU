@@ -572,7 +572,10 @@ def setOskPos(w=333,h=255,x=522,y=-21):
 	
 	
 def msgbox(s='',st='title',*a):
-	''' st title'''
+	'''
+__import__('ctypes').windll.user32.MessageBoxW(0, 'text', 'title', 0)	
+	
+	'''
 	if(a):
 		a=py.list(a)
 		a.insert(0,s)
