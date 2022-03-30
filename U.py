@@ -1234,6 +1234,31 @@ def split_cmd_str(a):
 	return shlex.split(a)
 splitCmd=split_cmd=cmdSplit=cmd_split=shlex_split=split_cmd_str
 
+def subprocess_check_output(*a, timeout=9,encoding=py.No('try decode,except return bytes'),**kwargs):
+	''' subprocess.check_output(*popenargs, timeout=None, **kwargs)
+'''
+	import subprocess
+	if py.len(a)==1:
+		if py.istr(a[0]):
+			if ' ' in a[0]:
+				a=split_cmd_str(a[0])
+		else:
+			a=a[0]
+			
+	output = subprocess.check_output(a,timeout=timeout,**kwargs)
+	try:
+		if encoding:
+			output=output.decode(encoding)
+		else:
+			# if is_win():
+				
+			output=output.decode()
+	except Exception as e:
+		pass
+	
+	return output
+check_out=check_output=subprocess_check_output
+
 def cmd(*a,**ka):
 	'''show=False :show command line
 	默认阻塞，直到进程结束返回
@@ -3255,6 +3280,9 @@ mul=multiply_two_tuple=tuple_multiply
 def tuple_div(a,b):return tuple_operator(a=a,b=b,operator='__truediv__')
 div=div_two_tuple=tuple_div
 
+def time_range_list(*a,**ka):
+	return py.list(time_range(*a,**ka))
+
 def traverseTime(start,stop=None,step='day',**ka):
 	'''
 	#TODO ipy 自动化测试框架 ， 解决 ipy3 兼容问题
@@ -3311,9 +3339,11 @@ from dateutil.relativedelta import relativedelta
 	if tdelta.total_seconds()==0.0:
 		print("U.set('t3',",set('t3',[start,stop,tdelta]))
 		return start,stop,tdelta
-	while start<=stop:
-		start+=tdelta
+	yield start	
+	start=start+tdelta
+	while start < stop:
 		yield start
+		start+=tdelta
 	# return i #SyntaxError: 'return' with argument inside generator
 time_delta=timeDelta=iter_time=range_time=time_range=rangeTime=timeRange=timeTraverser=timeTraversal=traverseTime	
 
