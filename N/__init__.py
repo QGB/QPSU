@@ -1600,7 +1600,10 @@ pip install qqwry  # Not have cz88update
 		U.set('QQwry',QQwry)
 		U.set('qqwry.dat',dat_path)
 	
-	return QQwry.lookup(ip)  #('北京市', '联通')
+	r=QQwry.lookup(ip)  #('北京市', '联通')
+	if not r:
+		r=('NotFound',U.stime())
+	return r	
 
 ###################  qqwry end ###########################
 def address_coordinate(address,raw_response=True):

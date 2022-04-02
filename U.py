@@ -5339,13 +5339,16 @@ def	rename_dict_key(d,new,old={}):
 	return d
 		# del d[old]#这个可以删除item,py27
 renameDictKey=rename_dict_key
-def unique(iterable,d=False,**ka):
-	d=get_duplicated_kargs(ka,'dict','return_dict','rd','count','ct',default=d)
+def unique(iterable,count=False,return_list=False,**ka):
+	d=get_duplicated_kargs(ka,'d','dict','return_dict','rd','count','ct',default=count)
 	if d:
 		d={}
 		for i in iterable:
 			dict_key_count_plus_1(d,i)
-		return d
+		if return_list:
+			return list(d.items())
+		else:
+			return d
 	r=[]
 	for i in iterable:
 		if i not in r:r.append(i)
@@ -5448,6 +5451,8 @@ def pip_install_qpsu_required(
 pipqp=pip_install_qpsu_required
 	
 def progressbar(iterable):
+	'''
+'''	
 	import progressbar
 	return progressbar.progressbar(iterable)
 
