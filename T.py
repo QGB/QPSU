@@ -755,6 +755,19 @@ gURL_unreserved_mark=('-','_','.','!','~','*',"'",'(',')')
 gURL_reserved=(';','/','?',':','@','&','=','+','$',',')
 gsURL_not_escaped=gURL_not_escaped='-0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ_abcdefghijklmnopqrstuvwxyz.'
 
+def url_arg_join(url_base='',arg_dict=None):
+	if py.isdict(url_base) and not arg_dict:
+		arg_dict,url_base=url_base,''
+	if url_base and not url_base.endswith('?'):
+		url_base+='?'
+		
+	rs=[]
+	for k,v in arg_dict.items():
+		rs.append('{}={}'.format(k,url_encode(v)))
+	sr='&'.join(rs)
+	return url_base+sr
+join_url_arg=url_join_arg_dict=url_arg_join
+	
 def parse_url_arg(url,list_len_one=False):
 	if py.is2():
 		from urlparse import urlparse,parse_qs
@@ -770,7 +783,7 @@ def parse_url_arg(url,list_len_one=False):
 		return U.DictAttr(r)
 	except:pass
 	return r
-parse_qs=parse_url_arg
+url_arg_dict=url_parse_arg=parse_qs=parse_url_arg
 
 def get_url_arg(url,arg_name):
 	d=parse_url_arg(url)
@@ -1987,13 +2000,25 @@ def min_len(*a):
 	return r
 	
 	
-def max_len(*a):
+def max_wcswidth_return_int(*a):
+	if py.len(a)==1 and not py.istr(a[0]) and py.iterable(a[0]):
+		a=a[0]
+	r=0
+	for i in a:
+		# i=string(i)
+		n=wcswidth(i)
+		if n>r:r=n
+	return r
+max_wcswidth=max_wcswidth_return_int
+
+def select_max_len_str(*a):
 	'''return max length string(a[i])'''
 	r=''
 	for i in a:
 		i=string(i)
 		if len(i)>len(r):r=i
 	return r
+get_max_len_str=select_max_len_str	
 	
 def allAscii(a):
 	if not py.istr(a):return False

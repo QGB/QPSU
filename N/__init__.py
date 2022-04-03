@@ -1535,8 +1535,11 @@ def ipToInt(ip):
 	return r
 ip_int=ip2int=ipToInt
 
-def ipLocation(ip,reverse_ip=False,
+def ipLocation(ip,reverse_ip=False,size=68,
 junk=['本机地址  CZ88.NET','IANA 保留地址','局域网 IP','局域网 对方和您在同一内部网'] ):
+	global U,T,N,F
+	if size:U,T,N,F=py.importUTNF()
+
 	location=' '.join(ip_location_qqwry(ip))
 	location=location.replace('CZ88.NET','').strip() #去除包含的
 	
@@ -1544,10 +1547,16 @@ junk=['本机地址  CZ88.NET','IANA 保留地址','局域网 IP','局域网 对
 		return ip
 		location=py.No(location)	
 	if reverse_ip:
-		return '%-15s [%s] '%(ip,location)
-		# return '{0} [{1}] '.format(ip,location)
+		r='%-15s [%s] '%(ip,location)
+		if size:
+			r=U.StrRepr(r,size=size)
 	else:
-		return location		
+		r=location
+		if (size-15)>0:
+			r=U.StrRepr(r,size=size-15)
+	return r
+	
+
 sip_location=sipLocation=ip_location=ipLocation
 
 ######################  qqwry   ###########################
@@ -1656,7 +1665,7 @@ map_location=address_coordinate
 	
 	
 def jsonwhois_com(domain,key=py.No('get_or_input',no_raise=True),raw_response=False):
-	
+	global U,T,N,F
 	import requests
 	U,T,N,F=py.importUTNF()
 	domain=T.get_fld(domain)
