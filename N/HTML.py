@@ -271,7 +271,7 @@ def flask_get_all_upload_files(upload_dir=py.No('U.gst/upload_dir',no_raise=1),s
 			
 	return d
 		# f.save(f.name)
-flask_save_all_upload_files=flask_get_all_upload_files	
+files=save_file=save_files=flask_files=flask_save_all_upload_files=flask_get_all_upload_files	
 	
 ghtml_txt='''
 <head>

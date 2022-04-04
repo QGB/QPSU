@@ -123,7 +123,7 @@ def string_index(a,line_max=122,escape_eol=('\r','\n'),):
 		r[2].append(c)
 		
 	return '\n'.join([''.join(r[0]),''.join(r[1]),''.join(r[2]),])
-sindex=str_index=string_index	
+enu=enumerate=sindex=str_index=string_index	
 
 def similarity_difflib(a,b,isjunk_function=None):
 	''' '''
