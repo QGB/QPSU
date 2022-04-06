@@ -1259,7 +1259,7 @@ def subprocess_check_output(*a, timeout=9,encoding=py.No('try decode,except retu
 	return output
 check_out=check_output=subprocess_check_output
 
-def cmd(*a,**ka):
+def cmd(*a,shell=True,**ka):
 	'''show=False :show command line
 	默认阻塞，直到进程结束返回
 	if 'timeout' not in ka:ka['timeout']=9     ## default timeout
@@ -1297,6 +1297,9 @@ def cmd(*a,**ka):
 	stdin   =get_duplicated_kargs(ka,'stdin','input')
 	timeout =get_duplicated_kargs(ka,'timeout',default=9)
 	encoding=get_duplicated_kargs(ka,'encoding','encode','coding',default='utf-8')
+	if shell:
+		ka['shell']=True
+	
 	if show:pln (a)
 	if stdin:
 		if py.is3() and py.istr(stdin):
