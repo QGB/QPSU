@@ -1588,6 +1588,32 @@ def json_load(astr='',file=None,comment=lambda s:re.sub("//.*","",s,flags=re.MUL
 		return py.No(e,astr)
 json_loads=json_load
 
+def json_dump_to_file(obj,file,**ka):
+	'''json.dump(
+    obj,
+    fp,
+    *,
+    skipkeys=False,
+    ensure_ascii=True,
+    check_circular=True,
+    allow_nan=True,
+    cls=None,
+    indent=None,
+    separators=None,
+    default=None,
+    sort_keys=False,
+    **kw,
+)
+'''
+	import json
+	U,T,N,F=py.importUTNF()
+	file=U.get_duplicated_kargs(ka,)
+	try:
+		with F.open(file) as f:
+			return json.dump(obj ,fp=f )
+	except Exception as e:
+		return py.No(e)
+		
 def json_dumps(obj):
 	U=py.importU()
 	def default(obj):# not json basic class

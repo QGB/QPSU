@@ -50,6 +50,28 @@ class IntSize(py.int):
 		# return '<{}={}>'.format(super().__repr__(),F.ssize(self) )
 	def __repr__(self):return self.__str__()
 	
+def open(file,mode='r',**ka):
+	'''py.open(
+    file,
+    mode='r',
+    buffering=-1,
+    encoding=None,
+    errors=None,
+    newline=None,
+    closefd=True,
+    opener=None,
+)
+'''
+	U,T,N,F=py.importUTNF()
+	mode=U.get_duplicated_kargs(ka,'mode','mod','m',default=mode)
+	if py.isfile(file):
+		#if file.closed==False:
+		return file
+	elif py.istr(file):
+		return py.open(file,mode=mode,**ka)
+	else:
+		raise py.ArgumentUnsupported(file,ka)
+	
 def test_long_filename():
 	'''
 245
@@ -854,12 +876,25 @@ readjson=readJSON=json_load=read_json
 
 def write_json(file,obj):
 	import json
+	file=auto_path(file,ext='json')
 	with py.open(file,'w') as f: #not bytes,json write str
 		json.dump(obj=obj,fp=f)
 	return file
 
 writeJSON=json_dump=write_json
 
+def write_csv(file,rows,title=None):
+	# import csv
+	# with open(file, 'w') as f: 
+		# write = csv.writer(f) 
+		# if title:
+			# write.writerow(title)
+		# write.writerows(rows) 
+		
+	with open(file, 'w') as f:
+		for row in rows:
+			f.write('"{}","{}"\n'.format(*row))
+	return file
 def read_csv(file,encoding=None,delimiter=',',keep_default_na=False,):
 	''' keep_default_na : use float nan ,not empty string ''
 the  na_filter=False can change your columns type to object

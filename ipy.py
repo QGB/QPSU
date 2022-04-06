@@ -133,7 +133,7 @@ def getIpyHistory(file='~/.ipython/profile_default/history.sqlite'):
 	
 def dill_load(filename,return_value=False,set_user_ns=True):
 	# F=py.importF()
-	if not filename.lower().endswith('.dill'):
+	if filename.lower()[-5:] not in ['.dill','ickle']:
 		for f in F.ls(U.gst,f=1,d=0):
 			if filename in f:
 				py.input('continue or ctrl+c  using: '+f)
@@ -144,14 +144,14 @@ def dill_load(filename,return_value=False,set_user_ns=True):
 	if U.all_in([',','='],filename):
 		vars=T.regex_match_all(F.getNameWithoutExt(filename),T.RE_vars_separated_by_commas)[0].split(',')
 	if vars:
-		for n,v in py.enumerate(F.dill_load(filename)):
+		for n,v in py.enumerate(F.dill_load(filename,dill_ext='')):
 			dnv[vars[n]]=v
 	else:
 		varname=''
 		for c in F.getNameWithoutExt(filename):
 			if c not in T.alphanumeric_:break
 			varname+=c
-		dnv[varname]=F.dill_load(filename)
+		dnv[varname]=F.dill_load(filename,dill_ext='')
 	if py.len(dnv)==1:	
 		r=[py.list(dnv)[0],filename]
 	else:
