@@ -571,7 +571,7 @@ u1604:  IPython repl  ok	,  bash python -c error  ?
 	def tmux_capture_pane(session=0,max_lines=9999):
 		U,T,N,F=py.importUTNF()
 		a=N.geta()
-		U.isipy().getoutput('tmux capture-pane -S -{max_lines} -t {session}:{window};tmux show-buffer'.format(max_lines=max_lines,session=session,window=a))
+		rs=U.isipy().getoutput('tmux capture-pane -S -{max_lines} -t {session}:{window};tmux show-buffer'.format(max_lines=max_lines,session=session,window=a))
 		return T.EOL.join(rs)
 	tmux=tmux_capture=tmux_capture_pane
 	
