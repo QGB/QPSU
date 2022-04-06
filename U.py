@@ -568,7 +568,12 @@ u1604:  IPython repl  ok	,  bash python -c error  ?
 			# [1]
 		#  0
 # u1604 # /bin/sh: 1: Syntax error: end of file unexpected
-		
+	def tmux_capture_pane(session=0,max_lines=9999):
+		U,T,N,F=py.importUTNF()
+		a=N.geta()
+		U.isipy().getoutput('tmux capture-pane -S -{max_lines} -t {session}:{window};tmux show-buffer'.format(max_lines=max_lines,session=session,window=a))
+		return T.EOL.join(rs)
+	tmux=tmux_capture=tmux_capture_pane
 	
 ########################## end init #############################################
 def list_del_multi_indexs(a,*ins):
@@ -1265,6 +1270,8 @@ def cmd(*a,shell=True,**ka):
 	if 'timeout' not in ka:ka['timeout']=9     ## default timeout
 	
 	stdin : str,bytes
+	
+在 ipython 中 使用rpcServer 调用U.cmd(shell=True),会造成子进程污染ipython命令窗口
 	'''
 	if iswin() or iscyg():quot='"'
 	else:quot="'"
@@ -1297,8 +1304,7 @@ def cmd(*a,shell=True,**ka):
 	stdin   =get_duplicated_kargs(ka,'stdin','input')
 	timeout =get_duplicated_kargs(ka,'timeout',default=9)
 	encoding=get_duplicated_kargs(ka,'encoding','encode','coding',default='utf-8')
-	if shell:
-		ka['shell']=True
+	if shell:ka['shell']=True
 	
 	if show:pln (a)
 	if stdin:
