@@ -281,7 +281,7 @@ if getattr(U,'Win',0):
 #is2 py:2.713 ipy:5.1 at[2018-05-13 10:26:35.049] G:/test/ipy/   #len 57
 #is3 py:3.63 ipy:6.1 at[2018-05-13 10:32:01.078] G:/test/ipy/    #56
 
-def save(file=None,lines=-1,tryExcept=False,out=False,columns=70,overide=True,del_other=False,**ka):
+def save(file=None,lines=-1,tryExcept=False,out=False,columns=70,overide=True,del_other=False,out_max=9999,**ka):
 	'''file is str or (mod a)
 	在没有ipython实例时，不能get_ipython()
 	当file被指定时，overide 参数无效
@@ -384,9 +384,13 @@ Out[303]: 'page=pa=await tb.get_or_new_page(U.cbg(e=1))'
 			U.p(v,' '*(columns-len(v.splitlines()[-1])),file=file )
 			
 		if out and (i in gOut) and (not skip):
+			pout=pformat(gOut[i])
+			if py.len(pout) > out_max:
+				pout='#Warning#  len(pout)={} > out_max'.format(py.len(pout))
+				print( '#ipy.save In[{}]{}# len(pout)={} > out_max'.format(i,gIn[i],py.len(pout)) )
 			U.pln(';"""#{0}'.format(i),file=file )
 			# U.pln('"""',file=file )
-			U.pln(pformat(gOut[i]),file=file )
+			U.pln(pout,file=file )
 			U.pln('"""',file=file )	
 		else:
 			U.pln('#',i,file=file )

@@ -568,12 +568,15 @@ u1604:  IPython repl  ok	,  bash python -c error  ?
 			# [1]
 		#  0
 # u1604 # /bin/sh: 1: Syntax error: end of file unexpected
-	def tmux_capture_pane(session=0,max_lines=9999):
+	def tmux_capture_pane(session=0,max_lines=9999,**ka):
 		U,T,N,F=py.importUTNF()
+		session=U.get_duplicated_kargs(ka,'session','sess',default=session)
+		max_lines=U.get_duplicated_kargs(ka,'max_lines','max','m','n','S','s',default=max_lines)
+		
 		a=N.geta()
-		rs=U.isipy().getoutput('tmux capture-pane -S -{max_lines} -t {session}:{window};tmux show-buffer'.format(max_lines=max_lines,session=session,window=a))
+		rs=U.isipy().getoutput('tmux capture-pane -S -{max_lines} -t {session}:{window};tmux show-buffer'.format(max_lines=max_lines,session=session,window=a))# 不能用 U.cmd
 		return T.EOL.join(rs)
-	tmux=tmux_capture=tmux_capture_pane
+	tmux=tmuxc=tmuxcap=tmuxcapture=tmuxCapture=tmux_capture=tmux_capture_pane
 	
 ########################## end init #############################################
 def list_del_multi_indexs(a,*ins):
