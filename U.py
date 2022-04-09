@@ -5695,8 +5695,12 @@ def get_args_dict_from_format_string(text,locals,regex=r'\{\w+\}'):
 	####	
 	return {i:locals[i] for i in ks}
 	
-def git_commit(commit_msg=None,dir='.',
-	git_exe=None, user_email='qgbcs1@gmail.com', user_name='qgb',):
+def git_psuh(remote,dir='.',git_exe=None,):
+	'''#TODO '''
+	raise py.NotImplementedError()
+	
+
+def git_commit(commit_msg=None,dir='.',	git_exe=None,git_add='"{git_exe}" add -A', user_email='qgbcs1@gmail.com', user_name='qgb',):
 	cmd=r'''   
 "   "{git_exe}" config --global user.email {user_email}
 "{git_exe}" config --global user.name {user_name}
@@ -5706,10 +5710,10 @@ def git_commit(commit_msg=None,dir='.',
 "{git_exe}" config --global credential.helper store
 "{git_exe}" config --global http.sslverify "false"
 echo 	 git config done
-"{git_exe}" add -A
+%(git_add)s
 "{git_exe}" commit -m "{commit_msg}"
 echo 	 git commit "{commit_msg}" done   "
-''' 
+''' % py.locals() # 其他地方不是用 %py.vars()
 	U,T,N,F=py.importUTNF()
 	U.cd(dir)
 	U.pwd(p=1)
