@@ -33,7 +33,7 @@ promte 提升
 	if edit:
 		type=U.get_duplicated_kargs(ka,'type','edit_type','t') 
 		edit_prompt=U.get_duplicated_kargs(ka,'title','msg','edit_msg','edit_prompt','prompt','promte','promot','promote',default=edit_prompt)
-		only_edit_firstline=U.get_duplicated_kargs(ka,'edit_firstline','firstline',
+		only_edit_firstline=U.get_duplicated_kargs(ka,'edit_firstline','firstline','fl',
 		'line0','l0',default=only_edit_firstline)
 		if not edit_prompt:
 			if py.istr(edit):edit_prompt=edit

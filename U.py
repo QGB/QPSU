@@ -6129,7 +6129,7 @@ text直接传入 title 有问题 , T.html_encode fix it：
 		if not title:
 			# print_repr(tb,title,text) #debug
 			r=N.HTTP.request(text.replace('://item.','://www.'),Host='item.taobao.com',no_raise=True)
-			if r:
+			if r and r.text:
 				bs=T.beautifulSoup(r.text)
 				title=bs.select('meta[name="keywords"]')
 				if title:
