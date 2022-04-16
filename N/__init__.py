@@ -187,7 +187,21 @@ def get_tornado_rpc_handler(key='/-',locals=None,globals=None):
 # except Exception as e:
 	# setErr(e)
 tornado_rpc_handler=RPCHandlerTornado=get_tornado_rpc_handler
-	
+
+def git_https_to_ssh(url=py.No('auto get clipboard'),):
+	U,T,N,F=py.importUTNF()
+	if not url:
+		url=U.cbg(e=1,edit_prompt='git-url:')
+	d=T.regex_match_named(url,T.RE_GIT_REPO)
+	if not d:return d
+	if   d['protocol'] in ['https','ssh',]:
+		return 'ssh://%(netloc)s/%(user)s/%(repo)s'%d
+	else:
+		raise Exception(url,d)
+		
+url_git_https_to_ssh=get_ssh_git=https_to_ssh_git=github_https_to_ssh=git_https_to_ssh	
+
+
 def github_release(url):
 	'''    "url": "https://api.github.com/repos/octocat/Hello-World/releases/1",
 	"html_url": "https://github.com/octocat/Hello-World/releases/v1.0.0",

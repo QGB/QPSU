@@ -52,7 +52,8 @@ RE_VAR_SIMPLE=RE_VAR=RE_variable_name=RE_python_variable_name=r'[_a-zA-Z]\w*'#
 #\w（不是W） 一共有 127073个字符，其中有815个不在sv中。sv一共有128491个非空字符。2233个不在\w中。交集有 126258个
 #如果不小心用（注意大小写）A-z Matches a character in the range "A" to "z" (char code 65 to 122). Case sensitive.
 RE_VARS_COMMAS=RE_vars_separated_by_commas=r'VAR(?:\s*,\s*VAR)+'.replace('VAR',RE_VAR)
-RE_GIT=RE_GIT_URL=RE_URL_GIT=r'((?P<protocol>git|ssh|http(s)?)|(git@[\w\.]+))(:(//)?)([\w\@\.\:\/~]*)([\w]+)/([\w]+)(\.git)?(/)?'
+RE_GIT_REPO=r'((?P<protocol>git|ssh|http(s)?)|(git@[\w\.]+))(:(\/\/)?)(?P<netloc>[\w\@\.\:~]+)\/(?P<user>[\w]+)\/(?P<repo>\w+(\.git)?)'
+RE_GIT=RE_GIT_URL=RE_URL_GIT=RE_GIT_REPO+'(?P<other>[\w\/]*)'
 ###############
 SQLITE='SELECT * FROM sqlite_master;'
 
@@ -856,6 +857,10 @@ Out[513]:
  SplitResult(scheme='https', netloc='buyertrade.taobao.com', path='/trade/itemlist/list_bought_items.htm', query='', fragment=''))
  
  T.get_domain_parts_by_url(websocket,fix_protocol=False)   
+ 
+ 
+netloc: Contains the network location - which includes the domain itself (and subdomain if present), the port number, along with an optional credentials in form of username:password. Together it may take form of username:password@domain.com:80.
+ 
 '''
 	if 'fix_protocol' not in ka:
 		ka['fix_protocol']=True
