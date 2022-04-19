@@ -195,6 +195,12 @@ def git_https_to_ssh(url=py.No('auto get clipboard'),):
 	d=T.regex_match_named(url,T.RE_GIT_REPO)
 	if not d:return d
 	if   d['protocol'] in ['https','ssh',]:
+		if not d['netloc'].startswith('git@'):
+			if '@' in d['netloc']:
+				d['netloc']='git@'+T.sub(d['netloc'],'@','')
+			else:
+				d['netloc']='git@'+d['netloc']
+				
 		return 'ssh://%(netloc)s/%(user)s/%(repo)s'%d
 	else:
 		raise Exception(url,d)
