@@ -264,3 +264,34 @@ Out[26]: 'C:/QGB/babun/cygwin/bin/qgb/'
 		return client
 		# return r.path,remote_location_bytes
 		
+def get_github_repo_directory_as_list(url,access_token=py.No('auto get_or_set_input'),return_object=True,return_str=False,return_fullpath=True,**ka):
+	'''pip install pygithub'''
+	import github
+	if not access_token:
+		access_token=U.get_or_set_input('github.access_token')
+	g=github.Github(access_token)
+	d=T.regex_match_named(url,T.RE_GIT_URL)
+	if not d:return d
+	repo=g.get_repo(d['user']+'/'+d['repo'])	
+	u=d['other']
+	start=T.regex_match_one(u,r'^/tree/[a-z0-9]+/')##==T.regex_match_one(s,r'^\/tree\/[a-z0-9]+\/')
+	if not start:
+		py.pdb()()
+		raise py.ArgumentError(url)
+	############# arg parse ############	
+	return_str=U.get_duplicated_kargs(ka,'return_str','rs','return_s',default=return_str)
+	return_fullpath=U.get_duplicated_kargs(ka,'return_fullpath','return_full_path','fullpath','path','rp',default=return_fullpath)
+	if return_str:return_object=False	
+	if not return_fullpath:return_object=False	
+	####################################	
+	os=repo.get_dir_contents(u[py.len(start):])	
+	if return_object:
+		return os
+	else:
+		if return_fullpath:
+			return [o.path for o in os]
+		else:
+			return [o.name for o in os]
+		
+github_dir=get_github_dir=get_github_repo_directory_as_list
+	

@@ -53,7 +53,7 @@ RE_VAR_SIMPLE=RE_VAR=RE_variable_name=RE_python_variable_name=r'[_a-zA-Z]\w*'#
 #如果不小心用（注意大小写）A-z Matches a character in the range "A" to "z" (char code 65 to 122). Case sensitive.
 RE_VARS_COMMAS=RE_vars_separated_by_commas=r'VAR(?:\s*,\s*VAR)+'.replace('VAR',RE_VAR)
 RE_GIT_REPO_URL=RE_GIT_REPO=r'((?P<protocol>git|ssh|http(s)?)|(git@[\w\.]+))(:(\/\/)?)(?P<netloc>[\w\@\.\:~]+)\/(?P<user>[\w]+)\/(?P<repo>[\w\-\.]+(\.git)?)'
-RE_GIT=RE_GIT_URL=RE_URL_GIT=RE_GIT_REPO+'(?P<other>[\w\/]*)'
+RE_GIT=RE_GIT_URL=RE_URL_GIT=RE_GIT_REPO_OTHER=RE_GIT_REPO+'(?P<other>[\w\/]*)'
 ###############
 SQLITE='SELECT * FROM sqlite_master;'
 

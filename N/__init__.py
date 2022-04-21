@@ -194,7 +194,7 @@ def git_https_to_ssh(url=py.No('auto get clipboard'),):
 		url=U.cbg(e=1,edit_prompt='git-url:')
 	d=T.regex_match_named(url,T.RE_GIT_REPO)
 	if not d:return d
-	if   d['protocol'] in ['https','ssh',]:
+	if d['protocol'] in ['https','ssh',]:
 		if not d['netloc'].startswith('git@'):
 			if '@' in d['netloc']:
 				d['netloc']='git@'+T.sub(d['netloc'],'@','')
@@ -203,7 +203,7 @@ def git_https_to_ssh(url=py.No('auto get clipboard'),):
 				
 		return 'ssh://%(netloc)s/%(user)s/%(repo)s'%d
 	else:
-		raise Exception(url,d)
+		raise py.NotImplementedError(url,d)
 		
 url_git_https_to_ssh=get_ssh_git=https_to_ssh_git=github_https_to_ssh=git_https_to_ssh	
 
