@@ -281,7 +281,7 @@ if getattr(U,'Win',0):
 #is2 py:2.713 ipy:5.1 at[2018-05-13 10:26:35.049] G:/test/ipy/   #len 57
 #is3 py:3.63 ipy:6.1 at[2018-05-13 10:32:01.078] G:/test/ipy/    #56
 
-def save(file=None,lines=-1,tryExcept=False,out=False,columns=70,overide=True,del_other=False,out_max=9999,**ka):
+def save(file=None,lines=-1,tryExcept=False,out=False,columns=70,overide=True,del_other=False,out_max=9999,In_index_delta=0,**ka):
 	'''file is str or (mod a)
 	在没有ipython实例时，不能get_ipython()
 	当file被指定时，overide 参数无效
@@ -293,8 +293,11 @@ Out[302]: '[i for i in sku if i[0] in [0.03, 0.04, 0.05, 0.06, 0.07, 0.18] ]'
 In [303]: In[265]
 Out[303]: 'page=pa=await tb.get_or_new_page(U.cbg(e=1))'
 	
+	
+In_index_delta=1  # In[268]==_i269	  , Out[269]
 	'''
 	del_other=U.get_duplicated_kargs(ka,'delOther','delete','delattr',default=del_other)
+	In_index_delta=U.get_duplicated_kargs(ka,'In_index_delta','in_index_delta','index_delta','in_delta','delta_in',default=In_index_delta)
 	if ka:raise py.ArgumentError('没有处理这个ka，是不是多传了参数',ka)
 	
 	try:
@@ -358,7 +361,7 @@ Out[303]: 'page=pa=await tb.get_or_new_page(U.cbg(e=1))'
 	for i,v in enumerate(gIn[lsta:lend]):
 		skip=False
 		if i==0 and lsta==0:continue
-		i=lsta+i
+		i=lsta+i+In_index_delta
 		v=v.strip()
 			# U.isSyntaxError(u'_{0}={1}'.format(i,v) ) :
 				# pass
