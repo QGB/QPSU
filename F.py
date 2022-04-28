@@ -1065,8 +1065,8 @@ True
 		# raise NotImplementedError
 	if _p.exists(fn):
 		if _p.isdir(fn):
-			fn=fn.replace('\\','/')
-			if not fn.endswith('/'):fn+='/'
+			# fn=fn.replace('\\','/')
+			if not (fn.endswith('/') or  fn.endswith('\\') ):fn+=get_splitor(fn)
 			return fn
 		if _p.getsize(fn)<1 and not zero:
 			return zero
@@ -1329,7 +1329,7 @@ def getSplitor(ap):
 	if '/' in ap:return '/'
 	if '\\' in ap:return '\\'		
 	return '/'#default	
-getsp=getSp=getSplitor		
+getsp=getS=get_splitor=getSplitor		
 		
 def join_path(a,*p):
 	'''os.path.join(a, *p)
@@ -1439,9 +1439,12 @@ def makeDirs(ap,isFile=False,cd=0,no_auto_path=False):
 			r=e
 		if p.exists():
 			if not no_auto_path:sp=autoPath(p)
-			else:sp=py.str(p.absolute()).replace('\\','/')
-			if p.is_dir() and not sp.endswith('/'):
-				sp+='/'
+			else:sp=py.str(p.absolute())
+			splitor=get_splitor(sp)
+			# else:sp=py.str(p.absolute()).replace('\\','/')
+			
+			if p.is_dir() and not sp.endswith(splitor):
+				sp+=splitor
 			r=sp
 		else:
 			r=py.No(r,p)
@@ -1494,15 +1497,8 @@ FileNotFoundError: [Errno 2] No such file or directory: '.
 
 	'''
 	U=py.importU()
-	if not gbAutoPath:
-		pass
-	else:
-		if default:
-			default=default.replace('\\','/')
-			if not default.endswith('/'):default+='/'
-		else:
-			default=U.set_test_path(U.gst) # 防止 U.gst 被改变没被保存
-		fn=str(fn)
+	def auto_string():
+		nonlocal fn,ext
 		fn=fn.replace('\\','/')
 		if ext and not ext.startswith('.'):ext='.'+ext
 		if not fn.lower().endswith(ext.lower()):fn+=ext
@@ -1523,6 +1519,23 @@ FileNotFoundError: [Errno 2] No such file or directory: '.
 		if py.len(fn)>=260 and U.iswin():
 			fn=nt_path(fn)
 		if(is_dir and not fn.endswith('/')):fn+='/'
+		# return fn
+	
+	if not gbAutoPath:
+		pass
+	else:
+		if default:
+			default=default.replace('\\','/')
+			if not default.endswith('/'):default+='/'
+		else:
+			default=U.set_test_path(U.gst) # 防止 U.gst 被改变没被保存
+		fn=str(fn)
+		if py.istr(fn) and fn.startswith('\\\\192.'):
+			pass#todo more 
+		else:
+			# fn=auto_string(fn)
+			auto_string()
+	
 	if p:print(fn)
 	return fn
 autofn=auto_filename=autoFileName=auto_file_path=autoPath=auto_path
@@ -1612,7 +1625,7 @@ def get_dirname_from_full_path(a):
 	if r in ['/','\\']:
 		return r
 	else:
-		return r+'/'
+		return r+get_splitor(r) 
 	# exit()
 get_dir=dirname=dir=get_path_from_full_path=get_dirname_from_full_path
 

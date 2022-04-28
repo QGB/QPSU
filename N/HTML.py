@@ -37,8 +37,14 @@ def eng_audio(response,word):
 	else:
 		return q
 	
-def eng_dwi(response,dwi,ecdict,sort_kw={},**ka):
-	sort_kw=U.get_duplicated_kargs(ka,'skw',default=sort_kw)
+def eng_dwi(response,dwi,ecdict=py.No('auto load'),sort_kw={},**ka):
+	if not ecdict:
+		ecdict=U.get_or_dill_load_and_set(r'C:\test\ecdict-770611.dill')
+		# F.dill_load()
+	
+	sort_kw=U.get_duplicated_kargs(ka,'skw','sort','s',default=sort_kw)
+	
+	
 	K_deci='deci-%s'%py.id(ecdict)
 	deci=U.get(K_deci)
 	if not deci:

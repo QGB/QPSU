@@ -314,7 +314,7 @@ Out[303]: 'page=pa=await tb.get_or_new_page(U.cbg(e=1))'
 				while py.len(file.encode('utf-8'))> 255-3: # 256-3 too long !
 					file=file[:-1]
 			file=F.autoPath(file,ext='.py',default=gsavePath)
-#255-3(.py)  防止文件名过长 OSError: [Errno 22] Invalid argument: "\\\\?\\C:\\test			
+#255-3(.py)  防止文件名过长 OSError: [Errno 22] Invalid argument: "\\\\?\	\C:\\test			
 			F.new(file)
 			if py.is2():file=open(file,'a')
 			else:file=open(file,'a',encoding="utf8")
@@ -388,7 +388,11 @@ Out[303]: 'page=pa=await tb.get_or_new_page(U.cbg(e=1))'
 			if py.len(pout) > out_max:
 				pout='#Warning#  len(pout)={} > out_max'.format(py.len(pout))
 				print( '#ipy.save In[{}]{}# len(pout)={} > out_max'.format(i,gIn[i],py.len(pout)) )
-			U.pln(';"""#{0}'.format(i),file=file )
+			if v.splitlines()[-1].strip().startswith('#'):
+				out_head_char=T.eol
+			else:out_head_char=';'
+				
+			U.pln(out_head_char+'"""#{0}'.format(i),file=file )
 			# U.pln('"""',file=file )
 			U.pln(pout,file=file )
 			U.pln('"""',file=file )	

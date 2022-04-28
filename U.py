@@ -282,14 +282,18 @@ def get_or_dill_load(name):
 get_dl=get_or_dl=get_or_dill_load	
 
 def get_or_dill_load_and_set(name):
-	o=get(name)
+	U,T,N,F=py.importUTNF()
+	name=F.auto_path(name)
+	if '/' in name:
+		o=get(T.sub_last(name,'/',''))
+	else:
+		o=get(name)
 	if not o:
 		o=F.dill_load(file=name)
 	if not o:
 		return o
 		# raise EnvironmentError('can not dill_load',name)
 	else:
-		U=py.importU()
 		U.set(name,o)
 	return o
 get_or_dill_load_set=get_or_dill_load_and_set
@@ -3665,6 +3669,9 @@ def len(obj,*other,return_index=False,**ka):
 	'''Exception return py.No or [no...]'''
 	return_index=get_duplicated_kargs(ka,'index','i','n','enumerate',default=return_index)
 	return FuncWrapForMultiArgs(f=_len,args=(obj,other),index=return_index )# ,default=default
+	
+def print_len(*a,**ka):
+	return pln(len(*a,**ka),)
 
 def hash(obj,*other):
 	'''Exception return py.No or [no...]'''
@@ -4853,7 +4860,7 @@ def dict_value_len(adict,return_list=False,):
 	d={}
 	for k,v in adict.items():
 		d[k]=len(v)	
-	if return_list:return py.list(d.items())
+	if return_list:return [[v,k] for k,v in d.items()]	
 	return d
 dictvlen=dictValueLen=dict_value_len
 def dict_value_len_count(adict,show_key_len_range=py.range(-1,-1),return_list=False, ):

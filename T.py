@@ -62,6 +62,7 @@ squote=quote="'"
 dquote=dQuote='"'
 
 import re	
+IGNORECASE=re_IGNORECASE=re.IGNORECASE
 
 gError=None
 try:
@@ -1055,13 +1056,16 @@ def readableSizeText(text,sizeMultiple=1,p=True):
 	
 	
 	
-def regex_count(a,regex):
-	return py.len(re.findall(regex, a))
+def regex_count(a,regex,flags=0):
+	return py.len(re.findall(regex, a,flags=flags))
 countRegex=regexCount=count_regex=regex_count
 	
-def regex_replace(a,regex,str_or_func):
+def regex_replace(a,regex,str_or_func,flags=0):
 	''' str_or_bytes_or_func
 func( a: <_sre.SRE_Match object; span=(2388, 2396), match='21758465'>  ):
+
+a.span()==(2388, 2396)
+
 	match==a.group()	
 	
 	
@@ -1079,10 +1083,10 @@ func( a: <_sre.SRE_Match object; span=(2388, 2396), match='21758465'>  ):
 	if not py.callable(func):raise py.ArgumentError('str_or_func',str_or_func)
 	
 	if py.istr(regex) or py.isbyte(regex):
-		p=re.compile(regex)
+		p=re.compile(regex,flags=flags)
 	else:
 		p=regex
-	return p.sub(func,a)
+	return p.sub(func,a)#TypeError: 'flags' is an invalid keyword argument for sub()
 regexReplace=regex_replace
 ##################  regex end  ############################
 def iter_detect(b,range=[]):
@@ -1455,15 +1459,20 @@ def bytes_to_base64(a,encoding='utf-8'):
 		return base64.b64encode(a)
 b64encode=base64_encode=bytesToBase64=bytes_to_base64
 		
-def base64_to_str(a,return_bytes=False):
+def base64_to_str(a,return_bytes=py.No('avoid argument conflict'),return_str=True):
 	import base64
-	if return_bytes or py.isbyte(a):
+	# if not (return_bytes^return_str): # a^b==False # a,b相等
+		# raise py.ArgumentError('return_bytes==return_str')
+	if not return_str:return_bytes=True
+	
+	if return_bytes :#or py.isbyte(a):
 		if not py.isbyte(a):
 			a=a.encode('ascii')
 		return base64.b64decode(a) #type bytes
-	if py.istr(a):
+	else:	
+	# if py.istr(a):
 		return detectAndDecode(base64.b64decode(a))
-base64Decode=base64_decode=base64decode=b64_str=base64_to_str	
+b64decode=base64Decode=base64_decode=base64decode=b64_str=base64_to_str	
 
 def base64_to_bytes(a):
 	import base64
