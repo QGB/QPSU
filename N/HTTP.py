@@ -254,6 +254,7 @@ def get_bytes(url,file='',
 		proxies=AUTO_GET_PROXY,
 		verify=False,
 		print_req=False,
+		bytes_with_response=True,
 		**ka ,):
 	'''
 url格式不对时：
@@ -282,15 +283,22 @@ UnicodeError: encoding with 'idna' codec failed (UnicodeError: label too long)
 	print_req=U.get_duplicated_kargs(ka,'show','print','p','print_req',default=print_req)
 	
 	proxies,ka=auto_proxy(proxies,ka)
-
+	
+	if not 'headers' in ka:ka['headers']=headers
+	
 	import requests
 	try:
-		if print_req:print(U.v.requests.get(url,verify=verify,timeout=timeout,headers=U.StrRepr(U.pformat(headers)),proxies=proxies))
-		b= requests.get(url,verify=verify,timeout=timeout,headers=headers,proxies=proxies).content
+		if print_req:print(U.v.requests.get(url,verify=verify,timeout=timeout,**ka))
+		#,headers=U.StrRepr(U.pformat(headers)
+		p= requests.get(url,verify=verify,timeout=timeout,**ka)
+		b=p.content
 		f=repr(b[:77])[2:-1]
 		if file and (b or write_zero):
 			f=F.write(file,b)
-		return U.object_custom_repr(b,repr='{}{}'.format(F.readable_size(b),f)  )
+		bo= U.object_custom_repr(b,repr='{}{}'.format(F.readable_size(b),f)  )
+		if bytes_with_response:
+			bo.p=bo.response=p
+		return bo
 	except Exception as e:
 		return py.No(e)
 getb=getByte=getBytes=get_byte=get_bytes
@@ -308,7 +316,7 @@ def get(url,file='',
 	url=N.auto_url(url)
 
 	show=U.get_duplicated_kargs(ka,'show','print','p','print_req',default=show)
-	proxies,ka=auto_proxy(proxies,ka)
+	proxies,ka=auto_proxy(proxies,ka)#return ka also have proxies
 
 	def writeFile():
 		if file:
