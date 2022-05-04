@@ -102,6 +102,30 @@ try:
 	from pprint import pprint,pformat
 except:pass
 ####################################################
+def get_most_common_substring(str_list):
+	import operator
+	return max(substring_counts(str_list).items(), key=operator.itemgetter(1))[0]
+most_common_substring=get_most_common_substring	
+
+def substring_counts(names):
+	''' one str list return {}
+
+'''
+	from difflib import SequenceMatcher
+	substring_counts={}
+
+	for i,s in py.enumerate(names):
+		for j in range(i+1,len(names)):
+			string1 = names[i]
+			string2 = names[j]
+			match = SequenceMatcher(None, string1, string2).find_longest_match(0, len(string1), 0, len(string2))
+			matching_substring=string1[match.a:match.a+match.size]
+			if(matching_substring not in substring_counts):
+				substring_counts[matching_substring]=1
+			else:
+				substring_counts[matching_substring]+=1
+	return substring_counts
+
 def string_index(a,line_max=122,escape_eol=('\r','\n'),):
 	U,T,N,F=py.importUTNF()
 	r=[[],[],[]]
