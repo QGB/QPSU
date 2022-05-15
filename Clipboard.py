@@ -44,7 +44,7 @@ promte 提升
 	return d
 # U.cbg=get
 	
-def set(aString,p=0):
+def set(aString,p=0,r=0):
 	U=py.importU()
 	if p:print("'''",aString,"'''")
 	if U.istermux():return U.cmd('termux-clipboard-set',input=aString) 
@@ -55,6 +55,7 @@ def set(aString,p=0):
 		w.SetClipboardText(aString)
 	finally:
 		w.CloseClipboard()
+	if r:return U.StrRepr(aString)	
 # U.cbs=set
 		
 def set_repr(a):

@@ -1493,8 +1493,9 @@ env PATH  无论在Windows 还是 Linux 统一使用大写是好的选择
 				p=env[k]
 				env.pop(k)
 
-		ps=get_env_path().split(os.pathsep)
 		if p :
+			# .split(os.pathsep)
+			ps=get_env_path()#return list
 			if (p not in ps):ps.append(p)
 			env['PATH']=os.pathsep.join(ps)	
 
@@ -3748,8 +3749,24 @@ def simulate_key_write(astr, delay=0,restore_state_after=True, exact=None,**ka):
 	return StrRepr(astr,repr='U.simulate_key_write(%r)'%astr)
 text_key=text_key_write=keyboard_write=simulate_key_write	
 
+def get_keyboard_all_mapping():
+	'''return dict 
+official_virtual_keys = {
+    0x03: ('control-break processing', False),
+    0x08: ('backspace', False),
+    0x09: ('tab', False),
+...	
+}	
+'''
+	import keyboard
+	return keyboard._os_keyboard.official_virtual_keys
+get_keyboard_map=get_keyboard_all_mapping
 def simulate_key_press(*akey, delay=0,restore_state_after=True, exact=None,**ka):
-	'''
+	'''pip install keyboard
+	
+keyboard._os_keyboard.official_virtual_keys
+
+	
 U.simulate_key_press('shift+s')    # OK  
 U.simulate_key_press(['shift+s'])  #ValueError: ("Key 'shift+s' is not mapped to any known key.", ValueError("Key name 'shift+s' is not mapped to any known key."))
 '''	

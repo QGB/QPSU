@@ -27,7 +27,7 @@ def eng_audio(response,word):
 	
 		try:
 			u='https://translate.googleapis.com/translate_tts?client=gtx&ie=UTF-8&tl=en&tk=775040.775040&q='+T.url_encode(word)
-			q=N.HTTP.request(u,proxy=proxy)
+			q=N.HTTP.request(u,proxy=proxy,timeout=6)
 			b=q.content
 			F.dill_dump(file=f,obj=q)
 		except Exception as e:
