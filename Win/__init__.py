@@ -70,6 +70,15 @@ try:
 	from ctypes import wintypes
 	import win32gui
 except Exception as ei:pass
+#############################################3
+def set_window_transparency(hwnd,alpha=180):
+	''' alpha:byte 0-255
+	'''
+	import win32api,win32gui,win32con,winxpgui
+	
+	win32gui.SetWindowLong (hwnd, win32con.GWL_EXSTYLE, win32gui.GetWindowLong (hwnd, win32con.GWL_EXSTYLE ) | win32con.WS_EX_LAYERED )
+	winxpgui.SetLayeredWindowAttributes(hwnd, win32api.RGB(0,0,0), alpha, win32con.LWA_ALPHA)	
+window_transparent=set_transparent=set_window_transparent=set_window_transparency
 
 def get_drive_letters_and_types():
 	import os
