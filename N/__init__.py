@@ -864,7 +864,9 @@ def rpc_copy_files(source_list_or_dict,target='',target_path_base=py.No('U.gst')
 	return  
 rpc_copy=rpc_copy_file=rpc_copy_files
 	
-def rpcGetVariable(varname,base=py.No('auto history e.g. [http://]127.0.0.1:23571[/../] ',no_raise=1,),
+def rpcGetVariable(varname,
+base=py.No('auto history e.g. [http://]127.0.0.1:23571[/../] ',no_raise=1,),
+template='{base}response.set_data(F.serialize({varname}))',
 		timeout=9,p=True,return_bytes=False,**ka):
 	U,T,N,F=py.importUTNF()	
 	return_bytes=U.get_duplicated_kargs(ka,'return_byte','rb','B','b','raw','raw_bytes',default=return_bytes)
@@ -877,7 +879,7 @@ def rpcGetVariable(varname,base=py.No('auto history e.g. [http://]127.0.0.1:2357
 	# if T.regexMatchOne(base,':\d*$') or T.regex_count(base,'/')==2:base+='/'
 	# U.set(RPC_BASE_ REMOTE,base)
 	
-	url='{0}response.set_data(F.dill_dump({1}))'.format(base,varname)
+	url=template.format(base=base,varname=varname)
 	# import requests,dill
 	# dill_loads=dill.loads
 	# get=requests.get
