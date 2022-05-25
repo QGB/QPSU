@@ -208,6 +208,11 @@ ds=pickle_load=unSerialize=unserialize=deserialize=deSerialize
 def serialize(obj,file=None,protocol=0):
 	'''if not file: Return the pickled representation of the object as a bytes object.
 	'''
+	try:
+		import dill	
+		return F.dill_dump(obj,file=file)
+	except Exception as e:
+		pass
 	import pickle
 	if file:
 		file=autoPath(file)
@@ -216,7 +221,7 @@ def serialize(obj,file=None,protocol=0):
 		return file
 	else:
 		return pickle.dumps(obj=obj,protocol=protocol)	
-s=pickle_dump=serialize
+s=obj_dump=dump=pickle_dump=serialize
 
 def dill_load_file(file,dill_ext='.dill'):
 	import dill
