@@ -183,7 +183,7 @@ def hash(a):
 	
 	
 def initIndex(indexName=gsIndex):
-	from elasticsearch_dsl import DocType, Date, Completion, Keyword, Text, Integer,Binary
+	from elasticsearch_dsl import Document, Date, Completion, Keyword, Text, Integer,Binary
 	from elasticsearch_dsl.analysis import CustomAnalyzer as _CustomAnalyzer
 	from elasticsearch_dsl.connections import connections
 	# connections.create_connection(hosts=['58.20.137.43'])#default 9200
@@ -193,7 +193,7 @@ def initIndex(indexName=gsIndex):
         # return {}
 # ik_analyzer = CustomAnalyzer("ik_max_word", filter=["lowercase"])
 
-	class Type(DocType):
+	class Type(Document):
 		url= Keyword()
 		title = Text(analyzer="ik_smart")
 		content = Text(analyzer="ik_smart")
@@ -334,7 +334,7 @@ def initIndex_mifeng(indexName='mifeng_search'):
 	return es.indices.create(index=indexName,body=body)
 '''
 	
-	from elasticsearch_dsl import DocType, Date, Completion, Keyword, Text, Integer,Binary
+	from elasticsearch_dsl import Document, Date, Completion, Keyword, Text, Integer,Binary
 	from elasticsearch_dsl.analysis import CustomAnalyzer as _CustomAnalyzer
 	from elasticsearch_dsl.connections import connections
 	# connections.create_connection(hosts=['58.20.137.43'])

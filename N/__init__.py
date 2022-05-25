@@ -1247,7 +1247,9 @@ txt=text=flask_text_response
 def flask_html_response(response,html='',file='',remove_tag=(
 		['<script','</script>'],
 ['<SCRIPT','</SCRIPT>'],'ondragstart=','oncopy=','oncut=','oncontextmenu=','"return false;"',
-	),encoding='utf-8',splitor='<hr>',content_type='text/html;charset=utf-8',**ka):
+	),encoding='utf-8',splitor='<hr>',content_type='text/html;charset=utf-8',
+	css='',
+	**ka):
 	'''
 Resource interpreted as Stylesheet but transferred with MIME type text/html:
 不正确设置 type可能导致页面无法正常显示
@@ -1290,6 +1292,12 @@ Resource interpreted as Stylesheet but transferred with MIME type text/html:
 			s=T.sub(html,start,end)
 			if not s:break
 			html=html.replace(start+s+end,'')
+	if css:
+		if '</style>' not in css:
+			css='''<style type="text/css">
+{}		
+</style>		'''.format(css)
+		html=css+html #TODO parse html and insert to HEAD
 	if not response:
 		return html
 	response.headers['Content-Type']=content_type;

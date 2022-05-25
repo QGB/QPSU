@@ -809,7 +809,7 @@ def parse_url_arg(url,list_len_one=False):
 		return U.DictAttr(r)
 	except:pass
 	return r
-url_arg_dict=url_parse_arg=parse_qs=parse_url_arg
+url_arg_dict=url_parse_arg=parse_qs=parse_url=parse_url_arg
 
 def get_url_arg(url,arg_name):
 	d=parse_url_arg(url)
@@ -1043,7 +1043,7 @@ def readableTimeText(txt,browser=False):
 timeText=readableTimeText
 
 RE_IP= re.compile('''(?:(?:2(?:[0-4][0-9]|5[0-5])|[0-1]?[0-9]?[0-9])\.){3}(?:(?:2([0-4][0-9]|5[0-5])|[0-1]?[0-9]?[0-9]))''')
-def ipLocationText(text,location_format=' [{0}] ',reverse_ip=True,**ka):
+def ip_location_text(text,location_format=' [{0}] ',reverse_ip=True,**ka):
 	''' p='deprecated'
 	'''
 	U=py.importU()
@@ -1060,7 +1060,7 @@ def ipLocationText(text,location_format=' [{0}] ',reverse_ip=True,**ka):
 	# if p:U.pln(r)
 	# else:return r
 	return U.StrRepr(r)
-readableIPLocationText=ipLocationText
+readableIPLocationText=ipLocationText=ip_location=ip_location_text
 
 	
 def readableSizeText(text,sizeMultiple=1,p=True):
@@ -1162,7 +1162,7 @@ def autoDecode(abytes,confidence=0.7,default=py.No('default encoding "" ')  ):
 	encoding=detect(abytes=abytes,confidence=confidence,default=default)
 	if not encoding:return encoding
 	return abytes.decode( encoding )
-detect_decode=detectDecode=detectAndDecode=auto_decode=autoDecode
+detect_decode=detect_and_decode=detectDecode=detectAndDecode=auto_decode=autoDecode
 
 def decode(abytes,codecs=('gb18030','utf-8','auto','latin' ) ):
 	for i in codecs:
@@ -1616,7 +1616,10 @@ def json_load(astr='',file=None,comment=lambda s:re.sub("//.*","",s,flags=re.MUL
 				return json.load(file,**ka)
 			except Exception as e:
 				return py.No(e,file)	
-	#######			
+	#######		
+	if py.isbyte(astr):
+		astr=detect_and_decode(astr,default='utf-8')
+	
 	if comment and py.callable(comment):
 		astr=comment(astr)
 		
