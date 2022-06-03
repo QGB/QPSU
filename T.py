@@ -975,7 +975,7 @@ def html2text(html,baseurl='',ignore_images=True,ignore_links=True,):
 	h=HTML2Text(baseurl=baseurl)
 	h.ignore_images=ignore_images
 	h.ignore_links=ignore_links
-	return h.handle(html)
+	return h.handle(py.str(html)) # beautifulSoup raise Exception None
 h2t=html2txt=html_to_text=html2text
 
 def html_prettify(html, formatter="html5",p=py.No('auto')):

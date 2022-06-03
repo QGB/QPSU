@@ -70,7 +70,19 @@ try:
 	from ctypes import wintypes
 	import win32gui
 except Exception as ei:pass
-#############################################3
+#############################################
+def change_file_time(file,time):
+	'''
+os.utime If times is not None, it must be a tuple (atime, mtime);
+atime and mtime should be expressed as float seconds since the epoch.
+
+'''
+	import os
+	r=os.utime(file,(time,time))#new_atime,new_mtime
+	import win32_setctime
+	return r,win32_setctime.setctime(file,time) # str,float
+cf_time=file_time=set_file_time=change_file_time	
+	
 def set_window_transparency(hwnd,alpha=180):
 	''' alpha:int byte 0-255
 	'''

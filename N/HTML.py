@@ -101,9 +101,9 @@ def eng_list(response,a):
 			zh=row.translation.replace('\\n','\n')
 		main+=r'''
 <tr>
-	<th class="num">{n}</th>
+	<th class="num" onclick="play('{en}')">{n}</th>
 	<th class=en onclick="play('{en}')"> <a>{en}</a>		</th>
-	<th class=zh>{zh}</th>
+	<th class=zh onclick="play('{en}')">{zh}</th>
 </tr> 	
 '''.format(n=n,en=en,zh=zh)
 

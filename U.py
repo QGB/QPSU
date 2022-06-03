@@ -686,7 +686,7 @@ def get_test_path():
 get_gst=getTestPath=get_test_path
 gst=gsTestPath=get_test_path()
 
-def set_test_path(sp,cd=False):
+def set_test_path(sp,cd=False,p=False):
 	global gst,gsTestPath
 	F=py.importF()
 	sp=F.mkdir(sp,no_auto_path=True)
@@ -697,6 +697,7 @@ def set_test_path(sp,cd=False):
 		
 	gst=gsTestPath=set('U.gst',sp)
 	if cd:chdir(gst)
+	if p:pln(gst)
 	return gst
 setgst=set_gst=setTestPath=set_test_path
 
@@ -2864,11 +2865,11 @@ In [305]: U.time
 --------> U.time()
 Out[305]: 1490080571.125
 '''
-	import time
 	if not a:
+		import time
 		a=time.time()
-	elif py.istr(a) and '-' in a:
-		return
+	elif py.istr(a) and one_in('/-',a):
+		return parse_time(a).timestamp()#
 	elif py.isnum(a) and a>0:
 		return
 	else:
@@ -3030,10 +3031,16 @@ U.stime(0.0004)
 stime=getCurrentTimeStr=timeToStr=getStime=get_time_as_str
 
 def parse_time_str(a,format='%Y-%m-%d__%H.%M.%S'):
-	import time
-	return time.strptime(a,format)
-	# from dateutil import parser
-	# return parser.parse(a)
+	''' return datetime.datetime( '''
+	try:
+		from dateutil import parser
+		return parser.parse(a) #return type datetime.datetime
+	except Exception as e:
+		pass
+	import time,datetime
+	struct_time = time.strptime(a,format)#time.struct_time(tm_year=
+	return datetime.datetime.fromtimestamp(time.mktime(struct_time))
+	# return r
 parse_time=stime2time=stime_to_time=parse_stime=parse_time_str	
 
 
