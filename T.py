@@ -316,26 +316,7 @@ def LF_to_CRLF(text):
 	raise py.ArgumentUnsupported(text)
 lf2crlf=LF2CRLF=lf_to_crlf=LF_to_CRLF
 
-def get_string_image(text,size=48,font='simsunb.ttf',w=None,h=None):
-	'''
-('simsunb.ttf',48) a[5+1行][0:5+37+5]==【5个0，37个1，5个0】  
-第6列 【5个0，37+2个1，3个0】 一个方框字符黑色尺寸 37*39
 
-Image.new(mode='P',"L", "RGB"	
-	If you have an L mode image, that means it is a single channel image - normally interpreted as greyscale. 
-	
-simsun.ttc 宋体 常规
-simhei.ttf 黑体 常规	
-	'''
-	from PIL import Image, ImageFont, ImageDraw
-	if not w:w=100
-	if not h:h=100
-	font=ImageFont.truetype(font,size)     
-	image = Image.new('L', (w, h), color='white')
-	drawing = ImageDraw.Draw(image)
-	drawing.text((0,0), text, font=font)
-	return image
-get_char_image=get_string_image	
 def slice(a,start, stop=None, step=1):
 	''' not only for str '''
 	if py.isinstance(start,py.slice):

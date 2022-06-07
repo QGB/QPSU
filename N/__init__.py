@@ -58,7 +58,7 @@ def get_all_pid_equal_port():
 	return r
 get_rpc_port_list=get_pid_equal_port=get_port_equal_pid=get_all_pid_equal_port	
 	
-def curl_return_bytes(url,verbose=True):
+def curl_return_bytes(url,verbose=True,proxy=py.No('socks5://127.0.0.1:21080'),headers=py.No('default use N.HTTP.headers')):
 	'''
 
 	'''
@@ -68,6 +68,22 @@ def curl_return_bytes(url,verbose=True):
 	c = pycurl.Curl()
 	c.setopt(c.URL, url)
 	c.setopt(c.VERBOSE,verbose)
+	if not headers:	
+		HTTP=py.from_qgb_import('N.HTTP')
+		headers=HTTP.headers
+	if headers:
+		if py.isdict(headers):
+			c.setopt(pycurl.HTTPHEADER, ["%s:%s"%(k,v) for k,v in headers.items()] )
+		elif py.islist(headers) and py.istr(headers[0]) and ':' in headers[0]:
+			c.setopt(pycurl.HTTPHEADER, headers )
+		
+		else:
+			raise py.ArgumentError(headers)
+
+	
+	if proxy:
+		c.setopt(pycurl.PROXYTYPE, pycurl.PROXYTYPE_SOCKS5)
+		c.setopt(pycurl.PROXY, N.set_proxy(proxy)['http'])##socks5://127.0.0.1:21080
 	from io import BytesIO
 	f=BytesIO()
 	c.setopt(c.WRITEDATA, f)

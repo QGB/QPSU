@@ -20,8 +20,8 @@ else:
 	except Exception as ei:
 		print(urllib,ei)
 		py.importU().repl()
-
-gheaders=headers={'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/59.0.2171.95 Safari/537.36'}
+user_agent='Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/59.0.2171.95 Safari/537.36'
+gheaders=headers={'User-Agent': user_agent}
 
 def thread_pool_request(targets,max_workers=None,request_ka={},print_log=False,**ka):
 	'''

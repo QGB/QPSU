@@ -417,7 +417,7 @@ In_index_delta=1  # In[268]==_i269	  , Out[269]
 	return '{0} {1} success!'.format(save.name,file.name)
 save.name='{0}.{1}'.format(__name__,save.__name__)
 
-def reset():
+def reset_execution_count():
 	gipy.execution_count=0
 
 def ipyStart(*a):
