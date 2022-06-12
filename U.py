@@ -589,6 +589,15 @@ def new_2d_list(width,height,default_value=0):
 	''' cols=height   rows=width '''
 	return [[default_value for i in py.range(width)] for j in py.range(height)]
 
+def list_get_multi_indexs(a,*ins):
+	if py.len(ins)==1 and py.islist(ins[0]):
+		ins=ins[0]
+	r=[]
+	for i in ins:
+		r.append(a[i])
+	return r
+get_list_elements_by_multi_indexs=list_multi_get=list_get_multi_indexs
+	
 def list_del_multi_indexs(a,*ins):
 	ins=py.sorted(ins,reverse=1)
 	d={}
@@ -1393,10 +1402,16 @@ pop(_63,25)  #_63 has change
 
 get_ka=get_multi_ka=getDuplicatedKargs=getKargsDuplicated=getKArgsDuplicated=get_kargs_duplicated=get_duplicated_kargs
 
-def sleep(asecond):
+def sleep(asecond,print_time_every_n_second=0):
 	''' asecond: int or float'''
 	if not asecond:return 
-	__import__('time').sleep(asecond)
+	if print_time_every_n_second:
+		for i in range(asecond):
+			if i%print_time_every_n_second==0:
+				pln(stime())
+			__import__('time').sleep(1)	
+	else:	
+		__import__('time').sleep(asecond)
 	return IntCustomRepr(asecond,repr='U.sleep(%s)'%asecond)
 delay=sleep
 	
