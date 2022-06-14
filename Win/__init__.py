@@ -71,6 +71,15 @@ try:
 	import win32gui
 except Exception as ei:pass
 #############################################
+def get_monitor_resolution(multi_monitor_combined=False):
+	import ctypes
+	user32 = ctypes.windll.user32
+	if multi_monitor_combined:
+		return user32.GetSystemMetrics(78), user32.GetSystemMetrics(79)
+	else:
+		return user32.GetSystemMetrics(0), user32.GetSystemMetrics(1)
+get_screen_size=get_screen_resolution=get_monitor_resolution	
+
 def change_file_time(file,time):
 	'''
 os.utime If times is not None, it must be a tuple (atime, mtime);

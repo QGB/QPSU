@@ -4022,29 +4022,47 @@ def get_all_process_value_list(**ka):
 	'''
 	U=py.importU()
 	filter=U.get_duplicated_kargs(ka,'filter','ps',default={})
-	size=9
-	da={}
-	da['pid']=U.get_duplicated_kargs(ka,'pid','PID','p',default=1)
-	da['ppid']=U.get_duplicated_kargs(ka,'ppid','PPID','pp',default=1)
-	da['_create_time']=U.get_duplicated_kargs(ka,'_create_time','t','time',default=26)
+	column_size_ka=U.get_duplicated_kargs(ka,'column_size_ka','dcol','dc',default={})
 	
-	da['cmd']=U.get_duplicated_kargs(ka,'cmd','CMD','cmdline','command','c',default=1) # cmd 每行最后		
+	size=9
+	column_size_ka={}
+	column_size_ka['pid']=U.get_duplicated_kargs(ka,'pid','PID','p',default=1)
+	column_size_ka['ppid']=U.get_duplicated_kargs(ka,'ppid','PPID','pp',default=1)
+	column_size_ka['_create_time']=U.get_duplicated_kargs(ka,'_create_time','time',default=26)#,'t' 和title冲突了
+	
+	column_size_ka['cmd']=U.get_duplicated_kargs(ka,'cmd','CMD','cmdline','command','c',default=1) # cmd 每行最后
+
+	def is_size(k,v):
+		if py.isint(v):
+			if k in ['pid','ppid']:
+				if v<10:return True
+				else  :
+					if k not in filter:filter[k]=v
+					return False
+			else:
+				if v>1:return True
+				else  :return False
+		else:
+			if k not in filter:filter[k]=v #这个写法很绕，但是懒得改了
+			return False
+		
+		
 	###########
-	if U.get_duplicated_kargs(ka,'title','tips','tip','t',default=1):
-		title=[]
-		for k,v in da.items():
-			if v:
-				if py.isint(v) and v>1:
-					title.append(U.StrRepr(k,size=v))
-				else:
-					title.append(U.StrRepr(k,size=size))
-		r=[title]			
-	else:
-		r=[]
+	need_title= U.get_duplicated_kargs(ka,'need_title','title','tips','tip','t',default=1)
+	title=[]
+	for k,v in column_size_ka.items():#if v  default always True
+		iss=is_size(k,v)
+		if need_title and v:
+			if iss:
+				title.append(U.StrRepr(k,size=v))
+			else:	
+				title.append(U.StrRepr(k,size=size))
+	if need_title:r=[title]			
+	else         :r=[]
 	###########
 	for p in get_all_process_list(**filter):
 		row=[]
-		for k,v in da.items():
+		for k,v in column_size_ka.items():
 			if v:
 				try:
 					pv=py.getattr(p,k)

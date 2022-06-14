@@ -1160,7 +1160,7 @@ def get_socket_req(PORT = 65432,HOST = '127.7.7.7'):
 		req, addr = s.accept()
 		return req, addr
 
-def get_rpc_request_a(request=None,raise_err=False):
+def get_flask_request_a(request=None,raise_err=False):
 	''' #TODO raise_err
 a=T.subr(u,T.u23)#'%23-'	
 
@@ -1194,8 +1194,31 @@ pythonAnywhere : multi[ // or  %2F%2F%2F%2F%2F ] in url will auto convert to one
 			raise py.ArgumentError('%23 not in request.url')
 		a=T.sub_tail(u,'%23')
 	return T.url_decode(a)
-geta=get_a=get_request_a=get_flask_request_a=get_rpc_request_a
+geta=get_a=get_request_a=get_rpc_request_a=get_flask_request_a
 
+def get_flask_request_a_file(request=None,raise_err=False):
+	''' 很奇怪,移动版 Yandex 浏览器 在下载大文件时，手动暂停。原来大文件url地址（192.168.1.3）端口 就彻底无法访问了，换同地址的其他端口可以访问。
+但是将原大文件url放在其他端口url后面也会导致该 地址无法访问。去除大文件url后面5个字符（此时len(a)==38），放在后面可以访问。去除4个字符，不能访问 
+一直显示黄色进度条，最后报 【192.168.1.3 没有发送任何数据】
+去除5个字符，后面随便加其他字符只要不和大文件url原位置字符相同，照样可以访问。
+
+重启everything后，原来大文件端口可以访问，但是原url依旧不能访问
+移动端换浏览器，可以正常下载
+	
+	'''
+	U,T,N,F=py.importUTNF()
+	a=N.get_flask_request_a(request=request,raise_err=raise_err)
+	if not a:
+		if raise_err:raise py.ArgumentError('not N.geta()')
+		else:return py.No('not N.geta()')
+	if a.startswith('http://'):
+		file=T.get_url_full_path(a)
+	else:
+		file=a
+		
+	return file	
+		
+getaf=getafile=get_flask_request_a_file
 
 def get_flask_request_file(q):
 	''' dir(f)  
@@ -1402,9 +1425,12 @@ def flask_media_stream_response(request,response,file=None,):
 	
 mp4_response=media_response=flask_media_stream_response
 	
-def flask_file_stream_response(response,file,):
+def flask_file_stream_response(response,file=py.No('if not file:use N.geta()'),):
 	from flask import stream_with_context,request
 	U,T,N,F=py.importUTNF()
+	if not file:
+		file=N.get_flask_request_a_file(request)
+
 	# try:
 	range=get_request_range(request)
 	# request.headers.get('Range','')

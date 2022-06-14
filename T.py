@@ -1212,7 +1212,14 @@ def get_url_netloc(url):
 	return up.netloc
 hostname=host_name=get_domain_parts_by_url=get_domain_from_url=netloc=get_url_netloc
 
+def get_url_full_path(url):
+	netloc=get_url_netloc(url)
+	return sub(url,netloc+'/')
+get_url_netloc_right=get_url_path=get_url_full_path
+
 def url_split(url):
+	''' return SplitResult(scheme='ws', netloc='192.168.43.162:8080', path='/pty', query='', fragment='')
+'''	
 	from six.moves.urllib.parse import urlsplit
 	return urlsplit(url=url)  # obj
 urlsplit=url_split	
