@@ -126,9 +126,14 @@ def substring_counts(names):
 				substring_counts[matching_substring]+=1
 	return substring_counts
 
-def string_index(a,line_max=122,escape_eol=('\r','\n'),):
+# def string_index2(a,b,**ka):
+	# U,T,N,F=py.importUTNF()
+	
+
+def string_index(a,b=None,line_max=122,escape_eol=('\r','\n'),):
 	U,T,N,F=py.importUTNF()
-	r=[[],[],[]]
+	r=[[],[],[],[]] #十位 个位 a b
+	mb=py.len(b)
 	w10=0
 	for n,c in py.enumerate(a):
 		if (n+1)%line_max==0:
@@ -147,8 +152,11 @@ def string_index(a,line_max=122,escape_eol=('\r','\n'),):
 			r[0].append(s10+' '*(w10-py.len(s10)))
 			w10=0	
 		r[2].append(c)
+		if n<mb:
+			r[3].append(b[n])
 		
-	return '\n'.join([''.join(r[0]),''.join(r[1]),''.join(r[2]),])
+		
+	return '\n'.join([''.join(row) for row in r])
 enu=enumerate=sindex=str_index=string_index	
 
 def similarity_difflib(a,b,isjunk_function=None):

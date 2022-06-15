@@ -3658,6 +3658,25 @@ def getModPath(mod=None,qgb=True,slash=True,backSlash=False,end_slash=True,trail
 	return sp+mod
 get_qpsu_path=getQPSUPath=getQpsuPath=get_qpsu_dir=getQPSUDir=get_mod_dir=get_module_dir=get_module_path=getModPath
 
+def import_module_by_full_path(f,exec_code=True):
+	''' if not exec_code 模块的属性也不会初始化
+	
+'''	
+	import importlib.util
+	U,T,N,F=py.importUTNF()
+	
+	if not f.lower().endswith('.py'):raise py.ArgumentError(f)
+	fn=F.get_filename_from_full_path(f)[:-3]
+	vs=T.regex_match_all(fn,T.RE_VAR_EXACTLY)
+	mod_name='_'.join(vs)
+		
+	mod_name=U.input('mod_name:',mod_name)	
+	spec= importlib.util.spec_from_file_location(mod_name,f)
+	mod=importlib.util.module_from_spec(spec)
+	if exec_code:spec.loader.exec_module(mod)
+	return mod
+importf=import_file=import_f=import_from_file=import_module_by_full_path		
+	
 def len_return_string(a,*other):
 	return py.repr(len(a,*other) )
 lens=len_return_str=len_return_string
@@ -4024,25 +4043,30 @@ def get_all_process_value_list(**ka):
 	filter=U.get_duplicated_kargs(ka,'filter','ps',default={})
 	column_size_ka=U.get_duplicated_kargs(ka,'column_size_ka','dcol','dc',default={})
 	
-	size=9
+	size=7 # must <10
 	column_size_ka={}
-	column_size_ka['pid']=U.get_duplicated_kargs(ka,'pid','PID','p',default=1)
-	column_size_ka['ppid']=U.get_duplicated_kargs(ka,'ppid','PPID','pp',default=1)
+	column_size_ka['pid']=U.get_duplicated_kargs(ka,'pid','PID','p',default=size)
+	column_size_ka['ppid']=U.get_duplicated_kargs(ka,'ppid','PPID','pp',default=size)
 	column_size_ka['_create_time']=U.get_duplicated_kargs(ka,'_create_time','time',default=26)#,'t' 和title冲突了
 	
 	column_size_ka['cmd']=U.get_duplicated_kargs(ka,'cmd','CMD','cmdline','command','c',default=1) # cmd 每行最后
 
 	def is_size(k,v):
+		nonlocal column_size_ka,size,filter
 		if py.isint(v):
 			if k in ['pid','ppid']:
-				if v<10:return True
+				if v<0:raise py.ArgumentError('[p]pid column_size_ka or filter must >=0')
+				if 0<v<10:return v
 				else  :
 					if k not in filter:filter[k]=v
+					column_size_ka[k]=size
 					return False
-			else:
-				if v>1:return True
+			else:#此处不可能 是 filter
+				if v>1:return v
 				else  :return False
-		else:
+		elif py.islist(v):
+			return U.get_slice_len(v)
+		else:	
 			if k not in filter:filter[k]=v #这个写法很绕，但是懒得改了
 			return False
 		
@@ -4051,10 +4075,10 @@ def get_all_process_value_list(**ka):
 	need_title= U.get_duplicated_kargs(ka,'need_title','title','tips','tip','t',default=1)
 	title=[]
 	for k,v in column_size_ka.items():#if v  default always True
-		iss=is_size(k,v)
+		iss=is_size(k,v)#这个总要执行
 		if need_title and v:
 			if iss:
-				title.append(U.StrRepr(k,size=v))
+				title.append(U.StrRepr(k,size=iss))
 			else:	
 				title.append(U.StrRepr(k,size=size))
 	if need_title:r=[title]			
