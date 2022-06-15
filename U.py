@@ -3667,11 +3667,11 @@ def import_module_by_full_path(f,exec_code=True):
 	
 	if not f.lower().endswith('.py'):raise py.ArgumentError(f)
 	fn=F.get_filename_from_full_path(f)[:-3]
-	vs=T.regex_match_all(fn,T.RE_VAR_EXACTLY)
-	mod_name='_'.join(vs)
+	# vs=T.regex_match_all(fn,T.RE_VAR_EXACTLY)
+	# mod_name='_'.join(vs)
 		
-	mod_name=U.input('mod_name:',mod_name)	
-	spec= importlib.util.spec_from_file_location(mod_name,f)
+	# mod_name=U.input('mod_name:',mod_name)	
+	spec= importlib.util.spec_from_file_location(fn,f)# name 用特殊字符不会报错
 	mod=importlib.util.module_from_spec(spec)
 	if exec_code:spec.loader.exec_module(mod)
 	return mod
