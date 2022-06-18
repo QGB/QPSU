@@ -1166,8 +1166,17 @@ a=T.subr(u,T.u23)#'%23-'
 
 pythonAnywhere : multi[ // or  %2F%2F%2F%2F%2F ] in url will auto convert to one / ,it can't bypass
 	'''
-	
-	if py.istr(request):return request
+	def _return(ax):
+		nonlocal u
+		if return_other_url:
+			if ax:
+				return u[:0-py.len(ax)],ax
+			else:
+				return u,ax
+		else:
+			return ax
+	u=''
+	if py.istr(request):return _return(request)
 	if not request:from flask import request
 	if py.islist(request):
 		try:
@@ -1176,12 +1185,12 @@ pythonAnywhere : multi[ // or  %2F%2F%2F%2F%2F ] in url will auto convert to one
 					u=value
 					break
 		except Exception as e:
-			return py.No(e)
+			return _return( py.No(e) )
 	else:
 		try:
 			u=request.url
 		except RuntimeError as e:
-			return py.No(e)
+			return _return( py.No(e) )
 		
 	U,T,N,F=py.importUTNF()
 	return_other_url =U.get_duplicated_kargs(ka,'return_other_url','return_head_code','return_url','return_head_url','return_url_head','return_front_url',default=return_other_url)
@@ -1198,12 +1207,11 @@ pythonAnywhere : multi[ // or  %2F%2F%2F%2F%2F ] in url will auto convert to one
 			if raise_err:
 				raise py.ArgumentError(msg_23)
 			else:
-				return py.No(msg_23)
+				return _return( py.No(msg_23) )
 		a=T.sub_tail(u,'%23')
 		
-	if return_other_url:
-		return u[:0-py.len(a)],a
-	return T.url_decode(a)
+	
+	return _return(T.url_decode(a) )
 geta=get_a=get_request_a=get_rpc_request_a=get_flask_request_a
 
 def get_flask_request_a_file(request=None,raise_err=False):

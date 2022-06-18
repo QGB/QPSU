@@ -8,15 +8,21 @@ else:
 	from qgb import py
 U,T,N,F=py.importUTNF()
 
-def everything_search_image(response,add_offset=py.No(''),):
+def everything_search_image(response,add_offset=py.No(''),**ka):
 	U.r(py,U,T,N,F,N.HTTP,N.HTML,)
+	add_offset=U.get_duplicated_kargs(ka,'add_offset','offset','oa','ao',default=add_offset)
+	# py.pdb()()
 	ucode,a=N.geta(return_other_url=True)
 	if a:a=U.set('esimg.a',a)
 	else:a=U.get('esimg.a')
 	dua=T.parse_url_arg(a)     
 	offset=py.int(dua.get('offset',0))
 	search=dua['search']#,'')
-	
+	if add_offset:
+		newa=T.replace_url_arg(a,'offset',offset+add_offset)
+	else:	
+		newa=a
+		
 	es_base='http://'+T.get_url_netloc(a)
 	h=N.HTTP.get(a,proxy=0)
 	bs=T.BeautifulSoup(h)
@@ -52,9 +58,9 @@ display: none;    /* 隐藏滚动条 */
 </style> 
 	
 """+f"""
-<form method="post" enctype="multipart/form-data" action="">
+<form method="post" enctype="multipart/form-data" action="{ucode}%23-">
 	<input type="text" name="t" value="{a}"/>
-	<input type="submit" value="+32"/>
+	<input type="submit" value="offset + {add_offset}"/>
 </form>	
 
 <!-- 
