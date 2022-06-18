@@ -3658,24 +3658,34 @@ def getModPath(mod=None,qgb=True,slash=True,backSlash=False,end_slash=True,trail
 	return sp+mod
 get_qpsu_path=getQPSUPath=getQpsuPath=get_qpsu_dir=getQPSUDir=get_mod_dir=get_module_dir=get_module_path=getModPath
 
-def import_module_by_full_path(f,exec_code=True):
+def import_module_by_full_path(f,exec_code=True,add_sys_modules=True):
 	''' if not exec_code 模块的属性也不会初始化
 	
+reload 重新调用此函数 就相当于 reload	
 '''	
 	import importlib.util
 	U,T,N,F=py.importUTNF()
 	
 	if not f.lower().endswith('.py'):raise py.ArgumentError(f)
 	fn=F.get_filename_from_full_path(f)[:-3]
-	# vs=T.regex_match_all(fn,T.RE_VAR_EXACTLY)
-	# mod_name='_'.join(vs)
-		
-	# mod_name=U.input('mod_name:',mod_name)	
-	spec= importlib.util.spec_from_file_location(fn,f)# name 用特殊字符不会报错
+	mod_name=fn
+	'''add_sys_modules 只能解决#Error  module www.xiezhen.xyz not in sys.modules
+和#Error  parent 'www.xiezhen' not in sys.modules
+不能解决 U.r(X) spec not found for the module   所以注释掉了
+'''
+	# if add_sys_modules:
+		# vs=T.regex_match_all(fn,T.RE_VAR_EXACTLY)
+		# mod_name='_'.join(vs)
+			
+		# mod_name=U.input('mod_name:',mod_name)	
+	spec= importlib.util.spec_from_file_location(mod_name,f)# mod name 用特殊字符不会报错
 	mod=importlib.util.module_from_spec(spec)
+	# mod.__spec__ =spec#不能解决 U.r(X) spec not found for the module 'www_xiezhen_xyz'
 	if exec_code:spec.loader.exec_module(mod)
+	# if add_sys_modules:sys.modules[mod_name]=mod
+	
 	return mod
-importf=import_file=import_f=import_from_file=import_module_by_full_path		
+reload_from_file=reload_from_path=importf=import_file=import_f=import_from_file=import_module_by_full_path		
 	
 def len_return_string(a,*other):
 	return py.repr(len(a,*other) )

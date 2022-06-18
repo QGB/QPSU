@@ -133,7 +133,8 @@ def substring_counts(names):
 def string_index(a,b=None,line_max=122,escape_eol=('\r','\n'),):
 	U,T,N,F=py.importUTNF()
 	r=[[],[],[],[]] #十位 个位 a b
-	mb=py.len(b)
+	if b:mb=py.len(b) 
+	else:mb=0
 	w10=0
 	for n,c in py.enumerate(a):
 		if (n+1)%line_max==0:
@@ -263,7 +264,7 @@ dict_format=format_dict
 def parse_cookie_str_to_dict(s):
 	T=py.importT()
 	dc={}
-	for n,l in enumerate(s.split(';')):
+	for n,l in py.enumerate(s.split(';')):
 		l=l.strip()
 		name=T.sub(l,'','=')
 		v=l[len(name)+1:]
@@ -849,7 +850,7 @@ def urlToFileName(url):
 	if py.istr(url):url=url.encode('utf-8')
 	url=py.list(urlEncode(url) )
 	
-	for i,c in enumerate(url):
+	for i,c in py.enumerate(url):
 		if c not in '%'+gsURL_not_escaped[1:] :
 			url[i]='%{0:02X}'.format( py.ord(c) ) 
 	return ''.join(url).replace('%','-')
@@ -1143,14 +1144,17 @@ def iter_detect(b,range=[]):
 	return r
 iterDecode=iter_decode=iterDetect=iter_detect		
 		
-def autoDecode(abytes,confidence=0.7,default=py.No('default encoding "" ')  ):
+def autoDecode(abytes,confidence=0.7,default=py.No('default encoding "" '),return_encoding=False  ):
 	if abytes==b'':return ''
 	if py.isunicode(abytes):return abytes
 	if not py.isbyte(abytes):
 		raise py.ArgumentError('is not bytes',abytes)
 	encoding=detect(abytes=abytes,confidence=confidence,default=default)
 	if not encoding:return encoding
-	return abytes.decode( encoding )
+	if return_encoding:
+		return encoding,abytes.decode( encoding )
+	else:
+		return abytes.decode( encoding )
 detect_decode=detect_and_decode=detectDecode=detectAndDecode=auto_decode=autoDecode
 
 def decode(abytes,codecs=('gb18030','utf-8','auto','latin' ) ):
@@ -1548,7 +1552,7 @@ def parseInt(a,base=16,symbols=None):
 	else:
 		is_py3_bytes=py.isbyte(a) and py.is3()
 		r=0
-		for i,v in enumerate(a[::-1]):
+		for i,v in py.enumerate(a[::-1]):
 			# try:
 			''' str.index(b'1')  #TypeError: must be str, not bytes
 			2:  In [1]: for i,v in enumerate(b'MzJyNDIz'):print(i,v)
@@ -2135,7 +2139,7 @@ IndexError: list index out of range
 	zh[0]=''#忽略 个
 	# zh=zh[1:]#忽略 个
 	b=a[::-1]
-	for i,k in enumerate(b):	
+	for i,k in py.enumerate(b):	
 		# if i!=0 and i%split==0:
 		if i%split==0:
 			w=b[i:i+split]

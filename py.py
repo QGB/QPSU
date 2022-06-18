@@ -152,7 +152,7 @@ def isbyte(a):
 		return isinstance(a, (bytearray,bytes,str) ,)
 	else    :
 		return isinstance(a, (bytearray,bytes) ,)
-isbytes=isbyte
+is_bytes=isbytes=isbyte
 	
 def istr(a):
 	if is2():return isinstance(a,basestring)#type(a) in (str,unicode,bytes)
