@@ -1160,12 +1160,13 @@ def get_socket_req(PORT = 65432,HOST = '127.7.7.7'):
 		req, addr = s.accept()
 		return req, addr
 
-def get_flask_request_a(request=None,raise_err=False):
+def get_flask_request_a(request=None,return_other_url=False,raise_err=False,**ka):
 	''' #TODO raise_err
 a=T.subr(u,T.u23)#'%23-'	
 
 pythonAnywhere : multi[ // or  %2F%2F%2F%2F%2F ] in url will auto convert to one / ,it can't bypass
 	'''
+	
 	if py.istr(request):return request
 	if not request:from flask import request
 	if py.islist(request):
@@ -1183,6 +1184,8 @@ pythonAnywhere : multi[ // or  %2F%2F%2F%2F%2F ] in url will auto convert to one
 			return py.No(e)
 		
 	U,T,N,F=py.importUTNF()
+	return_other_url =U.get_duplicated_kargs(ka,'return_other_url','return_head_code','return_url','return_head_url','return_url_head','return_front_url',default=return_other_url)
+	
 	if '%23=' in u:
 		a=T.sub_tail(u,'%23=')
 	elif '%23-' in u:
@@ -1191,8 +1194,15 @@ pythonAnywhere : multi[ // or  %2F%2F%2F%2F%2F ] in url will auto convert to one
 		a=T.sub_tail(u,'#-')
 	else:
 		if '%23' not in u:
-			raise py.ArgumentError('%23 not in request.url')
+			msg_23='%23 not in request.url'
+			if raise_err:
+				raise py.ArgumentError(msg_23)
+			else:
+				return py.No(msg_23)
 		a=T.sub_tail(u,'%23')
+		
+	if return_other_url:
+		return u[:0-py.len(a)],a
 	return T.url_decode(a)
 geta=get_a=get_request_a=get_rpc_request_a=get_flask_request_a
 

@@ -8,6 +8,73 @@ else:
 	from qgb import py
 U,T,N,F=py.importUTNF()
 
+def everything_search_image(response,add_offset=py.No(''),):
+	U.r(py,U,T,N,F,N.HTTP,N.HTML,)
+	ucode,a=N.geta(return_other_url=True)
+	if a:a=U.set('esimg.a',a)
+	else:a=U.get('esimg.a')
+	dua=T.parse_url_arg(a)     
+	offset=py.int(dua.get('offset',0))
+	search=dua['search']#,'')
+	
+	es_base='http://'+T.get_url_netloc(a)
+	h=N.HTTP.get(a,proxy=0)
+	bs=T.BeautifulSoup(h)
+	efs=bs.select('td[class=file]  a')
+	# U.set('es',[h,bs,fs])
+	r=r"""
+<meta name="viewport" content="width=device-width, initial-scale=0.3, minimum-scale=0.3, maximum-scale=1.0,user-scalable=0" cmt=禁止缩放/> 
+	
+<style type="text/css">
+	
+	img{
+		width:100%;
+		padding: 0 0 0 0;		
+		margin: 0 0 0 0;
+	}
+/*
+
+height: 25px;
+*/	
+	input,div{
+border:1px solid #000000;
+width: 100%;
+overflow-x: auto;
+white-space: nowrap;
+overflow-y: hidden;
+}
+
+div::-webkit-scrollbar {
+display: none;    /* 隐藏滚动条 */
+
+} 
+
+</style> 
+	
+"""+f"""
+<form method="post" enctype="multipart/form-data" action="">
+	<input type="text" name="t" value="{a}"/>
+	<input type="submit" value="+32"/>
+</form>	
+
+<!-- 
+<div>{a}</div>	
+-->	
+"""	
+
+	for e in efs:
+		u=es_base+e.get('href')
+		se=f''' <img style=" " src={u}>	
+	
+<div>{u}</div>		
+		'''
+		r+=se
+	# response.set_data( h)
+	response.headers['Content-Type']='text/html;charset=utf-8';
+	response.set_data(r)
+	return efs
+esimg=everything_search_image
+
 def format(s,**ka):
 	ka={'{%s}'%k:v for k,v in ka.items()}
 	return T.replacey(s,ka)

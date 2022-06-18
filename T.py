@@ -782,9 +782,12 @@ def url_arg_join(url_base='',arg_dict=None):
 		rs.append('{}={}'.format(k,url_encode(v)))
 	sr='&'.join(rs)
 	return url_base+sr
-join_url_arg=url_join_arg_dict=url_arg_join
+url_join_arg=join_url_arg=url_join_arg_dict=url_arg_join
 	
-def parse_url_arg(url,list_len_one=False):
+def parse_url_arg(url,list_len_one=False,return_not_arg_part=False):
+	''' if url not contains '?'  return empty dict
+	
+'''
 	if py.is2():
 		from urlparse import urlparse,parse_qs
 	else:
@@ -796,8 +799,14 @@ def parse_url_arg(url,list_len_one=False):
 			r[k]=v[0]
 	try:
 		U=py.importU()
-		return U.DictAttr(r)
+		r=U.DictAttr(r)
 	except:pass
+	
+	if return_not_arg_part:#only py3
+		import urllib.parse
+		pr=urllib.parse.ParseResult(**py.dict(o._asdict(), query='')).geturl()
+		if r:pr+='?'
+		return pr,r
 	return r
 url_arg_dict=url_parse_arg=parse_qs=parse_url=parse_url_arg
 
@@ -821,6 +830,24 @@ def get_url_args(url,*a,default=py.No('Not found')):
 			v=v[0]
 		r.append(v)
 	return r
+	
+	
+def replace_url_arg(url,arg_name_or_dict,new=py.No('if dict, this no')):
+	u,d=parse_url_arg(url,return_not_arg_part=True)
+	if py.isdict(arg_name_or_dict) and py.isno(new):
+		for k,v in arg_name_or_dict.items():
+			d[k]=v
+	elif py.istr(arg_name_or_dict):
+		if '=' in arg_name_or_dict and py.isno(new):
+			k,v=arg_name_or_dict.split('=')
+			d[k]=v
+		else:	
+			d[arg_name_or_dict]=string(new)
+	else:
+		raise py.ArgumentError('Not arg_name_or_dict',url,arg_name_or_dict,new)	
+	return u+url_arg_join(d)	
+	
+replace_url_args=replace_url_arg
 	
 def FileNameToURL(a):
 	'''
