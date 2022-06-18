@@ -10,9 +10,15 @@ U,T,N,F=py.importUTNF()
 
 def everything_search_image(response,add_offset=py.No(''),**ka):
 	U.r(py,U,T,N,F,N.HTTP,N.HTML,)
-	add_offset=U.get_duplicated_kargs(ka,'add_offset','offset','oa','ao',default=add_offset)
+	add_offset=U.get_duplicated_kargs(ka,'add_offset','offset','oa','ao','add',default=add_offset)
 	# py.pdb()()
-	ucode,a=N.geta(return_other_url=True)
+	ucode,a=N.geta(return_other_url={'url_decode':1,'%23-':1})
+	from flask import request
+	print(request.url,ucode)
+	# ucode=T.url_decode(ucode)
+	# if not ucode.endswith('%23-'):
+		# ucode+='%23-'
+	
 	if a:a=U.set('esimg.a',a)
 	else:a=U.get('esimg.a')
 	dua=T.parse_url_arg(a)     
@@ -58,7 +64,7 @@ display: none;    /* 隐藏滚动条 */
 </style> 
 	
 """+f"""
-<form method="post" enctype="multipart/form-data" action="{ucode}%23-">
+<form method="post" enctype="multipart/form-data" action="{ucode+a}">
 	<input type="text" name="t" value="{a}"/>
 	<input type="submit" value="offset + {add_offset}"/>
 </form>	

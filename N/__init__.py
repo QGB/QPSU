@@ -1167,14 +1167,34 @@ a=T.subr(u,T.u23)#'%23-'
 pythonAnywhere : multi[ // or  %2F%2F%2F%2F%2F ] in url will auto convert to one / ,it can't bypass
 	'''
 	def _return(ax):
-		nonlocal u
+		nonlocal u,return_other_url,U
 		if return_other_url:
+			if py.isdict(return_other_url):
+				ro_url_decode=U.get_duplicated_kargs(return_other_url,'url_decode','decode','urlDecode','urldecode')
+				ro_23=U.get_duplicated_kargs(return_other_url,'%23','%23-','_23','add_23')
+			else:
+				ro_url_decode,ro_23=False,False
+				
+			if ax:u=u[:0-py.len(ax)]	
+			if ro_23:
+				if '%23' in u[-4:]:
+					if ro_url_decode:
+						u=T.url_decode(T.sub_tail(u,'','%23'))+'%23-'
+					else:
+						u
+				else:
+					if ro_url_decode:
+						u=T.url_decode(u)+'%23-'
+					else:	
+						u+='%23-'
+						
+						
 			if ax:
-				return u[:0-py.len(ax)],ax
+				return u,T.url_decode(ax)
 			else:
 				return u,ax
 		else:
-			return ax
+			return T.url_decode(ax)
 	u=''
 	if py.istr(request):return _return(request)
 	if not request:from flask import request
@@ -1211,7 +1231,7 @@ pythonAnywhere : multi[ // or  %2F%2F%2F%2F%2F ] in url will auto convert to one
 		a=T.sub_tail(u,'%23')
 		
 	
-	return _return(T.url_decode(a) )
+	return _return(a )
 geta=get_a=get_request_a=get_rpc_request_a=get_flask_request_a
 
 def get_flask_request_a_file(request=None,raise_err=False):
