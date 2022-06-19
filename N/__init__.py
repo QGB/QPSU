@@ -1160,14 +1160,14 @@ def get_socket_req(PORT = 65432,HOST = '127.7.7.7'):
 		req, addr = s.accept()
 		return req, addr
 
-def get_flask_request_a(request=None,return_other_url=False,raise_err=False,**ka):
+def get_flask_request_a(request=None,return_other_url=False,return_request=False,raise_err=False,**ka):
 	''' #TODO raise_err
 a=T.subr(u,T.u23)#'%23-'	
 
 pythonAnywhere : multi[ // or  %2F%2F%2F%2F%2F ] in url will auto convert to one / ,it can't bypass
 	'''
 	def _return(ax):
-		nonlocal u,return_other_url,U
+		nonlocal u,return_other_url,U,request
 		if return_other_url:
 			if py.isdict(return_other_url):
 				ro_url_decode=U.get_duplicated_kargs(return_other_url,'url_decode','decode','urlDecode','urldecode')
@@ -1190,11 +1190,16 @@ pythonAnywhere : multi[ // or  %2F%2F%2F%2F%2F ] in url will auto convert to one
 						
 						
 			if ax:
-				return u,T.url_decode(ax)
+				return_r= u,T.url_decode(ax)
 			else:
-				return u,ax
+				return_r=  u,ax
 		else:
-			return T.url_decode(ax)
+			return_r=  T.url_decode(ax)
+		if return_request:	
+			return_r=py.list(return_r)
+			return_r.insert(0,request)
+		return return_r
+		
 	u=''
 	if py.istr(request):return _return(request)
 	if not request:from flask import request

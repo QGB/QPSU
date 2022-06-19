@@ -65,7 +65,7 @@ iter include stop_point
 			if color and  xy:yield x,y,a[x,y]
 	
 	# return
-iter_img=iter_img_all=iter_image=iterate_all_image=iterate_one_image_all=iterate_image_all
+iter_img_xy=iter_img=iter_img_all=iter_image=iterate_all_image=iterate_one_image_all=iterate_image_all
 
 def get_image_pixel(image,x,y):
 	'''

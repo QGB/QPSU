@@ -6062,7 +6062,12 @@ def rgb_name(r,g=None,b=None,hex_format='0x%02x_%02x_%02x',color_comment=True):
 		except ValueError:
 			pass
 	return name
-i2srgb=int2srgb=int_to_srgb=rgb_name			
+i2srgb=int2srgb=int_to_srgb=color_name=rgb_name			
+	
+def get_all_color_name_list():
+	import webcolors
+	return [(StrRepr(k,size=20),StrRepr(v,size=7+3)) for k,v in webcolors.CSS3_NAMES_TO_HEX.items() ]
+color_list=color_all_names=all_color_names=get_all_color_name_list
 	
 def iter_screen_colors(xrange=[855,1311],yrange=[],default_step=3,set_cur_pos=False,**ka):
 	# cc=-1

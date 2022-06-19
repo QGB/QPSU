@@ -8,19 +8,24 @@ else:
 	from qgb import py
 U,T,N,F=py.importUTNF()
 
-def everything_search_image(response,add_offset=py.No(''),**ka):
+def everything_search_image(response,add_offset=32,**ka):
 	U.r(py,U,T,N,F,N.HTTP,N.HTML,)
 	add_offset=U.get_duplicated_kargs(ka,'add_offset','offset','oa','ao','add',default=add_offset)
 	# py.pdb()()
-	ucode,a=N.geta(return_other_url={'url_decode':1,'%23-':1})
-	from flask import request
-	print(request.url,ucode)
+	request,ucode,a=N.geta(return_other_url={'url_decode':1,'%23-':1},return_request=True)
+	
+	U.set('rf',request.form )
+	if request.form.get('a',''):
+		a=request.form.get('a','')
+
+	
 	# ucode=T.url_decode(ucode)
 	# if not ucode.endswith('%23-'):
 		# ucode+='%23-'
 	
 	if a:a=U.set('esimg.a',a)
 	else:a=U.get('esimg.a')
+	
 	dua=T.parse_url_arg(a)     
 	offset=py.int(dua.get('offset',0))
 	search=dua['search']#,'')
@@ -28,6 +33,8 @@ def everything_search_image(response,add_offset=py.No(''),**ka):
 		newa=T.replace_url_arg(a,'offset',offset+add_offset)
 	else:	
 		newa=a
+	U.print_repr(add_offset,request.form,ucode,a,newa)	
+		
 		
 	es_base='http://'+T.get_url_netloc(a)
 	h=N.HTTP.get(a,proxy=0)
@@ -62,11 +69,22 @@ display: none;    /* 隐藏滚动条 */
 } 
 
 </style> 
+
+<script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
+<script>
+
+$(window).scroll(function() {
+   if($(window).scrollBottom() + $(window).height() == $(document).height()) {
+       alert("bottom!");
+   }
+});
+
+</script>
 	
 """+f"""
-<form method="post" enctype="multipart/form-data" action="{ucode+a}">
-	<input type="text" name="t" value="{a}"/>
-	<input type="submit" value="offset + {add_offset}"/>
+<form method="post" enctype="multipart/form-data" action="{ucode+newa}">
+	<input type="text" name="a" value="{T.url_decode(newa)}"/>
+	<input type="submit" value="↑ input added ;current offset see browser url bar!{'&nbsp'*99} offset + {add_offset} {'&nbsp'*99} "/>
 </form>	
 
 <!-- 

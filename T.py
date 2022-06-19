@@ -913,6 +913,8 @@ netloc: Contains the network location - which includes the domain itself (and su
 		return '.'.join(r)
 	else:
 		return r
+get_domain_tld=get_domain_of_url_tld=get_domain_parts_by_url_using_tld
+		
 		
 def getFLD(url_or_domain,fix_protocol=True):
 	"""Extract the first level domain.
