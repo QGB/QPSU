@@ -6064,10 +6064,44 @@ def rgb_name(r,g=None,b=None,hex_format='0x%02x_%02x_%02x',color_comment=True):
 	return name
 i2srgb=int2srgb=int_to_srgb=color_name=rgb_name			
 	
-def get_all_color_name_list():
+def get_all_color_name_list(index=False,hex_int=False,sort_kw=None,int_delta=False,**ka):
+	''' sort_kw c=0 代表第一列 k，（不包括 index）
+	
+'''	
+	U,T,N,F=py.importUTNF()
+	index=U.get_duplicated_kargs(ka,'index','n','enumerate','enu',default=index)
+	hex_int=U.get_duplicated_kargs(ka,'hex_int','color_int','int','_10','i',default=hex_int)
+	sort_kw=U.get_duplicated_kargs(ka,'sort_kw','sort_args','skw','s',default=sort_kw)
 	import webcolors
-	return [(StrRepr(k,size=20),StrRepr(v,size=7+3)) for k,v in webcolors.CSS3_NAMES_TO_HEX.items() ]
-color_list=color_all_names=all_color_names=get_all_color_name_list
+	r=[]
+	for k,v in webcolors.CSS3_NAMES_TO_HEX.items():
+		row=[U.StrRepr(k,size=20),U.StrRepr(v,size=7+3)]
+		
+		if hex_int:
+			row.append(U.IntRepr(py.int('0x'+v[1:],16),size=9) )
+		
+		r.append(row)
+				
+	if sort_kw:
+		r=U.sort(r,**sort_kw)
+			
+	if int_delta:
+		for n,row in py.enumerate(r):
+			i=row[-1]
+			if n==0:
+				row.append( -1)
+			else:
+				row.append( i-r[n-1][-2])
+		if py.isdict(int_delta):
+			r=U.sort(r,**int_delta)
+		
+	if index:
+		for n,row in py.enumerate(r):
+			row.insert(0,U.IntRepr(n,size=3) )	
+
+	return r	
+	# return [()  ]
+color_list=color_all_names=all_color_names=get_color_list=get_all_color_name_list
 	
 def iter_screen_colors(xrange=[855,1311],yrange=[],default_step=3,set_cur_pos=False,**ka):
 	# cc=-1

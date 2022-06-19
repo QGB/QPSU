@@ -58,12 +58,14 @@ def get_all_pid_equal_port():
 	return r
 get_rpc_port_list=get_pid_equal_port=get_port_equal_pid=get_all_pid_equal_port	
 	
-def curl_return_bytes(url,verbose=True,proxy=py.No('socks5://127.0.0.1:21080'),headers=py.No('default use N.HTTP.headers')):
+def curl_return_bytes(url,verbose=True,proxy=py.No('socks5h://127.0.0.1:21080'),headers=py.No('default use N.HTTP.headers'),**ka):
 	'''
 
 	'''
 	global U,T,N,F
 	U,T,N,F=py.importUTNF()
+	proxy=U.get_duplicated_kargs(ka,'proxies','proxy',default=proxy)
+	
 	import pycurl
 	c = pycurl.Curl()
 	c.setopt(c.URL, url)
@@ -1575,7 +1577,7 @@ def is_flask_request(q):
 	from werkzeug.local import LocalProxy
 	return isinstance(q,LocalProxy)
 
-def set_proxy(host='',port='',protocol='socks5',target_protocol=('http','https'),**ka):
+def set_proxy(host='',port='',protocol='socks5h',target_protocol=('http','https'),**ka):
 	''' no args provide,proxy will clean
 'proxies','proxy','ip'  =py.No('duplicated arg:host')	
 	'''
