@@ -12,6 +12,9 @@ def everything_search_image(response,add_offset=32,**ka):
 	U.r(py,U,T,N,F,N.HTTP,N.HTML,)
 	add_offset=U.get_duplicated_kargs(ka,'add_offset','offset','oa','ao','add',default=add_offset)
 	# py.pdb()()
+	# ucode=T.url_decode(ucode)
+	# if not ucode.endswith('%23-'):
+		# ucode+='%23-'
 	request,ucode,a=N.geta(return_other_url={'url_decode':1,'%23-':1},return_request=True)
 	
 	U.set('rf',request.form )
@@ -19,21 +22,22 @@ def everything_search_image(response,add_offset=32,**ka):
 		a=request.form.get('a','')
 
 	
-	# ucode=T.url_decode(ucode)
-	# if not ucode.endswith('%23-'):
-		# ucode+='%23-'
-	
 	if a:a=U.set('esimg.a',a)
 	else:a=U.get('esimg.a')
 	
 	dua=T.parse_url_arg(a)     
 	offset=py.int(dua.get('offset',0))
 	search=dua['search']#,'')
-	if add_offset:
-		newa=T.replace_url_arg(a,'offset',offset+add_offset)
-	else:	
-		newa=a
-	U.print_repr(add_offset,request.form,ucode,a,newa)	
+	
+	def offset_url(previous=False):
+		if add_offset:
+			if previous:
+				return T.replace_url_arg(a,'offset',offset-add_offset)
+			else:	
+				return T.replace_url_arg(a,'offset',offset+add_offset)
+		else:	
+			return a
+		U.print_repr(add_offset,request.form,ucode,a,newa)	
 		
 		
 	es_base='http://'+T.get_url_netloc(a)
@@ -68,6 +72,20 @@ display: none;    /* 隐藏滚动条 */
 
 } 
 
+.submit{
+	height:35%;
+	background:green;
+}
+input[type="text"]{
+	font-size:2vh;
+}
+
+/*
+	# height:555;
+	# background:grey;
+
+*/
+
 </style> 
 
 <script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
@@ -82,13 +100,15 @@ $(window).scroll(function() {
 </script>
 	
 """+f"""
-<form method="post" enctype="multipart/form-data" action="{ucode+newa}">
-	<input type="text" name="a" value="{T.url_decode(newa)}"/>
-	<input type="submit" value="↑ input added ;current offset see browser url bar!{'&nbsp'*99} offset + {add_offset} {'&nbsp'*99} "/>
+<form method="post" enctype="multipart/form-data" action="{ucode+offset_url(previous=True)}">
+	<input type="text" name="a" value="{T.url_decode(offset_url(previous=True))}"/>
+	<input class="submit" id="previous" type="submit" value="↑ input added ;current offset see browser url bar!{'&nbsp'*99} offset - {add_offset} {'&nbsp'*99} "/>
 </form>	
-
+<div class="submit" onclick="document.getElementById('next').click()">next offset + {add_offset}</div>		
 <!-- 
 <div>{a}</div>	
+
+<div class="submit" onclick="document.getElementById('submit').click()">offset + {add_offset}</div>		
 -->	
 """	
 
@@ -99,6 +119,14 @@ $(window).scroll(function() {
 <div>{u}</div>		
 		'''
 		r+=se
+	r=r+f'''	
+<div class="submit" onclick="document.getElementById('previous').click()"> previous offset - {add_offset}</div>			
+	
+<form method="post" enctype="multipart/form-data" action="{ucode+offset_url(previous=False)}">
+	<input type="text" name="a" value="{T.url_decode(offset_url(previous=False))}"/>
+	<input class="submit" id="next" type="submit" value="↑ input added ;current offset see browser url bar!{'&nbsp'*99} offset + {add_offset} {'&nbsp'*99} "/>
+</form>		
+'''	
 	# response.set_data( h)
 	response.headers['Content-Type']='text/html;charset=utf-8';
 	response.set_data(r)

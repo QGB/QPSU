@@ -2998,7 +2998,7 @@ def str_to_datetime(a):
 		
 try_parse_stime=str_to_datetime
 	
-def get_time_as_str(time=None,format=gsTimeFormatFile,ms=True):
+def get_time_as_str(time=None,format=gsTimeFormatFile,ms=True,time_zone=py.No('原来，除非指定')):
 	'''http://python.usyiyi.cn/translate/python_278/library/time.html#time.strftime
 	TODO: 可以指定 ms
 U.stime(0.0005)
@@ -3062,8 +3062,30 @@ def parse_time_str(a,format='%Y-%m-%d__%H.%M.%S'):
 	# return r
 parse_time=stime2time=stime_to_time=parse_stime=parse_time_str	
 
+def timezone_to_timedelta(a):
+	'''
+In [242]: 0<=i<=1
+Out[242]: False
 
-
+In [243]: 0=<i<=1
+  File "<ipython-input-243-0732a0107c4d>", line 1
+    0=<i<=1
+      ^
+SyntaxError: invalid syntax
+'''	
+	
+	# from datetime import datetime, timedelta, tzinfo
+	import datetime
+	if py.isint(a):
+		if -14 <= a <= 14:
+			return datetime.timedelta(seconds=3600*a)
+		else:
+			raise py.ArgumentError(a)
+	if py.istr(a):
+		import pytz
+		return pytz.timezone(a)._utcoffset
+	raise py.ArgumentUnsupported(a)	
+	
 def better_float(x):
 	''' float(x=0, /)  Subclasses:     float64
 0.07999999999999999  hangs	

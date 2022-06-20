@@ -1,5 +1,42 @@
+#coding=utf-8
+import sys,pathlib               # .py/test  /qgb   / 
+gsqp=pathlib.Path(__file__).absolute().parent.parent.parent.absolute().__str__()
+if gsqp not in sys.path:sys.path.append(gsqp)#py3 works
+from qgb import py
+U,T,N,F=py.importUTNF()
+
 import os
 import hashlib
+
+def get_current_bitcoin_price(symbol='USD',time_zone=0,proxy='127.0.0.1:21080'):
+	''' support symbol: ['USD', 'GBP', 'EUR']
+	
+'''	
+	import requests
+
+	headers = {
+		'authority': 'api.coindesk.com',
+		'pragma': 'no-cache',
+		'cache-control': 'no-cache',
+		'upgrade-insecure-requests': '1',
+		'user-agent': 'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/72.0.3626.121 YaBrowser/19.3.1.779 Yowser/2.5 Safari/537.36',
+		'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8',
+		# 'accept-encoding': 'gzip, deflate, br',
+		'accept-language': 'zh-CN,zh;q=0.9,zh-TW;q=0.8,en;q=0.7',
+	}
+
+	rp = requests.get('https://api.coindesk.com/v1/bpi/currentprice.json', headers=headers,timeout=9,proxies=N.set_proxy(proxy) )
+	j=rp.json()
+	
+	symbol=symbol.upper()
+	p=j['bpi'][symbol]['rate_float']
+	t=j['time']['updatedISO']
+	if time_zone:
+		dt=U.parse_time(t)+U.timezone_to_timedelta(time_zone)
+		t=U.stime(dt)
+	
+	return U.FloatRepr(p,repr=f"""{p} #{symbol} {t}""" )
+getp=price=get_price=get_current_price=get_current_bitcoin_price
 
 
 def sha256(data):
