@@ -3086,21 +3086,24 @@ SyntaxError: invalid syntax
 		return pytz.timezone(a)._utcoffset
 	raise py.ArgumentUnsupported(a)	
 	
-def better_float(x):
+def better_float(x,):
 	''' float(x=0, /)  Subclasses:     float64
 0.07999999999999999  hangs	
+
+11.200000000000001
 	'''
 	r=py.float(x)
 	# for i in range(99):
-	while True:
+	for i in py.range(11):
 		s=py.str(r)
 		if '0'*12 in s:
-			r-=(0.1**16)
+			f=r-(0.1**16*i)
+			if py.len(py.str(f)) < py.len(s):return f
 		elif '9'*12 in s:
-			r+=(0.1**16)
+			f=r+(0.1**16*i)
+			if py.len(py.str(f)) < py.len(s):return f
 		else:
-			break
-	return r
+			return r
 
 def float_with_default(obj,*other,default=None):
 	''' FuncWrapForMultiArgs: if default!=None:
@@ -5031,6 +5034,18 @@ def dict_swap_key_value(d):
 		r[v]=k
 	return r
 swap_dict_key_value=dict_key_value_swap=dict_swap_key_value
+
+def dict_update_dict_merge_value_list(da,db):
+	for k,v in db.items():
+		if k in da:
+			if py.islist(da[k]):
+				da[k].append(v)
+			else:
+				da[k]=[da[k],v]
+		else:
+			da[k]=v
+	return da
+dict_update_value_list=dict_update_merge_value_list=dict_update_dict_merge_value_list
 	
 def is_builtin_function(a):
 	'''

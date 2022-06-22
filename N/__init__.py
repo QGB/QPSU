@@ -1162,6 +1162,17 @@ def get_socket_req(PORT = 65432,HOST = '127.7.7.7'):
 		req, addr = s.accept()
 		return req, addr
 
+def get_flask_request_post_data(name='y'):
+	from flask import request as q
+	U,T,N,F=py.importUTNF()
+	
+	b=q.data;y=T.js_loads(b)
+	U.get_ipy().user_ns[name]=y
+	return F.dill_dump(obj=y,file='C:/test/{}-{}={}.dill'.format(name,U.len(y),U.stime()))
+rec=recive=receive=get_flask_request_post_data
+	
+	
+
 def get_flask_request_a(request=None,return_other_url=False,return_request=False,raise_err=False,**ka):
 	''' #TODO raise_err
 a=T.subr(u,T.u23)#'%23-'	

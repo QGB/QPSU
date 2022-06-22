@@ -54,6 +54,7 @@ RE_VAR_SIMPLE=RE_VAR=RE_variable_name=RE_python_variable_name=r'[_a-zA-Z]\w*'#
 RE_VARS_COMMAS=RE_vars_separated_by_commas=r'VAR(?:\s*,\s*VAR)+'.replace('VAR',RE_VAR)
 RE_GIT_REPO_URL=RE_GIT_REPO=r'((?P<protocol>git|ssh|http(s)?)|(git@[\w\.]+))(:(\/\/)?)(?P<netloc>[\w\@\.\:~]+)\/(?P<user>[\w]+)\/(?P<repo>[\w\-\.]+(\.git)?)'
 RE_GIT=RE_GIT_URL=RE_URL_GIT=RE_GIT_REPO_OTHER=RE_GIT_REPO+'(?P<other>[\w\/]*)'
+RE_FLOAT=REF=r'[+-]?([0-9]*[.])?[0-9]+'
 ###############
 SQLITE='SELECT * FROM sqlite_master;'
 
@@ -130,7 +131,7 @@ def substring_counts(names):
 	# U,T,N,F=py.importUTNF()
 	
 
-def string_index(a,b=None,line_max=122,escape_eol=('\r','\n'),):
+def string_index(a,b=None,line_max=122,escape_eol=('\r','\n'),p=0):
 	U,T,N,F=py.importUTNF()
 	r=[[],[],[],[]] #十位 个位 a b
 	if b:mb=py.len(b) 
@@ -157,7 +158,9 @@ def string_index(a,b=None,line_max=122,escape_eol=('\r','\n'),):
 			r[3].append(b[n])
 		
 		
-	return '\n'.join([''.join(row) for row in r])
+	r= '\n'.join([''.join(row) for row in r])
+	if p:U.pln(r)
+	else:return r
 enu=enumerate=sindex=str_index=string_index	
 
 def similarity_difflib(a,b,isjunk_function=None):
@@ -275,6 +278,12 @@ def parse_cookie_str_to_dict(s):
 		#break	
 	return dc
 c2d=parse_cookie=parse_cookie_str=parse_cookie_to_dict=parse_cookie_str_to_dict	
+
+def splitlines(*a):
+	r=[]
+	for s in a:
+		r.extend(s.splitlines())
+	return r	
 
 def split_to_2d_list(text,col=re.compile('\s+'),row='\n',strip=True,StrRepr=False):
 	'''
@@ -937,15 +946,15 @@ get_fld=getFLD
 
 ################### zh #############################
 # u'([\u4e00-\u9fff]+)'  
-RE_ZH_PATTERN = re.compile(u'[\u4e00-\u9fa5]+')
+RE_ZH_PATTERN = u'[\u4e00-\u9fa5]+'
 
 def list_filter_zh(a):
-	return RE_ZH_PATTERN.findall(a )
+	return re.compile(RE_ZH_PATTERN).findall(a )
 filter_zh_as_list=list_filter_zh
 
 def str_filter_zh(a,max_not_zh=0,splitor=' '):
 	if not max_not_zh:
-		return splitor.join(RE_ZH_PATTERN.findall(a ) )
+		return splitor.join(re.compile(RE_ZH_PATTERN).findall(a ) )
 	return regexReplace(a,r'[^\u4e00-\u9fa5]{%s,}'%max_not_zh,'')
 filter_zh_as_str=filter_zh=filterZh=str_filter_zh
 
@@ -956,7 +965,7 @@ def hasZh(word):
 	:return: True:包含中文  False:不包含中文
 	'''
 	global RE_ZH_PATTERN
-	match = RE_ZH_PATTERN.search(word)
+	match = re.compile(RE_ZH_PATTERN).search(word)
 	return match
 contain_zh=has_zh=hasZh	
 ################# zh end ##############
@@ -979,9 +988,11 @@ def filter_sint_list(a,digits=py.range(1,999)):
 	return r
 int_filter=matchInt=match_int=filter_sint=filter_int=filterInt=filter_sint_list
 
-RE_HTML_TAG = re.compile(r'<[^>]+>')
+RE_HTML_TAG = r'<[^>]+>'
 def filter_html(text):
-	return RE_HTML_TAG.sub('', text)
+	''' regex 多次 compile 没关系 ，结果相等 
+	'''
+	return re.compile(RE_HTML_TAG).sub('', text)
 html_filter=filter_html
 
 def html2text(html,baseurl='',ignore_images=True,ignore_links=True,):
@@ -1061,7 +1072,7 @@ def readableTimeText(txt,browser=False):
 		return U.StrRepr(r)
 timeText=readableTimeText
 
-RE_IP= re.compile('''(?:(?:2(?:[0-4][0-9]|5[0-5])|[0-1]?[0-9]?[0-9])\.){3}(?:(?:2([0-4][0-9]|5[0-5])|[0-1]?[0-9]?[0-9]))''')
+RE_IP= '''(?:(?:2(?:[0-4][0-9]|5[0-5])|[0-1]?[0-9]?[0-9])\.){3}(?:(?:2([0-4][0-9]|5[0-5])|[0-1]?[0-9]?[0-9]))'''
 def ip_location_text(text,location_format=' [{0}] ',reverse_ip=True,**ka):
 	''' p='deprecated'
 	'''
@@ -1319,22 +1330,46 @@ def match_wildcard(a,exp):
 		return ''
 wildcard=matchWildcard=match_wildcard
 
-def regex_match_named_return_dict(a,regex):
+def T_RE_preprocessor(regex,T_RE='T.RE'):
+	if not T_RE:return regex
+	if not py.istr(T_RE):T_RE='T.RE'
+	if T_RE not in regex:return regex
+	
+	T=py.importT()	
+	
+	rd={}
+	for i in T.regex_match_all(regex,T.regex_escape(T_RE)+r'[_\da-zA-Z]+'):
+		v=py.getattr(T,i[2:])
+		if not v:raise py.ArgumentError('%s not in T'%v,regex)
+		if not py.istr(v):raise py.ArgumentError('T.%s not string'%v,regex)
+		rd[i]=v
+	return T.replacey(regex,rd)	
+
+def regex_match_named_return_dict(a,*regexs,T_RE='T.RE'):
 	''' #not    ,**defaults
 re.search('(?P<name>.*) (?P<phone>.*)', 'John 123456').group('name')=='John'
 #py3.7 ka的顺序与调用顺序一致	
 '''
-	regex = re.compile(regex)
-	if not regex.groupindex:
-		raise py.ArgumentError(regex,'need (?P<name>regex) ... ')
-	d={}
-	r= re.search(regex,a) # if not match return None
-	if not r:
-		return py.No('NotMatch:',regex,a)
-	# 一组没匹配到 {'protocol': None} 与 匹配到空 {'aaa':''}  是不一样的
-	return r.groupdict()
+	U=py.importU()	
+	if not regexs:raise py.ArgumentError(regexs)
+	
+	rd={}
+	err=[]
+	for regex in regexs:
+		regex=T_RE_preprocessor(regex,T_RE)
+		regex = re.compile(regex)
+		if not regex.groupindex:
+			raise py.ArgumentError(regex,'need (?P<name>regex) ... ')
+		r= re.search(regex,a) # if not match return None
+		if not r:
+			err.append(regex)
+			continue
+		# 一组没匹配到 {'protocol': None} 与 匹配到空 {'aaa':''}  是不一样的
+		# rd.update(r.groupdict())
+		U.dict_update_dict_merge_value_list(rd,r.groupdict())
 	# for name,v in r.items():
-		
+	if rd:return rd
+	else :return py.No('NotMatch:',err,a)
 	
 	re.search(a,regex)
 regex_groupdict=regex_named=named_regex_match=regex_match_named=match_regex_named=regex_match_named_return_dict
@@ -1533,7 +1568,7 @@ def base64_to_bytes(a):
 		return base64.b64decode(a)
 	if py.isbyte(a):
 		return base64.b64decode(a) #type bytes
-b64_bytes=base64_to_bytes	
+b64_bytes=base64_decode_return_bytes=base64_to_bytes	
 
 		
 def strToBaseN(a,base=64,symbols=None):
@@ -1825,8 +1860,9 @@ def replace_all_space(a,to='',target=r"\s+"):
 	return re.sub(target, to, a, flags=re.UNICODE)
 del_space=del_spaces=remove_all_space=replace_all_spaces=delAllSpace=removeAllSpaces=removeAllSpace=replace_all_space
 
-def replacey(a,olds,new='',case_sensitive=True):
+def replace_multi_target(a,olds,new='',case_sensitive=True):
 	'''
+olds could be dict	
 #TODO case_sensitive	
 	'''
 	if not py.istr(a):return py.No('a is not str',a)
@@ -1842,6 +1878,7 @@ def replacey(a,olds,new='',case_sensitive=True):
 		for i in olds:
 			a=a.replace(i,new)
 	return a
+replacey=replace_multi_target	
 	
 def replace_all(a,old,new):
 	''' S.replace(old, new[, count]) -> string'''

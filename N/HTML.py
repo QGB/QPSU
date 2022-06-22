@@ -37,7 +37,7 @@ def everything_search_image(response,add_offset=32,**ka):
 				return T.replace_url_arg(a,'offset',offset+add_offset)
 		else:	
 			return a
-		U.print_repr(add_offset,request.form,ucode,a,newa)	
+		# U.print_repr(add_offset,request.form,ucode,a,newa)	
 		
 		
 	es_base='http://'+T.get_url_netloc(a)
@@ -49,8 +49,8 @@ def everything_search_image(response,add_offset=32,**ka):
 <meta name="viewport" content="width=device-width, initial-scale=0.3, minimum-scale=0.3, maximum-scale=1.0,user-scalable=0" cmt=禁止缩放/> 
 	
 <style type="text/css">
-	
-	img{
+html,body{margin:0;pading:0;}/*不然两侧有空白*/	
+img{
 		width:100%;
 		padding: 0 0 0 0;		
 		margin: 0 0 0 0;
@@ -59,6 +59,7 @@ def everything_search_image(response,add_offset=32,**ka):
 
 height: 25px;
 */	
+
 	input,div{
 border:1px solid #000000;
 width: 100%;
@@ -66,18 +67,56 @@ overflow-x: auto;
 white-space: nowrap;
 overflow-y: hidden;
 }
+textarea.img_path{
+	font-size:1.5vh;
+	direction: rtl; /*
+		text-align: right;
+		
+		从右向左超出*/
+	width:100%;
+	padding:0px;
+	margin:0px;
+	border:1px solid #00000022; /*修复调整 textarea大小导致下分割线消失的问题*/
+	border-spacing: 0px;
+	resize: none; /*禁用 调整大小*/
+	white-space: pre;/*以下3行，禁用 自动换行 */
+	overflow-wrap: normal;
+	overflow-x: scroll;
+	
+	height:2.3vh; /*隐藏滚动条 后，下方很多空白*/
+}
 
-div::-webkit-scrollbar {
-display: none;    /* 隐藏滚动条 */
 
+
+textarea.img_path::-webkit-scrollbar,div::-webkit-scrollbar {
+	display: none;    /* 隐藏滚动条 */
 } 
 
+div.scroll{
+	height:15%;
+	font-size:3vh;
+	background:grey;
+}
+
+br {
+   display: block;
+   margin: 10px 0;
+}
+
 .submit{
-	height:35%;
-	background:green;
+	font-size:3vh;
+	height:31%;
+	width:100%;
+	background:green;	
+	text-align: left;
+}
+
+div.submit{
+	height:15%;
 }
 input[type="text"]{
-	font-size:2vh;
+	font-size:1.8vh;
+	
 }
 
 /*
@@ -88,43 +127,53 @@ input[type="text"]{
 
 </style> 
 
-<script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
+<script src="http://libs.baidu.com/jquery/2.1.4/jquery.min.js"></script>
 <script>
 
-$(window).scroll(function() {
-   if($(window).scrollBottom() + $(window).height() == $(document).height()) {
-       alert("bottom!");
-   }
-});
-
+ 
 </script>
 	
 """+f"""
 <form method="post" enctype="multipart/form-data" action="{ucode+offset_url(previous=True)}">
 	<input type="text" name="a" value="{T.url_decode(offset_url(previous=True))}"/>
-	<input class="submit" id="previous" type="submit" value="↑ input added ;current offset see browser url bar!{'&nbsp'*99} offset - {add_offset} {'&nbsp'*99} "/>
+	<button type="submit" class="submit" id="previous" value="">
+		↑ input[type="text"] added (previous=True)<br>
+		current offset {offset} see browser url bar!<br>
+		previous offset - {add_offset}
+	</button>
 </form>	
-<div class="submit" onclick="document.getElementById('next').click()">next offset + {add_offset}</div>		
-<!-- 
-<div>{a}</div>	
 
-<div class="submit" onclick="document.getElementById('submit').click()">offset + {add_offset}</div>		
+<div class="scroll" onclick="window.scrollTo(0, document.body.scrollHeight);">scroll to bottom</div>		
+
+<div class="submit" onclick="document.getElementById('next').click()">next offset + {add_offset}</div>		
+
+<!-- 
+
 -->	
 """	
 
-	for e in efs:
+	for n,e in py.enumerate(efs):
 		u=es_base+e.get('href')
-		se=f''' <img style=" " src={u}>	
-	
-<div>{u}</div>		
+		se=f''' <img src={u}>	
+<textarea class="img_path">{n}{T.url_decode(u)}</textarea>		
 		'''
+		#RTL 文字从右至左  注意使用 f-string 执行顺序问题
+#很奇怪 加空格显示 n总是在u的后面		
+#>=={'77{} {} 99'.format(n,u)}++ 显示 ++http://192.168.1.3/C%3A/test/xsnvshen_a/24936/33978-8.jpg 99 772
+#复制出来不是
 		r+=se
 	r=r+f'''	
+<div class="scroll" onclick="window.scrollTo(0,0);">scroll to head</div>		
+	
 <div class="submit" onclick="document.getElementById('previous').click()"> previous offset - {add_offset}</div>			
 	
 <form method="post" enctype="multipart/form-data" action="{ucode+offset_url(previous=False)}">
 	<input type="text" name="a" value="{T.url_decode(offset_url(previous=False))}"/>
-	<input class="submit" id="next" type="submit" value="↑ input added ;current offset see browser url bar!{'&nbsp'*99} offset + {add_offset} {'&nbsp'*99} "/>
+	<button type="submit" class="submit" id="next" value="">
+		↑ input[type="text"] added (previous=False)<br>
+		current offset {offset} see browser url bar!<br>
+		next offset + {add_offset}
+	</button>
 </form>		
 '''	
 	# response.set_data( h)
