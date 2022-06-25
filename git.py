@@ -294,4 +294,30 @@ def get_github_repo_directory_as_list(url,access_token=py.No('auto get_or_set_in
 			return [o.name for o in os]
 		
 github_dir=get_github_dir=get_github_repo_directory_as_list
+
+def github_upload(filename):
+	import requests
+	# G=github_upload.__name__+'.'
+	repo,token=U.get_or_input('repo,token',default='',type=py.eval)
+	# token=U.get_or_input(G+'token',default='')
+	token=token.strip()
+	if not token.startswith('token '):token='token '+token
+	
+	# filename=F.auto_path(filename)
+	safe_filename=T.path_legalized('/'+F.auto_path(filename))[1:]
+	
+	import base64
+	s64=base64.b64encode(F.read_bytes(filename)).decode('ascii')
+	
+	url=f'https://api.github.com:443/repos/{repo}/contents/{safe_filename}'
+	data='{"message": "add new file", "content": "%s", "branch": "master"}'%s64
+	
+	ka={'headers': {'Authorization': token,
+  'User-Agent': 'PyGithub/Python',
+  'Content-Type': 'application/json'},
+ 'timeout': 15,
+ 'verify': True,
+ 'allow_redirects': False}
+ 
+	return requests.put(url,data,**ka)
 	

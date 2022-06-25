@@ -8,6 +8,60 @@ else:
 	from qgb import py
 U,T,N,F=py.importUTNF()
 
+def list2d(response,a,file_column=None,index=False,sort_kw=U.SORT_KW_SKIP,**ka):
+	file_column=U.get_duplicated_kargs(ka,'file_column','cf','fc','f_col','fcol','fcolumn',default=file_column)
+	index=U.get_duplicated_kargs(ka,'index','n','enu','add_index','enumerate',default=index)
+	sort_kw=U.get_duplicated_kargs(ka,'skw','sort','s',default=sort_kw)
+	a=U.sort(a,sort_kw=sort_kw)
+	# return a
+	from flask import request
+	
+	# request,ucode,urla=N.geta(return_other_url={'url_decode':1,
+	# '%23-':1
+	# },return_request=True)
+	
+	import pandas as pd
+	df = pd.DataFrame(data=a)
+	html=df.to_html(index=index) 
+	
+	if py.isint(file_column):
+		if file_column <0:file_column=py.len(a[0])+file_column
+		from bs4 import BeautifulSoup
+		
+		rpc_base=request.url_root[:-1]+U.get_or_set('rpc.server.base','/')
+		url_read='a=N.geta();r=F.read(a)%23-'
+		url_read='a=N.geta();N.flask_text_response(p,F.read(a))%23-'#有些txt文件会变下载框
+		# url_read='a=N.geta();N.html(p,F.read(a))%23-'
+		
+		
+		bs=T.BeautifulSoup(html)
+		es=bs.select(f'body > table > tbody > tr > td:nth-of-type({1+file_column})')
+		for ne,e in py.enumerate(es):
+			f=a[ne][file_column]
+			if e.text!=f:
+				print('#error a[',ne,file_column,'!= e.text')
+				continue
+				
+			# e.string.replace_with(f'<a href="http://{request.remote_addr}/{f}">{f}</a>' )	
+			# U.get_or_set('es.list',[]).append(e)
+			# ea=BeautifulSoup(f'<a href=>{f}</a>'			
+			ea=bs.new_tag('a')
+			# ea.attrs['href']=f"http://{request.remote_addr}/{f}"
+			# ea.attrs['href'  ]=f"{rpc_base+url_read}{f}"
+			ea.attrs['href'  ]=f"{U.get_or_set('rpc.server.base','/')}{url_read}{f}"
+			ea.attrs["target"]='_blank'
+			ea.append(f)
+			
+			e.clear()
+			e.append(ea)		
+			
+			
+		html=py.str(bs)
+	response.headers['Content-Type']='text/html;charset=utf-8';
+	response.set_data(html)
+	return a
+table=l2d=list2d
+
 def everything_search_image(response,add_offset=32,**ka):
 	U.r(py,U,T,N,F,N.HTTP,N.HTML,)
 	add_offset=U.get_duplicated_kargs(ka,'add_offset','offset','oa','ao','add',default=add_offset)
@@ -62,7 +116,7 @@ height: 25px;
 
 	input,div{
 border:1px solid #000000;
-width: 100%;
+width: 99%;/*不然桌面会有下侧滚动条*/
 overflow-x: auto;
 white-space: nowrap;
 overflow-y: hidden;
@@ -106,7 +160,7 @@ br {
 .submit{
 	font-size:3vh;
 	height:31%;
-	width:100%;
+	width:99%;/*不然桌面会有下侧滚动条*/
 	background:green;	
 	text-align: left;
 }

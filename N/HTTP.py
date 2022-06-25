@@ -255,6 +255,8 @@ def get_bytes(url,file='',
 		verify=False,
 		print_req=False,
 		bytes_with_response=True,
+		url_as_file=False,
+		skip_if_exist=False,
 		**ka ,):
 	'''
 url格式不对时：
@@ -279,6 +281,18 @@ UnicodeError: encoding with 'idna' codec failed (UnicodeError: label too long)
 
 	url=N.auto_url(url)
 	file=U.get_duplicated_kargs(ka,'file','f','filename',default=file)
+	if not file and url_as_file:
+		pf=T.sub(T.url_decode(url),'://',)
+		ps=[T.file_legalized(pi) for pi in pf.split('/')]
+		file=F.mkdir( '/'.join(ps[:-1]) )+ps[-1]
+		# mp=py.len(ps)-1
+		# lp=[]
+		# for pi in ps:
+	if file and skip_if_exist:
+		fsize=F.size(file)	
+		if fsize:
+			return U.object_custom_repr(py.No(file),repr='{}{}'.format(fsize,file)  )
+		
 	write_zero=U.get_duplicated_kargs(ka,'write0','w0','write_zero','zero',default=False)
 	print_req=U.get_duplicated_kargs(ka,'show','print','p','print_req',default=print_req)
 	

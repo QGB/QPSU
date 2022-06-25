@@ -769,7 +769,7 @@ def detect_file_encoding(file,confidence=0.7,default=py.No('not have default enc
 	return c
 detect=detectEncoding=detect_encoding=detect_file_encoding
 	
-def read(file,encoding='',mod='r',return_filename=False,print_detect_encoding=True,**ka):
+def read(file,encoding='',mod='r',return_filename=False,print_detect_encoding=False,**ka):
 	'''if return_filename:
 			return content,f.name
 1 not is 2
@@ -781,18 +781,32 @@ SyntaxError: invalid syntax
 		U=py.importU()
 		_pde=U.get_duplicated_kargs(ka,'print_encoding','p_encoding','p','pde','pEncoding','p_decode')
 		if not _pde is U.GET_DUPLICATED_KARGS_DEFAULT: #记住绝对不能用 ==
-			print_detect_encoding=_pde
+			# print_detect_encoding=_pde
+			print_detect_encoding=False
 	if not return_filename:
 		U=py.importU()
 		return_filename=U.get_duplicated_kargs(ka,'returnFile','rf','rfn','return_file','return_name',)
 		
-	if py.is2():f=py.open(file,mod)
+	if py.is2():
+		f=py.open(file,mod)
+		s=f.read()
+		f.close()
 	else:#is3
-		encoding=encoding or detectEncoding(file,confidence=0.9,default='utf-8',p=print_detect_encoding)
 		#utf-8 /site-packages/astropy/coordinates/builtin_frames/__init__.py  {'confidence': 0.73, 'encoding': 'Windows-1252'
-		f=py.open(file,mod,encoding=encoding)
-	s=f.read()
-	f.close()
+		if encoding:
+			f=py.open(file,mod,encoding=encoding)
+			s=f.read()
+			f.close()
+		else:
+			U,T,N,F=py.importUTNF()	
+			r2=T.detect_and_decode(F.read_byte(file),confidence=0.9,default='utf-8',return_encoding=True)
+			if not r2:return r2
+			U.set('r2',r2)
+			encoding,s=r2
+			if print_detect_encoding:print(file,encoding)
+			
+			
+	
 	if return_filename:
 		return s,f.name
 	else:
@@ -1673,6 +1687,7 @@ def readlines(a,EOL=True,encoding=None,str_repr=False):
 		return _return(r)
 	except Exception as e:
 		return py.No(e)
+		
 # F.isFileName('g:/a')
 # []
 def isFileName(a):

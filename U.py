@@ -239,7 +239,7 @@ def get_or_set_input(name,default='',type=None):
 	r=get(name)
 	if r:return r
 	return set(name,input('%s :'%name,default=default,type=type) )
-get_input=getInput=getOrInput=get_or_input=get_or_set_input
+get_input=getInput=getOrInput=get_or_input=get_or_input_set=get_or_set_input
 
 def parse_str_auto_type(s):
 	U=py.importU()
@@ -827,6 +827,8 @@ p=print_
 def input(prompt='', default='',type=py.str):
 	'''  '[U.input]:'
 default must be str ,auto convert to str !!
+
+list,tuple,dict 等type，用 type=py.eval， 否则list(input)==单个字符的list
 	'''
 	if default:
 		default=str(default) # default must be str
@@ -1931,16 +1933,26 @@ Return a random integer N such that a <= N <= b.'''
 	return random.randint(min, max)
 randint=ramdomInt=randomInt
 
-def sort(a,column=None, cmp=None, key=None, reverse=False,add_index=False,**ka):
+SORT_KW_SKIP=get_or_set('SORT_KW_SKIP',lazy_default=lambda :py.No('if sort_kw is this, skip sort'))
+def sort(a,column=None, cmp=None, key=None, reverse=False,add_index=False,sort_kw=None,**ka):
 	''' py2&py3  sorted _3 ,key=lambda i:len(i)        按长度从小到大排序
 	在python2.x  sorted _5,cmp=lambda a,b:len(a)-len(b) 实现同上功能， 一般不用cmp 参数
 	sorted中cmp参数指定的函数用来进行元素间的比较。此函数需要2个参数，然后返回负数表示小于，0表示等于，正数表示大于。
 	#这句可能写错了 a:item of sort list   |  *a: (item,) 
 	'''
 	repr=py.repr
+	if sort_kw is SORT_KW_SKIP:
+		return a
+	else:
+		# if sort_kw:# 0 忽略，用 sort_kw=dict(c=0)
+		if py.isint(sort_kw):column=sort_kw
+		if py.isdict(sort_kw):
+			ka.update(sort_kw)
+			# if ka:
+				# ka.
+			# else :ka=sort_kw
 	column=get_duplicated_kargs(ka,'col','C','c',default=column)
 	reverse=get_duplicated_kargs(ka,'rervese','revese','rev','re','r',default=reverse)
-	
 	
 	def key_func(ai,size=99,is_column=True):# ai :  item of a
 		
@@ -3091,11 +3103,16 @@ def better_float(x,):
 0.07999999999999999  hangs	
 
 11.200000000000001
+
+rs=T.regex_match_all(s,r'([0-9])\1{11,}') # 12不行，11 返回 最少12 个重复
+if not rs:return r
+
+像 1/3==0.3333333333333333 这是正常结果，不用处理
 	'''
 	r=py.float(x)
 	# for i in range(99):
+	s=py.str(r)
 	for i in py.range(11):
-		s=py.str(r)
 		if '0'*12 in s:
 			f=r-(0.1**16*i)
 			if py.len(py.str(f)) < py.len(s):return f

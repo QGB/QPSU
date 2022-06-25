@@ -1326,10 +1326,13 @@ def pdf2html(url,response=None,zoom=None,path=None,pw=None):
 	else:
 		return do_resp(F.read(html_file))
 
-def flask_text_response(response,data='',encoding=py.No('auto',no_raise=1),file='',):
+def flask_text_response(response,data='',encoding=py.No('auto',no_raise=1),file='',download_char='\x02\x06\x0f\x11\x12\x19\x1c\x1e'):
 	U,T,N,F=py.importUTNF()
 	if py.istr(data):
-		response.headers['Content-Type']='text/plain;charset=utf-8'	
+		if U.one_in(download_char,data):
+			response.headers['Content-Type']='text/html;charset=utf-8';
+		else:
+			response.headers['Content-Type']='text/plain;charset=utf-8'	
 	elif py.isbyte(data):
 		if not encoding:encoding=T.detect(data[:9999])
 		response.headers['Content-Type']='text/plain;charset=%s'%(

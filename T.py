@@ -67,7 +67,9 @@ IGNORECASE=re_IGNORECASE=re.IGNORECASE
 
 gError=None
 try:
-	from chardet import detect as _detect
+	try   :from cchardet import detect as _detect
+	except:from chardet import detect as _detect
+	
 	def detect(abytes,confidence=0.7,default=py.No('default encoding "" ')  ):
 		'''
 T._detect( b'\x1b'*1)  ### {'encoding': None, 'confidence': 0.0, 'language': None}	
@@ -90,9 +92,9 @@ T._detect( b'\x1b'*1)  ### {'encoding': None, 'confidence': 0.0, 'language': Non
 		else:
 			if default:return default
 			# raise Exception
-			return py.No(
-			'{0} encoding {1} confidence {2} less then {3}'.format(
-			abytes[:99],r['encoding'],r['confidence'],confidence)  )
+			return py.No(abytes,r,msg=
+			'T.detect encoding {1} confidence {2} less then {3} {0}'.format(
+			py.len(abytes),r['encoding'],r['confidence'],confidence)  )
 except Exception as ei:
 	def detect(*a):
 		raise Exception('#not install chardet Module')  # <no> is not callable ,see the source
@@ -1038,17 +1040,27 @@ def html_prettify(html, formatter="html5",p=py.No('auto')):
 		return r
 nice_html=htmlBeautify=html_beautify=html_prett=pretty_html=html_pretty=prettify_html=html_prettify
 
-def BeautifulSoup(html):
+def BeautifulSoup(html='',file='',cache=False):
+	# from bs4 import BeautifulSoup
+	if not html and file:
+		U,T,N,F=py.importUTNF()
+		if cache:
+			bs=U.get(file)
+			if bs:return bs
+		html=F.read(file)	
 	if not html:return html
-	from bs4 import BeautifulSoup
+	import bs4
+	
 	t=py.str(py.type(html) )
 	if 'requests.models.Response' in t:
 		html=html.text
 	try:
 		import lxml
-		bs=BeautifulSoup(html,features='lxml' )	
+		bs=bs4.BeautifulSoup(html,features='lxml' )	
 	except:
-		bs=BeautifulSoup(html,features="html5lib" )	
+		bs=bs4.BeautifulSoup(html,features="html5lib" )	
+	if cache and file:
+		return U.set(file,bs)
 	return bs
 bs=beautifulSoup=BeautifulSoup
 
@@ -1184,18 +1196,25 @@ def iter_detect(b,range=[]):
 	return r
 iterDecode=iter_decode=iterDetect=iter_detect		
 		
-def autoDecode(abytes,confidence=0.7,default=py.No('default encoding "" '),return_encoding=False  ):
+def detect_and_decode(abytes,confidence=0.7,default=py.No('default encoding "" '),return_encoding=False  ):
 	if abytes==b'':return ''
 	if py.isunicode(abytes):return abytes
 	if not py.isbyte(abytes):
 		raise py.ArgumentError('is not bytes',abytes)
 	encoding=detect(abytes=abytes,confidence=confidence,default=default)
 	if not encoding:return encoding
-	if return_encoding:
-		return encoding,abytes.decode( encoding )
-	else:
-		return abytes.decode( encoding )
-detect_decode=detect_and_decode=detectDecode=detectAndDecode=auto_decode=autoDecode
+	try:
+		if return_encoding:
+			return encoding,abytes.decode( encoding )
+		else:
+			return abytes.decode( encoding )
+	except Exception as e:
+		U,T,N,F=py.importUTNF()
+		# py.importU().get_or_set('auto_decode.err.list',[]).append(e)
+		# return py.No(*e.args)
+		return py.No(e,abytes,msg=f'''{T.sub(py.str(e.__class__),"'","'")} {e.args[0]} [{e.args[2]}:{e.args[3]}] {e.args[4]} {py.len(abytes),py.len(e.args[1])}''',)
+		
+detect_decode=detectDecode=detectAndDecode=auto_decode=autoDecode=detect_and_decode
 
 def decode(abytes,codecs=('gb18030','utf-8','auto','latin' ) ):
 	for i in codecs:
