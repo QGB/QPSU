@@ -315,7 +315,7 @@ def github_upload(filename,commit_msg=''):
 	s64=base64.b64encode(F.read_bytes(filename)).decode('ascii')
 	
 	url=f'https://api.github.com:443/repos/{repo}/contents/{safe_filename}'
-	data='{"message": %s, "content": "%s", "branch": "master"}'%(commit_msg,s64)
+	data='{"message": "%s", "content": "%s", "branch": "master"}'%(commit_msg,s64)
 	
 	ka={'headers': {'Authorization': token,
   'User-Agent': 'PyGithub/Python',
