@@ -300,7 +300,7 @@ github_dir=get_github_dir=get_github_repo_directory_as_list
 def github_upload(filename,commit_msg=''):
 	import requests
 	if not commit_msg:commit_msg=U.stime()
-	if os.path.islink(filename):return py.No(filename,'symlink')
+	if os.path.islink(filename):return py.No('link',filename,)
 	
 	
 	repo,token=U.get_or_input('repo,token',default='',type=py.eval)
