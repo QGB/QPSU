@@ -10,10 +10,12 @@ U,T,N,F=py.importUTNF()
 import os,sys
 import shutil
 
-import dulwich
-from dulwich import client,index,repo,porcelain
-from dulwich.client import get_transport_and_path_from_url #	return (<dulwich.client.SSHGitClient at 0x23218db7f88>, '/qgb/xxnet.git')
-
+try:
+	import dulwich
+	from dulwich import client,index,repo,porcelain
+	from dulwich.client import get_transport_and_path_from_url #	return (<dulwich.client.SSHGitClient at 0x23218db7f88>, '/qgb/xxnet.git')
+except Exception as e:
+	print('pip install dulwich paramiko',e)
 try:
 	import paramiko
 except Exception as e:
