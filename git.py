@@ -298,10 +298,20 @@ def get_github_repo_directory_as_list(url,access_token=py.No('auto get_or_set_in
 github_dir=get_github_dir=get_github_repo_directory_as_list
 
 def github_upload(filename,commit_msg=''):
-	import requests
-	if not commit_msg:commit_msg=U.stime()
-	if os.path.islink(filename):return py.No('link',filename,)
+	'''
 	
+- 常规文件
+d 目录
+b 块类型特殊文件
+c 字符类型特殊文件
+l 符号链接
+p 管道
+s 套接字
+'''	
+	import requests
+	if os.path.islink(filename):return py.No('symlink',filename,)
+	
+	if not commit_msg:commit_msg=U.stime()+' '+str(F.size(f))+filename
 	
 	repo,token=U.get_or_input('repo,token',default='',type=py.eval)
 	# token=U.get_or_input(G+'token',default='')
@@ -311,6 +321,10 @@ def github_upload(filename,commit_msg=''):
 	# filename=F.auto_path(filename)
 	safe_filename=T.path_legalized('/'+F.auto_path(filename))[1:]
 	
+	if '/.git/' in safe_filename:
+		pass# python pass keyword won't skip execution
+		''' path contains a malformed path component '''
+		
 	import base64
 	s64=base64.b64encode(F.read_bytes(filename)).decode('ascii')
 	

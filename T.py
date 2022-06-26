@@ -287,7 +287,7 @@ def splitlines(*a):
 		r.extend(s.splitlines())
 	return r	
 
-def split_to_2d_list(text,col=re.compile('\s+'),row='\n',strip=True,StrRepr=False):
+def split_to_2d_list(text,col=re.compile('\s+'),row='\n',strip=True,skip_empty_line=True,StrRepr=False):
 	'''
 numpy.loadtxt("myfile.txt")[:, 1]	
  fname : file, str, or pathlib.Path
@@ -304,24 +304,29 @@ numpy.loadtxt("myfile.txt")[:, 1]
 '''		
 	U=py.importU()
 	if row in ['\n','\r\n']:
-		r=text.splitlines()
+		rs=text.splitlines()
 	else:
-		r=text.split(row)
-	for i,v in py.enumerate(r):
+		rs=text.split(row)
+		
+	r=[]	
+	for i,v in py.enumerate(rs):
 		if strip:v=v.strip()
+		if skip_empty_line and not v:continue
+		
 		cs=re.split(col,v)
 		if StrRepr:
 			StrRepr_ka={}
 			if py.isint(StrRepr) and StrRepr>1:
 				StrRepr_ka['size']=StrRepr
-			r[i]=[U.StrRepr(i,**StrRepr_ka) for i in cs]
+			row=[U.StrRepr(i,**StrRepr_ka) for i in cs]
 		else:
-			r[i]=cs
+			row=cs
+		r.append(row)	
 	return r
 	# import numpy as np
 	# np.loadtxt("myfile.txt")[:, 1]
 	# return [ ]
-split2d=split2dlist=split_to_2d_list
+get_2d_list=split2d=split2dlist=split_to_2d_list
 
 def is_contains(text,target):
 	try:
