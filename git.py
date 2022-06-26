@@ -312,7 +312,7 @@ s 套接字
 	import requests,stat
 	if not stat.S_ISREG(os.stat(filename).st_mode):return py.No(os.stat(filename),filename,)
 	
-	if not commit_msg:commit_msg=U.stime()+' '+str(F.size(f))+filename
+	if not commit_msg:commit_msg=U.stime()+' '+str(F.size(filename))+filename
 	
 	repo,token=U.get_or_input('repo,token',default='',type=py.eval)
 	# token=U.get_or_input(G+'token',default='')
@@ -340,4 +340,4 @@ s 套接字
  'allow_redirects': False}
  
 	return requests.put(url,data,**ka)
-	
+upload_github=github_upload	
