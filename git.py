@@ -297,6 +297,7 @@ def get_github_repo_directory_as_list(url,access_token=py.No('auto get_or_set_in
 		
 github_dir=get_github_dir=get_github_repo_directory_as_list
 
+
 def github_upload(filename,commit_msg=''):
 	'''
 	
@@ -308,8 +309,8 @@ l 符号链接
 p 管道
 s 套接字
 '''	
-	import requests
-	if os.path.islink(filename):return py.No('symlink',filename,)
+	import requests,stat
+	if not stat.S_ISREG(os.stat(filename).st_mode):return py.No(os.stat(filename),filename,)
 	
 	if not commit_msg:commit_msg=U.stime()+' '+str(F.size(f))+filename
 	
