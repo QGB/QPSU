@@ -332,6 +332,7 @@ s 套接字
 	url=f'https://api.github.com:443/repos/{repo}/contents/{safe_filename}'
 	data='{"message": "%s", "content": "%s", "branch": "master"}'%(commit_msg,s64)
 	
+	
 	ka={'headers': {'Authorization': token,
   'User-Agent': 'PyGithub/Python',
   'Content-Type': 'application/json'},
@@ -339,5 +340,5 @@ s 套接字
  'verify': True,
  'allow_redirects': False}
  
-	return requests.put(url,data,**ka)
+	return requests.put(url,data.encode('utf-8'),**ka)
 upload_github=github_upload	
