@@ -2121,7 +2121,7 @@ def pathname_legalized(a,reduce_space=True):
 	if reduce_space:
 		a=replace_all_space(a.strip(),space)
 	r=''
-	for n,c in py.enumerate(a.strip()):
+	for n,c in py.enumerate(a):
 		if  (c in NOT_PATH_NAME) or (c==':' and n!=1):
 			r+=py.chr(py.ord(c)+0XFEE0)
 		else:r+=c
