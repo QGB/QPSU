@@ -334,7 +334,7 @@ github_api:  path cannot end with a slash
 	if not token.startswith('token '):token='token '+token
 	
 	# filename=F.auto_path(filename)
-	safe_filename=T.path_legalized('/'+F.auto_path(filename))[1:]
+	safe_filename=T.path_legalized('/'+F.auto_path(filename),reduce_space=False)[1:]
 	
 	if '/.git/' in safe_filename:
 		pass# python pass keyword won't skip execution

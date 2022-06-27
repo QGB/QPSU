@@ -2113,9 +2113,13 @@ OSError: [Errno 22] Invalid argument: 'C:/test/clipboard/林文\n===\n.png'
 fileName=filename=legalized_filename=fileNameLegalized=file_legalized=filename_legalized
 # filename.__str__=FILE_NAME	
 
-def pathname_legalized(a):
+def pathname_legalized(a,reduce_space=True):
+	''' Reduce 减少、Reuse 反复使用、Recycle 再循环
+	
+'''	
 	if not py.istr(a):a=string(a)
-	a=replace_all_space(a.strip(),space)
+	if reduce_space:
+		a=replace_all_space(a.strip(),space)
 	r=''
 	for n,c in py.enumerate(a.strip()):
 		if  (c in NOT_PATH_NAME) or (c==':' and n!=1):
