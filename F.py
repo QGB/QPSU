@@ -81,6 +81,7 @@ def test_long_filename():
 249 #FileNotFoundError     Windows 10                    
 
 '''
+	F=py.importF()
 	v='a234567890b234567890c234567890d234567890e234567890f234567890g234567890h234567890i234567890j234567890k234567890l234567890m234567890n234567890o234567890p234567890q234567890r234567890s234567890t234567890u234567890v234567890w234567890x234567890y234567890z23456789'# len(v)==259
 	p=F.mkdir(U.gst+'fn')
 	U.cd(p)
@@ -94,6 +95,7 @@ def test_long_filename():
 		# print(n)
 		
 def replace(f,ba,bb,encoding='utf-8'):
+	F=py.importF()
 	if not py.isbytes(ba):ba=ba.encode(encoding)
 	if not py.isbytes(bb):bb=bb.encode(encoding)
 	
@@ -211,6 +213,7 @@ ds=pickle_load=unSerialize=unserialize=deserialize=deSerialize
 def serialize(obj,file=None,protocol=0):
 	'''if not file: Return the pickled representation of the object as a bytes object.
 	'''
+	F=py.importF()
 	try:
 		import dill	
 		return F.dill_dump(obj,file=file)
