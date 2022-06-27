@@ -298,7 +298,7 @@ def get_github_repo_directory_as_list(url,access_token=py.No('auto get_or_set_in
 github_dir=get_github_dir=get_github_repo_directory_as_list
 
 
-def github_upload(filename,commit_msg=''):
+def github_upload(filename,commit_msg='',print_requests=False,**ka):
 	'''
 	
 - 常规文件
@@ -308,11 +308,25 @@ c 字符类型特殊文件
 l 符号链接
 p 管道
 s 套接字
+
+
+'/home/qgb/test/fn/\\'
+ArgumentError: ('is not bytes',                 ###<py.No|IsADirectoryError(21, 'Is a directory'),'/home/qgb/test/fn//'  2022-06-27__04.10.51__>)
+How to fix ? : F.gbAutoPath=0
+
+
+'/home/klk/test/fn/#'
+github_api:  path cannot end with a slash
+
+
 '''	
 	import requests,stat,json
 	if not stat.S_ISREG(os.stat(filename).st_mode):return py.No(os.stat(filename),filename,)
 	
 	if not commit_msg:commit_msg=U.stime()+' '+str(F.size(filename))+filename
+	
+	print_requests=U.get_duplicated_kargs(ka,'show','print','p','print_req','print_request','print_requests',default=print_requests)
+	
 	
 	repo,token=U.get_or_input('repo,token',default='',type=py.eval)
 	# token=U.get_or_input(G+'token',default='')
@@ -340,5 +354,7 @@ s 套接字
  'verify': True,
  'allow_redirects': False}
  
+	if print_requests:
+		print(U.v.requests.put(url,data.encode('utf-8'),**ka) )
 	return requests.put(url,data.encode('utf-8'),**ka)
 upload_github=github_upload	
