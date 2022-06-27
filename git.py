@@ -343,7 +343,7 @@ github_api:  path cannot end with a slash
 	import base64
 	s64=base64.b64encode(F.read_bytes(filename)).decode('ascii')
 	
-	url=f'https://api.github.com:443/repos/{repo}/contents/{safe_filename}'
+	url=f'https://api.github.com:443/repos/{repo}/contents/{T.url_encode(safe_filename)}'
 	data='{"message": %s, "content": "%s", "branch": "master"}'%(json.dumps(commit_msg),s64)
 	
 	
