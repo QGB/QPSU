@@ -309,7 +309,7 @@ l 符号链接
 p 管道
 s 套接字
 '''	
-	import requests,stat
+	import requests,stat,json
 	if not stat.S_ISREG(os.stat(filename).st_mode):return py.No(os.stat(filename),filename,)
 	
 	if not commit_msg:commit_msg=U.stime()+' '+str(F.size(filename))+filename
@@ -330,7 +330,7 @@ s 套接字
 	s64=base64.b64encode(F.read_bytes(filename)).decode('ascii')
 	
 	url=f'https://api.github.com:443/repos/{repo}/contents/{safe_filename}'
-	data='{"message": "%s", "content": "%s", "branch": "master"}'%(commit_msg,s64)
+	data='{"message": %s, "content": "%s", "branch": "master"}'%(json.dumps(commit_msg),s64)
 	
 	
 	ka={'headers': {'Authorization': token,
