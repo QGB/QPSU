@@ -93,9 +93,12 @@ def test_long_filename():
 	# for n in range(245,260):
 		# print(n)
 		
-		
-def replaceOnce(a,old,new):
-	return a.replace(old, new,1) #count=1 #TypeError: replace() takes no keyword arguments 
+def replace(f,ba,bb,encoding='utf-8'):
+	if not py.isbytes(ba):ba=ba.encode(encoding)
+	if not py.isbytes(bb):bb=bb.encode(encoding)
+	
+	br= F.read_bytes(f).replace(ba,bb)
+	return F.write(f,br)
 	
 def expandUser(file='',user=''):
 	'''always return endswith / 

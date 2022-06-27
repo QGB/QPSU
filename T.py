@@ -105,6 +105,10 @@ try:
 	from pprint import pprint,pformat
 except:pass
 ####################################################
+def replace_one(a,old,new):
+	return a.replace(old, new,1) #count=1 #TypeError: replace() takes no keyword arguments 
+replaceOnce=replace_one	
+
 def get_most_common_substring(str_list):
 	import operator
 	return max(substring_counts(str_list).items(), key=operator.itemgetter(1))[0]

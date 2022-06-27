@@ -356,5 +356,7 @@ github_api:  path cannot end with a slash
  
 	if print_requests:
 		print(U.v.requests.put(url,data.encode('utf-8'),**ka) )
-	return requests.put(url,data.encode('utf-8'),**ka)
+	return requests.put(url,data.encode('utf-8'),**ka) 
+	#data.encode('utf-8') fix UnicodeEncodeError: 'latin-1' codec can't encoding characters  
+
 upload_github=github_upload	
