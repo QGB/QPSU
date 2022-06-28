@@ -73,6 +73,8 @@ try:
 	def detect(abytes,confidence=0.7,default=py.No('default encoding "" ')  ):
 		'''
 T._detect( b'\x1b'*1)  ### {'encoding': None, 'confidence': 0.0, 'language': None}	
+
+_detect 可能返回 {'encoding': None, 'confidence': None}
 		'''
 		r=_detect(abytes)
 		if r['encoding'] in ['Windows-1254' ]:
@@ -88,7 +90,7 @@ T._detect( b'\x1b'*1)  ### {'encoding': None, 'confidence': 0.0, 'language': Non
 			except Exception as e:
 				pass		
 				
-		if r['confidence']>confidence:return r['encoding']
+		if r['confidence'] and r['confidence']>confidence:return r['encoding']
 		else:
 			if default:return default
 			# raise Exception

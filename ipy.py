@@ -163,7 +163,7 @@ def dill_load(filename,return_value=False,set_user_ns=True):
 	if return_value:
 		return r
 load=dill_load	
-def dill_dump(*vars,len=True):
+def dill_dump(*vars,len=True,dump_path=''):
 	'''
 pip install astor
 	'''
@@ -199,10 +199,16 @@ pip install astor
 	if py.len(r)==1:
 		f='%s-%s'
 		vars=vars[0]
-
+	#第一次调用 UnboundLocalError: local variable 'f' referenced before assignment ? 再次 ipy.dump 正常？
 	f=f % ( ','.join([i[0] for i in r]) ,','.join([i[1] for i in r]))
 	f=f.replace('"""',"'")
 	f=T.fileName(f)
+	if dump_path:
+		dump_path=F.auto_path(dump_path)
+		if not dump_path.endswith('/'):
+			# raise py.ArgumentError(dump_path)
+			dump_path+='/'
+		f=dump_path+f
 	return F.dill_dump(obj=vars,file=f)
 	
 dump=dill_dump
