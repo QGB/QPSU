@@ -83,8 +83,8 @@ try:
 	if __name__.endswith('qgb.U'):from . import Clipboard
 	else:                         import Clipboard
 	clipboard=cb=Clipboard#  
-	cbs=Clipboard.set
-	cbg=Clipboard.get
+	cbs=CBS=Clipboard.set
+	cbg=CBG=Clipboard.get
 except Exception as ei:
 	setErr(ei,msg='#Error import '+str(ei))
 	
@@ -3382,10 +3382,14 @@ a=-4 # relativedelta(months=+a) ==  relativedelta(months=-4)
 
 from dateutil.relativedelta import relativedelta
 
+pip install python-dateutil
+
 	'''
 	import re,datetime as dt
+	from dateutil.relativedelta import relativedelta
+	
 	U=py.importU()
-	sregex='([0-9]*)(micro|ms|milli|sec|minute|hour|day|month|year)'
+	sregex='([0-9]*)(micro|ms|milli|sec|minute|hour|day|month|mouth|year)'
 	timedeltaKW=('days', 'seconds', 'microseconds',
  'milliseconds', 'minutes', 'hours', 'weeks')
 	
@@ -3397,8 +3401,8 @@ from dateutil.relativedelta import relativedelta
 		if not rm or not step.startswith(rm.group()):
 			raise Exception('Invalid argument step '+py.repr(step))
 		istep,step=U.int(rm.group(1),default=1,),rm.group(2)
-		if step.startswith('year'):
-			istep,step=365*istep,'day'#没考虑闰年
+		# if step.startswith('year'):
+			# istep,step=365*istep,'day'#没考虑闰年
 		if step.startswith('ms'):step='milliseconds'
 		astep={}
 		for i in timedeltaKW:
@@ -3407,14 +3411,17 @@ from dateutil.relativedelta import relativedelta
 		if astep:tdelta=dt.timedelta(**astep)
 		
 		if one_in(['month','mouth'],step):
-			from dateutil.relativedelta import relativedelta
-			lsi=T.filter_int(step)
-			if lsi:
-				if py.len(lsi)!=1:raise py.ArgumentError('step=%r int must be none or one'%step)
-				step=py.int(lsi[0])
-			else:step=1
-			tdelta=relativedelta(months=+step,)
+			# lsi=T.filter_int(step)
+			# if lsi:
+				# if py.len(lsi)!=1:raise py.ArgumentError('step=%r int must be none or one'%step)
+				# step=py.int(lsi[0])
+			# else:step=1
+			tdelta=relativedelta(months=istep,)
 			tdelta.total_seconds=lambda :60*60*24*30
+		if 'year' in step:
+			tdelta=relativedelta(years=istep)
+			tdelta.total_seconds=lambda :60*60*24*365
+			
 	elif py.type(step) in (py.int,py.long):
 		tdelta=dt.timedelta(days=step)
 	elif py.type(step) is py.type(dt.timedelta.min):
