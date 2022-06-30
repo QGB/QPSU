@@ -108,12 +108,12 @@ try:
 except:pass
 ####################################################
 def zh_convert(a,lang='zh-cn'):
-	'''
+	''' zh-cn 大陆简体; zh-tw 台灣正體; zh-hk 香港繁體
 u'元旦快樂'	
 '''	
 	from zhconv import convert 
 	return convert(a, lang)
-zhconv=zh_convert
+zhc=zhconv=zh_convert
 
 def replace_one(a,old,new):
 	return a.replace(old, new,1) #count=1 #TypeError: replace() takes no keyword arguments 

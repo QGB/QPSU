@@ -948,6 +948,9 @@ def rpcSetVariable(*obj,base=py.No('auto history e.g. [http://]127.0.0.1:23571[/
 	if len(obj)==1 and ',' not in varname:
 		obj=obj[0]
 
+	if not obj and py.len(ka)==1:
+		varname,obj=U.get_dict_item(ka)
+
 	if not base:
 		base=get_remote_rpc_base(change=False)
 	else:
