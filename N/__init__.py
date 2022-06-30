@@ -305,7 +305,7 @@ http_external_kargs={'ipinfo.io':{'encoding':'utf-8'},},
 				re.append((k,v))  # 超时3.4 还未得到结果 的不会返回 
 		return re+r
 	return d
-get_public_ip=get_public_ipv4
+get_pub_ip=get_public_ip=get_public_ipv4
 
 def ftp_client(cwd=py.No('history or /',no_raise=1),
 	host=py.No('auto get ftp.host',no_raise=1),port=3721,user='', passwd='',ftp_encoding='utf-8', acct='',

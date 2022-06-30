@@ -1361,8 +1361,12 @@ def cmd(*a,shell=True,**ka):
 		return py.No('sb.run err', e,a,ka)
 
 	try:
-		so=T.auto_decode(r.stdout)
-		se=T.auto_decode(r.stderr)
+		if encoding:
+			so=r.stdout.decode(encoding)
+			se=r.stderr.decode(encoding)	
+		else:
+			so=T.auto_decode(r.stdout)
+			se=T.auto_decode(r.stderr)
 		if not se:
 			return so
 		else:
