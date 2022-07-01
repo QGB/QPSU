@@ -1177,7 +1177,8 @@ def flask_app_route(app,rule='',view_func=None,methods=('GET','POST'),**ka):
 	
 	app.add_url_rule(rule, view_func=view_func, methods=methods)
 	
-	return app
+	return app.url_map._rules
+	
 flask_url_map=flask_app_route	
 
 def get_flask_request_post_data(name='y'):
