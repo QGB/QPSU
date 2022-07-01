@@ -1165,6 +1165,16 @@ def get_socket_req(PORT = 65432,HOST = '127.7.7.7'):
 		req, addr = s.accept()
 		return req, addr
 
+def flask_app_route(app,rule='',view_func=None,methods=('GET','POST'),**ka):
+	if not rule or not view_func:raise py.ArgumentError(rule,view_func)
+	
+	U,T,N,F=py.importUTNF()
+	# , endpoint=U.stime()
+	app.add_url_rule(rule, view_func=view_func, methods=methods)
+	
+	return app
+flask_url_map=flask_app_route	
+
 def get_flask_request_post_data(name='y'):
 	from flask import request as q
 	U,T,N,F=py.importUTNF()
@@ -1173,8 +1183,7 @@ def get_flask_request_post_data(name='y'):
 	U.get_ipy().user_ns[name]=y
 	return F.dill_dump(obj=y,file='C:/test/{}-{}={}.dill'.format(name,U.len(y),U.stime()))
 rec=recive=receive=get_flask_request_post_data
-	
-	
+
 
 def get_flask_request_a(request=None,return_other_url=False,return_request=False,raise_err=False,**ka):
 	''' #TODO raise_err
@@ -1330,12 +1339,18 @@ def pdf2html(url,response=None,zoom=None,path=None,pw=None):
 		return do_resp(F.read(html_file))
 
 def flask_text_response(response,data='',encoding=py.No('auto',no_raise=1),file='',download_char='\x02\x06\x0f\x11\x12\x19\x1c\x1e'):
+	''' 手机浏览器 保存链接  如果是 utf-8 乱码 ，gb18030 正常
+	
+'''	
 	U,T,N,F=py.importUTNF()
 	if py.istr(data):
 		if U.one_in(download_char,data):
 			response.headers['Content-Type']='text/html;charset=utf-8';
 		else:
 			response.headers['Content-Type']='text/plain;charset=utf-8'	
+		if encoding:
+			response.headers['Content-Type']=response.headers['Content-Type'].replace('utf-8',encoding)
+			data=data.encode(encoding)
 	elif py.isbyte(data):
 		if not encoding:encoding=T.detect(data[:9999])
 		response.headers['Content-Type']='text/plain;charset=%s'%(
@@ -1426,7 +1441,7 @@ def get_chunk(full_path,byte1, byte2=None,):
 		chunk = f.read(length)
 	return chunk, start, length, file_size
 
-def get_request_range(request):
+def flask_get_request_range(request):
 	import re
 	range_header = request.headers.get('Range', None)
 	if not range_header:
@@ -1442,6 +1457,7 @@ def get_request_range(request):
 			byte2 = int(groups[1])
 	return byte1,byte2
 	# raise py.ArgumentError(request)
+get_request_range=flask_get_request_range
 	
 def flask_media_stream_response(request,response,file=None,):		
 	from flask import stream_with_context

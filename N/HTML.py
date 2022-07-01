@@ -8,6 +8,16 @@ else:
 	from qgb import py
 U,T,N,F=py.importUTNF()
 
+def a_href(response,u):
+	u=N.auto_url(u)
+	html=f"""
+<a href="{u}">{u}</a>	
+	"""
+	response.headers['Content-Type']='text/html;charset=utf-8';
+	response.set_data(html)
+	return 
+href=a_href	
+
 def list2d(response,a,file_column=None,index=False,sort_kw=U.SORT_KW_SKIP,**ka):
 	file_column=U.get_duplicated_kargs(ka,'file_column','cf','fc','f_col','fcol','fcolumn',default=file_column)
 	index=U.get_duplicated_kargs(ka,'index','n','enu','add_index','enumerate',default=index)
