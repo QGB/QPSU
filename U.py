@@ -686,8 +686,10 @@ def get_test_path():
 		s='/test/'
 		home=os.getenv('HOME')
 		if not home:
-			if istermux():
+			if is_termux():
 				home='/data/data/com.termux/files/home'
+			elif os.getenv('VERCEL'):
+				home='/var/task' #AWS lambda
 			#elif 添加其他情况
 			else:
 				home=''
