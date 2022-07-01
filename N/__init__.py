@@ -1170,6 +1170,10 @@ def flask_app_route(app,rule='',view_func=None,methods=('GET','POST'),**ka):
 	
 	U,T,N,F=py.importUTNF()
 	# , endpoint=U.stime()
+	if py.istr(view_func):
+		view_func=lambda :view_func
+		
+	
 	app.add_url_rule(rule, view_func=view_func, methods=methods)
 	
 	return app
