@@ -1171,8 +1171,9 @@ def flask_app_route(app,rule='',view_func=None,methods=('GET','POST'),**ka):
 	U,T,N,F=py.importUTNF()
 	# , endpoint=U.stime()
 	if py.istr(view_func):
-		view_func=lambda :py.str(view_func)
-		
+		# view_func=lambda :py.str(view_func) # 不能这样写 ，总是返回重新赋值后 的 view_func
+		U.set(py.hex(py.id(app))+rule,view_func)
+		view_func=lambda :U.get(py.hex(py.id(app))+rule)
 	
 	app.add_url_rule(rule, view_func=view_func, methods=methods)
 	
