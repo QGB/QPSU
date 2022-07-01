@@ -1028,9 +1028,12 @@ key compatibility :  key='#rpc\n'==chr(35)+'rpc'+chr(10)
 	
 	def _flaskEval(code=None):
 		nonlocal globals,locals 
-		if not code:code=T.urlDecode(_request.url)
+		if not code:code=T.url_decode(_request.url)
 		code=T.sub(code,_request.url_root )
 		if key and code.startswith(key):code=code[py.len(key):]
+		if U.is_vercel():
+			code=T.url_decode(code)
+			if code.endswith('/'):code=code[:-1]
 		# U.log( (('\n'+code) if '\n' in code else code)[:99]	)
 		# U.ipyEmbed()()
 		_response=make_response()
