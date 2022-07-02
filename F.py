@@ -389,6 +389,8 @@ copy_src_dir_struct=copy_with_src_dir_struct
 def copy(src,dst,src_base='',skip=''):
 	r''' src : sFilePath , list ,or \n strs
 dst:sPath
+
+return skip_list, copyed_list
 	'''
 	from shutil import copy as _copy
 	U,T,N,F=py.importUTNF()
@@ -1327,6 +1329,31 @@ def getSourcePath():
 	# U.pln globals().keys()
 	# U.pln __file__, __name__ , __package__
 	
+def delete_dir(a,raise_exception=False):
+	''' shutil.rmtree 无法删除 只读文件 （例如 .git 目录下的）报 PermissionError(13, '拒绝访问。') e.filename
+'''	
+	import shutil,os,stat
+	
+	if raise_exception:
+		shutil.rmtree(a)
+		return a
+		
+	try:
+		shutil.rmtree(a, )# ignore_errors=True  这里不发出 异常 
+		return a	
+	except py.PermissionError as e:
+		file=e.filename
+		if not os.access(file, os.W_OK):
+			os.chmod(file, stat.S_IWUSR)
+		########	
+		try:
+			return 	delete_dir(a,raise_exception=True)			
+		except Exception as e:
+			return py.No(e)
+		########
+	except Exception as e:
+		return py.No(e)
+		
 def deleteFile(file):
 	file=autoPath(file)
 	sp=getSplitor(file)
@@ -1340,10 +1367,11 @@ def deleteFile(file):
 		if U.iswin():	return WindowsError 
 	
 	try:
+		if U.isWin():
+			return py.from_qgb_import('Win').shell_delete(file)
+	
 		if isDir(file):
-			import shutil
-			shutil.rmtree(file, ignore_errors=True)#这里不发出 异常 
-			return file	
+			return delete_dir(file)
 		_os.remove(file)#异常 是从这里产生的
 		return file
 	except FileNotFoundError as e:

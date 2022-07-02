@@ -71,6 +71,23 @@ try:
 	import win32gui
 except Exception as ei:pass
 #############################################
+def shell_delete(a):
+	''' allow undo
+	
+shellcon.FOF_ALLOWUNDO 删除失败 r'C:\WINDOWS\system32\cmd.exe'
+弹框，阻塞，点击取消 ，返回 (1223, True)  1223 - 操作已被用户取消。
+	
+shellcon.FOF_ALLOWUNDO|shellcon.FOF_NO_UI 删除失败 r'C:\WINDOWS\system32\cmd.exe'
+ (120, False)  120 - 这个系统不支持该功能。
+
+ shellcon.FOF_ALLOWUNDO|shellcon.FOF_NO_UI 删除成功
+ (0, False)  0 - 操作成功完成。
+
+	'''
+	from win32com.shell import shell, shellcon
+	return shell.SHFileOperation((0, shellcon.FO_DELETE, a, None, shellcon.FOF_ALLOWUNDO ))
+rmtree=delete=delete_dir=shell_delete_dir=shell_del=shell_delete
+
 def get_monitor_resolution(multi_monitor_combined=False):
 	import ctypes
 	user32 = ctypes.windll.user32
@@ -139,7 +156,7 @@ def get_text(h):
 	return buf,length
 	result = buf[:length]
 
-def win32_shellcopy(src, dest):
+def shell_copy(src, dest):
 	"""
 	Copy files and directories using Windows shell.
 
@@ -178,7 +195,7 @@ def win32_shellcopy(src, dest):
 		raise WindowsError('SHFileOperation failed: 0x%08x' % result)
 
 	return not aborted	
-copy=win32_shellcopy
+copy=win32_shellcopy=shell_copy
 
 def mkfifo(path):
 	'''
@@ -815,7 +832,7 @@ def getLastError(errCode=None,p=True):
 		U.pln( r)
 	else:
 		return r
-lastError=geterr=getErr=getLastErr=getLastError
+error_code=lastError=geterr=getErr=getLastErr=getLastError
 ##############################################
 gdWinVerNum={'10':10.0,
 			 '7': 6.1,

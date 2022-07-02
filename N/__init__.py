@@ -1247,6 +1247,8 @@ pythonAnywhere : multi[ // or  %2F%2F%2F%2F%2F ] in url will auto convert to one
 					break
 		except Exception as e:
 			return _return( py.No(e) )
+	elif py.isdict(request) and 'PATH_INFO' in request: # wsgi def app(env,start_response):
+		u=request['PATH_INFO']
 	else:
 		try:
 			u=request.url
@@ -1262,6 +1264,8 @@ pythonAnywhere : multi[ // or  %2F%2F%2F%2F%2F ] in url will auto convert to one
 		a=T.sub_tail(u,'%23-')
 	elif '#-' in u: # pythonAnywhere
 		a=T.sub_tail(u,'#-')
+	elif '%2523-' in u: # vercel
+		a=T.sub_tail(u,'%2523-')
 	else:
 		if '%23' not in u:
 			msg_23='%23 not in request.url'
