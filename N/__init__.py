@@ -1200,6 +1200,7 @@ a=T.subr(u,T.u23)#'%23-'
 
 pythonAnywhere : multi[ // or  %2F%2F%2F%2F%2F ] in url will auto convert to one / ,it can't bypass
 	'''
+	U,T,N,F=py.importUTNF()
 	def _return(ax):
 		nonlocal u,return_other_url,U,request
 		if return_other_url:

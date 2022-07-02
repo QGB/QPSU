@@ -4323,6 +4323,8 @@ def get_obj_file_lineno(a,lineno=0,auto_file_path=True):
 			if r:return r
 		a=get_obj_module(a)#python无法获取class行数？https://docs.python.org/2/library/inspect.html
 		return get_obj_file_lineno(a=a,lineno=lineno,auto_file_path=auto_file_path)
+get_obj_fn=get_obj_file_lineno
+
 	
 def get_net_io_bytes():
 	# global F
