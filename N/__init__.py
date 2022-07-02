@@ -1228,8 +1228,9 @@ pythonAnywhere : multi[ // or  %2F%2F%2F%2F%2F ] in url will auto convert to one
 				return_r= u,T.url_decode(ax)
 			else:
 				return_r=  u,ax
-		else:
-			return_r=  T.url_decode(ax)
+		else: #return_other_url
+			if ax:return_r=  T.url_decode(ax)
+			else :return_r=ax
 		if return_request:	
 			return_r=py.list(return_r)
 			return_r.insert(0,request)
