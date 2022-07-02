@@ -391,6 +391,9 @@ def copy(src,dst,src_base='',skip=''):
 dst:sPath
 	'''
 	from shutil import copy as _copy
+	U,T,N,F=py.importUTNF()
+	
+	if py.istr(skip):skip=[skip]
 	if not py.istr(dst):raise py.ArgumentError('dst must be str')
 	if py.istr(src):
 		if '\n' in src:
@@ -401,7 +404,6 @@ dst:sPath
 		else:
 			return _copy(src,dst)
 	if not src_base:
-		U,T,N,F=py.importUTNF()
 		dl=U.unique(U.len(*src),ct=1)
 		min=py.min(*dl)
 		f=[i for i in src if py.len(i)==min][0]
@@ -416,7 +418,7 @@ dst:sPath
 		fns=[]
 		skips=[]
 		for i in src:
-			if skip and skip in i:
+			if U.one_in(skip,i):
 				skips.append(i)
 				continue
 			# fn=getName(i)
