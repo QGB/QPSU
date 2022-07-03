@@ -3580,9 +3580,11 @@ def exit(i=2357,msg=''):
 	print(msg)
 	os._exit(i)
 
-def get_module_dict_by_file(fileName,return_list=False):
+def get_modules_dict_by_file(fileName,return_list=False):
 	'''
 	return dict {sname:mod ...}
+return_list=True : only return [mods]
+	
 	
 ('google', <module 'google' (namespace)>) argument of type 'NoneType' is not iterable             
 ('zope', <module 'zope' (namespace)>) argument of type 'NoneType' is not iterable                 
@@ -3606,7 +3608,7 @@ def get_module_dict_by_file(fileName,return_list=False):
 		return py.list(dr.values())
 	return dr
 	
-mbf=modByFile=mod_by_file=getModByf=getModf=getModByF=getModF=getmbf=getmf=modulesByFile=getModsByFile=getModulesByFile=get_module_by_file=get_modules_by_file=get_module_dict_by_file
+mbf=modByFile=mod_by_file=getModByf=getModf=getModByF=getModF=getmbf=getmf=modulesByFile=getModsByFile=getModulesByFile=get_module_by_file=get_modules_by_file=get_module_dict_by_file=get_modules_dict_by_file
 	
 def getModsBy__all__(modPath=None):
 	r=[]
@@ -3667,14 +3669,14 @@ def get_all_modules_list(mods=py.No('default all'),name_padding=57):
 	if mods:
 		if py.istr(mods):
 			# mods=get_modules_by_path
-			ms=U.get_modules_by_file(fileName=mods,return_list=True)
+			ms=U.get_modules_dict_by_file(fileName=mods).items()
 			# if not mods:return mods	
 		
 		if py.islist(mods) and py.istr(mods[0]):
 			ms=[(k,v) for k,v in sys.modules.items() if k in mods()]
 		
 	return [[StrRepr(k,size=name_padding),v] for k,v in ms]
-getMods=get_mods=getAllMod=getAllModules=getAllMods=get_all_modules_list
+getMods=get_mods=get_modules=getAllMod=getAllModules=getAllMods=get_all_modules_list
 
 def getModPathForImport():
 	return getModPath(qgb=False)
