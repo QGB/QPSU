@@ -3637,7 +3637,7 @@ def getModsBy__all__(modPath=None):
 	fs=[i for i in fs if i.lower().endswith('.py')]
 	
 	
-def getAllMods(modPath=None):
+def get_modules_by_path(modPath=None):
 	r=[]
 	if not modPath:modPath=getModPath()
 	if 'F' in globals():
@@ -3659,7 +3659,12 @@ def getAllMods(modPath=None):
 		r.append(i[:-3])
 	if r:return [i.replace('/','.') for i in r]
 	else:return   ['U', 'T', 'N', 'F', 'py', 'ipy', 'Win', 'Clipboard']
-getAllMod=getAllModules=getAllMods
+get_qpsu_all_modules=get_modules_by_path
+
+def get_all_modules_list():	
+	return [[U.StrRepr(k,size=57),v] for k,v in sys.modules.items()]
+getMods=get_mods=getAllMod=getAllModules=getAllMods=get_all_modules_list
+
 def getModPathForImport():
 	return getModPath(qgb=False)
 	sp=os.path.dirname(getModPath())# dirname/ to dirname
