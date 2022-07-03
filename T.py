@@ -622,6 +622,7 @@ col=column=columnize
 def justify(s,size=0,char=' ',method=py.No('try use wc_ljust'),cut=False):#'ljust'
 	''' ljust() 方法返回一个原字符串左对齐,并使用空格填充右边至指定长度的新字符串。
 #当提供size 参数时，小心 ModuleNotFoundError: No module named 'wcwidth'	 # 已经fix部分情况
+rpcServer [U.StrRepr(T.az,size=26)]没有错误详情，  repr(U.StrRepr(T.az,size=26)) 就有出错详情
 	'''
 	s= string(s)
 	if size<1:
