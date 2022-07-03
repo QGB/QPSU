@@ -3662,7 +3662,7 @@ def get_modules_by_path(modPath=None):
 get_qpsu_all_modules=get_modules_by_path
 
 def get_all_modules_list():	
-	return [[U.StrRepr(k,size=57),v] for k,v in sys.modules.items()]
+	return [[StrRepr(k,size=57),v] for k,v in sys.modules.items()]
 getMods=get_mods=getAllMod=getAllModules=getAllMods=get_all_modules_list
 
 def getModPathForImport():
