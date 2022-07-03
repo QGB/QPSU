@@ -546,7 +546,10 @@ def pppoe():
 def flask_request_log():
 	from flask import request
 	U,T,N,F=py.importUTNF()	
-	r=U.stime(),U.dir(request)
+	rq=U.dir(request)
+	rq=U.pformat(rq)
+	
+	r=U.stime(),rq
 	rl=U.get_or_set('req_log',[])
 	rl.append(r)
 	return py.len(rl)

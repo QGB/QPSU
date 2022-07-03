@@ -325,6 +325,9 @@ def eng_list(response,a):
 <button style="height:33; width: 77%; " id=btn onclick="document.getElementById('btn').innerText=(window.outerWidth - 8) / window.innerWidth"></button>
 
 '''    	
+	if not a:
+		response.set_data('eng_list not a %r'%a)
+		return a
 	main=''
 	la0=len(a[0])
 	is_namedtuple=py.getattr(a[0],'_fields',None)
