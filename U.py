@@ -3664,6 +3664,9 @@ def get_modules_by_path(modPath=None):
 get_qpsu_all_modules=get_modules_by_path
 
 def get_all_modules_list(mods=py.No('default all'),name_padding=57):
+	'''
+57 : requests.packages.urllib3.packages.six.moves.urllib.parse
+'''	
 	U,T,N,F=py.importUTNF()
 	ms=sys.modules.items()
 	if mods:

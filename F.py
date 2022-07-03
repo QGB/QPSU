@@ -50,6 +50,29 @@ class IntSize(py.int):
 		# return '<{}={}>'.format(super().__repr__(),F.ssize(self) )
 	def __repr__(self):return self.__str__()
 	
+def compress_directory(source,target,format='zip'):
+	''' shutil.make_archive file: NotADirectoryError: [WinError 267] 目录名称无效。: './U.py'
+shutil.make_archive(
+    base_name,
+    format,
+    root_dir=None,
+    base_dir=None,
+    verbose=0,
+    dry_run=0,
+    owner=None,
+    group=None,
+    logger=None,
+)
+'''
+	import shutil
+	
+	target=auto_path(target)
+	if target.lower().endswith('.zip') and target[-5]!='/':
+		target=target[:-4]
+		
+	return shutil.make_archive(target, format, source) #return target
+zip_dir=zip_directory=compress_directory
+	
 def open(file,mode='r',**ka):
 	'''py.open(
     file,
