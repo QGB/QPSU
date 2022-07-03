@@ -44,7 +44,11 @@ isno=isNo
 gno2e=False
 
 def safe_repr(a):
-	try:return repr(a)
+	try:
+		if isinstance(a,PermissionError):
+			return str(a) #比 repr PermissionError(13, 'Permission denied') 有更丰富的信息
+		else:	
+			return repr(a)
 	except Exception as e:return repr(e)
 
 GS_NO_MSG='\t\t###<py.No|%s>'	

@@ -404,7 +404,10 @@ return skip_list, copyed_list
 		if src[-1] in ['/','\\']:
 			src=F.ls(src,r=1)
 		else:
-			return _copy(src,dst)
+			try:
+				return _copy(src,dst)
+			except Exception as e:
+				return py.No(e)
 	if not src_base:
 		dl=U.unique(U.len(*src),ct=1)
 		min=py.min(*dl)
