@@ -547,7 +547,7 @@ def flask_request_log():
 	from flask import request
 	U,T,N,F=py.importUTNF()	
 	rq=U.dir(request)
-	rq=U.pformat(rq)
+	rq=U.StrRepr(U.pformat(rq))
 	
 	r=U.stime(),rq
 	rl=U.get_or_set('req_log',[])
