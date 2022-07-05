@@ -627,16 +627,20 @@ def PyFile_FromFd(fd,name="filename",mode='r',buffering=-1,encoding='utf-8'):
 				  ctypes.c_char_p,
 				  ctypes.c_int ]
 				  
-	NULL=ctypes.create_string_buffer(0)
+	NULL=None
 	
 	if not py.isbyte(name):name=name.encode(encoding)
 	name=ctypes.create_string_buffer(name)
 	
+		
 	if not py.isbyte(mode):mode=mode.encode(encoding)
 	mode=ctypes.create_string_buffer(mode)
 	
-	bencoding=encoding.encode('ascii')
-	bencoding=ctypes.create_string_buffer(bencoding)
+	if 'b' in mode:
+		bencoding=NULL
+	else:	
+		bencoding=encoding.encode('ascii')
+		bencoding=ctypes.create_string_buffer(bencoding)
 	
 	
 	
