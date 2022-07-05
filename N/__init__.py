@@ -543,17 +543,22 @@ def pppoe():
 506 192.168.2.1+192.168.1.1 073198799737 777124	
 
 '''
-def flask_request_log(mark_path_end_count=0):
+def flask_request_log(time=True,url=False):
 	from flask import request
 	U,T,N,F=py.importUTNF()	
 	rq=U.dir(request)
 	rq=U.StrRepr(U.pformat(rq))
 	
-	mark=''
-	if mark_path_end_count:
-		mark=request.path[-mark_path_end_count:]
+	r=[]
+	if time:r.append(U.stime())
+	if url :r.append(T.url_decode(request.url) )
+	
+	if r:
+		r.append(rq)
+	else:	
+		r=rq
 		
-	r=U.stime()+mark,rq
+	
 	rl=U.get_or_set('req_log',[])
 	rl.append(r)
 	return py.len(rl)
@@ -1052,8 +1057,13 @@ key compatibility :  key='#rpc\n'==chr(35)+'rpc'+chr(10)
 		code=T.sub(code,_request.url_root )
 		if key and code.startswith(key):code=code[py.len(key):]
 		if U.is_vercel():
-			code=T.url_decode(code)
+			payload = T.json_loads(_request.environ['event']['body'])
+			_request.url=payload['path']
+			code=payload['path'][1:]
+			code=T.url_decode(code[py.len(key):])
+			
 			if code.endswith('/'):code=code[:-1]
+			
 		# U.log( (('\n'+code) if '\n' in code else code)[:99]	)
 		# U.ipyEmbed()()
 		_response=make_response()
@@ -1194,14 +1204,14 @@ def flask_app_route(app,rule='',view_func=None,methods=('GET','POST'),log_req=Fa
 	
 	U,T,N,F=py.importUTNF()
 	
-	log_req=U.get_duplicated_kargs(ka,'req_log','log_req',default=log_req)
+	log_req=U.get_duplicated_kargs(ka,'req_log','log_req','log',default=log_req)
 	
 	# , endpoint=U.stime()
 	if rule and not view_func:
 		if py.isdict(rule):
-		for u,v in rule.items():
-			flask_app_route(app,rule=u,view_func=v)
-		return app.url_map._rules
+			for u,v in rule.items():
+				flask_app_route(app,rule=u,view_func=v)
+			return app.url_map._rules
 		
 	if py.istr(view_func):
 		# view_func=lambda :py.str(view_func) # 不能这样写 ，总是返回重新赋值后 的 view_func
