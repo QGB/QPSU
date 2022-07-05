@@ -3757,6 +3757,8 @@ reload 重新调用此函数 就相当于 reload
 	'''add_sys_modules 只能解决#Error  module www.xiezhen.xyz not in sys.modules
 和#Error  parent 'www.xiezhen' not in sys.modules
 不能解决 U.r(X) spec not found for the module   所以注释掉了
+
+importlib.util.spec_from_file_location  如果是一个文件夹，返回None
 '''
 	# if add_sys_modules:
 		# vs=T.regex_match_all(fn,T.RE_VAR_EXACTLY)
@@ -4021,11 +4023,27 @@ File:      c:\qgb\anaconda3\lib\site-packages\keyboard\__init__.py'''
 	if a :simulate_key_write(a)
 	
 	if key:simulate_key_press(key)
-	
-	
-		
+
 key_action=key_actions=system_actions=system_action=sys_act=sys_acts=sys_actions=sys_action=simulate_system_actions
 
+def get_all_env(return_list=False):
+	r=py.dict(os.environ)
+	if return_list:
+		U=py.importU()
+		if py.isint(return_list):
+			return_list=[return_list]
+			
+		if U.len(return_list)>0 and py.all(py.map(py.isint,return_list)):
+			if len(return_list)==1:
+				return_list=py.list(return_list)
+				return_list.append(138-return_list[0])
+			rl=[]
+			for k,v in r.items():
+				rl.append( [U.StrRepr(k,size=return_list[0]),U.StrRepr(v,size=return_list[1]) ] )
+			return rl	
+		else:	
+			return py.list(r.items())
+	return r
 def set_env_path(append=[],delete=[]):
 	# if not p :raise py.ArgumentError()
 	if py.istr(append):append=[append]
@@ -4043,9 +4061,18 @@ def set_env_path(append=[],delete=[]):
 	os.environ['PATH']=os.pathsep.join(ps)		
 	return ps
 
-def set_env(name,value):
-	os.environ[name]=value
-	return value
+def set_env(name='',value='',force_value_str=True,**ka):
+	''' ka k,v must str,otherwise TypeError: str expected, not int
+'''	
+	
+	if not name and not value and ka:
+		for k,v in ka.items():
+			if force_value_str:v=py.str(v)
+			os.environ[k]=v
+		return ka
+	else:
+		os.environ[name]=value
+		return value
 	
 def getEnviron(name='PATH'):
 	'''

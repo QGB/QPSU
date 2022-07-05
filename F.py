@@ -66,10 +66,12 @@ shutil.make_archive(
 '''
 	import shutil
 	U,T,N,F=py.importUTNF()
+	if not source.endswith('/'):source+='/'
+	
 	if not target:
 		target=T.sub_last(F.get_dirname_from_full_path(source),'/','/')
 		if not target:
-			target=T.file_legalized(target)
+			target=T.file_legalized(source)
 	target=auto_path(target)
 	if target.lower().endswith('.zip') and target[-5]!='/':
 		target=target[:-4]

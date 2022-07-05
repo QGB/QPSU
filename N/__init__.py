@@ -987,6 +987,8 @@ def rpcSetVariable(*obj,base=py.No('auto history e.g. [http://]127.0.0.1:23571[/
 set_rpc=set_rpc_var=rpc_set=rpc_set_var=rpcSetVariable
 
 def rpc_set_file(obj,filename=py.No('if obj exists: auto '),name='v',**ka):
+	''' local_obj , remote_filename
+'''	
 	U,T,N,F=py.importUTNF()
 	if py.istr(obj) and py.len(obj)<999 and F.exists(obj):
 		if not filename:
