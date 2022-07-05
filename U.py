@@ -614,6 +614,8 @@ def PyFile_FromFd(fd,name="filename",mode='r',buffering=-1,encoding='utf-8'):
       Ignore *name* attribute.
 	  
  PyFile_FromFd() 的最后一个参数被设置成1，用来指出Python应该关闭这个文件。	  
+ 
+ 和open 打开同一个文件，tell 和 seek 自动同步，因为就是同一个文件
 '''	  
 	import ctypes
 	f = ctypes.pythonapi.PyFile_FromFd
@@ -633,7 +635,7 @@ def PyFile_FromFd(fd,name="filename",mode='r',buffering=-1,encoding='utf-8'):
 	name=ctypes.create_string_buffer(name)
 	
 		
-	if not py.isbyte(mode):mode=mode.encode(encoding)
+	if not py.isbyte(mode):mode=mode.encode()
 	mode=ctypes.create_string_buffer(mode)
 	
 	if 'b' in mode:
