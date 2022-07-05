@@ -543,13 +543,17 @@ def pppoe():
 506 192.168.2.1+192.168.1.1 073198799737 777124	
 
 '''
-def flask_request_log():
+def flask_request_log(mark_path_end_count=0):
 	from flask import request
 	U,T,N,F=py.importUTNF()	
 	rq=U.dir(request)
 	rq=U.StrRepr(U.pformat(rq))
 	
-	r=U.stime(),rq
+	mark=''
+	if mark_path_end_count:
+		mark=request.path[-mark_path_end_count:]
+		
+	r=U.stime()+mark,rq
 	rl=U.get_or_set('req_log',[])
 	rl.append(r)
 	return py.len(rl)
@@ -1184,21 +1188,38 @@ def get_socket_req(PORT = 65432,HOST = '127.7.7.7'):
 		req, addr = s.accept()
 		return req, addr
 
-def flask_app_route(app,rule='',view_func=None,methods=('GET','POST'),**ka):
-	if not rule or not view_func:raise py.ArgumentError(rule,view_func)
+# LOG_REQ_ENABLE=py.No('')
+def flask_app_route(app,rule='',view_func=None,methods=('GET','POST'),log_req=False,**ka):
+	if not rule:raise py.ArgumentError(rule)
 	
 	U,T,N,F=py.importUTNF()
+	
+	log_req=U.get_duplicated_kargs(ka,'req_log','log_req',default=log_req)
+	
 	# , endpoint=U.stime()
+	if rule and not view_func:
+		if py.isdict(rule):
+		for u,v in rule.items():
+			flask_app_route(app,rule=u,view_func=v)
+		return app.url_map._rules
+		
 	if py.istr(view_func):
 		# view_func=lambda :py.str(view_func) # 不能这样写 ，总是返回重新赋值后 的 view_func
 		U.set(py.hex(py.id(app))+rule,view_func)
-		view_func=lambda :U.get(py.hex(py.id(app))+rule)
+		def _func():
+			if log_req:
+				flask_request_log(url=True)
+			return U.get(py.hex(py.id(app))+rule)
+		view_func=_func	
+		# view_func=lambda :U.get(py.hex(py.id(app))+rule)
+	
+	if not view_func:raise py.ArgumentError(view_func)
 	
 	app.add_url_rule(rule, view_func=view_func, methods=methods)
 	
 	return app.url_map._rules
 	
-flask_url_map=flask_app_route	
+flask_url_map=app_route=app_router=flask_app_route	
 
 def get_flask_request_post_data(name='y'):
 	from flask import request as q

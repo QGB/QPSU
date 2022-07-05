@@ -4036,7 +4036,7 @@ def get_all_env(return_list=False):
 		if U.len(return_list)>0 and py.all(py.map(py.isint,return_list)):
 			if len(return_list)==1:
 				return_list=py.list(return_list)
-				return_list.append(138-return_list[0])
+				return_list.append(138-return_list[0]) #139 不行，换行
 			rl=[]
 			for k,v in r.items():
 				rl.append( [U.StrRepr(k,size=return_list[0]),U.StrRepr(v,size=return_list[1]) ] )
@@ -4044,6 +4044,8 @@ def get_all_env(return_list=False):
 		else:	
 			return py.list(r.items())
 	return r
+envs=get_all_env	
+	
 def set_env_path(append=[],delete=[]):
 	# if not p :raise py.ArgumentError()
 	if py.istr(append):append=[append]
