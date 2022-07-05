@@ -593,7 +593,7 @@ u1604:  IPython repl  ok	,  bash python -c error  ?
 	tmux=tmuxc=tmuxcap=tmuxcapture=tmuxCapture=tmux_capture=tmux_capture_pane
 	
 ########################## end init #############################################
-def PyFile_FromFd(fd,name="filename",mode='r'):
+def PyFile_FromFd(fd,name="filename",mode='r',encoding='utf-8'):
 	'''
 .. c:function:: PyObject* PyFile_FromFd(int fd, const char *name, const char *mode, int buffering, const char *encoding, const char *errors, const char *newline, int closefd)
 
@@ -619,14 +619,21 @@ def PyFile_FromFd(fd,name="filename",mode='r'):
 	f = ctypes.pythonapi.PyFile_FromFd
 	f.restype = ctypes.py_object
 	f.argtypes = [ctypes.c_int,
-							  ctypes.c_char_p,
-							  ctypes.c_char_p,
-							  ctypes.c_int,
-							  ctypes.c_char_p,
-							  ctypes.c_char_p,
-							  ctypes.c_char_p,
-							  ctypes.c_int ]
-	NULL=''	
+				  ctypes.c_char_p,
+				  ctypes.c_char_p,
+				  ctypes.c_int,
+				  ctypes.c_char_p,
+				  ctypes.c_char_p,
+				  ctypes.c_char_p,
+				  ctypes.c_int ]
+				  
+	NULL=ctypes.create_string_buffer(0)
+	
+	if not py.isbyte(name):name=name.encode(encoding)
+	name=ctypes.create_string_buffer(name)
+	
+	if not py.isbyte(mode):mode=mode.encode(encoding)
+	mode=ctypes.create_string_buffer(mode)
 	
 	return f(fd, name,mode,-1,NULL,NULL,NULL,1)						  
 	
