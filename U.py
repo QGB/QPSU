@@ -615,6 +615,7 @@ def PyFile_FromFd(fd,name="filename",mode='r'):
 	  
  PyFile_FromFd() 的最后一个参数被设置成1，用来指出Python应该关闭这个文件。	  
 '''	  
+	import ctypes
 	f = ctypes.pythonapi.PyFile_FromFd
 	f.restype = ctypes.py_object
 	f.argtypes = [ctypes.c_int,
