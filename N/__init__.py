@@ -1056,9 +1056,9 @@ key compatibility :  key='#rpc\n'==chr(35)+'rpc'+chr(10)
 		
 		if U.is_vercel():#为了一个环境而在所有运行时去判断一次，
 			payload = T.json_loads(_request.environ['event']['body'])
-			_request.url=root_url[:-1]+payload['path']
+			_request.url=_request.root_url[:-1]+payload['path']
 			code= payload['path'][1+py.len(key):]
-			code=T.url_decode(code)
+			# code=T.url_decode(code)
 			if code.endswith('/'):code=code[:-1]
 		else:
 			if not code:code=T.url_decode(_request.url)

@@ -593,6 +593,43 @@ u1604:  IPython repl  ok	,  bash python -c error  ?
 	tmux=tmuxc=tmuxcap=tmuxcapture=tmuxCapture=tmux_capture=tmux_capture_pane
 	
 ########################## end init #############################################
+def PyFile_FromFd(fd,name="filename",mode='r'):
+	'''
+.. c:function:: PyObject* PyFile_FromFd(int fd, const char *name, const char *mode, int buffering, const char *encoding, const char *errors, const char *newline, int closefd)
+
+   Create a Python file object from the file descriptor of an already
+   opened file *fd*.  The arguments *name*, *encoding*, *errors* and *newline*
+   can be ``NULL`` to use the defaults; *buffering* can be *-1* to use the
+   default. *name* is ignored and kept for backward compatibility. Return
+   ``NULL`` on failure. For a more comprehensive description of the arguments,
+   please refer to the :func:`io.open` function documentation.
+
+   .. warning::
+
+     Since Python streams have their own buffering layer, mixing them with
+     OS-level file descriptors can produce various issues (such as unexpected
+     ordering of data).
+
+   .. versionchanged:: 3.2
+      Ignore *name* attribute.
+	  
+ PyFile_FromFd() 的最后一个参数被设置成1，用来指出Python应该关闭这个文件。	  
+'''	  
+	f = ctypes.pythonapi.PyFile_FromFd
+	f.restype = ctypes.py_object
+	f.argtypes = [ctypes.c_int,
+							  ctypes.c_char_p,
+							  ctypes.c_char_p,
+							  ctypes.c_int,
+							  ctypes.c_char_p,
+							  ctypes.c_char_p,
+							  ctypes.c_char_p,
+							  ctypes.c_int ]
+	NULL=''	
+	
+	return f(fd, name,mode,-1,NULL,NULL,NULL,1)						  
+	
+
 def new_2d_list(width,height,default_value=0):
 	''' cols=height   rows=width '''
 	return [[default_value for i in py.range(width)] for j in py.range(height)]
@@ -5607,16 +5644,33 @@ def unique(iterable,count=False,return_list=False,**ka):
 		if i not in r:r.append(i)
 	return r
 
-def get_column_from_2D_list(matrix, *col_index):
+def get_column_from_2D_list(matrix, *col_index,no=None):
 	if not col_index:raise py.ArgumentError('need *col_index ')
+	
+	if py.isint(no):pass
+		# no=[no]
+	else:	
+		if not no      :no=None
+	
+	
+	
 	r=[]
 	m=py.len(col_index)
+	
 	for row in matrix:
+		# if no:
+#U.col(U.get('req_log'),0,1) 想到这个需求，如果列表中有列数不同的行，取相对值 ，比如说无论列数跳过最后 一列,no=-1。
+			# for n in no:
+				# if n<0:n=py.len(row)+n 
+				# if n==
 		if m==1:
 			l=row[col_index[0]]
 		else:
 			l=[]
 			for i in col_index:
+				if no!=None:
+					if no<0:no=py.len(row)+no
+					if i==no:continue
 				l.append(row[i])
 		r.append(l)
 	return r	
@@ -5880,7 +5934,7 @@ def get_objects(type,len=None):
 		if isinstance(o,type) or o is type:
 			r.append(o)
 	return r
-search_object=search_objects=find_objects=get_obj=get_objects
+search_object=search_objects=find_objects=get_obj=get_all_objects=get_objects
 
 def git_init(remote_url='',git_exe=None,**ka):
 	cmd=r''' 
