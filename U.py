@@ -593,7 +593,7 @@ u1604:  IPython repl  ok	,  bash python -c error  ?
 	tmux=tmuxc=tmuxcap=tmuxcapture=tmuxCapture=tmux_capture=tmux_capture_pane
 	
 ########################## end init #############################################
-def PyFile_FromFd(fd,name="filename",mode='r',encoding='utf-8'):
+def PyFile_FromFd(fd,name="filename",mode='r',buffering=-1,encoding='utf-8'):
 	'''
 .. c:function:: PyObject* PyFile_FromFd(int fd, const char *name, const char *mode, int buffering, const char *encoding, const char *errors, const char *newline, int closefd)
 
@@ -635,7 +635,12 @@ def PyFile_FromFd(fd,name="filename",mode='r',encoding='utf-8'):
 	if not py.isbyte(mode):mode=mode.encode(encoding)
 	mode=ctypes.create_string_buffer(mode)
 	
-	return f(fd, name,mode,-1,NULL,NULL,NULL,1)						  
+	bencoding=encoding.encode('ascii')
+	bencoding=ctypes.create_string_buffer(bencoding)
+	
+	
+	
+	return f(fd, name,mode,buffering,bencoding,NULL,NULL,1)						  
 	
 
 def new_2d_list(width,height,default_value=0):
