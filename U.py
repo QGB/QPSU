@@ -594,7 +594,8 @@ u1604:  IPython repl  ok	,  bash python -c error  ?
 	
 ########################## end init #############################################
 def PyFile_FromFd(fd,name="filename",mode='r',buffering=-1,encoding='utf-8'):
-	'''
+	'''__builtin__.open 也可以打开 int，但是此时 tell好像不共享 ？
+		
 .. c:function:: PyObject* PyFile_FromFd(int fd, const char *name, const char *mode, int buffering, const char *encoding, const char *errors, const char *newline, int closefd)
 
    Create a Python file object from the file descriptor of an already
@@ -616,6 +617,11 @@ def PyFile_FromFd(fd,name="filename",mode='r',buffering=-1,encoding='utf-8'):
  PyFile_FromFd() 的最后一个参数被设置成1，用来指出Python应该关闭这个文件。	  
  
  和open 打开同一个文件，tell 和 seek 自动同步，因为就是同一个文件
+ 
+ 两个 PyFile_FromFd 一个是 r utf-8.一个是 rb。可以分别read str 和byte。但是 tell依然共享
+ 
+ 
+ 
 '''	  
 	import ctypes
 	f = ctypes.pythonapi.PyFile_FromFd
