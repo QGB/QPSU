@@ -403,7 +403,7 @@ In_index_delta=1  # In[268]==_i269	  , Out[269]
 				
 			U.pln(out_head_char+'"""#{0}'.format(i),file=file )
 			# U.pln('"""',file=file )
-			U.pln(pout,file=file )
+			U.pln(pout.replace('"""','"qgb""'),file=file )
 			U.pln('"""',file=file )	
 		else:
 			U.pln('#',i,file=file )
