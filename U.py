@@ -593,6 +593,14 @@ u1604:  IPython repl  ok	,  bash python -c error  ?
 	tmux=tmuxc=tmuxcap=tmuxcapture=tmuxCapture=tmux_capture=tmux_capture_pane
 	
 ########################## end init #############################################
+def __import__(mod_name):
+	m=py.__import__(mod_name)
+	ss=mod_name.split('.')
+	for s in ss[1:]:
+		m=py.getattr(m,s)
+	return m
+_import=__import__
+	
 def PyFile_FromFd(fd,name="filename",mode='r',buffering=-1,encoding='utf-8'):
 	'''__builtin__.open 也可以打开 int，但是此时 tell好像不共享 ？
 		
@@ -1487,9 +1495,9 @@ def sleep(asecond,print_time_every_n_second=0):
 		for i in range(asecond):
 			if i%print_time_every_n_second==0:
 				pln(stime())
-			__import__('time').sleep(1)	
+			py.__import__('time').sleep(1)	
 	else:	
-		__import__('time').sleep(asecond)
+		py.__import__('time').sleep(asecond)
 	return IntCustomRepr(asecond,repr='U.sleep(%s)'%asecond)
 delay=sleep
 	
@@ -1599,7 +1607,7 @@ env PATH  无论在Windows 还是 Linux 统一使用大写是好的选择
 
 		env=ec.update(env)
 	######## 参数处理完毕，准备开始运行
-	# r= __import__('subprocess').Popen(a)
+	# r= py.__import__('subprocess').Popen(a)
 	import subprocess
 	# env["PATH"] = "/usr/sbin:/sbin:" + env["PATH"]
 	r=subprocess.Popen(a, env=env) # Windows下 光标有不回位问题 U.run('cmd /c set',env={'zzzzz':U.stime()})
@@ -1718,7 +1726,7 @@ def repl(_=None,printCount=False,msg=''):
 			locals['_qgb']=_
 		else:
 			locals['_']=_
-	__import__('code').interact(banner="",local=locals)
+	py.__import__('code').interact(banner="",local=locals)
 	return
 	
 	# try:
@@ -2752,7 +2760,7 @@ ValueError: Function has keyword-only parameters or annotations, use getfullargs
 	if py.getattr(getArgsDict,'debug',0):
 		pln(getArgsDict.__name__,'frame','args','rd')
 		# return frame,args,rd	
-		__import__('pdb').Pdb().set_trace()
+		py.__import__('pdb').Pdb().set_trace()
 	# while F.dir(frame.f_back.f_code.co_filename).endswith('qgb'):
 	tb=inspect.getframeinfo(frame.f_back)
 	# return frame
@@ -4585,7 +4593,7 @@ def nppMods(modName='qgb'):
 def backLocals(f=None,i=0,r=[]):
 	pln (i+1,'='*(20+i*2)  )
 	
-	if f is None and i==0:f=__import__('sys')._getframe()
+	if f is None and i==0:f=py.__import__('sys')._getframe()
 	try:pln (f.f_locals.keys()  );r.append(f.f_locals)
 	except:return r
 	return backLocals(f.f_back,i+1,r)	

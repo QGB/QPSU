@@ -23,6 +23,8 @@ if is2():
 	
 if is3():
 	from builtins import *
+	from __builtin__ import __import__ # 
+	
 	from importlib import reload
 		
 class Class:pass
