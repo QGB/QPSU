@@ -32,7 +32,7 @@ def convert_linux_netaddr(address):
 	return "{}:{}".format(addr, port)
 
 def format_line(data):
-	return (("%(seq)-4s %(uid)5s %(local)25s %(remote)25s %(timeout)8s %(inode)8s" % data) + "\n")
+	return (("%(seq)-4s %(uid)5s %(local)25s %(remote)25s %(timeout)8s %(inode)8s" % data) )#+ "\n"
 
 with open(net_tcp) as f:
 	sockets = process_file(f.read())
@@ -59,10 +59,10 @@ def main():
 	# from qgb import py,U
 	r=[]
 	if len(rv) > 0:
-		r.append(format_line(title))
+		r.append(U.StrRepr( format_line(title)))
 
 		for _ in rv:
-			r.append(format_line(_))
+			r.append(U.StrRepr(format_line(_)))
 	return r
 
 if __name__ == '__main__':
