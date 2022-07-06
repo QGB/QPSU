@@ -23,7 +23,8 @@ if is2():
 	
 if is3():
 	from builtins import *
-	from __builtin__ import __import__ # 
+	from builtins import __import__
+	# from __builtin__ import __import__ #Error  No module named '__builtin__'  但是在Win py3.74 下却可以？
 	
 	from importlib import reload
 		
