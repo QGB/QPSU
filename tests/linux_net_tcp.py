@@ -1,6 +1,12 @@
 # -*- coding: utf-8 -*-
 import re
-import sys
+import sys,pathlib            # *.py  /tests /qgb   /[gsqp]
+gsqp=pathlib.Path(__file__).absolute().parent.parent.parent.absolute().__str__()
+if gsqp not in sys.path:sys.path.append(gsqp)#py3 works
+from qgb import py
+U,T,N,F=py.importUTNF()
+
+
 
 net_tcp=sys.argv[1] if len(sys.argv)>1 else '/proc/net/tcp'
 if not [i for i in net_tcp if i not in '0123456789']:
@@ -50,7 +56,7 @@ for info in sockets:
 	}
 	rv.append(_tmp)
 def main():
-	from qgb import py,U
+	# from qgb import py,U
 	r=[]
 	if len(rv) > 0:
 		r.append(format_line(title))
@@ -60,8 +66,8 @@ def main():
 	return r
 
 if __name__ == '__main__':
-	from pprint import pprint
-	pprint(main())
+	# from pprint import pprint
+	U.pprint(main())
 
 		
 		
