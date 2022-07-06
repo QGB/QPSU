@@ -1769,7 +1769,7 @@ junk=['本机地址  CZ88.NET','IANA 保留地址','局域网 IP','局域网 对
 	
 	if location in junk:
 		if size:
-			return U.StrRepr(r,size=size)
+			return U.StrRepr(ip,size=size)
 		return ip
 		location=py.No(location)	
 	if reverse_ip:
