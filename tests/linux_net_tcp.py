@@ -47,7 +47,7 @@ def format_line(data):
 			if ':' in v:
 				ip,port=v.split(':')
 				ip=N.ip_location(reverse_ip=1,ip=ip,size=size)
-				port=U.StrRepr(port,size=1+5)
+				port=U.IntRepr(port,size=1+5)
 			else:
 				ip,port=U.StrRepr(k,size=size),U.StrRepr(k[0]+'_port',size=1+5)
 				

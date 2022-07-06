@@ -1755,7 +1755,7 @@ def ipToInt(ip):
 ip_int=ip2int=ipToInt
 
 def ipLocation(ip,reverse_ip=False,size=68,
-junk=['本机地址  CZ88.NET','IANA 保留地址','局域网 IP','局域网 对方和您在同一内部网'] ):
+junk=['本机地址','IANA 保留地址','局域网 IP','局域网 对方和您在同一内部网'] ):
 	global U,T,N,F
 	if size:U,T,N,F=py.importUTNF()
 
