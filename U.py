@@ -1672,6 +1672,11 @@ def this():
 		# txt(globals())
 		pln (__name__)
 
+def start_ipython():
+	import IPython
+	return IPython.start_ipython()
+start_ipy=ipy_start=start_ipython
+
 def ipyEmbed():
 	# global ipyEmbed
 	from IPython import embed

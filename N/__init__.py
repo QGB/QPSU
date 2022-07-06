@@ -56,7 +56,7 @@ def get_all_pid_equal_port():
 			r.append([t,sconn])
 			# r.append([t,p,sconn])
 	return r
-get_rpc_port_list=get_pid_equal_port=get_port_equal_pid=get_all_pid_equal_port	
+get_rpc_port=get_rpc_ports=get_all_rpc_port=get_all_rpc_ports=get_rpc_port_list=get_pid_equal_port=get_port_equal_pid=get_all_pid_equal_port	
 	
 def curl_return_bytes(url,verbose=True,proxy=py.No('socks5h://127.0.0.1:21080'),headers=py.No('default use N.HTTP.headers'),**ka):
 	'''
@@ -1056,13 +1056,15 @@ key compatibility :  key='#rpc\n'==chr(35)+'rpc'+chr(10)
 		
 		if U.is_vercel():#为了一个环境而在所有运行时去判断一次，
 			payload = T.json_loads(_request.environ['event']['body'])
-			_request.url=_request.root_url[:-1]+payload['path']
+			_request.url=_request.url_root[:-1]+payload['path']
 			code= payload['path'][1+py.len(key):]
 			# code=T.url_decode(code)
 			if code.endswith('/'):code=code[:-1]
 		else:
 			if not code:code=T.url_decode(_request.url)
-			code=T.sub(code,_request.root_url )
+			code=T.sub(code,_request.url_root )
+			#url_root host_url 都可以  Win py3.74 flask 1.1.1 root_url 不存在？ 查了文档，确实只有 url_root
+			# 所以，为了兼容性考虑 用 url_root
 			if key and code.startswith(key):code=code[py.len(key):]
 			
 		# U.log( (('\n'+code) if '\n' in code else code)[:99]	)
@@ -1754,7 +1756,7 @@ def ipToInt(ip):
 	return r
 ip_int=ip2int=ipToInt
 
-def ipLocation(ip,reverse_ip=False,size=68,
+def ip_location(ip,reverse_ip=False,size=68,
 junk=['本机地址','IANA 保留地址','局域网 IP','局域网 对方和您在同一内部网'] ):
 	global U,T,N,F
 	if size:U,T,N,F=py.importUTNF()
@@ -1783,7 +1785,7 @@ junk=['本机地址','IANA 保留地址','局域网 IP','局域网 对方和您�
 	return r
 	
 
-sip_location=sipLocation=ip_location=ipLocation
+sip_location=sipLocation=ipLocation=ip_location
 
 ######################  qqwry   ###########################
 gw_qqwry=['CoreLink骨干网', '不丹', '东帝汶', '中非', '丹麦', '乌克兰', '乌兹别克斯坦', '乌干达', '乌拉圭', '乍得', '也门', '亚太地区', '亚洲', '亚美尼亚', '以色列', '伊拉克', '伊朗', '伯利兹', '佛得角', '俄罗斯', '保加利亚', '克罗地亚', '关岛', '冈比亚', '冰岛', '几内亚', '几内亚比绍', '列支敦士登', '刚果共和国', '刚果民主共和国', '利比亚', '利比里亚', '加勒比海地区', '加拿大', '加纳', '加蓬', '匈牙利', '北美地区', '北马其顿', '北马里亚纳群岛', '南极洲', '南苏丹', '南非', '博茨瓦纳', '卡塔尔', '卢旺达', '卢森堡', '印尼', '印度', '印度尼西亚', '危地马拉', '厄瓜多尔', '厄立特里亚', '叙利亚', '古巴', 

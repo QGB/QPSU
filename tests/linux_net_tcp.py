@@ -33,7 +33,7 @@ def convert_linux_netaddr(address):
 
 def format_line(data):
 	d={
-		'seq'    :3,
+		'seq'    :5,
 		'uid'    :9,
 		'local'  :15,
 		'remote' :68,
@@ -79,11 +79,12 @@ for info in sockets:
 		'inode': _[9],
 	}
 	rv.append(_tmp)
-def main():
+def main(return_title=True):
 	# from qgb import py,U
 	r=[]
 	if len(rv) > 0:
-		r.append(format_line(title))
+		if return_title:
+			r.append(format_line(title))
 
 		for _ in rv:
 			r.append(format_line(_))

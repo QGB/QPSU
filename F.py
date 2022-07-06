@@ -1225,10 +1225,14 @@ def list(ap='.',type='',t='',r=False,d=False,dir=False,f=False,
 ls=list
 
 def ll(ap='.',readable=True,type='',t='',r=False,d=False,dir=False,f=False,file=False,
-	return_dict=True,no_raise=True,**ka):
+	return_dict=True,return_list=False,no_raise=True,**ka):
 	'''return {file : [size,atime,mtime,ctime,st_mode]}
 	readable is True: Size,Stime,..
 	linux struct stat: http://pubs.opengroup.org/onlinepubs/009695399/basedefs/sys/stat.h.html'''
+	U=py.importU()
+	return_list=U.get_duplicated_kargs(ka,'return_list','rl','list',default=return_list)
+	if return_list:return_dict=False
+	
 	dr={}
 	
 	for i in list(ap,type=type,t=t,r=r,d=d,dir=dir,f=f,file=file):#ls 肯定返回 list类型！
@@ -1238,7 +1242,7 @@ def ll(ap='.',readable=True,type='',t='',r=False,d=False,dir=False,f=False,file=
 		except:
 			continue
 		if readable:
-			U=py.importU()
+			
 			IntSize,FloatTime,IntOct=U.IntSize,U.FloatTime,U.IntOct
 			try:
 				dr[i]=[ IntSize(size(i)),
@@ -1255,7 +1259,7 @@ def ll(ap='.',readable=True,type='',t='',r=False,d=False,dir=False,f=False,file=
 				
 		else:
 			dr[i]=[size(i),s.st_atime,s.st_mtime,s.st_ctime,s.st_mode]
-	if return_dict:
+	if return_dict or not return_list:
 		return dr
 	else:
 		return [[k,*v] for k,v in dr.items()]

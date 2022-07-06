@@ -1895,7 +1895,7 @@ T.subLast('C:/test/list_bought_items.htm/10_15_知乎周源_list_bought_items.ht
 	# i1+=len(s1)
 	# U.pln( i1,i2
 	# return s[i1:i2]
-sublast=subt=sub_last=subLast=subr=sub_right=subRight=sub_tail
+subl=sublast=subt=sub_last=subLast=subr=sub_right=subRight=sub_tail
 	
 def del_sub(a,x,y,start=0,end=-1):
 	return a[start:x]+a[y:end]
