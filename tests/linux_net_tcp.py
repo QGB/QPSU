@@ -35,8 +35,8 @@ def format_line(data):
 	d={
 		'seq'    :3,
 		'uid'    :9,
-		'local'  :48,
-		'remote' :48,
+		'local'  :66,
+		'remote' :66,
 		'timeout':3,
 		'inode'  :11,
 	}
