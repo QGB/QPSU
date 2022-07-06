@@ -1768,6 +1768,8 @@ junk=['本机地址  CZ88.NET','IANA 保留地址','局域网 IP','局域网 对
 	location=location.replace('CZ88.NET','').strip() #去除包含的
 	
 	if location in junk:
+		if size:
+			return U.StrRepr(r,size=size)
 		return ip
 		location=py.No(location)	
 	if reverse_ip:

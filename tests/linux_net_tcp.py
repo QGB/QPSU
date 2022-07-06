@@ -35,8 +35,8 @@ def format_line(data):
 	d={
 		'seq'    :3,
 		'uid'    :9,
-		'local'  :35,
-		'remote' :35,
+		'local'  :48,
+		'remote' :48,
 		'timeout':3,
 		'inode'  :11,
 	}
@@ -46,7 +46,7 @@ def format_line(data):
 		if k in ['local','remote']:
 			if ':' in v:
 				ip,port=v.split(':')
-				ip=N.ip_location(reverse_ip=1,ip=ip)
+				ip=N.ip_location(reverse_ip=1,ip=ip,size=size)
 				port=U.StrRepr(port,size=1+5)
 			else:
 				ip,port=U.StrRepr(k,size=size),U.StrRepr(k[0]+'_port',size=1+5)
