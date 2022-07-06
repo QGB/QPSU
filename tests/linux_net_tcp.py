@@ -32,7 +32,31 @@ def convert_linux_netaddr(address):
 	return "{}:{}".format(addr, port)
 
 def format_line(data):
-	return (("%(seq)-4s %(uid)5s %(local)25s %(remote)25s %(timeout)8s %(inode)8s" % data) )#+ "\n"
+	d={
+		'seq'    :3,
+		'uid'    :9,
+		'local'  :35,
+		'remote' :35,
+		'timeout':3,
+		'inode'  :11,
+	}
+	row=[]
+	for k,size in d.items():
+		v=data[k]
+		if k in ['local','remote']:
+			if ':' in v:
+				ip,port=v.split(':')
+				ip=N.ip_location(reverse_ip=1,ip=ip)
+				port=U.StrRepr(port,size=1+5)
+			else:
+				ip,port=U.StrRepr(k,size=size),U.StrRepr(k[0]+'_port',size=1+5)
+				
+			row.append(ip)	
+			row.append(port)	
+			continue
+		row.append( U.StrRepr(v,size=size) )	
+	return row	
+	# return (("%(seq)-4s %(uid)5s %(local)25s %(remote)25s %(timeout)8s %(inode)8s" % data) )#+ "\n"
 
 with open(net_tcp) as f:
 	sockets = process_file(f.read())
@@ -59,10 +83,10 @@ def main():
 	# from qgb import py,U
 	r=[]
 	if len(rv) > 0:
-		r.append(U.StrRepr( format_line(title)))
+		r.append(format_line(title))
 
 		for _ in rv:
-			r.append(U.StrRepr(format_line(_)))
+			r.append(format_line(_))
 	return r
 
 if __name__ == '__main__':

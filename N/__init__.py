@@ -1759,6 +1759,11 @@ junk=['本机地址  CZ88.NET','IANA 保留地址','局域网 IP','局域网 对
 	global U,T,N,F
 	if size:U,T,N,F=py.importUTNF()
 
+	# port=''
+	# if ':' in ip:
+		# ip,port=ip.split(':')
+		# port=':'+port
+	
 	location=' '.join(ip_location_qqwry(ip))
 	location=location.replace('CZ88.NET','').strip() #去除包含的
 	
