@@ -1672,10 +1672,20 @@ def this():
 		# txt(globals())
 		pln (__name__)
 
+def ipython_getoutput(a,return_list=False):
+	U,T,N,F=py.importUTNF()
+	if not U.isipy():
+		U.start_ipython()
+	sl=U.isipy().getoutput(a)
+	if return_list:return sl
+	return T.eol.join(sl)
+getoutput=ipy_getoutput=ipython_getoutput	
+
+
 def start_ipython():
 	import IPython
 	return IPython.start_ipython()
-start_ipy=ipy_start=start_ipython
+start_ipy=ipy_start=ipython_start=start_ipython
 
 def ipyEmbed():
 	# global ipyEmbed
