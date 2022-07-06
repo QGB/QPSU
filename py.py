@@ -276,7 +276,7 @@ except Exception as ei3:pass
 		# pdb()
 		import U
 		raise Exception('#Error import U in qgb.py')
-importU=from_qgb_import
+importU=from_qgb=from_qgb_import
 
 def importT():
 	return from_qgb_import('T')
