@@ -2380,10 +2380,12 @@ def add(*a):
 		else:
 			raise NotImplementedError('not num type')
 	return r		
-def max_len(*a,return_value=False,return_index=False):
+def max_len(*a,return_value=False,return_index=False,**ka):
 	'''  max( *map(len,U.col(lr,5)) ) 
 max_len(dict)==max_len(dict.keys())	
 	'''
+	return_index=get_duplicated_kargs(ka,'index','i','n','enumerate',default=return_index)
+	
 	if py.len(a)==1:
 		a=a[0]
 		if py.isdict(a):
