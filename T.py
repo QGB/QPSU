@@ -376,7 +376,7 @@ def slice(a,start, stop=None, step=1):
 		return py.No(e)
 get=char_at=charAt=get_char_at=slice		
 		
-def search_return_position(text,*targets,case_sensitive=True,a=0,b=0,c=0,dict=False,**ka):
+def search_return_position(text,*targets,case_sensitive=True,a=0,b=0,c=0,dict=False,default_c_size=99,**ka):
 	U=py.importU()
 	a=U.get_duplicated_kargs(ka,'A',default=a)
 	b=U.get_duplicated_kargs(ka,'B',default=b)
@@ -407,8 +407,15 @@ def search_return_position(text,*targets,case_sensitive=True,a=0,b=0,c=0,dict=Fa
 					c0=py.max(i-a,0)
 					c1=i+py.len(t)+b
 					if c:
-						c0=py.max(i-c,0)
-						c1=i+py.len(t)+c
+						if py.isint(c):
+							c0=py.max(i-c,0)
+							c1=i+py.len(t)+c
+						elif U.len(c)==2:
+							c0=text.rfind(c[0],0,i)
+							c1=text.find(c[1],i)
+							if c0==-1 or c0-i>default_c_size:c0=i-(default_c_size/2)
+							if c1==-1 or i-c1>default_c_size:c1=i-(default_c_size/2)
+							
 					_append( t,i,text[c0:c1] )
 				else:
 					_append(t,i,)
