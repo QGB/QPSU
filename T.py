@@ -376,11 +376,12 @@ def slice(a,start, stop=None, step=1):
 		return py.No(e)
 get=char_at=charAt=get_char_at=slice		
 		
-def search_return_position(text,*targets,case_sensitive=True,a=0,b=0,c=0,dict=False,default_c_size=99,**ka):
+def search_return_position(text,*targets,case_sensitive=True,a=0,b=0,c=0,dict=False,default_c_size=99,c_StrRepr=True,**ka):
 	U=py.importU()
 	a=U.get_duplicated_kargs(ka,'A',default=a)
 	b=U.get_duplicated_kargs(ka,'B',default=b)
 	c=U.get_duplicated_kargs(ka,'C',default=c)
+	c_StrRepr=U.get_duplicated_kargs(ka,'c_StrRepr','crepr','cstrrepr',default=c_StrRepr)
 	case_sensitive=U.get_duplicated_kargs(ka,'cs','case','upper','caseSensitive',default=case_sensitive)
 	dict=U.get_duplicated_kargs(ka,'d','return_dict','rd',default=dict)
 	r=[]
@@ -415,8 +416,11 @@ def search_return_position(text,*targets,case_sensitive=True,a=0,b=0,c=0,dict=Fa
 							c1=text.find(c[1],i)
 							if c0==-1 or c0-i>default_c_size:c0=i-(default_c_size/2)
 							if c1==-1 or i-c1>default_c_size:c1=i-(default_c_size/2)
-							
-					_append( t,i,text[c0:c1] )
+							c0+=1
+					if c_StrRepr:		
+						_append( t,i,U.StrRepr(text[c0:c1]) )
+					else:	
+						_append( t,i,text[c0:c1] )
 				else:
 					_append(t,i,)
 			i+=1 # 不然 死循环		
