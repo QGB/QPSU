@@ -418,7 +418,7 @@ def search_return_position(text,*targets,case_sensitive=True,a=0,b=0,c=0,dict=Fa
 							if c1==-1 or i-c1>default_c_size:c1=i-(default_c_size/2)
 							c0+=1
 					if c_StrRepr:		
-						_append( t,i,U.StrRepr(text[c0:c1]) )
+						_append( t,i,U.StrRepr(text[c0:c1],size=default_c_size) )
 					else:	
 						_append( t,i,text[c0:c1] )
 				else:
