@@ -376,11 +376,12 @@ def slice(a,start, stop=None, step=1):
 		return py.No(e)
 get=char_at=charAt=get_char_at=slice		
 		
-def search_return_position(text,*targets,case_sensitive=True,a=0,b=0,c=0,dict=False,default_c_size=99,c_StrRepr=True,**ka):
+def search_return_position(text,*targets,case_sensitive=True,a=0,b=0,c=0,return_t=False,dict=False,default_c_size=99,c_StrRepr=True,**ka):
 	U=py.importU()
 	a=U.get_duplicated_kargs(ka,'A',default=a)
 	b=U.get_duplicated_kargs(ka,'B',default=b)
 	c=U.get_duplicated_kargs(ka,'C',default=c)
+	return_t=U.get_duplicated_kargs(ka,'return_t','t','target',default=return_t)
 	c_StrRepr=U.get_duplicated_kargs(ka,'c_StrRepr','crepr','cstrrepr',default=c_StrRepr)
 	case_sensitive=U.get_duplicated_kargs(ka,'cs','case','upper','caseSensitive',default=case_sensitive)
 	dict=U.get_duplicated_kargs(ka,'d','return_dict','rd',default=dict)
@@ -392,10 +393,14 @@ def search_return_position(text,*targets,case_sensitive=True,a=0,b=0,c=0,dict=Fa
 				U.dict_add_value_list(d,t,(i,sub))
 			else  :U.dict_add_value_list(d,t,i)
 		else:
+			row=[i]
 			if sub:
-				r.append([t,i,sub ])		
-			else  :r.append([t,i, ])
-			
+				row.append( sub)		
+			if return_t:
+				row.insert(0,t)		
+				
+			r.append(row)
+	len_text_digits=py.len(str(py.len(text))) #不是digitals		
 	for t in py.set(targets):
 		i=0
 		# re.finditer(re.escape)
@@ -418,7 +423,7 @@ def search_return_position(text,*targets,case_sensitive=True,a=0,b=0,c=0,dict=Fa
 							if c1==-1 or i-c1>default_c_size:c1=i-(default_c_size/2)
 							c0+=1
 					if c_StrRepr:		
-						_append( t,i,U.StrRepr(text[c0:c1],size=default_c_size) )
+						_append( t,U.IntRepr(i,size=len_text_digits),U.StrRepr(text[c0:c1],size=default_c_size) )
 					else:	
 						_append( t,i,text[c0:c1] )
 				else:
