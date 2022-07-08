@@ -23,6 +23,12 @@ def setErr(ae):
 	else:
 		gError=ae
 	if U.gbPrintErr:U.pln('#Error ',ae)
+	
+def init_module():
+	global DEFAULT_ENCODING		
+	if DEFAULT_ENCODING is None:
+		DEFAULT_ENCODING=U.get_or_set('F.read.encoding',lazy_default=lambda:py.No('utf-8'))
+		
 ###################
 class IntSize(py.int):
 	def __new__(cls, *a, **ka):
@@ -811,13 +817,16 @@ def detect_file_encoding(file,confidence=0.7,default=py.No('not have default enc
 	return c
 detect=detectEncoding=detect_encoding=detect_file_encoding
 	
-def read(file,encoding='',mod='r',return_filename=False,print_detect_encoding=False,**ka):
+DEFAULT_ENCODING=None
+
+def read(file,encoding='utf-8',mod='r',return_filename=False,print_detect_encoding=False,**ka):
 	'''if return_filename:
 			return content,f.name
 1 not is 2
 	   ^
 SyntaxError: invalid syntax			
 			'''
+
 	file=autoPath(file)
 	if not encoding and print_detect_encoding:
 		U=py.importU()
@@ -836,10 +845,12 @@ SyntaxError: invalid syntax
 	else:#is3
 		#utf-8 /site-packages/astropy/coordinates/builtin_frames/__init__.py  {'confidence': 0.73, 'encoding': 'Windows-1252'
 		if encoding:
-			f=py.open(file,mod,encoding=encoding)
-			s=f.read()
-			f.close()
-		else:
+			try:
+				f=py.open(file,mod,encoding=encoding)
+				s=f.read()
+				f.close()
+			except:encoding=''
+		if not encoding:
 			U,T,N,F=py.importUTNF()	
 			r2=T.detect_and_decode(F.read_byte(file),confidence=0.9,default='utf-8',return_encoding=True)
 			if not r2:return r2
