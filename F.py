@@ -1195,6 +1195,10 @@ def list(ap='.',type='',t='',r=False,d=False,dir=False,f=False,
 		setErr('F.list arguments ap error')
 		ap='.'
 	# if len(ap)==2 and ap.endswith(':'):ap+='/'	
+	if U.isnix() and ap.startswith('~'):
+		if ap[1:2]=='/':ap=ap[2:]
+		else:ap=ap[1:]
+		ap=get_home()+ap
 	ap=ap.replace('\\','/')
 	if not ap.endswith('/'):#U.inMuti(ap,'/','\\',f=str.endswith):
 		if isDir(ap):

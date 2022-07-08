@@ -376,7 +376,7 @@ def slice(a,start, stop=None, step=1):
 		return py.No(e)
 get=char_at=charAt=get_char_at=slice		
 		
-def search_return_position(text,*targets,case_sensitive=True,a=0,b=0,c=0,return_t=False,dict=False,default_c_size=99,c_StrRepr=True,**ka):
+def search_return_position(text,*targets,case_sensitive=True,a=0,b=0,c=0,default_c_size=100,return_t=False,return_dict=False,c_StrRepr=True,**ka):
 	U=py.importU()
 	a=U.get_duplicated_kargs(ka,'A',default=a)
 	b=U.get_duplicated_kargs(ka,'B',default=b)
@@ -384,7 +384,7 @@ def search_return_position(text,*targets,case_sensitive=True,a=0,b=0,c=0,return_
 	return_t=U.get_duplicated_kargs(ka,'return_t','t','target',default=return_t)
 	c_StrRepr=U.get_duplicated_kargs(ka,'c_StrRepr','crepr','cstrrepr',default=c_StrRepr)
 	case_sensitive=U.get_duplicated_kargs(ka,'cs','case','upper','caseSensitive',default=case_sensitive)
-	dict=U.get_duplicated_kargs(ka,'d','return_dict','rd',default=dict)
+	return_dict=U.get_duplicated_kargs(ka,'d','return_dict','rd','dict',default=return_dict)
 	r=[]
 	d={}
 	def _append(t,i,sub=''):
@@ -401,6 +401,9 @@ def search_return_position(text,*targets,case_sensitive=True,a=0,b=0,c=0,return_
 				
 			r.append(row)
 	len_text_digits=py.len(str(py.len(text))) #不是digitals		
+	c_isint=py.isint(c)
+	c_len_2= U.len(c)==2
+	
 	for t in py.set(targets):
 		i=0
 		# re.finditer(re.escape)
@@ -413,17 +416,19 @@ def search_return_position(text,*targets,case_sensitive=True,a=0,b=0,c=0,return_
 					c0=py.max(i-a,0)
 					c1=i+py.len(t)+b
 					if c:
-						if py.isint(c):
+						if c_isint:
 							c0=py.max(i-c,0)
 							c1=i+py.len(t)+c
-						elif U.len(c)==2:
+						elif c_len_2:
 							c0=text.rfind(c[0],0,i)
 							c1=text.find(c[1],i)
-							if c0==-1 or c0-i>default_c_size:c0=i-(default_c_size/2)
-							if c1==-1 or i-c1>default_c_size:c1=i-(default_c_size/2)
+							if c0==-1 or c0-i>default_c_size:c0=i-(default_c_size//2)
+							if c1==-1 or i-c1>default_c_size:c1=i-(default_c_size//2)
 							c0+=1
+						else:
+							raise py.ArgumentUnsupported(c)
 					if c_StrRepr:		
-						_append( t,U.IntRepr(i,size=len_text_digits),U.StrRepr(text[c0:c1],size=default_c_size) )
+						_append( t,U.IntRepr(i,size=len_text_digits+1),U.StrRepr(text[c0:c1],size=default_c_size) )
 					else:	
 						_append( t,i,text[c0:c1] )
 				else:
