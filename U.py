@@ -217,7 +217,7 @@ def get_multi_return_list(*names,**defaults):
 	for name,default in defaults.items():
 		r.append( get(name,default=default) )
 	return r	
-multi_get=get_multi=get_multi_return_list
+getm=multi_get=get_multi=get_multi_return_list
 
 def get_multi_return_exist_one(*names,default=GET_NO_VALUE,no_raise=True):
 	for name in names:

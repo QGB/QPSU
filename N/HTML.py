@@ -18,7 +18,7 @@ def a_href(response,u):
 	return 
 href=a_href	
 
-def list2d(response,a,file_column=None,index=False,sort_kw=U.SORT_KW_SKIP,**ka):
+def list_2d(response,a,file_column=None,index=False,sort_kw=U.SORT_KW_SKIP,debug=False,**ka):
 	file_column=U.get_duplicated_kargs(ka,'file_column','cf','fc','f_col','fcol','fcolumn',default=file_column)
 	index=U.get_duplicated_kargs(ka,'index','n','enu','add_index','enumerate',default=index)
 	sort_kw=U.get_duplicated_kargs(ka,'skw','sort','s',default=sort_kw)
@@ -34,6 +34,20 @@ def list2d(response,a,file_column=None,index=False,sort_kw=U.SORT_KW_SKIP,**ka):
 	df = pd.DataFrame(data=a)
 	html=df.to_html(index=index) 
 	
+# <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+	head='''
+<head>
+<style type="text/css">
+	table,th,td,textarea{
+		padding:0px;
+		margin:0px;
+		border:1px solid green;/*没有solid 导致分割线消失*/
+		border-spacing: 0px;
+	}
+</style> 
+</head>
+'''	
+	html=head+html
 	if py.isint(file_column):
 		if file_column <0:file_column=py.len(a[0])+file_column
 		from bs4 import BeautifulSoup
@@ -43,8 +57,10 @@ def list2d(response,a,file_column=None,index=False,sort_kw=U.SORT_KW_SKIP,**ka):
 		url_read='a=N.geta();N.flask_text_response(p,F.read(a))%23-'#有些txt文件会变下载框
 		# url_read='a=N.geta();N.html(p,F.read(a))%23-'
 		
-		
 		bs=T.BeautifulSoup(html)
+		if debug:
+			U.set('html',html)
+			U.set('bs',bs)
 		es=bs.select(f'body > table > tbody > tr > td:nth-of-type({1+file_column})')
 		for ne,e in py.enumerate(es):
 			f=a[ne][file_column]
@@ -70,7 +86,7 @@ def list2d(response,a,file_column=None,index=False,sort_kw=U.SORT_KW_SKIP,**ka):
 	response.headers['Content-Type']='text/html;charset=utf-8';
 	response.set_data(html)
 	return a
-table=l2d=list2d
+list=table=l2d=_2d_list=list2d=list_2d
 
 def everything_search_image(response,add_offset=32,**ka):
 	U.r(py,U,T,N,F,N.HTTP,N.HTML,)
@@ -82,7 +98,7 @@ def everything_search_image(response,add_offset=32,**ka):
 	request,ucode,a=N.geta(return_other_url={'url_decode':1,'%23-':1},return_request=True)
 	
 	U.set('rf',request.form )
-	if request.form.get('a',''):
+	if request.form.get('a',''):	
 		a=request.form.get('a','')
 
 	
@@ -759,7 +775,7 @@ def select(iterable,**ka):
 			# fk=lambda k: T.html_encode(repr(k))  #为啥会出现 0 ☑ q." checked > '
 			fk=lambda _k:T.html_encode(repr(_k))  
 			fv=lambda _v:T.html_encode(repr(_v)[:155-1] )# 全中文 80% 正好两行
-			# U.msgbox(list(kv)[:9])
+			# U.msgbox(py.list(kv)[:9])
 			for k,v in kv:
 				# k,v=fk(k),fv(v)
 				# U.msgbox(k,v)

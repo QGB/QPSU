@@ -1335,7 +1335,7 @@ def size_single_file(f):
 		
 get_single_file_size=single_file_size=size_single_file
 	
-def size(asf,int=py.No('ipython auto readable')): 
+def size(asf,int=py.No('ipython auto readable'),repr_size=0): 
 	'''file or path return byte count
 	not exist return -1'''
 	asf=nt_path(asf)#if linux etc ,will auto ignored
@@ -1356,7 +1356,7 @@ def size(asf,int=py.No('ipython auto readable')):
 	U=py.importU()
 	# U.msgbox(U.is_ipy_cell())
 	if not int :#and U.is_ipy_cell():
-		size=U.IntSize(size)
+		size=U.IntSize(size,size=repr_size)
 	return size 
 	
 # U.pln size(U.gst)
