@@ -839,7 +839,8 @@ def url_arg_join(url_base='',arg_dict=None):
 		
 	rs=[]
 	for k,v in arg_dict.items():
-		rs.append('{}={}'.format(k,url_encode(v)))
+		v=url_encode(py.str(v) )
+		rs.append('{}={}'.format(k,v))
 	sr='&'.join(rs)
 	return url_base+sr
 url_join_arg=join_url_arg=url_join_arg_dict=url_arg_join
@@ -892,8 +893,12 @@ def get_url_args(url,*a,default=py.No('Not found')):
 	return r
 	
 	
-def replace_url_arg(url,arg_name_or_dict,new=py.No('if dict, this no')):
+def replace_url_arg(url,arg_name_or_dict=py.No('ka or dict'),new=py.No('if dict, this no'),**ka):
 	u,d=parse_url_arg(url,return_not_arg_part=True)
+	
+	if not arg_name_or_dict and ka:
+		arg_name_or_dict=ka
+	
 	if py.isdict(arg_name_or_dict) and py.isno(new):
 		for k,v in arg_name_or_dict.items():
 			d[k]=v
@@ -907,7 +912,7 @@ def replace_url_arg(url,arg_name_or_dict,new=py.No('if dict, this no')):
 		raise py.ArgumentError('Not arg_name_or_dict',url,arg_name_or_dict,new)	
 	return u+url_arg_join(d)	
 	
-replace_url_args=replace_url_arg
+replace_url=url_replace=url_arg_replace=replace_url_args=replace_url_arg
 	
 def FileNameToURL(a):
 	'''

@@ -69,8 +69,10 @@ timeout
 	return r
 	
 AUTO_GET_PROXY=py.No(msg='auto get_proxy',no_raise=1)
-def auto_proxy_for_requests(proxies,ka):
-	''' proxies:#dict or str 均可 '''
+def auto_proxy_for_requests(proxies,ka,return_ka=False):
+	''' proxies:#dict or str 均可
+return proxies,ka
+	'''
 	U,T,N,F=py.importUTNF()
 	proxies=U.get_duplicated_kargs(ka,'proxies','proxy',default=proxies)
 	if proxies:
@@ -81,7 +83,10 @@ def auto_proxy_for_requests(proxies,ka):
 		else:
 			proxies={}
 	ka['proxies']=proxies
-	return proxies,ka
+	if return_ka:
+		return proxies,ka
+	else:
+		return proxies
 auto_proxy=auto_proxy_for_requests	
 	
 def random_headers():
@@ -97,7 +102,7 @@ def request(url,method='GET',headers=gheaders,
 '''
 	import requests
 	U,T,N,F=py.importUTNF()
-	proxies,ka=auto_proxy(proxies,ka)
+	proxies,ka=auto_proxy(proxies,ka,return_ka=True)
 	print_req=U.get_duplicated_kargs(ka,'show','print','p','print_req',default=print_req)
 	
 	if (py.istr(url) and url.upper() in HTTP_METHODS):
@@ -174,7 +179,7 @@ def download_seq(url_format,min=0,max=99,headers={},**ka):
 def download(url, file_path='',default_dir=py.No('set_input',no_raise=1),headers=None,proxies=AUTO_GET_PROXY,**ka):
 	import requests,sys,os
 	U,T,N,F=py.importUTNF()
-	proxies,ka=auto_proxy(proxies,ka)
+	proxies=auto_proxy(proxies,ka)
 	if not headers:
 		headers={}
 	
@@ -238,7 +243,7 @@ Type:	  function
 	U,T,N,F=py.importUTNF()
 
 	url=N.auto_url(url)
-	proxies,ka=auto_proxy(proxies,ka)
+	proxies,ka=auto_proxy(proxies,ka,return_ka=True)
 	
 	import requests
 	return requests.post(url,**ka)
@@ -296,7 +301,7 @@ UnicodeError: encoding with 'idna' codec failed (UnicodeError: label too long)
 	write_zero=U.get_duplicated_kargs(ka,'write0','w0','write_zero','zero',default=False)
 	print_req=U.get_duplicated_kargs(ka,'show','print','p','print_req',default=print_req)
 	
-	proxies,ka=auto_proxy(proxies,ka)
+	proxies,ka=auto_proxy(proxies,ka,return_ka=True)
 	
 	if not 'headers' in ka:ka['headers']=headers
 	
@@ -330,7 +335,7 @@ def get(url,file='',
 	url=N.auto_url(url)
 
 	show=U.get_duplicated_kargs(ka,'show','print','p','print_req',default=show)
-	proxies,ka=auto_proxy(proxies,ka)#return ka also have proxies
+	proxies=auto_proxy(proxies,ka)#only return proxies, but ka also have 
 
 	def writeFile():
 		if file:

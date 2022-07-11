@@ -956,10 +956,11 @@ rpc_get=rpc_get_var=rpcGetVariable
 		# print(self,name)
 		# return 
 		
-def rpcSetVariable(*obj,base=py.No('auto history e.g. [http://]127.0.0.1:23571[/../] '),timeout=9,varname='v',ext_cmd='',pr=False,**ka):
+def rpc_set_variable(*obj,base=py.No('auto history e.g. [http://]127.0.0.1:23571[/../] '),timeout=9,varname='v',ext_cmd='',pr=False,proxies=None,**ka):
 	U,T,N,F=py.importUTNF()
 	ext_cmd=U.get_duplicated_kargs(ka,'ext_cmd','cmd','extCmd','other_cmd',default=ext_cmd)
 	varname=U.get_duplicated_kargs(ka,'v','V','name','var_name','var',default=varname)
+	proxies=N.HTTP.auto_proxy_for_requests(proxies,ka)
 	
 	if ext_cmd:
 		if '%s'     in ext_cmd:ext_cmd=ext_cmd%varname
@@ -982,10 +983,12 @@ def rpcSetVariable(*obj,base=py.No('auto history e.g. [http://]127.0.0.1:23571[/
 	# post=requests.post
 	post=HTTP.post
 	# dill_dump=F.dill_dump
-	print(url)
-	b=post(url,verify=False,timeout=timeout,data=F.dill_dump(obj)) # data=list:TypeError: cannot unpack non-iterable int object
+	if not pr:print(url)
+	b=post(url,data=F.dill_dump(obj),verify=False,timeout=timeout,proxies=proxies) # data=list:TypeError: cannot unpack non-iterable int object
+	
 	if pr:
-		print(U.v.N.HTTP.post(url,verify=False,timeout=timeout,data=U.v.F.dill_dump(obj)) )
+		print(U.v.N.HTTP.post(url,verify=False,timeout=timeout,proxies=proxies,data=U.v.F.dill_dump(obj)) )
+		
 	if not b:return b
 	if not py.isbytes(b):
 		b=b.content
@@ -993,7 +996,7 @@ def rpcSetVariable(*obj,base=py.No('auto history e.g. [http://]127.0.0.1:23571[/
 		b= b.decode('utf-8')
 	# if py.istr:
 	return url,b
-set_rpc=set_rpc_var=rpc_set=rpc_set_var=rpcSetVariable
+set_rpc=set_rpc_var=rpc_set=rpc_set_var=rpcSetVariable=rpc_set_variable
 
 def rpc_set_file(obj,filename=py.No('if obj exists: auto '),name='v',**ka):
 	''' local_obj , remote_filename
@@ -1004,7 +1007,7 @@ def rpc_set_file(obj,filename=py.No('if obj exists: auto '),name='v',**ka):
 			filename=F.get_filename_from_full_path(obj)
 		obj=F.read_bytes(obj)
 		
-	return rpc_set_var(obj,name=name,ext_cmd='r=F.write({filename!r},%s,mkdir=True)'.format(filename=filename),**ka)
+	return rpc_set_variable(obj,name=name,ext_cmd='r=F.write({filename!r},%s,mkdir=True)'.format(filename=filename),**ka)
 
 def rpcServer(port=23571,thread=True,ip='0.0.0.0',ssl_context=(),currentThread=False,app=None,key=None,
 execLocals=None,locals=None,globals=None,

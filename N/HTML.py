@@ -8,7 +8,162 @@ else:
 	from qgb import py
 U,T,N,F=py.importUTNF()
 
-def a_href(response,u):
+def fullscreen_img(response,img):
+	if py.istr(img) and '://' in img:
+		u=img
+	else:
+		k='img-%s'%py.id(img)
+		U.set(k,img)
+		u=U.get('rpc.server.base')+f"N.img(p,U.get({repr(k)}))"
+
+	html='''
+<!doctype html>
+<html lang="en"><head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title>HTML5 Fullscreen API
+</title>
+
+<style type="text/css">
+body {
+	background-color: #f3f3f3;
+	margin: 0; /* 修复 左上 白边  【user agent stylesheet 8px】无效 */
+}
+
+.html5-fullscreen-api {
+	position: relative;
+}
+.html5-fullscreen-api img {
+	max-width: 100%;
+	border: 0px solid #fff;
+	box-shadow: 0px 0px 50px #ccc;
+}
+.html5-fullscreen-api .fs-button {
+	z-index: 100;
+	display: inline-block;
+	position: absolute;
+	top: 0px;
+	right: 0px;
+	cursor: pointer;
+}
+.html5-fullscreen-api .fs-button:after {
+	display: inline-block;
+	width: 100%;
+	height: 100%;
+	font-size: 32px;
+	font-family: 'ModernPictogramsNormal';
+	color: rgba(255,255,255,.5);
+	cursor: pointer;
+	content: "v";
+}
+.html5-fullscreen-api .fs-button:hover:after {
+	color: rgb(255,255,255);
+}
+#fullscreen:-webkit-full-screen .fs-button:after {
+	content: "X";
+}
+#fullscreen:-webkit-full-screen {
+	width: 100%;
+}
+#fullscreen:-webkit-full-screen img {
+	display: block;
+	height: 100%;
+	margin-left: auto;
+	margin-right: auto
+}
+
+#fullscreen:-moz-full-screen .fs-button:after {
+	content: "X";
+}
+#fullscreen:-moz-full-screen {
+	width: 100%;
+}
+#fullscreen:-moz-full-screen img {
+	display: block;
+	height: 100%;
+	margin-left: auto;
+	margin-right: auto;
+}
+
+img{
+		width:100%;
+		padding: 0 0 0 0;		
+		margin: 0 0 0 0;
+		
+}
+
+</style> 
+
+<script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+
+<script>
+$(document).ready(function(){
+	$('.fs-button').on('click', function(){
+		var elem = document.getElementById('fullscreen');
+
+        if (
+            document.fullscreenEnabled ||
+            document.webkitFullscreenEnabled ||
+            document.mozFullScreenEnabled ||
+            document.msFullscreenEnabled
+        ) {
+            if (
+                document.fullscreenElement ||
+                document.webkitFullscreenElement ||
+                document.mozFullScreenElement ||
+                document.msFullscreenElement
+            ) {
+                if (document.exitFullscreen) {
+                    document.exitFullscreen();
+                } else if (document.webkitExitFullscreen) {
+                    document.webkitExitFullscreen();
+                } else if (document.mozCancelFullScreen) {
+                    document.mozCancelFullScreen();
+                } else if (document.msExitFullscreen) {
+                    document.msExitFullscreen();
+                }
+            } else {
+                if (elem.requestFullscreen) {
+                    elem.requestFullscreen();
+                } else if (elem.webkitRequestFullscreen) {
+                    elem.webkitRequestFullscreen();
+                } else if (elem.mozRequestFullScreen) {
+                    elem.mozRequestFullScreen();
+                } else if (elem.msRequestFullscreen) {
+                    elem.msRequestFullscreen();
+                }
+            }
+        } else {
+            alert('Fullscreen is not supported on your browser.');
+        }
+	});
+});
+
+setTimeout(function(){
+	// $('.fs-button').click()
+},666)
+</script>
+</head>
+
+<body>
+
+<div id="fullscreen" class="html5-fullscreen-api">
+	<img src="img_url">
+	<span class="fs-button"></span>
+</div>
+
+
+</body>
+</html>
+
+'''.replace('img_url',u) # %py.locals()
+	response.headers['Content-Type']='text/html;charset=utf-8';
+	response.set_data(html)
+	return 	html
+fsimg=imgfs=fullscreen_img
+
+def a_href(response,u=''):
+	if not u:
+		u=U.cbg()
 	u=N.auto_url(u)
 	html=f"""
 <a href="{u}">{u}</a>	
@@ -16,7 +171,7 @@ def a_href(response,u):
 	response.headers['Content-Type']='text/html;charset=utf-8';
 	response.set_data(html)
 	return 
-href=a_href	
+HREF=URL=href=a_href	
 
 def list_2d(response,a,file_column=None,index=False,sort_kw=U.SORT_KW_SKIP,debug=False,**ka):
 	file_column=U.get_duplicated_kargs(ka,'file_column','cf','fc','f_col','fcol','fcolumn',default=file_column)
