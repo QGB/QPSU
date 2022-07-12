@@ -3230,9 +3230,17 @@ def float_with_default(obj,*other,default=None):
 	return FuncWrapForMultiArgs(f=better_float,args=(obj,other),default=default)
 float=float_with_default	
 
+def better_int(x,base=10):
+	'''
+	int([x]) -> integer
+int(x, base=10) -> integer
+'''
+	if py.istr(x):
+		x=x.replace(',','')
+	return py.int(x,base)
 def int_with_default(obj,*other,default=None):
 	''' FuncWrapForMultiArgs: if default!=None:'''
-	return FuncWrapForMultiArgs(f=py.int,args=(obj,other),default=default)
+	return FuncWrapForMultiArgs(f=better_int,args=(obj,other),default=default)
 int=int_with_default	
 	
 def least_common_multiple(x,y):

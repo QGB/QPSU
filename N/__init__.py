@@ -305,7 +305,7 @@ http_external_kargs={'ipinfo.io':{'encoding':'utf-8'},},
 				re.append((k,v))  # 超时3.4 还未得到结果 的不会返回 
 		return re+r
 	return d
-get_pub_ip=get_public_ip=get_public_ipv4
+get_all_pub_ip=get_pub_ip=get_public_ip=get_public_ipv4
 
 def ftp_client(cwd=py.No('history or /',no_raise=1),
 	host=py.No('auto get ftp.host',no_raise=1),port=3721,user='', passwd='',ftp_encoding='utf-8', acct='',
@@ -1061,7 +1061,7 @@ key compatibility :  key='#rpc\n'==chr(35)+'rpc'+chr(10)
 			payload = T.json_loads(_request.environ['event']['body'])
 			_request.url=_request.url_root[:-1]+payload['path']
 			code= payload['path'][1+py.len(key):]
-			# code=T.url_decode(code)
+			code=T.url_decode(code) # decode %23- to #- to ignore
 			if code.endswith('/'):code=code[:-1]
 		else:
 			if not code:code=T.url_decode(_request.url)
@@ -1306,8 +1306,8 @@ vercel : !curl -vvvik "https://vercel-django-example-ten.vercel.app/r=T.az%23-/a
 					break
 		except Exception as e:
 			return _return( py.No(e) )
-	elif py.isdict(request) and 'PATH_INFO' in request: # wsgi def app(env,start_response):
-		u=request['PATH_INFO']  #  'PATH_INFO': '/r=env%23-4/',not %2523
+	# elif py.isdict(request) and 'PATH_INFO' in request: # wsgi def app(env,start_response):
+		# u=request['PATH_INFO']  #  'PATH_INFO': '/r=env%23-4/',not %2523
 	else:
 		try:
 			u=request.url
@@ -1316,6 +1316,7 @@ vercel : !curl -vvvik "https://vercel-django-example-ten.vercel.app/r=T.az%23-/a
 		
 	U,T,N,F=py.importUTNF()
 	return_other_url =U.get_duplicated_kargs(ka,'return_other_url','return_head_code','return_url','return_head_url','return_url_head','return_front_url',default=return_other_url)
+	
 	
 	if '%23=' in u:
 		a=T.sub_tail(u,'%23=')
@@ -1333,6 +1334,16 @@ vercel : !curl -vvvik "https://vercel-django-example-ten.vercel.app/r=T.az%23-/a
 			else:
 				return _return( py.No(msg_23) )
 		a=T.sub_tail(u,'%23')
+		
+	if U.is_vercel(): #todo 速度优化
+		if a.endswith('/'):
+			a=a[:-1]
+		hs=['https:/','http:/']
+		for v in hs:
+			if v in a and v+'/' not in a:
+				a=a.replace(v,v+'/')
+		
+		
 		
 	
 	return _return(a )
