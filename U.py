@@ -1930,7 +1930,7 @@ def get_current_file_dir():
 	
 getCurrentFilePath=get_file_dir=get_current_file_dir
 	
-def pwd(p=False,display=False):
+def pwd(p=False,display=False,win=False):
 	s=os.getcwd()
 	if p or display:pln (s)
 	# try:pwd.sp=F.getsp(s)
@@ -1939,7 +1939,13 @@ def pwd(p=False,display=False):
 		pwd.sp='/'
 	s=s.replace('\\','/')
 	
-	return s+pwd.sp#带sp方便使用者拼接路径
+	r= s+pwd.sp#带sp方便使用者拼接路径
+	
+	if win:
+		r=r.replace('/','\\')
+		r=StrRepr(r)
+	
+	return r
 getCurrentPath=cwd=pwd
 	
 def random_choice(seq,size=1,repeat=0,not_repeat_max_try=9999,**ka):

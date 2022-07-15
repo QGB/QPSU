@@ -1677,7 +1677,7 @@ write success, read failed ?
 			fn=u"\\\\?\\UNC\\" + fn[2:]
 		else:
 			fn=u"\\\\?\\" + fn    
-	return fn
+	return U.StrRepr(fn)
 	
 def abs_path(file):
 	'''In [165]: gs ###notice Users/Admin

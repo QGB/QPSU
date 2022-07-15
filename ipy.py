@@ -312,6 +312,14 @@ In_index_delta=1  # In[268]==_i269	  , Out[269]
 			lsta,lend=lines,-1
 		elif len(lines)==2:
 			lsta,lend=lines
+			if lsta and py.istr(lsta):
+				for nls in py.range(py.len(gIn)-2,0-1,-1):
+					if lsta in gIn[nls]:
+						lsta=nls
+						break
+				else:# if break  else不会执行
+					raise py.ArgumentError('lines index str not found in In',lsta)
+			
 			lsta=lsta if lsta>0 else 0
 		else:raise Exception
 	except:

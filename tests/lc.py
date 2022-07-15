@@ -186,6 +186,15 @@ def get_net_traffic(rsignin,app_id=''):
  
 	return sl
 	
+	
+def del_cache(username_list):
+	mail_base=U.get_or_input('lc.mail_base')
+	U.del_set('lc.login')
+	for u in username_list:
+		f=f'C:/test/{u}{mail_base}.dill'
+		print(F.ll(f),F.delete(f))
+unset=del_cache		
+	
 def load(s,skip_err_load=0):
 	if py.istr(s):
 		ls=[i.strip() for i in s.split(',')]

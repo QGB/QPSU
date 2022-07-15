@@ -4,6 +4,8 @@ from PIL import Image
 from PIL.ImageColor import colormap
 import PIL.ExifTags
 import PIL.ImageGrab
+
+
 def read_exif(img):
 	r=img._getexif()
 	if r==None:
@@ -114,6 +116,11 @@ def cv2_image_to_bytes(img_numpy,format='png'):
 	_, img_encode = cv2.imencode(format, img_numpy)
 	img_bytes = img_encode.tobytes()
 	return img_bytes
+	
+def write_cv2_image(fn,a,format='png'):
+	b=cv2_image_to_bytes(a,format=format)
+	return F.write(fn,b)
+	
 def bytes_to_cv2_image(b):
 	import cv2,numpy
 	nparr = numpy.fromstring(b, numpy.uint8)
@@ -286,3 +293,73 @@ def cv2_draw_rect(a,rect,color):
 	a[y:y1,x]=color
 	a[y:y1,x1]=color
 	return a
+	
+	
+def read_file_as_cv2_image(file):
+	'''
+IMREAD_ANYDEPTH : 输入具有相应深度时返回 16 位/32 位图像，否则将其转换为 8 位。
+只有IMREAD_ANYDEPTH，返回8位 0-255 灰度图
+	'''
+	import cv2
+
+	image = cv2.imread(file, cv2.IMREAD_ANYCOLOR | cv2.IMREAD_ANYDEPTH)
+	return image
+	
+read_cv2_image=read_file_as_cv2_image	
+
+def trim_cv2_image(a,condition=None,direction='y',):
+	'''
+In [496]: z
+array([[ 0,  0,  0,  0],
+       [ 1,  2,  3,  4],
+       [ 5,  6,  7,  8],
+       [ 9, 10, 11, 12]])
+
+In [497]: np.where((z <11).all(axis=1))
+Out[497]: (array([0, 1, 2], dtype=int64),)
+
+In [498]: np.where((z <11).all(axis=0))
+Out[498]: (array([0, 1], dtype=int64),)
+
+
+
+'''	
+	
+	from qgb import np as Y
+	import numpy
+	if direction=='y':a=a.swapaxes(0,1) # a.T 会将shape (125, 925, 3)变成 (3, 925, 125)
+	n0=0	
+	for n,i in Y.enumerate(a):
+		if condition==None:
+			c=Y.counts(i)
+			if py.len(c)!=1:break
+		else:
+			i=condition(i)
+			if numpy.all(i):break
+		n0=n
+	n1=py.len(a)
+	for n,i in Y.enumerate(a,reverse=True):
+		if condition==None:
+			c=Y.counts(i)
+			if py.len(c)!=1:break
+		else:
+			i=condition(i)
+			if numpy.all(i):break
+		n1=n+1
+	if direction=='y':	
+		a=a.swapaxes(0,1)
+		return a[..., n0:n1]
+	return a[n0:n1,] 
+	
+strip_cv2_image=cv2_image_strip=trim_cv2_image
+
+def expand_grey_to_rgb(grey):
+	''' grey 2d int 
+return.shape x,y,3	
+	'''
+	import numpy
+	return numpy.stack([grey, grey,grey], axis=-1)  # 这个增加维度 对任意shape的都适用
+	#下面 只能从 2d 到 3d ?
+	return numpy.dstack((grey, numpy.zeros_like(grey), numpy.zeros_like(grey)))# [22,0,0]
+	return numpy.dstack((grey, grey,grey))# [22,22,22]
+	
