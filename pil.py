@@ -307,7 +307,7 @@ IMREAD_ANYDEPTH : 输入具有相应深度时返回 16 位/32 位图像，否则
 	
 read_cv2_image=read_file_as_cv2_image	
 
-def trim_cv2_image(a,condition=None,direction='y',):
+def trim_cv2_image(a,condition=None,direction='y',margin=1):
 	'''
 In [496]: z
 array([[ 0,  0,  0,  0],
@@ -327,30 +327,47 @@ Out[498]: (array([0, 1], dtype=int64),)
 	
 	from qgb import np as Y
 	import numpy
-	if direction=='y':a=a.swapaxes(0,1) # a.T 会将shape (125, 925, 3)变成 (3, 925, 125)
-	n0=0	
-	for n,i in Y.enumerate(a):
-		if condition==None:
-			c=Y.counts(i)
-			if py.len(c)!=1:break
-		else:
-			i=condition(i)
-			if numpy.all(i):break
-		n0=n
-	n1=py.len(a)
-	for n,i in Y.enumerate(a,reverse=True):
-		if condition==None:
-			c=Y.counts(i)
-			if py.len(c)!=1:break
-		else:
-			i=condition(i)
-			if numpy.all(i):break
-		n1=n+1
-	if direction=='y':	
-		a=a.swapaxes(0,1)
-		return a[..., n0:n1]
-	return a[n0:n1,] 
-	
+	if 'y' in direction:
+		m=a.shape[1]
+		n0=0
+		for n in range(m):
+			ah=a[:,:n]
+			if not condition(ah).all():
+				n0=n
+				break
+
+		n1=m-1
+		for n in range(m-1,0,-1):
+			ae=a[:,n:]
+			if not condition(ae).all():
+				n1=n
+				break
+				
+		#cols=numpy.where(condition.all(axis=0).all(axis=1))[0]
+		n0=py.max(0,n0-margin)
+		n1=py.min(m-1,n1+margin)
+
+		a= a[:,n0:n1]
+	if 'x' in direction:
+		m=a.shape[0]
+		n0=0
+		for n in range(m):
+			ah=a[:n,]
+			if not condition(ah).all():
+				n0=n
+				break
+
+		n1=m-1
+		for n in range(m-1,0,-1):
+			ae=a[n:,:]
+			if not condition(ae).all():
+				n1=n
+				break
+				
+		n0=py.max(0,n0-margin)
+		n1=py.min(m-1,n1+margin)
+		a= a[n0:n1]		
+	return a
 strip_cv2_image=cv2_image_strip=trim_cv2_image
 
 def expand_grey_to_rgb(grey):
@@ -363,3 +380,4 @@ return.shape x,y,3
 	return numpy.dstack((grey, numpy.zeros_like(grey), numpy.zeros_like(grey)))# [22,0,0]
 	return numpy.dstack((grey, grey,grey))# [22,22,22]
 	
+

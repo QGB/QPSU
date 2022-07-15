@@ -40,12 +40,18 @@ reverse:
 	else:
 		return py.enumerate(a)
 
-
-#select columns by condition from 3d array
-def select_columns(a,condition):
-	''' condition: list of bool
+def select_2d_columns(a,condition):
+	''' condition: a<11
 	'''
-	return a[:,condition]
+	idx=(...,*np.where((condition).all(axis=0)))
+	return a[idx]
+select_2d_cols=select_2d_columns
+
+def select_2d_rows(a,condition):
+	''' condition: a<11
+	'''
+	idx=(*np.where((condition).all(axis=1)),...)
+	return a[idx]
 
 def expand_2d_array(a,top=0,bottom=0,left=0,right=0,mode='constant',constant_values=0):
 	''' only support 2d array
@@ -59,3 +65,41 @@ def pad_array(a,pad_width,mode='constant',constant_values=0):
 	''' pad_width: [(d1_head,d1_tail),(d2_head,d2_tail), ...]
 	'''
 	return numpy.pad(a,pad_width,mode,constant_values=constant_values)
+
+def 一维变对角矩阵(a):
+	return numpy.diag(a)
+diag=dj=djjz=一维变对角矩阵
+
+def 二维变对角矩阵(a):
+	return numpy.diagflat(a)
+
+def slice_2d_array(a,x,y):
+	'''不能这样用 Y.slice_2d_array(d,0:5,0:5)
+SyntaxError: invalid syntax
+
+In [629]: d[0:5,0:5]
+Out[629]:
+array([[0, 0, 0, 0, 0],
+       [0, 1, 0, 0, 0],
+       [0, 0, 2, 0, 0],
+       [0, 0, 0, 3, 0],
+       [0, 0, 0, 0, 4]])
+
+In [630]: d[0:5,0:4]
+Out[630]:
+array([[0, 0, 0, 0],
+       [0, 1, 0, 0],
+       [0, 0, 2, 0],
+       [0, 0, 0, 3],
+       [0, 0, 0, 0]])
+_.shape
+ (5, 4)
+
+
+'''
+	return a[x,y]
+
+	
+
+
+
