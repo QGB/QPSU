@@ -266,12 +266,14 @@ Out[26]: 'C:/QGB/babun/cygwin/bin/qgb/'
 		return client
 		# return r.path,remote_location_bytes
 		
-def get_github_repo_directory_as_list(url,access_token=py.No('auto get_or_set_input'),return_object=True,return_str=False,return_fullpath=True,**ka):
+GITHUB_TOKEN=py.No('auto get_or_set_input')
+
+def get_github_repo_directory_as_list(url,token=GITHUB_TOKEN,return_object=True,return_str=False,return_fullpath=True,**ka):
 	'''pip install pygithub'''
 	import github
-	if not access_token:
-		access_token=U.get_or_set_input('github.access_token')
-	g=github.Github(access_token)
+	if not token:
+		token=U.get_or_set_input('github.token')
+	g=github.Github(token)
 	d=T.regex_match_named(url,T.RE_GIT_URL)
 	if not d:return d
 	repo=g.get_repo(d['user']+'/'+d['repo'])	
@@ -363,3 +365,87 @@ github_api:  path cannot end with a slash
 	#data.encode('utf-8') fix UnicodeEncodeError: 'latin-1' codec can't encoding characters  
 
 upload_github=github_upload	
+
+def github_get_repo(repo,token=GITHUB_TOKEN,**ka):
+	'''
+	pip install pygithub
+	'''
+	import github
+	token=github_get_token(token,**ka)
+	g=github.Github(token)
+	return g.get_repo(repo)
+
+def github_get_token(token=GITHUB_TOKEN,**ka):
+	'''
+	'''
+	if not token:
+		token=U.get_or_set_input('github.token')
+	return token	
+
+def github_get_branch_all_commits(repo,branch,count=90,token=GITHUB_TOKEN,**ka):
+	'''count=900 ,耗时5分钟 count=90 耗时 45秒'''	
+	repo=github_get_repo(repo,token=token,**ka)
+	branch=repo.get_branch(branch)
+	pl= repo.get_commits() # <github.PaginatedList.PaginatedList at 0x1ca808150c8> 每页 30 
+	rc=[]
+	for n,c in enumerate(pl):
+		row=c,U.StrRepr(c.raw_data['commit']['message'])
+		rc.append(row)
+
+		# print('%-5s'%n,c.sha)
+		if (n+1)>=count:break
+	return rc	
+
+	return github.Repository.Repository.get_commits()
+	return [c for c in branch.get_commits()]
+	
+GITLAB_TOKEN=py.No('GITLAB_TOKEN')
+
+def gitlab_get_brance_all_commits(repo,branch,count=90,gitlab_url='https://gitlab.com/',token=GITLAB_TOKEN,**ka):
+	'''pip install python-gitlab 
+	'''
+	import gitlab
+	gitlab_url=U.get_duplicated_kargs(ka,'gitlab_url','url','u',default=gitlab_url)
+
+	if not token:
+		token=U.get_or_set_input(gitlab_url+'.token')
+	gl=gitlab.Gitlab(gitlab_url,token)
+
+	return gl
+	repo=gl.projects.get(repo)
+	branch=repo.branches.get(branch)
+	rc=[]
+	for n,c in enumerate(branch.commits):
+		row=c,U.StrRepr(c.message)
+		rc.append(row)
+		# print('%-5s'%n,c.sha)
+		if (n+1)>=count:break
+	return rc	
+
+	return [c for c in branch.get_commits()]	
+
+def gitlab_get_repo_all_branches(repo ):
+	return repo.branches.list()
+
+def gitlab_get_all_projects(gitlab_url='https://gitlab.com/',count=None,token=GITLAB_TOKEN,**ka):
+	'''pip install python-gitlab 
+
+p.path_with_namespace 	
+	'''
+	import gitlab
+	gitlab_url=U.get_duplicated_kargs(ka,'gitlab_url','url','u',default=gitlab_url)
+
+	if not token:
+		token=U.get_or_set_input(gitlab_url+'.token')
+
+
+	gl=gitlab.Gitlab(gitlab_url)
+
+	count_is_int=py.isint(count)
+	r=[]
+	for n,p in enumerate(gl.projects.list(iterator=True)):
+		print( U.stime(),n,p.id,U.StrRepr(p.path_with_namespace,size=60),p.last_activity_at )
+		r.append(p)
+		if count_is_int and count>0 and (n+1)>=count:break
+	return r	
+gitlab_get_all_repo=gitlab_get_all_projects	

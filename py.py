@@ -164,6 +164,7 @@ is_bytes=isbytes=isbyte
 def istr(a):
 	if is2():return isinstance(a,basestring)#type(a) in (str,unicode,bytes)
 	else    :return isinstance(a,str)       #bytes is not str
+isstr=istr
 
 def isnum(a):
 	'''

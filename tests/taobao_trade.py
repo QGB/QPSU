@@ -202,7 +202,7 @@ async def get_all_pages(browser=None):
 		t=await pa.title()
 		print(fr'{n:>02d} {t[:33]:33} {pa.url[33:]:33} {py.repr(pa)[-11:] }' )
 	return ps
-async def new_page(url='https://intoli.com/blog/not-possible-to-block-chrome-headless/chrome-headless-test.html',timeout=30*1000,browser=None,url_add_timestamp=True):
+async def new_page(url='https://intoli.com/blog/not-possible-to-block-chrome-headless/chrome-headless-test.html',timeout=30*1000,browser=None,url_add_timestamp=True,user_agent=None):
 	''' Go to the ``url``.
 
 :arg string url: URL to navigate page to. The url should include
@@ -240,6 +240,10 @@ The ``Page.goto`` will raise errors if:
 		url='https://'+url
 	if '#' not in url and url_add_timestamp:
 		url+='#'+U.stime()
+	if user_agent:
+		await page.setUserAgent(user_agent);
+
+		
 	await page.goto(url,timeout=timeout)
 	return page
 	
@@ -327,11 +331,12 @@ async def scroll_page_bottom(page):
 	return await page.evaluate('window.scrollTo(0, document.body.scrollHeight || document.documentElement.scrollHeight);')
 page_scroll_bottom=scroll_page_bottom	
 
-async def get_or_new_page(url,select_tab=True,timeout=30*1000,url_add_timestamp=False):
+async def get_or_new_page(url,select_tab=True,url_add_timestamp=False,**ka):
 	tb=taobao_trade
 	pa=await tb.get_page(url)
 	if not pa:
-		pa=await tb.new_page(url,timeout=timeout,url_add_timestamp=url_add_timestamp)
+		#async def new_page
+		pa=await tb.new_page(url,url_add_timestamp=url_add_timestamp,**ka)#
 	if select_tab:
 		await pa.bringToFront()
 	return pa

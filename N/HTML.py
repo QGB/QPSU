@@ -8,6 +8,66 @@ else:
 	from qgb import py
 U,T,N,F=py.importUTNF()
 
+# def list_2d_txt_href(response,a,file_column=None,**ka):
+def google_search_result_zhihu(response,hs,u_size=36+4,**ka):
+	l2=[[T.sub(a,'href="','"'),T.html2txt(a)] for a in hs]     
+	
+	zhihu_mark='.zhihu.com/'
+	dr={}
+	lr=[]
+	for n,(u,t) in py.enumerate(l2):
+		if zhihu_mark not in u:continue
+		u=T.sub(u,zhihu_mark)
+		
+		t=T.replacey(t,['https://www.zhihu.com ›','https://www2.zhihu.com ›','http://www2.zhihu.com ›','http://www-quic.zhihu.com ›','https://zhuanlan.zhihu.com › ...','...  更多','question','answer'
+			],'').strip()
+		
+		iq=u.find('?')
+		if iq!=-1:
+			if not U.one_in(['?page='],u):
+				u=u[:iq]
+		if u in dr:
+			if '查看所有帖子'==t:continue
+			
+		U.set_dict_value_list(dr,u,t)
+		
+		t=T.replace_all_spaces(t,' ')
+		
+		lr.append([U.IntRepr(n,size=4),U.StrRepr(u,size=u_size),t])
+		
+	# lr=U.sort(lr,c=1)	
+	lr.sort(key=lambda x:x[1])
+	U.set('dr',dr)
+	if not response:
+		return lr
+	
+	def html_callback(html,head):
+		bs=T.BeautifulSoup(html)
+		es=bs.select(f'body > table > tbody > tr > td:nth-of-type({1+1})')
+		
+		t=''
+		for ne,e in py.enumerate(es):
+			u=e.text
+			ea=bs.new_tag('a')
+			ea.attrs["target"]='_blank'
+			t=T.eol.join(dr[u])
+			ea.append(t+u)
+			if '/answer/' in u:
+				u='answer/'+T.sub(u,'/answer/')
+			ea.attrs['href'  ]=f"zhihu://{u}"
+			e.clear()
+			e.append(ea)		
+			
+			
+		html=py.str(bs)
+		return html
+		
+		
+	return list_2d(response,U.col(lr,0,1),html_callback=html_callback,**ka)
+	
+	# return lr	
+zhihu=google_search_result_zhihu		
+
 def fullscreen_img(response,img):
 	if py.istr(img) and '://' in img:
 		u=img
@@ -173,14 +233,64 @@ def a_href(response,u=''):
 	return 
 HREF=URL=href=a_href	
 
-def list_2d(response,a,file_column=None,index=False,sort_kw=U.SORT_KW_SKIP,debug=False,**ka):
+
+
+
+def list_2d_txt_href(response,a,file_column=None,**ka):
 	file_column=U.get_duplicated_kargs(ka,'file_column','cf','fc','f_col','fcol','fcolumn',default=file_column)
+	def file_column_callback(html,head):
+		nonlocal file_column,a
+		if not py.isint(file_column):return html
+		
+		if file_column <0:file_column=py.len(a[0])+file_column
+		from bs4 import BeautifulSoup
+		
+		from flask import request
+		rpc_base=request.url_root[:-1]+U.get_or_set('rpc.server.base','/')
+		url_read='a=N.geta();r=F.read(a)%23-'
+		url_read='a=N.geta();N.flask_text_response(p,F.read(a))%23-'#fix 有些txt文件会变下载框
+		# url_read='a=N.geta();N.html(p,F.read(a))%23-'
+		
+		bs=T.BeautifulSoup(html)
+		# if debug:
+			# U.set('html',html)
+			# U.set('bs',bs)
+		es=bs.select(f'body > table > tbody > tr > td:nth-of-type({1+file_column})')
+		for ne,e in py.enumerate(es):
+			f=a[ne][file_column]
+			# if e.text!=f:
+				# print('#error a[',ne,file_column,'!= e.text')
+				# continue
+				
+			# e.string.replace_with(f'<a href="http://{request.remote_addr}/{f}">{f}</a>' )	
+			# U.get_or_set('es.list',[]).append(e)
+			# ea=BeautifulSoup(f'<a href=>{f}</a>'			
+			ea=bs.new_tag('a')
+			# ea.attrs['href']=f"http://{request.remote_addr}/{f}"
+			# ea.attrs['href'  ]=f"{rpc_base+url_read}{f}"
+			ea.attrs['href'  ]=f"{U.get_or_set('rpc.server.base','/')}{url_read}{f}"
+			ea.attrs["target"]='_blank'
+			ea.append(f)
+			
+			e.clear()
+			e.append(ea)		
+			
+			
+		html=py.str(bs)
+		return html
+	
+		# def file_column_callback():pass
+	return list_2d(response,a,html_callback=file_column_callback,**ka)
+		
+list_2d_txt=list_2d_txt_href
+
+list_2d_CSS_MARK='/*css*/'
+def list_2d(response,a,html_callback=None,index=False,sort_kw=U.SORT_KW_SKIP,debug=False,**ka):
 	index=U.get_duplicated_kargs(ka,'index','n','enu','add_index','enumerate',default=index)
 	sort_kw=U.get_duplicated_kargs(ka,'skw','sort','s',default=sort_kw)
 	a=U.sort(a,sort_kw=sort_kw)
 	# return a
-	from flask import request
-	
+
 	# request,ucode,urla=N.geta(return_other_url={'url_decode':1,
 	# '%23-':1
 	# },return_request=True)
@@ -199,45 +309,16 @@ def list_2d(response,a,file_column=None,index=False,sort_kw=U.SORT_KW_SKIP,debug
 		border:1px solid green;/*没有solid 导致分割线消失*/
 		border-spacing: 0px;
 	}
+	/*css*/
 </style> 
 </head>
 '''	
 	html=head+html
-	if py.isint(file_column):
-		if file_column <0:file_column=py.len(a[0])+file_column
-		from bs4 import BeautifulSoup
-		
-		rpc_base=request.url_root[:-1]+U.get_or_set('rpc.server.base','/')
-		url_read='a=N.geta();r=F.read(a)%23-'
-		url_read='a=N.geta();N.flask_text_response(p,F.read(a))%23-'#有些txt文件会变下载框
-		# url_read='a=N.geta();N.html(p,F.read(a))%23-'
-		
-		bs=T.BeautifulSoup(html)
-		if debug:
-			U.set('html',html)
-			U.set('bs',bs)
-		es=bs.select(f'body > table > tbody > tr > td:nth-of-type({1+file_column})')
-		for ne,e in py.enumerate(es):
-			f=a[ne][file_column]
-			if e.text!=f:
-				print('#error a[',ne,file_column,'!= e.text')
-				continue
-				
-			# e.string.replace_with(f'<a href="http://{request.remote_addr}/{f}">{f}</a>' )	
-			# U.get_or_set('es.list',[]).append(e)
-			# ea=BeautifulSoup(f'<a href=>{f}</a>'			
-			ea=bs.new_tag('a')
-			# ea.attrs['href']=f"http://{request.remote_addr}/{f}"
-			# ea.attrs['href'  ]=f"{rpc_base+url_read}{f}"
-			ea.attrs['href'  ]=f"{U.get_or_set('rpc.server.base','/')}{url_read}{f}"
-			ea.attrs["target"]='_blank'
-			ea.append(f)
-			
-			e.clear()
-			e.append(ea)		
-			
-			
-		html=py.str(bs)
+	if py.callable(html_callback):
+		html=html_callback(html=html,head=head)
+
+	if debug:return html
+	
 	response.headers['Content-Type']='text/html;charset=utf-8';
 	response.set_data(html)
 	return a

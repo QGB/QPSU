@@ -68,3 +68,9 @@ def backup_all_app(adb='C:/QGB/software/scrcpy-win64/adb.exe',backup_path='D:/ne
 		
 	return count
 	
+def swipe_and_click(x,y,sleep=0.5):
+	os.system('adb shell input swipe 444 1680 444 311 100')
+	U.sleep(sleep)
+	# x,y=666,840
+	os.system(f'adb shell input swipe {x} {y} {x} {y} 50')
+	

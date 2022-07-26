@@ -874,7 +874,28 @@ def set_remote_rpc_base(base=RPC_BASE_REMOTE_DEFAULT,change=True,ka=None):
 	return U.set(RPC_BASE_REMOTE,base)	
 rpc_base=change_rpc_base=get_or_set_rpc_base=get_rpc_base_remote=get_remote_rpc_base=set_rpc_base_remote=set_remote_rpc_base
 	
-	
+def rpc_iter_U_get(name,bases=None,**ka):
+	'''
+	bases= ports or urls
+	'''
+	U,T,N,F=py.importUTNF()
+
+	if not bases:
+		bases=[i[1].pid for i in N.get_rpc_port_list()]
+
+	if py.istr(bases):
+		bases=[bases]
+	r=[]	
+	for base in bases:
+		if py.isint(base):
+			base='http://127.0.0.1:{}/'.format(base)
+		u=base+'r=U.get(%r)'%name
+
+		# rq=N.HTTP.post(u)
+		rq=N.curl(u)
+		r.append([base,rq])
+	return r
+
 def rpc_copy_single_file(source,target='',base=RPC_BASE_REMOTE_DEFAULT,**ka):
 	U,T,N,F=py.importUTNF()
 	base=get_remote_rpc_base(base,ka=ka)
@@ -903,17 +924,20 @@ def rpc_copy_files(source_list_or_dict,target='',target_path_base=py.No('U.gst')
 	return  
 rpc_copy=rpc_copy_file=rpc_copy_files
 	
-def rpcGetVariable(varname,
-base=py.No('auto history e.g. [http://]127.0.0.1:23571[/../] ',no_raise=1,),
+AUTO_GET_BASE=py.No('auto history e.g. [http://]127.0.0.1:23571[/../] ',no_raise=1,)
+	
+def rpc_get_variable(varname,
+base=AUTO_GET_BASE,
 template='{base}response.set_data(F.serialize({varname}))',
-		timeout=9,p=True,return_bytes=False,**ka):
+		timeout=9,p=True,return_bytes=False,proxies=None,**ka):
 	U,T,N,F=py.importUTNF()	
 	return_bytes=U.get_duplicated_kargs(ka,'return_byte','rb','B','b','raw','raw_bytes',default=return_bytes)
-	if not base:
+	if base is AUTO_GET_BASE:
 		base=get_remote_rpc_base(change=False)
-	if base.lower() in ['input','modify','change']:
+	if not base or base.lower() in ['input','modify','change']:
 		base=get_remote_rpc_base(change=True)
 		
+	proxies=N.HTTP.auto_proxy_for_requests(proxies,ka)	
 	# if not base:raise py.ArgumentError('need base=')
 	# if T.regexMatchOne(base,':\d*$') or T.regex_count(base,'/')==2:base+='/'
 	# U.set(RPC_BASE_ REMOTE,base)
@@ -923,9 +947,9 @@ template='{base}response.set_data(F.serialize({varname}))',
 	# dill_loads=dill.loads
 	# get=requests.get
 	dill_loads=py.importF().dill_loads
-	get=HTTP.get_bytes
+	# get=HTTP.get_bytes
 	if p:print('Getting...',U.stime()[15:20+2+4],url)
-	b=get(url,verify=False,timeout=timeout)
+	b=HTTP.get_bytes(url,verify=False,timeout=timeout,proxies=proxies)
 	if not b:return b
 	if not py.isbytes(b):
 		b=b.content
@@ -939,7 +963,7 @@ template='{base}response.set_data(F.serialize({varname}))',
 		if p:print('LoadErr ##',U.stime()[15:20+2+4],repr(e))
 		else:
 			return py.No(e,url,b)
-rpc_get=rpc_get_var=rpcGetVariable
+rpc_get=rpc_get_var=rpcGetVariable=rpc_get_variable
 
 # grpc_base=''
 
@@ -1012,7 +1036,7 @@ def rpc_set_file(obj,filename=py.No('if obj exists: auto '),name='v',**ka):
 def rpcServer(port=23571,thread=True,ip='0.0.0.0',ssl_context=(),currentThread=False,app=None,key=None,
 execLocals=None,locals=None,globals=None,
 qpsu='py,U,T,N,F',importMods='sys,os',request=True,
-flaskArgs=None,
+flaskArgs=None,no_banner=False,
 	):
 	'''N.rpcServer(globals=globals(),locals=locals(),)
 	
@@ -1051,7 +1075,11 @@ key compatibility :  key='#rpc\n'==chr(35)+'rpc'+chr(10)
 		
 	from flask import Flask,make_response
 	from flask import request as _request
-	
+	if no_banner:
+		import flask.cli
+		flask.cli.show_server_banner=lambda *a,**ka:print(a,ka)
+
+
 	app=app or Flask('rpcServer'+U.stime_()   )
 	
 	def _flaskEval(code=None):
@@ -1115,6 +1143,8 @@ key compatibility :  key='#rpc\n'==chr(35)+'rpc'+chr(10)
 			flaskArgs['port']=port
 	# U.log(flaskArgs)
 	if currentThread or not thread:
+		U.set('app',app)
+		U.set(app.name,app)
 		return app.run(**flaskArgs)
 	else:
 		t= Thread(target=app.run,name='qgb thread '+app.name,kwargs=flaskArgs)
@@ -1205,6 +1235,19 @@ def get_socket_req(PORT = 65432,HOST = '127.7.7.7'):
 		return req, addr
 
 # LOG_REQ_ENABLE=py.No('')
+def flask_kill_server_in_request(pid=None):
+	U,T,N,F=py.importUTNF()
+	import socketserver
+	return U.get_objects(socketserver.BaseServer)
+	import os,signal
+	if not pid:
+		pid=os.getpid()
+
+	sig = getattr(signal, "SIGKILL", signal.SIGTERM)
+	os.kill(pid, sig)
+	
+shutdown=shutdown_flask=flask_shutdown=flask_kill_server=flask_kill_server_in_request
+
 def flask_app_route(app,rule='',view_func=None,methods=('GET','POST'),log_req=False,**ka):
 	if not rule:raise py.ArgumentError(rule)
 	

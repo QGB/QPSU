@@ -55,6 +55,15 @@ class IntSize(py.int):
 		# return 
 		# return '<{}={}>'.format(super().__repr__(),F.ssize(self) )
 	def __repr__(self):return self.__str__()
+################################
+
+def get_file_owner_username(filename):
+	''' Windows : ModuleNotFoundError: No module named 'pwd'
+	'''
+	import pwd,os
+	return pwd.getpwuid(os.stat(filename).st_uid).pw_name
+file_owner=file_username=get_file_user=get_file_username=get_file_owner_username
+	
 	
 def compress_directory(source,target=py.No('auto use source name save in U.gst'),format='zip'):
 	''' shutil.make_archive file: NotADirectoryError: [WinError 267] 目录名称无效。: './U.py'
@@ -1660,7 +1669,7 @@ def get_nt_short_path_name(long_name,max=250):
 	if not long_name.startswith( u"\\\\?\\"):
 		long_name=u"\\\\?\\"+long_name
 	return win32api.GetShortPathName(long_name)
-shortPath=short_path=get_win_short_path=win_short_path=get_windows_short_path=windows_short_path=nt_short_path=get_short_path=GetShortPath=GetShortPathName=get_nt_short_path_name
+shortPath=short_path=get_win_short_path=win_short_path=get_windows_short_path=windows_short_path=nt_short_path=get_short_path=GetShortPath=GetShortPathName=get_nt_short_path_name	
 
 def nt_path(fn):
 	'''if linux etc ,will auto ignored

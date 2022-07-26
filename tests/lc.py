@@ -88,7 +88,7 @@ def get_app_id(rsignin):
 	try:
 		return ra.json()[0]['app_id']
 	except Exception as e:
-		return py.No(ra,rsignin,msg=ra.text,)
+		return py.No(ra,rsignin,msg=f"""{rsignin.json()['email']}  {ra.text}""",)
 	 
 get_apps=get_app_id	
 
@@ -107,8 +107,9 @@ def get_all_traffic(*rs):
 	for n,rsignin in py.enumerate(rs):
 		email=rsignin.json()['email']
 		app_id=get_app_id(rsignin)
+		if not app_id:return app_id
 		headers_t = {'x-xsrf-token': rsignin.cookies['XSRF-TOKEN'],
-			'x-lc-id': get_app_id(rsignin),
+			'x-lc-id': app_id,
 			}
 		rt = requests.get('https://us-w1-console-api.leancloud.app/1.1/engine/stats/outbound-traffic', headers=headers_t, params=params,cookies=rsignin.cookies)
 		for k,v in rt.json()[0]['dps'].items():
@@ -193,7 +194,7 @@ def del_cache(username_list):
 	for u in username_list:
 		f=f'C:/test/{u}{mail_base}.dill'
 		print(F.ll(f),F.delete(f))
-unset=del_cache		
+reset=unset=del_cache		
 	
 def load(s,skip_err_load=0):
 	if py.istr(s):

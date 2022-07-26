@@ -21,6 +21,8 @@ else:
 		print(urllib,ei)
 		py.importU().repl()
 user_agent='Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/59.0.2171.95 Safari/537.36'
+user_agent_iphone=r'Mozilla/5.0 (iPhone; CPU iPhone OS 15_3_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/15.3 Mobile/15E148 Safari/604.1'
+
 gheaders=headers={'User-Agent': user_agent}
 
 def thread_pool_request(targets,max_workers=None,request_ka={},print_log=False,**ka):
@@ -135,6 +137,31 @@ def request(url,method='GET',headers=gheaders,
 	return requests.request(**ka)
 requests=request
 
+def auto_method(method,ka,return_ka=False):
+	if method:
+		r=method
+	else:
+		if 'method' in ka:
+			r=ka['method']
+		else:
+			r='GET'
+	if return_ka:		
+		ka['method']=r
+		r=r,ka
+	else:
+		if 'method'	in ka:
+			ka.pop('method')		
+	
+	return r
+	
+def get_json(u,proxies=AUTO_GET_PROXY,method='GET',**ka):
+	import requests
+	proxies,ka=auto_proxy(proxies,ka,return_ka=True) # def auto_proxy_for_requests
+	method,ka=auto_method(method,ka,return_ka=True)
+	r=requests.request(url=u,**ka)
+	
+	return r.json()
+	
 def download_one_page_list(url,headers={},**ka):
 	U,T,N,F=py.importUTNF()
 	
@@ -246,7 +273,10 @@ Type:	  function
 	proxies,ka=auto_proxy(proxies,ka,return_ka=True)
 	
 	import requests
-	return requests.post(url,**ka)
+	try:
+		return requests.post(url,**ka)
+	except Exception as e:
+		return py.No(e)
 
 def get_str(url,**ka ,):
 	T=py.importT()

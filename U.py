@@ -873,7 +873,7 @@ iterable 的元素,没有特殊处理
 	if py.len(a)==0:#print (end='233') #233
 		write(end)
 		if flush:
-			if getattr(file,'flush',None):file.flush()
+			if py.getattr(file,'flush',None):file.flush()
 # in npp pythonScript :  AttributeError: 'Console' object has no attribute 'flush' 
 		return
 	if py.len(a)==1:
@@ -1119,7 +1119,7 @@ hashlib.algorithms_available 一个集合，其中包含在所运行的 Python �
 	'''
 	import hashlib   
 	hexdigest_args=get_duplicated_kargs(ka,'hexdigest_args',default=[])
-	myhash = getattr(hashlib,hash_func)()
+	myhash = py.getattr(hashlib,hash_func)()
 	if file:
 		f = py.open(file,'rb')
 		while True:
@@ -1465,6 +1465,7 @@ def pop(d,k):
 pop(_63,25)  #_63 has change
 
 '''
+	if not ka:return default
 	if not py.isdict(ka):raise py.ArgumentError('ka should be a dict,but get',ka)
 	r=[]
 	for i in keys:
@@ -1815,7 +1816,7 @@ class __wrapper(object):
 	def __getattr__(self, name):
 		try:
 			
-			return getattr(self.wrapped, name)
+			return py.getattr(self.wrapped, name)
 		except AttributeError:
 			return 'default' # Some sensible default
 	
@@ -2091,7 +2092,8 @@ def sort(a,column=None, cmp=None, key=None, reverse=False,add_index=False,sort_k
 		return ''.join(a)
 	else:
 		return a
-def sortDictV(ad,key=lambda item:item[1],des=True):
+		
+def dict_sort_value(ad,key=lambda item:item[1],des=True):
 	'''des True,,, python dict key auto sort ?'''
 	if type(ad) is not dict:return {}
 	return sorted(ad.items(),key=key,reverse=True)
@@ -2104,6 +2106,8 @@ def sortDictV(ad,key=lambda item:item[1],des=True):
 
 # d=sortDictV(d)
 # exit()
+sortDictV=sort_dict_value=dict_sort_value
+
 def dictToList(a):
 	return py.list(a.items())
 
@@ -2195,7 +2199,7 @@ def calltimes_return_string(a=''):
 	return py.str(calltimes(a=a))
 sct=scount=calltimes_return_string	
 	
-def calltimes(a=''):
+def calltimes(a='',int_size=0):
 	'''U.ct.clear.__dict__
 	'''
 	a='_count_%s' % T.string(a).__hash__()
@@ -2204,7 +2208,10 @@ def calltimes(a=''):
 	else:
 		_ct_clear.__dict__[a]=stime() # 记录首次 初始化的时间，并且只更新不删除？
 		calltimes.__dict__[a]=0
-	return calltimes.__dict__[a]
+	n= calltimes.__dict__[a]
+	
+	if int_size:n=IntRepr(n,size=int_size)
+	return n
 ct=count=counter=calltimes
 def _ct_clear():
 	r=calltimes.__dict__
@@ -2258,7 +2265,7 @@ def setStd(name,file):
 	if py.len(name)<4:name='std'+name
 	d=py.globals()
 	if d.has_key('__'+name) and d['__'+name]:
-		old=getattr(sys,name)
+		old=py.getattr(sys,name)
 		old.close()
 		py.execute('''sys.{0}=file'''.format(name))
 	else:
@@ -2281,7 +2288,7 @@ def resetStd(name=''):
 		
 	try:
 		sm=globals()[name]
-		stdm=getattr(sys,std)
+		stdm=py.getattr(sys,std)
 	except Exception as e:
 		setErr(e)
 		return False
@@ -2386,9 +2393,14 @@ def add(*a):
 		else:
 			raise NotImplementedError('not num type')
 	return r		
-def max_len(*a,return_value=False,return_index=False,**ka):
+def min_len(*a,**ka):
+	return max_len(*a,im=None,cmp=lambda n,im:n<im,**ka)
+	
+def max_len(*a,return_value=False,return_index=False,im=-1,cmp=lambda n,im:n>im,**ka):
 	'''  max( *map(len,U.col(lr,5)) ) 
 max_len(dict)==max_len(dict.keys())	
+
+
 	'''
 	return_index=get_duplicated_kargs(ka,'index','i','n','enumerate',default=return_index)
 	
@@ -2396,13 +2408,17 @@ max_len(dict)==max_len(dict.keys())
 		a=a[0]
 		if py.isdict(a):
 			a=py.list(a.keys())
+		elif py.islist(a) or py.istuple(a):
+			pass
 		else:
 			a=flat(a)
-	im=-1
+	# im=-1
 	v=c_index=py.No('a is empty?',no_raise=1)
 	for index,i in enumerate(a):
+		if im==None and index==0:
+			im=len(i)
 		n=len(i)
-		if n>im:
+		if cmp(n,im):
 			im=n
 			v=i
 			c_index=index
@@ -2454,7 +2470,7 @@ def dir_show_in_html(a,b='chrome',console=False,call=False):
 	r='';v='';vi=-1
 	for i,k in py.enumerate(d):
 		try:
-			v=getattr(a,k,'Error getattr')#py.eval('a.{0}'.format(k))			
+			v=py.getattr(a,k,'Error getattr')#py.eval('a.{0}'.format(k))			
 			vi=len(v)
 			# import pdb;pdb.set_trace()
 			# if py.callable(v):
@@ -2504,6 +2520,25 @@ pa=printattr=printAttr=html_dir=htmlDir=dir_show_in_html
 # repl()
 # printAttr(5)
 
+def dir_getattr(a,sub='__closure__'):
+	U=py.importU()
+	cs=py.dir(a)
+	No=U.StrRepr('')
+	rvc=[]
+	for n,c in enumerate(cs):
+		row=[U.IntRepr(n,size=4),U.StrRepr(c,size=42),]
+		try:
+			v=py.getattr(a,c)
+		except Exception as e:
+			row.append(e)
+		else:	
+			vc=py.getattr(v,sub,No)
+			row.append(vc)
+		if vc:
+			row.append(vc[0].cell_contents)
+		rvc.append(row)
+	return rvc
+	
 def dir(a,type_filter=py.No('default not filter'),raw_value=False,**ka):
 	'''
 	[attr_]filter='',
@@ -2521,7 +2556,7 @@ def dir(a,type_filter=py.No('default not filter'),raw_value=False,**ka):
 	err=py.No("#can't getattr ")
 	for i in attrs:
 		ok=True
-		v=getattr(a,i) # py.getattr(a,i,err)
+		v=py.getattr(a,i) # py.getattr(a,i,err)
 		if (not raw_value) and i in {'f_builtins','__builtins__'}:
 			v='{} : {}'.format(py.len(v),py.type(v) )
 		if (not raw_value) and i in {'f_globals','f_locals'}:
@@ -2562,7 +2597,7 @@ def dirValue(a=None,filter='',type=None,recursion=False,depth=2,timeout=6,__ai=0
 			if a==None:
 				tmp=dr[i]
 			else:
-				tmp=getattr(a,i,'!Error getattr')#py.eval('a.'+i)
+				tmp=py.getattr(a,i,'!Error getattr')#py.eval('a.'+i)
 			if tmp in dirValue.cache:r[i]=('!cache',tmp);continue
 			else:dirValue.cache.append(tmp)
 			if recursion:
@@ -2820,7 +2855,12 @@ sg.bind(#vars 如何处理，详细研究下 )
 	
 get_arg=get_args=getargspec=getargs=getarg=getArgs=get_args_dict=getArgsDict=get_function_args_dict =get_caller_args=get_caller_args_dict
 
-def getattr(object, *names,default=None):
+def getattr(obj,*other,name='',default=None):
+	'''TypeError: getattr() takes no keyword arguments'''
+	#    def FuncWrapForMultiArgs
+	return FuncWrapForMultiArgs(f=py.getattr,args=(obj,other),f_a=(name,default),)
+
+def getattr_multi_name(object, *names,default=None):
 	''' py2.7 
   File "qgb/U.py", line 1613
 	def getattr(object, *names,default=None):                                                        
@@ -2833,12 +2873,14 @@ SyntaxError: invalid syntax
 		if py.len(names)<=1:
 			return r
 		else:
-			return getattr(r, *names[1:],default=None) # 多重取值，保留出错信息
+			return getattr_multi_name(r, *names[1:],default=None) # 多重取值，保留出错信息
 	except Exception as e:
 		if default==None:
 			return py.No(e,object,names)
 		else:
 			return default
+# getattr=
+getattr_multi_name
 			
 #npp funcList 不索引注释
 def enumerate(a,start=0,ignore_no=False,index_size=0,**ka):#todo 设计一个 indexList类，返回 repr 中带有index，用下标访问与普通list一样
@@ -3680,7 +3722,7 @@ def exit(i=2357,msg=''):
 	print(msg)
 	os._exit(i)
 
-def get_modules_dict_by_file(fileName,return_list=False):
+def get_modules_dict_by_file(fileName,return_list=False,return_one_module=False):
 	'''
 	return dict {sname:mod ...}
 return_list=True : only return [mods]
@@ -3704,6 +3746,8 @@ return_list=True : only return [mods]
 			dr[name]=mod
 	# if py.len(r)==1:return r[0]
 	if not dr:return py.No('can not found {} in sys.modules __file__ '.format(fileName),dnf)
+	if return_one_module and py.len(dr)==1:
+		return py.list(dr.values())[0]
 	if return_list:
 		return py.list(dr.values())
 	return dr
@@ -3763,11 +3807,12 @@ def get_modules_by_path(modPath=None):
 	else:return   ['U', 'T', 'N', 'F', 'py', 'ipy', 'Win', 'Clipboard']
 get_qpsu_all_modules=get_modules_by_path
 
-def get_all_modules_list(mods=py.No('default all'),name_padding=57):
+def get_all_modules_list(mods=py.No('default all'),name_padding=57,index=True,**ka):
 	'''
 57 : requests.packages.urllib3.packages.six.moves.urllib.parse
 '''	
 	U,T,N,F=py.importUTNF()
+	index=U.get_duplicated_kargs(ka,'index','i','n','enumerate','enu',default=index)
 	ms=sys.modules.items()
 	if mods:
 		if py.istr(mods):
@@ -3777,9 +3822,15 @@ def get_all_modules_list(mods=py.No('default all'),name_padding=57):
 		
 		if py.islist(mods) and py.istr(mods[0]):
 			ms=[(k,v) for k,v in sys.modules.items() if k in mods()]
+	r=[]	
+	for n,(k,v) in enumerate(ms):
+		row=[U.StrRepr(k,size=name_padding),v]
+		if index:
+			row.insert(0,U.IntRepr(n,size=4))
 		
-	return [[StrRepr(k,size=name_padding),v] for k,v in ms]
-getMods=get_mods=get_modules=getAllMod=getAllModules=getAllMods=get_all_modules_list
+		r.append(row)
+	return r
+get_all_modules=getMods=get_mods=get_modules=getAllMod=getAllModules=getAllMods=get_all_modules_list
 
 def getModPathForImport():
 	return getModPath(qgb=False)
@@ -3935,15 +3986,17 @@ for builtin_function_name in ['bin','bool','callable','chr','hex','id','max','mi
 def {0}(obj,*other):return FuncWrapForMultiArgs(f=py.{0},args=(obj,other))
 	'''.format(builtin_function_name) )		
 	
-def FuncWrapForMultiArgs(f,args,default=None,index=False,f_ka={}):
+def FuncWrapForMultiArgs(f,args,default=None,index=False,f_ka=None,f_a=py.tuple(),):
 	'''Exception return py.No'''
 	obj,other=args ########## other is tuple
 	all=py.list(other)
 	all.insert(0,obj)
+	if not f_ka:f_ka={}
+	
 	r=[]
 	for n,i in py.enumerate(all):
 		try:
-			r1=f(i,**f_ka)
+			r1=f(i,*f_a,**f_ka)
 		except Exception as e:
 			if default!=None:
 				r1=default
@@ -4250,6 +4303,9 @@ pid=0, name='System Idle Process', cmdline=[]
 		if py.isint(pid) and pid>=0:
 			if pid==i.pid:r.append(i)
 			continue# 找到 找不到 ，都下一条
+		if py.islist(pid):
+			if i.pid in pid:r.append(i)
+			continue
 		if py.isint(ppid) and ppid>=0:
 			if ppid==i.ppid():r.append(i)
 			continue
@@ -4401,7 +4457,10 @@ def kill(*ps,caseSensitive=True,confirm=True,**ka):
 	return r		
 			
 
-def get_process_all_modules_by_pid(pid,only_name=0):
+def get_process_all_modules_by_pid(pid,only_name=0,only_path=0):
+	''' rss: aka “Resident Set Size”, this is the non-swapped physical memory a process has
+rss：又名“驻留集大小”，这是进程使用的非交换物理内存。在 UNIX 上，它匹配“top”的 RES 列）。在 Windows 上，这是wset字段的别名，它匹配 taskmgr.exe 的“Mem Usage”列。
+	'''
 	import psutil
 	try:
 		p = psutil.Process( pid )
@@ -4411,6 +4470,8 @@ def get_process_all_modules_by_pid(pid,only_name=0):
 	if only_name:
 		F=py.importF()
 		r=[F.get_filename_from_full_path(i.path) for i in r] 
+	if only_path:	
+		r=[i.path for i in r] 
 	return r  
 	# for dll in p.memory_maps():
 	# print(dll.path)
@@ -4519,7 +4580,7 @@ def vscode(a='',lineno=0,auto_file_path=True,get_cmd=False,
 	if isWin():
 		executor = get('vscode_win',level=gd_sync_level['system'])
 		if not executor:
-			vscp=ps('code.exe')
+			vscp=ps(name=r'Code',cmd=r'\Code')
 			if vscp:
 				executor=vscp[0].cmdline()[0]
 				set('vscode_win',executor,level=gd_sync_level['system'])
@@ -4797,7 +4858,7 @@ def extract_variable(a,dsf=0,p=0):
 	import _ast
 	# if not isinstance(a,_ast.AST):
 	for k in a._fields:
-		v=getattr(a,k)
+		v=py.getattr(a,k)
 		if py.istr(v):
 			# dict_key_count_plus_1(dsf,k)
 			add_dict_value_set(dsf,k,v)
@@ -4872,7 +4933,7 @@ def getModule(modName=None,surfixMatch=True):
 		modName=modName[4:]
 		return getModule(modName)
 	return ()
-get_obj_module=get_module=getmod=getMod=getModule
+get_mod=get_obj_module=get_module=getmod=getMod=getModule
 
 def test():
 	pln('sys.path *U* :',[i for i in sys.modules if 'U' in i])
@@ -5655,7 +5716,7 @@ def set_system_volume(a):
 	else:
 		raise py.ArgumentUnsupported(a)
 	return nircmd( 'setsysvolume',a )
-vol=volume=volume_change=changesysvolume=setVol=setVolume=et_vol=setvolumn=set_volumn=set_volume=set_system_volumn=set_system_volume
+setvol=vol=volume=volume_change=changesysvolume=setVol=setVolume=et_vol=setvolumn=set_volumn=set_volume=set_system_volumn=set_system_volume
 
 def save(a,name=0):
 	if not iswin():raise NotImplementedError()
@@ -5707,13 +5768,12 @@ def unique(iterable,count=False,return_list=False,**ka):
 		if i not in r:r.append(i)
 	return r
 
-def get_column_from_2D_list(matrix, *col_index,no=None):
+def get_column_from_2D_list(matrix, *col_index,skip_IndexError=False,skip_col=None):
 	if not col_index:raise py.ArgumentError('need *col_index ')
 	
-	if py.isint(no):pass
-		# no=[no]
+	if py.isint(skip_col):pass
 	else:	
-		if not no      :no=None
+		if not skip_col:skip_col=None
 	
 	
 	
@@ -5722,18 +5782,24 @@ def get_column_from_2D_list(matrix, *col_index,no=None):
 	
 	for row in matrix:
 		# if no:
-#U.col(U.get('req_log'),0,1) 想到这个需求，如果列表中有列数不同的行，取相对值 ，比如说无论列数跳过最后 一列,no=-1。
+#U.col(U.get('req_log'),0,1) 想到这个需求，如果列表中有列数不同的行，取相对值 ，比如说无论列数跳过最后 一列,skip_col=-1。
 			# for n in no:
 				# if n<0:n=py.len(row)+n 
 				# if n==
 		if m==1:
-			l=row[col_index[0]]
+			i=col_index[0]
+			if skip_IndexError and 	i>=py.len(row):
+				continue
+			l=row[i]
 		else:
 			l=[]
 			for i in col_index:
-				if no!=None:
-					if no<0:no=py.len(row)+no
-					if i==no:continue
+				if skip_col!=None:
+					if skip_col<0:skip_col=py.len(row)+skip_col
+					if i==skip_col:continue
+				if skip_IndexError and 	i>=py.len(row):
+					l.append(py.No('IndexError'))
+					continue
 				l.append(row[i])
 		r.append(l)
 	return r	
@@ -6291,7 +6357,7 @@ def rgb_tuple_to_integer(rgb,g=None,b=None):
 	return rgb[2]*256*256+rgb[1]*256+rgb[0]
 color2int=color_to_int=color3_to_int=rgb2i=rgb_to_int=rgb_to_integer=rgb_tuple_to_integer
 
-def rgb_name(r,g=None,b=None,hex_format='0x%02x_%02x_%02x',color_comment=True):
+def rgb_name(r,g=None,b=None,hex_format='0x%02x_%02x_%02x',color_comment=True,str_repr=False):
 	if not py.isint(r):
 		if g==None and b==None:
 			if py.istr(r):
@@ -6315,6 +6381,9 @@ def rgb_name(r,g=None,b=None,hex_format='0x%02x_%02x_%02x',color_comment=True):
 			name=hex+' #'+webcolors.rgb_to_name(rgb)
 		except ValueError:
 			pass
+	if str_repr:	
+		if not py.isint(str_repr):str_repr=30
+		name=StrRepr(name,size=str_repr)
 	return name
 i2srgb=int2srgb=int_to_srgb=color_name=rgb_name			
 	

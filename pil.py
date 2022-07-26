@@ -5,6 +5,18 @@ from PIL.ImageColor import colormap
 import PIL.ExifTags
 import PIL.ImageGrab
 
+color10=[
+ [(0  , 0  , 0  ), '0x00_00_00 #black'],
+ [(0  , 0  , 255), '0x00_00_ff #blue'],
+ [(0  , 255, 0  ), '0x00_ff_00 #lime'],
+ [(0  , 255, 255), '0x00_ff_ff #cyan'],
+ [(128, 0  , 128), '0x80_00_80 #purple'],
+ [(128, 128, 128), '0x80_80_80 #gray'],
+ [(255, 0  , 0  ), '0xff_00_00 #red'],
+ [(255, 0  , 255), '0xff_00_ff #magenta'],
+ [(255, 255, 0  ), '0xff_ff_00 #yellow'],
+ [(255, 255, 255), '0xff_ff_ff #white']]
+
 
 def read_exif(img):
 	r=img._getexif()
@@ -307,7 +319,7 @@ IMREAD_ANYDEPTH : 输入具有相应深度时返回 16 位/32 位图像，否则
 	
 read_cv2_image=read_file_as_cv2_image	
 
-def trim_cv2_image(a,condition=None,direction='y',margin=1):
+def trim_cv2_image(a,condition=None,direction='x',margin=2):
 	'''
 In [496]: z
 array([[ 0,  0,  0,  0],
@@ -327,7 +339,10 @@ Out[498]: (array([0, 1], dtype=int64),)
 	
 	from qgb import np as Y
 	import numpy
-	if 'y' in direction:
+	# 获取边界
+	# def get_edge(m,)
+
+	if 'x' in direction:
 		m=a.shape[1]
 		n0=0
 		for n in range(m):
@@ -348,7 +363,7 @@ Out[498]: (array([0, 1], dtype=int64),)
 		n1=py.min(m-1,n1+margin)
 
 		a= a[:,n0:n1]
-	if 'x' in direction:
+	if 'y' in direction:
 		m=a.shape[0]
 		n0=0
 		for n in range(m):
@@ -367,7 +382,7 @@ Out[498]: (array([0, 1], dtype=int64),)
 		n0=py.max(0,n0-margin)
 		n1=py.min(m-1,n1+margin)
 		a= a[n0:n1]		
-	return a
+	return a.copy()
 strip_cv2_image=cv2_image_strip=trim_cv2_image
 
 def expand_grey_to_rgb(grey):
@@ -380,4 +395,63 @@ return.shape x,y,3
 	return numpy.dstack((grey, numpy.zeros_like(grey), numpy.zeros_like(grey)))# [22,0,0]
 	return numpy.dstack((grey, grey,grey))# [22,22,22]
 	
+def match_char(image,char,show=False):
+	import cv2,numpy,numpy as np
+	from qgb import pil
+	U.set_gst('C:/test/cv2',cd=1)
 
+	img=pil.new_font_img(char,size=12,w=6,h=12)
+	t2d=pil.pil_to_cv2(img)
+	# image = cv2.imread('large.png')
+	#image=image[0:60,0:30-6]
+
+	ts=t2d.shape
+	t=numpy.full(shape=(*ts,3),fill_value=255).astype('u1')
+	mask=numpy.zeros(shape=ts).astype('u1')
+	for x,y in np.ndindex(ts):
+		if t2d[x,y]!=255:
+			mask[x,y]=255
+			t[x,y]=0
+
+
+	print(image.shape, image.dtype)	
+	print(t2d.shape, t2d.dtype)
+	print(mask.shape, mask.dtype)
+	trows,tcols = template.shape[:2]
+	result = cv2.matchTemplate(image, t, cv2.TM_SQDIFF, None, )
+
+	import numpy
+	import numpy as np
+	a,b=np.min(result),np.max(result)
+	de=b-a
+	ts=result.shape
+	t=numpy.full(shape=(*ts,3),fill_value=255).astype('u1')
+	tc=t.copy()
+	mask=numpy.zeros(shape=ts).astype('u1')
+	for x,y in np.ndindex(ts):
+		di=result[x,y]-a
+		tc[x,y]=t[x,y]=round( (di/de)*255)
+		if np.all(t[x,y]<20):
+			cv2.rectangle(image, (y,x),(y+tcols,x+trows),(0,0,255),1)
+			cv2.rectangle(tc, (y-3,x-6),(y+tcols-3,x+trows-6),(0,0,255),1)
+	#        print('0==t  %s,%s'%(x,y) )
+
+	mn,_,mnLoc,_ = cv2.minMaxLoc(result)
+
+	# Draw the rectangle:
+	# Extract the coordinates of our best match
+	MPx,MPy = mnLoc
+
+	# Step 2: Get the size of the template. This is the same size as the match.
+	#trows,tcols = template.shape[:2]
+
+	# Step 3: Draw the rectangle on large_image
+	cv2.rectangle(image, (MPx-1,MPy-1),(MPx+tcols,MPy+trows),(0,0,255),1)
+	if show:
+		# cv2.imwrite('rect.bmp',image)
+		# Display the original image with the rectangle around the match.
+		cv2.imshow('output',image)
+
+		# The image is only displayed if we call this
+		cv2.waitKey(0)
+	return image	

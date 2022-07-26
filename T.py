@@ -1051,7 +1051,7 @@ def filter_html(text):
 	return re.compile(RE_HTML_TAG).sub('', text)
 html_filter=filter_html
 
-def html2text(html,baseurl='',ignore_images=True,ignore_links=True,):
+def html2text(html,baseurl='',ignore_images=True,ignore_links=True,str_repr=False):
 	try:
 		from html2text import HTML2Text
 	except:
@@ -1061,7 +1061,12 @@ def html2text(html,baseurl='',ignore_images=True,ignore_links=True,):
 	h=HTML2Text(baseurl=baseurl)
 	h.ignore_images=ignore_images
 	h.ignore_links=ignore_links
-	return h.handle(py.str(html)) # beautifulSoup raise Exception None
+	r= h.handle(py.str(html)) # beautifulSoup raise Exception None
+	
+	if str_repr:
+		U=py.importU()
+		r=U.StrRepr(r)
+	return r
 h2t=html2txt=html_to_text=html2text
 
 def html_prettify(html, formatter="html5",p=py.No('auto')):
@@ -1116,7 +1121,7 @@ def BeautifulSoup(html='',file='',cache=False):
 	if cache and file:
 		return U.set(file,bs)
 	return bs
-bs=beautifulSoup=BeautifulSoup
+bs=beautifulsoup=beautifulSoup=BeautifulSoup
 
 def readableTimeText(txt,browser=False):
 	U=py.importU()
@@ -1785,9 +1790,9 @@ def json_dump_to_file(obj,file,**ka):
 '''
 	import json
 	U,T,N,F=py.importUTNF()
-	file=U.get_duplicated_kargs(ka,)
+	file=U.get_duplicated_kargs(ka,'file','f','fp',default=file)
 	try:
-		with F.open(file) as f:
+		with F.open(file,'w') as f:
 			return json.dump(obj ,fp=f )
 	except Exception as e:
 		return py.No(e)
