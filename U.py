@@ -583,7 +583,16 @@ u1604:  IPython repl  ok	,  bash python -c error  ?
 		#  0
 # u1604 # /bin/sh: 1: Syntax error: end of file unexpected
 	def tmux_capture_pane(session=0,max_lines=9999,socket='',**ka):
-		''' unset TMUX '''
+		''' unset TMUX 
+
+-S 套接字路径
+	   指定服务器套接字的完整替代路径。
+	   如果指定了 -S，则默认套接字目录为
+	   未使用并且任何 -L 标志都将被忽略。	
+		Specify a full alternative path to the server socket.
+		If -S is specified, the default socket directory is
+		not used and any -L flag is ignored.
+		'''
 		U,T,N,F=py.importUTNF()
 		session=U.get_duplicated_kargs(ka,'session','sess',default=session)
 		max_lines=U.get_duplicated_kargs(ka,'max_lines','max','m','n','S','s',default=max_lines)
@@ -592,10 +601,11 @@ u1604:  IPython repl  ok	,  bash python -c error  ?
 		
 		if (not socket) and U.is_root() and U.is_termux():
 			socket=[f for f in F.ls('/data/data/com.termux/files/usr/var/run/',r=1) if U.all_in(['tmux','default'],f)][0]
-		
-		
+		if socket and not socket.startswith('-S')
+			socket='-S '+socket.strip()
+			
 		os.environ['TMUX']=''
-		rs=U.isipy().getoutput(f'tmux capture-pane -S {socket} -{max_lines} -t {session}:{a};tmux show-buffer'#.format(max_lines=max_lines,session=session,window=a))# 不能用 U.cmd
+		rs=U.isipy().getoutput(f'tmux {socket} capture-pane -S -{max_lines} -t {session}:{a};tmux show-buffer'#.format(max_lines=max_lines,session=session,window=a))# 不能用 U.cmd
 		return T.EOL.join(rs)
 	tmux=tmuxc=tmuxcap=tmuxcapture=tmuxCapture=tmux_capture=tmux_capture_pane
 	
