@@ -557,6 +557,8 @@ u1604:  IPython repl  ok	,  bash python -c error  ?
 	
 	'''
 	def is_root():
+		''' windows 没有 AttributeError: module 'os' has no attribute 'getuid'
+		'''
 		return os.getuid()==0
 	isroot=isRoot=is_root
 	
@@ -580,15 +582,20 @@ u1604:  IPython repl  ok	,  bash python -c error  ?
 			# [1]
 		#  0
 # u1604 # /bin/sh: 1: Syntax error: end of file unexpected
-	def tmux_capture_pane(session=0,max_lines=9999,**ka):
+	def tmux_capture_pane(session=0,max_lines=9999,socket='',**ka):
 		''' unset TMUX '''
 		U,T,N,F=py.importUTNF()
 		session=U.get_duplicated_kargs(ka,'session','sess',default=session)
 		max_lines=U.get_duplicated_kargs(ka,'max_lines','max','m','n','S','s',default=max_lines)
 		
 		a=N.geta()
+		
+		if (not socket) and U.is_root() and U.is_termux():
+			socket=[f for f in F.ls('/data/data/com.termux/files/usr/var/run/',r=1) if U.all_in(['tmux','default'],f)][0]
+		
+		
 		os.environ['TMUX']=''
-		rs=U.isipy().getoutput('tmux capture-pane -S -{max_lines} -t {session}:{window};tmux show-buffer'.format(max_lines=max_lines,session=session,window=a))# 不能用 U.cmd
+		rs=U.isipy().getoutput(f'tmux capture-pane -S {socket} -{max_lines} -t {session}:{a};tmux show-buffer'#.format(max_lines=max_lines,session=session,window=a))# 不能用 U.cmd
 		return T.EOL.join(rs)
 	tmux=tmuxc=tmuxcap=tmuxcapture=tmuxCapture=tmux_capture=tmux_capture_pane
 	

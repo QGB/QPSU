@@ -77,15 +77,20 @@ dns=set_dns=set_dns_server
 
 
 def change_user(uid, gid=None):
+	'''
+check_output(['id'], preexec_fn=change_user(pwd.getpwnam('u0_a131').pw_uid), env={})	
+
+android 必须 3003 才能访问 网络 
+	'''
 	import os
-    if gid is None:
-        gid = uid
-    def preexec_fn():
-        os.setgid(gid)
-        os.setgroups([gid])
-        os.setuid(uid)
-    return preexec_fn
-from subprocess import check_output	
-print(check_output(['id']))
-print(check_output(['id'], preexec_fn=change_user(pwd.getpwnam('u0_a131').pw_uid), env={}))
-print(check_output(['id']))
+	if gid is None:
+		gid = uid
+	def preexec_fn():
+		os.setgid(gid)
+		os.setgroups([gid,3003]) 
+		os.setuid(uid)
+	return preexec_fn
+# from subprocess import check_output	
+# print(check_output(['id']))
+# print()
+# print(check_output(['id']))
