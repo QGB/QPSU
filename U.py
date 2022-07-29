@@ -1309,7 +1309,11 @@ def all_in(vs,*t):
 	'''for i in vs:i all_in t 
 	U.all_in(py.list(string),T.PATH_NAME)  
 	
-	(1,2,3,[t])	or	([vs].[t])'''
+	(1,2,3,[t])	or	([vs].[t])
+	
+U.all_in(['3',''],T._09) == ['3', ''] # 空字符 不影响结果
+	
+	'''
 	if not hasattr(vs, '__iter__'):vs=[vs]
 	if len(t)==1:
 		t=t[0]
