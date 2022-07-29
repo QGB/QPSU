@@ -2583,12 +2583,10 @@ def dir(a,type_filter=py.No('default not filter'),raw_value=False,**ka):
 	err=py.No("#can't getattr ")
 	for i in attrs:
 		ok=True
-		v=py.getattr(a,i) # py.getattr(a,i,err)
-		if (not raw_value) and i in {'f_builtins','__builtins__'}:
-			v='{} : {}'.format(py.len(v),py.type(v) )
-		if (not raw_value) and i in {'f_globals','f_locals'}:
-			v='{} : {}'.format(py.len(v),' '.join(v) )
-		# if not py.issubclass(type_filter,py.No):# 这里很奇怪，这样判断 type_filter始终不是py.No
+		try:
+			v=py.getattr(a,i) # py.getattr(a,i,err)
+		except Exception as e:
+			v=py.No(e)
 		if type_filter:
 			# 类型过滤 ,过滤只剩type_filter类型（如果指定了的话）        只要满足以下一条 就ok
 			ok=False
@@ -2601,6 +2599,11 @@ def dir(a,type_filter=py.No('default not filter'),raw_value=False,**ka):
 				ok=1
 			else:ok=0
 			
+		if (not raw_value) and i in {'f_builtins','__builtins__'}:
+			v='{} : {}'.format(py.len(v),py.type(v) )
+		if (not raw_value) and i in {'f_globals','f_locals'}:
+			v='{} : {}'.format(py.len(v),' '.join(v) )
+		# if not py.issubclass(type_filter,py.No):# 这里很奇怪，这样判断 type_filter始终不是py.No
 		if ok:rv.append([py.len(rv),i,v])
 	return rv
 
