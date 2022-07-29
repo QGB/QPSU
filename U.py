@@ -600,7 +600,13 @@ u1604:  IPython repl  ok	,  bash python -c error  ?
 		a=N.geta()
 		
 		if (not socket) and U.is_root() and U.is_termux():
-			socket=[f for f in F.ls('/data/data/com.termux/files/usr/var/run/',r=1) if U.all_in(['tmux','default'],f)][0]
+			pt=U.ps(name='tmux: server')[0]
+			username=pt.username()
+			if username.startswith('u0_a'):
+				username=username[4:]
+			else:
+				username=''
+			socket=[f for f in F.ls('/data/data/com.termux/files/usr/var/run/',r=1) if U.all_in(['tmux','default',username],f)][0]
 		if socket and not socket.startswith('-S'):
 			socket='-S '+socket.strip()
 			
