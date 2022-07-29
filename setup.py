@@ -5,7 +5,7 @@ print('#'*99,find_packages())
 setup(
     name="qgb",
     version="0.1",
-    packages=['qgb'],
+    packages=['qgb','qgb.N'],
     package_dir={
         'qgb': '.',
         'qgb.N': './N',
