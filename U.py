@@ -2571,6 +2571,7 @@ def dir(a,type_filter=py.No('default not filter'),raw_value=False,**ka):
 	[attr_]filter='',
 	skip
 	'''
+	U=py.importU()
 	if py.istr(type_filter):type_filter=type_filter.lower()
 	filter=get_duplicated_kargs(ka,'filter','keyFilter','key_filter','attr_filter','attrFilter')
 	skip=get_duplicated_kargs(ka,'skip','skipKey','key_skip','skip_key','attr_skip','attrSkip')
@@ -2583,10 +2584,11 @@ def dir(a,type_filter=py.No('default not filter'),raw_value=False,**ka):
 	err=py.No("#can't getattr ")
 	for i in attrs:
 		ok=True
-		try:
-			v=py.getattr(a,i) # py.getattr(a,i,err)
-		except Exception as e:
-			v=py.No(e)
+		# try:
+			# v=py.getattr(a,i) # py.getattr(a,i,err)
+		# except Exception as e:
+			# v=py.No()
+		v=U.getattr(a,name=i)
 		if type_filter:
 			# 类型过滤 ,过滤只剩type_filter类型（如果指定了的话）        只要满足以下一条 就ok
 			ok=False
