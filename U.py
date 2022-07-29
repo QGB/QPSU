@@ -601,7 +601,7 @@ u1604:  IPython repl  ok	,  bash python -c error  ?
 		
 		if (not socket) and U.is_root() and U.is_termux():
 			socket=[f for f in F.ls('/data/data/com.termux/files/usr/var/run/',r=1) if U.all_in(['tmux','default'],f)][0]
-		if socket and not socket.startswith('-S')
+		if socket and not socket.startswith('-S'):
 			socket='-S '+socket.strip()
 			
 		os.environ['TMUX']=''
