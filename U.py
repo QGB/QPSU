@@ -605,7 +605,7 @@ u1604:  IPython repl  ok	,  bash python -c error  ?
 			socket='-S '+socket.strip()
 			
 		os.environ['TMUX']=''
-		rs=U.isipy().getoutput(f'tmux {socket} capture-pane -S -{max_lines} -t {session}:{a};tmux show-buffer'#.format(max_lines=max_lines,session=session,window=a))# 不能用 U.cmd
+		rs=U.isipy().getoutput(f'tmux {socket} capture-pane -S -{max_lines} -t {session}:{a};tmux show-buffer')#.format(max_lines=max_lines,session=session,window=a))# 不能用 U.cmd
 		return T.EOL.join(rs)
 	tmux=tmuxc=tmuxcap=tmuxcapture=tmuxCapture=tmux_capture=tmux_capture_pane
 	
