@@ -41,7 +41,7 @@ if target_base_url:print( config(target_base_url) )
 
 ips=F.dill_load('ips') or []
 ipsn=F.dill_load('ipsn') or []
-gblock_ip,gwrite_req=F.dill_load('gblock_ip,gwrite_req') or (False,True)
+gblock_ip,gwrite_req=F.dill_load('gblock_ip,gwrite_req') or (False,False)
 
 def target_to_flask_response(target,response=None,flask_request=None):
 	global base_host

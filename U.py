@@ -3845,6 +3845,7 @@ def get_all_modules_list(mods=py.No('default all'),name_padding=57,index=True,**
 '''	
 	U,T,N,F=py.importUTNF()
 	index=U.get_duplicated_kargs(ka,'index','i','n','enumerate','enu',default=index)
+	name_padding=U.get_duplicated_kargs(ka,'name_padding','l','list','name','padding',default=name_padding)
 	ms=sys.modules.items()
 	if mods:
 		if py.istr(mods):
@@ -3862,7 +3863,7 @@ def get_all_modules_list(mods=py.No('default all'),name_padding=57,index=True,**
 		
 		r.append(row)
 	return r
-get_all_modules=getMods=get_mods=get_modules=getAllMod=getAllModules=getAllMods=get_all_modules_list
+get_all_mod=get_all_mods=get_all_modules=getMods=get_mods=get_modules=getAllMod=getAllModules=getAllMods=get_all_modules_list
 
 def getModPathForImport():
 	return getModPath(qgb=False)
@@ -4211,7 +4212,7 @@ File:      c:\qgb\anaconda3\lib\site-packages\keyboard\__init__.py'''
 
 key_action=key_actions=system_actions=system_action=sys_act=sys_acts=sys_actions=sys_action=simulate_system_actions
 
-def get_all_env(return_list=False,index=False,**ka):
+def get_all_envs(return_list=False,index=False,**ka):
 	U=py.importU()
 	return_list=U.get_duplicated_kargs(ka,'list','l','return_list',default=return_list)
 	index=U.get_duplicated_kargs(ka,'index','i','n',default=index)
@@ -4238,7 +4239,7 @@ def get_all_env(return_list=False,index=False,**ka):
 		return rl	
 
 	return r
-envs=get_all_env	
+envs=get_all_env=get_all_envs
 	
 def set_env_path(append=[],delete=[]):
 	# if not p :raise py.ArgumentError()
