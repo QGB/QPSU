@@ -388,7 +388,7 @@ def search_return_position(text,*targets,case_sensitive=True,a=0,b=0,c=0,default
 	r=[]
 	d={}
 	def _append(t,i,sub=''):
-		if dict:
+		if return_dict:
 			if sub:
 				U.dict_add_value_list(d,t,(i,sub))
 			else  :U.dict_add_value_list(d,t,i)
@@ -1625,7 +1625,7 @@ def bytes_to_base64(a,encoding='utf-8'):
 		return base64.b64encode(a)
 b64encode=base64_encode=bytesToBase64=bytes_to_base64
 		
-def base64_to_str(a,return_bytes=py.No('avoid argument conflict'),return_str=True):
+def base64_decode_return_string(a,return_bytes=py.No('avoid argument conflict'),return_str=True):
 	import base64
 	# if not (return_bytes^return_str): # a^b==False # a,b相等
 		# raise py.ArgumentError('return_bytes==return_str')
@@ -1638,7 +1638,7 @@ def base64_to_str(a,return_bytes=py.No('avoid argument conflict'),return_str=Tru
 	else:	
 	# if py.istr(a):
 		return detectAndDecode(base64.b64decode(a))
-b64decode=base64Decode=base64_decode=base64decode=b64_str=base64_to_str	
+b64decode=base64Decode=base64_decode=base64decode=b64_str=base64_to_str=base64_decode_return_str=base64_decode_return_string	
 
 def base64_to_bytes(a):
 	import base64

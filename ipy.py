@@ -274,7 +274,7 @@ except Exception as _e{0}:U.pln({0},_e{0})'''
 gsavelist=gsave_dict=gsave_list=gdTimeName=U.get_or_set(__name__+'.save_file_list',{})
 gIgnoreIn=[ u'from qgb import *',u'ipy.',u'get_ipython()']
 # U.cdt()
-gsavePath=U.gst+'ipy/'
+gsavePath=U.get_or_set('ipy.save_path',U.gst+'ipy/')
 # U.cd('ipy')
 # U.pln U.pwd()
 F.md(gsavePath)
@@ -302,6 +302,8 @@ Out[303]: 'page=pa=await tb.get_or_new_page(U.cbg(e=1))'
 	
 In_index_delta=1  # In[268]==_i269	  , Out[269]
 	'''
+	global gsavePath
+	gsavePath=U.get('ipy.save_path')
 	del_other=U.get_duplicated_kargs(ka,'delOther','delete','delattr',default=del_other)
 	In_index_delta=U.get_duplicated_kargs(ka,'In_index_delta','in_index_delta','index_delta','in_delta','delta_in',default=In_index_delta)
 	if ka:raise py.ArgumentError('没有处理这个ka，是不是多传了参数',ka)
@@ -405,7 +407,7 @@ In_index_delta=1  # In[268]==_i269	  , Out[269]
 			if py.len(pout) > out_max:
 				pout='#Warning#  len(pout)={} > out_max'.format(py.len(pout))
 				print( '#ipy.save In[{}]{}# len(pout)={} > out_max'.format(i,gIn[i],py.len(pout)) )
-			if v.splitlines()[-1].strip().startswith('#'):
+			if '#' in v.splitlines()[-1].strip():
 				out_head_char=T.eol
 			else:out_head_char=';'
 				
