@@ -172,13 +172,13 @@ pip install astor
 	co=sys._getframe().f_back.f_code
 	dvars={}
 	for index_a,e in  enumerate(ast.walk(U.getAST(co) )  ):
-		da={i:getattr(e,i) for i in dir(e) if not i.startswith('_') } 
+		da={i:py.getattr(e,i) for i in dir(e) if not i.startswith('_') } 
 		
 		# if index==1:break
 		if ('value' in da) and py.isinstance( e.value,ast.Call):
 			#ipy.*dump*()
-			if U.getattr(e.value,'func','value','id')=='ipy' and \
-				('dump' in U.getattr(e.value,'func','attr').lower() ):
+			if U.getattr_multi_name(e.value,'func','value','id')=='ipy' and \
+				('dump' in U.getattr_multi_name(e.value,'func','attr').lower() ):
 				# print(index_a, da,'\n================\n')
 				# U.set(e.value.args)
 				for i,var in py.enumerate(e.value.args):

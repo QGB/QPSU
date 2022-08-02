@@ -42,6 +42,16 @@ else:
 	from SimpleHTTPServer import SimpleHTTPRequestHandler
 	from BaseHTTPServer import HTTPServer as _HTTPServer
 
+
+def http_server(PORT):
+	import http.server
+	import socketserver
+	Handler = http.server.SimpleHTTPRequestHandler
+	with socketserver.TCPServer(("", int(PORT)), Handler) as httpd:
+		print("serving at port", PORT)
+		httpd.serve_forever()
+
+
 def get_all_pid_equal_port():
 	global U,T,N,F
 	U,T,N,F=py.importUTNF()

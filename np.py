@@ -59,7 +59,7 @@ bottom	= 0
 
 	'''
 	return numpy.pad(a,[(top,bottom),(left,right)],mode,constant_values=constant_values)
-pad=pad2d=expand_array	
+pad=pad2d=expand_array=expand_2d_array
 
 def pad_array(a,pad_width,mode='constant',constant_values=0):
 	''' pad_width: [(d1_head,d1_tail),(d2_head,d2_tail), ...]

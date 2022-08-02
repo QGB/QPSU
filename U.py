@@ -2449,12 +2449,18 @@ max_len(dict)==max_len(dict.keys())
 			im=n
 			v=i
 			c_index=index
-		
-	if return_value:
-		return v
+	r=[]
 	if return_index:
-		return c_index
-	return im
+		r.append(c_index)
+	if return_value:
+		r.append(v)
+	if not r:	
+		return im
+	if py.len(r)==1:
+		return r[0]
+	else:
+		return r
+		
 maxLen=max_len	
 	
 def minLen(*a):
@@ -2923,6 +2929,7 @@ def enumerate(a,start=0,ignore_no=False,index_size=0,**ka):#todo 设计一个 in
 	
 	'''
 	ignore_no=get_duplicated_kargs(ka,'n','ignore_none','ignoreNull',default=ignore_no)
+	start=get_duplicated_kargs(ka,'start','base','base_index',default=start)
 	r=[]
 	# index=start
 	for i,v in py.enumerate(a):
@@ -3784,7 +3791,7 @@ return_list=True : only return [mods]
 		return py.list(dr.values())
 	return dr
 	
-mbf=modByFile=mod_by_file=getModByf=getModf=getModByF=getModF=getmbf=getmf=modulesByFile=getModsByFile=getModulesByFile=get_module_by_file=get_modules_by_file=get_module_dict_by_file=get_modules_dict_by_file
+mbf=modByFile=mod_by_file=getModByf=getModf=getModByF=getModF=getmbf=getmf=modulesByFile=getModsByFile=getModulesByFile=get_mod_by_file=get_module_by_file=get_modules_by_file=get_module_dict_by_file=get_modules_dict_by_file
 	
 def getModsBy__all__(modPath=None):
 	r=[]
@@ -4732,7 +4739,13 @@ sdate=stoday=getdatestr=getDateStr
 # sys.argv=['display=t','pressKey=t','clipboard=f']
 def getAST(mod):
 	import ast,inspect
-	return ast.parse(inspect.getsource(mod))
+	try:
+		source=inspect.getsource(mod)
+	except Exception as e:  # OSError: could not get source code
+		U=py.importU()
+		source=U.decompile(mod)
+	
+	return ast.parse(source)
 getModAST=getAST
 
 def rebuild_function_call_self_args_str(a,cbs=False):
@@ -4785,7 +4798,7 @@ def get_source(a):
 			sw= uncompyle6.uncompyle6.code_deparse(a,out=out)
 			s=out.getvalue()
 			lines=s.splitlines()
-			if 'def ' not in lines[0] and lines[1][0] not in [T.tab,T.space] :
+			if 'def ' not in lines[0] and py.len(lines)>1 and lines[1][0] not in [T.tab,T.space] :
 				if [i for i in lines if i.startswith(T.tab)] :indent=T.tab
 				else:indent=T.space*4
 				# sw.indent_more()
@@ -4794,8 +4807,8 @@ def get_source(a):
 				for n,l in py.enumerate(lines):
 					s+=indent+l+T.eol
 				return s
-			return out.getvalue()+sw.text
 			return s
+			return out.getvalue()+sw.text
 	return inspect.getsource(a) # module, class, method, function, traceback, frame, or code object
 decompile=getsource=get_mod_source=getSource=get_source
 
@@ -5500,13 +5513,18 @@ setErr( gError 还是要保留，像这种 出错 是正常流程的一部分，
 getDictNestedValue=getNestedValue=get_nested_value=get_nested_one_value
 	
 	
-def dict_get_nested_multi_keys_return_dict(d,*keys,**defaults):
+def dict_get_nested_multi_keys_return_dict(d,*keys,return_all_exclude=[],**defaults):
 	'''( k,[k0,v[k0_0,...]],)
 	# if py.istr(d) or py.isbyte()
 	'''
-	if not (isgen(d) or py.islist(d) or py.istuple(d) or py.isdict(d)) or (not keys) :
+	if not (isgen(d) or py.islist(d) or py.istuple(d) or py.isdict(d)):# or (not keys) :
 		return d
 	dr={}
+	if return_all_exclude and not keys:
+		for k,v in d.items():
+			if k in return_all_exclude:continue
+			dr[k]=v
+			
 	for k in keys:
 		if py.islist(k):
 			if py.len(k)==0:
@@ -6978,6 +6996,13 @@ def get_all_indexes_of_sub_seq(all,sub):
 	return [(i, i+lb) for i in py.range(py.len(all)) if all[i:i+lb] == sub]
 is_sub_seq=get_all_indexes_of_sub_seq
 ############## qgb type ######################	
+def StrRepr_multi(*a,**ka): # ,wrap=StrRepr
+	r=[]
+	for i in a:
+		r.append(StrRepr(i,**ka))
+	return r
+multi_StrRepr=strrepr_multi=StrRepr_multi
+
 def object_custom_repr(obj, *a, **ka):
 	'''
 In [1306]: float U.obj_repr(2.3,repr=3)

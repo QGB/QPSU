@@ -8,6 +8,33 @@ else:
 	from qgb import py
 U,T,N,F=py.importUTNF()
 
+def get_or_input_html(response,*name):
+	v= U.get(name[0],)
+	# if not v:
+		# raise v
+	# print(v)	
+	return v	
+def xiaomi_air_conditioner_control(response=None,token=py.No('auto get'),t=0):
+	if not token:token=get_or_input_html(response,'miio.token')
+	if not token:return
+	
+	import miio
+	d=U.get_or_set(token,
+			lazy_default=lambda:miio.device.Device(ip='192.168.1.4',token=token),
+		)	
+		
+	if not t:t=261
+		
+	if t<16:t=16
+	if t<33:t=t*10
+		
+	if t<160:t=160
+	if t>320:t=320
+	
+	d.send("set_temperature", [t] )	
+	return d
+ac=xiaomi_air_conditioner_control	
+
 # def list_2d_txt_href(response,a,file_column=None,**ka):
 def google_search_result_zhihu(response,hs,u_size=36+4,**ka):
 	l2=[[T.sub(a,'href="','"'),T.html2txt(a)] for a in hs]     
@@ -384,7 +411,7 @@ white-space: nowrap;
 overflow-y: hidden;
 }
 textarea.img_path{
-	font-size:1.5vh;
+	font-size:1.5vh; /*相对 屏幕高度*/
 	direction: rtl; /*
 		text-align: right;
 		

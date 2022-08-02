@@ -6,16 +6,74 @@ import PIL.ExifTags
 import PIL.ImageGrab
 
 color10=[
- [(0  , 0  , 0  ), '0x00_00_00 #black'],
- [(0  , 0  , 255), '0x00_00_ff #blue'],
- [(0  , 255, 0  ), '0x00_ff_00 #lime'],
- [(0  , 255, 255), '0x00_ff_ff #cyan'],
- [(128, 0  , 128), '0x80_00_80 #purple'],
- [(128, 128, 128), '0x80_80_80 #gray'],
- [(255, 0  , 0  ), '0xff_00_00 #red'],
- [(255, 0  , 255), '0xff_00_ff #magenta'],
- [(255, 255, 0  ), '0xff_ff_00 #yellow'],
- [(255, 255, 255), '0xff_ff_ff #white']]
+ [(0  , 0  , 0  ), '0x00_00_00','#000000','black'  ],
+ [(0  , 0  , 255), '0x00_00_ff','#0000ff','blue'   ],
+ [(0  , 255, 0  ), '0x00_ff_00','#00ff00','lime'   ],
+ [(0  , 255, 255), '0x00_ff_ff','#00ffff','cyan'   ],
+ [(128, 0  , 128), '0x80_00_80','#800080','purple' ],
+ [(255, 0  , 0  ), '0xff_00_00','#ff0000','red'    ],
+ [(128, 128, 128), '0x80_80_80','#808080','gray'   ],
+ [(255, 0  , 255), '0xff_00_ff','#ff00ff','magenta'],
+ [(255, 255, 0  ), '0xff_ff_00','#ffff00','yellow' ],
+ [(255, 255, 255), '0xff_ff_ff','#ffffff','white'  ]]
+
+def get_max_distance_color_from_color10(color,return_distance=False):
+	'''
+black   yellow  101.20397657762743 #2
+blue    yellow  103.42734340936836 #1
+lime    magenta 111.4155485492564  #3
+cyan    black   90.52994557259021  #
+purple  lime    108.45317555822828 #
+red     lime    86.60838088768512  #
+gray    yellow  43.96422414898059  #
+magenta lime    111.4155485492564  #1
+yellow  blue    103.42734340936836 #3
+white   black   99.99998490203575  #	
+	'''
+	d10={}
+	for c in color10:
+		d10[c[-1]]=color_distance(color,c[0])
+
+	name=py.max(d10, key=d10.get)
+	if return_distance:
+		return name,d10[name]
+	return name
+
+def color_distance(c1,c2):
+	'''
+In [48]: pil.color_distance('#808080','black')
+Out[48]: 39.93446113669445
+
+In [49]: pil.color_distance('#808080','grey')
+Out[49]: 0.0
+
+In [50]: pil.color_distance('#808080','white')
+Out[50]: 33.238953926863736
+
+In [51]: pil.color_distance('#7f7f7f','white')
+Out[51]: 33.591543369973444
+
+In [52]: pil.color_distance('#818181','grey')
+Out[52]: 0.3778491589507859	
+	'''
+	from colormath.color_objects import sRGBColor, LabColor
+	from colormath.color_conversions import convert_color
+	from colormath.color_diff import delta_e_cie2000
+
+	# Red Color
+	color1_rgb = sRGBColor(*U.color_to_rgb_tuple(c1), is_upscaled=True);
+	color2_rgb = sRGBColor(*U.color_to_rgb_tuple(c2), is_upscaled=True);
+
+
+	# Convert from RGB to Lab Color Space
+	color1_lab = convert_color(color1_rgb, LabColor);
+
+	# Convert from RGB to Lab Color Space
+	color2_lab = convert_color(color2_rgb, LabColor);
+
+	# Find the color difference
+	delta_e = delta_e_cie2000(color1_lab, color2_lab);
+	return delta_e
 
 
 def read_exif(img):

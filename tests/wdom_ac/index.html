@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,shrink-to-fit=no"/>
+<link rel="shortcut icon" href="./favicon.png"/>
+<title>wdom_ac</title>
+<script src="./vendor/viz/viz-1.8.0.min.js" type="javascript/worker"></script>
+
+<style id="css" type="text/css">
+input{
+	width:98%;
+	
+}
+
+#pt{
+	
+}
+
+.wrapper {
+  display: table-cell;
+  vertical-align: bottom;
+    height: 80vh;
+    width: 100vw;
+}
+.content {
+	width:100%;
+  overflow: auto;
+  display: flex;
+flex-direction: column;
+}
+</style>
+
+<!-- 
+
+mix-blend-mode: difference;
+
+color:yellow; /*doc.body.style.backgroundColor='grey' 看不见*/
+color:white;
+
+display: flex;
+flex-direction: column;
+justify-content: flex-end;
+
+
+flex-wrap: wrap-reverse;
+flex-direction: row-reverse;
+justify-content: center;
+ -->
+	
+
+<body>
+
+
+<div class="wrapper">
+  <div class="content">
+
+
+<button id="exit">exit</button>
+<hr>
+<hr>
+<hr>
+<input type="range" min="16" max="32" step="0.1" value="50" class="slider" id="t">
+<p>temperature: <span  id="pt"></span></p>
+
+
+<button id="fullscreen" onclick="document.documentElement.requestFullscreen()">fullscreen</button>
+<button id="exitFullscreen" onclick="document.exitFullscreen()">exitFullscreen</button>
+
+
+  </div>
+</div>  
+
+</body>
+</html>

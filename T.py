@@ -107,6 +107,26 @@ try:
 	from pprint import pprint,pformat
 except:pass
 ####################################################
+def pdf_to_text_generator(filename,):
+	r''' pip install PyPDF2
+	
+AttributeError: function/symbol 'ARC4_stream_init' not found in library 'C:\QGB\Anaconda3\lib\site-packages\Crypto\Util\..\Cipher\_ARC4.cp37-win_amd64.pyd': error 0x7f
+https://github.com/py-pdf/PyPDF2/issues/1192
+	
+'''
+	import PyPDF2
+	reader=PyPDF2.PdfReader(filename)
+	# text = ""
+	for page in reader.pages:
+		# text += page.extract_text() + "\n"
+		yield page.extract_text() #+ page_splitor
+	return 
+pdf_to_text_gen=pdf_to_text_generator
+
+def pdf_to_text(filename,page_splitor='\n'):
+	return page_splitor.join(pdf_to_text_generator(filename))
+pdf2txt=pdf2text=pdf_to_txt=pdf_to_text
+
 def zh_convert(a,lang='zh-cn'):
 	''' zh-cn 大陆简体; zh-tw 台灣正體; zh-hk 香港繁體
 u'元旦快樂'	
