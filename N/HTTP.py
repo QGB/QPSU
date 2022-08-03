@@ -292,6 +292,7 @@ def get_bytes(url,file='',
 		bytes_with_response=True,
 		url_as_file=False,
 		skip_if_exist=False,
+		return_only_filename=False,
 		**ka ,):
 	'''
 url格式不对时：
@@ -316,6 +317,9 @@ UnicodeError: encoding with 'idna' codec failed (UnicodeError: label too long)
 
 	url=N.auto_url(url)
 	file=U.get_duplicated_kargs(ka,'file','f','filename',default=file)
+	if not file and not url_as_file and return_only_filename:
+		url_as_file=True
+	
 	if not file and url_as_file:
 		pf=T.sub(T.url_decode(url),'://',)
 		ps=[T.file_legalized(pi) for pi in pf.split('/')]
@@ -326,30 +330,32 @@ UnicodeError: encoding with 'idna' codec failed (UnicodeError: label too long)
 	if file and skip_if_exist:
 		fsize=F.size(file)	
 		if fsize:
+			if return_only_filename:return file
 			return U.object_custom_repr(py.No(file),repr='{}{}'.format(fsize,file)  )
+	else:	
+		write_zero=U.get_duplicated_kargs(ka,'write0','w0','write_zero','zero',default=False)
+		print_req=U.get_duplicated_kargs(ka,'show','print','p','print_req',default=print_req)
 		
-	write_zero=U.get_duplicated_kargs(ka,'write0','w0','write_zero','zero',default=False)
-	print_req=U.get_duplicated_kargs(ka,'show','print','p','print_req',default=print_req)
-	
-	proxies,ka=auto_proxy(proxies,ka,return_ka=True)
-	
-	if not 'headers' in ka:ka['headers']=headers
-	
-	import requests
-	try:
-		if print_req:print(U.v.requests.get(url,verify=verify,timeout=timeout,**ka))
-		#,headers=U.StrRepr(U.pformat(headers)
-		p= requests.get(url,verify=verify,timeout=timeout,**ka)
-		b=p.content
-		f=repr(b[:77])[2:-1]
-		if file and (b or write_zero):
-			f=F.write(file,b)
-		bo= U.object_custom_repr(b,repr='{}{}'.format(F.readable_size(b),f)  )
-		if bytes_with_response:
-			bo.p=bo.response=p
-		return bo
-	except Exception as e:
-		return py.No(e)
+		proxies,ka=auto_proxy(proxies,ka,return_ka=True)
+		
+		if not 'headers' in ka:ka['headers']=headers
+		
+		import requests
+		try:
+			if print_req:print(U.v.requests.get(url,verify=verify,timeout=timeout,**ka))
+			#,headers=U.StrRepr(U.pformat(headers)
+			p= requests.get(url,verify=verify,timeout=timeout,**ka)
+			b=p.content
+			f=repr(b[:77])[2:-1]
+			if file and (b or write_zero):
+				f=F.write(file,b)
+			if return_only_filename:return f
+			bo= U.object_custom_repr(b,repr='{}{}'.format(F.readable_size(b),f)  )
+			if bytes_with_response:
+				bo.p=bo.response=p
+			return bo
+		except Exception as e:
+			return py.No(e)
 getb=getByte=getBytes=get_byte=get_bytes
 
 def get(url,file='',

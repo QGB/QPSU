@@ -1095,8 +1095,8 @@ def read_xls_sheets_name(file):
 get_xls_sheets_name=read_xls_sheets_name
 	
 	
-	
-def read_sqlite(file,table='',sql="SELECT * FROM {};"):
+SQL_DEFAULT="SELECT * FROM {};"	
+def read_sqlite(file,table='',sql=SQL_DEFAULT):
 	file=autoPath(file)
 	if table:sql=sql.format(table)
 	import sqlite3
@@ -1105,8 +1105,8 @@ def read_sqlite(file,table='',sql="SELECT * FROM {};"):
 		cursor.execute("SELECT name FROM sqlite_master WHERE type='table';")
 		#[('sessions',), ('sqlite_sequence',), ('history',), ('output_history',)]
 		tables=[i[0] for i in cursor.fetchall()]
-		if table:
-			if not (table in tables):return py.No('no table',table,'found in',file)
+		if table or sql!=SQL_DEFAULT:
+			# if not (table in tables):return py.No('no table',table,'found in',file)
 			cursor.execute(sql )
 			return cursor.fetchall()
 		else:

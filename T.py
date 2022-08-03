@@ -107,13 +107,18 @@ try:
 	from pprint import pprint,pformat
 except:pass
 ####################################################
-def pdf_to_text_generator(filename,):
+def pdf_to_text_generator(filename_or_url,**ka):
 	r''' pip install PyPDF2
 	
 AttributeError: function/symbol 'ARC4_stream_init' not found in library 'C:\QGB\Anaconda3\lib\site-packages\Crypto\Util\..\Cipher\_ARC4.cp37-win_amd64.pyd': error 0x7f
 https://github.com/py-pdf/PyPDF2/issues/1192
 	
 '''
+	if '://' in filename_or_url:
+		U,T,N,F=py.importUTNF()
+		filename=N.HTTP.get_bytes(filename_or_url,return_only_filename=True,skip_if_exist=True,**ka)
+	else:
+		filename=filename_or_url
 	import PyPDF2
 	reader=PyPDF2.PdfReader(filename)
 	# text = ""

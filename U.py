@@ -4741,7 +4741,7 @@ def getAST(mod):
 	import ast,inspect
 	try:
 		source=inspect.getsource(mod)
-	except Exception as e:  # OSError: could not get source code
+	except Exception as e:  # OSError: could not get source code  # 常发生于 ipdb
 		U=py.importU()
 		source=U.decompile(mod)
 	

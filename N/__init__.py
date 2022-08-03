@@ -42,6 +42,16 @@ else:
 	from SimpleHTTPServer import SimpleHTTPRequestHandler
 	from BaseHTTPServer import HTTPServer as _HTTPServer
 
+def udp_send(ip,data=b'',port=0,timeout=9):
+	if ':' in ip:
+		ip,port=ip.split(':')
+	import socket
+	s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+	s.settimeout(timeout)
+	try:
+		s.sendto(m, (ip, port))
+	except OSError as ex:
+		return py.No(ex)
 
 def http_server(PORT):
 	import http.server
