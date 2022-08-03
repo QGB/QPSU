@@ -116,7 +116,7 @@ https://github.com/py-pdf/PyPDF2/issues/1192
 '''
 	if '://' in filename_or_url:
 		U,T,N,F=py.importUTNF()
-		filename=N.HTTP.get_bytes(filename_or_url,return_only_filename=True,skip_if_exist=True,**ka)
+		filename=N.HTTP.get_bytes(filename_or_url,return_only_filename=True,skip_if_exist=True,print_req=True,**ka) #if file exist, no print_req
 	else:
 		filename=filename_or_url
 	import PyPDF2
@@ -126,7 +126,7 @@ https://github.com/py-pdf/PyPDF2/issues/1192
 		# text += page.extract_text() + "\n"
 		yield page.extract_text() #+ page_splitor
 	return 
-pdf_to_text_gen=pdf_to_text_generator
+pdf2text_gen=pdf_to_text_gen=pdf_to_text_generator
 
 def pdf_to_text(filename,page_splitor='\n'):
 	return page_splitor.join(pdf_to_text_generator(filename))

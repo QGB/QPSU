@@ -332,30 +332,30 @@ UnicodeError: encoding with 'idna' codec failed (UnicodeError: label too long)
 		if fsize:
 			if return_only_filename:return file
 			return U.object_custom_repr(py.No(file),repr='{}{}'.format(fsize,file)  )
-	else:	
-		write_zero=U.get_duplicated_kargs(ka,'write0','w0','write_zero','zero',default=False)
-		print_req=U.get_duplicated_kargs(ka,'show','print','p','print_req',default=print_req)
-		
-		proxies,ka=auto_proxy(proxies,ka,return_ka=True)
-		
-		if not 'headers' in ka:ka['headers']=headers
-		
-		import requests
-		try:
-			if print_req:print(U.v.requests.get(url,verify=verify,timeout=timeout,**ka))
-			#,headers=U.StrRepr(U.pformat(headers)
-			p= requests.get(url,verify=verify,timeout=timeout,**ka)
-			b=p.content
-			f=repr(b[:77])[2:-1]
-			if file and (b or write_zero):
-				f=F.write(file,b)
-			if return_only_filename:return f
-			bo= U.object_custom_repr(b,repr='{}{}'.format(F.readable_size(b),f)  )
-			if bytes_with_response:
-				bo.p=bo.response=p
-			return bo
-		except Exception as e:
-			return py.No(e)
+	#else:	不能用，如果文件不存在，else不会执行
+	write_zero=U.get_duplicated_kargs(ka,'write0','w0','write_zero','zero',default=False)
+	print_req=U.get_duplicated_kargs(ka,'show','print','p','print_req',default=print_req)
+	
+	proxies,ka=auto_proxy(proxies,ka,return_ka=True)
+	
+	if not 'headers' in ka:ka['headers']=headers
+	
+	import requests
+	try:
+		if print_req:print(U.v.requests.get(url,verify=verify,timeout=timeout,**ka))
+		#,headers=U.StrRepr(U.pformat(headers)
+		p= requests.get(url,verify=verify,timeout=timeout,**ka)
+		b=p.content
+		f=repr(b[:77])[2:-1]
+		if file and (b or write_zero):
+			f=F.write(file,b)
+		if return_only_filename:return f
+		bo= U.object_custom_repr(b,repr='{}{}'.format(F.readable_size(b),f)  )
+		if bytes_with_response:
+			bo.p=bo.response=p
+		return bo
+	except Exception as e:
+		return py.No(e)
 getb=getByte=getBytes=get_byte=get_bytes
 
 def get(url,file='',
