@@ -23,6 +23,8 @@ def xiaomi_air_conditioner_control(response=None,token=py.No('auto get'),t=0):
 			lazy_default=lambda:miio.device.Device(ip='192.168.1.4',token=token),
 		)	
 		
+	if not t:t=N.geta()
+	t=U.int(t)
 	if not t:t=261
 		
 	if t<16:t=16

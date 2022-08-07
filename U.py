@@ -3324,7 +3324,9 @@ int(x, base=10) -> integer
 '''
 	if py.istr(x):
 		x=x.replace(',','')
-	return py.int(x,base)
+		return py.int(x,base)
+	else:	
+		return py.int(x)
 def int_with_default(obj,*other,default=None):
 	''' FuncWrapForMultiArgs: if default!=None:'''
 	return FuncWrapForMultiArgs(f=better_int,args=(obj,other),default=default)
@@ -4586,14 +4588,15 @@ def get_obj_file_lineno(a,lineno=0,auto_file_path=True):
 get_obj_fn=get_obj_file_lineno
 
 	
-def get_net_io_bytes():
+def get_net_io_bytes_count():
 	# global F
 	# if not 
 	import psutil
 	c=psutil.net_io_counters()
 	m=c.bytes_sent+c.bytes_recv
 	return F.IntSize(m)
-		
+get_net_io_bytes=get_net_io_bytes_count		
+
 def vscode(a='',lineno=0,auto_file_path=True,get_cmd=False,
 	editor_path=py.No('config this system editor_path'),):
 	'''
