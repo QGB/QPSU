@@ -1665,8 +1665,14 @@ autofn=auto_filename=autoFileName=auto_file_path=autoPath=auto_path
 
 
 def get_nt_short_path_name(long_name,max=250):
+	'''
+win32api.GetShortPathName 一定要用 '\\'分隔符，不能用 '/' ，否则：
+error: (2, 'GetShortPathNameW', '系统找不到指定的文件。')
+
+'''	
 	import win32api
 	if py.len(long_name)<max:return long_name
+	long_name=long_name.replace('/','\\')
 	if not long_name.startswith( u"\\\\?\\"):
 		long_name=u"\\\\?\\"+long_name
 	return win32api.GetShortPathName(long_name)
@@ -1675,6 +1681,8 @@ shortPath=short_path=get_win_short_path=win_short_path=get_windows_short_path=wi
 def nt_path(fn):
 	'''if linux etc ,will auto ignored
 write success, read failed ?	
+
+ 
 	'''
 	U=py.importU()
 	fn=_p.abspath(fn)

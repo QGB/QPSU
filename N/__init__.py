@@ -43,16 +43,28 @@ else:
 	from BaseHTTPServer import HTTPServer as _HTTPServer
 
 def udp_send(ip,data=b'',port=0,timeout=9):
+	''' 在miio中可以发送，这里不行，ipdb 也 socket.timeout: timed out
+	
+	'''
 	if ':' in ip:
 		ip,port=ip.split(':')
+	if not py.isint(port):
+		port=py.int(port		)
+		
 	import socket
 	s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 	s.settimeout(timeout)
 	try:
-		s.sendto(m, (ip, port))
+		s.sendto(data, (ip, port))
 	except OSError as ex:
 		return py.No(ex)
-
+		
+	try:
+		rdata,addr = s.recvfrom(4096)	
+		return rdata,addr
+	except Exception as e:
+		return py.No(e)
+		
 def http_server(PORT):
 	import http.server
 	import socketserver

@@ -529,12 +529,15 @@ def format(s,**ka):
 	ka={'{%s}'%k:v for k,v in ka.items()}
 	return T.replacey(s,ka)
 
-def eng_audio(response,word):
-	f='google_translate_tts/%s.dill'%word
-	F.mkdir(U.gst+F.dir(f))
+def eng_audio(response,word,audio_path='C:/test/google_translate_tts/'):
+	if 'google_translate_tts' not in audio_path:
+		audio_path+='google_translate_tts/'
+
+	F.mkdir(audio_path)
+	f=audio_path+'%s.dill'%word
 	q=F.dill_load(f)
 	if not q:
-		q=F.dill_load('google_translate_tts/%s.dill'%U.StrRepr(word,size=15) )
+		q=F.dill_load(f )
 	if not q:
 	
 		if N.check_port(21080):
