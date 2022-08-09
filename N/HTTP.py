@@ -331,7 +331,7 @@ UnicodeError: encoding with 'idna' codec failed (UnicodeError: label too long)
 		fsize=F.size(file)	
 		if fsize:
 			if return_only_filename:return file
-			return U.object_custom_repr(py.No(file),repr='{}{}'.format(fsize,file)  )
+			return U.object_custom_repr(F.read_bytes(file),repr='{}{}'.format(fsize,file)  )
 	#else:	不能用，如果文件不存在，else不会执行
 	write_zero=U.get_duplicated_kargs(ka,'write0','w0','write_zero','zero',default=False)
 	print_req=U.get_duplicated_kargs(ka,'show','print','p','print_req',default=print_req)

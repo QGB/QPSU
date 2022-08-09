@@ -155,9 +155,10 @@ pwd.getpwuid(os.getuid()).pw_dir
 	'''
 	import os
 	h=os.path.expanduser('~'+user)
-	h=autoPath(h)
+	h=auto_path(h)
 	# if not r.endswith('/'):r=r+'/'
-	return replaceOnce(file,'~',h)
+	T=py.importT()
+	return T.replace_once(file,'~',h)
 expand_user=expanduser=expandUser
 	
 def getHomeFromEnv():
@@ -1096,23 +1097,24 @@ get_xls_sheets_name=read_xls_sheets_name
 	
 	
 SQL_DEFAULT="SELECT * FROM {};"	
-def read_sqlite(file,table='',sql=SQL_DEFAULT):
+def read_sqlite(file,table='',sql=SQL_DEFAULT,limit=None):
 	file=autoPath(file)
 	if table:sql=sql.format(table)
 	import sqlite3
 	with sqlite3.connect(file) as con:
 		cursor = con.cursor()
-		cursor.execute("SELECT name FROM sqlite_master WHERE type='table';")
-		#[('sessions',), ('sqlite_sequence',), ('history',), ('output_history',)]
-		tables=[i[0] for i in cursor.fetchall()]
+
 		if table or sql!=SQL_DEFAULT:
 			# if not (table in tables):return py.No('no table',table,'found in',file)
 			cursor.execute(sql )
 			return cursor.fetchall()
-		else:
+		else:		
+			cursor.execute("SELECT name FROM sqlite_master WHERE type='table';")
+			#[('sessions',), ('sqlite_sequence',), ('history',), ('output_history',)]
+			tables=[i[0] for i in cursor.fetchall()]
 			r={}
 			for i in tables:
-				r[i]=read_sqlite(file=file,table=i)
+				r[i]=read_sqlite(file=file,sql=SQL_DEFAULT.format(i))
 			return r
 readSqlite=read_sqlite
 

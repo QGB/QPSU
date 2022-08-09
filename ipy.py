@@ -122,14 +122,19 @@ def trace_variable(code):
 	
 trace_code=trace_var=trace_variable
 
-def getIpyHistory(file='~/.ipython/profile_default/history.sqlite'):
-	F=py.importF()
+def get_sqlite_history(file='~/.ipython/profile_default/history.sqlite',limit=2000,offset=0,**ka):
+	''' ipy console default output max len 500
+rpc_server : 2000  ,2001 有省略号 ...
+'''	
+	limit=U.get_duplicated_kargs(ka,'limit','limits','limites','count','n','max',default=limit)
+	
 	file=F.expanduser(file)
-	his=F.read_sqlite(file)
-	his=his['history'] 
+	his=F.read_sqlite(file,sql=f'SELECT * FROM history ORDER BY session DESC,line DESC  limit {limit} offset {offset} ')
+	# his=his['history'] 
 #    (44, 614, 'U.unique(_)', 'U.unique _')  
 # session,line,  autocall ,    raw_input
 	return [ i[2] for i in his ]
+his=history=getIpyHistory=get_history=get_sqlite_history
 	
 def dill_load(filename,return_value=False,set_user_ns=True):
 	# F=py.importF()

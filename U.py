@@ -3321,12 +3321,15 @@ def better_int(x,base=10):
 	'''
 	int([x]) -> integer
 int(x, base=10) -> integer
+
+py.int(0,10) # TypeError("int() can't convert non-string with explicit base")
 '''
 	if py.istr(x):
 		x=x.replace(',','')
 		return py.int(x,base)
 	else:	
 		return py.int(x)
+		
 def int_with_default(obj,*other,default=None):
 	''' FuncWrapForMultiArgs: if default!=None:'''
 	return FuncWrapForMultiArgs(f=better_int,args=(obj,other),default=default)
@@ -4326,7 +4329,7 @@ def get_process_name_by_pid(pid):
 	import psutil
 	return psutil.Process(pid).name()						
 						
-def get_all_process_list(name='',cmd='',pid=None,ppid=None):
+def get_all_process_list(name='',cmd='',pid=None,ppid=None,net_connections=False):
 	'''if err return [r, {i:err}  ]
 _62.name()#'fontdrvhost.exe'
 _62.cmdline()#AccessDenied: psutil.AccessDenied (pid=8, name='fontdrvhost.exe')
@@ -4334,6 +4337,11 @@ pid=0, name='System Idle Process', cmdline=[]
 	
 '''
 	import psutil
+	if not pid and py.isint(name):
+		pid=name
+		name=''
+	
+	
 	r=[]
 	err=py.dict()
 	for i in psutil.process_iter():
@@ -4364,8 +4372,25 @@ pid=0, name='System Idle Process', cmdline=[]
 	# r=py.list
 	# if err:return r,err
 	# else:  
+	# if net_connections:
+		# for p in r:
+			
+	
 	return r
 ps=getTasklist=getProcess=getProcessList=get_all_process_list
+
+
+def psutil_net_connections(pid=None):
+	import psutil
+	ns=psutil.net_connections()
+	U,T,N,F=py.importUTNF()
+	d={}
+	for sconn in ns:
+		# p=psutil.Process(pid=sconn.pid)
+		U.dict_add_value_list(d,sconn.pid,sconn)
+	
+	return d
+	# net_connections
 
 def get_all_process_value_list(**ka):
 	''' ka : title=True  : return [  [pid      , ppid     , cmd      ] ...] 
