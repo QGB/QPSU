@@ -356,7 +356,7 @@ UnicodeError: encoding with 'idna' codec failed (UnicodeError: label too long)
 		return bo
 	except Exception as e:
 		return py.No(e)
-getb=getByte=getBytes=get_byte=get_bytes
+bytes=byte=getb=getByte=getBytes=get_byte=get_bytes
 
 def get(url,file='',
 		headers = gheaders,

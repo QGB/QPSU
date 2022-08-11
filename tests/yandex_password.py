@@ -1,4 +1,4 @@
-#encoding=utf-8
+#coding=utf-8
 import os
 from Crypto.Hash import SHA512
 import sqlite3
