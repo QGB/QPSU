@@ -16,16 +16,18 @@ from bybit_backtest import Backtest
 class MyBacktest(Backtest):
 
 	def strategy(self):
-		fast_ma = self.sma(period=5)
-		slow_ma = self.sma(period=25)
+		# fast_ma = self.sma(period=5)
+		# slow_ma = self.sma(period=25)
+		# bb=self.bbands(band=3)
 		# golden cross
-		self.sell_exit = self.buy_entry = (fast_ma > slow_ma) & (
-			fast_ma.shift() <= slow_ma.shift()
-		)
+		# self.df['C']
+		
+		
+		self.sell_exit = self.df.L.rolling(20).min()<10540
+		self.buy_entry = (  self.df.L.rolling(20).min()<4000		)
 		# dead cross
-		self.buy_exit = self.sell_entry = (fast_ma < slow_ma) & (
-			fast_ma.shift() >= slow_ma.shift()
-		)
+		self.buy_exit = self.df.H.rolling(20).max()>10000 
+		self.sell_entry = (	 self.df.H.rolling(20).max()>10540 	)
 
 ka=dict(	
 sqlite_file_name =f'c:/test/trade/{__file__}/bt.db',

@@ -77,7 +77,7 @@ try:
 	else:import F,T
 	write,read,ls,ll,md,rm=F.write,F.read,F.ls,F.ll,F.md,F.rm
 	IntSize=F.IntSize
-	F.fileName=F.filename=T.filename_legalized
+	# F.fileName=F.filename=T.filename_legalized
 
 	from pprint import pformat
 	if __name__.endswith('qgb.U'):from . import Clipboard

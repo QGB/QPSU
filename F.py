@@ -556,13 +556,15 @@ def getPaths(a):
 		
 def get_filename_from_full_path(a):
 	''' if a.endswith('/'):return ''
+	
+def name(	
 	'''
 	a=a.replace('\\','/')
 	if '/' not in a:return a
 	else:
 		# import T
 		return T.subr(a,'/','')
-get_name=getname=getName=getNameFromPath=getFilename=get_filename=get_filename_from_full_path
+fileName=filename=get_name=getname=getName=getNameFromPath=getFilename=get_filename=get_filename_from_full_path
 # filename=fileName=getname=getName=name
 		
 def getNameWithoutExt(a):
