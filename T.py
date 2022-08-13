@@ -34,6 +34,8 @@ CR='\r'
 LF=EOL=eol='\n'
 EOLS=EOL+'='*44+EOL
 
+CRLF='\r\n'
+
 TAB=Tab=tab='\t'
 gspace=space=py.chr(0x20)
 slash='/'   # chr(0x2F)
@@ -1477,6 +1479,11 @@ re.search('(?P<name>.*) (?P<phone>.*)', 'John 123456').group('name')=='John'
 	re.search(a,regex)
 regex_groupdict=regex_named=named_regex_match=regex_match_named=match_regex_named=regex_match_named_return_dict
 	
+def regex_match_all_return_pos(a,regex):
+	return {i.regs[0][0]:i.group() for i in re.finditer(regex,a)}
+	# return
+regex_match_all_pos=regex_match_all_return_pos	
+
 def regex_match_all(a,regex):
 	if py.isinstance(a,re.Pattern) and py.istr(regex):
 		U.log('#Warning# Args: a,regex  not  regex,a . but auto fixed')

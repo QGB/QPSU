@@ -2572,7 +2572,7 @@ def dir_getattr(a,sub='__closure__'):
 		rvc.append(row)
 	return rvc
 	
-def dir(a,type_filter=py.No('default not filter'),raw_value=False,**ka):
+def dir(a,type_filter=py.No('default not filter'),raw_value=False,skip_attr='',**ka):
 	'''
 	[attr_]filter='',
 	skip
@@ -2580,12 +2580,12 @@ def dir(a,type_filter=py.No('default not filter'),raw_value=False,**ka):
 	U=py.importU()
 	if py.istr(type_filter):type_filter=type_filter.lower()
 	filter=get_duplicated_kargs(ka,'filter','keyFilter','key_filter','attr_filter','attrFilter')
-	skip=get_duplicated_kargs(ka,'skip','skipKey','key_skip','skip_key','attr_skip','attrSkip')
+	skip_attr=get_duplicated_kargs(ka,'skip_attr','skip','skipKey','key_skip','skip_key','attr_skip','attrSkip',default=skip_attr)
 	attrs=py.dir(a)
 	if filter:
 		attrs=[i for i in attrs if filter in i]
-	if skip:
-		attrs=[i for i in attrs if skip not in i]
+	if skip_attr:
+		attrs=[i for i in attrs if skip_attr not in i]
 	rv=[]
 	err=py.No("#can't getattr ")
 	for i in attrs:
@@ -6738,6 +6738,34 @@ text直接传入 title 有问题 , T.html_encode fix it：
 	if browser:U.browser(file)
 	return file
 qr=qrcode=svg_qrcode=get_svg_qrcode	
+
+def qrcode_decode(a,**ka):
+	'''
+pip install pyzbar
+'''	
+	# import cv2
+	from pyzbar import pyzbar
+	U,T,N,F=py.importUTNF()
+	from qgb import pil
+	
+	img=pil.open(a,**ka)
+	if not img:return img
+	r= pyzbar.decode(img)
+	return r[0].data
+	
+	image = pil.cv2_read(a,**ka)
+	if not U.is_numpy_ndarray(image):return image
+	# initialize the cv2 QRCode detector
+	detector = cv2.QRCodeDetector()
+	# detect and decode
+	data, vertices_array, binary_qrcode = detector.detectAndDecode(image)
+	# if there is a QR code
+	# print the data
+	if vertices_array is not None:
+	  # print("QRCode data:")
+	  return data
+	else:
+	  return py.No("qrcode_decode error") 
 
 def search_image(image,precision=0.9,gray=True,background=py.No('screenshot',no_raise=True),):
 	r''' if not gray:

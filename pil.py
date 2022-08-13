@@ -150,7 +150,22 @@ image.load()
 pixel=get_pixel_from_image=get_image_pixel	
 
 	
-def open(file):
+def open(a,**ka):
+	if py.istr(a) and '://' in a:
+		a=N.HTTP.get_bytes(a,**ka)
+		
+	if py.istr(a):
+		r=F.exist(a)
+		if r:
+			return PIL.Image.open(a)
+		else:
+			return r
+			
+	if py.isbyte(a):
+		return bytes_to_pil_image(a)
+	if not a:return a
+	raise py.ArgumentUnsupported(a)
+
 	return PIL.Image.open(file)
 	
 def dataURL_to_pil_image(s):
@@ -187,6 +202,25 @@ def cv2_image_to_bytes(img_numpy,format='png'):
 	img_bytes = img_encode.tobytes()
 	return img_bytes
 	
+
+def cv2_open_image(a,**ka):
+	import cv2
+	if py.istr(a) and '://' in a:
+		a=N.HTTP.get_bytes(a,**ka)
+		
+	if py.istr(a):
+		r=F.exist(a)
+		if r:
+			return cv2.imread(a)
+		else:
+			return r
+			
+	if py.isbyte(a):
+		return bytes_to_cv2_image(a)
+	if not a:return a
+	raise py.ArgumentUnsupported(a)
+		
+cv2_imread=cv2_read=cv2_open=cv2_read_image=cv2_open_image
 def write_cv2_image(fn,a,format='png'):
 	b=cv2_image_to_bytes(a,format=format)
 	return F.write(fn,b)
@@ -208,7 +242,7 @@ def new_numpy_image(width,height,color=(255,255,255)):
 	blank_image[:]=U.color_to_bgr_tuple(color)
 	return blank_image
 new_cv2_image=new_numpy_image	
-	
+
 def cv2_draw_text(img,text,
 xy = (0,50),#x,y+font_height
 font                   = U.IntRepr(0,repr='cv2.FONT_HERSHEY_SIMPLEX'),
