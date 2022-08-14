@@ -1522,7 +1522,7 @@ def sleep(asecond,print_time_every_n_second=0):
 	if print_time_every_n_second:
 		for i in range(asecond):
 			if i%print_time_every_n_second==0:
-				pln(stime())
+				pln('%-6s'%i,'{:.2%}'.format(i/asecond),stime())
 			py.__import__('time').sleep(1)	
 	else:	
 		py.__import__('time').sleep(asecond)
@@ -6739,7 +6739,7 @@ text直接传入 title 有问题 , T.html_encode fix it：
 	return file
 qr=qrcode=svg_qrcode=get_svg_qrcode	
 
-def qrcode_decode(a,**ka):
+def qrcode_decode_return_bytes(a,**ka):
 	'''
 pip install pyzbar
 '''	
@@ -6766,6 +6766,7 @@ pip install pyzbar
 	  return data
 	else:
 	  return py.No("qrcode_decode error") 
+qrcode_decode=qrcode_decode_return_bytes
 
 def search_image(image,precision=0.9,gray=True,background=py.No('screenshot',no_raise=True),):
 	r''' if not gray:

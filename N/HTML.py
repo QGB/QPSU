@@ -537,6 +537,7 @@ def eng_audio(response,word,audio_path='C:/test/google_translate_tts/'):
 
 	F.mkdir(audio_path)
 	f=audio_path+'%s.dill'%word
+	t0=U.timestamp()
 	q=F.dill_load(f)
 	if not q:
 		q=F.dill_load(f )
