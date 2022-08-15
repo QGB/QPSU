@@ -150,10 +150,10 @@ image.load()
 pixel=get_pixel_from_image=get_image_pixel	
 
 	
-def open(a,**ka):
+def open(a,skip_download_if_exist=1,**ka):
 	if py.istr(a) and '://' in a:
+		U.dict_set_value_skip_if_exist(ka,url_as_file=1,skip_if_exist=skip_download_if_exist)
 		a=N.HTTP.get_bytes(a,**ka)
-		
 	if py.istr(a):
 		r=F.exist(a)
 		if r:
