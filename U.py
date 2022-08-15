@@ -1522,7 +1522,7 @@ def sleep(asecond,print_time_every_n_second=0):
 	if print_time_every_n_second:
 		for i in range(asecond):
 			if i%print_time_every_n_second==0:
-				pln('%-6s'%i,'{:.2%}'.format(i/asecond),stime())
+				pln('%-6s'%i,'%6s  '%'{:.2%}'.format(i/asecond),stime())
 			py.__import__('time').sleep(1)	
 	else:	
 		py.__import__('time').sleep(asecond)
@@ -2572,20 +2572,21 @@ def dir_getattr(a,sub='__closure__'):
 		rvc.append(row)
 	return rvc
 	
-def dir(a,type_filter=py.No('default not filter'),raw_value=False,skip_attr='',**ka):
+def dir(a,type_filter=py.No('default not filter'),only_attr='',skip_attr='',raw_value=False,**ka):
 	'''
 	[attr_]filter='',
 	skip
 	'''
 	U=py.importU()
+	type_filter=get_duplicated_kargs(ka,'type_filter','type','t',default=type_filter)
 	if py.istr(type_filter):type_filter=type_filter.lower()
-	filter=get_duplicated_kargs(ka,'filter','keyFilter','key_filter','attr_filter','attrFilter')
-	skip_attr=get_duplicated_kargs(ka,'skip_attr','skip','skipKey','key_skip','skip_key','attr_skip','attrSkip',default=skip_attr)
+	only_attr=get_duplicated_kargs(ka,'filter','keyFilter','key_filter','attr_filter','attrFilter','only_attr','name','k',default=only_attr)
+	skip_attr=get_duplicated_kargs(ka,'skip_attr','skip','ignore','skipKey','key_skip','skip_key','attr_skip','attrSkip',default=skip_attr)
 	attrs=py.dir(a)
-	if filter:
-		attrs=[i for i in attrs if filter in i]
 	if skip_attr:
 		attrs=[i for i in attrs if skip_attr not in i]
+	if only_attr:
+		attrs=[i for i in attrs if only_attr in i]
 	rv=[]
 	err=py.No("#can't getattr ")
 	for i in attrs:
@@ -5625,6 +5626,28 @@ def dict_pop_by_index(d,index):
 	return py.No('not found match index in dict',d,index)
 pop_dict_index=pop_dict_by_index=dict_pop_by_index	
 	
+	
+def	rename_dict_key(d,new,old={}):
+	if not old:
+		for i in d:
+			old=i
+			break
+	if isinstance(d, OrderedDict):
+		d.rename(old,new)
+	else:
+		d[new] = d.pop(old)
+	return d
+		# del d[old]#这个可以删除item,py27
+renameDictKey=rename_dict_key
+
+def dict_set_value_skip_if_exist(d,**ka):
+	for k,v in ka.items():
+		if k in d:continue
+		d[k]=v
+	return d
+	
+########################   dict end   ############################	
+
 def split_list(alist,sub_size):
 	n=py.int(sub_size)
 	return [alist[i:i+n] for i in py.range(0, py.len(alist), n)]
@@ -5819,19 +5842,6 @@ def load(name=0,returnFile=False):
 	return F.read(name,returnFile=returnFile)
 	# if name:#TODO 配合 save 并正确转换到相应类型，使用对象序列化？ 
 
-	
-def	rename_dict_key(d,new,old={}):
-	if not old:
-		for i in d:
-			old=i
-			break
-	if isinstance(d, OrderedDict):
-		d.rename(old,new)
-	else:
-		d[new] = d.pop(old)
-	return d
-		# del d[old]#这个可以删除item,py27
-renameDictKey=rename_dict_key
 def unique(iterable,count=False,return_list=False,**ka):
 	d=get_duplicated_kargs(ka,'d','dict','return_dict','rd','count','ct',default=count)
 	if d:
