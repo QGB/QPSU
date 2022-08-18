@@ -122,7 +122,7 @@ def trace_variable(code):
 	
 trace_code=trace_var=trace_variable
 
-def get_sqlite_history(file='~/.ipython/profile_default/history.sqlite',limit=2000,offset=0,**ka):
+def get_sqlite_history(file='~/.ipython/profile_default/history.sqlite',limit=2000,offset=0,StrRepr=True,**ka):
 	''' ipy console default output max len 500
 rpc_server : 2000  ,2001 有省略号 ...
 '''	
@@ -133,6 +133,8 @@ rpc_server : 2000  ,2001 有省略号 ...
 	# his=his['history'] 
 #    (44, 614, 'U.unique(_)', 'U.unique _')  
 # session,line,  autocall ,    raw_input
+	if StrRepr:
+		return [ U.StrRepr(i[2]) for i in his ]
 	return [ i[2] for i in his ]
 his=history=getIpyHistory=get_history=get_sqlite_history
 	

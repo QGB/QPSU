@@ -403,15 +403,16 @@ def slice(a,start, stop=None, step=1):
 		return py.No(e)
 get=char_at=charAt=get_char_at=slice		
 		
-def search_return_position(text,*targets,case_sensitive=True,a=0,b=0,c=0,default_c_size=100,return_t=False,return_dict=False,c_StrRepr=True,**ka):
+def search_return_position(text,*targets,case_sensitive=True,a=0,b=0,c=0,default_c_size=100,return_target=False,return_dict=False,c_StrRepr=True,index=False,merge_sub=False,**ka):
 	U=py.importU()
 	a=U.get_duplicated_kargs(ka,'A',default=a)
 	b=U.get_duplicated_kargs(ka,'B',default=b)
 	c=U.get_duplicated_kargs(ka,'C',default=c)
-	return_t=U.get_duplicated_kargs(ka,'return_t','t','target',default=return_t)
+	return_target=U.get_duplicated_kargs(ka,'return_target','return_t','t','target',default=return_target)
 	c_StrRepr=U.get_duplicated_kargs(ka,'c_StrRepr','crepr','cstrrepr',default=c_StrRepr)
 	case_sensitive=U.get_duplicated_kargs(ka,'cs','case','upper','caseSensitive',default=case_sensitive)
 	return_dict=U.get_duplicated_kargs(ka,'d','return_dict','rd','dict',default=return_dict)
+	index=U.get_duplicated_kargs(ka,'index','i','n',default=index)
 	r=[]
 	d={}
 	def _append(t,i,sub=''):
@@ -421,11 +422,14 @@ def search_return_position(text,*targets,case_sensitive=True,a=0,b=0,c=0,default
 			else  :U.dict_add_value_list(d,t,i)
 		else:
 			row=[i]
+			
 			if sub:
 				row.append( sub)		
-			if return_t:
+			if return_target:
 				row.insert(0,t)		
 				
+			if index:	
+				row.insert(0,py.len(r))		
 			r.append(row)
 	len_text_digits=py.len(str(py.len(text))) #不是digitals		
 	c_isint=py.isint(c)
@@ -461,6 +465,14 @@ def search_return_position(text,*targets,case_sensitive=True,a=0,b=0,c=0,default
 				else:
 					_append(t,i,)
 			i+=1 # 不然 死循环		
+	if merge_sub and c_len_2 and r:
+		dt={}
+		for row in r:
+			head=row[:-1]
+			if py.len(head)==1:head=head[0]
+			
+			U.dict_add_value_list(dt,row[-1],head)
+		r=py.list(dt.items())	
 	if r:return r
 	if d:return d
 	return py.No('Not found',targets,'in text',py.len(text))
@@ -1479,9 +1491,13 @@ re.search('(?P<name>.*) (?P<phone>.*)', 'John 123456').group('name')=='John'
 	re.search(a,regex)
 regex_groupdict=regex_named=named_regex_match=regex_match_named=match_regex_named=regex_match_named_return_dict
 	
-def regex_match_all_return_pos(a,regex):
-	return {i.regs[0][0]:i.group() for i in re.finditer(regex,a)}
-	# return
+def regex_match_all_return_pos(a,regex,return_list=False,**ka):
+	U=py.importU()	
+	return_list=U.get_duplicated_kargs(ka,'return_list','list','rl','l',default=return_list)
+	rd={i.regs[0][0]:i.group() for i in re.finditer(regex,a)}
+	if return_list:
+		return py.list(rd.items())
+	return rd
 regex_match_all_pos=regex_match_all_return_pos	
 
 def regex_match_all(a,regex):

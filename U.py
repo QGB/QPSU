@@ -4227,7 +4227,7 @@ key_action=key_actions=system_actions=system_action=sys_act=sys_acts=sys_actions
 
 def get_all_envs(return_list=False,index=False,**ka):
 	U=py.importU()
-	return_list=U.get_duplicated_kargs(ka,'list','l','return_list',default=return_list)
+	return_list=U.get_duplicated_kargs(ka,'return_list','list','rl','l',default=return_list)
 	index=U.get_duplicated_kargs(ka,'index','i','n',default=index)
 	
 	r=py.dict(os.environ)
@@ -5842,14 +5842,22 @@ def load(name=0,returnFile=False):
 	return F.read(name,returnFile=returnFile)
 	# if name:#TODO 配合 save 并正确转换到相应类型，使用对象序列化？ 
 
-def unique(iterable,count=False,return_list=False,**ka):
-	d=get_duplicated_kargs(ka,'d','dict','return_dict','rd','count','ct',default=count)
-	if d:
+def unique(iterable,count=False,count_and_sort=False,return_list=False,**ka):
+	count=get_duplicated_kargs(ka,'d','dict','return_dict','rd','count','ct',default=count)
+	count_and_sort=get_duplicated_kargs(ka,'count_and_sort','count_sort','cts',default=count_and_sort)
+	if count_and_sort:
+		count=True
+		return_list=True
+	if count:
 		d={}
 		for i in iterable:
 			dict_key_count_plus_1(d,i)
 		if return_list:
-			return list(d.items())
+			r= py.list(d.items())
+			if count_and_sort:
+				U,T,N,F=py.importUTNF()
+				r=U.sort(r,column=1,reverse=1)
+			return r
 		else:
 			return d
 	r=[]

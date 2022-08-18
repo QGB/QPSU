@@ -1259,7 +1259,7 @@ def ll(ap='.',readable=True,type='',t='',r=False,d=False,dir=False,f=False,file=
 	readable is True: Size,Stime,..
 	linux struct stat: http://pubs.opengroup.org/onlinepubs/009695399/basedefs/sys/stat.h.html'''
 	U=py.importU()
-	return_list=U.get_duplicated_kargs(ka,'return_list','rl','list',default=return_list)
+	return_list=U.get_duplicated_kargs(ka,'return_list','list','rl','l',default=return_list)
 	if return_list:return_dict=False
 	
 	dr={}

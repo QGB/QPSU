@@ -154,10 +154,27 @@ def auto_method(method,ka,return_ka=False):
 	
 	return r
 	
-def get_json(u,proxies=AUTO_GET_PROXY,method='GET',**ka):
+def auto_headers(headers,ka,return_ka=False):
+	U,T,N,F=py.importUTNF()
+	headers=U.get_duplicated_kargs(ka,'headers','header','hd','h',default=headers)		
+	if not headers:
+		headers={}
+	if py.istr(headers):
+		if '\n' in headers:raise py.NotImplementedError
+		headers=[i.strip() for i in headers.split(':')] 
+		headers={headers[0]:headers[1]}
+	if return_ka:
+		ka['headers']=headers
+		return headers,ka
+	return headers
+	
+auto_header=auto_headers
+	
+def get_json(u,proxies=AUTO_GET_PROXY,method='GET',headers=None,**ka):
 	import requests
 	proxies,ka=auto_proxy(proxies,ka,return_ka=True) # def auto_proxy_for_requests
-	method,ka=auto_method(method,ka,return_ka=True)
+	method ,ka=auto_method (method ,ka,return_ka=True)
+	headers,ka=auto_headers(headers,ka,return_ka=True)
 	r=requests.request(url=u,**ka)
 	
 	return r.json()
