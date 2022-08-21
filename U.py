@@ -2433,6 +2433,7 @@ def add(*a):
 	return r		
 def min_len(*a,**ka):
 	return max_len(*a,im=None,cmp=lambda n,im:n<im,**ka)
+minLen=min_len
 	
 def max_len(*a,return_value=False,return_index=False,im=-1,cmp=lambda n,im:n>im,**ka):
 	'''  max( *map(len,U.col(lr,5)) ) 
@@ -2473,15 +2474,31 @@ max_len(dict)==max_len(dict.keys())
 		return r
 		
 maxLen=max_len	
+
+def max_len_top_n(a,n=5,line_max=73):
+	''' return [ [index,len,v ] ]
+
+ipython console :73 不换行，74 不行	
+'''	
+	U=py.importU()
+	rt=[]
 	
-def minLen(*a):
-	if py.len(a)==1:a=flat(a)
-	if not a:return -1
-	im=gimax
-	for i in a:
-		i=len(i)
-		if i<im:im=i
-	return im
+	for index,v in py.enumerate(a):
+		rt.append( [index,U.len(v)] )
+	ril=U.sort(rt,col=1,reverse=1)[:n]
+	
+	ml=py.len(py.str(  ril[0][1]							))
+	mi=py.len(py.str(  U.sort(ril,col=0,reverse=1)[0][0]	))
+	
+	r=[]	
+	for index,lv in ril:
+		v=a[index]
+		row=[U.IntRepr(index,size=mi+1),U.IntRepr(lv,size=ml),U.StrRepr(v,size=line_max-(mi+ml+3),cut=1 ) , ]
+		r.append(row)
+	
+	return r
+max_len_n=max_len_top_n	
+	
 def avgLen(*a):
 	if py.len(a)==1:a=flat(a)
 	if not a:return -1
