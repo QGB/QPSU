@@ -397,7 +397,7 @@ def ftp_client(cwd=py.No('history or /',no_raise=1),
 		if (py.isnumber(cwd) and cwd>0):
 			host,cwd=cwd,''	
 			#warnning
-		if not host:host=U.get_or_set_input('ftp.host[default]',type=U.auto_type)
+		if not host:host=U.get_or_set_input('ftp.host[default]',type=U.parse_str_auto_type)
 	if py.istr(host):
 		if host.startswith('ftp://') or ('@' in host):
 			host,url='',host

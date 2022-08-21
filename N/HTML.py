@@ -14,7 +14,13 @@ def get_or_input_html(response,*name):
 		# raise v
 	# print(v)	
 	return v	
-def xiaomi_air_conditioner_control(response=None,token=py.No('auto get'),t=0):
+def xiaomi_air_conditioner_control(response=None,token=py.No('auto get'),t=0,angle=None,lcd=None,**ka):
+	''' 风扇水平 0 时，环境感知温度会立马降低 
+	
+'''	
+	U.r(py,U,T,N,F,N.HTTP,N.HTML)
+	angle=U.get_duplicated_kargs(ka,'angle','angel','jd','ang','a','j',default=angle)
+	
 	if not token:token=get_or_input_html(response,'miio.token')
 	if not token:return
 	
@@ -34,6 +40,22 @@ def xiaomi_air_conditioner_control(response=None,token=py.No('auto get'),t=0):
 	if t>320:t=320
 	
 	d.send("set_temperature", [t] )	
+	
+	def set_angle():
+		d.send("set_ver_pos", [70])
+		U.sleep(21)
+		d.send("set_ver_pos", [0])
+		U.sleep(21)
+		d.send("set_ver_pos", [angle])
+	
+	if py.isint(angle):
+		d.send('set_ver_range',[0,70])
+		t=U.thread(target=set_angle)
+		U.set(angle,t)
+		t.start()
+		# if angle<35
+	if py.isint(lcd):
+		d.send('set_lcd',[lcd])
 	return d
 ac=xiaomi_air_conditioner_control	
 

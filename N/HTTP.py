@@ -89,7 +89,7 @@ return proxies,ka
 		return proxies,ka
 	else:
 		return proxies
-auto_proxy=auto_proxy_for_requests	
+auto_proxy=auto_proxies=auto_proxy_for_requests	
 	
 def random_headers():
 	import fake_headers
@@ -104,7 +104,7 @@ def request(url,method='GET',headers=gheaders,
 '''
 	import requests
 	U,T,N,F=py.importUTNF()
-	proxies,ka=auto_proxy(proxies,ka,return_ka=True)
+	proxies,ka=auto_proxies(proxies,ka,return_ka=True)
 	print_req=U.get_duplicated_kargs(ka,'show','print','p','print_req',default=print_req)
 	
 	if (py.istr(url) and url.upper() in HTTP_METHODS):
@@ -172,7 +172,7 @@ auto_header=auto_headers
 	
 def get_json(u,proxies=AUTO_GET_PROXY,method='GET',headers=None,**ka):
 	import requests
-	proxies,ka=auto_proxy(proxies,ka,return_ka=True) # def auto_proxy_for_requests
+	proxies,ka=auto_proxies(proxies,ka,return_ka=True) # def auto_proxy_for_requests
 	method ,ka=auto_method (method ,ka,return_ka=True)
 	headers,ka=auto_headers(headers,ka,return_ka=True)
 	r=requests.request(url=u,**ka)

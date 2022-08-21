@@ -173,7 +173,7 @@ def set(name,value=SET_NO_VALUE,level=gd_sync_level['process'],**ka):
 		import sqlite3
 	return value
 	
-def unset(*names,level=gd_sync_level['process'],**ka):
+def set_delete(*names,level=gd_sync_level['process'],**ka):
 	if level>=gd_sync_level['process']:
 		import sys
 		d=sys._qgb_dict=py.getattr(sys,'_qgb_dict',{})
@@ -187,8 +187,7 @@ def unset(*names,level=gd_sync_level['process'],**ka):
 			return r[0]
 		else:
 			return r
-delset=del_set=delete_set=unset			
-			
+delset=del_set=unset=delete_set=set_delete
 	
 def set_multi(**ka):
 	surfix=get_duplicated_kargs(ka,'__surfix','_surfix',default='')
@@ -199,6 +198,7 @@ def set_multi(**ka):
 		# d[name]=value	
 	return ka
 set_ka=set_named=set_multi	
+
 def get(name='_',default=GET_NO_VALUE,level=gd_sync_level['process']):
 	if level>=gd_sync_level['process']:
 		import sys
@@ -208,8 +208,11 @@ def get(name='_',default=GET_NO_VALUE,level=gd_sync_level['process']):
 			# default=py.No('can not get name '+py.repr(name),no_raise=True)
 		return d.get(name,default)
 	#TODO
+	
 def get_multi_return_dict():
+	raise py.NotImplementedError()
 	return
+	
 def get_multi_return_list(*names,**defaults):
 	r=[]
 	for name in names:
@@ -240,25 +243,6 @@ def get_or_set_input(name,default='',type=None):
 	if r:return r
 	return set(name,input('%s :'%name,default=default,type=type) )
 get_input=getInput=getOrInput=get_or_input=get_or_input_set=get_or_set_input
-
-def parse_str_auto_type(s):
-	U=py.importU()
-	ss=s.strip()
-	if U.all_in(ss,'.0123456789') and U.unique(ss,ct=1).get('.',0)==1:
-		try:return py.float(ss)
-		except:pass
-	if U.all_in(ss,'0123456789') or ss.lower().startswith('0x'):
-		try:return py.int(ss)
-		except:pass
-	
-	# if (ss.startswith('[') and ss.endswith(']')) or :
-	T=py.importT()		
-	try:return T.unrepr(s)
-	except:pass
-	
-	return s
-	
-auto_type=input_auto_type=parse_str_auto_type
 
 def get_or_set(name,default=None,lazy_default=None):
 	# if not default: # ipy module set {}
@@ -296,7 +280,7 @@ def get_or_dill_load_and_set(name):
 	else:
 		U.set(name,o)
 	return o
-get_or_dill_load_set=get_or_dill_load_and_set
+get_or_dl_and_set=get_or_dill_load_set=get_or_dill_load_and_set
 
 def set_and_dill_dump(name,value):
 	return set(name,value),F.dill_dump(file=name,obj=value)
@@ -323,6 +307,15 @@ def set_or_get(name,value,default=SET_NO_VALUE):
 			return set(name,default)
 			
 setget=setGet=set_get=set_or_get
+
+def set_rename(old,new):
+	v=set_delete(old)
+	if not v:return v
+	set(new,v)
+	return 'U.set_rename {} > {}'.format(old,new)
+	# return new
+setmv=mvset=set_move=move_set=rename_set=set_rename
+
 #########################
 def one_in(vs,*t):
 	'''(1,2,3,[t])	or	([vs].[t])
@@ -616,6 +609,24 @@ u1604:  IPython repl  ok	,  bash python -c error  ?
 	tmux=tmuxc=tmuxcap=tmuxcapture=tmuxCapture=tmux_capture=tmux_capture_pane
 	
 ########################## end init #############################################
+def parse_str_auto_type(s):
+	U=py.importU()
+	ss=s.strip()
+	if U.all_in(ss,'.0123456789') and U.unique(ss,ct=1).get('.',0)==1:
+		try:return py.float(ss)
+		except:pass
+	if U.all_in(ss,'0123456789') or ss.lower().startswith('0x'):
+		try:return py.int(ss)
+		except:pass
+	
+	# if (ss.startswith('[') and ss.endswith(']')) or :
+	T=py.importT()		
+	try:return T.unrepr(s)
+	except:pass
+	
+	return s
+auto_type=input_auto_type=parse_str_auto_type
+
 def __import__(mod_name):
 	m=py.__import__(mod_name)
 	ss=mod_name.split('.')
