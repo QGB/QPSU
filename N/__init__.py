@@ -42,6 +42,51 @@ else:
 	from SimpleHTTPServer import SimpleHTTPRequestHandler
 	from BaseHTTPServer import HTTPServer as _HTTPServer
 
+def tftp_download(ip,filename,port=69):
+	''' pip install TFTPy     
+U.enable_log()
+
+2022-08-24:09:30:59,15 INFO     [TftpContexts.py:389] Sending tftp download request to 192.168.1.3
+2022-08-24:09:30:59,15 INFO     [TftpContexts.py:390]     filename -> breed.bin
+2022-08-24:09:30:59,15 INFO     [TftpContexts.py:391]     options -> {}
+2022-08-24:09:30:59,23 INFO     [TftpStates.py:560] Set remote port for session to 58823
+2022-08-24:09:30:59,23 INFO     [TftpStates.py:582] Received DAT from server
+2022-08-24:09:30:59,24 INFO     [TftpStates.py:173] Handling DAT packet - block 1
+......
+......
+2022-08-24:09:30:59,237 INFO     [TftpStates.py:173] Handling DAT packet - block 180
+2022-08-24:09:30:59,238 INFO     [TftpStates.py:120] Sending ack to block 180
+2022-08-24:09:30:59,238 INFO     [TftpStates.py:186] End of file detected
+2022-08-24:09:30:59,238 INFO     [TftpClient.py:68]
+2022-08-24:09:30:59,239 INFO     [TftpClient.py:69] Download complete.
+2022-08-24:09:30:59,239 INFO     [TftpClient.py:73] Downloaded 91650.00 bytes in 0.22 seconds
+2022-08-24:09:30:59,240 INFO     [TftpClient.py:74] Average rate: 3198.34 kbps
+2022-08-24:09:30:59,241 INFO     [TftpClient.py:75] 0.00 bytes in resent data
+2022-08-24:09:30:59,245 INFO     [TftpClient.py:76] Received 0 duplicate packets
+Out[1022]: b'\xff\x00\	
+'''	
+	global U,T,N,F
+	U,T,N,F=py.importUTNF()
+	
+	import tftpy
+	ip=auto_ip(ip)
+	
+	client = U.get_or_set('tftp_client=%s:%s'%(ip, port),
+		lazy_default=lambda:tftpy.TftpClient(ip, port)
+		)
+	# print(client)
+	from io import BytesIO
+	f=BytesIO()
+	
+	client.download(filename,f)
+	f.seek(0)
+	b=f.read()
+	if py.len(b)>99:
+		return U.object_custom_repr(b,repr='{}...#{}'.format(b[:99],F.readable_size(b) )  )
+	else:
+		return b
+tftp_client=tftp_get=tftp_download		
+		
 def udp_send(ip,data=b'',port=0,timeout=9):
 	''' 在miio中可以发送，这里不行，ipdb 也 socket.timeout: timed out
 	
