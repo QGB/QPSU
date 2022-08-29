@@ -538,6 +538,9 @@ def wcswidth(pwcs, n=None):
 	return the length of the entire string.
 
 	 if a non-printable character is encountered. 0 width added
+	 
+#TODO  :
+T.wcswidth('Stack Overflow на русском')==25    # should be 34	 
 	"""
 	# pylint: disable=C0103
 	#         Invalid argument name "n"

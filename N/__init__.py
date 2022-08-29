@@ -69,7 +69,7 @@ Out[1022]: b'\xff\x00\
 	U,T,N,F=py.importUTNF()
 	
 	import tftpy
-	ip=auto_ip(ip)
+	ip=N.auto_ip(ip)
 	
 	client = U.get_or_set('tftp_client=%s:%s'%(ip, port),
 		lazy_default=lambda:tftpy.TftpClient(ip, port)
@@ -2231,6 +2231,11 @@ def auto_url(a,default_protocol='http',p=0):
 scheme = alpha *( alpha | digit | "+" | "-" | "." )
 
 Scheme names consist(组成) of a sequence of characters beginning with a lower case letter(小写字母开头) and followed by any combination of lower case letters, digits, plus ("+"), period句号 ("."), or hyphen ("-").
+
+#TODO
+2.1002  = 2.10 
+2.20x2  = 2.20
+2.1003  = 2.100
 '''
 	global URL_SCHEME_CHARS
 	T=py.importT()

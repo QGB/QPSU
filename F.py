@@ -450,6 +450,8 @@ return skip_list, copyed_list
 		if src[-1] in ['/','\\']:
 			src=F.ls(src,r=1)
 		else:
+			dst_dir=F.get_dirname_from_full_path(dst)
+			F.mkdir(dst_dir)
 			try:
 				return _copy(src,dst)
 			except Exception as e:

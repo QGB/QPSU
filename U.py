@@ -5674,6 +5674,11 @@ def dict_set_value_skip_if_exist(d,**ka):
 		d[k]=v
 	return d
 	
+def dict_move_key_to_last_index(d,k):
+	v=d.pop(k)
+	d[k]=v
+	return d
+dict_key_move=dict_move_key_to_last_index
 ########################   dict end   ############################	
 
 def split_list(alist,sub_size):
