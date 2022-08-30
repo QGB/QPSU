@@ -56,6 +56,22 @@ class IntSize(py.int):
 		# return '<{}={}>'.format(super().__repr__(),F.ssize(self) )
 	def __repr__(self):return self.__str__()
 ################################
+def read_levelDB(db_dir):
+	''' conda install leveldb plyvel
+
+
+pip装不上
+
+'''
+	import plyvel
+	db = plyvel.DB(db_dir) #进程退出 ！！
+	r={}
+	with db.iterator() as it:
+		for k, v in it:
+			r[k]=v
+			# pass	
+	return r
+read_leveldb=read_levelDB	
 
 def get_file_owner_username(filename):
 	''' Windows : ModuleNotFoundError: No module named 'pwd'

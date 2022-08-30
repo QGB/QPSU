@@ -24,11 +24,38 @@ if U.isLinux():
 	else:
 		gipy.editor=U.where('vi')
 
-gIn=gipy.user_ns['In'];gOut=gipy.user_ns['Out']
+In=gIn=gipy.user_ns['In'];Out=gOut=gipy.user_ns['Out']
 # version='.'.join([str(i) for i in IPython.version_info if py.isnum(i)])  #(5, 1, 0, '') 5.1.0
 version=py.float('{0}.{1}{2}\n{3}'.format(*IPython.version_info).splitlines()[0])
 # gipy.editor=U.npp()
-
+gd_undo_save_In=U.get_or_set('ipy.undo_save_In',{})
+def undo_save(*indexs):
+	if not indexs:
+		for n,i in U.enumerate_reversed(In):
+			if i and i.startswith('ipy.save('):
+				index=n
+				break
+		#没找到 index 就不会被定义，自动抛出异常		
+		index=U.input('undo last ipy.save:',type=py.int,default=index)
+		indexs=[index]
+	r=[]
+	for index in indexs:
+		if gIn[index] and gIn[index].startswith('ipy.save('):
+			gd_undo_save_In[index]=gIn[index]
+			gIn[index]=''#py.No(gIn[index])
+		if not index in gOut:raise py.ArgumentError('index not in Out')
+		sf=gOut[index]
+		if 'ipy.save' not in sf:raise py.ArgumentError('not ipy.save')
+		
+		f=U.get_obj_file_lineno(sf)[0]
+		row=F.delete(f),gIn[index]
+		r.append(row)
+	if py.len(r)==1:
+		return r[0]
+	else:	
+		return r
+save_undo=undo_save
+	
 def jupyter_password(passphrase='',salt='0'*12,algorithm='sha1'):
 	import hashlib
 	from ipython_genutils.py3compat import cast_bytes,str_to_bytes
@@ -385,6 +412,7 @@ In_index_delta=1  # In[268]==_i269	  , Out[269]
 		skip=False
 		if i==0 and lsta==0:continue
 		i=lsta+i+In_index_delta
+		if not v:v=''
 		v=v.strip()
 			# U.isSyntaxError(u'_{0}={1}'.format(i,v) ) :
 				# pass

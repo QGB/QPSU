@@ -2972,6 +2972,10 @@ def enumerate(a,start=0,ignore_no=False,index_size=0,**ka):#todo 设计一个 in
 	return r
 il=ilist=indexList=enu=enumerate
 
+def enumerate_reversed(*a,**ka):
+	return enumerate(*a,**ka)[::-1]
+reverse_enumerate=reversed_enumerate=enumerate_reversed
+
 def map(*a):
 	'''TypeError: map() takes no keyword arguments
 Init signature: map(self, /, *args, **kwargs)
@@ -5987,10 +5991,21 @@ Could not install packages due to an EnvironmentError: [Errno 2] No such file or
 Out[81]: 1
 #######################
 '''
+	import pip
+	
+	if not pip_main and pip.__version__=='9.0.1':
+		'''python -m pip install --upgrade pip
+pip is configured with locations that require TLS/SSL, however the ssl module in Python is not available.
+Could not fetch URL https://pypi.python.org/simple/pip/: There was a problem confirming the ssl certificate: Can't connect to HTTPS URL because the SSL module is not available. - skipping
+Requirement already up-to-date: pip in c:\qgb\anaconda3\envs\py365\lib\site-packages'''
+		pip_main=pip.__main__.pip.main
+	
 	if not pip_main and (py.version>3.9 or py.len(py.str(py.version))>4 ):
 		from pip._internal.cli.main import main as pip_main
 	if not pip_main:	
 		from pip.__main__ import _main as pip_main
+		
+		
 	return pip_main(['install',*args,modName])
 pip=pipInstall=pip_install
 	
