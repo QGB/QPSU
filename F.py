@@ -41,8 +41,8 @@ class IntSize(py.int):
 		self.ka=ka
 		return self
 	def __str__(self):
-		U=py.importU()
-		s='<{}'.format(numToSize(self) )
+		U,T,N,F=py.importUTNF()	
+		s='<{}'.format(int_to_size_str(self) )
 		
 		repr=U.get_duplicated_kargs(self.ka,'repr','str','s','st','__repr__','__str__',no_pop=True)
 		if repr:
@@ -56,15 +56,21 @@ class IntSize(py.int):
 		# return '<{}={}>'.format(super().__repr__(),F.ssize(self) )
 	def __repr__(self):return self.__str__()
 ################################
-def read_levelDB(db_dir):
-	''' conda install leveldb plyvel
+def read_levelDB(db_dir,debug=0):
+	'''
+pip install plyvel-win32
 
-
-pip装不上
+conda install leveldb plyvel #不能用  ## plyvel.DB(db_dir) #进程退出 ！！
+pip install plyvel 装不上
 
 '''
 	import plyvel
-	db = plyvel.DB(db_dir) #进程退出 ！！
+	U,T,N,F=py.importUTNF()	
+	db_dir=F.auto_path(db_dir)
+	db = U.get_or_set(db_dir,lazy_default=lambda:plyvel.DB(db_dir)) #只能打开一次 不然 IOError: b'IO error: 
+	if db.closed:
+		db=U.set(db_dir,plyvel.DB(db_dir))
+	if debug:return db
 	r={}
 	with db.iterator() as it:
 		for k, v in it:
@@ -791,21 +797,30 @@ pretty=True        Format a Python object into a pretty-printed representation.
 	return f.name
 	# except Exception as e:
 		# setErr(e)
-		# return False
+			# return False
+			
 gb_write_auto_filename_len=True
 def write_auto_filename(*a,**ka):
 	all_args=py.importU().getArgsDict()
-	return all_args
+	# py.pdb()()
+	# return all_args
 	U=py.importU()
 	T=py.importT()
+	name=U.get_duplicated_kargs(ka,'name',default=None)
+	ext=U.get_duplicated_kargs(ka,'extension','ext',default='.txt')
+	if ext and not ext.startswith('.'):ext='.'+ext
+	
 	sp=mkdir(U.gst+write_auto_filename.__name__)
 	rf=[]
 	for k,v in  all_args.items():
+		if py.istuple(v) and py.len(v)==1:
+			v=v[0]
+	
 		fn='{}{}'.format(sp,T.filename_legalized(k))
 		if gb_write_auto_filename_len:
 			len=U.len(v)
 			if py.isint(len):
-				fn+='={}'.format(len)
+				fn+='={}{}'.format(len,ext)
 		f=write(fn ,v,autoArgs=False)
 		rf.append(f)
 	return rf
@@ -1313,7 +1328,7 @@ def ll(ap='.',readable=True,type='',t='',r=False,d=False,dir=False,f=False,file=
 
 SUFFIXES = {1000: ['KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'],
 			1024: ['KiB', 'MiB', 'GiB', 'TiB', 'PiB', 'EiB', 'ZiB', 'YiB']}
-def int_to_size_str(size,b1024=True,zero='0 B',less_than_zero='%s', ):
+def int_to_size_str(size,b1024=True,zero='0 B',less_than_zero='%s',str_size=0 ):
 	'''Convert a file size to human-readable form.
 	Keyword arguments:
 	size -- file size in bytes
@@ -1369,7 +1384,9 @@ get_single_file_size=single_file_size=size_single_file
 	
 def size(asf,int=py.No('ipython auto readable'),repr_size=0): 
 	'''file or path return byte count
-	not exist return -1'''
+	
+repr_size=12  才能整齐
+	'''
 	asf=nt_path(asf)#if linux etc ,will auto ignored
 	# asf=autoPath(asf)#in there,can't use gst
 	size =0 #0L  SyntaxError in 3
@@ -1385,10 +1402,10 @@ def size(asf,int=py.No('ipython auto readable'),repr_size=0):
 	else:# is dir
 		for root, dirs, files in _os.walk(asf):  
 			size += sum([_p.getsize(_p.join(root, name)) for name in files])  	
-	U=py.importU()
+	U,T,N,F=py.importUTNF()
 	# U.msgbox(U.is_ipy_cell())
 	if not int :#and U.is_ipy_cell():
-		size=U.IntSize(size,size=repr_size)
+		size=F.IntSize(size,size=repr_size)
 	return size 
 	
 # U.pln size(U.gst)

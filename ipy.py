@@ -27,6 +27,10 @@ if U.isLinux():
 In=gIn=gipy.user_ns['In'];Out=gOut=gipy.user_ns['Out']
 # version='.'.join([str(i) for i in IPython.version_info if py.isnum(i)])  #(5, 1, 0, '') 5.1.0
 version=py.float('{0}.{1}{2}\n{3}'.format(*IPython.version_info).splitlines()[0])
+try:
+	import asyncio
+	gMainThread_async_event_loop=U.get_or_set('asyncio.get_event_loop()',lazy_default=lambda:asyncio.get_event_loop(),)
+except:pass	
 # gipy.editor=U.npp()
 gd_undo_save_In=U.get_or_set('ipy.undo_save_In',{})
 def undo_save(*indexs):

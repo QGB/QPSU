@@ -60,8 +60,45 @@ def xiaomi_air_conditioner_control(response=None,token=py.No('auto get'),t=0,ang
 ac=xiaomi_air_conditioner_control	
 
 # def list_2d_txt_href(response,a,file_column=None,**ka):
-def google_search_result_zhihu(response,hs,u_size=36+4,**ka):
-	l2=[[T.sub(a,'href="','"'),T.html2txt(a)] for a in hs]     
+def google_search_result_zhihu(response,word='',hs='',proxy='127.0.0.1:21080',u_size=36+4,**ka):
+	if not word:
+		word=N.geta()
+	url=('https://www.google.com/search?q=site:zhihu.com+'
+		+T.url_encode(word)	)
+	if not hs and not U.get(url):	
+		U.set('gzurl',url)	
+		print(U.stime(),'set gzurl')
+		import asyncio
+		asyncio.set_event_loop(U.get('asyncio.get_event_loop()')) 
+#如果不【set_event_loop】  RuntimeError: There is no current event loop in thread 'Thread-26685'. 
+#如果此时 MainThread 想要运行 await ，RuntimeError: This event loop is already running，必须要等其他线程运行完成		
+		rx=U.get_ipython(raise_exception=1).run_cell('''
+	from qgb.tests import taobao_trade;
+	print(U.stime(),'start google_zhihu, getting page...')
+	pa_google_zhihu=await taobao_trade.get_or_new_page(U.get('gzurl'));
+	print(U.stime(),pa_google_zhihu)
+	h_google_zhihu=await pa_google_zhihu.evaluate("document.documentElement.outerHTML");
+	print(U.stime(),'get html',py.len(h_google_zhihu))
+	U.set_no_return(U.get('gzurl'),h_google_zhihu)
+
+	''')
+	if not hs:hs=U.get(url)
+		
+	# hs=N.HTTP.get(u,proxy=proxy,print_req=1)
+	# l2=[[T.sub(a,'href="','"'),T.html2txt(a)] for a in hs]     
+	bs=T.BeautifulSoup(hs)
+	es=bs.select('a')
+	l2=[]
+	for e in es:
+		u=e.get('href')
+		if not u:continue
+		u=u.replace('site:zhihu.com',' site_zhihu_com ')
+		if 'zhihu.com' not in u[:33]:continue
+	#    if not u.startswith('http'):continue
+		iz=u.index
+		l2.append([u,e.text])
+		
+	# return U.StrRepr(hs,repr=f'{py.len(hs)} {hs[:44]}'),l2
 	
 	zhihu_mark='.zhihu.com/'
 	dr={}
@@ -70,19 +107,20 @@ def google_search_result_zhihu(response,hs,u_size=36+4,**ka):
 		if zhihu_mark not in u:continue
 		u=T.sub(u,zhihu_mark)
 		
-		t=T.replacey(t,['https://www.zhihu.com ›','https://www2.zhihu.com ›','http://www2.zhihu.com ›','http://www-quic.zhihu.com ›','https://zhuanlan.zhihu.com › ...','...  更多','question','answer'
+		t=T.replacey(t,['https://www.zhihu.com ›','https://www2.zhihu.com ›','http://www.zhihu.com ›','http://www2.zhihu.com ›','http://www-quic.zhihu.com ›','https://zhuanlan.zhihu.com › ...','...  更多','question','answer'
 			],'').strip()
 		
 		iq=u.find('?')
 		if iq!=-1:
 			if not U.one_in(['?page='],u):
 				u=u[:iq]
+		t=T.replace_all_spaces(t,' ')
+		
 		if u in dr:
 			if '查看所有帖子'==t:continue
 			
 		U.set_dict_value_list(dr,u,t)
 		
-		t=T.replace_all_spaces(t,' ')
 		
 		lr.append([U.IntRepr(n,size=4),U.StrRepr(u,size=u_size),t])
 		
@@ -92,7 +130,7 @@ def google_search_result_zhihu(response,hs,u_size=36+4,**ka):
 	if not response:
 		return lr
 	
-	def html_callback(html,head):
+	def html_callback(html,*a,**ka):
 		bs=T.BeautifulSoup(html)
 		es=bs.select(f'body > table > tbody > tr > td:nth-of-type({1+1})')
 		
@@ -102,22 +140,25 @@ def google_search_result_zhihu(response,hs,u_size=36+4,**ka):
 			ea=bs.new_tag('a')
 			ea.attrs["target"]='_blank'
 			t=T.eol.join(dr[u])
-			ea.append(t+u)
+			ea.append(t)
 			if '/answer/' in u:
 				u='answer/'+T.sub(u,'/answer/')
+			u=u.replace('column/p/','articles/')	
+			u=u.replace('p/','articles/')	
+				
 			ea.attrs['href'  ]=f"zhihu://{u}"
 			e.clear()
 			e.append(ea)		
-			
+			# py.list(e.parent.children)[2]=u
 			
 		html=py.str(bs)
 		return html
 		
 		
-	return list_2d(response,U.col(lr,0,1),html_callback=html_callback,**ka)
+	return list_2d(response,U.col(lr,0,1,1),html_callback=html_callback,**ka)
 	
 	# return lr	
-zhihu=google_search_result_zhihu		
+zhihu=google_zhihu=google_search_result_zhihu		
 
 def fullscreen_img(response,img):
 	if py.istr(img) and '://' in img:
@@ -276,7 +317,7 @@ def a_href(response,u=''):
 	if not u:
 		u=U.cbg()
 	u=N.auto_url(u)
-	html=f"""
+	html='<br>'*5+f"""
 <a href="{u}">{u}</a>	
 	"""
 	response.headers['Content-Type']='text/html;charset=utf-8';

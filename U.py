@@ -172,6 +172,9 @@ def set(name,value=SET_NO_VALUE,level=gd_sync_level['process'],**ka):
 	if level>=gd_sync_level['system']:
 		import sqlite3
 	return value
+
+def set_no_return(name,value,**ka):
+	set(name,value,**ka)
 	
 def set_delete(*names,level=gd_sync_level['process'],**ka):
 	if level>=gd_sync_level['process']:
@@ -458,16 +461,16 @@ drwxr-xr-x  1 root         root 4.0K Jan  1  1970 var
 def iscyg():
 	return 'cygwin' in  platform_system().lower()
 # gipy=None#这个不是qgb.ipy, 是否与U.F U.T 这样的风格冲突？
-def is_ipython(**ka): # e=False
+def is_ipython(raise_exception=False,**ka): # e=False
 	# global gipy
-	raise_EnvironmentError=get_duplicated_kargs(ka,
-'raise_err','raise_error','raiseError','raiseErr','raise_EnvironmentError','EnvironmentError','raiseEnvironmentError')
+	raise_exception=get_duplicated_kargs(ka,'raise_exception',
+'raise_err','raise_error','raiseError','raiseErr','raise_EnvironmentError','EnvironmentError','raiseEnvironmentError',default=raise_exception)
 	try:
 		# if not py.modules('IPython'):return py.No()
 		import IPython
 		return IPython.get_ipython()
 	except Exception as e:
-		if raise_EnvironmentError:
+		if raise_exception:
 			raise
 		return py.No(e)
 	# ipy=False  #如果曾经有过实例，现在没有直接返回原来
@@ -2335,34 +2338,54 @@ def resetStd(name=''):
 		py.execute('sys.{0}=sm'.format(std))
 	return True
 resetstd=resetStd#=resetStream
-gsBrowser=''
-def browser(url,browser=gsBrowser,b='yandex'):
+
+def browser(url,browser=py.No('auto select browser'),**ka):
 	'''b,browser='yandex'
 	'''
-	if istermux():return run('termux-open-url',url) 
+	U,T,N,F=py.importUTNF()
+	
+	if U.istermux():return run('termux-open-url',url) 
 	import webbrowser
-	if gsBrowser:browser=gsBrowser
-	if b:browser=b
+	browser=U.get_duplicated_kargs(ka,'browser','b',default=browser)
+	
 	sp=''
 	def _open(asp,url):
+		exist=F.exist(asp)
+		if not exist:return exist
 		b=sys._getframe().f_back.f_code.co_names[-1]#get caller function name 
 		webbrowser.register(b, None, webbrowser.BackgroundBrowser(asp))
-		return webbrowser.get(b).open_new_tab(url)
+		webbrowser.get(b).open_new_tab(url)
+		return asp,url		
+		
 	def chrome(url):
 		###TODO: auto Find system base everything
 		try:sp=getProcessList(name='chrome.exe')[-1].cmdline()[0]
 		except:sp='''C:\QGB\Chrome\Application\chrome.exe'''
-		_open(sp,url)		
+		return _open(sp,url)
+		
 	def yandex(url):
-		sp=getProcessList(name='browser.exe')[-1].cmdline()[0]
-		_open(sp,url)
-	for i in py.dir():
-		if not browser:
-			webbrowser.open(url)
+		ps=getProcessList(name='browser.exe')
+		if not ps:return ps
+		sp=ps[-1].cmdline()[0]
+		return _open(sp,url)
+		
+	def edge(url):
+		ps=getProcessList(name='msedge.exe')
+		if not ps:return ps
+		sp=ps[-1].cmdline()[0]
+		return _open(sp,url)
+		
+	for i in [edge,yandex,chrome]:
+		if browser and browser.lower() in i.__name__:
+			# webbrowser.open(url)
+			i(url)
 			break
-		if py.eval('callable({0})'.format(i)):
-			if browser.lower()== i:
-				py.execute('{0}(url)'.format(i) ) in globals(),locals()  
+		else:	
+			r=i(url)	
+			if r:return r
+		# if py.eval('callable({0})'.format(i)):
+			# if browser.lower()== i:
+				# py.execute('{0}(url)'.format(i) ) in globals(),locals()  
 	return url
 	# webbrowser.open_new_tab(url)
 	# if iswin():os.system('''start '''+str(url))
@@ -2376,7 +2399,7 @@ browserObj=browser_obj
 
 gsHtmlTextarea=('<textarea style="width:100%; height:100%;">','</textarea>')
 def autohtml(file=None):
-	import T
+	T=py.importT()
 	if not py.istr(file):
 		if file is None:file=stime()+'.html'
 		else:
@@ -7229,7 +7252,7 @@ class IntCustomStrRepr(py.int):
 		self.ka=ka
 		return self
 		
-	# def __str__(self):return self.__repr__()
+	def __str__(self):return self.__repr__() # 为了print 表现一致 2022年8月31日
 	def __repr__(self):#super().__str__()
 		'''
 		'''
