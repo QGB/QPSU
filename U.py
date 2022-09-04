@@ -611,6 +611,29 @@ u1604:  IPython repl  ok	,  bash python -c error  ?
 		return T.EOL.join(rs)
 	tmux=tmuxc=tmuxcap=tmuxcapture=tmuxCapture=tmux_capture=tmux_capture_pane
 	
+	def tmux_detach_client_all_skip_max(skip_max_n=1):
+		'''
+!tmux list-clients
+/dev/pts/0: 0 [186x45 xterm-256color] (utf8) # ttyd
+/dev/pts/3: 0 [109x42 xterm] (utf8)          # ssh
+
+tmux detach-client -t /dev/pts/3
+'''		
+		U,T,N,F=py.importUTNF()
+		cs=[]
+		for s in U.ipy_getoutput('tmux list-clients',return_list=1):
+			c=T.sub(s,'',':')
+			d=T.regex_match_named_return_dict(s,r'\s\[(?P<x>\d+)x(?P<y>\d+)\s')     
+			x,y=py.int(d['x']),py.int(d['y'])
+			cs.append([c,x,y,x*y])
+		cs=U.sort(cs,col=-1)	
+		for row in cs[skip_max_n:]:
+			U.ipy_getoutput(f'tmux detach-client -t {row[0]}')
+			row.append(U.stime())
+		return cs
+		
+	tmux_dt=tmux_detach=tmux_detach_client=tmux_detach_client_all=tmux_detach_client_all_skip_max
+		
 ########################## end init #############################################
 def parse_str_auto_type(s):
 	U=py.importU()
@@ -4307,7 +4330,7 @@ def get_all_envs(return_list=False,index=False,**ka):
 		return rl	
 
 	return r
-envs=get_all_env=get_all_envs
+env=envs=get_all_env=get_all_envs
 	
 def set_env_path(append=[],delete=[]):
 	# if not p :raise py.ArgumentError()

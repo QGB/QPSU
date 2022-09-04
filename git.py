@@ -30,6 +30,25 @@ except Exception as e:
 # urllib.request.install_opener(opener)
 grepo=U.get('git.repo')
 
+def ssh_T():
+	import socks
+	import paramiko
+
+	sock=socks.socksocket()
+	sock.set_proxy(
+		proxy_type=socks.SOCKS5,
+		addr="127.0.0.1",
+		port=21080,
+		# username="blubbs",
+		# password="blabbs"
+	)
+	sock.connect(('github.com', 22)) #None
+	ssh = paramiko.SSHClient()
+	ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+	ssh.connect('ignored without host key verification', username='git', sock=sock)
+
+	return sock,ssh
+
 def clone(url,path=None):
 	client, target = dulwich.client.get_transport_and_path(url) #c , 'user/repo'
 	if not path:

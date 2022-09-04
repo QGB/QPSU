@@ -1692,7 +1692,7 @@ FileNotFoundError: [Errno 2] No such file or directory: '.
 		else:
 			default=U.set_test_path(U.gst) # 防止 U.gst 被改变没被保存
 		fn=str(fn)
-		if py.istr(fn) and fn.startswith('\\\\192.'):
+		if py.istr(fn) and (fn.startswith(r'\\192.') or fn.startswith('//192.168') or fn.startswith(r'\\?\UNC')):
 			pass#todo more 
 		else:
 			# fn=auto_string(fn)
