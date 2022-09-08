@@ -42,6 +42,72 @@ else:
 	from SimpleHTTPServer import SimpleHTTPRequestHandler
 	from BaseHTTPServer import HTTPServer as _HTTPServer
 
+def sendkey8888(response=None,s=''):
+	''' pip install python3-xlib
+	
+SEMICLN 分号 ;
+SLASH 斜杠 /
+EQUAL 等号 =
+LBRACKET 左括弧（
+MINUS 减号 -
+RBRACKET 右括弧 )
+COMMA 逗号 ,
+QUOTE 引号 ‘
+PERIOD 句号 . 
+##句号（“。”“.”英式英语：Full stop；美式英语：Period，也称作句点）
+BSLASH 反斜杠 \	
+
+
+6, #ENDCALL 关闭屏幕 休眠？
+19, #DPAD_UP 粘贴
+23, #DPAD_CENTER 换行
+HEADSETHOOK 耳机HOOK键 
+
+94, #PICTSYMBOLS 不知道
+115, #CAPS_LOCK
+
+cs[26]     #[':', 'COLON'
+'''	
+	dci={
+'*':17, #STAR
+'#':18, #POUND
+
+',':55, #COMMA
+'.':56, #PERIOD 'FULL STOP'
+'\t':61, #tab
+' ':62,#space
+'\n':66,#enter
+'`':68,#GRAVE
+'-':69, #MINUS
+'=':70, #EQUALS
+'[':71, #LEFT_BRACKET
+']':72, #RIGHT_BRACKET
+'\\':73, #BACKSLASH
+';':74, #SEMICOLON
+"'":75, #APOSTROPHE 撇号   cs[7]   #["'", 'APOSTROPHE']
+'/':76,#SLASH
+'@':77, #AT
+'+':81, #PLUS
+# '':
+# '':
+# '':
+		
+	}
+	global U,T,N,F
+	U,T,N,F=py.importUTNF()
+	
+	if not s:s=geta()
+	for c in s:
+		if c in T.az:ic=ord(c)-68
+		elif c in T._09:ic=ord(c)-41
+		else:
+			ic=dci[c]
+		# if 
+		
+		N.HTTP.get('http://192.168.1.12:8888/cmd/sendkey?KeyCode=%s'%(ic),proxy=0)
+	if response:response.set_data(s)	
+k8888=sendkey8888
+
 def tftp_download(ip,filename,port=69):
 	''' pip install TFTPy     
 U.enable_log()
@@ -117,23 +183,6 @@ def http_server(PORT):
 	with socketserver.TCPServer(("", int(PORT)), Handler) as httpd:
 		print("serving at port", PORT)
 		httpd.serve_forever()
-
-
-def get_all_pid_equal_port():
-	global U,T,N,F
-	U,T,N,F=py.importUTNF()
-	import psutil
-	ns=psutil.net_connections()
-	r=[]
-	for sconn in ns:
-		if sconn.pid==sconn.laddr.port:
-			p=psutil.Process(pid=sconn.pid)
-			t=U.object_custom_repr(p._create_time,repr=psutil._pprint_secs(p._create_time),)
-			
-			r.append([t,sconn])
-			# r.append([t,p,sconn])
-	return r
-get_rpc_port=get_rpc_ports=get_all_rpc_port=get_all_rpc_ports=get_rpc_port_list=get_pid_equal_port=get_port_equal_pid=get_all_pid_equal_port	
 	
 def curl_return_bytes(url,verbose=True,proxy=py.No('socks5h://127.0.0.1:21080'),headers=py.No('default use N.HTTP.headers'),**ka):
 	'''
@@ -886,6 +935,58 @@ def uploadServer(port=1122,host='0.0.0.0',dir='./',url='/up'):
 			r.headers['Content-Type'] = 'text/plain;charset=utf-8'
 			return r
 	app.run(host=host,port=port,debug=0,threaded=True)	
+############# rpc start ############
+def rpc_pop_window_127(port=443):
+	'''
+U.ppid(6672)
+30464
+
+U.ppid(30464)
+5740
+
+ws[1]==
+(1247918,
+ '6672 ipy:7.9 py:3.74 at[2022-09-03__10.56.09__.462] C:/test/ipy/',
+ 5740)
+ =========
+ ssl_context=('C:/test/ssl/##domain##/fullchain.crt', 'C:/test/ssl/##domain##/private.pem')
+''' 
+	global U,T,N,F
+	U,T,N,F=py.importUTNF()
+	if port==443:
+		f=U.get_or_dill_load_and_set('ssl_context')[0]
+		if '\\' in f:
+			domain=T.sub_last(f,'\\','\\')
+		else:	
+			domain=T.sub_last(f,'/','/')
+		rpc_base=f'https://3.{domain}/'
+	else:	
+		rpc_base=f'http://127.0.0.1:{port}/'
+	print(rpc_base)
+	b=N.curl(rpc_base+'Win.popw();r=U.pid,U.ppid(),U.ppid(U.ppid())')
+	r3=T.unrepr(b.decode())
+	return r3
+
+rpc_popw=rpc_pop_window=rpc_pop_window_127
+
+
+
+
+def get_all_pid_equal_port():
+	global U,T,N,F
+	U,T,N,F=py.importUTNF()
+	import psutil
+	ns=psutil.net_connections()
+	r=[]
+	for sconn in ns:
+		if sconn.pid==sconn.laddr.port:
+			p=psutil.Process(pid=sconn.pid)
+			t=U.object_custom_repr(p._create_time,repr=psutil._pprint_secs(p._create_time),)
+			
+			r.append([t,sconn])
+			# r.append([t,p,sconn])
+	return r
+get_rpc_port=get_rpc_ports=get_all_rpc_port=get_all_rpc_ports=get_rpc_port_list=get_pid_equal_port=get_port_equal_pid=get_all_pid_equal_port	
 
 RPC_BASE_REMOTE_DEFAULT=py.No('if not base:input',no_raise=1)
 def is_remote_rpc_base(base):

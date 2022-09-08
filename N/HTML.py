@@ -8,6 +8,64 @@ else:
 	from qgb import py
 U,T,N,F=py.importUTNF()
 
+def sendkey_list(response):
+	ki=U.get_or_dill_load_and_set('ki')
+	
+	la=[]
+	for k,i in ki:
+		la.append(f'<a href="#{i}" n={i} > {i} {k} </a>')
+	sla='<br>'.join(la)
+	
+	html='''
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+%(sla)s
+
+<script>
+async function post(url,data){
+    if(typeof a!='string')data=JSON.stringify(data)
+
+    return new Promise(function (resolve, reject) {
+        var xhr = new XMLHttpRequest();
+        xhr.open('post', url, true);
+        xhr.onload = function () {
+            resolve(xhr.response);
+        };
+        xhr.send(data)
+    });
+}
+
+
+
+for(e of document.querySelectorAll("a")){
+
+	e.onclick=async (event)=>{
+		et=event.target
+		await post(
+"http://192.168.1.12:8888/cmd/sendkey?KeyCode="+et.getAttribute('n')
+		)
+		
+	};
+
+}
+
+		
+
+function a_onclick(event){
+	e=event.target
+	
+
+	
+}
+ 
+</script>
+	
+'''%py.locals()
+	
+	response.headers['Content-Type']='text/html;charset=utf-8'
+	response.set_data(html)
+k8888=sendkey_list
+	
 def get_or_input_html(response,*name):
 	v= U.get(name[0],)
 	# if not v:
@@ -322,7 +380,7 @@ def a_href(response,u=''):
 	"""
 	response.headers['Content-Type']='text/html;charset=utf-8';
 	response.set_data(html)
-	return 
+	return  u
 HREF=URL=href=a_href	
 
 

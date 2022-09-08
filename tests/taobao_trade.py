@@ -919,7 +919,7 @@ js_trade_list='''async function js_trade_list(){
 	var emax=xpath('//li[@title="下一页"]/preceding-sibling::li[1]')
 	var max=Number.parseInt(emax.textContent) 
 
-	var es=xpath_all("//table[contains(., '订单号')]")
+	var es=xpath_all("//table[contains(.,'订单号')]")
 	var ts=Array.from(es).map(i=> i.innerHTML)
 	   
 	var en=xpath_all("//li[contains(@class, 'active')]")[0]

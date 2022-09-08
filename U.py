@@ -185,7 +185,8 @@ def set_delete(*names,level=gd_sync_level['process'],**ka):
 			if name in d:
 				r.append(d.pop(name))
 			else:
-				r.append(py.No('%r not found to unset'%name))
+				r.append(py.No('{} not found to unset'.format(py.repr(name)),) ,)#如果用%s,name tuple时
+				#出错：TypeError: not all arguments converted during string formatting
 		if py.len(r)==1:
 			return r[0]
 		else:
@@ -261,29 +262,48 @@ def get_or_set(name,default=None,lazy_default=None):
 		return set(name,default)
 getset=getSet=get_set=get_or_set
 
-def get_or_dill_load(name):
+def get_or_dill_load_noset(name):
 	o=get(name)
 	if not o:
 		o=F.dill_load(file=name)
 	return o
-get_dl=get_or_dl=get_or_dill_load	
+get_dl=get_or_dl=get_or_dill_load=get_or_dill_load_noset
 
-def get_or_dill_load_and_set(name):
+def get_or_dill_load_or_dill_dump_and_set(name,default=None):
 	U,T,N,F=py.importUTNF()
-	name=F.auto_path(name)
+	
+	gst=U.get_gst(base_gst=True)
+	name=F.auto_path(name,default=gst)
 	if '/' in name:
 		o=get(T.sub_last(name,'/',''))
 	else:
 		o=get(name)
 	if not o:
 		o=F.dill_load(file=name)
+		if not o:
+			fs=[f for f in F.ls(gst) if f.startswith(name) and f.endswith('.dill')]
+			if py.len(fs)==1:
+				o=F.dill_load(file=fs[0])
+	
+	if not o and default:
+		f=F.dill_dump(obj=default,file=name)
+		if f:
+			print(U.stime(),'dill_dump:',f)
+			o=default
+		else:
+			raise Exception('not o,dill_dump',o,f)
+		
 	if not o:
 		return o
 		# raise EnvironmentError('can not dill_load',name)
 	else:
 		U.set(name,o)
 	return o
-get_or_dl_and_set=get_or_dill_load_set=get_or_dill_load_and_set
+get_or_set_sys_level=get_or_set_system_level=get_or_dl_and_set=get_or_dill_load_set=get_or_dill_load_and_set=get_or_dill_load_or_dill_dump_and_set
+
+# def get_or_dill_load_or_dill_dump(name):
+	# return
+
 
 def set_and_dill_dump(name,value):
 	return set(name,value),F.dill_dump(file=name,obj=value)
@@ -626,7 +646,7 @@ tmux detach-client -t /dev/pts/3
 			d=T.regex_match_named_return_dict(s,r'\s\[(?P<x>\d+)x(?P<y>\d+)\s')     
 			x,y=py.int(d['x']),py.int(d['y'])
 			cs.append([c,x,y,x*y])
-		cs=U.sort(cs,col=-1)	
+		cs=U.sort(cs,col=3,reverse=1)	
 		for row in cs[skip_max_n:]:
 			U.ipy_getoutput(f'tmux detach-client -t {row[0]}')
 			row.append(U.stime())
@@ -818,7 +838,8 @@ def retry( exceptions,times=3,sleep_second=0):
 #TODO: if not has ei,import error occur twice,why?
 
 
-def get_test_path():
+def get_test_path(base_gst=False):
+	'''TODO: base_gst 【dill_load, ipy.save】'''
 	if isnix():
 		s='/test/'
 		home=os.getenv('HOME')
@@ -835,7 +856,9 @@ def get_test_path():
 			home+='/workspace'
 		return get('U.gst',home+s)
 	if iswin() or iscyg():
-		return get('U.gst',find_driver_path('c:/test/'[1:]))
+		if base_gst:
+			return 'C:/test/'
+		return get('U.gst',find_driver_path(':/test/'))
 get_gst=getTestPath=get_test_path
 gst=gsTestPath=get_test_path()
 

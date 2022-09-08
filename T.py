@@ -109,6 +109,17 @@ try:
 	from pprint import pprint,pformat
 except:pass
 ####################################################
+def get_char_name(c):
+	import unicodedata
+	r=[]
+	for i in c:
+		r.append(unicodedata.name(c))
+	if py.len(c)==1:
+		return r[0]
+	else:
+		return r
+char_name=ascii_name=unicode_name=get_char_name	
+
 def pdf_to_text_generator(filename_or_url,**ka):
 	r''' pip install PyPDF2
 	
