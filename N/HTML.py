@@ -67,12 +67,13 @@ function a_onclick(event){
 k8888=sendkey_list
 	
 def get_or_input_html(response,*name):
-	v= U.get(name[0],)
+	# v= U.get(name[0],)
+	v=U.get_or_set_sys_level(name[0])
 	# if not v:
 		# raise v
 	# print(v)	
 	return v	
-def xiaomi_air_conditioner_control(response=None,token=py.No('auto get'),t=0,angle=None,lcd=None,**ka):
+def xiaomi_air_conditioner_control(response=None,token=py.No('auto get'),t=0,angle=None,lcd=None,before=None,after=None,**ka):
 	''' 风扇水平 0 时，环境感知温度会立马降低 
 	
 '''	
@@ -80,24 +81,27 @@ def xiaomi_air_conditioner_control(response=None,token=py.No('auto get'),t=0,ang
 	angle=U.get_duplicated_kargs(ka,'angle','angel','jd','ang','a','j',default=angle)
 	
 	if not token:token=get_or_input_html(response,'miio.token')
-	if not token:return
+	if not token:return token
 	
 	import miio
 	d=U.get_or_set(token,
 			lazy_default=lambda:miio.device.Device(ip='192.168.1.4',token=token),
 		)	
 		
-	if not t:t=N.geta()
-	t=U.int(t)
-	if not t:t=261
+	if py.callable(before):
+		before(d)
 		
-	if t<16:t=16
-	if t<33:t=t*10
+	if not t:
+		t=N.geta()
+		t=U.float(t)
+	if t:
+		if t<16:t=16
+		if t<=32:t=t*10
+			
+		if t<160:t=160
+		if t>320:t=320
 		
-	if t<160:t=160
-	if t>320:t=320
-	
-	d.send("set_temperature", [t] )	
+		d.send("set_temperature", [t] )	
 	
 	def set_angle():
 		d.send("set_ver_pos", [70])
@@ -106,14 +110,20 @@ def xiaomi_air_conditioner_control(response=None,token=py.No('auto get'),t=0,ang
 		U.sleep(21)
 		d.send("set_ver_pos", [angle])
 	
+	if py.isint(lcd):
+		d.send('set_lcd',[lcd])
+		
 	if py.isint(angle):
 		d.send('set_ver_range',[0,70])
 		t=U.thread(target=set_angle)
 		U.set(angle,t)
 		t.start()
 		# if angle<35
-	if py.isint(lcd):
-		d.send('set_lcd',[lcd])
+	if py.callable(after):
+		after(d)
+		
+	# return d,py.id(d)
+	
 	return d
 ac=xiaomi_air_conditioner_control	
 

@@ -4326,7 +4326,7 @@ File:      c:\qgb\anaconda3\lib\site-packages\keyboard\__init__.py'''
 
 key_action=key_actions=system_actions=system_action=sys_act=sys_acts=sys_actions=sys_action=simulate_system_actions
 
-def get_all_envs(return_list=False,index=False,**ka):
+def get_all_envs(return_list=False,index=False,line_max=138,**ka):
 	U=py.importU()
 	return_list=U.get_duplicated_kargs(ka,'return_list','list','rl','l',default=return_list)
 	index=U.get_duplicated_kargs(ka,'index','i','n',default=index)
@@ -4339,7 +4339,7 @@ def get_all_envs(return_list=False,index=False,**ka):
 		if U.len(return_list)>0 and py.all(py.map(py.isint,return_list)):
 			if len(return_list)==1:
 				return_list=py.list(return_list)
-				return_list.append(138-return_list[0]) #139 不行，换行
+				return_list.append(line_max-return_list[0]) #139 不行，换行
 			strep=True	
 		rl=[]
 		for n,(k,v) in py.enumerate(r.items()):
