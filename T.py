@@ -109,6 +109,33 @@ try:
 	from pprint import pprint,pformat
 except:pass
 ####################################################
+def chr(*a):
+	if py.len(a)==1 and a[0]> 0x110000:
+		s=py.hex(a[0])[2:]
+		ms=py.len(s)
+		if ms%2!=0:raise py.ArgumentError('0xAABBCC long a % 2 !+0  ')
+		ta=[]
+		for i in py.range(0,ms,2):
+			i=py.int('0x'+s[i:i+2],16)
+			ta.append(i)
+		a=ta	
+	s=''
+	for i in a:
+		s+=py.chr(i)
+	return s
+	
+def ord(s,hex=False,_0x='0x'):
+	global U,T,N,F
+	U,T,N,F=py.importUTNF()
+	
+	r=[]
+	for c in s:
+		i=py.ord(c)
+		if hex:
+			i=U.IntRepr(i,repr=_0x+py.hex(i)[2:].upper(),)
+		r.append(i)
+	return r
+	
 def get_char_name(c):
 	import unicodedata
 	r=[]
@@ -1746,7 +1773,7 @@ def parseInt(a,base=16,symbols=None):
 	# if base==256:#字节流，这样效率更高？
 		# r=0
 		# for i,v in enumerate(a[::-1]):
-			# r+=ord(v)*pow(256,i)
+			# r+=py.ord(v)*pow(256,i)
 		# return r
 	U=py.importU()	
 	if base<2:raise Exception(base,'base invild')
@@ -2300,8 +2327,8 @@ get_max_len_str=select_max_len_str
 def allAscii(a):
 	if not py.istr(a):return False
 	for i in a:
-		if ord(i)>127:return False
-		# U.pln( ord(i);break
+		if py.ord(i)>127:return False
+		# U.pln( py.ord(i);break
 	return True
 	
 z09_finance=gzfn=zfn=zf09=gszFinancial='''零壹贰叁肆伍陆柒捌玖拾佰仟萬億'''

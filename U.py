@@ -2547,7 +2547,9 @@ maxLen=max_len
 def max_len_top_n(a,n=5,line_max=73):
 	''' return [ [index,len,v ] ]
 
-ipython console :73 不换行，74 不行	
+ipython_console: win, 6p_ttyd_tmux :73 不换行，74 不行	
+
+U.env(l=22,line_max=73)
 '''	
 	U=py.importU()
 	rt=[]
