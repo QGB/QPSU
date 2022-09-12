@@ -30,24 +30,91 @@ except Exception as e:
 # urllib.request.install_opener(opener)
 grepo=U.get('git.repo')
 
-def ssh_T():
-	import socks
+def ssh_T(host='github.com',port=22,username='git',private_key='',proxy=0,cmd=''):
+	''' -T 禁用伪 tty 分配。Disable pseudo-tty allocation.
+ssh.connect(
+    hostname,
+    port=22,
+    username=None,
+    password=None,
+    pkey=None,
+    key_filename=None,
+    timeout=None,
+    allow_agent=True,
+    look_for_keys=True,
+    compress=False,
+    sock=None,
+    gss_auth=False,
+    gss_kex=False,
+    gss_deleg_creds=True,
+    gss_host=None,
+    banner_timeout=None,
+    auth_timeout=None,
+    gss_trust_dns=True,
+    passphrase=None,
+    disabled_algorithms=None,
+)
+'''	
 	import paramiko
-
+	import socks
 	sock=socks.socksocket()
-	sock.set_proxy(
-		proxy_type=socks.SOCKS5,
-		addr="127.0.0.1",
-		port=21080,
-		# username="blubbs",
-		# password="blabbs"
-	)
-	sock.connect(('github.com', 22)) #None
+	if proxy:
+		sock.set_proxy(
+			proxy_type=socks.SOCKS5,
+			addr="127.0.0.1",
+			port=21080,
+			# username="blubbs",
+			# password="blabbs"
+		)
+	sock.connect((host,port)) #None
 	ssh = paramiko.SSHClient()
 	ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-	ssh.connect('ignored without host key verification', username='git', sock=sock)
+	try:
+		ssh.connect(hostname=host, username=username,key_filename=private_key, sock=sock)
+	except Exception as e:
+		return py.No(e)
+	
+	channel = ssh.get_transport().open_session(timeout=1000)
+	
+	from paramiko.message import Message
+	from paramiko.common import  cMSG_CHANNEL_REQUEST
+	m = Message()
+	m.add_byte(cMSG_CHANNEL_REQUEST)
+	m.add_int(channel.remote_chanid)
+	m.add_string("shell")
+	m.add_boolean(True)
+	channel.transport._send_user_message(m)
+	
+	bo=be=b''
+	for i in range(10):
+		ready=channel.recv_ready(),channel.recv_stderr_ready()
+		print(U.stime(),ready)
+		if py.any(ready):
+			if channel.recv_ready():
+				bo=channel.recv(4096)
+			if channel.recv_stderr_ready():
+				be=channel.recv_stderr(4096)
+			return bo+be
+			break
+		U.sleep(0.2)
+	else:
+		print(U.stime(),'timeout! 10*0.2 ')
+	
+	
+	return sock,ssh,channel
 
 	return sock,ssh
+
+
+	# with open_private_key(private_key) as fpkey:
+		# pkey=paramiko.RSAKey.from_private_key(fpkey, password=None) #private_key_password
+
+		# if 'git@' not in repo_path:
+			# raise py.NotImplementedError("'git@' not in repo_path")
+			# repo_path
+		
+		# ParamikoSSHVendor(pkey=pkey)
+
 
 def clone(url,path=None):
 	client, target = dulwich.client.get_transport_and_path(url) #c , 'user/repo'
