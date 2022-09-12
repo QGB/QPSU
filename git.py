@@ -322,8 +322,13 @@ Out[26]: 'C:/QGB/babun/cygwin/bin/qgb/'
 			return new_refs
 		
 		import paramiko
-		pkey=paramiko.RSAKey.from_private_key(fpkey, password=private_key_password)
-
+		skey=fpkey.read()
+		fpkey.seek(0)
+		if 'RSA' in skey:
+			pkey=paramiko.RSAKey.from_private_key(fpkey, password=private_key_password)
+		else:
+			pkey=paramiko.ECDSAKey.from_private_key(fpkey, password=private_key_password)
+			
 		if 'git@' not in repo_path:
 			# raise py.NotImplementedError("'git@' not in repo_path")
 			repo_path
