@@ -99,7 +99,7 @@ def random_headers():
 ghttp_methods=HTTP_METHODS=[
 'HEAD', 'GET', 'POST', 'OPTIONS', 'PUT', 'PATCH', 'DELETE']	
 def request(url,method='GET',headers=gheaders,
-	proxies=AUTO_GET_PROXY,verify=False,no_raise=False,print_req=False,**ka):	
+	proxies=AUTO_GET_PROXY,verify=False,timeout=9,no_raise=False,print_req=False,**ka):	
 	''' 
 '''
 	import requests
@@ -121,11 +121,12 @@ def request(url,method='GET',headers=gheaders,
 				if k[0].isupper():
 					ka.pop(k)
 					headers[k]=v
-	ka['verify']=verify
 	
 	if url and 'url' not in ka:
 		ka['url']=url
-	ka['url']=N.auto_url(ka['url'])
+	ka['verify']=verify
+	ka['timeout']=timeout
+	ka['url']=N.auto_url(ka['url']) # 特意将url放最后，方便显示
 		
 	if print_req:print(U.v.requests.request(**ka))
 		
@@ -269,7 +270,7 @@ def download(url, file_path='',default_dir=py.No('set_input',no_raise=1),headers
 				sys.stdout.flush()
 	print()  # 避免上面\r 回车符
 		
-def post(url,proxies=AUTO_GET_PROXY,**ka):
+def post(url,data=None,**ka):
 	'''
 Signature: requests.post(url, data=None, json=None, **kwargs)
 Docstring:
@@ -286,14 +287,17 @@ Type:	  function
 '''	
 	U,T,N,F=py.importUTNF()
 
-	url=N.auto_url(url)
-	proxies,ka=auto_proxy(proxies,ka,return_ka=True)
+	# url=N.auto_url(url)
+	# proxies,ka=auto_proxy(proxies,ka,return_ka=True)
 	
-	import requests
-	try:
-		return requests.post(url,**ka)
-	except Exception as e:
-		return py.No(e)
+	data=U.get_duplicated_kargs(ka,'data','v',default=data)
+	
+	return request(url,method='POST',data=data,**ka)
+	# import requests
+	# try:
+		# return requests.post(url,data=data,**ka)
+	# except Exception as e:
+		# return py.No(e)
 
 def get_str(url,**ka ,):
 	T=py.importT()

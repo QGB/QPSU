@@ -109,7 +109,15 @@ try:
 	from pprint import pprint,pformat
 except:pass
 ####################################################
+def extract_UTNF_function(f):
+	global U,T,N,F
+	U,T,N,F=py.importUTNF()
+	
+	
+	
 def chr(*a):
+	if py.len(a)==1 and not py.isint(a[0]):
+		a=a[0]
 	if py.len(a)==1 and a[0]> 0x110000:
 		s=py.hex(a[0])[2:]
 		ms=py.len(s)

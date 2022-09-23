@@ -3331,7 +3331,7 @@ U.stime(0.0004)
 				
 		time=tMod.localtime(time) #return time.struct_time
 	elif not time:
-		time=getTimestamp()
+		time=get_float_us_time() #float
 		return get_time_as_str(time)
 	else:
 		raise py.ArgumentUnsupported(time)
@@ -4810,6 +4810,16 @@ Out[115]: 0
 
 in ipy , npp() not autoReload when U.r(), But U.npp()
 '''
+	if isnix():
+		U,T,N,F=py.importUTNF()
+		rpc_ka={}
+		if a:
+			f,lineno=get_obj_file_lineno(a,lineno=lineno,auto_file_path=auto_file_path)
+			if f.startswith('/mnt/c/'):
+				f='C:/'+f[4+3:]
+			rpc_ka['a']=f
+			rpc_ka['lineno']=lineno
+		return N.rpc_call(base=U.get_or_set_input('U.npp.rpc_base',default='https://'),name='U.npp',**rpc_ka)
 	if editor_path:
 		npath=editor_path
 	else:

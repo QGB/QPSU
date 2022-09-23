@@ -669,6 +669,13 @@ def pppoe():
 506 192.168.2.1+192.168.1.1 073198799737 777124	
 
 '''
+
+def flask_dill_data():
+	from flask import request
+	U,T,N,F=py.importUTNF()	
+	b=request.get_data()
+	return F.dill_load_bytes(b)
+	
 def flask_request_log(time=True,url=False):
 	from flask import request
 	U,T,N,F=py.importUTNF()	
@@ -1051,6 +1058,14 @@ def set_remote_rpc_base(base=RPC_BASE_REMOTE_DEFAULT,change=True,ka=None):
 		# base+='/'
 	return U.set(RPC_BASE_REMOTE,base)	
 rpc_base=change_rpc_base=get_or_set_rpc_base=get_rpc_base_remote=get_remote_rpc_base=set_rpc_base_remote=set_remote_rpc_base
+	
+def rpc_call(name,*a,base='',**ka):
+	U,T,N,F=py.importUTNF()
+	# base=get_remote_rpc_base(base=base,ka=ka)
+	if not base:
+		raise py.ArgumentError('need base')
+	rp= N.HTTP.post(f'{base}rpc_a,rpc_ka=N.flask_dill_data();r={name}(*rpc_a,**rpc_ka)',F.dill_dump([a,ka]),proxies=0,print_req=1)
+	return U.StrRepr(rp.text)
 	
 def rpc_iter_U_get(name,bases=None,**ka):
 	'''
@@ -1925,6 +1940,9 @@ def set_proxy(host='',port='',protocol='socks5h',target_protocol=('http','https'
 	proxies=U.get_duplicated_kargs(ka,'proxies','proxy','ip')
 	if not host and proxies:
 		host=proxies
+	if py.isint(host) and not port:
+		port=host
+		host='127.0.0.1'
 	if py.isdict(host):
 		for k,v in host.items():
 			d.update( set_proxy(v,target_protocol=k) ) # 递归
