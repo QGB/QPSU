@@ -185,8 +185,8 @@ def http_server(PORT):
 		httpd.serve_forever()
 	
 def curl_return_bytes(url,verbose=True,proxy=py.No('socks5h://127.0.0.1:21080'),headers=py.No('default use N.HTTP.headers'),**ka):
-	'''
-
+	'''  CURLOPT_* see:
+https://github.com/pycurl/pycurl/blob/master/src/module.c
 	'''
 	global U,T,N,F
 	U,T,N,F=py.importUTNF()
@@ -194,6 +194,12 @@ def curl_return_bytes(url,verbose=True,proxy=py.No('socks5h://127.0.0.1:21080'),
 	
 	import pycurl
 	c = pycurl.Curl()
+	for k,v in ka.items():
+		if not k.isupper():
+			print('===qgb skip',k,v)
+			continue
+		ik=py.getattr(c,k)
+		c.setopt(ik, v)
 	c.setopt(c.URL, url)
 	c.setopt(c.VERBOSE,verbose)
 	if not headers:	
@@ -378,6 +384,8 @@ https://raw.githubusercontent.com/Banou26/chromium-issue-1178811/main/content-sc
 '''	
 	a=get_flask_request_a(q)
 	sa=a.split('/')
+	['https:', '', 'github.com', 'espressif', 'crosstool-NG', 'releases', 'download', 'esp-2021r2-patch3', 'xtensa-esp32-elf-gcc8_4_0-esp-2021r2-patch3-linux-amd64.tar.gz']
+	raise py.NotImplementedError()
 	if '://github.com/' in a:
 		n0=-1
 		for n,i in py.enumerate(sa):
@@ -1059,12 +1067,28 @@ def set_remote_rpc_base(base=RPC_BASE_REMOTE_DEFAULT,change=True,ka=None):
 	return U.set(RPC_BASE_REMOTE,base)	
 rpc_base=change_rpc_base=get_or_set_rpc_base=get_rpc_base_remote=get_remote_rpc_base=set_rpc_base_remote=set_remote_rpc_base
 	
-def rpc_call(name,*a,base='',**ka):
+def rpc_append_list(*a,name='la',base='',proxies=0,print_req=1):
+	''' #TODO  check_row_len=None
+	'''
+	U,T,N,F=py.importUTNF()
+	
+	if not base:
+		raise py.ArgumentError('need base')
+		
+	
+	rp= N.HTTP.post(f'{base}rpc_a=N.flask_dill_data();{name}.append(rpc_a);r=py.len({name})',F.dill_dump(a if py.len(a)!=1 else a[0]),proxies=proxies,print_req=print_req)
+	t=rp.text
+	if 'NameError: name' in t and 'is not defined' in t:
+		 N.HTTP.post(f'{base}r={name}=[]')
+		 return rpc_append_list(*a,name=name,base=base)
+	return U.StrRepr(t)
+	
+def rpc_call(name,*a,base='',proxies=0,print_req=1,**ka):
 	U,T,N,F=py.importUTNF()
 	# base=get_remote_rpc_base(base=base,ka=ka)
 	if not base:
 		raise py.ArgumentError('need base')
-	rp= N.HTTP.post(f'{base}rpc_a,rpc_ka=N.flask_dill_data();r={name}(*rpc_a,**rpc_ka)',F.dill_dump([a,ka]),proxies=0,print_req=1)
+	rp= N.HTTP.post(f'{base}rpc_a,rpc_ka=N.flask_dill_data();r={name}(*rpc_a,**rpc_ka)',F.dill_dump([a,ka]),proxies=proxies,print_req=print_req)
 	return U.StrRepr(rp.text)
 	
 def rpc_iter_U_get(name,bases=None,**ka):

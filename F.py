@@ -1364,7 +1364,7 @@ def int_to_size_str(size,b1024=True,zero='0 B',less_than_zero='%s',str_size=0 ):
 	raise ValueError('number too large')
 ssize=readable_size=readablesize=readableSize=numToSize=int_to_size=int_to_size_str
 
-def size_single_file(f):
+def size_single_file(f,repr_size=0):
 	f=nt_path(f)
 	size =0 #0L  SyntaxError in 3
 	if not _p.exists(f):
@@ -1377,6 +1377,8 @@ def size_single_file(f):
 		size= _p.getsize(f)
 		if size<=0:
 			size=py.len(read_bytes(f))
+		F=py.importF()	
+		return F.IntSize(size,size=repr_size)
 	except Exception as e:
 		return py.No('unexcept err',e,f)
 		

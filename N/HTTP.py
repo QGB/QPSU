@@ -20,6 +20,8 @@ else:
 	except Exception as ei:
 		print(urllib,ei)
 		py.importU().repl()
+ghttp_methods=HTTP_METHODS=[
+'HEAD', 'GET', 'POST', 'OPTIONS', 'PUT', 'PATCH', 'DELETE']		
 user_agent='Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/59.0.2171.95 Safari/537.36'
 user_agent_iphone=r'Mozilla/5.0 (iPhone; CPU iPhone OS 15_3_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/15.3 Mobile/15E148 Safari/604.1'
 
@@ -96,8 +98,7 @@ def random_headers():
 	return fake_headers.Headers( headers=fake_headers.make_header() ).generate()
 	
 #8
-ghttp_methods=HTTP_METHODS=[
-'HEAD', 'GET', 'POST', 'OPTIONS', 'PUT', 'PATCH', 'DELETE']	
+
 def request(url,method='GET',headers=gheaders,
 	proxies=AUTO_GET_PROXY,verify=False,timeout=9,no_raise=False,print_req=False,**ka):	
 	''' 

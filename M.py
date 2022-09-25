@@ -69,7 +69,7 @@ def ifconfig():
 	return n.ifconfig()
 ip=ipconfig=ifconfig
 
-def wifi_scan(p=1):
+def wifi_scan(p=1,return_dict=False):
 	n=network.WLAN(network.STA_IF)
 	n.active(True)
 	r=[]
@@ -88,7 +88,7 @@ def wifi_scan(p=1):
 			r.append(row)
 	gc()
 	if not p:return r
-wl=lw=wifi_ls=ls_wifi=wifi_list=ws=get_wifi_list=scanw=scan_wifi=wifi_scan
+wl=lw=wifi_ls=ls_wifi=list_wifi=wifi_list=ws=get_wifi_list=scanw=scan_wifi=wifi_scan
 
 def is_wifi_connected():
 	global STA_IF
@@ -105,7 +105,11 @@ def wifi_connect(ssid='test',pw=''.join(str(i) for i in range(1,9))):
 	if not STA_IF:
 		STA_IF=network.WLAN(network.STA_IF)
 	STA_IF.active(True)
-	STA_IF.connect(ssid,pw)
+	try:
+		STA_IF.connect(ssid,pw)
+	except Exception as e:
+		print(e)
+		STA_IF.disconnect()
 	return STA_IF.isconnected()
 c=jap=wc=wific=wifi_connect
 
@@ -270,6 +274,11 @@ def http_get(url):
 	import urequests
 	return urequests.get(url)
 get=http_get
+
+def http_post(url,data):
+	import urequests
+	return urequests.post(url)
+post=http_post
 
 def localtime():
 	import utime
