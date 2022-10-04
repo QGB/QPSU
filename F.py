@@ -1362,7 +1362,7 @@ def int_to_size_str(size,b1024=True,zero='0 B',less_than_zero='%s',str_size=0 ):
 		if size < multiple:
 			return '{0:.3f} {1}'.format(size, suffix)
 	raise ValueError('number too large')
-ssize=readable_size=readablesize=readableSize=numToSize=int_to_size=int_to_size_str
+rsize=ssize=readable_size=readablesize=readableSize=numToSize=int_to_size=int_to_size_str
 
 def size_single_file(f,repr_size=0):
 	f=nt_path(f)
@@ -1780,13 +1780,14 @@ def name(a):
 	'''
 	U=py.importU()
 	if not U.T.istr(a):return ''
-	if U.inMuti(a,'/','\\',f=str.endswith):a=a[:-1]
+	# if U.inMuti(a,'/','\\',f=str.endswith):a=a[:-1]
+	if a.endswith('/') or a.endswith('\\'):a=a[:-1]
 	if not isAbs(a):return a
 	else:
 		
 		a=T.sub(a,dir(a))
 		# U.repl()
-		if U.inMuti(a,'/','\\',f=str.startswith):return a[1:]
+		if a.endswith('/') or a.endswith('\\'):return a[1:]
 		else:return a
 		
 def get_dirname_from_full_path(a):

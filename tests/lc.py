@@ -41,8 +41,8 @@ def sign_in(email,pw,dill_file=py.No('auto use email'),set_app_id=False):
 	
 	data='{"email":"%s","password":"%s"}'%(email,pw)
 
-	print(U.v.requests.post('https://us-w1-console-api.leancloud.app/1.1/signin', headers=headers, data=data))
-	rsignin = requests.post('https://us-w1-console-api.leancloud.app/1.1/signin', headers=headers, data=data)
+	print(U.v.requests.post('https://us-w1-console-api.leancloud.app/1.1/signin', headers=headers, data=data,verify=False,))
+	rsignin = requests.post('https://us-w1-console-api.leancloud.app/1.1/signin', headers=headers, data=data,verify=False,)
 	print(rsignin,rsignin.text[:99])
 	if 'XSRF-TOKEN' not in rsignin.cookies or not rsignin.cookies['XSRF-TOKEN']:
 		return py.No(rsignin,rsignin.text,)
@@ -84,7 +84,7 @@ def get_app_id(rsignin):
     'referer': 'https://console.leancloud.app/',
 	}
 
-	ra = requests.get('https://us-w1-console-api.leancloud.app/1.1/clients/self/apps', headers=headers_apps,cookies=rsignin.cookies)
+	ra = requests.get('https://us-w1-console-api.leancloud.app/1.1/clients/self/apps', headers=headers_apps,cookies=rsignin.cookies,verify=False,)
 	try:
 		return ra.json()[0]['app_id']
 	except Exception as e:
@@ -111,7 +111,7 @@ def get_all_traffic(*rs):
 		headers_t = {'x-xsrf-token': rsignin.cookies['XSRF-TOKEN'],
 			'x-lc-id': app_id,
 			}
-		rt = requests.get('https://us-w1-console-api.leancloud.app/1.1/engine/stats/outbound-traffic', headers=headers_t, params=params,cookies=rsignin.cookies)
+		rt = requests.get('https://us-w1-console-api.leancloud.app/1.1/engine/stats/outbound-traffic', headers=headers_t, params=params,cookies=rsignin.cookies,verify=False,)
 		for k,v in rt.json()[0]['dps'].items():
 			s=U.stime(int(k))
 			s=s.replace('.00__.000','')

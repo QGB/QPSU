@@ -598,7 +598,7 @@ u1604:  IPython repl  ok	,  bash python -c error  ?
 			# [1]
 		#  0
 # u1604 # /bin/sh: 1: Syntax error: end of file unexpected
-	def tmux_capture_pane(session=0,max_lines=9999,socket='',**ka):
+	def tmux_capture_pane(session=0,max_lines=9999,reverse=False,socket='',**ka):
 		''' unset TMUX 
 
 -S 套接字路径
@@ -611,7 +611,8 @@ u1604:  IPython repl  ok	,  bash python -c error  ?
 		'''
 		U,T,N,F=py.importUTNF()
 		session=U.get_duplicated_kargs(ka,'session','sess',default=session)
-		max_lines=U.get_duplicated_kargs(ka,'max_lines','max','m','n','S','s',default=max_lines)
+		max_lines=U.get_duplicated_kargs(ka,'max_lines','max','m','n','S','s','l',default=max_lines)
+		reverse=U.get_duplicated_kargs(ka,'reverse','rev','r','R',default=reverse)
 		
 		a=N.geta()
 		
@@ -628,6 +629,7 @@ u1604:  IPython repl  ok	,  bash python -c error  ?
 			
 		os.environ['TMUX']=''
 		rs=U.isipy().getoutput(f'tmux {socket} capture-pane -S -{max_lines} -t {session}:{a};tmux {socket} show-buffer')#.format(max_lines=max_lines,session=session,window=a))# 不能用 U.cmd
+		if reverse:rs=rs[::-1]
 		return T.EOL.join(rs)
 	tmux=tmuxc=tmuxcap=tmuxcapture=tmuxCapture=tmux_capture=tmux_capture_pane
 	
@@ -3047,7 +3049,7 @@ def enumerate_reversed(*a,**ka):
 	return enumerate(*a,**ka)[::-1]
 reverse_enumerate=reversed_enumerate=enumerate_reversed
 
-def map(*a):
+def map(func,*a):
 	'''TypeError: map() takes no keyword arguments
 Init signature: map(self, /, *args, **kwargs)
 Docstring:
@@ -3057,7 +3059,7 @@ Make an iterator that computes the function using arguments from
 each of the iterables.  Stops when the shortest iterable is exhausted.
 Type:           type
 '''
-	return py.list(py.map(*a))
+	return py.list(py.map(func,*a))
 
 def range(*a):
 	'''return list
@@ -4332,6 +4334,7 @@ def get_all_envs(return_list=False,index=False,line_max=138,**ka):
 	U=py.importU()
 	return_list=U.get_duplicated_kargs(ka,'return_list','list','rl','l',default=return_list)
 	index=U.get_duplicated_kargs(ka,'index','i','n',default=index)
+	line_max=U.get_duplicated_kargs(ka,'line_max','max','lmax',default=line_max)
 	
 	r=py.dict(os.environ)
 	if return_list:
@@ -4704,6 +4707,14 @@ def get_obj_file_lineno(a,lineno=0,auto_file_path=True):
 			F=py.importF()
 			f=F.auto_file_path(f)
 		return f,lineno
+	elif py.repr(a).startswith('<subprocess.Popen '):
+		'''In [14]: _1,repr(_1)
+(<subprocess.Popen at 0x2713f449a08>,
+ '<subprocess.Popen object at 0x000002713F449A08>')  '''	
+		la=py.getattr(a,'args')
+		if py.islist(la):
+			if 'notepad++.exe' in la[0].lower():
+				return la[1],py.int(la[2][3:]) # '-n '
 	else:
 		# if py.getattr(a,'__module__',None):  
 		# #最后的情况，不要判断 get_module 会自动raise ArgumentUnsupported
@@ -4758,7 +4769,8 @@ def vscode(a='',lineno=0,auto_file_path=True,get_cmd=False,
 				set('vscode_win',executor,level=gd_sync_level['system'])
 				# U.log('vscode_win exe path cached %s'%executor)
 			else:
-				executor=F.expanduser(r'~\AppData\Local\Programs\Microsoft VS Code\_\Code.exe') 
+				# executor=F.expanduser(r'~\AppData\Local\Programs\Microsoft VS Code\_\Code.exe') 
+				executor=r'C:\VSCode-win32-x64-1.70.0-insider\Code - Insiders.exe'
 
 	if isLinux(): # only work when using remoteSSH
 		executor = get('vscode_linux',level=gd_sync_level['system'])
@@ -5962,7 +5974,7 @@ def load(name=0,returnFile=False):
 
 def unique(iterable,count=False,count_and_sort=False,return_list=False,**ka):
 	count=get_duplicated_kargs(ka,'d','dict','return_dict','rd','count','ct',default=count)
-	count_and_sort=get_duplicated_kargs(ka,'count_and_sort','count_sort','cts',default=count_and_sort)
+	count_and_sort=get_duplicated_kargs(ka,'count_and_sort','count_sort','cts','cs',default=count_and_sort)
 	if count_and_sort:
 		count=True
 		return_list=True

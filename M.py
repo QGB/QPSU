@@ -1,12 +1,153 @@
 #coding=utf-8
 # cs=charset={'cp864', 'rot-13', 'iso8859-14', 'mac-cyrillic', 'cp852', 'cp863', 'cp367', 'iso8859-5', 'iso8859-16', 'cp500', 'gbk', 'mac-iceland', 'cp869', 'mac-arabic', 'koi8-r', 'koi8-u', 'cp856', 'cp949', 'cp1258', 'cp874', 'iso8859-4', 'euc-kr', 'utf-32', 'cp037', 'cp1255', 'cp850', 'bz2-codec', 'palmos', 'utf-16-le', 'cp737', 'punycode', 'cp437', 'iso8859-15', 'iso8859-1', 'cp858', 'iso2022-jp-2004', 'utf-32-le', 'gb2312', 'ascii', 'latin-1', 'iso2022-jp-ext', 'hex-codec', 'mac-centeuro', 'unicode-escape', 'shift-jisx0213', 'raw-unicode-escape', 'iso8859-3', 'cp866', 'iso8859-7', 'mac-latin2', 'iso8859-2', 'big5hkscs', 'cp1254', 'hz', 'iso2022-jp-1', 'mac-romanian', 'iso2022-kr', 'utf-16-be', 'iso8859-11', 'iso8859-13', 'cp1361', 'cp819', 'charmap', 'cp860', 'cp950', 'cp1140', 'iso2022-jp', 'hp-roman8', 'euc-jis-2004', 'utf-16', 'cp1253', 'cp1256', 'cp936', 'big5', 'cp1026', 'cp855', 'cp1251', 'mac-greek', 'cp1250', 'cp932', 'mbcs', 'iso8859-9', 'uu-codec', 'shift-jis-2004', 'unicode-internal', 'zlib-codec', 'iso2022-jp-3', 'cp1252', 'cp775', 'quopri-codec', 'tis-620', 'johab', 'shift-jis', 'cp1006', 'iso8859-6', 'utf-7', 'utf-8-sig', 'cp861', 'iso8859-8', 'cp1257', 'iso2022-jp-2', 'gb18030', 'base64-codec', 'cp720', 'iso8859-10', 'cp862', 'euc-jp', 'ptcp154', 'cp865', 'utf-32-be', 'cp875', 'utf-8', 'idna', 'mac-farsi', 'mac-roman', 'mac-turkish', 'euc-jisx0213', 'cp857', 'mac-croatian', 'cp424'}
 
+def t():
+	import os
+	l=[]
+	for i in range(2):
+		try:
+			l.append(os.dupterm(None,i))
+		except Exception as e:
+			l.append(e)
+		write(f'osd{len(l)}',repr(l))	
+	return l	
+
+
+def socket_send(file='',data='',ip='192.168.1.3',port=8000):
+	import socket
+	sock = socket.socket()
+	addrinfos = socket.getaddrinfo(ip, port)
+	# (host and port to connect to are in 5th element of the first tuple in the addrinfos list
+	sock.connect(addrinfos[0][4])
+	if data:sock.send(data)
+	if file:
+		isize=size(file)
+		with open(file,'rb') as f:
+			while f.tell()<isize:
+				sock.write(f.read(4096))
+	sock.close()
+
+def _post_large_file(url,file,headers={}):
+	'''   File "/lib/urequests.py", line 115, in post
+TypeError: unexpected keyword argument 'files'
+>>>
+'''
+	import urequests
+	files = {'odimg': open(file, 'rb')}
+	return urequests.post(url,files=files)
+	
+def post_large_file(url,file,headers={}):#, data=None, json=None,params=None
+	import urequests,usocket
+	try:
+		proto, dummy, host, path = url.split("/", 3)
+	except ValueError:
+		proto, dummy, host = url.split("/", 2)
+		path = ""
+	if proto == "http:":
+		port = 80
+	elif proto == "https:":
+		import ussl
+		port = 443
+	else:
+		raise ValueError("Unsupported protocol: " + proto)
+
+	if ":" in host:
+		host, port = host.split(":", 1)
+		port = int(port)
+		
+	# if params:
+		# path = path + "?"
+		# for k in params:
+			# path = path + '&'+k+'='+params[k]
+
+	ai = usocket.getaddrinfo(host, port)
+	addr = ai[0][4]
+	s = usocket.socket()
+	s.connect(addr)
+	if proto == "https:":
+		s = ussl.wrap_socket(s)
+	s.write(b"%s /%s HTTP/1.0\r\n" % (method, path))
+	if not "Host" in headers:
+		s.write(b"Host: %s\r\n" % host)
+	# Iterate over keys to avoid tuple alloc
+	for k in headers:
+		s.write(k)
+		s.write(b": ")
+		s.write(headers[k])
+		s.write(b"\r\n")
+	# if json is not None:
+		# assert data is None
+		# import ujson
+		# data = ujson.dumps(json)
+	
+	# if data:
+	isize=size(file)
+	s.write(b"Content-Length: %d\r\n" % isize)
+	s.write(b"\r\n")
+	# if data:
+	gc()
+
+	with open(file,'rb') as f:
+		while f.tell()<isize:
+			s.write(f.read(4096))
+
+	l = s.readline()
+	protover, status, msg = l.split(None, 2)
+	status = int(status)
+	#print(protover, status, msg)
+	while True:
+		l = s.readline()
+		if not l or l == b"\r\n":
+			break
+				#print(l)
+		if l.startswith(b"Transfer-Encoding:"):
+			if b"chunked" in l:
+				raise ValueError("Unsupported " + l)
+		elif l.startswith(b"Location:") and not 200 <= status <= 299:
+			raise NotImplementedError("Redirects not yet supported")
+
+	resp = Response(s)
+	resp.status_code = status
+	resp.reason = msg.rstrip()
+	return resp
+
+
+
+def size(f):
+	'''
+os.stat('boot.py')
+st_mode
+(32768, 0, 0, 0, 0, 0, 742, 0, 0, 0)
+	
+	'''
+	import os
+	st_mode,  st_ino,st_dev,st_nlink,  st_uid,st_gid,  st_size,  st_atime,st_mtime,st_ctime=os.stat(f)
+	return st_size
+
+def is_esp32c3():
+	import os
+	return 'ESP32C3' in os.uname().machine
+
+def uname():
+	'''
+(sysname='esp32', nodename='esp32', release='1.19.1', version='v1.19.1 on 2022-08-29', machine='ESP32C3 module with ESP32C3')
+'''	
+	import os
+	return os.uname()
+
+def get_chip_id(return_hex=False):
+	import machine
+	b=machine.unique_id()
+	if return_hex:
+		return b2h(b)  # '6055f9776880'    
+	return b	
+
 def b2h(bs,split=''):
 	return split.join(
 	[('%02s'%(hex(b)[2:])).replace(' ','0') for b in	bs])
 # str no rjust ,%02i不支持str类型
 
-gct={}
+guart=gct={}
 def count(a=0):
 	if a not in gct:
 		gct[a]=0
@@ -15,14 +156,53 @@ def count(a=0):
 	return gct[a]
 ct=count
 
+def uart(tx=2,rx=3,w='',baudrate=115200,wsleep=0.1):
+	global guart
+	from machine import UART
+	if not guart:guart={}
+	k=(tx,rx,baudrate)
+	if k in guart:
+		uart1=guart[k]
+	else:
+		guart[k]=uart1 = UART(1, baudrate=115200, tx=2, rx=3)
+	if w:
+		uart1.write(w)
+		sleep(wsleep)
+		print(uart1.read())
+	return uart1
+
+def sha256(b=b'',f=''):
+	hashlib.sha256
+	h.update(b)
+	return binascii.hexlify(h.digest())
+
+def new_file(f,size,chunk=4096,b=b'\x00'):
+	with open(f,'w') as _:
+		_.write('')
+	n=0	
+	with open(f,'a') as _: # wa ValueError:
+		if size>chunk:
+			bc=b*chunk
+			for i in range(0,size,chunk):
+				_.write(bc)
+				n+=chunk
+				if i%20480==0:print(i,i/1024,'KB')
+		_.write(b*(size-n))
+	import os	
+	return os.stat(f)
+new=new_file	
+	
 def write(f,text):
 	with open(f,'w') as _:
 		return _.write(text)
 def read(f):
+	if "'TextIOWrapper'" in repr(f):#<class 'TextIOWrapper'>
+		f.seek(0)
+		return f.read(-1)
+
 	with open(f) as _:
 		return _.read(-1)
 
-import os,time
 def gv():
 	print(sys_info())
 	gc()
@@ -33,6 +213,14 @@ def sleep(t=0.001):
 	time.sleep(t)
 	
 def ls(p='/'):
+	'''
+icroPython v1.15-60-g28b5a71b1-dirty on 2021-05-01; win32 version
+list(os.ilistdir())	
+AttributeError: 'module' object has no attribute 'listdir'
+AttributeError: 'module' object has no attribute 'statvfs'
+ImportError: no module named 'upip'
+	'''
+	import os
 	return os.listdir(p)
 	
 	
@@ -47,6 +235,7 @@ mem=info=sys_info
 
 def disk_usage(unit=1024): 
 	'''1024 B = KB
+(4096, 4096, 669, 0, 0, 0, 0, 0, 0, 255)	
 	'''
 	f_bsize, f_frsize, f_blocks, f_bfree, f_bavail, f_files, f_ffree, f_favail, f_flag, f_namemax=os.statvfs('/')
 	return (f_bsize*f_blocks/unit,f_bsize*f_bavail/unit)
@@ -70,6 +259,7 @@ def ifconfig():
 ip=ipconfig=ifconfig
 
 def wifi_scan(p=1,return_dict=False):
+	import network
 	n=network.WLAN(network.STA_IF)
 	n.active(True)
 	r=[]

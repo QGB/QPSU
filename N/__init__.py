@@ -985,8 +985,19 @@ ws[1]==
 rpc_popw=rpc_pop_window=rpc_pop_window_127
 
 
-
-
+def get_process_all_listen_addr(pid):
+	''' addr(ip='0.0.0.0', port=443),
+	'''
+	import psutil
+	# p=psutil.Process(pid=pid)
+	ns=psutil.net_connections()
+	r=[]
+	for sconn in ns:
+		if sconn.pid==pid:
+			r.append(sconn.laddr)
+	return r
+get_process_listen_port=get_process_all_listen=get_process_all_listen_addr
+	
 def get_all_pid_equal_port():
 	global U,T,N,F
 	U,T,N,F=py.importUTNF()

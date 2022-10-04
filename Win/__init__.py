@@ -608,7 +608,7 @@ def setWindowPos(hwnd=0,x=0,y=0,w=0,h=0,rect=(),top=None,flags=None):
 	if user32.SetWindowPos(hwnd,top,x,y,w,h,flags):#1
 		return hwnd
 	else:return py.No(getLastError())
-setPos=setpos=setWPos=setWindowPos
+setPos=setpos=setWPos=set_window_pos=setWindowPos
 	
 def setOskPos(w=333,h=255,x=522,y=-21):
 	flags=SWP_SHOWWINDOW

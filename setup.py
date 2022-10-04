@@ -7,7 +7,7 @@ setup(
     version="0.1",
     packages=['qgb','qgb.N','qgb.Win'],
     package_dir={
-        'qgb': '.',
+        'qgb': '.',	
         'qgb.N': './N',
         'qgb.Win': './Win',
     },
