@@ -2362,7 +2362,7 @@ def get_ip_from_mac(mac):
 	if py.len(r)==1:
 		return r[0]
 
-def getLAN_IP_HOSTS(ip='192.168.1.{}',count=256):
+def getLAN_IP_ALL_HOSTS(ip='192.168.1.{}',count=256):
 	import socket
 	for i in range(count):
 		with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as s:
@@ -2371,13 +2371,62 @@ def getLAN_IP_HOSTS(ip='192.168.1.{}',count=256):
 			print(my_ip, flush=True)	
 	r=getAllAdapter()
 	return r
+	
+def get_lan_ip(adapter=py.No('auto')):
+	'''
+	
+['lo', 'eth0', 'docker0', 'vetha535de0', 'bond0', 'dummy0']
 
-def getAllAdapter():
+	
+['以太网 2', '本地连接* 9', '本地连接* 10', 'WLAN', '蓝牙网络连接', 'Loopback Pseudo-Interface 1']	
+'''	
+	import socket
+	dals=get_all_adapter()
+	daip={}
+	for a,ls in dals.items():
+		for s in ls:
+			# if '192.168.' in s.address:
+			if s.family is socket.AddressFamily.AF_INET: # ipv4
+				daip[a]=s.address
+				break
+			# socket.AddressFamily.AF_INET6: #ipv6
+	if adapter:
+		return daip[adapter]
+	U=py.importU()			
+	if U.isLinux():
+		return daip['eth0']
+	elif U.isWin():
+
+		return daip['WLAN']
+	else:
+		raise py.NotImplementedError('other system')
+	
+	import socket
+	import fcntl
+	import struct
+
+	def get_ip_address(ifname):
+		s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+		return socket.inet_ntoa(fcntl.ioctl(
+			s.fileno(),
+			0x8915,  # SIOCGIFADDR
+			struct.pack('256s', ifname[:15])
+		)[20:24])
+
+	return get_ip_address(b'eth0') #if str struct.pack('256s', error: argument for 's' must be a bytes object
+	
+getLAN_IP=getlanip=get_lan_ip
+
+def get_all_adapter():
+	import psutil
+
+	return psutil.net_if_addrs() # dict {'eth0': }
+
 	U=py.importU()
 	if U.iswin():
 		from qgb import Win
 		return Win.getAllNetworkInterfaces()
-getLAN_IP=getlanip=get_lan_ip=getAllAdapter
+getAllAdapter=get_all_adapter
 
 URL_SCHEME_CHARS=py.No('call N.auto_url will auto set')
 def auto_url(a,default_protocol='http',p=0):

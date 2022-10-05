@@ -4829,6 +4829,8 @@ in ipy , npp() not autoReload when U.r(), But U.npp()
 			f,lineno=get_obj_file_lineno(a,lineno=lineno,auto_file_path=auto_file_path)
 			if f.startswith('/mnt/c/'):
 				f='C:/'+f[4+3:]
+			if f.startswith('/'):
+				f=rf'\\{N.get_lan_ip()}\smb'+f.replace('/','\\')
 			rpc_ka['a']=f
 			rpc_ka['lineno']=lineno
 		return N.rpc_call(base=U.get_or_set_input('U.npp.rpc_base',default='https://'),name='U.npp',**rpc_ka)
