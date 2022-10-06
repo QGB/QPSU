@@ -316,8 +316,8 @@ class Microdot(BaseMicrodot):
 
             app.run(debug=True)
         """
-        asyncio.run(self.start_server(host=host, port=port, debug=debug,
-                                      ssl=ssl))
+        return self.start_server(host=host, port=port, debug=debug,ssl=ssl)
+        asyncio.run( )
 
     def shutdown(self):
         self.server.close()

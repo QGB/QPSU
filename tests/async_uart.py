@@ -13,7 +13,7 @@ async def sender():
 sreader = asyncio.StreamReader(uart)
 async def receiver():
     while True:
-        res = await sreader.readline()
+        res = await sreader.read(1)
         print('Recieved', res)
 
 loop = asyncio.get_event_loop()

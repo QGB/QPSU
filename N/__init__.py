@@ -1860,6 +1860,19 @@ def flask_media_stream_response(request,response,file=None,):
 mp4_response=media_response=flask_media_stream_response
 	
 def flask_file_stream_response(response,file=py.No('if not file:use N.geta()'),):
+	'''
+< HTTP/1.0 200 OK
+< Content-Type: text/plain;charset=utf-8
+< X-XSS-Protection: 0
+< Access-Control-Allow-Origin: *
+< Content-Disposition: inline; filename=typescript-4.8.3.tgz
+< Content-Length: <11.389 MiB>
+< Server: Werkzeug/1.0.1 Python/3.8.5
+< Date: Thu, 06 Oct 2022 17:17:38 GMT
+	
+	Parse Error: Invalid character in Content-Length".
+	
+'''	
 	from flask import stream_with_context,request
 	U,T,N,F=py.importUTNF()
 	if not file:
@@ -1878,7 +1891,7 @@ def flask_file_stream_response(response,file=py.No('if not file:use N.geta()'),)
 		# 不进行url_encode,chrome ERR_RESPONSE_HEADERS_TRUNCATED
 		# response.headers['Content-Disposition'] = "inline; filename=" + T.url_encode(file)
 		response.headers['Content-Disposition'] ="inline; filename=" + T.url_encode(F.get_filename_from_full_path(file))
-		response.headers['Content-Length'] =F.size(file)
+		response.headers['Content-Length'] =F.size(file,int=True)
 		
 	except Exception as e:
 		# r=T.pformat([e,U.get_tb_stack()],**U.get('pformat_kw',{}))

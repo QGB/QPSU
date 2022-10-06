@@ -237,6 +237,7 @@ def disk_usage(unit=1024):
 	'''1024 B = KB
 (4096, 4096, 669, 0, 0, 0, 0, 0, 0, 255)	
 	'''
+	import os
 	f_bsize, f_frsize, f_blocks, f_bfree, f_bavail, f_files, f_ffree, f_favail, f_flag, f_namemax=os.statvfs('/')
 	return (f_bsize*f_blocks/unit,f_bsize*f_bavail/unit)
 df=disk_usage
@@ -475,13 +476,13 @@ def localtime():
 	return utime.localtime()
 time=localtime	
 
-upip=0
+# upip=0
 def upip_install(pkg_name):
-	global upip
-	if not upip:
-		import upip
+	# global upip
+	# if not upip:
+	import upip
 	return upip.install(pkg_name)
-pip=pip_install=upip_install	
+pip=upip=pip_install=upip_install	
 
 def pwm(pin=17,freq=1,duty=1023):
 	''' machine.Pin.OUT == 3

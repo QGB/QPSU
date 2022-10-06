@@ -3304,6 +3304,10 @@ def str_to_datetime(a):
 		
 try_parse_stime=str_to_datetime
 	
+def get_time_as_bytes(*a,**ka):
+	return get_time_as_str(*a,**ka).encode('ascii')
+btime=timeb=get_time_as_byte=get_time_as_bytes
+	
 def get_time_as_str(time=None,format=gsTimeFormatFile,ms=True,time_zone=py.No('原来，除非指定')):
 	'''http://python.usyiyi.cn/translate/python_278/library/time.html#time.strftime
 	TODO: 可以指定 ms
