@@ -20,7 +20,7 @@ async def receiver():
 		if gws:await gws.send(res)
 
 
-from microdot_asyncio import Microdot, send_file
+from microdot_asyncio import Microdot, send_file,Response
 from microdot_asyncio_websocket import with_websocket
 
 app = Microdot()
@@ -29,9 +29,14 @@ app = Microdot()
 @app.route('/')
 def index(request):
 	return send_file('index.html')
+	
+import io
+@app.route('/token')
+def index(request):
+	return Response(body=io.StringIO('{"token": ""}'), status_code=200,)
 
 gws=None
-@app.route('/echo')
+@app.route('/ws')
 @with_websocket
 async def echo(request, ws):
 	global gws
@@ -42,6 +47,8 @@ async def echo(request, ws):
 		# await ws.send(data)
 		await swriter.awrite(data)
 		# await swriter.awrite('Hello uart\n')
+# 30e4 b8ad e696 87   #F.b2h('中文'.encode('utf-8'))== 'E4B8AD E69687'		
+		
 		
 loop = asyncio.get_event_loop()
 # rs=loop.create_task(sender())

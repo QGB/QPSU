@@ -78,7 +78,7 @@ def auto_proxy_for_requests(proxies,ka,return_ka=False):
 return proxies,ka
 	'''
 	U,T,N,F=py.importUTNF()
-	proxies=U.get_duplicated_kargs(ka,'proxies','proxy',default=proxies)
+	proxies=U.get_duplicated_kargs(ka,'proxies','proxy','x',default=proxies)
 	if proxies:
 		proxies=N.set_proxy(proxies)
 	else:

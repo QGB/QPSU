@@ -1207,6 +1207,14 @@ rpc_get=rpc_get_var=rpcGetVariable=rpc_get_variable
 			# return
 		# print(self,name)
 		# return 
+
+def rpc_set_variable_local(**ka):
+	U,T,N,F=py.importUTNF()
+	base
+	for k,v in ka.items():
+		k
+	
+rpc_set_local=rpc_set_variable_local	
 		
 def rpc_set_variable(*obj,base=py.No('auto history e.g. [http://]127.0.0.1:23571[/../] '),timeout=9,varname='v',ext_cmd='',pr=False,proxies=None,**ka):
 	U,T,N,F=py.importUTNF()
@@ -2408,12 +2416,12 @@ def get_lan_ip(adapter=py.No('auto')):
 	U=py.importU()			
 	if U.isLinux():
 		return daip['eth0']
-	elif U.isWin():
+	elif U.isWin():#TODO
 
 		return daip['WLAN']
 	else:
 		raise py.NotImplementedError('other system')
-	
+	################
 	import socket
 	import fcntl
 	import struct
@@ -2428,7 +2436,7 @@ def get_lan_ip(adapter=py.No('auto')):
 
 	return get_ip_address(b'eth0') #if str struct.pack('256s', error: argument for 's' must be a bytes object
 	
-getLAN_IP=getlanip=get_lan_ip
+ip=get_ip=getLAN_IP=getlanip=get_lan_ip
 
 def get_all_adapter():
 	import psutil

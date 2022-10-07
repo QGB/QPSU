@@ -784,15 +784,27 @@ https://stackoverflow.com/a/65001152/6239815
 	import multiprocess.pool
 	return multiprocess.Pool(*a,**ka)
 
-def pprint(object, stream=None, indent=1, width=133, depth=None, *,
-           compact=False):
-	try:
-		ipy=py.from_qgb_import('ipy')
-		return print(ipy.format(object),file=stream)
-	except:pass
-	
-	from pprint import pprint as _pprint
-	_pprint(object=object,stream=stream,indent=indent,width=width,depth=depth,)
+def pprint(*objects, stream=None, indent=1, width=133, depth=None,compact=False):
+	'''
+pprint(
+    object,
+    stream=None,
+    indent=1,
+    width=80,
+    depth=None,
+    *,
+    compact=False,
+)	
+	'''
+	# if py.len(object)==1:object=object[0]
+	for object in objects: # 默认换行
+		try:
+			ipy=py.from_qgb_import('ipy')
+			return print(ipy.format(object),file=stream)
+		except:pass
+		
+		from pprint import pprint as _pprint
+		_pprint(object=object,stream=stream,indent=indent,width=width,depth=depth,)
 
 def retry( exceptions,times=3,sleep_second=0):
 
@@ -7011,8 +7023,12 @@ thunder_start :  light :	!min_val, max_val, min_loc, max_loc
 find_image_on_screen=seach_image_on_screen=search_image_on_screen
 
 
-def set_timed_task(func,every='day',time='05:09',unit=1):
+def set_timed_task(func,every='day',time='05:09',unit=1,**ka):
 	'''U.set_timed_task(baidu_start,'2hour') 
+#TODO	
+	min=5
+	ms=44
+	day=3
 '''
 	U,T,N,F=py.importUTNF()
 	import schedule
@@ -7051,14 +7067,14 @@ def set_timed_task(func,every='day',time='05:09',unit=1):
 		r=py.getattr(schedule.every(unit),every).do(func)  # every current time ,Depend Time unit   
 	return schedule.jobs,U.StrRepr('\n#######  U.get(%r)'%SCHEDULE_RUN_PENDING+' == '),t #,r
 	
-schedule=everyday_time_task=set_time_task=timing_task=dsrw=set_schedule=setInterval=set_interval=set_timed_task
+timer=schedule=everyday_time_task=set_time_task=timing_task=dsrw=set_schedule=setInterval=set_interval=set_timed_task
 
 def remove_timed_task(index=-1):
 	''' -1 is last added
 0 is first added'''
 	import schedule
 	return schedule.jobs,'########## pop:',schedule.jobs.pop(index)
-schedule_jobs_pop=pop_time_task=cancel_time_task=del_time_task=remove_time_task=remove_timed_task
+cancel_job=schedule_jobs_pop=pop_time_task=cancel_time_task=del_time_task=remove_time_task=remove_timed_task
 	
 def get_timed_task_list():
 	import schedule
