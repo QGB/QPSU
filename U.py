@@ -262,14 +262,17 @@ def get_or_set(name,default=None,lazy_default=None):
 		return set(name,default)
 getset=getSet=get_set=get_or_set
 
-def get_or_dill_load_noset(name):
-	o=get(name)
-	if not o:
-		o=F.dill_load(file=name)
-	return o
-get_dl=get_or_dl=get_or_dill_load=get_or_dill_load_noset
+# def get_or_dill_load_noset(name):
+	# o=get(name)
+	# if not o:
+		# o=F.dill_load(file=name)
+	# return o
+# =get_or_dill_load_noset
 
 def get_or_dill_load_or_dill_dump_and_set(name,default=None):
+	''' 
+#TODO  linux /mnt/c redirect	
+	'''
 	U,T,N,F=py.importUTNF()
 	
 	gst=U.get_gst(base_gst=True)
@@ -297,9 +300,8 @@ def get_or_dill_load_or_dill_dump_and_set(name,default=None):
 		return o
 		# raise EnvironmentError('can not dill_load',name)
 	else:
-		U.set(name,o)
-	return o
-get_or_set_sys_level=get_or_set_system_level=get_or_dl_and_set=get_or_dill_load_set=get_or_dill_load_and_set=get_or_dill_load_or_dill_dump_and_set
+		return U.set(name,o)
+get_dl=get_or_dl=get_or_dill_load=get_or_set_sys_level=get_or_set_system_level=get_or_dl_and_set=get_or_dill_load_set=get_or_dill_load_and_set=get_or_dill_load_or_dill_dump_and_set
 
 # def get_or_dill_load_or_dill_dump(name):
 	# return
@@ -7263,7 +7265,8 @@ Out[1312]: []
 '''	
 	# if py.len(a)<1:raise py.ArgumentError('')
 	target=get_duplicated_kargs(ka,'f','target','repr','__repr__','func','function','custom','custom_repr',default=None)
-	if target==None:
+	size=get_duplicated_kargs(ka,'size','width')
+	if not size and target==None:
 		return obj
 	t=py.type(obj)
 	class QGB_REPR_SUBTYPE(t):
@@ -7289,7 +7292,14 @@ Out[1312]: []
 	self._qgb_obj=obj
 	self._qgb_a=a
 	self._qgb_ka=ka
-	self._qgb_repr=target
+	if size and not target:
+		if is_ipy():
+			s=py.from_qgb_import('ipy').pformat(obj)
+		else:
+			s=repr(obj)
+		self._qgb_repr=T.justify(s,size=size)
+	else:	
+		self._qgb_repr=target
 	
 	return self
 ObjectRepr=objectRepr=obj_repr=object_repr=custom_object_repr=object_custom_repr	

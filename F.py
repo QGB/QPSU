@@ -332,7 +332,8 @@ F.readableSize(len(F.dill_dump(protocol=2,obj=r)  ) )   #'18.972 KiB'
 F.readableSize(len(F.dill_dump(protocol=3,obj=r)  ) )   #'14.192 KiB'
 F.readableSize(len(F.dill_dump(protocol=4,obj=r)  ) )   #'13.694 KiB'
 
-
+dill还包括几个pickle错误检测工具，在dill.detect module.
+['at', 'baditems', 'badobjects', 'badtypes', 'children', 'code', 'dis', 'errors', 'freevars', 'getmodule', 'globalvars', 'iscode', 'isframe', 'isfunction', 'ismethod', 'istraceback', 'nestedcode', 'nestedglobals', 'outermost', 'parent', 'parents', 'reference', 'referredglobals', 'referrednested', 'trace', 'varnames', ...]
 	'''
 	import dill
 	if file:

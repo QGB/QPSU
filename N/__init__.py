@@ -816,11 +816,12 @@ def parse_everthing_html(html):
 	return r	
 parse_es=parse_everthing=parse_everthing_http=parse_http_everthing=parse_everthing_html
 	
-def zhihu_question(url,response=None):
+def zhihu_question(url=py.No('N.geta'),response=None):
 	import qgb.tests.zhihu_scrapy_single_QA
 	if not( py.istr(url) or py.isint(url) ):
-		url=py.getattr(url,'url')
-		
+		# url=py.getattr(url,'url')
+		url=geta()
+	print(repr(url))	
 	r= qgb.tests.zhihu_scrapy_single_QA.zhihu(url)
 	if response:
 		response.set_data(r)
@@ -1210,11 +1211,12 @@ rpc_get=rpc_get_var=rpcGetVariable=rpc_get_variable
 
 def rpc_set_variable_local(**ka):
 	U,T,N,F=py.importUTNF()
-	base
+	base=f'''https://{T.sub_last(N.get_lan_ip(),'.')}.{U.get_dl('qgb_domain')}/'''
 	for k,v in ka.items():
-		k
-	
-rpc_set_local=rpc_set_variable_local	
+		# k
+		rpc_set_variable(v,base=base,varname=k)
+		
+local_rpc_set=set_local_rpc=rpc_set_local=rpc_set_variable_local	
 		
 def rpc_set_variable(*obj,base=py.No('auto history e.g. [http://]127.0.0.1:23571[/../] '),timeout=9,varname='v',ext_cmd='',pr=False,proxies=None,**ka):
 	U,T,N,F=py.importUTNF()

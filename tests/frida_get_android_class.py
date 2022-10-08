@@ -28,19 +28,30 @@ def on_message(message,data): #js中执行send函数后要回调的函数
         print(message)
     
 # device=frida.get_usb_device()
-device=frida.get_device_manager().add_remote_device('192.168.1.14')
+def get_device(device=''):
+	if not device:
+		host='192.168.1.14'
+	elif py.istr(device):
+		host=device
+	else:
+		return device
+	return frida.get_device_manager().add_remote_device(host)
+	
+def get_apps_ps(device=''):
+	device=get_device(device)
 
-scope='minimal'  # full
-apps=device.enumerate_applications() 
-U.pprint(U.stime(),apps)
+	scope='minimal'  # full
+	apps=device.enumerate_applications() 
+	U.pprint(U.stime(),apps)
 
-ps = device.enumerate_processes(scope=scope)
-U.pprint(U.stime(),ps)
+	ps = device.enumerate_processes(scope=scope)
+	U.pprint(U.stime(),ps)
+	return apps,ps
+# N.rpc_set_local(apps=apps,ps=ps)#TypeError: can't pickle _frida.Application objects
 
-
-
-process = device.attach('com.termux') # app包名
+device=get_device()
+process = device.attach('Termux') #进程 name ,不是 'com.termux' 包名
 script = process.create_script(jscode) #创建js脚本
 script.on('message',on_message) #加载回调函数，也就是js中执行send函数规定要执行的python函数
 script.load() #加载脚本
-sys.stdin.read()
+# sys.stdin.read()
