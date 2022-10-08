@@ -201,7 +201,7 @@ def set_multi(**ka):
 	# for name,value in ka.items():
 		# d[name]=value	
 	return ka
-set_ka=set_named=set_multi	
+set_named=set_multi	
 
 def get(name='_',default=GET_NO_VALUE,level=gd_sync_level['process']):
 	if level>=gd_sync_level['process']:
@@ -339,8 +339,19 @@ def set_rename(old,new):
 	set(new,v)
 	return 'U.set_rename {} > {}'.format(old,new)
 	# return new
-setmv=mvset=set_move=move_set=rename_set=set_rename
+setmv=mvset=mv_set=set_move=move_set=rename_set=set_rename
 
+def get_or_set_ka(name,**ka):
+	return get_or_set(name,default=ka)
+
+def set_ka(name,**ka):
+	if not ka:raise py.ArgumentError('need ka')
+	d=get(name)
+	if d and not py.isdict(d):raise py.EnvironmentError('U.get(%r) is not dict ?'%name,d,ka)
+	if not py.isdict(d):return get_or_set_ka(name,ka)
+	for k,v in ka.items():
+		d[k]=v
+	return d
 #########################
 def one_in(vs,*t):
 	'''(1,2,3,[t])	or	([vs].[t])

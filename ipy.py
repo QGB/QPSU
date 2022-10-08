@@ -132,7 +132,10 @@ C:\QGB\Anaconda3\lib\site-packages\IPython\core\formatters.py :89  '''
 	if not max_seq_length:
 		max_seq_length=U.get_or_set('ipy.pformat.max_seq_length',2000)
 	U.set('ipy.pformat.max_seq_length',max_seq_length)
-	return IPython.lib.pretty.pretty(obj,max_width=width,max_seq_length=max_seq_length)
+	try:
+		return IPython.lib.pretty.pretty(obj,max_width=width,max_seq_length=max_seq_length)
+	except Exception as e:
+		return py.repr(e)
 	
 	from IPython.core.interactiveshell import InteractiveShell
 	r= InteractiveShell.instance().display_formatter.format(obj)
@@ -439,7 +442,8 @@ In_index_delta=1  # In[268]==_i269	  , Out[269]
 		else:
 			if py.is2():v=v.encode('utf-8')
 			else:pass
-			U.p(v,' '*(columns-len(v.splitlines()[-1])),file=file )
+			if v:# IndexError: list index out of range
+				U.p(v,' '*(columns-len(v.splitlines()[-1])),file=file )
 			
 		if out and (i in gOut) and (not skip):
 			pout=pformat(gOut[i])
