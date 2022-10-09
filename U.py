@@ -1879,6 +1879,7 @@ del_mod=delete_mod=del_modules=delete_modules=remove_mod=remove_module
 
 def reload(*mods):
 	''' 不是一个模块时，尝试访问mod._module'''
+	# da=U.get_caller_args_dict()
 	import sys,imp
 	if len(mods)<1:#如果 mods 中含有长度为0的元素，会导致U重新加载
 		# sys.modules['qgb._U']=sys.modules['qgb.U'] #useless, _U is U
@@ -1890,9 +1891,19 @@ def reload(*mods):
 		# pln 233
 	elif len(mods)==1:
 		mod=mods[0]
-		if not isModule(mod):
-			# sys.a=mod
-			# return
+		if isModule(mod):
+			if mod.__name__ in sys.module:				
+				try:
+					imp.reload(mod)
+				except Exception as ei:
+					setErr(ei)
+			else:
+				mod=import_module_by_full_path(mod.__file__)
+				if get_ipy():
+					warning('reload m=U.import_module_by_full_path , but now return your mod, m=_')
+					# get_ipy().user_ns['']=mod
+				return mod	
+		else:
 			try:
 				if py.type(mod) is py.str:
 					if mod not in sys.modules:
@@ -1911,10 +1922,7 @@ def reload(*mods):
 				raise em
 			
 			# else:gbPrintErr=True#在函数局域覆盖全局属性
-		try:
-			imp.reload(mod)
-		except Exception as ei:
-			setErr(ei)
+		
 	else:
 		for i in mods:
 			reload(i)
@@ -4091,16 +4099,12 @@ reload 重新调用此函数 就相当于 reload
 
 importlib.util.spec_from_file_location  如果是一个文件夹，返回None
 '''
-	# if add_sys_modules:
-		# vs=T.regex_match_all(fn,T.RE_VAR_EXACTLY)
-		# mod_name='_'.join(vs)
-			
-		# mod_name=U.input('mod_name:',mod_name)	
+	
 	spec= importlib.util.spec_from_file_location(mod_name,f)# mod name 用特殊字符不会报错
 	mod=importlib.util.module_from_spec(spec)
 	# mod.__spec__ =spec#不能解决 U.r(X) spec not found for the module 'www_xiezhen_xyz'
 	if exec_code:spec.loader.exec_module(mod)
-	# if add_sys_modules:sys.modules[mod_name]=mod
+	# 重新调用此函数 就相当于 reload	
 	
 	return mod
 reload_from_file=reload_from_path=importf=import_file=import_f=import_from_file=import_module_by_full_path		
