@@ -1892,7 +1892,7 @@ def reload(*mods):
 	elif len(mods)==1:
 		mod=mods[0]
 		if isModule(mod):
-			if mod.__name__ in sys.module:				
+			if mod.__name__ in sys.modules:				
 				try:
 					imp.reload(mod)
 				except Exception as ei:
@@ -7639,11 +7639,12 @@ U.StrRepr(b'3232',encoding='ascii')	[<class 'qgb.U.StrRepr'>, (b'3232',), {'enco
 			return py.No(e,cls, a, ka)
 			
 		self.ka=ka
+		self._qgb_obj=a[0]
 		return self
 		
 	def __repr__(self):return self.__str__()
 	def __str__(self) :
-		repr=get_duplicated_kargs(self.ka,'repr','str','s','st','__repr__','__str__',no_pop=True)
+		repr=get_duplicated_kargs(self.ka,'repr','str','s','st','__repr__','__str__','f',no_pop=True)
 		if repr:
 			if py.callable(repr):
 				return repr(self, **self.ka ) # try fix：传入 self
