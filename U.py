@@ -1787,6 +1787,12 @@ def this():
 		# txt(globals())
 		pln (__name__)
 
+def ipython_system(a,print_cmd='>>',):
+	ipy=get_ipython(raise_exception=1)
+	if print_cmd:print(print_cmd,a)
+	ipy.system(a)
+ipy_system=ipython_system	
+	
 def ipython_getoutput(a,return_list=False):
 	U,T,N,F=py.importUTNF()
 	if not U.isipy():

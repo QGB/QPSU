@@ -86,8 +86,8 @@ return proxies,ka
 			proxies=N.get_proxy(target_protocol=('http','https'),)
 		else:
 			proxies={}
-	ka['proxies']=proxies
 	if return_ka:
+		ka['proxies']=proxies
 		return proxies,ka
 	else:
 		return proxies

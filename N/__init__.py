@@ -1218,10 +1218,11 @@ def rpc_set_variable_local(**ka):
 		
 local_rpc_set=set_local_rpc=rpc_set_local=rpc_set_variable_local	
 		
-def rpc_set_variable(*obj,base=py.No('auto history e.g. [http://]127.0.0.1:23571[/../] '),timeout=9,varname='v',ext_cmd='',pr=False,proxies=None,**ka):
+def rpc_set_variable(*obj,base=py.No('auto history e.g. [http://]127.0.0.1:23571[/../] '),timeout=9,varname='v',ext_cmd='',print_req=False,pr=False,proxies=None,**ka):
 	U,T,N,F=py.importUTNF()
 	ext_cmd=U.get_duplicated_kargs(ka,'ext_cmd','cmd','extCmd','other_cmd',default=ext_cmd)
 	varname=U.get_duplicated_kargs(ka,'v','V','name','var_name','var',default=varname)
+	print_req=U.get_duplicated_kargs(ka,'print_req','pr',default=varname)
 	proxies=N.HTTP.auto_proxy_for_requests(proxies,ka)
 	
 	if ext_cmd:
@@ -1233,8 +1234,10 @@ def rpc_set_variable(*obj,base=py.No('auto history e.g. [http://]127.0.0.1:23571
 		obj=obj[0]
 
 	if not obj and py.len(ka)==1:
-		varname,obj=U.get_dict_item(ka)
-
+		varname,obj=U.get_dict_item(ka)	
+	if not obj and U.get_ipy():
+		obj=U.get_ipy().user_ns[varname]
+		
 	if not base:
 		base=get_remote_rpc_base(change=False)
 	else:
@@ -1243,13 +1246,13 @@ def rpc_set_variable(*obj,base=py.No('auto history e.g. [http://]127.0.0.1:23571
 	# import requests,dill
 	# dill_loads=dill.loads
 	# post=requests.post
-	post=HTTP.post
+	# post=HTTP.post
 	# dill_dump=F.dill_dump
-	if not pr:print(url)
-	b=post(url,data=F.dill_dump(obj),verify=False,timeout=timeout,proxies=proxies) # data=list:TypeError: cannot unpack non-iterable int object
+	if not print_req:print(url)
+	b=N.HTTP.post(url,data=F.dill_dump(obj),verify=False,timeout=timeout,proxies=proxies,print_req=print_req) # data=list:TypeError: cannot unpack non-iterable int object
 	
-	if pr:
-		print(U.v.N.HTTP.post(url,verify=False,timeout=timeout,proxies=proxies,data=U.v.F.dill_dump(obj)) )
+	# if print_req:
+		# print(U.v.N.HTTP.post(url,verify=False,timeout=timeout,proxies=proxies,print_req=print_req,data=U.v.F.dill_dump(obj)) )
 		
 	if not b:return b
 	if not py.isbytes(b):

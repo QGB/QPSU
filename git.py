@@ -540,3 +540,25 @@ p.path_with_namespace
 		if count_is_int and count>0 and (n+1)>=count:break
 	return r	
 gitlab_get_all_repo=gitlab_get_all_projects	
+
+def clone_specific_commit(u,convert_to_ssh=True):
+	# ipy=U.get_ipython()
+	if convert_to_ssh:
+		url=N.git_https_to_ssh(u)
+		# 'git@github.com:'
+	else:
+		raise py.NotImplementedError()
+	# for s in u.split('/'):
+		# if T.regex_match_one(u,'[a-z]{40,}')
+	cid=T.regex_match_one(u,'[a-z0-9]{40,}')
+	
+	repo_name=T.sub_last(url,'/','')
+	repo_path=U.pwd()+repo_name
+	if not F.exist(repo_path):
+		F.mkdir(repo_path)
+	U.cd(repo_path,p=1)	
+	U.ipy_system(f'git init')
+	U.ipy_system(f'git fetch {url} {cid}')
+	U.ipy_system(f'git branch master {cid}')
+	U.ipy_system(f'git checkout')
+clone_commit=clone_specific_commit

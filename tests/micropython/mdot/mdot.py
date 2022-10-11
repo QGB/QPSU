@@ -9,8 +9,15 @@ try:
 	swriter = asyncio.StreamWriter(uart, {})
 	sreader = asyncio.StreamReader(uart)
 	gport=80
+	gp='/'
+	U,T,N,F=0,0,0,0
 except:
-	import sys;'qgb.U' in sys.modules or sys.path.append('C:/QGB/babun/cygwin/bin/');from qgb import py,U,T,N,F
+	import requests,os,sys,pathlib   # .py/mdot  /micropy/test  /qgb   / 
+	gsqp=pathlib.Path(__file__).absolute().parent.parent.parent.parent.parent.absolute().__str__()
+	if gsqp not in sys.path:sys.path.append(gsqp)#py3 works
+	from qgb import py
+	U,T,N,F=py.importUTNF()
+	
 	import asyncio	
 	class StreamReader:
 		async def read(self,n):
@@ -27,8 +34,12 @@ except:
 		async def awrite(self,a):
 			self.a=a
 	swriter=StreamWriter()
+	
 	gport=1122
+	gp=gsqp+'/qgb/tests/micropython/mdot/'
+	gp=r'\\192.168.1.10\qgb\github\ttyd\html\dist\\'
 	print('Not in micropython. pid:',U.pid)
+#############################################
 async def receiver():
 	global gws
 	print('start uart receive...')
@@ -37,15 +48,9 @@ async def receiver():
 		
 		# print('uart Recieved', res)
 		if gws:await gws.send(res)
-#############################################
 
 app = Microdot()
 
-
-@app.route('/')
-def index(request):
-	return send_file('index.html')
-	
 import io
 @app.route('/token')
 def index(request):
@@ -55,6 +60,13 @@ gws=None
 @app.route('/ws')
 @with_websocket
 async def echo(request, ws):
+	'''
+AuthToken
+1{"columns":186,"rows":45}
+<
+	
+# 30e4 b8ad e696 87   #F.b2h('中文'.encode('utf-8'))== 'E4B8AD E69687'		
+'''
 	global gws
 	gws=ws
 	while True:
@@ -63,9 +75,18 @@ async def echo(request, ws):
 		# await ws.send(data)
 		if swriter:await swriter.awrite(data)
 		# await swriter.awrite('Hello uart\n')
-# 30e4 b8ad e696 87   #F.b2h('中文'.encode('utf-8'))== 'E4B8AD E69687'		
 		
-		
+
+
+@app.route('/')
+@app.route('/<path:path>')#路径匹配函数放在最后，不然后面的 ws，token也会被匹配
+def index(request,path=''):
+	if not path:path='index.html'
+	path=gp+path
+	# if U:print(U.stime(),path)
+	return send_file(path)
+	
+
 loop = asyncio.get_event_loop()
 # rs=loop.create_task(sender())
 # print(rs)
@@ -73,6 +94,3 @@ loop.create_task(receiver())
 loop.create_task(app.run(port=gport))
 
 loop.run_forever()
-
-
-# loop.run_forever()
