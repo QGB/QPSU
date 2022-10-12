@@ -38,7 +38,8 @@ except:
 	gport=1122
 	gp=gsqp+'/qgb/tests/micropython/mdot/'
 	gp=r'\\192.168.1.10\qgb\github\ttyd\html\dist\\'
-	print('Not in micropython. pid:',U.pid)
+	# gp=r'\\192.168.1.10\qgb\github\ttyd\ttyd_html\dist/'
+	print(f'Not in micropython.listen:{gport} pid:',U.pid)
 #############################################
 async def receiver():
 	global gws

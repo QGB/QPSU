@@ -695,15 +695,15 @@ def eng_dwi(response,dwi,ecdict=py.No('auto load'),sort_kw={},**ka):
 	if not ecdict:
 		ecdict=U.get_or_dill_load_and_set(r'C:\test\ecdict-770611.dill')
 		# F.dill_load()
-	
-	sort_kw=U.get_duplicated_kargs(ka,'skw','sort','s',default=sort_kw)
-	
-	
 	K_deci='deci-%s'%py.id(ecdict)
 	deci=U.get(K_deci)
 	if not deci:
 		deci=U.get_or_set(K_deci,{i.word:n for n,i in enumerate(ecdict)},)
 		
+	
+	sort_kw=U.get_duplicated_kargs(ka,'skw','sort','s',default=sort_kw)
+	
+	
 		
 	def get3(w,count=0):
 		row=ecdict[deci[w]]

@@ -541,7 +541,7 @@ p.path_with_namespace
 	return r	
 gitlab_get_all_repo=gitlab_get_all_projects	
 
-def clone_specific_commit(u,convert_to_ssh=True):
+def clone_specific_commit(u,convert_to_ssh=True,dir_name=py.No('auto repo_name')):
 	# ipy=U.get_ipython()
 	if convert_to_ssh:
 		url=N.git_https_to_ssh(u)
@@ -549,11 +549,12 @@ def clone_specific_commit(u,convert_to_ssh=True):
 	else:
 		raise py.NotImplementedError()
 	# for s in u.split('/'):
-		# if T.regex_match_one(u,'[a-z]{40,}')
-	cid=T.regex_match_one(u,'[a-z0-9]{40,}')
+	cid=T.regex_match_one(u,'[a-f0-9]{40,}')
 	
-	repo_name=T.sub_last(url,'/','')
-	repo_path=U.pwd()+repo_name
+	if not dir_name:
+		dir_name=T.sub_last(url,'/','')
+		
+	repo_path=U.pwd()+dir_name
 	if not F.exist(repo_path):
 		F.mkdir(repo_path)
 	U.cd(repo_path,p=1)	

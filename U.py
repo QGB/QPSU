@@ -193,6 +193,20 @@ def set_delete(*names,level=gd_sync_level['process'],**ka):
 			return r
 delset=del_set=unset=delete_set=set_delete
 	
+def set_delete_by_prefix(prefix,confirm=True,level=gd_sync_level['process']):
+	U,T,N,F=py.importUTNF()
+	ks=[]
+	if level>=gd_sync_level['process']:
+		import sys
+		d=sys._qgb_dict=py.getattr(sys,'_qgb_dict',{})
+		for k in d:
+			if py.istr(k) and k.startswith(prefix):
+				ks.append(k)
+		if confirm:
+			U.input('delete:%s \n#press Enter to del,ctrl+c to cancel'%ks)
+		return U.object_custom_repr(U.dict_multi_pop(d,*ks),repr='{%s}#dict custom repr'%','.join('%r: ... '%k for k in ks),)
+delset_prefix=del_set_by_prefix=set_delete_by_prefix
+		
 def set_multi(**ka):
 	surfix=get_duplicated_kargs(ka,'__surfix','_surfix',default='')
 	import sys
@@ -5751,7 +5765,7 @@ def dict_multi_pop(adict,*keys,default=py.No('key not in dict')):
 		else:	
 			dr[k]=adict.pop(k,default)
 	return dr	
-dict_pop=pop_list_multi_index=pop_dict_multi_key=dict_pop_multi_key=dict_multi_pop
+dict_del_multi_key=dict_pop=pop_list_multi_index=pop_dict_multi_key=dict_pop_multi_key=dict_multi_pop
 	
 GET_DICT_MULTI_VALUES_RETURN_LIST_DEFAULT_DEFAULT=get_dict_multi_values_return_list_DEFAULT_DEFAULT=get_or_set('get_dict_multi_values_return_list_DEFAULT_DEFAULT',lazy_default=lambda:py.No('can not get key'),)
 
