@@ -203,7 +203,7 @@ def set_delete_by_prefix(prefix,confirm=True,level=gd_sync_level['process']):
 			if py.istr(k) and k.startswith(prefix):
 				ks.append(k)
 		if confirm:
-			U.input('delete:%s \n#press Enter to del,ctrl+c to cancel'%ks)
+			U.input('delete:%s \n### press Enter to del,ctrl+c to cancel'%ks)
 		return U.object_custom_repr(U.dict_multi_pop(d,*ks),repr='{%s}#dict custom repr'%','.join('%r: ... '%k for k in ks),)
 delset_prefix=del_set_by_prefix=set_delete_by_prefix
 		
@@ -290,20 +290,21 @@ def get_or_dill_load_or_dill_dump_and_set(name,default=None):
 	U,T,N,F=py.importUTNF()
 	
 	gst=U.get_gst(base_gst=True)
-	name=F.auto_path(name,default=gst)
-	if '/' in name:
-		o=get(T.sub_last(name,'/',''))
+	path=F.auto_path(name,default=gst)
+	if '/' in path:
+		name=T.sub_last(path,'/','')
 	else:
-		o=get(name)
+		name=path
+	o=get(name)
 	if not o:
-		o=F.dill_load(file=name)
+		o=F.dill_load(file=path)
 		if not o:
 			fs=[f for f in F.ls(gst) if f.startswith(name) and f.endswith('.dill')]
 			if py.len(fs)==1:
 				o=F.dill_load(file=fs[0])
 	
 	if not o and default:
-		f=F.dill_dump(obj=default,file=name)
+		f=F.dill_dump(obj=default,file=path)
 		if f:
 			print(U.stime(),'dill_dump:',f)
 			o=default
