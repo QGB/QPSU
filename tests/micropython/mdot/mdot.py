@@ -36,9 +36,9 @@ except:
 	swriter=StreamWriter()
 	
 	gport=1122
-	gp=gsqp+'/qgb/tests/micropython/mdot/'
 	gp=r'\\192.168.1.10\qgb\github\ttyd\html\dist\\'
 	# gp=r'\\192.168.1.10\qgb\github\ttyd\ttyd_html\dist/'
+	gp=gsqp+'/qgb/tests/micropython/mdot/'
 	print(f'Not in micropython.listen:{gport} pid:',U.pid)
 #############################################
 async def receiver():
@@ -77,7 +77,11 @@ AuthToken
 		if swriter:await swriter.awrite(data)
 		# await swriter.awrite('Hello uart\n')
 		
-
+@app.route('/<re:-.*:code>')#[dynamic path component]只能用 / 分隔
+# @app.route('/-<path:code>')#像这种就不会匹配 除非 /-/
+def index(request,code):
+	r=U.execResult(T.url_decode(code[1:]),globals=globals(),locals=locals())
+	return Response(body=io.StringIO(r), status_code=200,)
 
 @app.route('/')
 @app.route('/<path:path>')#路径匹配函数放在最后，不然后面的 ws，token也会被匹配
