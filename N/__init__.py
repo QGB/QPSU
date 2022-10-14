@@ -1079,6 +1079,12 @@ def set_remote_rpc_base(base=RPC_BASE_REMOTE_DEFAULT,change=True,ka=None):
 	return U.set(RPC_BASE_REMOTE,base)	
 rpc_base=change_rpc_base=get_or_set_rpc_base=get_rpc_base_remote=get_remote_rpc_base=set_rpc_base_remote=set_remote_rpc_base
 	
+def get_local_rpc_base():
+	U,T,N,F=py.importUTNF()
+	return f'''https://{T.sub_last(N.get_lan_ip(),'.')}.{U.get_dl('qgb_domain')}/'''
+get_rpc_base_local=get_local_rpc_base
+
+	
 def rpc_append_list(*a,name='la',base='',proxies=0,print_req=1):
 	''' #TODO  check_row_len=None
 	'''
@@ -1211,7 +1217,7 @@ rpc_get=rpc_get_var=rpcGetVariable=rpc_get_variable
 
 def rpc_set_variable_local(**ka):
 	U,T,N,F=py.importUTNF()
-	base=f'''https://{T.sub_last(N.get_lan_ip(),'.')}.{U.get_dl('qgb_domain')}/'''
+	base=N.get_local_rpc_base()
 	for k,v in ka.items():
 		# k
 		rpc_set_variable(v,base=base,varname=k)

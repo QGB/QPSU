@@ -177,8 +177,7 @@ def dill_load(filename,return_value=False,set_user_ns=True):
 	if filename.lower()[-5:] not in ['.dill','ickle']:
 		for f in F.ls(U.gst,f=1,d=0):
 			if filename in f:
-				py.input('continue or ctrl+c  using: '+f)
-				filename=f
+				filename=U.input('edit or ctrl+c using: ',default=f)
 				break
 	vars=[]
 	dnv={}

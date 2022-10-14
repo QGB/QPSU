@@ -6,7 +6,7 @@ U,T,N,F=py.importUTNF()
 from qgb import A
 
 taobao_trade=U.getMod(__name__)
-RPC_BASE=U.get_or_input(__name__+N.RPC_BASE_REMOTE[1:],default=F.read('default_rpc_domain'))
+RPC_BASE=U.get_or_input(__name__+N.RPC_BASE_REMOTE[1:],default=N.get_local_rpc_base())
 URL_WULIU_BY_TRADE_ID='https://buyertrade.taobao.com/trade/json/transit_step.do?bizOrderId='
 URL_TRADE_LIST='https://buyertrade.taobao.com/trade/itemlist/list_bought_items.htm'
 URL_WebDriver_DETECT=URL_WEBDRIVER_DETECT='https://intoli.com/blog/not-possible-to-block-chrome-headless/chrome-headless-test.html'

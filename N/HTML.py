@@ -393,7 +393,31 @@ def a_href(response,u=''):
 	return  u
 HREF=URL=href=a_href	
 
+def list_github_search(response,a,txt_column=-1,**ka):
+	if txt_column<0:
+		txt_column=py.len(a[0])+txt_column
+	
+	def txt_column_callback(html,head):
+		bs=T.BeautifulSoup(html)
+		style=bs.find('head').find('style')
+		# py.pdb()()
+		style.string=style.text.replace('/*css*/','''
+textarea{
+	width:50vw;
+	height:28vh;
+}
 
+		
+''')		
+		es=bs.select(f'body > table > tbody > tr > td:nth-of-type({1+txt_column})')
+		for ne,e in py.enumerate(es):
+			ea=bs.new_tag('textarea')
+			ea.append(a[ne][txt_column].strip())
+			e.clear()
+			e.append(ea)
+		return	py.str(bs)
+	return list_2d(response,a,html_callback=txt_column_callback,**ka)	
+gs=github_search=list_github_search
 
 
 def list_2d_txt_href(response,a,file_column=None,**ka):
@@ -448,6 +472,8 @@ list_2d_CSS_MARK='/*css*/'
 def list_2d(response,a,html_callback=None,index=False,sort_kw=U.SORT_KW_SKIP,debug=False,**ka):
 	index=U.get_duplicated_kargs(ka,'index','n','enu','add_index','enumerate',default=index)
 	sort_kw=U.get_duplicated_kargs(ka,'skw','sort','s',default=sort_kw)
+	# if py.isint(sort_kw): # U.sort 中已经处理
+
 	a=U.sort(a,sort_kw=sort_kw)
 	# return a
 

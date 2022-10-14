@@ -2194,13 +2194,15 @@ def sort(a,column=None, cmp=None, key=None, reverse=False,add_index=False,sort_k
 		return a
 	else:
 		# if sort_kw:# 0 忽略，用 sort_kw=dict(c=0)
-		if py.isint(sort_kw):column=sort_kw
+		if py.isint(sort_kw):
+			sort_kw=py.dict(col=sort_kw)
 		if py.isdict(sort_kw):
 			ka.update(sort_kw)
 			# if ka:
 				# ka.
 			# else :ka=sort_kw
 	column=get_duplicated_kargs(ka,'col','C','c',default=column)
+	# print(stime(),sort_kw,column) # IntMutableSize 没有处理 比较大小
 	reverse=get_duplicated_kargs(ka,'rervese','revese','rev','re','r',default=reverse)
 	
 	def key_func(ai,size=99,is_column=True):# ai :  item of a
@@ -7450,11 +7452,42 @@ class IntTime(py.int):
 		return '<{}>'.format(stime(time=self) )
 
 
+
+def IntMutableSize(obj):
+	''' https://github.com/hevangel/mutable_int/blob/master/mutableint/__init__.py
+'''	
+	from mutableint import MutableInt
+	U,T,N,F=py.importUTNF()
+	class IntSize(MutableInt):
+		def __init__(self, data):
+			self.maxval=U.INT_MAX
+			self.val=0
+			# self.data = []
+		# def set_obj(self,data):
+			# self.data=data
+		def __str__(self):
+			self.val=py.len(obj)	
+			return T.justify(self.val,size=6)
+		def __repr__(self):
+			return self.__str__()
+
+		def __int__(self):
+			self.val=py.len(obj)
+			return super().__int__()
+		def __eq__(self, other):
+			self.val=py.len(obj)
+			return super(int).__eq__(other)
+			
+		
+		
+	return IntSize(obj)	
+intMutableSize=IntMutableSize	
+			
 def mutableString(obj):
-	class MetaClass(type):
+	class MetaClass(py.type):
 		def __new__(mcls, classname, bases, classdict):
-			wrapped_classname = '_%s_%s' % ('Wrapped', type(obj).__name__)
-			return type.__new__(mcls, wrapped_classname, (type(obj),)+bases, classdict)
+			wrapped_classname = '_%s_%s' % ('Wrapped', py.type(obj).__name__)
+			return py.type.__new__(mcls, wrapped_classname, (py.type(obj),)+bases, classdict)
 
 	class MutableString(metaclass=MetaClass):
 		def set(self, data):
@@ -7506,7 +7539,10 @@ ValueOfAttr_NAMES=['__init__',
 #  '__call__',
  ] 
 class ValueOfAttr(py.object):
-	'''  '''
+	''' 
+#TODO npp(U.v) # 卡死
+
+'''
 	def __init__(self,parent=None):
 		self.__parent__=parent
 		self.__child__=None

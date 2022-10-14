@@ -18,11 +18,12 @@ async def sleep(sec):
 	return await asyncio.sleep(sec)
 	
 	
-async def websocket_client_send(url,astr):
+async def websocket_client_send(url,astr,subprotocols=None):
 	import websockets
 	url=N.auto_url(url,default_protocol='ws')
-	
-	async with websockets.connect(url) as ws:
+	# py.pdb()()
+	if py.istr(subprotocols):subprotocols=[subprotocols]
+	async with websockets.connect(url, subprotocols=subprotocols) as ws:
 		await ws.send(astr)
 		r = await ws.recv()
 		return r

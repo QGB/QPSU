@@ -23,7 +23,7 @@ except:
 		async def read(self,n):
 			while True:
 				if swriter.a:
-					r=f'{U.stime()} {swriter.a}'
+					r=swriter.a
 					swriter.a=None
 					return r
 				await asyncio.sleep(0.01)# 不加占满cpu
@@ -52,10 +52,9 @@ async def receiver():
 
 app = Microdot()
 
-import io
 @app.route('/token')
 def index(request):
-	return Response(body=io.StringIO('{"token": ""}'), status_code=200,)
+	return Response(body='{"token": ""}', status_code=200,)
 
 gws=None
 @app.route('/ws')
@@ -73,15 +72,21 @@ AuthToken
 	while True:
 		data = await ws.receive()
 		print('ws receive',data)
+		r=U.execResult(data,globals=globals(),locals=locals())
+		if swriter:await swriter.awrite(r)
 		# await ws.send(data)
-		if swriter:await swriter.awrite(data)
+		# if swriter:await swriter.awrite(f'{U.stime()} {data}')
 		# await swriter.awrite('Hello uart\n')
 		
 @app.route('/<re:-.*:code>')#[dynamic path component]只能用 / 分隔
 # @app.route('/-<path:code>')#像这种就不会匹配 除非 /-/
 def index(request,code):
+	response=Response( status_code=200,)
 	r=U.execResult(T.url_decode(code[1:]),globals=globals(),locals=locals())
-	return Response(body=io.StringIO(r), status_code=200,)
+	if not response.body:
+		response.body=r#.encode('utf-8')
+	return response
+	# return Response(body=io.StringIO(r), status_code=200,)
 
 @app.route('/')
 @app.route('/<path:path>')#路径匹配函数放在最后，不然后面的 ws，token也会被匹配
