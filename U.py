@@ -4960,13 +4960,13 @@ def getAST(mod):
 	return ast.parse(source)
 getModAST=getAST
 
-def rebuild_function_call_self_args_str(a,cbs=False):
+def rebuild_function_call_self_args_str(a,arg_template='{0}={0},',cbs=False):
 	U=py.importU()
 	r=a.__name__+'(' # lambda : '<lambda>'
 	a=U.getfullargspec(a)
 	if not a:return a
 	for s in a.args:
-		r+='{0}={0},'.format(s)
+		r+=arg_template.format(s)
 	# if a.varargs: # 如果args指定了名称 TypeError: ft() got multiple values for argument 'q'，不指定名称 按顺序调用没事
 	if a.varkw:r+='**%s,'%a.varkw
 	r=r+')'
@@ -7456,6 +7456,10 @@ class IntTime(py.int):
 
 def IntMutableSize(obj):
 	''' https://github.com/hevangel/mutable_int/blob/master/mutableint/__init__.py
+	
+sorted(xs)  __lt__	 小于 return self.val.__lt__          (py.int(value),)  #不加 py.int(结果错误
+
+__eq__ 加 py.int(结果错误 ValueError: invalid literal for int() with base 10: 'extra_headers=None, **kwds):'
 '''	
 	from mutableint import MutableInt
 	U,T,N,F=py.importUTNF()
@@ -7486,11 +7490,61 @@ def IntMutableSize(obj):
 		# def __int__(self):
 			# self.val=py.len(obj)
 			# return super().__int__()
-		# def __eq__(self, other):
-			# self.val=py.len(obj)
-			# return super(int).__eq__(other)
-			
-		
+		# def __eq__(self, other):self.val=py.len(obj);return super(int).__eq__(other)
+
+
+		def __abs__         (self,)            :self.val=py.len(obj);return self.val.__abs__         ()            
+		def __add__         (self,value,)      :self.val=py.len(obj);return self.val.__add__         (py.int(value),)      
+		def __and__         (self,value,)      :self.val=py.len(obj);return self.val.__and__         (py.int(value),)      
+		def __bool__        (self,)            :self.val=py.len(obj);return self.val.__bool__        ()            
+		def __delattr__     (self,name,)       :self.val=py.len(obj);return self.val.__delattr__     (name,)       
+		def __dir__         (self,)            :self.val=py.len(obj);return self.val.__dir__         ()            
+		def __divmod__      (self,value,)      :self.val=py.len(obj);return self.val.__divmod__      (py.int(value),)      
+		def __eq__          (self,value,)      :self.val=py.len(obj);return self.val.__eq__          (value,)   #  
+		def __float__       (self,)            :self.val=py.len(obj);return self.val.__float__       ()            
+		def __floordiv__    (self,value,)      :self.val=py.len(obj);return self.val.__floordiv__    (py.int(value),)      
+		def __format__      (self,format_spec,):self.val=py.len(obj);return self.val.__format__      (format_spec,)
+		def __ge__          (self,value,)      :self.val=py.len(obj);return self.val.__ge__          (py.int(value),)      
+		def __getnewargs__  (self,)            :self.val=py.len(obj);return self.val.__getnewargs__  ()            
+		def __gt__          (self,value,)      :self.val=py.len(obj);return self.val.__gt__          (py.int(value),)      
+		def __hash__        (self,)            :self.val=py.len(obj);return self.val.__hash__        ()            
+		def __index__       (self,)            :self.val=py.len(obj);return self.val.__index__       ()            
+		def __int__         (self,)            :self.val=py.len(obj);return self.val.__int__         ()            
+		def __invert__      (self,)            :self.val=py.len(obj);return self.val.__invert__      ()            
+		def __le__          (self,value,)      :self.val=py.len(obj);return self.val.__le__          (py.int(value),)      
+		def __lshift__      (self,value,)      :self.val=py.len(obj);return self.val.__lshift__      (py.int(value),)      
+		def __lt__          (self,value,)      :self.val=py.len(obj);return self.val.__lt__          (py.int(value),)      
+		def __mod__         (self,value,)      :self.val=py.len(obj);return self.val.__mod__         (py.int(value),)      
+		def __mul__         (self,value,)      :self.val=py.len(obj);return self.val.__mul__         (py.int(value),)      
+		def __ne__          (self,value,)      :self.val=py.len(obj);return self.val.__ne__          (py.int(value),)      
+		def __neg__         (self,)            :self.val=py.len(obj);return self.val.__neg__         ()            
+		def __or__          (self,value,)      :self.val=py.len(obj);return self.val.__or__          (py.int(value),)      
+		def __pos__         (self,)            :self.val=py.len(obj);return self.val.__pos__         ()            
+		def __pow__         (self,value,mod,)  :self.val=py.len(obj);return self.val.__pow__         (py.int(value),mod,)  
+		def __radd__        (self,value,)      :self.val=py.len(obj);return self.val.__radd__        (py.int(value),)      
+		def __rand__        (self,value,)      :self.val=py.len(obj);return self.val.__rand__        (py.int(value),)      
+		def __rdivmod__     (self,value,)      :self.val=py.len(obj);return self.val.__rdivmod__     (py.int(value),)      
+		def __reduce__      (self,)            :self.val=py.len(obj);return self.val.__reduce__      ()            
+		def __reduce_ex__   (self,protocol,)   :self.val=py.len(obj);return self.val.__reduce_ex__   (protocol,)   
+		def __rfloordiv__   (self,value,)      :self.val=py.len(obj);return self.val.__rfloordiv__   (py.int(value),)      
+		def __rlshift__     (self,value,)      :self.val=py.len(obj);return self.val.__rlshift__     (py.int(value),)      
+		def __rmod__        (self,value,)      :self.val=py.len(obj);return self.val.__rmod__        (py.int(value),)      
+		def __rmul__        (self,value,)      :self.val=py.len(obj);return self.val.__rmul__        (py.int(value),)      
+		def __ror__         (self,value,)      :self.val=py.len(obj);return self.val.__ror__         (py.int(value),)      
+		def __rpow__        (self,value,mod,)  :self.val=py.len(obj);return self.val.__rpow__        (py.int(value),mod,)  
+		def __rrshift__     (self,value,)      :self.val=py.len(obj);return self.val.__rrshift__     (py.int(value),)      
+		def __rshift__      (self,value,)      :self.val=py.len(obj);return self.val.__rshift__      (py.int(value),)      
+		def __rsub__        (self,value,)      :self.val=py.len(obj);return self.val.__rsub__        (py.int(value),)      
+		def __rtruediv__    (self,value,)      :self.val=py.len(obj);return self.val.__rtruediv__    (py.int(value),)      
+		def __rxor__        (self,value,)      :self.val=py.len(obj);return self.val.__rxor__        (py.int(value),)      
+		def __sizeof__      (self,)            :self.val=py.len(obj);return self.val.__sizeof__      ()            
+		def __sub__         (self,value,)      :self.val=py.len(obj);return self.val.__sub__         (py.int(value),)      
+		def __truediv__     (self,value,)      :self.val=py.len(obj);return self.val.__truediv__     (py.int(value),)      
+		def __xor__         (self,value,)      :self.val=py.len(obj);return self.val.__xor__         (py.int(value),)      
+		def bit_length      (self,)            :self.val=py.len(obj);return self.val.bit_length      ()            
+		def to_bytes        (self,length,byteorder,):self.val=py.len(obj);return self.val.to_bytes        (length,byteorder,)
+		###########
+		# def __cmp__         (self,value,)      :self.val=py.len(obj);return self.val>value
 		
 	return IntSize(obj)	
 intMutableSize=IntMutableSize	

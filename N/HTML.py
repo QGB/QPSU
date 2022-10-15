@@ -402,20 +402,52 @@ def list_github_search(response,a,txt_column=-1,**ka):
 		style=bs.find('head').find('style')
 		# py.pdb()()
 		style.string=style.text.replace('/*css*/','''
-textarea{
-	width:60vw;
-	height:28vh;
-	min-height:18vh;
+
+/* Html { */
+	/* font-size: 2vh; */
+/* } 	 
+
+body > table > tbody > tr > 
+*/
+	
+td:nth-of-type(5) > textarea{
+	text-align: right;
+	width:90vw;
 }
 
+td:nth-of-type(6){
+	color: red;
+}
+
+td:nth-of-type(7) > textarea{
+	width:110vh;
+	/* height:5em; */
+	/* min-width:70vw; */
+	/* font-size:1.1vw; */
+	
+}
 		
-''')		
+''')	
+		dclu=U.get('dclu',{})
+		es=bs.select(f'body > table > tbody > tr > td:nth-of-type({1+txt_column-2})')
+		for ne,e in py.enumerate(es):
+			s=a[ne][txt_column]
+			lu=dclu.get(s,None)
+			if lu:
+				ea=bs.new_tag('textarea')
+				ea.attrs['rows']=f"""{s.count(T.eol)-1};"""
+				# ea.attrs['style']=f"""height:100%;"""
+				ea.append(T.eol.join(lu))
+				e.clear()
+				e.append(ea)
+			
 		es=bs.select(f'body > table > tbody > tr > td:nth-of-type({1+txt_column})')
 		for ne,e in py.enumerate(es):
 			ea=bs.new_tag('textarea')
 			s=a[ne][txt_column].strip()
-		
-			ea.attrs['style']=f"""height:{s.count(T.eol)*2.36+4}vh;"""
+			ea.attrs['rows']=f"""{s.count(T.eol)+1};"""
+			#ea.attrs['style']=f"""height:{s.count(T.eol)*2.36+4}vh;"""
+			#ea.attrs['style']=f"""height:{s.count(T.eol)*1.1+2.4}em;"""
 			ea.append(s)
 			e.clear()
 			e.append(ea)
