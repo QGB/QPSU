@@ -4964,6 +4964,7 @@ def rebuild_function_call_self_args_str(a,cbs=False):
 	U=py.importU()
 	r=a.__name__+'(' # lambda : '<lambda>'
 	a=U.getfullargspec(a)
+	if not a:return a
 	for s in a.args:
 		r+='{0}={0},'.format(s)
 	# if a.varargs: # 如果args指定了名称 TypeError: ft() got multiple values for argument 'q'，不指定名称 按顺序调用没事
@@ -7467,16 +7468,27 @@ def IntMutableSize(obj):
 			# self.data=data
 		def __str__(self):
 			self.val=py.len(obj)	
+			# super().val=py.len(obj)
 			return T.justify(self.val,size=6)
 		def __repr__(self):
 			return self.__str__()
-
-		def __int__(self):
-			self.val=py.len(obj)
-			return super().__int__()
-		def __eq__(self, other):
-			self.val=py.len(obj)
-			return super(int).__eq__(other)
+			
+		# def __getattribute__(self, name):
+			# r= super(MutableInt,self).__getattribute__(name)
+			# print('__getattribute__',name,r)
+		# def __call__(self, *a, **ka):
+			# print('CALL ',self,a,ka)
+			# self.val=py.len(obj)
+			# if self=='__getattribute__':
+				# return 
+			# return super(MutableInt,self).__call__(*a, **ka)
+			# return super().__call__(*a, **ka)
+		# def __int__(self):
+			# self.val=py.len(obj)
+			# return super().__int__()
+		# def __eq__(self, other):
+			# self.val=py.len(obj)
+			# return super(int).__eq__(other)
 			
 		
 		

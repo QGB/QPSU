@@ -403,8 +403,9 @@ def list_github_search(response,a,txt_column=-1,**ka):
 		# py.pdb()()
 		style.string=style.text.replace('/*css*/','''
 textarea{
-	width:50vw;
+	width:60vw;
 	height:28vh;
+	min-height:18vh;
 }
 
 		
@@ -412,7 +413,10 @@ textarea{
 		es=bs.select(f'body > table > tbody > tr > td:nth-of-type({1+txt_column})')
 		for ne,e in py.enumerate(es):
 			ea=bs.new_tag('textarea')
-			ea.append(a[ne][txt_column].strip())
+			s=a[ne][txt_column].strip()
+		
+			ea.attrs['style']=f"""height:{s.count(T.eol)*2.36+4}vh;"""
+			ea.append(s)
 			e.clear()
 			e.append(ea)
 		return	py.str(bs)

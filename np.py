@@ -12,6 +12,29 @@ def test():
 	a = (a < 255).astype(numpy.int_) # <255 变 1， 255及以上 变0
 	a[:,6] # 获取 第 6 列
 	
+def two_point_line_function(*points):
+	''' #(x1y1,x2y2,...):
+	
+'''	
+	from numpy import ones,vstack
+	from numpy.linalg import lstsq
+	# points = [x1y1,x2y2]
+	x_coords, y_coords = zip(*points) # x1x2, y1y2
+	A = vstack([x_coords,ones(len(x_coords))]).T
+	m, c = lstsq(A, y_coords)[0]
+	print("Line Solution is y = {m}x + {c}".format(m=m,c=c))
+	
+	# from pylab import plot,xlabel,ylabel,show
+	# plot(points,xpoints)
+	import matplotlib.pyplot as plt  
+	
+	fig, ax = plt.subplots(figsize=(18,10))  
+	ax.scatter(allAreasData, y, label='Traning Data', color='r') 
+	ax.plot(areasTestValues, predictions, 'b', label='Prediction')  
+	ax.legend(loc=2)  
+	ax.set_xlabel('Area')  
+	ax.set_ylabel('Price')  
+	ax.set_title('Predicted Price vs. House Area')
 	
 def counts(a,return_dict=True,one_value=False):
 	
