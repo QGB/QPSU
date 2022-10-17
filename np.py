@@ -12,30 +12,40 @@ def test():
 	a = (a < 255).astype(numpy.int_) # <255 变 1， 255及以上 变0
 	a[:,6] # 获取 第 6 列
 	
-def two_point_line_function(*points):
+def two_point_line_function(*points,plot=True):
 	''' #(x1y1,x2y2,...):
 	
+	
+Decimal('166.36363220214844') # UFuncTypeError: Cannot cast ufunc 'lstsq_n' input 0 from dtype('O') to dtype('float64') with casting rule 'same_kind'
+float()转换 解决这个问题
+	
 '''	
-	from numpy import ones,vstack
-	from numpy.linalg import lstsq
-	# points = [x1y1,x2y2]
-	x_coords, y_coords = zip(*points) # x1x2, y1y2
-	A = vstack([x_coords,ones(len(x_coords))]).T
-	m, c = lstsq(A, y_coords)[0]
-	print("Line Solution is y = {m}x + {c}".format(m=m,c=c))
-	
-	# from pylab import plot,xlabel,ylabel,show
-	# plot(points,xpoints)
-	import matplotlib.pyplot as plt  
-	
-	fig, ax = plt.subplots(figsize=(18,10))  
-	ax.scatter(allAreasData, y, label='Traning Data', color='r') 
-	ax.plot(areasTestValues, predictions, 'b', label='Prediction')  
-	ax.legend(loc=2)  
-	ax.set_xlabel('Area')  
-	ax.set_ylabel('Price')  
-	ax.set_title('Predicted Price vs. House Area')
-	
+	import numpy as np
+	import numpy.linalg as LA
+	t=U.col(points,0)
+	y=U.col(points,1)
+	A=np.c_[t, np.ones_like(t)]
+	#print(np.ones_like(t))
+	a,b=LA.lstsq(A,y,rcond=None)[0]
+	#####
+	if b<0:sop=''
+	else  :sop='+'
+	print(f'y = {a} x {sop} {b}');
+		
+	sf=f'y={py.round(a,3)}*x{sop}{py.round(b,3)}'
+	print(sf)
+	if plot:
+		import matplotlib.pyplot as plt
+		plt.rc('font',size=16)
+		plt.plot(t,y,'o',label='Original data',markersize=5)
+		plt.plot(t,A.dot([a,b]),'r',label=sf)
+		plt.legend();
+		
+		# ax=plt.gca()
+		# ax.format_coord = lambda x,y:f'x={x} y={y}' # 好像 x,y 鼠标 标签 反了，后面怎么又正常了？
+		
+		plt.show()
+		
 def counts(a,return_dict=True,one_value=False):
 	
 	unique, counts = numpy.unique(a, return_counts=True)	

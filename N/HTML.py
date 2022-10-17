@@ -401,18 +401,37 @@ def list_github_search(response,a,txt_column=-1,**ka):
 		bs=T.BeautifulSoup(html)
 		style=bs.find('head').find('style')
 		# py.pdb()()
-		style.string=style.text.replace('/*css*/','''
+		style.string=style.text.replace(list_2d_CSS_MARK,'''
 
 /* Html { */
 	/* font-size: 2vh; */
 /* } 	 
 
 body > table > tbody > tr > 
-*/
+textarea{
+	white-space: pre;
+	overflow-wrap: normal;
 	
-td:nth-of-type(5) > textarea{
+}
+
+
+	// display: inline-block;
+	// transform: rotateY(180deg);
+		
+
+	,table 
+	
+*/
+
+td:nth-of-type(5){
 	text-align: right;
-	width:90vw;
+}
+
+
+td:nth-of-type(5) > textarea{
+	width:90vh;
+	text-align: right;
+	 display: flex;
 }
 
 td:nth-of-type(6){
@@ -423,8 +442,10 @@ td:nth-of-type(7) > textarea{
 	width:110vh;
 	/* height:5em; */
 	/* min-width:70vw; */
-	/* font-size:1.1vw; */
+	/* font-size:1.1vw; 
+	overflow-x: scroll;
 	
+	*/
 }
 		
 ''')	
@@ -434,10 +455,23 @@ td:nth-of-type(7) > textarea{
 			s=a[ne][txt_column]
 			lu=dclu.get(s,None)
 			if lu:
-				ea=bs.new_tag('textarea')
-				ea.attrs['rows']=f"""{s.count(T.eol)-1};"""
-				# ea.attrs['style']=f"""height:100%;"""
-				ea.append(T.eol.join(lu))
+				# m=U.max_len(lu)+18
+				# lu=[T.justfy('https://github.com'+i,method=T.wc_rjust,size=m) for i in lu]
+				# ea=bs.new_tag('textarea')
+				# ea.attrs['rows']=f"""{s.count(T.eol)-1};"""
+				# ea.attrs['readonly'] = 'readonly'
+				# ea.attrs['wrap'] = 'off'
+				# ea.append(T.eol.join(lu))
+				
+				sn='#L'+T.regex_match_one(s,r'\d+')
+				slu=T.eol.join(f'<p><a target="_blank" href="https://github.com{i}{sn}">{i}</a></p>' for i in lu)
+				ea=T.bs_tag(f'''
+<div id="box">
+{slu}
+
+</div>''')
+				
+				
 				e.clear()
 				e.append(ea)
 			
@@ -448,10 +482,26 @@ td:nth-of-type(7) > textarea{
 			ea.attrs['rows']=f"""{s.count(T.eol)+1};"""
 			#ea.attrs['style']=f"""height:{s.count(T.eol)*2.36+4}vh;"""
 			#ea.attrs['style']=f"""height:{s.count(T.eol)*1.1+2.4}em;"""
+			ea.attrs['readonly'] = 'readonly'
 			ea.append(s)
 			e.clear()
 			e.append(ea)
-		return	py.str(bs)
+		return	py.str(bs)+'''
+<script>
+// r=[]
+for(e of document.querySelectorAll("td:nth-of-type(5) > textarea")){
+	//console.log(e)
+	// e.scrollLeft=e.scrollWidth
+	e.scrollLeft=e.scrollWidth*1.03-575
+	// 少 1 都有个别没有到位 
+	
+	// r.push([e.scrollLeft,e.scrollWidth])
+}
+
+
+
+</script>
+'''		
 	return list_2d(response,a,html_callback=txt_column_callback,**ka)	
 gs=github_search=list_github_search
 

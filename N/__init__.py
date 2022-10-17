@@ -1527,14 +1527,20 @@ def flask_app_route(app,rule='',view_func=None,methods=('GET','POST'),log_req=Fa
 	
 flask_url_map=app_route=app_router=flask_app_route	
 
-def get_flask_request_post_data(name='y'):
+def get_flask_request_post_data(name='y',save_dill=True,**ka):
 	from flask import request as q
 	U,T,N,F=py.importUTNF()
+	save_dill=U.get_duplicated_kargs(ka,'save_dill','dill','save','write','dp',default=save_dill)
+	if ka:raise py.NotImplementedError(ka)
 	
 	b=q.data;y=T.js_loads(b)
 	U.get_ipy().user_ns[name]=y
-	return F.dill_dump(obj=y,file='C:/test/{}-{}={}.dill'.format(name,U.len(y),U.stime()))
-rec=recive=receive=get_flask_request_post_data
+	f=f'{name}-{U.len(y)}={U.stime()}'
+	if save_dill:
+		return F.dill_dump(obj=y,file=f'C:/test/{f}.dill')
+	else:
+		return U.StrRepr('# '+f)
+rec=recv=recive=receive=get_flask_request_post_data
 
 
 def get_flask_request_a(request=None,return_other_url=False,return_request=False,raise_err=False,**ka):

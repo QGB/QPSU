@@ -13,6 +13,14 @@ import websockets
 async def echo(websocket,path):
 	''' path:'/ws'
 '''	
+	try:
+		requested_protocols = websocket.request_headers["Sec-WebSocket-Protocol"]
+	except KeyError:
+		print("Client hasn't requested any Subprotocol. Closing connection")
+		return await websocket.close()
+	print(requested_protocols)
+	await asyncio.sleep(999)
+
 	async for message in websocket:
 		r=U.execResult(message,globals=globals(),locals=locals())
 		await websocket.send(r)
@@ -29,9 +37,18 @@ async def main():
 	# loop.add_signal_handler(signal.SIGINT, stop.set_result, None)
 	# signal.signal(signal.SIGINT, stop.set_result)
 	stop = loop.create_future()
-	async with websockets.serve(echo, '0.0.0.0', 1122):
-		await stop
+	# async with websockets.serve(echo, '0.0.0.0', 1122,):#不加 asyncio.streams.IncompleteReadError: 0 bytes read on a total of 2 expected bytes
+	serve=await websockets.serve(echo, '0.0.0.0', 1122,subprotocols=['tty'])
+	# serve=await websockets.serve(echo, '0.0.0.0', 1122,subprotocols=[])
+	# serve
+	# async with :
+	await stop
 
 
-# async 		
+
+import logging
+logger = logging.getLogger('websockets.server')
+logger.setLevel(-1)
+
+
 asyncio.run(main())

@@ -109,6 +109,13 @@ try:
 	from pprint import pprint,pformat
 except:pass
 ####################################################
+def xml_to_dict(sxml):
+	import xmltodict
+	return xmltodict.parse(sxml)
+	# =xml_to_json
+xmltodict=xml_to_dict
+
+
 def extract_UTNF_function(f):
 	global U,T,N,F
 	U,T,N,F=py.importUTNF()
@@ -1187,6 +1194,11 @@ def html_prettify(html, formatter="html5",p=py.No('auto')):
 		return r
 nice_html=htmlBeautify=html_beautify=html_prett=pretty_html=html_pretty=prettify_html=html_prettify
 
+def bs_tag(html):
+	e=BeautifulSoup(html)
+	for i in py.range(3):
+		e=py.list(e.children)[0]
+	return e
 def BeautifulSoup(html='',file='',cache=False):
 	# from bs4 import BeautifulSoup
 	if not html and file:
