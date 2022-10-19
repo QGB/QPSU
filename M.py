@@ -111,7 +111,10 @@ def post_large_file(url,file,headers={}):#, data=None, json=None,params=None
 	resp.reason = msg.rstrip()
 	return resp
 
-
+def delete_file(f):
+	import os
+	return os.remove(f)
+delete=delete_file
 
 def size(f):
 	'''
@@ -164,7 +167,7 @@ def uart(tx=2,rx=3,w='',baudrate=115200,wsleep=0.1):
 	if k in guart:
 		uart1=guart[k]
 	else:
-		guart[k]=uart1 = UART(1, baudrate=115200, tx=2, rx=3)
+		guart[k]=uart1 = UART(1, baudrate=115200, tx=tx, rx=rx)
 	if w:
 		uart1.write(w)
 		sleep(wsleep)
@@ -324,7 +327,8 @@ def gc():
 		
 def reload(m='M'):
 	import sys
-	sys.modules.pop(m)
+	if m in sys.modules:
+		sys.modules.pop(m)
 	sys.modules[m]=__import__(m)
 	return sys.modules[m]
 r=reload
@@ -470,6 +474,71 @@ def http_post(url,data):
 	import urequests
 	return urequests.post(url)
 post=http_post
+
+def http_download_file(url,filename=''):
+	import mrequests
+	r=mrequests.get(url)
+	print('open...',r)
+	if not filename:filename=sub_last(url,'/')
+	print('save...',filename)
+	r.save(filename)
+	print('done !',filename)
+	return filename
+	
+down_file=download=download_file=http_download=http_download_file	
+
+def sub_tail(s,s1,s2=''):
+	'''
+
+'''	
+	if not s:return s
+	if isinstance(b'',bytes):
+		null=b''
+	else:
+		s= str(s)
+		null=''
+	i1=0
+	if s2:
+		i2=s.rfind(s2)
+		if i2==-1:return null
+		if s1:
+			i1=s[:i2].rfind(s1)
+			if i1==-1:return null
+			i1+=len(s1)
+		else:
+			i1=0
+	else:
+		i1=s.rfind(s1)
+		if i1==-1:return null
+		i1+=len(s1)
+		i2=len(s)
+	return s[i1:i2] 
+sub_last=sub_tail
+
+def sub_head(s,s1,s2=''):
+	if not s:return s
+	if isinstance(b'',bytes):
+		null=b''
+	else:
+		s= str(s)
+		null=''	
+	i1=s.find(s1)
+	if not s2:
+		i2=len(s)
+	else:
+		i2=s.find(s2,i1+len(s1))
+	if(-1==i1 or -1==i2):
+		return null
+	i1+=len(s1)
+	return s[i1:i2]
+sub=sub_head
+
+
+def url_decode(str):
+	dic = {"%21":"!","%22":'"',"%23":"#","%24":"$","%26":"&","%27":"'","%28":"(","%29":")","%2A":"*","%2B":"+","%2C":",","%2F":"/","%3A":":","%3B":";","%3D":"=","%3F":"?","%40":"@","%5B":"[","%5D":"]","%7B":"{","%7D":"}"}
+	for k,v in dic.items(): str=str.replace(k,v)
+	return str
+urldecode=url_decode
 
 def localtime():
 	import utime

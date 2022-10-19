@@ -4492,6 +4492,25 @@ def get_process_name_by_pid(pid):
 	import psutil
 	return psutil.Process(pid).name()						
 						
+def get_process_all_parent(*a,**ka):
+	p=get_all_process_list(*a,**ka)
+	if py.len(p)!=1:return py.No('can not filter 1 process',p)
+	r=[p[0]]
+	while True:
+		ppid=r[-1].ppid()
+		if ppid==r[-1].pid:
+			return r
+		for p in get_all_process_list():
+			if p.pid==ppid:
+				r.append(p)
+				break
+			# break	
+		else:
+			break #没找到
+	return r		
+pstree=psps=get_process_all_parent	# psp get_process_path
+	
+						
 def get_all_process_list(name='',cmd='',pid=None,ppid=None,net_connections=False):
 	'''if err return [r, {i:err}  ]
 _62.name()#'fontdrvhost.exe'
@@ -4631,7 +4650,7 @@ def get_all_process_value_list(**ka):
 	return r
 ps_path=psCmd=ps_cmd=ps_value=ps_values=GetCommandLine=getCommandLine=get_command_line=getCmdList=get_cmd_list=get_all_process_cmd_list=get_all_process_value_list
 
-def getProcessPath(name='',pid=0):
+def get_process_path(name='',pid=0):
 	if not (name or pid):pid=globals()['pid']
 	r=getProcessList(name=name,pid=pid)
 	rs=[]
@@ -4645,7 +4664,8 @@ def getProcessPath(name='',pid=0):
 		return rs[0].replace('\\','/')
 	else:
 		return ()
-psp=getProcessPath
+psp=getProcessPath=get_process_path
+
 def kill(*ps,caseSensitive=True,confirm=True,**ka):
 	'''TODO:use text Match if any
 	'''

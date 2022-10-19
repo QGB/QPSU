@@ -28,6 +28,7 @@ if not r:
 			sta_if.disconnect()
 			print('try connect ',ssid,pw)
 			sta_if.connect(ssid,pw);
+		del ds,ssid,pw
 	del webrepl_cfg,lsp
 
 
@@ -36,4 +37,8 @@ import gc
 gc.collect()
 del gc
 
+# try:
+	# import mdot
+# except Exception as e:
+	# print(e)
 

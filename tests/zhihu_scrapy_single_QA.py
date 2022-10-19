@@ -10,16 +10,33 @@ if not U.get('rpc.server.base'):
 c=item=html=0
 next_url=[]
 answers=[]
+
+def answer_to_question(id):
+	rp=N.HTTP.request(f'https://www.zhihu.com/answer/{id}',proxy=0,p=1)
+	if not rp.history:return id
+	u=rp.history[0].headers['location']
+	if rp.history[0].status_code == 301:
+		if 'question/' in u:
+			return T.filterInt(u,range(8,11))[0]
+			
+	raise py.ArgumentError(id,rp,u)
+	# if rp.history[0].status_code == 302:
+		# if u=='/404':
+			
+	
 def zhihu_question(id,debug=0):
 	global c,next_url,answers,html
 	#
-	
-	if py.istr(id):
-		id=T.filterInt(id,range(8,11))[0]
-	u=f'http://192.168.1.10:1200/zhihu/question/{id}'	
+	if py.istr(id):#N.geta 总会到这里
+		qid=T.filterInt(id,range(8,11))[0]
+		if 'question/' not in id:
+			qid=answer_to_question(qid)
+	else:
+		qid=id
+	u=f'http://192.168.1.10:1200/zhihu/question/{qid}'	
 	s=N.get(u,proxy=0,p=1)
 	d=T.xmltodict(s)
-	rl=[]
+	rl=[ U.StrRepr(d['rss']['channel']['title'][3:]+'\n'*4),  ]
 	for item in d['rss']['channel']['item']:
 		t=item['description']
 		t=T.html2text(t)

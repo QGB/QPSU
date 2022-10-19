@@ -71,6 +71,29 @@ try:
 	import win32gui
 except Exception as ei:pass
 #############################################
+def send_key_to_window_ctrl(h,c):
+	import win32api,win32con
+	CTRL_KEY=0x11
+	S_KEY=py.ord(c.upper())
+	
+	
+	# win32api.keybd_event(17,0,0,0)
+	win32gui.SendMessage(win, win32con.WM_KEYDOWN, 86, 0)
+	win32api.PostMessage(h, win32con.WM_KEYDOWN, CTRL_KEY, 0);
+	win32api.PostMessage(h, win32con.WM_KEYDOWN, S_KEY   , 0);
+	# win32api.PostMessage(h, win32con.WM_KEYUP  , S_KEY   , 0);
+	# win32api.PostMessage(h, win32con.WM_KEYUP  , CTRL_KEY, 0); 
+	
+def send_key_to_window(h,*a):
+	import win32api,win32con
+	for i in a:
+		if i.lower().startswith('ctrl+'):
+			send_key_to_window_ctrl(h,i[5:])
+		elif py.istr(i):
+			for c in i:
+				win32api.PostMessage(h, win32con.WM_CHAR, py.ord(c), 0)
+		else:
+			raise py.ArgumentUnsupported(i)
 def shell_delete(a):
 	''' allow undo
 	
