@@ -73,16 +73,16 @@ except Exception as ei:pass
 #############################################
 def send_key_to_window_ctrl(h,c):
 	import win32api,win32con
-	CTRL_KEY=0x11
+	CTRL_KEY=win32con.VK_LCONTROL
 	S_KEY=py.ord(c.upper())
 	
 	
 	# win32api.keybd_event(17,0,0,0)
-	win32gui.SendMessage(win, win32con.WM_KEYDOWN, 86, 0)
+	# win32gui.SendMessage(win, win32con.WM_KEYDOWN, 86, 0)
 	win32api.PostMessage(h, win32con.WM_KEYDOWN, CTRL_KEY, 0);
 	win32api.PostMessage(h, win32con.WM_KEYDOWN, S_KEY   , 0);
 	# win32api.PostMessage(h, win32con.WM_KEYUP  , S_KEY   , 0);
-	# win32api.PostMessage(h, win32con.WM_KEYUP  , CTRL_KEY, 0); 
+	win32api.PostMessage(h, win32con.WM_KEYUP  , CTRL_KEY, 0); 
 	
 def send_key_to_window(h,*a):
 	import win32api,win32con

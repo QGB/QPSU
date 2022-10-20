@@ -167,7 +167,7 @@ def uart(tx=2,rx=3,w='',baudrate=115200,wsleep=0.1):
 	if k in guart:
 		uart1=guart[k]
 	else:
-		guart[k]=uart1 = UART(1, baudrate=115200, tx=tx, rx=rx)
+		guart[k]=uart1 = UART(1, baudrate=baudrate, tx=tx, rx=rx)
 	if w:
 		uart1.write(w)
 		sleep(wsleep)

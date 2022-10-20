@@ -4365,6 +4365,9 @@ File:      c:\qgb\anaconda3\lib\site-packages\keyboard\__init__.py'''
 					a=Win.set_foreground(row[1],raise_error=raise_error)
 					r.append(['foreground',a])
 					_sleep(delay);continue
+				elif one_in(['kill','terminate',],action):
+					r.append(['kill',kill(*row[1:]),])
+					_sleep(delay);continue
 				elif one_in(['delay','sleep','wait'],action):
 					_sleep(py.int(row[1]))	
 					continue
@@ -4494,7 +4497,7 @@ def get_process_name_by_pid(pid):
 						
 def get_process_all_parent(*a,**ka):
 	p=get_all_process_list(*a,**ka)
-	if py.len(p)!=1:return py.No('can not filter 1 process',p)
+	if py.len(p)!=1:return py.No('filter process len must 1,not %s'%py.len(p),p)
 	r=[p[0]]
 	while True:
 		ppid=r[-1].ppid()

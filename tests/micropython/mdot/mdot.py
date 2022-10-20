@@ -4,9 +4,10 @@ from microdot_asyncio_websocket import with_websocket
 try:
 	import uasyncio as asyncio
 	import M
-	uart=M.uart(tx=3,rx=2)#6 18
-	# uart=M.uart(tx=9,rx=8)#13 k1
-
+	# uart=M.uart(tx=3,rx=2)#6 18
+	uart=M.uart(tx=2,rx=3,baudrate=57600)#12 mt7688
+	# uart=M.uart(tx=9,rx=8)#13 hdc
+	
 	swriter = asyncio.StreamWriter(uart, {})
 	sreader = asyncio.StreamReader(uart)
 	gport=80
@@ -102,10 +103,12 @@ AuthToken
 		print('ws receive',data)
 		if data.startswith(b'0'):#len(data)==2 and 
 			data=data[1:]
-		elif data.startswith(b'{"AuthToken":"","columns":'):
-			print('ws skip',data)
-			data=b''
-			
+		else:
+			for bs in [b'{"AuthToken":"","columns":',b'1{"columns":',]:
+				if data.startswith(bs):
+					print('ws skip',data)
+					data=b''
+					break
 		if swriter:await swriter.awrite(data)
 		# r=U.execResult(data,globals=globals(),locals=locals())
 		# if swriter:await swriter.awrite(r)
