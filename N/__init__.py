@@ -184,7 +184,7 @@ def http_server(PORT):
 		print("serving at port", PORT)
 		httpd.serve_forever()
 	
-def curl_return_bytes(url,verbose=True,proxy=py.No('socks5h://127.0.0.1:21080'),headers=py.No('default use N.HTTP.headers'),**ka):
+def curl_return_bytes(url,verbose=True,proxy=py.No('socks5h://127.0.0.1:21080'),headers=py.No('default use N.HTTP.headers'),max_show_bytes_size=99,**ka):
 	'''  CURLOPT_* see:
 https://github.com/pycurl/pycurl/blob/master/src/module.c
 	'''
@@ -228,7 +228,7 @@ https://github.com/pycurl/pycurl/blob/master/src/module.c
 	b=f.read()
 	# print(len(b),b)
 	# b.decode()
-	if py.len(b)>99:
+	if py.len(b)>max_show_bytes_size:
 		return U.object_custom_repr(b,repr='{}...#{}'.format(b[:99],F.readable_size(b) )  )
 	else:
 		return b

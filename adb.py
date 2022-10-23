@@ -74,3 +74,25 @@ def swipe_and_click(x,y,sleep=0.5):
 	# x,y=666,840
 	os.system(f'adb shell input swipe {x} {y} {x} {y} 50')
 	
+	
+def get_apk_info(f,p=1):
+	''' pip install pyaxmlparser 
+'''	
+	from pyaxmlparser import APK
+
+	apk = APK(f)
+	if p:
+		print(apk.package)
+		print(apk.version_name)
+		print(apk.version_code)
+		print(apk.icon_info)
+		print(apk.icon_data)
+		print(apk.application)	
+	return apk
+apk=get_apk_info
+	
+def get_apk_package(f,return_apk=False):
+	apk=get_apk_info(f,p=0)
+	if return_apk:return apk,apk.package
+	return apk.package
+apk_package=apk_package_name=get_apk_package	

@@ -4,8 +4,8 @@ from microdot_asyncio_websocket import with_websocket
 try:
 	import uasyncio as asyncio
 	import M
-	# uart=M.uart(tx=3,rx=2)#6 18
-	uart=M.uart(tx=2,rx=3,baudrate=57600)#12 mt7688
+	uart=M.uart(tx=3,rx=2)#6 18
+	# uart=M.uart(tx=2,rx=3,baudrate=57600)#12 mt7688
 	# uart=M.uart(tx=9,rx=8)#13 hdc
 	
 	swriter = asyncio.StreamWriter(uart, {})
@@ -143,14 +143,8 @@ def rpc(request,code=''):
 	if not response.body:
 		# response.body=r.encode()
 		response.body=r#.encode('utf-8')
-		# if U:
-		# else:
-			# import io
-			# response.body=io.StringIO(r)
-			# M.gc()
 			
 	return response
-	# return Response(body=io.StringIO(r), status_code=200,)
 
 @app.route('/')
 @app.route('/<path:path>')#路径匹配函数放在最后，不然后面的 ws，token也会被匹配

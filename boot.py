@@ -37,8 +37,8 @@ import gc
 gc.collect()
 del gc
 
-# try:
-	# import mdot
-# except Exception as e:
-	# print(e)
+try:
+	import mdot
+except Exception as e:
+	print(e)
 

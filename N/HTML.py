@@ -422,6 +422,13 @@ textarea{
 	,table 
 	
 */
+#box{
+	/* display: flex; */
+	flex-wrap: wrap;	
+	flex-direction: column;
+	width:90vh;
+}
+
 
 td:nth-of-type(5){
 	text-align: right;
@@ -447,7 +454,31 @@ td:nth-of-type(7) > textarea{
 	
 	*/
 }
+
+.wrapper {
+  /* background: #EFEFEF; */
+  box-shadow: 1px 1px 10px #999;
+  margin: 0;
+  text-align: right;
+  position: relative;
+
+  margin-bottom: 20px !important;
+  width: 110vh;
+  padding-top: 5px;
+}
+.scrolls {
+  overflow-x: hidden;
+  overflow-y: scroll;
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  white-space: nowrap
+  text-align: left;
+}
 		
+.scrolls>p {		
+	color:gray;
+}
 ''')	
 		dclu=U.get('dclu',{})
 		es=bs.select(f'body > table > tbody > tr > td:nth-of-type({1+txt_column-2})')
@@ -464,12 +495,20 @@ td:nth-of-type(7) > textarea{
 				# ea.append(T.eol.join(lu))
 				
 				sn='#L'+T.regex_match_one(s,r'\d+')
-				slu=T.eol.join(f'<p><a target="_blank" href="https://github.com{i}{sn}">{i}</a></p>' for i in lu)
+				slu=T.eol.join(f'<a target="_blank" href="https://github.com{i}{sn}">{i[1:]}</a>' for i in lu)
+#				ea=T.bs_tag(f'''
+#<div id="box" style="height:{s.count(T.eol)*2.36+4}vh;">
+#{slu}
+#
+#</div>''')
 				ea=T.bs_tag(f'''
-<div id="box">
-{slu}
-
-</div>''')
+<div class="wrapper" >
+  <div class="scrolls" style="height:{s.count(T.eol)*1.2}vh;">
+  {slu}
+  </div>
+</div> 
+  
+  ''')
 				
 				
 				e.clear()
@@ -615,7 +654,7 @@ def everything_search_image(response,add_offset=32,**ka):
 	
 	dua=T.parse_url_arg(a)     
 	offset=py.int(dua.get('offset',0))
-	search=dua['search']#,'')
+	search=dua.get('search','')
 	
 	def offset_url(previous=False):
 		if add_offset:
@@ -632,7 +671,11 @@ def everything_search_image(response,add_offset=32,**ka):
 	h=N.HTTP.get(a,proxy=0)
 	bs=T.BeautifulSoup(h)
 	efs=bs.select('td[class=file]  a')
-	# U.set('es',[h,bs,fs])
+	if not efs:#NMM管理器 8888
+		efs=bs.select('body > ul > section.files > li > a')
+		
+		
+	# U.set('efs',[h,bs,fs])
 	r=r"""
 <meta name="viewport" content="width=device-width, initial-scale=0.3, minimum-scale=0.3, maximum-scale=1.0,user-scalable=0" cmt=禁止缩放/> 
 	
@@ -661,7 +704,7 @@ textarea.img_path{
 		text-align: right;
 		
 		从右向左超出*/
-	width:100%;
+	width:96%;
 	padding:0px;
 	margin:0px;
 	border:1px solid #00000022; /*修复调整 textarea大小导致下分割线消失的问题*/
@@ -743,7 +786,8 @@ input[type="text"]{
 	for n,e in py.enumerate(efs):
 		u=es_base+e.get('href')
 		se=f''' <img src={u}>	
-<textarea class="img_path">{n}{T.url_decode(u)}</textarea>		
+<i>{n}</i>		
+<textarea class="img_path">{T.url_decode(u)}</textarea>		
 		'''
 		#RTL 文字从右至左  注意使用 f-string 执行顺序问题
 #很奇怪 加空格显示 n总是在u的后面		

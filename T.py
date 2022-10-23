@@ -40,6 +40,7 @@ TAB=Tab=tab='\t'
 gspace=space=py.chr(0x20)
 slash='/'   # chr(0x2F)
 back_slash=backslash='\\' # chr(0x5C)
+eq=equal=EQ='='
 ######### html ######
 hr='<hr>'
 br='<br>'
