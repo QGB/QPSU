@@ -1261,7 +1261,9 @@ def rpc_set_variable(*obj,base=py.No('auto history e.g. [http://]127.0.0.1:23571
 		# print(U.v.N.HTTP.post(url,verify=False,timeout=timeout,proxies=proxies,print_req=print_req,data=U.v.F.dill_dump(obj)) )
 		
 	if not b:return b
-	if not py.isbytes(b):
+	elif py.istr(b):
+		pass
+	elif not py.isbytes(b):
 		b=b.content
 	if py.isbytes(b):
 		b= b.decode('utf-8')

@@ -271,7 +271,7 @@ def download(url, file_path='',default_dir=py.No('set_input',no_raise=1),headers
 				sys.stdout.flush()
 	print()  # 避免上面\r 回车符
 		
-def post(url,data=None,return_text=True,**ka):
+def post(url,data=None,return_text=False,**ka):
 	'''
 Signature: requests.post(url, data=None, json=None, **kwargs)
 Docstring:

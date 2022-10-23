@@ -8,6 +8,21 @@ else:
 	from qgb import py
 U,T,N,F=py.importUTNF()
 
+JS_async_post='''
+async function post(url,data){
+    if(typeof a!='string')data=JSON.stringify(data)
+
+    return new Promise(function (resolve, reject) {
+        var xhr = new XMLHttpRequest();
+        xhr.open('post', url, true);
+        xhr.onload = function () {
+            resolve(xhr.response);
+        };
+        xhr.send(data)
+    });
+}
+'''
+
 def sendkey_list(response):
 	ki=U.get_or_dill_load_and_set('ki')
 	
@@ -22,18 +37,7 @@ def sendkey_list(response):
 %(sla)s
 
 <script>
-async function post(url,data){
-    if(typeof a!='string')data=JSON.stringify(data)
-
-    return new Promise(function (resolve, reject) {
-        var xhr = new XMLHttpRequest();
-        xhr.open('post', url, true);
-        xhr.onload = function () {
-            resolve(xhr.response);
-        };
-        xhr.send(data)
-    });
-}
+%(JS_async_post)s
 
 
 
@@ -1092,7 +1096,7 @@ def flask_get_all_upload_files(upload_dir=py.No('U.gst/upload_dir',no_raise=1),s
 		# f.save(f.name)
 files=save_file=save_files=flask_files=flask_save_all_upload_files=flask_get_all_upload_files	
 	
-ghtml_txt='''
+ghtml_txt=r'''
 <head>
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 <style type="text/css">
@@ -1138,6 +1142,8 @@ ghtml_txt='''
 <button type="button" class="edit_btn" onclick="edit(this.innerText)">undo</button>
 <button type="button" class="edit_btn" onclick="edit(this.innerText)">redo</button>
 
+<button type="button" class="edit_btn" onclick="insert_cbg()">U.cbg()</button>
+
 
 
 	</div>
@@ -1155,6 +1161,18 @@ value="$U.get('rpc.server.base')#$U.set('rpc.server.upload.save_size',$U.int_exp
 	<input id=url_end   class=url type="text" name="url_end" value="%23-">
 </form> 
 <script> 
+
+$JS_async_post$
+
+async function insert_cbg() {
+	t=await post('$N.get_rpc_base_local()$r=U.cbg()')
+	if(!t.endsWith('\n')){
+		t=t+'\n'
+	} 
+	e=document.querySelector('textarea#textarea')
+	e.value = t+e.value
+}
+
 function edit(command,text){
 	document.querySelector('textarea#textarea').focus()
 	return document.execCommand(command, true,text);
