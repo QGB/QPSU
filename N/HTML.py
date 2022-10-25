@@ -1165,12 +1165,15 @@ value="$U.get('rpc.server.base')#$U.set('rpc.server.upload.save_size',$U.int_exp
 $JS_async_post$
 
 async function insert_cbg() {
-	t=await post('$N.get_rpc_base_local()$r=U.cbg()')
+	t=await post('$N.get_rpc_base_local()#$r=U.cbg()')
 	if(!t.endsWith('\n')){
 		t=t+'\n'
 	} 
 	e=document.querySelector('textarea#textarea')
-	e.value = t+e.value
+	if(!e.value.startsWith(t)){
+		e.value = t+e.value
+	}
+		
 }
 
 function edit(command,text){

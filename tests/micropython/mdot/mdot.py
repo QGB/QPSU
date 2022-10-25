@@ -4,8 +4,8 @@ from microdot_asyncio_websocket import with_websocket
 try:
 	import uasyncio as asyncio
 	import M
-	uart=M.uart(tx=3,rx=2)#6 18
-	# uart=M.uart(tx=2,rx=3,baudrate=57600)#12 mt7688
+	# uart=M.uart(tx=3,rx=2)#6 18
+	uart=M.uart(tx=2,rx=3,baudrate=38400)#12 mt7688
 	# uart=M.uart(tx=9,rx=8)#13 hdc
 	
 	swriter = asyncio.StreamWriter(uart, {})
@@ -45,6 +45,7 @@ except Exception as e:
 	print(f'Not in micropython.listen:{gport} pid:',U.pid)
 #############################################
 async def sleep_loop():#sleep_for_ctrl_c windows
+	global res
 	while True:
 		dws=[]
 		for ws in gws:
@@ -52,27 +53,43 @@ async def sleep_loop():#sleep_for_ctrl_c windows
 				dws.append(ws)
 		for ws in dws:
 			gws.remove(ws)
+			
+		# if res:
+			# if len(res)==1:res=b'0'+res # micropython
+			# for ws in gws:
+				# try:
+					# await ws.send(b'0'+res)
+					
+				# except Exception as e:
+					# ws.closed=True
+					# print(ws,e)
+			# res=''	
 		await asyncio.sleep(1)
 		
+# grn=1		
+# res=''
 async def receiver():
 	global gws
 	print('start uart receive...')
+	res=''
 	while True:
-		if sreader:res = await sreader.read(1)#空参数，write 换行也不回返回	
-		
-		# if b'\r' in res and (b'\n' not in res):
-			# res=b'0\n\r'
-		if gws:
-			if len(res)==1:res=b'0'+res # micropython
-			for ws in gws:
-				try:
-					await ws.send(res)
-				except Exception as e:
-					ws.closed=True
-					print(ws,e)
-				# else:
-				
+		if sreader:
+			# res.append(await sreader.read(1))#空参数，write 换行也不回返回	
+			res = await sreader.read(999)#空参数，write 换行也不回返回	
+			# if grn:
+				# res = await sreader.read(grn)#空参数，write 换行也不回返回	
+			# else:
+				# res = await sreader.read()#空参数，write 换行也不回返回	
 		if T:print('uart Recieved', res) # for debug
+		
+		if res:res=b'0'+res # micropython
+		for ws in gws:
+			try:
+				await ws.send(res)
+			except Exception as e:
+				ws.closed=True
+				print(ws,e)
+				
 
 loop = asyncio.get_event_loop()
 loop.create_task(receiver())
