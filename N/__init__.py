@@ -2432,9 +2432,20 @@ def get_lan_ip(adapter=py.No('auto')):
 			# socket.AddressFamily.AF_INET6: #ipv6
 	if adapter:
 		return daip[adapter]
-	U=py.importU()			
+	U,T,N,F=py.importUTNF()	
 	if U.isLinux():
-		return daip['eth0']
+		try:
+			return daip['eth0']
+		except:
+			ips=[]
+			for a,ip in daip.items():
+				if a.startswith('enp0s'):
+					ips.append(ip)
+			if ips:
+				for ip in ips:
+					if T.startswith_multi(ip,'192.168','172.','10.'):
+						return ip
+			raise py.NotImplementedError(daip,ips)	
 	elif U.isWin():#TODO
 
 		return daip['WLAN']

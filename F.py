@@ -1287,6 +1287,11 @@ def list(ap='.',type='',t='',r=False,d=False,dir=False,f=False,
 	# else:return r3[1]+r3[2]
 ls=list
 
+def get_filemode(f):
+	U=py.importU()
+	return U.IntOct(_os.stat(f).st_mode )
+mod=mode=get_mod=get_mode=get_filemode	
+
 def ll(ap='.',readable=True,type='',t='',r=False,d=False,dir=False,f=False,file=False,
 	return_dict=True,return_list=False,no_raise=True,**ka):
 	'''return {file : [size,atime,mtime,ctime,st_mode]}

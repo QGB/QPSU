@@ -1481,6 +1481,13 @@ def urlDecode(a):
 	raise NotImplementedError()
 urldecode=url_decode=urlDecode
 
+def startswith_multi(s,*a):
+	for i in a:
+		if s.startswith(i):
+			return True
+	return False
+startswith=startswith_multi	
+
 def startsEnds(a,chars):
 	'''S.strip([chars]) -> str
 '1234'.strip('1') # '234'

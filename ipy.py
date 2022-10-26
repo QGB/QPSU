@@ -143,8 +143,8 @@ C:\QGB\Anaconda3\lib\site-packages\IPython\core\formatters.py :89  '''
 	return U.get_dict_value(r[0])
 pformat=format
 
-import _ast
 def trace_variable(code):
+	import _ast
 	if py.istr(code):a=U.parse_code(code ) # one line return <_ast.Expr,_ast.For...,multi return [Assign,Expr,For..]
 	if getattr(code,'value',0):a=code
 	if isinstance(a,_ast.Expr):
