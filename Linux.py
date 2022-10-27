@@ -94,3 +94,50 @@ android 必须 3003 才能访问 网络
 # print(check_output(['id']))
 # print()
 # print(check_output(['id']))
+
+
+def bootargs_to_xml(s,f='',p=0):
+	'''
+bootargs=console=ttyAMA0,115200 blkdevparts=mmcblk0:1M(fastboot),1M(bootargs),10M(recovery),2M(deviceinfo),8M(loader),8M(loaderbak),1M(loaderdb),1M(loaderdbbak),8M(baseparam),8M(pqparam),20M(logo),20M(logobak),40M(fastplay),40M(fastplaybak),40M(kernel),20M(misc),8M(userapi),8M(hibdrv),8M(qbflag),300M(qbdata),500M(cache),50M(private),800M(system),-(userdata)
+	
+	'''
+	m=0
+	r=[]
+	
+	rs=[]
+	ss=T.sub(s,':').split(',')
+	mss=py.len(ss)-1
+	for index,i in py.enumerate(ss):
+		if i.startswith('-') and index==mss:
+			print(index,i)
+			name=T.sub(i,'(',')')
+			n=0
+			sn='"-"   '
+			# break
+		else:
+			d=T.regex_match_named(i,r'(?P<n>\d+)(?P<unit>\w)\((?P<name>\w+)\)')
+			if d['unit']!='M':return py.No(i,d,s)
+			n=py.int(d['n'])
+			name=d['name']
+			sn=f'"{n}M"'
+		sname=f'"{name}"'
+		sm=f'"{m}M"'
+		si=fr'''
+<Part Sel="0" PartitionName={T.padding(sname,size=13)} FlashType="emmc" FileSystem="none" Start={T.padding(sm,size=7)} Length={T.padding(sn,size=6)} SelectFile="{name}.bin" />		
+'''		
+		m+=n
+		rs.append('\t'+si.strip())
+		r.append((n,name))
+	xml= fr'''<?xml version="1.0" encoding="UTF-8"?>
+<Partition_Info>
+{T.eol.join(rs)}
+</Partition_Info>	
+'''	
+	if p:print(xml)
+	if f:
+		if not f.lower().endswith('.xml'):
+			f+='.xml'
+		return F.write(f,xml)
+	return r
+	
+	

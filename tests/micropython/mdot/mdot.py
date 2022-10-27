@@ -4,8 +4,8 @@ from microdot_asyncio_websocket import with_websocket
 try:
 	import uasyncio as asyncio
 	import M
-	# uart=M.uart(tx=3,rx=2)#6 18
-	uart=M.uart(tx=2,rx=3,baudrate=38400)#12 mt7688
+	uart=M.uart(tx=3,rx=2)#6 18
+	# uart=M.uart(tx=2,rx=3,baudrate=38400)#12 mt7688
 	# uart=M.uart(tx=9,rx=8)#13 hdc
 	
 	swriter = asyncio.StreamWriter(uart, {})
