@@ -1520,6 +1520,7 @@ def cmd(*a,shell=True,**ka):
 		# TODO #
 	if len(a)==1:
 		a=a[0]
+		if not a:return a
 		if py.istr(a):
 			if (' ' in a) and not a.startswith(quot):
 				a=split_cmd_str(a)
@@ -6816,7 +6817,7 @@ def _hotkey_callback():
 		print('#BaseException',stime(),e,)
 		# py.traceback()
 	
-def register_hotkey	(callback=_hotkey_callback,hotkey='alt+c',unregister_all=True,**ka):
+def register_hotkey(callback=_hotkey_callback,hotkey='alt+c',unregister_all=True,**ka):
 	'''  
 def f():
     print(23)
