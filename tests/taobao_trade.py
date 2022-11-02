@@ -4,6 +4,7 @@ import pyppeteer
 from qgb import py
 U,T,N,F=py.importUTNF()
 from qgb import A
+from qgb import Win #Win.get_screen_size
 
 taobao_trade=U.getMod(__name__)
 RPC_BASE=U.get_or_input(__name__+N.RPC_BASE_REMOTE[1:],default=N.get_local_rpc_base())
@@ -12,6 +13,17 @@ URL_TRADE_LIST='https://buyertrade.taobao.com/trade/itemlist/list_bought_items.h
 URL_WebDriver_DETECT=URL_WEBDRIVER_DETECT='https://intoli.com/blog/not-possible-to-block-chrome-headless/chrome-headless-test.html'
 us=zu=F.dill_load('C:/test/zu-67.dill')  
 
+def get_tmall_sku_2022(jst):
+	r=[]
+	for id,d in jst['data']['skuCore']['sku2info']:
+		if id==0:
+			print(id,d)
+			continue
+		fp=py.float(d['price']['priceText'])	
+		quantity=py.int(d['quantity'])
+		quantity=U.IntRepr(quantity,repr=T.padding(f"""{quantity}#{d['quantityText']}""",size=10))
+	#TODO	
+		
 def _registed_click_pop_cart():
 	if U.isWin():
 		from qgb import Win
@@ -120,6 +132,7 @@ async def set_cookies(ck,page=py.No('auto last -1')):
 
 async def set_viewport(pages=py.No('auto all pages'),**ka):
 	''' 	#1347 看不到，1322 有留白'''
+	return
 	if 'width' not in ka:
 		ka['width']=1366-26
 	if 'height' not in ka:
@@ -153,6 +166,7 @@ async def get_browser(browserURL='http://127.0.0.1:9222',browserWSEndpoint='',
 # if not chrome.exe or : BrowserError: Browser closed unexpectedly:	
 	'''
 	global browser
+	import websockets.client# 可能是因为修改了 websockets 模块
 	browser=U.get(uk)
 	if browser:
 		try:
@@ -164,7 +178,7 @@ async def get_browser(browserURL='http://127.0.0.1:9222',browserWSEndpoint='',
 			
 	try:
 		if browserWSEndpoint:
-			browser=await pyppeteer.connect(browserWSEndpoint=browserWSEndpoint)
+			browser=await pyppeteer.connect(browserWSEndpoint=browserWSEndpoint,defaultViewport=None)
 		else:
 			with pyppeteer.launcher.urlopen(browserURL) as f:
 				data = T.json_loads(f.read().decode())			
@@ -311,6 +325,8 @@ async def get_pages_onload(pages=None,viewport=None):
 		r.append(row)
 	return r
 VIEW_PORT={'width':1340,'height':670}
+if Win.get_screen_size(1)[0]>1366:# (3286, 1303)  whole screen 3286-1366=1920
+	VIEW_PORT={'width':1920-26,'height':1280-98}
 async def set_pages_onload(pages=None,viewport=VIEW_PORT):
 	if not pages:
 		p4s=await get_pages_onload()

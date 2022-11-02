@@ -1215,6 +1215,10 @@ rpc_get=rpc_get_var=rpcGetVariable=rpc_get_variable
 		# print(self,name)
 		# return 
 
+def rpc_get_variable_local(name):
+	return rpc_get_variable(name,base=get_local_rpc_base())
+rpc_get_local=rpc_get_variable_local
+
 def rpc_set_variable_local(**ka):
 	U,T,N,F=py.importUTNF()
 	base=N.get_local_rpc_base()

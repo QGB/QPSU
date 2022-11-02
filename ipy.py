@@ -328,7 +328,10 @@ if getattr(U,'Win',0):
 #is3 py:3.63 ipy:6.1 at[2018-05-13 10:32:01.078] G:/test/ipy/    #56
 
 def save(file=None,lines=-1,tryExcept=False,out=False,columns=70,overide=True,del_other=False,out_max=9999,In_index_delta=0,**ka):
-	'''file is str or (mod a)
+	'''
+U.set('ipy.save_path',U.gst+'ipy/')
+	
+file is str or (mod a)
 	在没有ipython实例时，不能get_ipython()
 	当file被指定时，overide 参数无效
 #BUG #TODO
