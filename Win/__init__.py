@@ -676,9 +676,9 @@ def mouse_drag(x,y,x2=0,y2=0,time=1.1):
 drag=mouse_drag	
 		
 def get_cursor_pos():
-	from ctypes import Structure,c_ulong,byref
+	from ctypes import Structure,byref,c_long# c_ulong 无符号 在第二屏 负数坐标得到(1831, 4294967041)，不能用于 win32api.SetCursorPos((x,y))
 	class POINT(Structure):
-		_fields_ = [("x", c_ulong), ("y", c_ulong)]
+		_fields_ = [("x", c_long), ("y", c_long)]
 	pt = POINT()
 	user32.GetCursorPos(byref(pt))
 	return pt.x,pt.y		
@@ -690,7 +690,7 @@ def set_cursor_pos(x,y):
 	return x,y
 move_cur=mv_cur=setMousePos=setCursorPos=SetCursorPos=setCurPos=set_mouse_pos=set_cur_pos=set_cursor_pos
 
-def mouse_click(x=None,y=None,*a,_1=False):
+def mouse_click(x=None,y=None,*a,_1=False,debug=0):
 	''' click(*xy+(2,3)) == click(x,y,2,3) == click(x+2,y+3)
 	'''
 	import win32api, win32con
@@ -706,6 +706,7 @@ def mouse_click(x=None,y=None,*a,_1=False):
 		if py.len(a)!=2:raise py.ArgumentError('a must be 2 int tuple')
 		x=x+a[0]
 		y=y+a[1]
+	if debug:print(x,y)
 	win32api.SetCursorPos((x,y))
 	win32api.mouse_event(win32con.MOUSEEVENTF_LEFTDOWN,x,y,0,0)
 	win32api.mouse_event(win32con.MOUSEEVENTF_LEFTUP,x,y,0,0)
