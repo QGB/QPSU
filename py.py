@@ -227,11 +227,13 @@ def execute(source, globals=None, locals=None):
 	exec(source,globals,locals)   # is2  exec(expr, globals, locals) 等同于exec expr in globals, locals
 	
 gpdb=True	
-def pdb(frame=No('if no frame use: py.pdb()()')):
+def pdb(frame=No('if no frame use: py.pdb()()'),f=None,**ka):
 	'''import pdb;pdb.set_trace()
 	call pdb in pdb is useless
 	
 	frame=sys._getframe().f_back
+	
+f : function	
 	'''
 	if not gpdb:return
 	# import os
@@ -239,6 +241,10 @@ def pdb(frame=No('if no frame use: py.pdb()()')):
 	# "win can set 'PY.PDB': '1'  "
 	# if msg:print(msg)
 	set_trace=__import__('pdb').Pdb().set_trace
+	if callable(f):
+		set_trace()
+		return f(**ka)
+	
 	if frame:
 		set_trace(  frame)
 	else:

@@ -676,7 +676,7 @@ def mouse_drag(x,y,x2=0,y2=0,time=1.1):
 drag=mouse_drag	
 		
 def get_cursor_pos():
-	from ctypes import Structure,byref,c_long# c_ulong 无符号 在第二屏 负数坐标得到(1831, 4294967041)，不能用于 win32api.SetCursorPos((x,y))
+	from ctypes import Structure,byref,c_long# c_ulong 无符号 在第二屏 负数坐标得到(1831, 4294967041)，不能用于 win32api.SetCursorPos((x,y))#OverflowError: Python int too large to convert to C long
 	class POINT(Structure):
 		_fields_ = [("x", c_long), ("y", c_long)]
 	pt = POINT()

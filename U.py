@@ -4382,7 +4382,9 @@ File:      c:\qgb\anaconda3\lib\site-packages\keyboard\__init__.py'''
 					_sleep(delay);continue
 				else:###########################
 					raise py.ArgumentError("a[%s]== %r[0] not supported!! key|text|delay"%(index,row))
-			
+			if py.callable(row):
+				row()
+				r.append(row)
 		return py.tuple(r)
 	if a :simulate_key_write(a)
 	
