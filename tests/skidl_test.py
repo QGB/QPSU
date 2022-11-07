@@ -13,32 +13,49 @@ U.set_env(KICAD_SYMBOL_DIR=r'C:\Program Files\KiCad\share\kicad\library')
 #C:\Program Files\KiCad\6.0\bin>
 # python -m pip install -i http://pypi.doubanio.com/simple --trusted-host pypi.doubanio.com   dill ipython
 #pip install skidl
-from skidl import *  
-from skidl import generate_pcb
+# from skidl import *  
+# from skidl import generate_pcb
 
-# Create part templates.
-q = Part("Device", "Q_PNP_CBE", dest=TEMPLATE)
-r = Part("Device", "R", dest=TEMPLATE)
+import skidl,kinparse
 
-# Create nets.
-gnd, vcc = Net("GND"), Net("VCC")
-a, b, a_and_b = Net("A"), Net("B"), Net("A_AND_B")
+def my_empty_footprint_handler(part):
+    """Function for handling parts with no footprint.
 
-# Instantiate parts.
-gndt = Part("power", "GND")             # Ground terminal.
-vcct = Part("power", "VCC")             # Power terminal.
-q1, q2 = q(2)                           # Two transistors.
-r1, r2, r3, r4, r5 = r(5, value="10K")  # Five 10K resistors.
+    Args:
+        part (Part): Part with no footprint.
+    """
+    ref_prefix = part.ref_prefix.upper()
 
-# Make connections between parts.
-a & r1 & q1["B C"] & r4 & q2["B C"] & a_and_b & r5 & gnd
-b & r2 & q1["B"]
-q1["C"] & r3 & gnd
-vcc += q1["E"], q2["E"], vcct
-gnd += gndt
+    if ref_prefix in ("R", "C", "L") and len(part.pins) == 2:
+        # Resistor, capacitors, inductors default to 0805 SMD footprint.
+        part.footprint = 'Resistor_SMD:R_0805_2012Metric'
 
-netlist=generate_netlist()
+    elif ref_prefix in ('Q',) and len(part.pins) == 3:
+        # Transistors default to SOT-23 footprint.
+        part.footprint = 'Package_TO_SOT_SMD:SOT-23'
 
+    else:
+        # Everything else goes to the default empty footprint handler.
+        skidl.default_empty_footprint_handler(part)
 
+# Replace the default empty footprint handler with your own handler.
+skidl.empty_footprint_handler = my_empty_footprint_handler
+
+# Create parts with no footprints.
+r = skidl.PartTmplt("Device", "R")
+r1, r2 = r(), r()
+r2.footprint='Resistor_SMD:R_1206_3216Metric'
+
+# Generate a netlist. R1 has no footprint so it will be assigned an 0805.
+# R2 already has a footprint so it will not change because it is not passed
+# to the empty footprint handler.
+
+snetlist=skidl.generate_netlist()
+
+netlist=kinparse.parse_netlist(snetlist)
+for n,part in enumerate(netlist.parts):
+    #fp_lib, fp_name = part.footprint.split(":")
+    #print(n,fp_lib, fp_name)
+    print(n,part.footprint)
 # py.pdb()()
-print(generate_pcb())
+# print(generate_pcb())

@@ -920,7 +920,7 @@ def set_test_path(sp,cd=False,p=False):
 setgst=set_gst=setTestPath=set_test_path
 
 def getShellPath():
-	'''wsPath=G:\QGB\babun\cygwin\home\qgb\wshell\
+	r'''wsPath=G:\QGB\babun\cygwin\home\qgb\wshell\
 	'''
 	if isnix():s='/bin/qgb/'
 	if iswin() or iscyg():
@@ -1744,7 +1744,7 @@ env PATH  无论在Windows 还是 Linux 统一使用大写是好的选择
 	r=subprocess.Popen(a, env=env) # Windows下 光标有不回位问题 U.run('cmd /c set',env={'zzzzz':U.stime()})
 	if getPyVersion()<3.3:r.args=a
 	return r
-	'''
+r'''
 In [151]: _131.poll?
 Signature: _131.poll()
 Docstring:
@@ -1836,7 +1836,7 @@ def ipyEmbed():
 	return functools.partial(embed,**ka)# useless ?   ka不对？
 	return embed
 ipy_repl=ipy=ipy_embed=embed=ipyEmbed
-'''
+r'''
 try:
 	sys._path=sys.path[:]                 #  list.copy() method (available since python 3.3):
 	# from IPython import embed                       #NOTICE 在 qpsu中不要修改 sys.path 
@@ -2094,7 +2094,7 @@ def pwd(p=False,display=False,win=False):
 getCurrentPath=cwd=pwd
 	
 def random_choice(seq,size=1,repeat=0,not_repeat_max_try=9999,**ka):
-	'''
+	r'''
 if not repeat: choice  (size+not_repeat_max_try)	times
 	
 random.choice(seq) #每次抽取都是独立的 多次调用可能重复
@@ -2465,7 +2465,7 @@ def browser(url,browser=py.No('auto select browser'),**ka):
 	def chrome(url):
 		###TODO: auto Find system base everything
 		try:sp=getProcessList(name='chrome.exe')[-1].cmdline()[0]
-		except:sp='''C:\QGB\Chrome\Application\chrome.exe'''
+		except:sp=r'''C:\QGB\Chrome\Application\chrome.exe'''
 		return _open(sp,url)
 		
 	def yandex(url):
@@ -3973,7 +3973,7 @@ def getModsBy__all__(modPath=None):
 	for f in fs:#大写 畸形 不考虑
 		if not f.endswith( '__init__.py'):continue
 		content= F.read(f)
-		ia=T.re_search('\s*__all__\s*=\s*.*',content)
+		ia=T.re_search(r'\s*__all__\s*=\s*.*',content)
 		if '[' in ia and ']' in ia:
 			i=T.sub(ia,'[',']')
 		else:
@@ -4285,7 +4285,7 @@ U.simulate_key_press(['shift+s'])  #ValueError: ("Key 'shift+s' is not mapped to
 system_key=pressKey=keyPress=press_key=key_press=simulate_key_press
 
 def simulate_system_actions(a=py.No("str[key|key_write ] or action list[['click',xy],['move',xy],[foreground,title|handle],['k','sss'],['t','text']]"),key='', delay=py.No('using _DELAY'),restore_state_after=True, exact=None,raise_error=False,**ka):
-	'''pip install keyboard
+	r'''pip install keyboard
 key='Win+D'  # mute  ,not min all window	
 	
 	
@@ -4528,7 +4528,13 @@ pid=0, name='System Idle Process', cmdline=[]
 	if not pid and py.isint(name):
 		pid=name
 		name=''
-	
+	def match_name(n1,n2):
+		if n1.islower():n2=n2.lower()# 忽略大小写匹配,(是否应该限定在Windows？)
+		if n1 in n2:
+			return True
+		else:
+			return False
+			
 	
 	r=[]
 	err=py.dict()
@@ -4552,8 +4558,13 @@ pid=0, name='System Idle Process', cmdline=[]
 			continue			
 		# if name:
 		iname=i.name()
-		if name.islower():iname=iname.lower()# 忽略大小写匹配,(是否应该限定在Windows？)
-		if name in iname:r.append(i)
+		if py.istr(name):
+			if match_name(name,iname):r.append(i)
+		elif py.islist(name) or py.istuple(name):
+			for sn in name:
+				if match_name(sn,iname):
+					r.append(i)
+					break
 		else:continue
 				
 		# except Exception as e:err[i]=e
@@ -4893,7 +4904,7 @@ code=vsc=VSCode=vsCode=vscode
 
 def notePadPlusPlus(a='',lineno=0,auto_file_path=True,editor_path=py.No('config this system editor_path'),
 	get_cmd=False,line_arg='-n',):
-	'''
+	r'''
 --------> os.system('"M:\\Program Files\\Notepad++\\notepad++.exe" "IP.py"')
 'M:\Program' 不是内部或外部命令，也不是可运行的程序
 或批处理文件。
@@ -5926,7 +5937,7 @@ def get_stack(frame=None, limit=None, ):
 
 
 def getClassHierarchy(obj):
-	'''In [68]: inspect.getmro?
+	r'''In [68]: inspect.getmro?
 Signature: inspect.getmro(cls)
 Docstring: Return tuple of base classes (including cls) in method resolution order.
 File:      g:\qgb\anaconda2\lib\inspect.py
@@ -6172,7 +6183,7 @@ Out[81]: 1
 	import pip
 	
 	if not pip_main and pip.__version__=='9.0.1':
-		'''python -m pip install --upgrade pip
+		r'''python -m pip install --upgrade pip
 pip is configured with locations that require TLS/SSL, however the ssl module in Python is not available.
 Could not fetch URL https://pypi.python.org/simple/pip/: There was a problem confirming the ssl certificate: Can't connect to HTTPS URL because the SSL module is not available. - skipping
 Requirement already up-to-date: pip in c:\qgb\anaconda3\envs\py365\lib\site-packages'''
@@ -6284,7 +6295,7 @@ def parse_cmd_duplicated_arg(*names,default=py.No('no default'),type=py.No('auto
 parse_cmd_arg_duplicate=parse_cmd_arg_duplicated=get_duplicated_arg_cmd=get_duplicated_cmd_arg=get_duplicated_cmd_args=parse_cmd_args_duplicated=parse_cmd_duplicated_args=parse_cmd_duplicated_arg
 	
 def parse_cmd_args(int=0,str='',float=0.0,dict={},list=[],tuple=py.tuple(),**ka,  ):
-	'''
+	r'''
 	用int=4不行，必须加上 - ，【"C:\\QGB\\Anaconda3\\lib\\argparse.py", line 1470, in _get_optional_kwargs】【 ValueError: invalid option string 'int': must start with a character '-'】，
 	如果在命令行中忘记加上 - ，这里则获取不到这个参数
 	
@@ -6910,7 +6921,7 @@ text直接传入 title 有问题 , T.html_encode fix it：
 		t='https://item.taobao.com/item.htm?'
 		if py.istr(tb) and t in tb:
 			# text=tb+'&fpChannel=9'
-			tb=T.regexMatchOne(tb,r'(?<=[\?\&]id=)\d{6,}','\d{6,}')
+			tb=T.regexMatchOne(tb,r'(?<=[\?\&]id=)\d{6,}',r'\d{6,}')
 		if py.isint(tb) or U.all_in(tb,T._09):
 			text=t+'fpChannel=9&id=%s'%tb
 		if not title:
@@ -7125,6 +7136,12 @@ def set_timed_task(func,every='day',time='05:09',unit=1,**ka):
 		every=T.replacey(every,numbers,'').strip()
 		unit=py.float(''.join(numbers))
 	if every=='sec':every='second'
+	if unit==1:
+		if py.isint(every):
+			unit,every=every,'s'
+		elif py.istr(every):pass
+		else:
+			raise py.ArgumentError(every)
 	if unit>0:
 		if not every.endswith('s'):
 			every+='s'
@@ -7141,7 +7158,7 @@ def remove_timed_task(index=-1):
 0 is first added'''
 	import schedule
 	return schedule.jobs,'########## pop:',schedule.jobs.pop(index)
-cancel_job=schedule_jobs_pop=pop_time_task=cancel_time_task=del_time_task=remove_time_task=remove_timed_task
+timer_del=cancel_job=schedule_jobs_pop=pop_time_task=cancel_time_task=del_time_task=remove_time_task=remove_timed_task
 	
 def get_timed_task_list():
 	import schedule

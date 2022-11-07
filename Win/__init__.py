@@ -71,11 +71,29 @@ try:
 	import win32gui
 except Exception as ei:pass
 #############################################
+def pywinauto_windows(handle):
+	''' 
+w.window_text() # title
+
+'''	
+	from pywinauto import Application
+	app=Application()
+	app.Connect(handle=handle)
+	ws=app.windows()
+	return ws
+get_sub_windows=pywinauto_windows
+
+# pywinauto_window_text
+def close_window(handle):
+	import win32con    
+	return win32gui.PostMessage(handle,win32con.WM_CLOSE,0,0)
+window_close=close_window
+
 def send_key_to_window_ctrl(h,c):
 	import win32api,win32con
 	CTRL_KEY=win32con.VK_LCONTROL
 	S_KEY=py.ord(c.upper())
-	
+	#TODO 
 	
 	# win32api.keybd_event(17,0,0,0)
 	# win32gui.SendMessage(win, win32con.WM_KEYDOWN, 86, 0)
@@ -443,7 +461,7 @@ splitCmd=split_cmd=cmdSplit=cmd_split=shlex_split=split_cmd_str=CommandLineToArg
 
 def GetConsoleWindow():
 	return kernel32.GetConsoleWindow()
-get_current_cmd_windows=getcmdw=getCmdHandle=GetConsoleWindow
+get_current_cmd_window=getcmdw=getCmdHandle=GetConsoleWindow
 	
 def getCmdLine(bytes=False):
 	'''------> k.GetCommandLineW()

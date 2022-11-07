@@ -441,8 +441,9 @@ td:nth-of-type(5){
 
 td:nth-of-type(5) > textarea{
 	width:90vh;
-	text-align: right;
-	 display: flex;
+	/* text-align: right; */
+	 /* display: flex; */
+	 /* color: blue; */
 }
 
 td:nth-of-type(6){
@@ -466,7 +467,6 @@ td:nth-of-type(7) > textarea{
   text-align: right;
   position: relative;
 
-  margin-bottom: 20px !important;
   width: 110vh;
   padding-top: 5px;
 }
@@ -507,7 +507,7 @@ td:nth-of-type(7) > textarea{
 #</div>''')
 				ea=T.bs_tag(f'''
 <div class="wrapper" >
-  <div class="scrolls" style="height:{s.count(T.eol)*1.2}vh;">
+  <div class="scrolls" style="height:{s.count(T.eol)*1.9}vh;">
   {slu}
   </div>
 </div> 
