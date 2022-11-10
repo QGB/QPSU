@@ -7125,6 +7125,13 @@ def set_timed_task(func,every='day',time='05:09',unit=1,**ka):
 		U.set(SCHEDULE_RUN_PENDING,t)
 		t.start()
 	#### check run end ####
+	if unit==1:
+		if py.isint(every):
+			unit,every=every,'second'
+		elif py.istr(every):pass
+		else:
+			raise py.ArgumentError(every)
+			
 	if py.istr(every) and  ':' in every:
 		time=every
 		every='day'
@@ -7136,12 +7143,6 @@ def set_timed_task(func,every='day',time='05:09',unit=1,**ka):
 		every=T.replacey(every,numbers,'').strip()
 		unit=py.float(''.join(numbers))
 	if every=='sec':every='second'
-	if unit==1:
-		if py.isint(every):
-			unit,every=every,'s'
-		elif py.istr(every):pass
-		else:
-			raise py.ArgumentError(every)
 	if unit>0:
 		if not every.endswith('s'):
 			every+='s'
