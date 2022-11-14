@@ -226,6 +226,15 @@ def get(name='_',default=GET_NO_VALUE,level=gd_sync_level['process']):
 			# default=py.No('can not get name '+py.repr(name),no_raise=True)
 		return d.get(name,default)
 	#TODO
+
+def get_startswith_keys(name):
+	import sys
+	r=[]
+	for k,v in sys._qgb_dict.items():
+		if py.istr(k) and k.startswith(name):
+			r.append(k)
+	return r
+get_startswith=get_startswith_keys	
 	
 def get_multi_return_dict():
 	raise py.NotImplementedError()

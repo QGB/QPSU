@@ -2097,8 +2097,9 @@ junk=['本机地址','IANA 保留地址','局域网 IP','局域网 对方和您�
 	# if ':' in ip:
 		# ip,port=ip.split(':')
 		# port=':'+port
-	
-	location=' '.join(ip_location_qqwry(ip))
+	ipq=ip_location_qqwry(ip)
+	if not ipq:return ipq
+	location=' '.join(ipq)
 	location=location.replace('CZ88.NET','').strip() #去除包含的
 	
 	if location in junk:
@@ -2171,7 +2172,7 @@ pip install qqwry  # Not have cz88update
 	
 	r=QQwry.lookup(ip)  #('北京市', '联通')
 	if not r:
-		r=('NotFound',U.stime())
+		return py.No('NotFound %s'%ip,QQwry,U.stime())
 	return r	
 
 ###################  qqwry end ###########################

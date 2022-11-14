@@ -113,6 +113,16 @@ def set(e,t,x,y,pcb=None):
 	e.SetText(t)
 	return e,t,x,y
 	
+def set_fp(f=r'C:\Program Files\KiCad\6.0\share\kicad\footprints\Package_BGA.pretty\Xilinx_FFG1761.kicad_mod',pcb=None):
+	if not pcb:pcb = pcbnew.GetBoard()
+	f=F.auto_path(f)
+	name=T.sub_last(f,'/','.kicad_mod')
+	m = pcbnew.FootprintLoad(f,name)
+	
+	return f,m
+	pcb.Add(m)
+	return m
+	
 from KicadModTree import *
 def new_footprint ():
 
@@ -148,3 +158,5 @@ def new_footprint ():
 	file_handler.writeFile('example_footprint.kicad_mod')
 	
 	return kicad_mod
+	
+	

@@ -42,16 +42,19 @@ class IntSize(py.int):
 		return self
 	def __str__(self):
 		U,T,N,F=py.importUTNF()	
-		s='<{}'.format(int_to_size_str(self) )
+		# s=
 		
-		repr=U.get_duplicated_kargs(self.ka,'repr','str','s','st','__repr__','__str__',no_pop=True)
-		if repr:
-			if py.callable(repr):
-				return repr(self, **self.ka )
-			else:
-				return py.str(repr)
+		# repr=U.get_duplicated_kargs(self.ka,'repr','str','s','st','__repr__','__str__',no_pop=True)
+		# if repr:
+			# if py.callable(repr):
+				# return repr(self, **self.ka )
+			# else:
+				# return py.str(repr)
 			
-		return T.justify(s,**self.ka)+'>'
+		# return T.justify(s,**self.ka)+'>'
+		
+		str_size=U.get_duplicated_kargs(self.ka,'size','str_size','repr_size','s',default=0)
+		return '<{}>'.format(int_to_size_str(self,str_size=str_size) )
 		# return 
 		# return '<{}={}>'.format(super().__repr__(),F.ssize(self) )
 	def __repr__(self):return self.__str__()
@@ -1294,7 +1297,7 @@ mod=mode=get_mod=get_mode=get_filemode
 
 def ll(ap='.',readable=True,type='',t='',r=False,d=False,dir=False,f=False,file=False,
 	return_dict=True,return_list=False,no_raise=True,**ka):
-	'''return {file : [size,atime,mtime,ctime,st_mode]}
+	'''return {file : [size,atime,mtime,ctime,st_mode]}	
 	readable is True: Size,Stime,..
 	linux struct stat: http://pubs.opengroup.org/onlinepubs/009695399/basedefs/sys/stat.h.html'''
 	U=py.importU()
@@ -1334,7 +1337,7 @@ def ll(ap='.',readable=True,type='',t='',r=False,d=False,dir=False,f=False,file=
 
 SUFFIXES = {1000: ['KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'],
 			1024: ['KiB', 'MiB', 'GiB', 'TiB', 'PiB', 'EiB', 'ZiB', 'YiB']}
-def int_to_size_str(size,b1024=True,zero='0 B',less_than_zero='%s',str_size=0 ):
+def int_to_size_str(size,b1024=True,zero='0 B',less_than_zero='%s',str_size=0,):
 	'''Convert a file size to human-readable form.
 	Keyword arguments:
 	size -- file size in bytes
@@ -1347,6 +1350,12 @@ def int_to_size_str(size,b1024=True,zero='0 B',less_than_zero='%s',str_size=0 ):
 	if py.istr(size) or py.isbyte(size):
 		size=U.len(size)
 	size=py.int(size)
+	def padding_str(a):
+		if not str_size:return a
+		sn,su=a.split(' ')
+		i=str_size-py.len(sn)-py.len(su)
+		i=py.max(i,0)
+		return sn+' '*i+su
 	if size < 0:
 		if py.callable(less_than_zero):
 			return less_than_zero(size)
@@ -1356,17 +1365,17 @@ def int_to_size_str(size,b1024=True,zero='0 B',less_than_zero='%s',str_size=0 ):
 			if '{' in less_than_zero and '}' in less_than_zero:
 				return less_than_zero.format(size)
 		return less_than_zero
-	if size==0:return zero
+	if size==0:return padding_str(zero)
 		# raise ValueError('number must be non-negative')
 
 	multiple = 1024.0 if b1024 else 1000.0 #another if statement style
 	
-	if size<=multiple:return py.str(size)+' B'
+	if size<=multiple:return padding_str(py.str(size)+' B'  )
 	
 	for suffix in SUFFIXES[multiple]:
 		size /= multiple
 		if size < multiple:
-			return '{0:.3f} {1}'.format(size, suffix)
+			return padding_str('{0:.3f} {1}'.format(size, suffix)  )
 	raise ValueError('number too large')
 rsize=ssize=readable_size=readablesize=readableSize=numToSize=int_to_size=int_to_size_str
 
@@ -1413,7 +1422,7 @@ repr_size=12  才能整齐
 	U,T,N,F=py.importUTNF()
 	# U.msgbox(U.is_ipy_cell())
 	if not int :#and U.is_ipy_cell():
-		size=F.IntSize(size,size=repr_size)
+		size=F.IntSize(size,repr_size=repr_size)
 	return size 
 	
 # U.pln size(U.gst)
