@@ -308,7 +308,10 @@ def get_or_dill_load_or_dill_dump_and_set(name,default=None):
 	if not o:
 		o=F.dill_load(file=path)
 		if not o:
-			fs=[f for f in F.ls(gst) if f.startswith(name) and f.endswith('.dill')]
+			fsg=F.ls(gst)
+			fs=[f for f in fsg if f.startswith(name) and f.endswith('.dill')]
+			if not fs:
+				fs=[f for f in fsg if name in f and f.endswith('.dill')]
 			if py.len(fs)==1:
 				o=F.dill_load(file=fs[0])
 	

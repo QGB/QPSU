@@ -229,7 +229,7 @@ def new_footprint (w=17.5,yd=17.6,drill_1=0.96,drill_08=0.79,xt=0.1):
 	tf=rf'"{w},{yd}\n{drill_1},{drill_08} {U.stime()[-8:]}"'
 	tf=rf'"{w},{yd}\n{drill_1},{drill_08}  "'
 
-	name=f"{tf[1:-1].replace(T.backslash+'n','=')}"
+	name=f"{tf[1:-1].replace(T.backslash+'n','='*12)}"
 	kicad_mod = Footprint(name)
 	kicad_mod.setDescription(name)
 	# kicad_mod.setTags('q')
@@ -252,7 +252,7 @@ def new_footprint (w=17.5,yd=17.6,drill_1=0.96,drill_08=0.79,xt=0.1):
 
 	for n in range(12):	
 		kicad_mod.append(Pad(number=n,type=Pad.TYPE_THT, shape=Pad.SHAPE_RECT,
-			at=[x0+ n*1.27+1.7, 0+yd], size=[drill_08+0.01, 1.6], drill=drill_08, layers=Pad.LAYERS_THT))
+			at=[x0+ n*1.27+1.7, 0+yd], size=[drill_08-0.2, 1.6], drill=drill_08, layers=Pad.LAYERS_THT))
 			
 		n1y=[2.2,4.4][(n+1)%2]	
 		kicad_mod.append(Pad(number=n, type=Pad.TYPE_THT, shape=Pad.SHAPE_RECT,
@@ -269,11 +269,11 @@ def new_footprint (w=17.5,yd=17.6,drill_1=0.96,drill_08=0.79,xt=0.1):
 		kicad_mod.append(Pad(number=n, type=Pad.TYPE_THT, shape=Pad.SHAPE_RECT,at=[x0+ w+n1x,n*1.27], size=[n1x*1.35, 0.25], drill=drill_1, layers=Pad.LAYERS_THT))				 
 						 
 		kicad_mod.append(Pad(number=n, type=Pad.TYPE_THT, shape=Pad.SHAPE_RECT,
-						 at=[x0,n*1.27], size=[sx, drill_08+0.01], drill=drill_08, layers=Pad.LAYERS_THT)) #左 14
+						 at=[x0,n*1.27], size=[sx, drill_08-0.2], drill=drill_08, layers=Pad.LAYERS_THT)) #左 14
 						
 						 
 		kicad_mod.append(Pad(number=n, type=Pad.TYPE_THT, shape=Pad.SHAPE_RECT,
-						 at=[x0+ w,n*1.27], size=[sx, drill_08+0.01], drill=drill_08, layers=Pad.LAYERS_THT))
+						 at=[x0+ w,n*1.27], size=[sx, drill_08-0.2], drill=drill_08, layers=Pad.LAYERS_THT))
 
 	# output kicad model	
 	file_handler = KicadFileHandler(kicad_mod)
@@ -295,19 +295,19 @@ def generate_all():
  (19.1, 19.3, 0.96, 0.82)]
  
 	l4_9_1123=[
- (18.30, 18.0, 0.94, 0.76),
- (18.35, 18.2, 0.95, 0.77),
- (18.40, 18.4, 0.96, 0.78),
- (18.40, 18.6, 0.96, 0.79),
- (18.42, 18.7, 0.96, 0.79),
- (18.44, 18.8, 0.96, 0.79),
- (18.50, 18.9, 0.96, 0.80),
- (18.54, 19.0, 0.96, 0.81),
- (18.58, 19.3, 0.96, 0.82)]
+ (18.30, 18.10, 0.90, 0.70),
+ (18.35, 18.15, 0.90, 0.70),
+ (18.40, 18.18, 0.90, 0.70),
+ (18.45, 18.20, 0.90, 0.70),
+ (18.42, 18.22, 0.90, 0.70),
+ (18.44, 18.24, 0.90, 0.70),
+ (18.50, 18.26, 0.90, 0.70),
+ (18.54, 18.28, 0.95, 0.75),
+ (18.58, 18.30, 0.95, 0.75)]
  
  
 
-	for n,l4 in enumerate(l4_9):
+	for n,l4 in enumerate(l4_9_1123):
 		r=new_footprint(*l4)
 		print(n,r)
 	# fs=F.ls(U.pwd(),include='.kicad_mod')
