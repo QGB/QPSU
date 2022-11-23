@@ -194,74 +194,124 @@ from KicadModTree import *
 import KicadModTree
 def km_text(kicad_mod,t,at=[6,6],size=[1,1]):
 	kicad_mod.append(KicadModTree.Text(type='reference', text=t, at=at,size=size,layer='F.SilkS'))
-	# kicad_mod.append(KicadModTree.Text(type='reference', text=t, at=at,size=size,layer='B.SilkS'))
-	# kicad_mod.append(KicadModTree.Text(type='value', text=t, at=at,size=size,layer='F.SilkS'))
-	# kicad_mod.append(KicadModTree.Text(type='value', text=t, at=at,size=size,layer='B.SilkS'))
-	at[1]+=5
-	kicad_mod.append(KicadModTree.Text(type='value', text=t, at=at,size=size,layer='F.Cu'))
+	# kicad_mod.append(KicadModTree.Text(type='reference', text=t, at=at,size=size,layer='B.SilkS'))#lceda 不能有两个 reference  导入错误
+	# kicad_mod.append(KicadModTree.Text(type='value', text='vf '+t, at=at,size=size,layer='F.SilkS'))
+	# kicad_mod.append(KicadModTree.Text(type='value', text='vb '+t, at=at,size=size,layer='B.SilkS'))
+	# at[1]+=5
+	# kicad_mod.append(KicadModTree.Text(type='value', text=t, at=at,size=size,layer='F.Cu')) 
 	kicad_mod.append(KicadModTree.Text(type='value', text=t, at=at,size=size,layer='B.Cu'))
 	
-def new_footprint (w=17.5,dy=17.6,drill_1=0.95,drill_08=0.78):
-
-	
-	
-	tf=rf'"{w},{dy}\n{drill_1},{drill_08}"'
-
-	name=f"esp32s3={tf[1:-1].replace(T.backslash+'n','=')}"
+def new_footprint_holes(start=0.25,end=5.9,step=0.01,delta=0.3):
+	import numpy
+	name=fr'{start}-{end},{step} holes  '
 	kicad_mod = Footprint(name)
 	kicad_mod.setDescription(name)
-	kicad_mod.setTags(name[:7])
-
-
+	km_text(kicad_mod,name,at=[-1,4]) 
+	m=1
+	for x in numpy.arange(start,end,step):
+		x=py.float(x)
+		print(m,type(x),x)
+		# s=min(x+0.1,delta)
+		s=x+0.1
+		kicad_mod.append(Pad(number=x,type=Pad.TYPE_THT, shape=Pad.SHAPE_CIRCLE,
+			at=[m,0], size=[s,s], drill=x, layers=Pad.LAYERS_THT))
+		m=m+x+s	
+	file_handler = KicadFileHandler(kicad_mod)
+	fname=f'{T.file_legalized(name)}.kicad_mod'
+	file_handler.writeFile(fname)
 	
-	# km_text(kicad_mod,)
-	km_text(kicad_mod,tf,at=[8,6],size=[1,1])
-	# kicad_mod.append(KicadModTree.Text(type='value',text='w,dy',at=[8,2],size=[1,1],layer='B.SilkS'))
-	# kicad_mod.append(KicadModTree.Text(type='value',text=tf,at=[8,6],size=[1,1],mirror=Fa,layer='B.SilkS'))
-	kicad_mod.append(KicadModTree.Text(type='value',text=tf,at=[8,6],size=[1,1],mirror=True,layer='B.SilkS'))
+	return kicad_mod,fname
 	
-	kicad_mod.append(RectLine(start=[0, 0], end=[w, dy], layer='F.SilkS'))
-	kicad_mod.append(RectLine(start=[0, 0], end=[w, dy], layer='B.SilkS'))
-
+def new_footprint (w=17.5,yd=17.6,drill_1=0.96,drill_08=0.79,xt=0.1):
+	if not xt:xt=w/2
+	x0,y0=0,0
 	
-	# create courtyard
-	# kicad_mod.append(RectLine(start=[-3, -3], end=[17, 17], layer='F.CrtYd'))
+	tf=rf'"{w},{yd}\n{drill_1},{drill_08} {U.stime()[-8:]}"'
+	tf=rf'"{w},{yd}\n{drill_1},{drill_08}  "'
 
-	# create pads
-	# kicad_mod.append(Pad(number=1, type=Pad.TYPE_THT, shape=Pad.SHAPE_RECT,
-						 # at=[0, 0], size=[2, 2], drill=1.2, layers=Pad.LAYERS_THT))
-						 
-	for n in range(12):	
-		
-		kicad_mod.append(Pad(number=n,type=Pad.TYPE_THT, shape=Pad.SHAPE_RECT,
-						 at=[n*1.27+1.7, 0+dy], size=[0.8, 1.6], drill=drill_08, layers=Pad.LAYERS_THT))
-	for n in range(14):					 
-		sx=4
-		n1x=[2,6][(n+1)%2]
-		if n==13:
-			sx=1.6
-			# nix+=2
-			kicad_mod.append(Pad(number=n, type=Pad.TYPE_SMT, shape=Pad.SHAPE_RECT,at=[0-sx,n*1.27], size=[sx,0.55], drill=0, layers=Pad.LAYERS_THT))	
-			kicad_mod.append(Pad(number=n, type=Pad.TYPE_SMT, shape=Pad.SHAPE_RECT,at=[w+sx,n*1.27], size=[sx,0.55], drill=0, layers=Pad.LAYERS_THT))	
-			
-		kicad_mod.append(Pad(number=n, type=Pad.TYPE_THT, shape=Pad.SHAPE_RECT,at=[0-n1x,n*1.27], size=[n1x*1.35, 0.25], drill=drill_1, layers=Pad.LAYERS_THT))				 
-		kicad_mod.append(Pad(number=n, type=Pad.TYPE_THT, shape=Pad.SHAPE_RECT,at=[w+n1x,n*1.27], size=[n1x*1.35, 0.25], drill=drill_1, layers=Pad.LAYERS_THT))				 
-						 
-		kicad_mod.append(Pad(number=n, type=Pad.TYPE_THT, shape=Pad.SHAPE_RECT,
-						 at=[0,n*1.27], size=[sx, 0.79], drill=drill_08, layers=Pad.LAYERS_THT))
-						
-						 
-		kicad_mod.append(Pad(number=n, type=Pad.TYPE_THT, shape=Pad.SHAPE_RECT,
-						 at=[w,n*1.27], size=[sx, 0.79], drill=drill_08, layers=Pad.LAYERS_THT))
+	name=f"{tf[1:-1].replace(T.backslash+'n','=')}"
+	kicad_mod = Footprint(name)
+	kicad_mod.setDescription(name)
+	# kicad_mod.setTags('q')
 
 	# add model
 	# kicad_mod.append(Model(filename="example.3dshapes/example_footprint.wrl",
 						   # at=[0, 0, 0], scale=[1, 1, 1], rotate=[0, 0, 0]))
 
+	
+	# km_text(kicad_mod,) # .split(' ')[0]
+	km_text(kicad_mod,name,at=[-9,4+y0],size=[0.5,0.5]) #没有这句 lceda 导入错误
+	# kicad_mod.append(KicadModTree.Text(type='value',text=tf,at=[xt,10],size=[1,1],mirror=True,layer='B.SilkS'))
+	# kicad_mod.append(KicadModTree.Text(type='value',text='w,yd',at=[8,2],size=[1,1],layer='B.SilkS'))
+	# kicad_mod.append(KicadModTree.Text(type='value',text=tf,at=[8,6],size=[1,1],mirror=Fa,layer='B.SilkS'))
+		# create courtyard
+	# kicad_mod.append(RectLine(start=[-3, -3], end=[17, 17], layer='F.CrtYd'))
+
+	kicad_mod.append(RectLine(start=[0+x0, 0], end=[w+x0, yd], layer='F.SilkS'))
+	kicad_mod.append(RectLine(start=[0+x0, 0], end=[w+x0, yd], layer='B.SilkS'))
+
+	for n in range(12):	
+		kicad_mod.append(Pad(number=n,type=Pad.TYPE_THT, shape=Pad.SHAPE_RECT,
+			at=[x0+ n*1.27+1.7, 0+yd], size=[drill_08+0.01, 1.6], drill=drill_08, layers=Pad.LAYERS_THT))
+			
+		n1y=[2.2,4.4][(n+1)%2]	
+		kicad_mod.append(Pad(number=n, type=Pad.TYPE_THT, shape=Pad.SHAPE_RECT,
+			at=[x0+ n*1.27+1.7, 0+yd+n1y], size=[0.25, n1y*1.7	], drill=drill_1, layers=Pad.LAYERS_THT))				 
+	for n in range(14):					 
+		sx=4
+		n1x=[2.2,4.4][(n+1)%2]
+		if n==13:
+			sx=1.6
+			kicad_mod.append(Pad(number=n, type=Pad.TYPE_SMT, shape=Pad.SHAPE_RECT,at=[x0-sx,n*1.27], size=[sx,0.55], drill=0, layers=Pad.LAYERS_THT))	
+			kicad_mod.append(Pad(number=n, type=Pad.TYPE_SMT, shape=Pad.SHAPE_RECT,at=[x0+ w+sx,n*1.27], size=[sx,0.55], drill=0, layers=Pad.LAYERS_THT))	
+			
+		kicad_mod.append(Pad(number=n, type=Pad.TYPE_THT, shape=Pad.SHAPE_RECT,at=[x0-n1x,n*1.27], size=[n1x*1.35, 0.25], drill=drill_1, layers=Pad.LAYERS_THT))				 
+		kicad_mod.append(Pad(number=n, type=Pad.TYPE_THT, shape=Pad.SHAPE_RECT,at=[x0+ w+n1x,n*1.27], size=[n1x*1.35, 0.25], drill=drill_1, layers=Pad.LAYERS_THT))				 
+						 
+		kicad_mod.append(Pad(number=n, type=Pad.TYPE_THT, shape=Pad.SHAPE_RECT,
+						 at=[x0,n*1.27], size=[sx, drill_08+0.01], drill=drill_08, layers=Pad.LAYERS_THT)) #左 14
+						
+						 
+		kicad_mod.append(Pad(number=n, type=Pad.TYPE_THT, shape=Pad.SHAPE_RECT,
+						 at=[x0+ w,n*1.27], size=[sx, drill_08+0.01], drill=drill_08, layers=Pad.LAYERS_THT))
+
 	# output kicad model	
 	file_handler = KicadFileHandler(kicad_mod)
-	file_handler.writeFile(f'{name}.kicad_mod')
+	fname=f'{T.file_legalized(name)}.kicad_mod'
+	file_handler.writeFile(fname)
 	
-	return kicad_mod
+	return kicad_mod,fname
 	
+def generate_all():
+	l4_9_1116=[
+ (17.8, 18.0, 0.94, 0.76),
+ (18.0, 18.2, 0.95, 0.77),
+ (18.2, 18.4, 0.96, 0.78),
+ (18.4, 18.6, 0.96, 0.79),
+ (18.5, 18.7, 0.96, 0.79),
+ (18.6, 18.8, 0.96, 0.79),
+ (18.7, 18.9, 0.96, 0.80),
+ (18.8, 19.0, 0.96, 0.81),
+ (19.1, 19.3, 0.96, 0.82)]
+ 
+	l4_9_1123=[
+ (18.30, 18.0, 0.94, 0.76),
+ (18.35, 18.2, 0.95, 0.77),
+ (18.40, 18.4, 0.96, 0.78),
+ (18.40, 18.6, 0.96, 0.79),
+ (18.42, 18.7, 0.96, 0.79),
+ (18.44, 18.8, 0.96, 0.79),
+ (18.50, 18.9, 0.96, 0.80),
+ (18.54, 19.0, 0.96, 0.81),
+ (18.58, 19.3, 0.96, 0.82)]
+ 
+ 
+
+	for n,l4 in enumerate(l4_9):
+		r=new_footprint(*l4)
+		print(n,r)
+	# fs=F.ls(U.pwd(),include='.kicad_mod')
 	
+	# for x,y in U.range2d(4,4):
+		# x
+gall=generate_all		
