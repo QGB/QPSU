@@ -62,6 +62,9 @@ try:
 	from collections import OrderedDict
 	from concurrent.futures import ThreadPoolExecutor
 	threadPool=ThreadPool=ThreadPoolExecutor
+	
+	from copy import deepcopy
+
 except Exception as ei:
 	setErr(ei,msg='#Error py lib import')
 	
@@ -779,14 +782,19 @@ def PyFile_FromFd(fd,name="filename",mode='r',buffering=-1,encoding='utf-8'):
 	if not py.isbyte(mode):mode=mode.encode()
 	mode=ctypes.create_string_buffer(mode)
 	
-	
-	
 	return f(fd, name,mode,buffering,bencoding,NULL,NULL,1)						  
 	
+def new_nd_list(*a,default_value=0):
+	from copy import deepcopy
+	r=default_value
+	for nd in py.reversed(a):
+		r=[deepcopy(r) for i in py.range(nd)]
+	return r
+new_3d_list=new_nd_list
 
 def new_2d_list(width,height,default_value=0):
 	''' cols=height   rows=width '''
-	return [[default_value for i in py.range(width)] for j in py.range(height)]
+	return [[default_value for i in py.range(height)] for j in py.range(width)]
 
 def list_get_multi_indexs(a,*ins):
 	if py.len(ins)==1 and py.islist(ins[0]):
@@ -7259,6 +7267,18 @@ for x,y in U.iter2d(2,2):#这样正常
 				r[i-1]+=step
 
 range2d=rangen=rangeN=itern=iterN=iterdc=iter2d=iter3d=iternd=iterNd=iter_N_d=iter_all_coordinate=iter_coordinate=iter_high_demensional_coordinate=iter_each_demensional_coordinate
+
+def iter_key_value(a):
+	if py.isdict(a):
+		for k,v in a.items():
+			yield k,v
+	elif len(a)>1 and len(a[0])==2:
+		for i1,i2 in a:
+			yield i1,i2
+	else:
+		for n,v in py.enumerate(a):
+			yield n,v
+iter_kv=iter_key_value		
 
 def getfullargspec(callable,no_raise=True):
 	'''
