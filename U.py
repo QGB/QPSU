@@ -6111,6 +6111,7 @@ def unique(iterable,count=False,count_and_sort=False,return_list=False,**ka):
 		if i not in r:r.append(i)
 	return r
 
+# def get_row_from_2D_list(matrix, *index,skip_IndexError=False,skip_col=None):
 def get_column_from_2D_list(matrix, *col_index,skip_IndexError=False,skip_col=None):
 	if not col_index:raise py.ArgumentError('need *col_index ')
 	

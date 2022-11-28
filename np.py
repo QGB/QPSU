@@ -12,17 +12,23 @@ def test():
 	a = (a < 255).astype(numpy.int_) # <255 变 1， 255及以上 变0
 	a[:,6] # 获取 第 6 列
 	
-def plot(x,*ys,markersize=1):
+def plot(x,*ys,dys=None,markersize=1,font_size=8):
 	import matplotlib.pyplot as plt
-	plt.rc('font',size=16)
+	fig,ax = plt.subplots(figsize=(8,8))
+	fig.subplots_adjust(
+		top=1.0,
+		bottom=0.034,
+		left=0.033,
+		right=1.0,
+		hspace=0.2,
+		wspace=0.2
+	)
+	plt.rc('font',size=font_size)
+	if not ys and dys:ys=dys
 	for k,y in U.iter_kv(ys):
 		plt.plot(x,y,'o',label=py.str(k),markersize=markersize)
-	
-	# plt.plot(t,[i**2.0 for i in t],'o',label='2',markersize=2)
 	plt.legend();
 	
-	# ax=plt.gca()
-	# ax.format_coord = lambda x,y:f'x={x} y={y}' # 好像 x,y 鼠标 标签 反了，后面怎么又正常了？
 	
 	plt.show()
 	
