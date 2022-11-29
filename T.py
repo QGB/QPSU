@@ -2224,6 +2224,9 @@ TypeError: format requires a mapping
 
 '%(1)s %("")s'%{'1':1,'""':54353}  # dict key必须为str，%()s支持任意字符串？，dict-key只能多，不能少
 
+In [241]: f'{1.1:.5f}'
+Out[241]: '1.10000'
+
 In [141]: f'{n:03} =='
 Out[141]: '004 =='
 
@@ -2232,6 +2235,8 @@ Out[139]: '004 =='
 
 In [140]: f'{n:>03d} =='
 Out[140]: '004 =='
+
+
 
 	'''
 	for k,v in ka.items():
