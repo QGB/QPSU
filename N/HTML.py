@@ -854,6 +854,9 @@ def eng_audio(response,word,audio_path='C:/test/google_translate_tts/'):
 def eng_dwi(response,dwi,ecdict=py.No('auto load'),sort_kw={},**ka):
 	if not ecdict:
 		ecdict=U.get_or_dill_load_and_set(r'C:\test\ecdict-770611.dill')
+	dw3_freq=U.get_or_dill_load_and_set('C:/test/dw3-54150.dill')
+		
+		
 		# F.dill_load()
 	K_deci='deci-%s'%py.id(ecdict)
 	deci=U.get(K_deci)
@@ -868,7 +871,11 @@ def eng_dwi(response,dwi,ecdict=py.No('auto load'),sort_kw={},**ka):
 	def get3(w,count=0):
 		row=ecdict[deci[w]]
 		zh=row.translation.replace('\\n','\n')
-		return count or dwi[w],w,zh
+		if w in dw3_freq:
+			f=dw3_freq[w][0]# TOTAL, RANK ,PoS
+		else:
+			f=0
+		return count or dwi[w],f,w,zh
 	r=[]
 	re=[]
 	rw=[]
@@ -891,6 +898,7 @@ def eng_dwi(response,dwi,ecdict=py.No('auto load'),sort_kw={},**ka):
 	if sort_kw:
 		r=U.sort(r,**sort_kw)
 	return eng_list(response,r)		
+	
 def eng_list(response,a):
 	'''
 
@@ -910,9 +918,14 @@ def eng_list(response,a):
 	n=-1
 	for row in a:
 		# n,en,zh=-1,'',''
-		if la0!=3:n+=1
-		if la0==2:  en,zh=row
-		if la0==3:n,en,zh=row
+		if la0==2:
+			n+=1
+			en,zh=row
+		elif la0==3:n,en,zh=row
+		elif la0==4:
+			n,nf,en,zh=row
+			n=n,nf
+		# if la0!=3:
 		if is_namedtuple:# len==13
 			en=row.word
 			zh=row.translation.replace('\\n','\n')

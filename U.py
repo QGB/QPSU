@@ -5722,7 +5722,7 @@ return:  slice to [all index list]
 	return py.list(py.range(*range) )
 get_all_index_list=get_index_list=get_slice_range
 
-def getDictItems(a,*range,index=False,key=True, ):
+def getDictItems(a,*range,index=False,key=True,key_in_flat_list=False ):
 	'''
 *range= (stop) 
 *range= (start, stop[, step])
@@ -5757,7 +5757,10 @@ Create a slice object.  This is used for extended slicing (e.g. a[0:10:2]).
 				if index:
 					r.append([i, item] )
 				else:
-					r.append(item)
+					if key_in_flat_list:
+						r.append([item[0],*item[1]])
+					else:
+						r.append(item)
 		except py.StopIteration:
 			break
 	return r
@@ -6064,7 +6067,7 @@ def set_system_volume(a):
 	else:
 		raise py.ArgumentUnsupported(a)
 	return nircmd( 'setsysvolume',a )
-setvol=vol=volume=volume_change=changesysvolume=setVol=setVolume=et_vol=setvolumn=set_volumn=set_volume=set_system_volumn=set_system_volume
+set_vol=setvol=vol=volume=volume_change=changesysvolume=setVol=setVolume=et_vol=setvolumn=set_volumn=set_volume=set_system_volumn=set_system_volume
 
 def save(a,name=0):
 	if not iswin():raise NotImplementedError()

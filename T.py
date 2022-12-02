@@ -112,6 +112,42 @@ try:
 	from pprint import pprint,pformat
 except:pass
 ####################################################
+def parse_WebKitFormBoundary(a,content_type=py.No('auto')):
+	'''
+[[0, '__class__', requests_toolbelt.multipart.decoder.BodyPart],
+ [1, '__delattr__', <method-wrapper '__delattr__' of BodyPart object at 0x000002B990690EC8>],
+ [2, '__dict__', {'encoding': 'utf-8', 'content': b'8000000', 'headers': {b'Content-Disposition': b'form-data; name="MAX_FILE_SIZE"'}}],
+ [3, '__dir__', <function BodyPart.__dir__()>],
+ [4,
+  '__doc__',
+  '\n\n    The ``BodyPart`` object is a ``Response``-like interface to an individual\n    subpart of a multipart response. It is expected that these will\n    generally be created by objects of the ``MultipartDecoder`` class.\n\n    Like ``Response``, there is a ``CaseInsensitiveDict`` object named headers,\n    ``content`` to access bytes, ``text`` to access unicode, and ``encoding``\n    to access the unicode codec.\n\n    '],	
+....	
+ [26, 'content', b'8000000'],
+ [27, 'encoding', 'utf-8'],
+ [28, 'headers', {b'Content-Disposition': b'form-data; name="MAX_FILE_SIZE"'}],
+ [29, 'text', '8000000']]
+
+''' 
+	from requests_toolbelt.multipart import decoder
+
+	# a = b"--ce560532019a77d83195f9e9873e16a1\r\nContent-Disposition: form-data; name=\"author\"\r\n\r\nJohn Smith\r\n--ce560532019a77d83195f9e9873e16a1\r\nContent-Disposition: form-data; name=\"file\"; filename=\"example2.txt\"\r\nContent-Type: text/plain\r\nExpires: 0\r\n\r\nHello World\r\n--ce560532019a77d83195f9e9873e16a1--\r\n"
+	# content_type = "multipart/form-data; boundary=ce560532019a77d83195f9e9873e16a1"
+	# content_type = 'multipart/form-data; boundary=----WebKitFormBoundaryZXuC4Jc1YZng6box'
+	if py.istr(a):
+		a=a.encode()
+	
+	if not content_type:
+		h=a.splitlines()[0].decode().strip()[2:]
+		content_type= fr'multipart/form-data; boundary={h}'
+	
+	r=[]
+	for part in decoder.MultipartDecoder(a, content_type).parts:
+		print(part.text)
+		r.append(part)
+	# return a,content_type,r
+	return r
+MultipartDecoder=parse_WebKitFormBoundary
+	
 def xml_to_dict(sxml):
 	import xmltodict
 	return xmltodict.parse(sxml)
