@@ -182,7 +182,7 @@ async def get_browser(browserURL='http://127.0.0.1:9222',browserWSEndpoint='',
 		else:
 			with pyppeteer.launcher.urlopen(browserURL) as f:
 				data = T.json_loads(f.read().decode())			
-			browser=await pyppeteer.connect(browserURL=browserURL)
+			browser=await pyppeteer.connect(browserURL=browserURL,defaultViewport=None)
 	except Exception as e: #
 		U.log(e)
 		# if is_chrome_process_exists(): # 会自动开一个 全新环境
