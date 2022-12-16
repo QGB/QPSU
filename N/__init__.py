@@ -1103,7 +1103,15 @@ def rpc_append_list(*a,name='la',base='',proxies=0,print_req=1):
 	
 def rpc_call(name,*a,base='',proxies=0,print_req=1,**ka):
 	U,T,N,F=py.importUTNF()
-	# base=get_remote_rpc_base(base=base,ka=ka)
+	# base=get_remot_rpc_base(base=base,ka=ka)
+	if '://' in name:
+		s=T.get_url_path(name)
+		base=T.sub(name,'',s)
+		name=s
+	if name.startswith('r='):
+		name=name[2:]
+	# if name.endswith(')')	
+		
 	if not base:
 		raise py.ArgumentError('need base')
 	rp= N.HTTP.post(f'{base}rpc_a,rpc_ka=N.flask_dill_data();r={name}(*rpc_a,**rpc_ka)',F.dill_dump([a,ka]),proxies=proxies,print_req=print_req)

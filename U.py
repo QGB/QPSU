@@ -339,7 +339,7 @@ get_dl=get_or_dl=get_or_dill_load=get_or_set_sys_level=get_or_set_system_level=g
 
 def set_and_dill_dump(name,value):
 	return set(name,value),F.dill_dump(file=name,obj=value)
-set_dp=set_and_dp=set_and_dill_dump
+set_dp=set_and_dp=dill_dump_and_set=set_and_dill_dump
 	
 def get_or_set_and_dill_dump(name,default=None,lazy_default=None):
 	o=get_or_set(name=name,default=default,lazy_default=lazy_default)
@@ -1491,7 +1491,7 @@ def split_cmd_str(a):
 	'''return list'''
 	import shlex
 	return shlex.split(a)
-splitCmd=split_cmd=cmdSplit=cmd_split=shlex_split=split_cmd_str
+parse_cmd=splitCmd=split_cmd=cmdSplit=cmd_split=shlex_split=split_cmd_str
 
 def subprocess_check_output(*a, timeout=9,encoding=py.No('try decode,except return bytes'),**kwargs):
 	''' subprocess.check_output(*popenargs, timeout=None, **kwargs)
@@ -4537,7 +4537,7 @@ def get_process_all_parent(*a,**ka):
 pstree=psps=get_process_all_parent	# psp get_process_path
 	
 						
-def get_all_process_list(name='',cmd='',pid=None,ppid=None,net_connections=False):
+def get_all_process_list(name='',cmd='',pid=None,ppid=None,net_connections=False,status=''):
 	'''if err return [r, {i:err}  ]
 _62.name()#'fontdrvhost.exe'
 _62.cmdline()#AccessDenied: psutil.AccessDenied (pid=8, name='fontdrvhost.exe')
@@ -4555,7 +4555,13 @@ pid=0, name='System Idle Process', cmdline=[]
 		else:
 			return False
 			
-	
+	def append(i):
+		if status:
+			if status==i.status():
+				return r.append(i)
+			else:
+				return
+		r.append(i)
 	r=[]
 	err=py.dict()
 	for i in psutil.process_iter():
@@ -4565,25 +4571,27 @@ pid=0, name='System Idle Process', cmdline=[]
 			i.cmd=py.No(e) #NoneObj #TODO 需要一个 空字符 类，携带出错或其他信息				
 
 		if py.isint(pid) and pid>=0:
-			if pid==i.pid:r.append(i)
+			if pid==i.pid:append(i)
 			continue# 找到 找不到 ，都下一条
 		if py.islist(pid):
-			if i.pid in pid:r.append(i)
+			if i.pid in pid:append(i)
 			continue
 		if py.isint(ppid) and ppid>=0:
-			if ppid==i.ppid():r.append(i)
+			if ppid==i.ppid():append(i)
 			continue
 		if cmd:
-			if cmd in i.cmd:r.append(i)
-			continue			
+			if cmd in i.cmd:append(i)
+			continue
+
+				
 		# if name:
 		iname=i.name()
 		if py.istr(name):
-			if match_name(name,iname):r.append(i)
+			if match_name(name,iname):append(i)
 		elif py.islist(name) or py.istuple(name):
 			for sn in name:
 				if match_name(sn,iname):
-					r.append(i)
+					append(i)
 					break
 		else:continue
 				
@@ -5276,6 +5284,7 @@ pln({0})
 def explorer(path='.'):
 	''' exp can not open g:/qgb '''
 	U,T,N,F=py.importUTNF()
+	if py.isno(path):return path
 	if not path or path=='.':path=U.pwd(p=False)
 	pt=F.auto_path(path)
 	if F.exist(pt):

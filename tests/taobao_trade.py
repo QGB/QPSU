@@ -161,7 +161,7 @@ def is_chrome_process_exists():
 uk='pyppeteer.connect'
 browser=U.get(uk)
 async def get_browser(browserURL='http://127.0.0.1:9222',browserWSEndpoint='',
-	executablePath=r'C:\Users\qgb\AppData\Local\CentBrowser\Application\chrome.exe'):
+	executablePath=r'C:\Users\qgb\AppData\Local\CentBrowser\Application\chrome.exe',defaultViewport=None):
 	''' await tb.pyppeteer.launcher.get_ws_endpoint('http://127.0.0.1:9222')
 # if not chrome.exe or : BrowserError: Browser closed unexpectedly:	
 	'''
@@ -178,11 +178,11 @@ async def get_browser(browserURL='http://127.0.0.1:9222',browserWSEndpoint='',
 			
 	try:
 		if browserWSEndpoint:
-			browser=await pyppeteer.connect(browserWSEndpoint=browserWSEndpoint,defaultViewport=None)
+			browser=await pyppeteer.connect(browserWSEndpoint=browserWSEndpoint,defaultViewport=defaultViewport)
 		else:
 			with pyppeteer.launcher.urlopen(browserURL) as f:
 				data = T.json_loads(f.read().decode())			
-			browser=await pyppeteer.connect(browserURL=browserURL,defaultViewport=None)
+			browser=await pyppeteer.connect(browserURL=browserURL,defaultViewport=defaultViewport)
 	except Exception as e: #
 		U.log(e)
 		# if is_chrome_process_exists(): # 会自动开一个 全新环境

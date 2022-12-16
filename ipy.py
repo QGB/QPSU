@@ -49,7 +49,7 @@ def undo_save(*indexs):
 			gIn[index]=''#py.No(gIn[index])
 		if not index in gOut:raise py.ArgumentError('index not in Out')
 		sf=gOut[index]
-		if 'ipy.save' not in sf:raise py.ArgumentError('not ipy.save')
+		if 'ipy.save' not in sf:raise py.ArgumentError('not ipy.save,But In[index] cleaned')
 		
 		f=U.get_obj_file_lineno(sf)[0]
 		row=F.delete(f),gIn[index]

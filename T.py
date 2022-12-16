@@ -803,7 +803,23 @@ padding=justfy=justify
 	
 def encode(s,encoding):
 	'''
+ codecs.encode(obj, encoding='utf-8', errors='strict')	
 	'''
+	def return_error(e):
+		U,T,N,F=py.importUTNF()
+		return U.StrRepr('')
+		return py.No(e)
+	
+	try:
+		return s.encode(encoding)
+	except LookupError:
+		import codecs
+		try:
+			return codecs.encode(s,encoding=encoding)
+		except Exception as e:
+			return return_error(e)
+	except Exception as e:
+		return return_error(e)
 
 def diff_bytes(b1,b2,p=True):
 	all_args=py.importU().getArgsDict()
@@ -1822,7 +1838,7 @@ def baseNToStr(a,base=64,symbols=None):
 	'''TODO: '''
 	if not symbols:symbols=gdBaseN[base]#先传入符号表，baseN的符号表可以由用户指定
 	r=parseInt(a,base,symbols)
-	return intToStr(r,256)#这里使用  默认字节符号表
+	return intToStr(r,256)# 256 ? 这里使用  默认字节符号表
 baseN_decode=baseN2s=baseNToStr
 	
 def intToStr(n,base=16,symbols=None):
@@ -1831,7 +1847,8 @@ def intToStr(n,base=16,symbols=None):
 	r=''
 	while n>=base:
 		r=symbols[py.int(n%base)]+r
-		n=py.int(n/base)
+		# n=py.int(n/base)
+		n=n//base
 	return symbols[n]+r	
 radix=i2s=intToStr
 

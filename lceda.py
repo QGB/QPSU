@@ -6,7 +6,7 @@ from qgb import py
 U,T,N,F=py.importUTNF()
 
 import requests
-cookies = U.get_or_dill_load_and_set('dcookies_jlc')
+
 
 headers = {
     'authority': 'lceda.cn',
@@ -26,10 +26,15 @@ headers = {
     'x-requested-with': 'XMLHttpRequest',
 }
 
-def get_all_components():
-	return requests.get('https://lceda.cn/api/components?version=6.5.23&docType=4&uid=f87c808f549443acbac8e59cc590cbc3&type=3&tag%5B%5D=All').json()
+default_sz=py.No('auto sz')
 
-def delete_component(uuid):
+def get_all_components(uuid=default_sz): 
+	if not uuid:
+		uuid=U.get_or_dill_load_and_set('jlc.sz.uuid')
+	return requests.get(fr'https://lceda.cn/api/components?version=6.5.23&docType=4&uid={uuid}&type=3&tag%5B%5D=All').json()
+
+def delete_component(uuid,cookies=default_sz):
+	if not cookies:cookies = U.get_or_dill_load_and_set('jlc.sz.cookies')
 	data = {
 		'uuid': uuid,#'f90fe65a90d94ea4a573b0fb60a43ca5',
 		'version': '6.5.23',
