@@ -1341,13 +1341,12 @@ def regex_count(a,regex,flags=0):
 countRegex=regexCount=count_regex=regex_count
 	
 def regex_replace(a,regex,str_or_func,flags=0):
-	''' str_or_bytes_or_func
+	'''  str_or_bytes_or_func
 func( a: <_sre.SRE_Match object; span=(2388, 2396), match='21758465'>  ):
-
-a.span()==(2388, 2396)
-
+	a.span()==(2388, 2396)
 	match==a.group()	
 	
+不支持 overlapped=True 重叠匹配
 	
 \QGB\Anaconda3\Lib\site-packages\jedi\evaluate\compiled\fake\_sre.pym
 	class SRE_Match():

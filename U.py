@@ -6111,10 +6111,12 @@ def unique(iterable,count=False,count_and_sort=False,return_list=False,**ka):
 		for i in iterable:
 			dict_key_count_plus_1(d,i)
 		if return_list:
-			r= [(v,k) for k,v in d.items()]
+			r= [(v,n) for n,v in d.items()]
 			if count_and_sort:
 				U,T,N,F=py.importUTNF()
 				r=U.sort(r,column=0,reverse=1)
+				mn=py.len(py.str(r[0][0]))
+				r=[(IntRepr(n,size=mn),v) for n,v in r]
 			return r
 		else:
 			return d
