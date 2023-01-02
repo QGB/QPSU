@@ -4931,7 +4931,7 @@ def vscode(a='',lineno=0,auto_file_path=True,get_cmd=False,
 code=vsc=VSCode=vsCode=vscode
 
 def notePadPlusPlus(a='',lineno=0,auto_file_path=True,editor_path=py.No('config this system editor_path'),
-	get_cmd=False,line_arg='-n',):
+	get_cmd=False,line_arg='-n',debug=False):
 	r'''
 --------> os.system('"M:\\Program Files\\Notepad++\\notepad++.exe" "IP.py"')
 'M:\Program' 不是内部或外部命令，也不是可运行的程序
@@ -4954,6 +4954,7 @@ in ipy , npp() not autoReload when U.r(), But U.npp()
 				f=rf'\\{N.get_lan_ip()}\smb'+f.replace('/','\\')
 			rpc_ka['a']=f
 			rpc_ka['lineno']=lineno
+			if debug:rpc_ka['debug']=True
 		return N.rpc_call(base=U.get_or_set_input('U.npp.rpc_base',default='https://'),name='U.npp',**rpc_ka)
 	if editor_path:
 		npath=editor_path
@@ -4978,6 +4979,9 @@ in ipy , npp() not autoReload when U.r(), But U.npp()
 
 	if a:
 		f,lineno=get_obj_file_lineno(a,lineno=lineno,auto_file_path=auto_file_path)
+		if debug:
+			print_repr(f,lineno)
+			return f,lineno
 		if py.len(f)>250:
 			f=py.importF().nt_short_path(f)
 			

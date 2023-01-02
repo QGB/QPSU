@@ -1757,11 +1757,15 @@ def flask_text_response(response,data='',encoding=py.No('auto',no_raise=1),file=
 	return response
 txt=text=flask_text_response
 	
+CSS_FONT=r'''*{
+ font-size: 50%;
+ /*font-family: Arial;*/
+}'''
 def flask_html_response(response,html='',file='',remove_tag=(
 		['<script','</script>'],
 ['<SCRIPT','</SCRIPT>'],'ondragstart=','oncopy=','oncut=','oncontextmenu=','"return false;"',
 	),encoding='utf-8',splitor='<hr>',content_type='text/html;charset=utf-8',
-	css='',
+	css='',eol='',
 	**ka):
 	'''
 Resource interpreted as Stylesheet but transferred with MIME type text/html:
@@ -1794,6 +1798,12 @@ Resource interpreted as Stylesheet but transferred with MIME type text/html:
 	else:#if not py.istr(html):
 		html=py.str(html)
 	
+	if eol:
+		if T.CRLF in html:
+			html=html.replace(T.CRLF,eol)
+		else:
+			html=html.replace(T.EOL,eol)
+	
 	for itag in remove_tag:
 		if py.istr(itag):
 			html=html.replace(itag,'')
@@ -1811,6 +1821,8 @@ Resource interpreted as Stylesheet but transferred with MIME type text/html:
 {}		
 </style>		'''.format(css)
 		html=css+html #TODO parse html and insert to HEAD
+		
+		
 	if not response:
 		return html
 	response.headers['Content-Type']=content_type;

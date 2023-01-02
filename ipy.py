@@ -32,6 +32,10 @@ try:
 	gMainThread_async_event_loop=U.get_or_set('asyncio.get_event_loop()',lazy_default=lambda:asyncio.get_event_loop(),)
 except:pass	
 # gipy.editor=U.npp()
+
+def get_var(name):
+	return gipy.user_ns.get(name,py.No('not found',name))
+
 gd_undo_save_In=U.get_or_set('ipy.undo_save_In',{})
 def undo_save(*indexs):
 	if not indexs:

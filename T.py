@@ -112,6 +112,15 @@ try:
 	from pprint import pprint,pformat
 except:pass
 ####################################################
+def parse_http_plain_request(t):
+	import email,io
+	
+	message=email.message_from_file(io.StringIO(t))
+	
+	return py.dict(message.items())
+parse_HTTPAnalyzer_request=parse_http_plain_request	
+	
+	
 def parse_WebKitFormBoundary(a,content_type=py.No('auto')):
 	'''
 [[0, '__class__', requests_toolbelt.multipart.decoder.BodyPart],

@@ -59,6 +59,15 @@ class IntSize(py.int):
 		# return '<{}={}>'.format(super().__repr__(),F.ssize(self) )
 	def __repr__(self):return self.__str__()
 ################################
+def gzip_decode(b):
+	import zlib
+	import urllib
+
+	# f=urllib.request.urlopen(url) 
+	decompressed_data=zlib.decompress(b, 16+zlib.MAX_WBITS)
+	return decompressed_data	
+decode_gzip_bytes=gzip_decode
+
 def read_levelDB(db_dir,debug=0):
 	'''
 pip install plyvel-win32
@@ -163,6 +172,13 @@ def test_long_filename():
 		
 	# for n in range(245,260):
 		# print(n)
+def sub_head(f,a,b=b''):
+	# br=
+	if not py.isbyte(a):
+		a=a.encode('utf-8')
+	U,T,N,F=py.importUTNF()
+	return F.write(f,T.sub(F.read_bytes(f),a,b))
+sub=sub_head			
 		
 def replace(f,ba,bb,encoding='utf-8'):
 	F=py.importF()
@@ -1725,6 +1741,7 @@ def get_nt_short_path_name(long_name,max=250):
 win32api.GetShortPathName 一定要用 '\\'分隔符，不能用 '/' ，否则：
 error: (2, 'GetShortPathNameW', '系统找不到指定的文件。')
 
+#TODO SMB IP network file
 '''	
 	import win32api
 	if py.len(long_name)<max:return long_name
