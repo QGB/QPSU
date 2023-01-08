@@ -413,27 +413,27 @@ def getPyVersion():
 def platform_system():
 	'''Traceback (most recent call last):
   File "/var/www/contextlib.py", line 21, in <module>
-    from qgb import U
+	from qgb import U
   File "/home/qmm/qgb/U.py", line 356, in <module>
-    if iswin() or iscyg():
+	if iswin() or iscyg():
   File "/home/qmm/qgb/U.py", line 295, in is_windows
-    return platform.system().startswith('Windows')
+	return platform.system().startswith('Windows')
   File "/usr/lib/python3.8/platform.py", line 891, in system
-    return uname().system
+	return uname().system
   File "/usr/lib/python3.8/platform.py", line 857, in uname
-    processor = _syscmd_uname('-p', '')
+	processor = _syscmd_uname('-p', '')
   File "/usr/lib/python3.8/platform.py", line 613, in _syscmd_uname
-    output = subprocess.check_output(('uname', option),
+	output = subprocess.check_output(('uname', option),
   File "/usr/lib/python3.8/subprocess.py", line 411, in check_output
-    return run(*popenargs, stdout=PIPE, timeout=timeout, check=True,
+	return run(*popenargs, stdout=PIPE, timeout=timeout, check=True,
   File "/usr/lib/python3.8/subprocess.py", line 489, in run
-    with Popen(*popenargs, **kwargs) as process:
+	with Popen(*popenargs, **kwargs) as process:
   File "/usr/lib/python3.8/subprocess.py", line 854, in __init__
-    self._execute_child(args, executable, preexec_fn, close_fds,
+	self._execute_child(args, executable, preexec_fn, close_fds,
   File "/usr/lib/python3.8/subprocess.py", line 1650, in _execute_child
-    self._close_pipe_fds(p2cread, p2cwrite,
+	self._close_pipe_fds(p2cread, p2cwrite,
   File "/usr/lib/python3.8/subprocess.py", line 1104, in _close_pipe_fds
-    with contextlib.ExitStack() as stack:
+	with contextlib.ExitStack() as stack:
 AttributeError: partially initialized module 'contextlib' has no attribute 'ExitStack' (most likely due to a circular import)
 '''
 	import platform
@@ -635,7 +635,7 @@ u1604:  IPython repl  ok	,  bash python -c error  ?
 		# except:
 			# from subprocess import PIPE,Popen
 			# p = Popen(['sudo', '-S'] + cmd, stdin=PIPE, stderr=PIPE,
-          # universal_newlines=True)
+		  # universal_newlines=True)
 			# sudo_prompt = p.communicate(password + '\n')
 			# return sudo_prompt
 			# [1]
@@ -740,12 +740,12 @@ def PyFile_FromFd(fd,name="filename",mode='r',buffering=-1,encoding='utf-8'):
 
    .. warning::
 
-     Since Python streams have their own buffering layer, mixing them with
-     OS-level file descriptors can produce various issues (such as unexpected
-     ordering of data).
+	 Since Python streams have their own buffering layer, mixing them with
+	 OS-level file descriptors can produce various issues (such as unexpected
+	 ordering of data).
 
    .. versionchanged:: 3.2
-      Ignore *name* attribute.
+	  Ignore *name* attribute.
 	  
  PyFile_FromFd() 的最后一个参数被设置成1，用来指出Python应该关闭这个文件。	  
  
@@ -815,10 +815,10 @@ del_list_multi_indexs=list_del_multi_indexs
 
 def multiprocess_pool(*a,**ka):
 	'''multiprocess.Pool(
-    processes=None,
-    initializer=None,
-    initargs=(),
-    maxtasksperchild=None,
+	processes=None,
+	initializer=None,
+	initargs=(),
+	maxtasksperchild=None,
 )
 原生multiprocessing模块在使用 IPython 时有一个主要限制：
 
@@ -835,13 +835,13 @@ https://stackoverflow.com/a/65001152/6239815
 def pprint(*objects, stream=None, indent=1, width=133, depth=None,compact=False):
 	'''
 pprint(
-    object,
-    stream=None,
-    indent=1,
-    width=80,
-    depth=None,
-    *,
-    compact=False,
+	object,
+	stream=None,
+	indent=1,
+	width=80,
+	depth=None,
+	*,
+	compact=False,
 )	
 	'''
 	# if py.len(object)==1:object=object[0]
@@ -1213,8 +1213,8 @@ TypeError: hexdigest() takes exactly one argument (0 given)
 https://github.com/python/cpython/blob/main/Modules/_sha3/sha3module.c#L673
 /*[clinic input]
 _sha3.shake_128.hexdigest
-    length: unsigned_long
-    /
+	length: unsigned_long
+	/
 Return the digest value as a string of hexadecimal digits.
 [clinic start generated code]*/	
 	
@@ -2126,11 +2126,11 @@ random.choices(population, weights=None, *, cum_weights=None, k=1)#可能重复
  
 random.choice(dict)
  C:\QGB\Anaconda3\lib\random.py in choice(self, seq)
-    260         except ValueError:
-    261             raise IndexError('Cannot choose from an empty sequence') from None
+	260         except ValueError:
+	261             raise IndexError('Cannot choose from an empty sequence') from None
 --> 262         return seq[i]
-    263
-    264     def shuffle(self, x, random=None):
+	263
+	264     def shuffle(self, x, random=None):
 
 KeyError: 4
 
@@ -3330,13 +3330,20 @@ Out[79]: 0.296
 getFloaTail=get_float_tail
 		
 def stime_(time=None,ms=True):
-	r=getStime(time=time,ms=ms)
+	r=get_time_as_str(time=time,ms=ms)
 	return T.regexReplace(r,'[^0-9_]','_')
 	
 gsTimeFormatFile=get_or_set('gsTimeFormatFile','%Y-%m-%d__%H.%M.%S')
 gsymd=gsYMD=gsTimeFormatYMD='%Y%m%d'
 gsTimeFormat='%Y-%m-%d %H:%M:%S'
 #ValueError: year=1 is before 1900; the datetime strftime() methods require year >= 1900
+
+def stime_utc(time=None,ms=True):
+	if time or not ms:raise py.NotImplementedError()
+	from datetime import datetime,timezone
+	now_utc = datetime.now(timezone.utc)
+	return get_time_as_str(now_utc)
+	
 def str_to_datetime(a):
 	''' #TODO:  转换 字符串 或其他时间格式
 	''' 	 
@@ -3456,8 +3463,8 @@ Out[242]: False
 
 In [243]: 0=<i<=1
   File "<ipython-input-243-0732a0107c4d>", line 1
-    0=<i<=1
-      ^
+	0=<i<=1
+	  ^
 SyntaxError: invalid syntax
 '''	
 	
@@ -4275,9 +4282,9 @@ text_key=text_key_write=keyboard_write=simulate_key_write
 def get_keyboard_all_mapping():
 	'''return dict 
 official_virtual_keys = {
-    0x03: ('control-break processing', False),
-    0x08: ('backspace', False),
-    0x09: ('tab', False),
+	0x03: ('control-break processing', False),
+	0x08: ('backspace', False),
+	0x09: ('tab', False),
 ...	
 }	
 '''
@@ -6679,9 +6686,9 @@ def color_to_bgr_tuple(a):
 def color_to_rgb_tuple(a):
 	'''
 ImageColor.colormap = {
-    # X11 colour table from https://drafts.csswg.org/css-color-4/, with
-    # gray/grey spelling issues fixed.  This is a superset of HTML 4.0
-    # colour names used in CSS 1.
+	# X11 colour table from https://drafts.csswg.org/css-color-4/, with
+	# gray/grey spelling issues fixed.  This is a superset of HTML 4.0
+	# colour names used in CSS 1.
 '''	
 	U,T,N,F=py.importUTNF()
 	if py.istr(a):
@@ -6872,7 +6879,7 @@ def _hotkey_callback():
 def register_hotkey(callback=_hotkey_callback,hotkey='alt+c',unregister_all=True,**ka):
 	'''  
 def f():
-    print(23)
+	print(23)
 U.set('hotkey_f',f)	
 	
 	U.hotkey(lambda:print(U.stime()))
@@ -6932,18 +6939,18 @@ def get_svg_qrcode(text=py.No(msg='auto get clipboard',no_raise=True),
 	scale=8,browser=True,return_bytes=False,response=None,tb='',**ka):
 	'''Signature:
 q.svg(
-    file, : stream_or_path 
-    scale=1,
-    module_color='#000',
-    background=None,
-    quiet_zone=4,
-    xmldecl=True,
-    svgns=True,
-    title=None,
-    svgclass='pyqrcode',
-    lineclass='pyqrline',
-    omithw=False,
-    debug=False,
+	file, : stream_or_path 
+	scale=1,
+	module_color='#000',
+	background=None,
+	quiet_zone=4,
+	xmldecl=True,
+	svgns=True,
+	title=None,
+	svgclass='pyqrcode',
+	lineclass='pyqrline',
+	omithw=False,
+	debug=False,
 )
 text直接传入 title 有问题 , T.html_encode fix it：
 	This page contains the following errors:
@@ -7259,7 +7266,7 @@ return yield (0,0,0...)  ---  	(xM-1,yM-1,zM-1....)
 list(U.iter2d(2,2))==[[2,0],[2,0],[2,0],[2,0]]
 				not  [[0,0],[0,1],[1,0],[1,1]]
 for x,y in U.iter2d(2,2):#这样正常
-    U.p('[{},{}],'.format(x,y))				
+	U.p('[{},{}],'.format(x,y))				
 
 	'''
 	if not shape:raise py.ArgumentError('must privide int s')
@@ -7307,12 +7314,12 @@ tions={})
 
 In [1070]: sb.run?
 sb.run(
-    *popenargs,
-    input=None,
-    capture_output=False,
-    timeout=None,
-    check=False,
-    **kwargs,
+	*popenargs,
+	input=None,
+	capture_output=False,
+	timeout=None,
+	check=False,
+	**kwargs,
 )
 
 	
@@ -7369,6 +7376,49 @@ def get_all_indexes_of_sub_seq(all,sub):
 	lb=py.len(sub)
 	return [(i, i+lb) for i in py.range(py.len(all)) if all[i:i+lb] == sub]
 is_sub_seq=get_all_indexes_of_sub_seq
+
+def new_ssh_key(key_size=2048):
+	from cryptography.hazmat.primitives import serialization as crypto_serialization
+	from cryptography.hazmat.primitives.asymmetric import rsa
+	from cryptography.hazmat.backends import default_backend as crypto_default_backend
+
+	key = rsa.generate_private_key(
+		backend=crypto_default_backend(),
+		public_exponent=65537,
+		key_size=key_size,
+	)
+
+	public_key = key.public_key().public_bytes(
+		crypto_serialization.Encoding.OpenSSH,
+		crypto_serialization.PublicFormat.OpenSSH
+	)
+
+	private_key = key.private_bytes(
+		crypto_serialization.Encoding.PEM,
+		crypto_serialization.PrivateFormat.PKCS8,
+		crypto_serialization.NoEncryption()
+	)
+	
+	return public_key,private_key
+
+
+def createECDSAKeyPairLocally(secret_multiplier=1, comment = "qgb_comment",dir='C:/test/ssh/'):
+	import base64,ecdsa
+	sk = ecdsa.SigningKey.generate(curve=ecdsa.SECP256k1)
+	sk.privkey.secret_multiplier=secret_multiplier
+	vk = sk.verifying_key
+
+	with open(f"{dir}privateKey_{secret_multiplier}.pem", "wb") as f:
+		f.write(sk.to_pem())
+	with open(f"{dir}publicKey_{secret_multiplier}.pub", "wb") as f:
+		first = "ecdsa-sha2-nistp256"
+		prefix = b"\x00\x00\x00\x13ecdsa-sha2-nistp256\x00\x00\x00\x08nistp256\x00\x00\x00A"
+		second = base64.b64encode(
+			prefix+vk.to_string(encoding="uncompressed")
+		 ).decode("utf-8")
+		third = comment
+		f.write(" ".join([first, second, third]).encode())
+	return vk	
 ############## qgb type ######################	
 def StrRepr_multi(*a,**ka): # ,wrap=StrRepr
 	r=[]

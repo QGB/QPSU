@@ -112,6 +112,14 @@ try:
 	from pprint import pprint,pformat
 except:pass
 ####################################################
+def ip_to_hex(ip,splitor=""):
+	return splitor.join(map(str,["{0:02x}".format(int(x)) for x in ip.split(".")])) 
+ip2h=ip2hex=ip_to_hex	
+	
+def ip_to_binary(ip,splitor="."):
+	return splitor.join(map(str,["{0:08b}".format(int(x)) for x in ip.split(".")])) 
+ip2b=ip2bin=ip_to_bin=ip_to_binary
+
 def parse_http_plain_request(t):
 	import email,io
 	
