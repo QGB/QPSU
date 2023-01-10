@@ -119,7 +119,11 @@ class Point:
 
 def getPublicKey(privkey):
 	SPEC256k1 = Point()
-	pk = int.from_bytes(privkey, "big")
+	if py.isbytes(privkey):
+		pk = int.from_bytes(privkey, "big")
+	elif py.isint(privkey):pk=privkey
+	else:
+		raise py.ArgumentUnsupported(privkey)
 	hash160 = ripemd160(sha256((SPEC256k1 * pk).toBytes()))
 	address = b"\x00" + hash160
 
@@ -128,6 +132,8 @@ def getPublicKey(privkey):
 
 
 def getWif(privkey):
+	if py.isint(privkey):
+		privkey=int.to_bytes(privkey,32,'big')
 	wif = b"\x80" + privkey
 	wif = b58(wif + sha256(sha256(wif))[:4])
 	return wif

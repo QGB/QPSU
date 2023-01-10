@@ -3339,6 +3339,9 @@ gsTimeFormat='%Y-%m-%d %H:%M:%S'
 #ValueError: year=1 is before 1900; the datetime strftime() methods require year >= 1900
 
 def stime_utc(time=None,ms=True):
+	''' datetime.utcnow().replace(tzinfo=timezone.utc)
+'''	
+	
 	if time or not ms:raise py.NotImplementedError()
 	from datetime import datetime,timezone
 	now_utc = datetime.now(timezone.utc)
@@ -7402,23 +7405,74 @@ def new_ssh_key(key_size=2048):
 	return public_key,private_key
 
 
-def createECDSAKeyPairLocally(secret_multiplier=1, comment = "qgb_comment",dir='C:/test/ssh/'):
-	import base64,ecdsa
-	sk = ecdsa.SigningKey.generate(curve=ecdsa.SECP256k1)
-	sk.privkey.secret_multiplier=secret_multiplier
+def createECDSAKeyPairLocally(secexp=1,curve='NIST256p', comment = "qgb_comment",dir='C:/test/ssh/',return_pub=False):
+	'''  ecdsa.NIST256p # NIST P-256被称为secp256r1  prime256v1。不同的名字，但他们都是一样的。
+ecdsa.SECP256k1 # cryptography hazmat can not load SECP256k1, _ECDSA_KEY_TYPE[curve.name]
+ValueError: Unsupported curve for ssh private key: 'secp256k1'
+
+十进制整数 39位 以下的（准确的说 0xf32+1），用作ssh，连接时ssh -vvvT -i privateKey_NIST256p_1.pem u@ip 容易报错 
+debug1: Trying private key: C:/test/ssh/privateKey_NIST256p_1.pem
+Load key "C:/test/ssh/privateKey_NIST256p_1.pem": invalid format
+
+	'''
+	import base64,ecdsaz
+	# sk = ecdsa.SigningKey.generate(curve=py.getattr(ecdsa,curve))
+	sk = ecdsa.SigningKey.from_secret_exponent(secexp=secexp,curve=py.getattr(ecdsa,curve))
+	sk.privkey.secret_multiplier=secexp
 	vk = sk.verifying_key
 
-	with open(f"{dir}privateKey_{secret_multiplier}.pem", "wb") as f:
+	with open(f"{dir}privateKey_{curve}_{secexp}.pem", "wb") as f:
 		f.write(sk.to_pem())
-	with open(f"{dir}publicKey_{secret_multiplier}.pub", "wb") as f:
-		first = "ecdsa-sha2-nistp256"
-		prefix = b"\x00\x00\x00\x13ecdsa-sha2-nistp256\x00\x00\x00\x08nistp256\x00\x00\x00A"
-		second = base64.b64encode(
-			prefix+vk.to_string(encoding="uncompressed")
-		 ).decode("utf-8")
-		third = comment
-		f.write(" ".join([first, second, third]).encode())
-	return vk	
+	first = "ecdsa-sha2-nistp256"
+	prefix = b"\x00\x00\x00\x13ecdsa-sha2-nistp256\x00\x00\x00\x08nistp256\x00\x00\x00A"
+	second = base64.b64encode(
+		prefix+vk.to_string(encoding="uncompressed")
+		).decode("utf-8")
+	third = comment
+	bpub=" ".join([first, second, third]).encode()
+	if return_pub:return StrRepr(bpub.decode())
+	with open(f"{dir}publicKey_{curve}_{secexp}.pub", "wb") as f:
+		f.write(bpub)
+	return sk,vk	
+
+def generate_edcsa_key_pair(private_key=None,filename='id_ecdsa'):
+	"""This example shows how easy it is to generate and export ECDSA keys with python.
+
+	This program is similar to `ssh-keygen -t ecdsa` with no passphrase.
+	To export the private key with a passphrase, read paramiko.pkey.PKey._write_private_key method.
+
+> c:\qgb\anaconda3\lib\site-packages\paramiko\ecdsakey.py(272)generate()
+	(curve, default_backend())
+	(<cryptography.hazmat.primitives.asymmetric.ec.SECP256R1 object at 0x000001923072BF08>, <OpenSSLBackend(version: OpenSSL 3.0.5 5 Jul 2022, FIPS: False)>)	
+
+
+curve_nid==415
+	"""
+
+	import paramiko
+	from cryptography.hazmat.primitives.serialization import (
+		Encoding, PrivateFormat, PublicFormat, NoEncryption
+	)
+
+	# key = paramiko.ECDSAKey.generate()
+	if not private_key:
+		from cryptography.hazmat.backends.openssl.backend import backend
+		import cryptography.hazmat.primitives.asymmetric.ec
+		private_key = backend.generate_elliptic_curve_private_key(cryptography.hazmat.primitives.asymmetric.ec.SECP256R1)
+	key=paramiko.ECDSAKey(vals=(private_key, private_key.public_key()))
+
+	with open(filename, "wb") as fh:
+		data = key.signing_key.private_bytes(Encoding.PEM,
+											PrivateFormat.OpenSSH,
+											NoEncryption())
+		fh.write(data)
+
+	with open(f"{filename}.pub", "wb") as fh:
+		data = key.verifying_key.public_bytes(Encoding.OpenSSH,
+											PublicFormat.OpenSSH)
+		fh.write(data + b"\n")
+	return private_key,key
+	
 ############## qgb type ######################	
 def StrRepr_multi(*a,**ka): # ,wrap=StrRepr
 	r=[]
