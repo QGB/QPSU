@@ -7415,7 +7415,7 @@ debug1: Trying private key: C:/test/ssh/privateKey_NIST256p_1.pem
 Load key "C:/test/ssh/privateKey_NIST256p_1.pem": invalid format
 
 	'''
-	import base64,ecdsaz
+	import base64,ecdsa
 	# sk = ecdsa.SigningKey.generate(curve=py.getattr(ecdsa,curve))
 	sk = ecdsa.SigningKey.from_secret_exponent(secexp=secexp,curve=py.getattr(ecdsa,curve))
 	sk.privkey.secret_multiplier=secexp
