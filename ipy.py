@@ -135,7 +135,8 @@ C:\QGB\Anaconda3\lib\site-packages\IPython\core\formatters.py :89  '''
 	import IPython.lib.pretty
 	if not max_seq_length:
 		max_seq_length=U.get_or_set('ipy.pformat.max_seq_length',2000)
-	U.set('ipy.pformat.max_seq_length',max_seq_length)
+	else:
+		U.set('ipy.pformat.max_seq_length',max_seq_length)
 	try:
 		return IPython.lib.pretty.pretty(obj,max_width=width,max_seq_length=max_seq_length)
 	except Exception as e:

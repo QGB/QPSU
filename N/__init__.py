@@ -1314,7 +1314,7 @@ key compatibility :  key='#rpc\n'==chr(35)+'rpc'+chr(10)
 	T=py.importT()
 	# if not U.get('pformat_kw'):
 		# U.set('pformat_kw',{'width':144})
-	U.get_or_set('pformat_kw',{})['width']=222
+	U.get_or_set('pformat_kw',{})['width']=333
 	
 	
 	if not flaskArgs:

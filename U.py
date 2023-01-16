@@ -174,6 +174,9 @@ def set(name,value=SET_NO_VALUE,level=gd_sync_level['process'],**ka):
 		# sys._qgb_dict=d
 	if level>=gd_sync_level['system']:
 		import sqlite3
+		
+	if ka:
+		raise py.NotImplementedError()
 	return value
 
 def set_no_return(name,value,**ka):
@@ -194,7 +197,7 @@ def set_delete(*names,level=gd_sync_level['process'],**ka):
 			return r[0]
 		else:
 			return r
-delset=del_set=unset=delete_set=set_delete
+set_del=delset=del_set=unset=delete_set=set_delete
 	
 def set_delete_by_prefix(prefix,confirm=True,level=gd_sync_level['process']):
 	U,T,N,F=py.importUTNF()
@@ -1294,8 +1297,12 @@ jiami=encrypt_DES=des_encrypt=DES_encrypt=DES_encrypt_return_bytes
 
 def DES_decrypt_return_bytes(byte_or_ascii,password,password_max_length=24):
 	from pyDes import triple_des
+	if not byte_or_ascii:return byte_or_ascii
+	
 	password=T.padding(password,size=password_max_length)[:password_max_length]
 	bytes = triple_des(password).decrypt(byte_or_ascii, padmode=2)
+	if bytes=='':
+		raise Exception('can not decrypt des',byte_or_ascii,)
 	return  bytes
 jiemi=decrypt_DES=des_decrypt=DES_decrypt=DES_decrypt_return_bytes
 	
