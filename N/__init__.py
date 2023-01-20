@@ -1251,9 +1251,12 @@ def rpc_set_variable(*obj,base=py.No('auto history e.g. [http://]127.0.0.1:23571
 	if len(obj)==1 and ',' not in varname:
 		obj=obj[0]
 
-	if not obj and py.len(ka)==1:
-		varname,obj=U.get_dict_item(ka)	
-	if not obj and U.get_ipy():
+	if not obj:
+		if py.len(ka)==1:
+			varname,obj=U.get_dict_item(ka)	
+		if py.len(ka)> 1:
+			obj=ka
+	if not obj and U.get_ipy() and varname!='v':
 		obj=U.get_ipy().user_ns[varname]
 		
 	if not base:
@@ -1547,7 +1550,8 @@ def get_flask_request_post_data(name='y',save_dill=True,**ka):
 	save_dill=U.get_duplicated_kargs(ka,'save_dill','dill','save','write','dp',default=save_dill)
 	if ka:raise py.NotImplementedError(ka)
 	
-	b=q.data;y=T.js_loads(b)
+	b=q.data
+	y=T.js_loads(b)#demjson
 	U.get_ipy().user_ns[name]=y
 	f=f'{name}-{U.len(y)}={U.stime()}'
 	if save_dill:
@@ -2065,7 +2069,12 @@ def set_proxy(host='',port='',protocol='socks5h',target_protocol=('http','https'
 		host=U.set('{}.proxy.host'.format(t),host)
 		port=U.set('{}.proxy.port'.format(t),port)
 		protocol=U.set('{}.proxy.protocol'.format(t),protocol)
-		d[t]="{}://{}:{}".format(protocol,host,port)
+		d[t]="{}://{}:{}".format(protocol,host,port)	
+
+	for t in target_protocol:
+		if t not in d:
+			print('delete:',U.delset_prefix(f'{t}.proxy',confirm=False))
+			
 	return d
 	# {'http': "socks5://myproxy:9191"}
 setProxy=set_proxy

@@ -4876,7 +4876,7 @@ def get_net_io_bytes_count():
 get_net_io_bytes=get_net_io_bytes_count		
 
 def vscode(a='',lineno=0,auto_file_path=True,get_cmd=False,
-	editor_path=py.No('config this system editor_path'),):
+	editor_path=py.No('config this system editor_path'),linux_dirs=('.vscode-server','.vscode-server-insiders'),  ):
 	'''
 	'''
 	if editor_path:
@@ -4913,16 +4913,19 @@ def vscode(a='',lineno=0,auto_file_path=True,get_cmd=False,
 	if isLinux(): # only work when using remoteSSH
 		executor = get('vscode_linux',level=gd_sync_level['system'])
 		if not executor:
-			vsbin=F.expanduser('~/.vscode-server/bin/')
-			if not F.exist(vsbin):#root用户 下可能没有
-				vsbin='/home/qgb/.vscode-server/bin/'#TODO auto find all user
-				if not F.exist(vsbin):raise py.EnvironmentError('not found ~/.vscode-server/bin/ ')
-			ctime=0
-			for f,stat in F.ll(vsbin,d=True,f=False,readable=False).items():
-				if stat[3]>ctime:
-					ctime=stat[3]
-					executor=F.join(f,'bin/code')
-			set('vscode_linux',executor,level=gd_sync_level['system'])
+			for sdir in linux_dirs:
+				vsbin=F.expanduser(f'~/{sdir}/bin/')
+				if not F.exist(vsbin):#root用户 下可能没有
+					vsbin=f'/home/qgb/{sdir}/bin/'#TODO auto find all user
+					if not F.exist(vsbin):
+						continue
+				ctime=0
+				for f,stat in F.ll(vsbin,d=True,f=False,readable=False).items():
+					if stat[3]>ctime:
+						ctime=stat[3]
+						executor=F.join(f,'bin/code')
+			if executor:			
+				set('vscode_linux',executor,level=gd_sync_level['system'])
 			
 		env = get('vscode_linux_env',level=gd_sync_level['process']) or {}
 		if not env:
