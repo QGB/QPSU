@@ -5097,7 +5097,10 @@ def get_source(a):
 				# uncompyle6.semantics.pysource.SourceWalker.println=U.AttrCallNo(p=0)
 			# s= uncompyle6.deparse_code2str(a,out=io.StringIO())
 			out=io.StringIO()
-			sw= uncompyle6.uncompyle6.code_deparse(a,out=out)
+			try:
+				sw=uncompyle6.uncompyle6.code_deparse(a,out=out)
+			except:	#uncompyle6-3.9.0
+				sw=uncompyle6.code_deparse(a,out=out)
 			s=out.getvalue()
 			lines=s.splitlines()
 			if 'def ' not in lines[0] and py.len(lines)>1 and lines[1][0] not in [T.tab,T.space] :

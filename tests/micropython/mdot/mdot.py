@@ -1,6 +1,6 @@
 from microdot_asyncio import Microdot, send_file,Response
 from microdot_asyncio_websocket import with_websocket
-
+ismpy=True
 try:
 	import uasyncio as asyncio
 	import M
@@ -37,13 +37,37 @@ except Exception as e:
 		async def awrite(self,a):
 			self.a=a
 	swriter=StreamWriter()
-	
 	gport=1122
 	gp=r'\\192.168.1.10\qgb\github\ttyd\html\dist\\'
 	# gp=r'\\192.168.1.10\qgb\github\ttyd\ttyd_html\dist/'
 	gp=gsqp+'/qgb/tests/micropython/mdot/'
+	ismpy=False
 	print(f'Not in micropython.listen:{gport} pid:',U.pid)
 #############################################
+loop = asyncio.get_event_loop()
+
+break_sleep=False
+async def sleep(asec):
+	global break_sleep
+	if aisec<1:return await asyncio.sleep(asec)
+
+	break_sleep=False
+	n,y=divmod(asec,int(asec)) # ZeroDivisionError: divide by zero
+	for i in range(n):
+		if break_sleep:return
+		asyncio.sleep(1)
+	if break_sleep:return	
+	asyncio.sleep(y)
+	
+gt_off,gt_on,gpin=9999,0,18
+def set_blink(off,on,pin):
+	global gt_off,gt_on,gpin
+
+async def blink_loop():
+	await asyncio.sleep(1)
+loop.create_task(blink_loop())
+
+# if not ismpy:
 async def sleep_loop():#sleep_for_ctrl_c windows
 	global res
 	while True:
@@ -53,19 +77,8 @@ async def sleep_loop():#sleep_for_ctrl_c windows
 				dws.append(ws)
 		for ws in dws:
 			gws.remove(ws)
-			
-		# if res:
-			# if len(res)==1:res=b'0'+res # micropython
-			# for ws in gws:
-				# try:
-					# await ws.send(b'0'+res)
-					
-				# except Exception as e:
-					# ws.closed=True
-					# print(ws,e)
-			# res=''	
 		await asyncio.sleep(1)
-		
+loop.create_task(sleep_loop())		
 # grn=1		
 # res=''
 async def receiver():
@@ -73,28 +86,18 @@ async def receiver():
 	print('start uart receive...')
 	res=''
 	while True:
-		if sreader:
-			# res.append(await sreader.read(1))#空参数，write 换行也不回返回	
+		if sreader:	
 			res = await sreader.read(999)#空参数，write 换行也不回返回	
-			# if grn:
-				# res = await sreader.read(grn)#空参数，write 换行也不回返回	
-			# else:
-				# res = await sreader.read()#空参数，write 换行也不回返回	
-		if T:print('uart Recieved', res) # for debug
+		if not ismpy:print('uart Recieved', res) # for debug
 		
-		if res:res=b'0'+res # micropython
+		if ismpy and res:res=b'0'+res # micropython
 		for ws in gws:
 			try:
 				await ws.send(res)
 			except Exception as e:
 				ws.closed=True
 				print(ws,e)
-				
-
-loop = asyncio.get_event_loop()
 loop.create_task(receiver())
-loop.create_task(sleep_loop())
-
 
 app = Microdot()
 
@@ -159,8 +162,7 @@ def rpc(request,code=''):
 		# r=code
 	if not response.body:
 		# response.body=r.encode()
-		response.body=r#.encode('utf-8')
-			
+		response.body=r#.encode('utf-8')	
 	return response
 
 @app.route('/')

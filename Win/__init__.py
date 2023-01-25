@@ -532,7 +532,7 @@ def SetForegroundWindow(title=None,handle=None,pid=None,process_name='',raise_er
 'raise_err','raise_error','raiseError','raiseErr','raise_EnvironmentError','EnvironmentError','raiseEnvironmentError',default=raise_error)
 
 	if not handle and not title and not pid and not process_name:
-		handle=get_current_cmd_windows()
+		handle=get_current_cmd_window()
 	if not handle:
 		from qgb import Win
 		for h,t,p in Win.getAllWindows():
@@ -708,6 +708,7 @@ def set_cursor_pos(x,y):
 	return x,y
 move_cur=mv_cur=setMousePos=setCursorPos=SetCursorPos=setCurPos=set_mouse_pos=set_cur_pos=set_cursor_pos
 
+def mouse_whi(a=1,debug=0):
 def mouse_click(x=None,y=None,*a,_1=False,debug=0):
 	''' click(*xy+(2,3)) == click(x,y,2,3) == click(x+2,y+3)
 	'''
