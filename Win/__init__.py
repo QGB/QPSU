@@ -708,7 +708,11 @@ def set_cursor_pos(x,y):
 	return x,y
 move_cur=mv_cur=setMousePos=setCursorPos=SetCursorPos=setCurPos=set_mouse_pos=set_cur_pos=set_cursor_pos
 
-def mouse_whi(a=1,debug=0):
+def mouse_wheel(a=1,debug=0):
+	raise py.NotImplementedError()
+	return
+mouse_while=mouse_wheel
+	
 def mouse_click(x=None,y=None,*a,_1=False,debug=0):
 	''' click(*xy+(2,3)) == click(x,y,2,3) == click(x+2,y+3)
 	'''
