@@ -750,7 +750,7 @@ def is_valid_idcard(idcard):
 		idcard = str(idcard)
 
 	if not re.match(IDCARD_REGEX, idcard):
-		return False
+		return py.No('IDCARD_REGEX not match',idcard)
 
 	items = [int(item) for item in idcard[:-1]]
 

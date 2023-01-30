@@ -1256,6 +1256,8 @@ def rpc_set_variable(*obj,base=py.No('auto history e.g. [http://]127.0.0.1:23571
 			varname,obj=U.get_dict_item(ka)	
 		if py.len(ka)> 1:
 			obj=ka
+			if not ext_cmd:
+				ext_cmd='globals().update(%r)'%varname
 	if not obj and U.get_ipy() and varname!='v':
 		obj=U.get_ipy().user_ns[varname]
 		
