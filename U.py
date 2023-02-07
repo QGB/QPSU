@@ -2792,9 +2792,9 @@ def dir(a,type_filter=py.No('default not filter'),only_attr='',skip_attr='',raw_
 			elif ok or py.type(v) is type_filter or isinstance(v,type_filter) or py.type(v)==py.type(type_filter):
 				ok=1
 			else:ok=0
-			
+		#m.__builtins__ <module 'builtins' (built-in)>	
 		if (not raw_value) and i in {'f_builtins','__builtins__'}:
-			v='{} : {}'.format(py.len(v),py.type(v) )
+			v='{} : {}'.format(U.len(v),py.type(v) )
 		if (not raw_value) and i in {'f_globals','f_locals'}:
 			v='{} : {}'.format(py.len(v),' '.join(v) )
 		# if not py.issubclass(type_filter,py.No):# 这里很奇怪，这样判断 type_filter始终不是py.No
@@ -3505,6 +3505,18 @@ SyntaxError: invalid syntax
 		return pytz.timezone(a)._utcoffset
 	raise py.ArgumentUnsupported(a)	
 	
+def datetime_timedelta(seconds=0,days=0):	
+	import datetime
+	if py.istr(seconds):#fmz
+		n=int(seconds[:-1])
+		if not n:return n
+		if seconds.endswith('m'):seconds=n*60
+		if seconds.endswith('h'):seconds=n*60*60
+		if seconds.endswith('d'):seconds=n*60*60*24
+			
+	return datetime.timedelta(seconds=seconds,days=days)
+time_delta=timeDelta=timedelta=datetime_timedelta
+	
 def better_float(x,):
 	''' float(x=0, /)  Subclasses:     float64
 0.07999999999999999  hangs	
@@ -3859,7 +3871,7 @@ pip install python-dateutil
 		yield start
 		start+=tdelta
 	# return i #SyntaxError: 'return' with argument inside generator
-time_delta=timeDelta=iter_time=range_time=time_range=rangeTime=timeRange=timeTraverser=timeTraversal=traverseTime	
+time_delta_range=timeDeltaRange=iter_time=range_time=time_range=rangeTime=timeRange=timeTraverser=timeTraversal=traverseTime	
 
 def datetime(a,month=0, day=0,hour=0,minute=0,second=0,microsecond=0):
 	''' a : string
