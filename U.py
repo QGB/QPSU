@@ -1615,8 +1615,8 @@ def cmd(*a,shell=True,**ka):
 	# exit()
 # cmd('echo 23456|sub','3','')	
 GET_DUPLICATED_KARGS_DEFAULT=py.No('Not found matched kargs',no_raise=True)
-def get_duplicated_kargs(ka,*keys,default=GET_DUPLICATED_KARGS_DEFAULT,no_pop=False):
-	'''
+def get_duplicated_kargs(ka,*keys,default=GET_DUPLICATED_KARGS_DEFAULT,no_pop=False,):
+	''' #TODO ,**ka 不同name可以对应不同默认值
 def pop(d,k):
 	d.pop(k)
 pop(_63,25)  #_63 has change
@@ -3003,6 +3003,8 @@ def getArgsTest(a,b,c,d=2,**ka):
 	return getArgsDict()
 
 def inspect_getframeinfo(*a,**ka):
+	''' frame=sys
+'''
 	import inspect
 	return inspect.getframeinfo(*a,**ka)	
 getframeinfo=inspect_getframeinfo	
@@ -3011,6 +3013,19 @@ def inspect_findsource(*a,**ka):
 	import inspect
 	return inspect.findsource(*a,**ka)	
 findsource=inspect_findsource	
+
+def inspect_trace(*a,**ka):
+	import inspect
+	return inspect.trace()
+
+def sys_getframe(n=0):
+	f=sys._getframe()
+	for i in py.range(n):
+		try:
+			f=f.f_back
+		except Exception as e:
+			return py.No(e)
+	return f		
 
 def get_caller_args_dict(*args,**kwargs):
 	''' MUST BE FIRST LINE in caller 

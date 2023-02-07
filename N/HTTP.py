@@ -99,7 +99,7 @@ def random_headers():
 	
 #8
 
-def request(url,method='GET',headers=gheaders,
+def request(url,method='GET',headers=gheaders.copy(),
 	proxies=AUTO_GET_PROXY,verify=False,timeout=9,no_raise=False,print_req=False,**ka):	
 	''' 
 '''
@@ -396,7 +396,7 @@ def get(url,file='',
 	url=N.auto_url(url)
 
 	show=U.get_duplicated_kargs(ka,'show','print','p','print_req',default=show)
-	proxies=auto_proxy(proxies,ka)#only return proxies, but ka also have 
+	proxies=auto_proxy(proxies,ka)#only return proxies, del proxy keys in ka
 
 	def writeFile():
 		if file:

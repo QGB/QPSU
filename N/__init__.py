@@ -184,14 +184,14 @@ def http_server(PORT):
 		print("serving at port", PORT)
 		httpd.serve_forever()
 	
-def curl_return_bytes(url,verbose=True,proxy=py.No('socks5h://127.0.0.1:21080'),headers=py.No('default use N.HTTP.headers'),max_show_bytes_size=99,**ka):
+def curl_return_bytes(url,verbose=True,proxy=py.No('socks5h://127.0.0.1:21080'),headers=py.No('default use N.HTTP.headers'),max_show_bytes_size=99,user_agent=py.No('auto use N.HTTP.user_agent'),**ka):
 	'''  CURLOPT_* see:
 https://github.com/pycurl/pycurl/blob/master/src/module.c
 	'''
 	global U,T,N,F
 	U,T,N,F=py.importUTNF()
 	proxy=U.get_duplicated_kargs(ka,'proxies','proxy',default=proxy)
-	
+	user_agent=U.get_duplicated_kargs(ka,'user_agent','useragent','User_Agent',default=user_agent)
 	import pycurl
 	c = pycurl.Curl()
 	for k,v in ka.items():
@@ -204,8 +204,18 @@ https://github.com/pycurl/pycurl/blob/master/src/module.c
 	c.setopt(c.VERBOSE,verbose)
 	if not headers:	
 		HTTP=py.from_qgb_import('N.HTTP')
-		headers=HTTP.headers
+		headers=HTTP.headers.copy()
 	if headers:
+		if py.istr(user_agent):
+			kua='User-Agent'
+			for n,k in py.enumerate(headers):
+				if kua.lower() in k.lower():
+					if py.isdict(headers):
+						headers[k]=user_agent
+					if py.islist(headers):	
+						headers[n]=f'{kua}:{user_agent}'
+						
+				# user_agent
 		if py.isdict(headers):
 			c.setopt(pycurl.HTTPHEADER, ["%s:%s"%(k,v) for k,v in headers.items()] )
 		elif py.islist(headers) and py.istr(headers[0]) and ':' in headers[0]:
@@ -228,7 +238,7 @@ https://github.com/pycurl/pycurl/blob/master/src/module.c
 	b=f.read()
 	# print(len(b),b)
 	# b.decode()
-	if py.len(b)>max_show_bytes_size:
+	if max_show_bytes_size and py.len(b)>max_show_bytes_size:
 		return U.object_custom_repr(b,repr='{}...#{}'.format(b[:99],F.readable_size(b) )  )
 	else:
 		return b
@@ -1809,18 +1819,18 @@ Resource interpreted as Stylesheet but transferred with MIME type text/html:
 			html=html.replace(T.CRLF,eol)
 		else:
 			html=html.replace(T.EOL,eol)
-	
-	for itag in remove_tag:
-		if py.istr(itag):
-			html=html.replace(itag,'')
-			continue
-		if py.len(itag)==2:
-			start,end=itag
-		s=True
-		while s:
-			s=T.sub(html,start,end)
-			if not s:break
-			html=html.replace(start+s+end,'')
+	if remove_tag:
+		for itag in remove_tag:
+			if py.istr(itag):
+				html=html.replace(itag,'')
+				continue
+			if py.len(itag)==2:
+				start,end=itag
+			s=True
+			while s:
+				s=T.sub(html,start,end)
+				if not s:break
+				html=html.replace(start+s+end,'')
 	if css:
 		if '</style>' not in css:
 			css='''<style type="text/css">

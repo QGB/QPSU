@@ -822,7 +822,7 @@ def format(s,**ka):
 	ka={'{%s}'%k:v for k,v in ka.items()}
 	return T.replacey(s,ka)
 
-def eng_audio(response,word,audio_path='C:/test/google_translate_tts/'):
+def eng_audio(response,word,audio_path='C:/test/google_translate_tts/',proxies=21080,curl=False,**ka):
 	if 'google_translate_tts' not in audio_path:
 		audio_path+='google_translate_tts/'
 
@@ -830,23 +830,33 @@ def eng_audio(response,word,audio_path='C:/test/google_translate_tts/'):
 	f=audio_path+'%s.dill'%word
 	t0=U.timestamp()
 	q=F.dill_load(f)
-	if not q:
-		q=F.dill_load(f )
+	# if not q:
+		# q=F.dill_load(f )
 	if not q:
 	
-		if N.check_port(21080):
-			proxy='socks5://127.0.0.1:21080'
-		else:	
-			proxy=None
+		proxies=N.HTTP.auto_proxy(proxies,ka)#only return proxies, del proxy keys in ka
+		
+		# if N.check_port(21080):
+			# proxy='socks5://127.0.0.1:21080'
+		# else:	
+			# proxy=None
 	
 		try:
 			u='https://translate.googleapis.com/translate_tts?client=gtx&ie=UTF-8&tl=en&tk=775040.775040&q='+T.url_encode(word)
-			q=N.HTTP.request(u,proxy=proxy,timeout=6)
-			b=q.content
+			if curl:
+				import requests
+				q=requests.Response()	
+				q.status_code=200 # 不加这句 dill_load 时：requests\models.py  if 400 <= self.status_code < 500: ## TypeError: '<=' not supported between instances of 'int' and 'NoneType'
+				q._content=N.curl(proxies=proxies,max_show_bytes_size=False,url=u)
+			else:
+				q=N.HTTP.request(u,proxies=proxies,timeout=6,**ka)
+				b=q.content
+				
 			F.dill_dump(file=f,obj=q)
 		except Exception as e:
 			return py.No(e)
 	if response:	
+		# if py.isbyte(q)
 		return N.copy_request_to_flask_response(q,response)
 	else:
 		return q

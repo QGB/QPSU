@@ -1321,6 +1321,7 @@ def ip_location_text(text,location_format=' [{0}] ',reverse_ip=True,**ka):
 	'''
 	U=py.importU()
 	N=py.importN()
+	location_format=U.get_duplicated_kargs(ka,'location_format','format',default=location_format)
 	
 	def fr(a):
 		# i0,i=a.span()
