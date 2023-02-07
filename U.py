@@ -3510,9 +3510,12 @@ def datetime_timedelta(seconds=0,days=0):
 	if py.istr(seconds):#fmz
 		n=int(seconds[:-1])
 		if not n:return n
+		
 		if seconds.endswith('m'):seconds=n*60
-		if seconds.endswith('h'):seconds=n*60*60
-		if seconds.endswith('d'):seconds=n*60*60*24
+		elif seconds.endswith('h'):seconds=n*60*60
+		elif seconds.endswith('d'):seconds=n*60*60*24
+		else:
+			raise py.ArgumentUnsupported(seconds)
 			
 	return datetime.timedelta(seconds=seconds,days=days)
 time_delta=timeDelta=timedelta=datetime_timedelta
