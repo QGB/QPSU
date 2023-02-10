@@ -1550,7 +1550,7 @@ def flask_app_route(app,rule='',view_func=None,methods=('GET','POST'),log_req=Fa
 	
 	if not view_func:raise py.ArgumentError(view_func)
 	
-	app.add_url_rule(rule, view_func=view_func, methods=methods)
+	app.add_url_rule(rule, view_func=view_func, methods=methods,endpoint=rule)
 	
 	return app.url_map._rules
 	
