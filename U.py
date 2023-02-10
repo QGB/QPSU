@@ -2057,14 +2057,13 @@ def cdCurrentFile(*a,**ka):
 	return False
 cd__file__=cdc=cdCurrent=cdcf=cdCurrentFile
 
-def cdTest(a='',**ka):
+def cd_test(a='',**ka):
 	return cd(gst+a,**ka)
-cdt=cdTest
+cdt=cdTest=cd_test
 	
-def cdQPSU(a='',**ka):
+def cd_qpsu_dir(a='',**ka):
 	return cd(getModPath()+a,**ka)
-# @property
-cdq=cdqp=cdqpsu=cdQPSU
+cdq=cdqp=cdqpsu=cdQPSU=cd_qpsu=cd_qpsu_dir
 	
 def cdWShell(a='',**ka):
 	return cd(gsWShell+a,**ka)
@@ -7515,6 +7514,16 @@ curve_nid==415
 											PublicFormat.OpenSSH)
 		fh.write(data + b"\n")
 	return private_key,key
+	
+def tts_speak(t):
+	''' pip install pyttsx3
+长文本会一直阻塞，KeyboardInterrupt 无效	
+'''	
+	import pyttsx3
+	engine = get_or_set('pyttsx3.engine',lazy_default=lambda:pyttsx3.init())
+	engine.say(t)
+	engine.runAndWait()	
+tts=speak=tts_speak
 	
 ############## qgb type ######################	
 def StrRepr_multi(*a,**ka): # ,wrap=StrRepr
