@@ -112,6 +112,26 @@ try:
 	from pprint import pprint,pformat
 except:pass
 ####################################################
+def parse_requirements_txt(f):
+	'''C:\test\github\TradingView-Machine-Learning-GUI\requirements.txt
+	
+'''
+	global U,T,N,F
+	U,T,N,F=py.importUTNF()
+	
+	d={}
+	for line in F.readlines(f):
+		line=line.strip()
+		if not line:continue
+		if '==' in line:
+			name,v=line.split('==')
+		else:
+			name,v=line,None
+		d[name]=v
+		
+		# r.append(line)
+	return d
+	
 def ip_to_hex(ip,splitor=""):
 	return splitor.join(map(str,["{0:02x}".format(int(x)) for x in ip.split(".")])) 
 ip2h=ip2hex=ip_to_hex	
@@ -453,7 +473,9 @@ numpy.loadtxt("myfile.txt")[:, 1]
  
 '''		
 	U=py.importU()
-	if row in ['\n','\r\n']:
+	if py.islist(text):
+		rs=text
+	elif row in ['\n','\r\n']:
 		rs=text.splitlines()
 	else:
 		rs=text.split(row)
