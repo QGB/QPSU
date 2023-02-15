@@ -2065,6 +2065,11 @@ def cd_qpsu_dir(a='',**ka):
 	return cd(getModPath()+a,**ka)
 cdq=cdqp=cdqpsu=cdQPSU=cd_qpsu=cd_qpsu_dir
 	
+def cd_home(a='',**ka):
+	U,T,N,F=py.importUTNF()
+	return cd(F.get_home()+a,**ka)
+cdh=cdHome=cd_home
+
 def cdWShell(a='',**ka):
 	return cd(gsWShell+a,**ka)
 cds=cdws=cdWShell
