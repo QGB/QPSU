@@ -5,6 +5,30 @@ else:import py
 U,T,N,F=py.importUTNF()
 gError=None
 # U.pln U.gError
+def main():
+	'''不行，还是出现 sqlite3 缺少，
+只能在bat里设置PATH启动
+'''	
+	ps=['',
+ 'Library\\mingw-w64\\bin',
+ 'Library\\usr\\bin',
+ 'Library\\bin',
+ 'Scripts',
+ 'lib\\site-packages\\numpy\\.libs']
+ 
+	if U.iswin() and sys.executable.startswith(r'\\') and 'Anaconda3' in sys.executable:
+		prefix=sys.executable[:sys.executable.index('Anaconda3')+9+1]
+		print(U.set_env_path(append=[prefix+i for i in ps]))	
+		
+		from _ctypes import LoadLibrary as _dlopen
+		h=_dlopen(r'\\192.168.1.3\c\QGB\Anaconda3\DLLs\_sqlite3.pyd',0)
+		import sqlite3
+		print(h,sqlite3)
+	IPython.start_ipython()
+	
+if __name__ == '__main__':main()	
+
+
 if not U.isipy():raise EnvironmentError
 g=get=gipy=U.isipy()#不能直接引用U.ipy,环境不确定 动态判断避免识别错误 g.
 gipy.autocall=2
@@ -380,6 +404,9 @@ In_index_delta=1  # In[268]==_i269	  , Out[269]
 			if U.is_linux():
 				while py.len(file.encode('utf-8'))> 255-3: # 256-3 too long !
 					file=file[:-1]
+			if U.iswin() and U.gst.startswith('\\'):
+				while T.wcswidth(file) >= (255-3-4):
+					file=file[:-1]
 			file=F.autoPath(file,ext='.py',default=gsavePath)
 #255-3(.py)  防止文件名过长 OSError: [Errno 22] Invalid argument: "\\\\?\	\C:\\test			
 			F.new(file)
@@ -488,7 +515,8 @@ def reset_execution_count():
 
 def ipyStart(*a):
 	import IPython
-	IPython.start_IPython()
+	
+	IPython.start_ipython()
 
 
 def _seq_pprinter_factory(start, end, basetype):
@@ -524,3 +552,4 @@ def _seq_pprinter_factory(start, end, basetype):
 def test(*a,**ka):
 	co=sys._getframe().f_back.f_code
 	return co
+	

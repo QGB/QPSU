@@ -1350,7 +1350,14 @@ def ip_location_text(text,location_format=' [{0}] ',reverse_ip=True,**ka):
 		# a=py.int(text[i0:i] )
 		a=a.group()
 		location=N.ipLocation(a,reverse_ip=reverse_ip)
-		return location
+		return location # qqwry 查找出错返回No 
+		# if location:
+			# return location
+		# else:
+			# if reverse_ip:
+				# return a
+			# else:	
+				# return ''
 
 	r=regexReplace(text,RE_IP,fr)
 	# if p:U.pln(r)
@@ -1847,14 +1854,20 @@ def base64_decode_return_string(a,return_bytes=py.No('avoid argument conflict'),
 		return base64.b64decode(a) #type bytes
 	else:	
 	# if py.istr(a):
-		return detectAndDecode(base64.b64decode(a))
+		return detectAndDecode(base64_decode_return_bytes(a))
 b64decode=base64Decode=base64_decode=base64decode=b64_str=base64_to_str=base64_decode_return_str=base64_decode_return_string	
 
 def base64_to_bytes(a):
 	import base64
+	m=py.len(a)
+	w=m%4
+	
+	
 	if py.istr(a):
+		if w:a+='='*(4-w)
 		return base64.b64decode(a)
 	if py.isbyte(a):
+		if w:a+=b'='*(4-w)
 		return base64.b64decode(a) #type bytes
 b64_bytes=base64_decode_return_bytes=base64_to_bytes	
 

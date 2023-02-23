@@ -2068,7 +2068,7 @@ cdq=cdqp=cdqpsu=cdQPSU=cd_qpsu=cd_qpsu_dir
 def cd_home(a='',**ka):
 	U,T,N,F=py.importUTNF()
 	return cd(F.get_home()+a,**ka)
-cdh=cdHome=cd_home
+cdh=cdHome=cdhome=cd_home
 
 def cdWShell(a='',**ka):
 	return cd(gsWShell+a,**ka)
@@ -7452,7 +7452,7 @@ def new_ssh_key(key_size=2048):
 	return public_key,private_key
 
 
-def createECDSAKeyPairLocally(secexp=1,curve='NIST256p', comment = "qgb_comment",dir='C:/test/ssh/',return_pub=False):
+def generate_edcsa_by_secexp(secexp=1,curve='NIST256p', comment="",dir='C:/test/ssh/',return_pub=False):
 	'''  ecdsa.NIST256p # NIST P-256被称为secp256r1  prime256v1。不同的名字，但他们都是一样的。
 ecdsa.SECP256k1 # cryptography hazmat can not load SECP256k1, _ECDSA_KEY_TYPE[curve.name]
 ValueError: Unsupported curve for ssh private key: 'secp256k1'
@@ -7463,26 +7463,36 @@ Load key "C:/test/ssh/privateKey_NIST256p_1.pem": invalid format
 
 	'''
 	import base64,ecdsa
+	U,T,N,F=py.importUTNF()
 	# sk = ecdsa.SigningKey.generate(curve=py.getattr(ecdsa,curve))
+	if py.istr(secexp):
+		comment=T.file_legalized(secexp)
+		secexp=py.eval(secexp)
+	if not comment:
+		comment=secexp
 	sk = ecdsa.SigningKey.from_secret_exponent(secexp=secexp,curve=py.getattr(ecdsa,curve))
 	sk.privkey.secret_multiplier=secexp
 	vk = sk.verifying_key
 
-	with open(f"{dir}privateKey_{curve}_{secexp}.pem", "wb") as f:
+	with open(f"{dir}privateKey_{curve}_{comment}.pem", "wb") as f:
 		f.write(sk.to_pem())
 	first = "ecdsa-sha2-nistp256"
 	prefix = b"\x00\x00\x00\x13ecdsa-sha2-nistp256\x00\x00\x00\x08nistp256\x00\x00\x00A"
 	second = base64.b64encode(
 		prefix+vk.to_string(encoding="uncompressed")
 		).decode("utf-8")
-	third = comment
+	if comment.strip().startswith('#'):
+		third = comment
+	else:	
+		third = ' # '+comment
 	bpub=" ".join([first, second, third]).encode()
 	if return_pub:return StrRepr(bpub.decode())
-	with open(f"{dir}publicKey_{curve}_{secexp}.pub", "wb") as f:
+	with open(f"{dir}publicKey_{curve}_{comment}.pub", "wb") as f:
 		f.write(bpub)
 	return sk,vk	
+edcsa_key_pair=get_edcsa_key_pair=generate_edcsa_key_pair=createECDSAKeyPairLocally=generate_edcsa_by_secexp
 
-def generate_edcsa_key_pair(private_key=None,filename='id_ecdsa'):
+def generate_edcsa_by_private_key(private_key=None,filename='id_ecdsa'):
 	"""This example shows how easy it is to generate and export ECDSA keys with python.
 
 	This program is similar to `ssh-keygen -t ecdsa` with no passphrase.

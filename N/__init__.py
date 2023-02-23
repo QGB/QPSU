@@ -1298,6 +1298,15 @@ def rpc_set_variable(*obj,base=py.No('auto history e.g. [http://]127.0.0.1:23571
 	return url,b
 set_rpc=set_rpc_var=rpc_set=rpc_set_var=rpcSetVariable=rpc_set_variable
 
+def rpc_get_file(filename,name='v',**ka):
+	U,T,N,F=py.importUTNF()
+	base=set_remote_rpc_base(**ka)
+	u=base+'response.set_data(F.readb(N.geta()))%23-'+T.url_encode(filename)
+	
+	b=curl_return_bytes(u)
+	
+	return F.write(filename,b)
+	
 def rpc_set_file(obj,filename=py.No('if obj exists: auto '),name='v',**ka):
 	''' local_obj , remote_filename
 '''	
@@ -2201,7 +2210,7 @@ pip install qqwry  # Not have cz88update
 				if F.exist(qqwry_path):
 					dat_path=qqwry_path
 			if not dat_path:
-				dat_path=U.gst+'qqwry.dat'
+				dat_path=U.get_gst(base_gst=1)+'qqwry.dat'
 				
 		if not F.exist(dat_path):
 			U.log(['updateQQwry length:', qqwry.updateQQwry(dat_path)] )
