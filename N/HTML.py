@@ -134,7 +134,11 @@ ac=xiaomi_air_conditioner_control
 # def list_2d_txt_href(response,a,file_column=None,**ka):
 def google_search_result_zhihu(response,word='',hs='',proxy='127.0.0.1:21080',u_size=36+4,**ka):
 	if not word:
-		word=N.geta()
+		if response:
+			word=N.geta()
+		else:
+			word=U.cbg(edit_prompt='keyword:')
+			
 	url=('https://www.google.com/search?q=site:zhihu.com+'
 		+T.url_encode(word)	)
 	if not hs and not U.get(url):	

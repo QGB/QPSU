@@ -25,14 +25,17 @@ promte 提升
 	if U.istermux():return U.cmd('termux-clipboard-get') 
 	p=U.get_duplicated_kargs(ka,'_print','print_','show','PRINT',default=p)
 	edit=U.get_duplicated_kargs(ka,'e','E','input_edit','input','edit_clipboard',default=edit)
+	edit_prompt=U.get_duplicated_kargs(ka,'title','msg','edit_msg','edit_prompt','prompt','promte','promot','promote',default=edit_prompt)
 	
 	w.OpenClipboard()
 	d = w.GetClipboardData(win32con.CF_UNICODETEXT)
 	w.CloseClipboard()
 	if p:U.pln(d)
+	
+	if edit_prompt and edit==False:
+		edit=True
 	if edit:
 		type=U.get_duplicated_kargs(ka,'type','edit_type','t') 
-		edit_prompt=U.get_duplicated_kargs(ka,'title','msg','edit_msg','edit_prompt','prompt','promte','promot','promote',default=edit_prompt)
 		only_edit_firstline=U.get_duplicated_kargs(ka,'edit_firstline','firstline','fl',
 		'line0','l0',default=only_edit_firstline)
 		if not edit_prompt:
