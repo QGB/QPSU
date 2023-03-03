@@ -198,13 +198,13 @@ new=new_file
 def write(f,text):
 	with open(f,'w') as _:
 		return _.write(text)
-def read(f):
+def read(f,size=-1):
 	if "'TextIOWrapper'" in repr(f):#<class 'TextIOWrapper'>
 		f.seek(0)
-		return f.read(-1)
+		return f.read(size)
 
 	with open(f) as _:
-		return _.read(-1)
+		return _.read(size)
 
 def gv():
 	print(sys_info())

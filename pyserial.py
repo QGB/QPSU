@@ -67,9 +67,10 @@ def open_device(dev=None, baudrate=115200, timeout=5,dtr=1):
 	if isinstance(dev,serial.Serial):
 		dev=dev.port
 		# return set_g(dev)
-	if py.isint(dev):
-		dev='COM{}'.format(dev)
-	dev=dev.upper()
+	if U.iswin():
+		if py.isint(dev):
+			dev='COM{}'.format(dev)
+		dev=dev.upper()
 	for k in py.list(devs):
 		if k.upper()==dev:
 			v=devs[k]
