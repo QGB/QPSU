@@ -12,6 +12,10 @@ def t():
 		write(f'osd{len(l)}',repr(l))	
 	return l	
 
+def run_forever():
+	import uasyncio as asyncio
+	loop = asyncio.get_event_loop()
+	loop.run_forever()
 
 def socket_send(file='',data='',ip='192.168.1.3',port=8000):
 	import socket
@@ -33,7 +37,7 @@ TypeError: unexpected keyword argument 'files'
 >>>
 '''
 	import urequests
-	files = {'odimg': open(file, 'rb')}
+	files = {file: open(file, 'rb')}
 	return urequests.post(url,files=files)
 	
 def post_large_file(url,file,headers={}):#, data=None, json=None,params=None
@@ -66,7 +70,7 @@ def post_large_file(url,file,headers={}):#, data=None, json=None,params=None
 	s.connect(addr)
 	if proto == "https:":
 		s = ussl.wrap_socket(s)
-	s.write(b"%s /%s HTTP/1.0\r\n" % (method, path))
+	s.write(b"POST /%s HTTP/1.0\r\n" % path)
 	if not "Host" in headers:
 		s.write(b"Host: %s\r\n" % host)
 	# Iterate over keys to avoid tuple alloc
@@ -89,7 +93,7 @@ def post_large_file(url,file,headers={}):#, data=None, json=None,params=None
 
 	with open(file,'rb') as f:
 		while f.tell()<isize:
-			s.write(f.read(4096))
+			s.write(f.read(256))
 
 	l = s.readline()
 	protover, status, msg = l.split(None, 2)

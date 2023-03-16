@@ -2007,6 +2007,12 @@ Image.open(fp)
    The file object must implement `~file.read`,
    `~file.seek`, and `~file.tell` methods,
    and be opened in binary mode.	
+   
+[20, 'FLIP_LEFT_RIGHT', 0],
+[21, 'FLIP_TOP_BOTTOM', 1],
+[51, 'ROTATE_90', 2], 
+[49, 'ROTATE_180', 3],
+[50, 'ROTATE_270', 4],
 	'''
 	U,T,N,F=py.importUTNF()
 	try:
@@ -2033,7 +2039,15 @@ Image.open(fp)
 		elif (py.istuple(rect) or py.islist(rect)) and U.len(rect)==4:
 			im = ImageGrab.grab(rect)
 			# raise py.ArgumentError('rect must be PIL Image or [ x0,y0,x1,y1 ]')
+		elif py.callable(transform_function):
+			from qgb import pil
+			if py.isbyte(rect):
+				im=pil.bytes_to_pil_image(rect)
+			# if 	
+			else:
+				raise py.NotImplementedError()
 		else:
+		
 			im=rect
 	else:	
 		if U.is_termux() and U.is_root():

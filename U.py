@@ -7530,14 +7530,25 @@ curve_nid==415
 		fh.write(data + b"\n")
 	return private_key,key
 	
-def tts_speak(t):
+def tts_speak(t,):
 	''' pip install pyttsx3
 长文本会一直阻塞，KeyboardInterrupt 无效	
 '''	
 	import pyttsx3
 	engine = get_or_set('pyttsx3.engine',lazy_default=lambda:pyttsx3.init())
-	engine.say(t)
-	engine.runAndWait()	
+	
+	
+	U,T,N,F=py.importUTNF()
+	engine.proxy._driver._tts.Speak(T.string(t))
+	# engine.say(t)
+	# if wait:
+	# try:
+		# engine.endLoop()
+	# except:pass	
+	# engine.runAndWait()	
+	# else:
+	# return engine
+		
 tts=speak=tts_speak
 	
 ############## qgb type ######################	

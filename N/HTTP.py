@@ -271,7 +271,7 @@ def download(url, file_path='',default_dir=py.No('set_input',no_raise=1),headers
 				sys.stdout.flush()
 	print()  # 避免上面\r 回车符
 		
-def post(url,data=None,return_text=False,**ka):
+def post(url,data=None,files=None,return_text=False,**ka):
 	'''
 Signature: requests.post(url, data=None, json=None, **kwargs)
 Docstring:
@@ -293,7 +293,7 @@ Type:	  function
 	
 	data=U.get_duplicated_kargs(ka,'data','v',default=data)
 	
-	rp= request(url,method='POST',data=data,**ka)
+	rp= request(url,method='POST',data=data,files=files,**ka)
 	if return_text:
 		return rp.text
 	return rp

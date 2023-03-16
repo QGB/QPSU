@@ -112,6 +112,17 @@ try:
 	from pprint import pprint,pformat
 except:pass
 ####################################################
+def list_append_row_StrRepr(alist,**ka):
+	global U,T,N,F
+	U,T,N,F=py.importUTNF()
+	row=[]
+	for k,v in ka.items():
+		if py.len(k)<2:raise py.NotImplementedError()
+		n=py.int(k[1:])
+		row.append(U.StrRepr(v,size=n))
+	alist.append(row)	
+append=list_append_row_StrRepr		
+		
 def parse_requirements_txt(f):
 	'''C:\test\github\TradingView-Machine-Learning-GUI\requirements.txt
 	
