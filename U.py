@@ -7537,18 +7537,10 @@ def tts_speak(t,):
 	import pyttsx3
 	engine = get_or_set('pyttsx3.engine',lazy_default=lambda:pyttsx3.init())
 	
-	
 	U,T,N,F=py.importUTNF()
-	engine.proxy._driver._tts.Speak(T.string(t))
-	# engine.say(t)
-	# if wait:
-	# try:
-		# engine.endLoop()
-	# except:pass	
-	# engine.runAndWait()	
-	# else:
-	# return engine
-		
+	t=T.string(t)
+	engine.proxy._driver._tts.Speak(t)
+	return t	
 tts=speak=tts_speak
 	
 ############## qgb type ######################	

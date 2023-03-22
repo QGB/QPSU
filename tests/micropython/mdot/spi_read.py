@@ -154,7 +154,10 @@ def gpio_g(m=96,s=None):
 
 	for i in range(m):
 		print(i)
-		M.get(f'http://192.168.1.3:2296/r=U.speak({i})')
+		try:
+			M.get(f'http://192.168.1.3:16084/r=U.speak({i})')
+		except Exception as e:print(e)	
+		M.gc()
 		uart.write(f'gpio g {i} \n')
 		w=0
 		for j in range(99):

@@ -405,7 +405,7 @@ def list_github_search(response,a,txt_column=-1,**ka):
 	if txt_column<0:
 		txt_column=py.len(a[0])+txt_column
 	
-	def txt_column_callback(html,head):
+	def github_txt_column_callback(html,head):
 		bs=T.BeautifulSoup(html)
 		style=bs.find('head').find('style')
 		# py.pdb()()
@@ -549,11 +549,48 @@ for(e of document.querySelectorAll("td:nth-of-type(5) > textarea")){
 
 </script>
 '''		
-	return list_2d(response,a,html_callback=txt_column_callback,**ka)	
+	return list_2d(response,a,html_callback=github_txt_column_callback,**ka)	
 gs=github_search=list_github_search
 
 
-def list_2d_txt_href(response,a,file_column=None,**ka):
+def list_2d_txt_href(response,a,url_index_dict=None,txt=None,**ka):
+	''' url_index_dict [1,2] : 1.href == 2(url)
+url_index_dict == int 默认 url最后一列 url_index_dict={index:-1}	
+	
+url尽量放在列表靠后的列，简化影响	
+
+TODO:  list pop multiple indexes  您需要以相反的顺序删除它们，以免丢弃后续索引。
+'''
+	url_index_dict=U.get_duplicated_kargs(ka,'url_index_dict','u','url','u_col','ucol','ucolumn',default=url_index_dict)
+	if not py.isdict(url_index_dict):
+		if py.isint(url_index_dict):
+			url_index_dict={url_index_dict:-1}
+		else:
+			url_index_dict={url_index_dict[0]:url_index_dict[1]}
+	a=[py.list(row).copy() for row in a]
+	diu={}
+	for ia,iu in url_index_dict.items():
+		diu[iu]=[row.pop(iu) for row in a]
+		
+	def href_column_callback(html,head):
+		nonlocal a,url_index_dict,txt
+
+		bs=T.BeautifulSoup(html)
+		for ia,iu in url_index_dict.items():
+			es=bs.select(f'body > table > tbody > tr > td:nth-of-type({1+ia})')
+			for ne,e in py.enumerate(es):
+				f=a[ne][ia]
+				ea=bs.new_tag('a')
+				ea.attrs['href'  ]=diu[iu][ne]
+				ea.attrs["target"]='_blank'
+				ea.append(f)
+				e.clear()
+				e.append(ea)
+		return py.str(bs)		
+	return list_2d(response,a,html_callback=href_column_callback,**ka)
+list_2d_txt=listu=list_url=list_2d_url=list_2d_href=list_2d_txt_href	
+
+def list_2d_href_file_column(response,a,file_column=None,**ka):
 	file_column=U.get_duplicated_kargs(ka,'file_column','cf','fc','f_col','fcol','fcolumn',default=file_column)
 	def file_column_callback(html,head):
 		nonlocal file_column,a
@@ -599,7 +636,6 @@ def list_2d_txt_href(response,a,file_column=None,**ka):
 		# def file_column_callback():pass
 	return list_2d(response,a,html_callback=file_column_callback,**ka)
 		
-list_2d_txt=list_2d_txt_href
 
 list_2d_CSS_MARK='/*css*/'
 def list_2d(response,a,html_callback=None,index=False,sort_kw=U.SORT_KW_SKIP,debug=False,**ka):

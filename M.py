@@ -12,6 +12,11 @@ def t():
 		write(f'osd{len(l)}',repr(l))	
 	return l	
 
+def rename(a,b):
+	import os
+	return	os.rename(a,b)
+mv=rename	
+
 def run_forever():
 	import uasyncio as asyncio
 	loop = asyncio.get_event_loop()

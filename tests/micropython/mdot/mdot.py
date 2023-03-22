@@ -4,9 +4,9 @@ ismpy=True
 try:
 	import uasyncio as asyncio
 	import M
-	uart=M.uart(tx=3,rx=2)#6 18
-	# uart=M.uart(tx=2,rx=3,baudrate=38400)#12 mt7688
-	# uart=M.uart(tx=9,rx=8)#13 hdc
+	# uart=M.uart(tx=2,rx=3,baudrate=38400)# RTL8196E
+	# uart=M.uart(tx=18,rx=19,baudrate=57600)# MT7688
+	uart=M.uart(tx=9,rx=8)#13 hdc
 	
 	swriter = asyncio.StreamWriter(uart, {})
 	sreader = asyncio.StreamReader(uart)
@@ -47,24 +47,54 @@ except Exception as e:
 loop = asyncio.get_event_loop()
 
 break_sleep=False
-async def sleep(asec):
+# sleep_min=0.1
+async def sleep(aisec):
 	global break_sleep
-	if aisec<1:return await asyncio.sleep(asec)
-
 	break_sleep=False
-	n,y=divmod(asec,int(asec)) # ZeroDivisionError: divide by zero
+
+	if aisec<1:return await asyncio.sleep(aisec)
+
+	n=int(aisec)
+	y=aisec-n
+
 	for i in range(n):
 		if break_sleep:return
-		asyncio.sleep(1)
+		await asyncio.sleep(1)
 	if break_sleep:return	
-	asyncio.sleep(y)
+	await asyncio.sleep(y)
 	
-gt_off,gt_on,gpin=9999,0,18
-def set_blink(off,on,pin):
-	global gt_off,gt_on,gpin
+gt_off,gt_on,gpin=9999,0,None
+def set_blink(off,on,pin=18):
+	global gt_off,gt_on,gpin,break_sleep
+	break_sleep=True
+	gt_off,gt_on=off,on
+	# if isinstance(pin,int)
+	# if not gpin:
 
+	import machine
+	gpin=machine.Pin(pin,machine.Pin.OUT)
+	gpin.off()
+	M.gc()
+	# break_sleep=False
+	return gt_off,gt_on,gpin,break_sleep
 async def blink_loop():
-	await asyncio.sleep(1)
+	while True:
+		# for ws in gws:
+			# try:
+			# 	await ws.send(b'0'+repr([M.time(),gt_off,gt_on,gpin,break_sleep])+b'\r\n') # str '0' not work, 单独 \r 不换行，\n 不回首
+			# except Exception as e:
+			# 	ws.closed=True
+			# 	print(ws,e)
+		if not gpin:
+			await asyncio.sleep(0.9)
+			continue
+
+		if gt_on:
+			gpin.on()
+			await sleep(gt_on)
+		gpin.off()
+		await sleep(gt_off)
+
 loop.create_task(blink_loop())
 
 # if not ismpy:
@@ -174,7 +204,5 @@ def static(request,path=''):
 	else:print(request,path)
 	return send_file(path)
 	
-
 loop.create_task(app.run(port=gport))
-
 loop.run_forever()
