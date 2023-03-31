@@ -561,7 +561,7 @@ url尽量放在列表靠后的列，简化影响
 
 TODO:  list pop multiple indexes  您需要以相反的顺序删除它们，以免丢弃后续索引。
 '''
-	url_index_dict=U.get_duplicated_kargs(ka,'url_index_dict','u','url','u_col','ucol','ucolumn',default=url_index_dict)
+	url_index_dict=U.get_duplicated_kargs(ka,'url_index_dict','u','uc','ui','url','u_col','ucol','ucolumn',default=url_index_dict)
 	if not py.isdict(url_index_dict):
 		if py.isint(url_index_dict):
 			url_index_dict={url_index_dict:-1}

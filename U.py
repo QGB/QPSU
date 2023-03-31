@@ -799,6 +799,11 @@ def new_2d_list(width,height,default_value=0):
 	''' cols=height   rows=width '''
 	return [[default_value for i in py.range(height)] for j in py.range(width)]
 
+def list2d_swap_row_column(a):
+	import pandas as pd
+	return pd.DataFrame(a).T.values.tolist()
+transpose_list_xy=swap_xy_list=list2d_swap_row_column
+
 def list_get_multi_indexs(a,*ins):
 	if py.len(ins)==1 and py.islist(ins[0]):
 		ins=ins[0]
@@ -3765,6 +3770,12 @@ def tuple_operator(a,operator,b=None,operator_ka={},skip_AttributeError=False):
 	''' 对两个长度相等的（tuple，list，...） 操作
 如果只对一个tuple操作，可以这样用：  t=U.tuple_operator(t,t,U.StrRepr)	
 
+
+ipdb> !py.getattr(n,'__add__')(6)
+7
+ipdb> !py.getattr(n,'__add__')(0.2)
+NotImplemented
+
 	'''
 	r=[]
 	for n,v in enumerate(a):
@@ -3794,7 +3805,15 @@ def tuple_operator(a,operator,b=None,operator_ka={},skip_AttributeError=False):
 		return py.tuple(r)
 	return r
 	
-def tuple_add(a,b):return tuple_operator(a=a,b=b,operator='__add__')
+def tuple_add(a,b):
+	''' #TODO
+'''	
+	U,T,N,F=py.importUTNF()
+	if U.unique(U.type(*a))==[py.int]:
+		if py.isfloat(b):
+			return tuple_operator(a=[b]*py.len(a),b=a,operator='__radd__')
+			
+	return tuple_operator(a=a,b=b,operator='__add__')
 add_two_tuple=tuple_add
 
 def tuple_minus(a,b):return tuple_operator(a=a,b=b,operator='__sub__')

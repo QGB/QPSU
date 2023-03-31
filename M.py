@@ -168,7 +168,7 @@ def count(a=0):
 	return gct[a]
 ct=count
 
-def uart(tx=2,rx=3,w='',baudrate=115200,wsleep=0.1):
+def uart(tx=2,rx=3,index=1,w='',baudrate=115200,wsleep=0.1):
 	global guart
 	from machine import UART
 	if not guart:guart={}
@@ -176,7 +176,7 @@ def uart(tx=2,rx=3,w='',baudrate=115200,wsleep=0.1):
 	if k in guart:
 		uart1=guart[k]
 	else:
-		guart[k]=uart1 = UART(1, baudrate=baudrate, tx=tx, rx=rx)
+		guart[k]=uart1 = UART(index, baudrate=baudrate, tx=tx, rx=rx)
 	if w:
 		uart1.write(w)
 		sleep(wsleep)

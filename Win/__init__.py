@@ -71,6 +71,66 @@ try:
 	import win32gui
 except Exception as ei:pass
 #############################################
+def GetForegroundWindow():
+	import win32gui
+	h=win32gui.GetForegroundWindow()
+	return h,win32gui.GetWindowText(h)
+get_current_window=GetForegroundWindow
+
+def keil_download(button=None,md5=''):
+	r"""
+rm miniFOC.*;STD_PERIPH_LIBS=./STM32F10x_StdPeriph_Lib_V3.5.0 make all;cp ./miniFOC.elf /all/mnt/c/test/gd32/gd32f130_uart/Objects/gd32f
+130_uart.axf;wget -nv -O - "https://3/r=Win.keil_download(md5='''$(md5sum *)''')"
+
+"""	
+	U,T,N,F=py.importUTNF()   
+	button=button or U.get(keil_download.__name__)
+	if not button:
+		hs=[r3 for r3 in get_all_windows() if ' - μVision' in r3[1]]
+		if py.len(hs)==1:h=hs[0][0]
+		elif py.len(hs)>1:
+			U.pprint(U.enumerate(hs))
+			n=U.input('multi keil,select window index or input handle:',type=int)
+			if n > 99:h=n
+			h=hs[n][0]
+		else:
+			raise py.EnvironmentError('not found keil window')
+			
+		import pywinauto
+		w=pywinauto.Desktop(backend='uia').window(handle=h)
+		es=w._WindowSpecification__resolve_control(w.criteria)[0].descendants()
+		py.repr(es)#TODO 没有这句获取不到 bs?
+		bs=[e for e in es if py.getattr(e,'friendlyclassname',0)=='Button']
+		# bs=[]
+		# for i in range(9):
+			# print(U.stime(),'wait bs',len(bs))
+			# U.sleep(0.5)
+		# if not bs:return es
+		button=[e for e in bs if e.texts()==['Download']][0]
+	U.set(keil_download.__name__,button)
+	
+	if md5:
+		# md5=md5.replace(py.chr(0x0a),T.eol)
+		ms=[i for i in md5.splitlines() if '.elf' in i]
+		md5=ms[0][:32]
+		
+		t=button.parent().parent().parent().texts()[0]
+		sp=T.subLast(t,'','\\')
+		name=T.subLast(t,'\\','.uvprojx')
+		if sp and name:
+			sp=f'{sp}/Objects/{name}.axf'
+			if md5==U.md5(file=sp):
+				import win32gui
+				h=win32gui.GetForegroundWindow()
+				button.click()
+				win32gui.SetForegroundWindow(h)
+				
+				return U.StrRepr('='*122+T.eol*3),'Success keil_download !',md5,sp,U.stime(),U.StrRepr(T.eol*2+'='*122)
+			
+		return U.StrRepr('#'*122+T.eol*3),'check failed !!!',md5,sp,U.md5(file=sp),U.StrRepr(T.eol*2+'#'*122)
+	button.click()
+	return button
+
 def pywinauto_windows(handle):
 	''' 
 w.window_text() # title
@@ -102,6 +162,29 @@ def send_key_to_window_ctrl(h,c):
 	# win32api.PostMessage(h, win32con.WM_KEYUP  , S_KEY   , 0);
 	win32api.PostMessage(h, win32con.WM_KEYUP  , CTRL_KEY, 0); 
 	
+
+def pywinauto_print_control_identifiers(h,return_w=False):
+	import pywinauto,io,contextlib
+	# app = pywinauto.application.Application().connect(handle=h)
+	# w=app.window(handle=h)
+	w=pywinauto.Desktop(backend='uia').window(handle=h)
+	f = io.StringIO()
+	
+	with contextlib.redirect_stdout(f):
+		w.print_control_identifiers()
+	if return_w:
+		return w,f
+	return f.getvalue()	
+		
+print_control_identifiers=pywinauto_print_control_identifiersdef send_key_by_pywinauto(h,*a,**ka):
+	import pywinauto
+	if py.isint(h):ka['handle']=h
+	if py.isstr(h):ka['title_re']=h
+	app = pywinauto.application.Application().connect(**ka)
+	
+	return app
+	pywinauto
+
 def send_key_to_window(h,*a):
 	import win32api,win32con
 	for i in a:
@@ -633,6 +716,7 @@ def setWindowPos(hwnd=0,x=0,y=0,w=0,h=0,rect=(),top=None,flags=None):
 	'''if not flags:flags=SWP_SHOWWINDOW  # 无论是否top，是否拥有焦点，默认显示此窗口
 	'''
 	if not hwnd:
+		if py.isno(hwnd):return hwnd
 		hwnd=getCmdHandle()
 		# if x==y==w==h==0 and not rect:
 			# x,y,w,h=(199,-21,999,786)
