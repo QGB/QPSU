@@ -4,9 +4,10 @@ ismpy=True
 try:
 	import uasyncio as asyncio
 	import M
+	uart=M.uart(tx=2,rx=3,baudrate=19200)# E32
 	# uart=M.uart(tx=2,rx=3,baudrate=38400)# RTL8196E
 	# uart=M.uart(tx=18,rx=19,baudrate=57600)# MT7688
-	uart=M.uart(tx=9,rx=8)#13 hdc
+	# uart=M.uart(tx=9,rx=8)#13 hdc
 	
 	swriter = asyncio.StreamWriter(uart, {})
 	sreader = asyncio.StreamReader(uart)

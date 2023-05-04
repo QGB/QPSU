@@ -5,9 +5,76 @@ if gsqp not in sys.path:sys.path.append(gsqp)#py3 works
 from qgb import py
 U,T,N,F=py.importUTNF()
 
+def convert_klines_to_json(klines):
+	import json
+	rds = []
+	if py.islist(klines) and py.len(klines[0])==12:
+		for v in klines:
+			kline_data = {
+				'timestamp': v[0],
+				'open': 	py.float(v[1]),
+				'high': 	py.float(v[2]),
+				'low':  	py.float(v[3]),
+				'close':	py.float(v[4]),
+				'volume':	py.float(v[5]),
+				'turnover': py.float(v[7]),
+			}
+			rds.append(kline_data)	
+	
+	elif py.istr(klines):
+		return klines
+	elif 'pandas.core.frame.DataFrame' in py.str(py.type(klines)):
+		ds = klines.to_dict(orient='records')
+		for d in ds:
+			kline_data = {
+				'timestamp': int(d['close_datetime'].timestamp() * 1000),
+				'open': d['open'],
+				'high': d['high'],
+				'low': d['low'],
+				'close': d['close'],
+				'volume':d['volume'],
+				'turnover':d['quote_volume'],
+			}
+			rds.append(kline_data)
+	return json.dumps(rds)
+to_json=convert_klines_to_json	
+	
+def get_kline(symbol="BTCUSDT",timeframe="1m",start="2022-12-14",end="2022-12-24",return_json=False):
+	'''
+pip install -i http://pypi.douban.com/simple --trusted-host pypi.douban.com binance-history
+'''	
+	tas=(symbol,timeframe,start,end)
+	print(tas)
+	klines = U.get(tas)
+	if py.isno(klines):
+		import binance_history
+		klines = binance_history.fetch_klines(
+			symbol=symbol,
+			timeframe=timeframe,
+			start=start,
+			end=end,
+		)
+		U.set(tas,klines)	
+	if return_json:
+		return convert_klines_to_json(klines)
+	else:
+		return klines
 
-from binance.client import Client
+def get_kline_1s(symbol,date='',return_json=False):
+	'''
+	# from datetime import date
+	# start=date.fromisoformat("2022-02-14")#01 02 month
+'''
+	if symbol.startswith('?') and '=' in symbol:
+		date=T.sub(symbol,'=','')
+		symbol=T.sub(symbol,'?','=')
+	start=U.parse_time(date).date()
+	return get_kline(symbol=symbol,timeframe="1s",start=start.isoformat(),end=(start+U.time_delta(days=1)).isoformat(),return_json=return_json)
 
+try:
+	from binance.client import Client
+except:
+	Client=py.No
 class QClient(Client):
 	def __init__(self,*a,**ka):
 		'''self, api_key: Optional[str] = None, 
@@ -93,3 +160,4 @@ def get_ws_key(key):
 	rp=requests.post('https://www.mokexapp.cz/api/v1/userDataStream', headers=headers)
 	print(rp.text)
 	return rp
+	

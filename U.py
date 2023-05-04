@@ -516,6 +516,9 @@ def is_termux():
 	return '/com.termux' in sys.executable
 istermux=isTermux=is_termux
 
+def is_kivy():
+	return os.environ['KIVY_ORIENTATION'] or os.environ['P4A_BOOTSTRAP']
+
 def is_vercel():
 	'''
 drwx------  2 sbx_user1051  990 4.0K Jul  1 14:46 tmp
@@ -2775,7 +2778,7 @@ def dir(a,type_filter=py.No('default not filter'),only_attr='',skip_attr='',raw_
 	type_filter=get_duplicated_kargs(ka,'type_filter','type','t',default=type_filter)
 	if py.istr(type_filter):type_filter=type_filter.lower()
 	only_attr=get_duplicated_kargs(ka,'filter','keyFilter','key_filter','attr_filter','attrFilter','only_attr','name','k',default=only_attr)
-	skip_attr=get_duplicated_kargs(ka,'skip_attr','skip','ignore','skipKey','key_skip','skip_key','attr_skip','attrSkip',default=skip_attr)
+	skip_attr=get_duplicated_kargs(ka,'skip_attr','skip','ignore','skipKey','key_skip','skip_key','attr_skip','attrSkip','exclude',default=skip_attr)
 	attrs=py.dir(a)
 	if skip_attr:
 		attrs=[i for i in attrs if skip_attr not in i]
@@ -3808,6 +3811,7 @@ NotImplemented
 def tuple_add(a,b):
 	''' #TODO
 '''	
+	if py.isnum(a) and py.isnum(b):return a+b
 	U,T,N,F=py.importUTNF()
 	if U.unique(U.type(*a))==[py.int]:
 		if py.isfloat(b):
@@ -3816,13 +3820,19 @@ def tuple_add(a,b):
 	return tuple_operator(a=a,b=b,operator='__add__')
 add_two_tuple=tuple_add
 
-def tuple_minus(a,b):return tuple_operator(a=a,b=b,operator='__sub__')
+def tuple_minus(a,b):
+	if py.isnum(a) and py.isnum(b):return a-b
+	return tuple_operator(a=a,b=b,operator='__sub__')
 minus=tuple_minus
 
-def tuple_multiply(a,b):return tuple_operator(a=a,b=b,operator='__mul__')
+def tuple_multiply(a,b):
+	if py.isnum(a) and py.isnum(b):return a*b
+	return tuple_operator(a=a,b=b,operator='__mul__')
 mul=multiply_two_tuple=tuple_multiply
 
-def tuple_div(a,b):return tuple_operator(a=a,b=b,operator='__truediv__')
+def tuple_div(a,b):
+	if py.isnum(a) and py.isnum(b):return a/b
+	return tuple_operator(a=a,b=b,operator='__truediv__')
 div=div_two_tuple=tuple_div
 
 def time_range_list(*a,**ka):
@@ -4568,7 +4578,11 @@ def getParentPid(pid=None):
 	import psutil
 	if not pid:
 		pid=globals()['pid']
-	return psutil.Process(pid).ppid()
+	try:
+		return psutil.Process(pid).ppid()
+	except Exception as e:
+		return py.No(e)
+		
 ppid=getppid=get_ppid=getParentPid	
 	
 def getParentCmdLine():
@@ -4702,6 +4716,7 @@ def get_all_process_value_list(**ka):
 	column_size_ka['ppid']=U.get_duplicated_kargs(ka,'ppid','PPID','pp',default=size)
 	column_size_ka['_create_time']=U.get_duplicated_kargs(ka,'_create_time','time',default=26)#,'t' 和title冲突了
 	
+	# column_size_ka['name']=U.get_duplicated_kargs(ka,'name',default=1) # cmd 每行最后
 	column_size_ka['cmd']=U.get_duplicated_kargs(ka,'cmd','CMD','cmdline','command','c',default=1) # cmd 每行最后
 
 	def is_size(k,v):
@@ -7471,7 +7486,7 @@ def new_ssh_key(key_size=2048):
 	return public_key,private_key
 
 
-def generate_edcsa_by_secexp(secexp=1,curve='NIST256p', comment="",dir='C:/test/ssh/',return_pub=False):
+def generate_ecdsa_by_secexp(secexp=1,curve='NIST256p', comment="",dir='C:/test/ssh/',return_pub=False):
 	'''  ecdsa.NIST256p # NIST P-256被称为secp256r1  prime256v1。不同的名字，但他们都是一样的。
 ecdsa.SECP256k1 # cryptography hazmat can not load SECP256k1, _ECDSA_KEY_TYPE[curve.name]
 ValueError: Unsupported curve for ssh private key: 'secp256k1'
@@ -7509,7 +7524,7 @@ Load key "C:/test/ssh/privateKey_NIST256p_1.pem": invalid format
 	with open(f"{dir}publicKey_{curve}_{comment}.pub", "wb") as f:
 		f.write(bpub)
 	return sk,vk	
-edcsa_key_pair=get_edcsa_key_pair=generate_edcsa_key_pair=createECDSAKeyPairLocally=generate_edcsa_by_secexp
+edcsa_key_pair=get_edcsa_key_pair=generate_edcsa_key_pair=createECDSAKeyPairLocally=generate_edcsa_by_secexp=generate_ecdsa_by_secexp
 
 def generate_edcsa_by_private_key(private_key=None,filename='id_ecdsa'):
 	"""This example shows how easy it is to generate and export ECDSA keys with python.
@@ -7549,6 +7564,15 @@ curve_nid==415
 		fh.write(data + b"\n")
 	return private_key,key
 	
+def load_jks(filename,password=''):
+	from jks import KeyStore
+	keystore = KeyStore.loads(F.read(filename),password)
+	# with open(filename) as f: 
+		# keystore = KeyStore.loads(f.read(),password)
+
+	return keystore
+	p12 = keystore.entries['myalias'].export_pkcs12('mypassword')
+	
 def tts_speak(t,):
 	''' pip install pyttsx3
 长文本会一直阻塞，KeyboardInterrupt 无效	
@@ -7561,6 +7585,31 @@ def tts_speak(t,):
 	engine.proxy._driver._tts.Speak(t)
 	return t	
 tts=speak=tts_speak
+
+def permutations(*a):
+	from itertools import permutations
+	return py.list(permutations(a))
+	# from itertools import combinations
+	# return py.list(combinations(a, 3))
+	# print list(combinations(l, 3))
+	# from itertools import product
+	# return py.list(product(a, repeat=3))
+qpl=plzh=permutations	
+
+def get_kivy_files_path():
+	return os.__file__[:0-py.len('app/_python_bundle/stdlib.zip/os.pyc')]
+	
+def tar_gz(filename,fs):
+	import tarfile
+	ext='.tar.gz'
+	if not filename.lower().endswith(ext):
+		filename+=ext
+	with tarfile.open(filename, "w:gz") as tar:
+		for name in fs:
+			tar.add(name)
+	# tar.close()	
+	return tar
+tar=tar_gz
 	
 ############## qgb type ######################	
 def StrRepr_multi(*a,**ka): # ,wrap=StrRepr

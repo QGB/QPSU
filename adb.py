@@ -86,7 +86,7 @@ def get_apk_info(f,p=1):
 		print(apk.version_name)
 		print(apk.version_code)
 		print(apk.icon_info)
-		print(apk.icon_data)
+		# print(apk.icon_data)
 		print(apk.application)	
 	return apk
 apk=get_apk_info

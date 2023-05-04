@@ -1022,9 +1022,9 @@ def intToHex(number,uppercase=True):
 '{:02X}'.format(257)=='101'
 
 '''
-	sf='{:02{}}'
-	if uppercase:sf=sf.format('X')
-	else:sf=sf.format('x')
+	sf='{:02%s}'
+	if uppercase:sf=sf%'X'
+	else:sf=sf%'x'
 	return sf.format(number)
 
 gURL_unreserved_mark=('-','_','.','!','~','*',"'",'(',')')
@@ -1225,7 +1225,7 @@ def hasZh(word):
 	return match
 contain_zh=has_zh=hasZh	
 ################# zh end ##############
-def filter_sint_list(a,digits=py.range(1,999)):
+def filter_sint_list(a,digits=py.range(1,999),return_int=True):
 	if py.isint(digits):
 		digits=py.range(digits,999)
 	# digits=py.list(digits)
@@ -1241,7 +1241,10 @@ def filter_sint_list(a,digits=py.range(1,999)):
 			si=''
 	if py.len(si) in digits:
 		r.append(si)
-	return r
+	if return_int:
+		return [py.int(i) for i in r]
+	else:	
+		return r
 int_filter=matchInt=match_int=filter_sint=filter_int=filterInt=filter_sint_list
 
 RE_HTML_TAG = r'<[^>]+>'

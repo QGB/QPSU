@@ -275,6 +275,17 @@ def wifi_scan(p=1,return_dict=False):
 	import network
 	n=network.WLAN(network.STA_IF)
 	n.active(True)
+	rd={}
+	if return_dict:
+		while not rd:
+			for ssid, bssid, channel, RSSI, authmode, hidden in n.scan():
+				ssid=ssid.decode('utf-8')
+				rd[ssid]=(bssid, channel, RSSI, authmode, hidden)
+			print('wifi_scan rd',len(rd))	
+			if rd:return rd
+			else:
+				n.disconnect()
+				M.sleep(1)
 	r=[]
 # ' '.join([' '*8,'ssid',' '*6,'bssid',' '*4,'channel,RSSI,authmode,hidden'])
 	if p:print('         ssid        bssid      channel,RSSI,authmode,hidden')
@@ -373,8 +384,7 @@ def gpi(index=0,mod=None):
 	return gdpin[(index,0)]
 
 
-def blink(a=0.2,b=0.47,index=None):
-	if index==None:index=2
+def blink(a=0.2,b=0.47,index=12):#esp32c3 12
 	if 'gop' in globals():
 		p=gop
 	else:

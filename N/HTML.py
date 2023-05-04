@@ -1349,9 +1349,9 @@ def select_result(q,response,**ka):
 			# r[k]=disabled.pop(k)
 			# continue
 
-	return select(r,response=response,**ka)
+	return select(iterable=r,response=response,**ka)
 
-def select(iterable,**ka):
+def select(response,iterable,**ka):
 	'''
 #<!-- 
 				# 不能用  editable="false" readyonly  
@@ -1359,7 +1359,7 @@ def select(iterable,**ka):
 				# background="green" 无效 , lavender淡紫色, 熏衣草花 ,#e6e6fa 太淡啦
 				#  -->	
 	 '''
-	response=U.get_duplicated_kargs(ka,'p','resp','response','rp')
+	# response=U.get_duplicated_kargs(ka,'p','resp','response','rp')
 	request=U.get_duplicated_kargs(ka,'q','req','request','requests','rq')
 	url=U.get_duplicated_kargs(ka,'url','mark_url', 'request_url')
 	 
@@ -1419,7 +1419,8 @@ def select(iterable,**ka):
 			for k,v in kv:
 				# k,v=fk(k),fv(v)
 				# U.msgbox(k,v)
-				rows+=hd.format(i=i,name=r.id(k,v), k=fk(k),v=fv(v) ,checked='checked')
+				print(type(r),r.id)
+				rows+=hd.format(i=i,name=r.id(k,v),k=fk(k),v=fv(v),checked='checked')
 				i+=1
 			for k,v in disabled:
 				# k,v=fk(k),fv(v)
@@ -1438,7 +1439,7 @@ def select(iterable,**ka):
 			rd=iterable
 		elif id not in gid_select:
 			rd = gid_select[id]=DictSelect(iterable)
-			rd.id=id
+			# rd.id=id
 		else:
 			rd = gid_select[id]
 		return do_resp(rd,rd.items(),rd.disabled.items())
@@ -1448,10 +1449,10 @@ def select(iterable,**ka):
 			rd=iterable
 		elif id not in gid_select:
 			rd = gid_select[id]=ListSelect(iterable)
-			rd.id=id
+			# rd.id=id
 		else:
 			rd = gid_select[id]
-		return do_resp(  rd,enumerate(rd),enumerate(rd.disabled) 	)
+		return do_resp(rd,enumerate(rd),enumerate(rd.disabled) 	)
 
 ################################################
 

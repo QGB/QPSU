@@ -77,44 +77,58 @@ def GetForegroundWindow():
 	return h,win32gui.GetWindowText(h)
 get_current_window=GetForegroundWindow
 
-def keil_download(button=None,md5=''):
+def get_keil_es():
+	hs=[r3 for r3 in get_all_windows() if ' - μVision' in r3[1]]
+	if py.len(hs)==1:h=hs[0][0]
+	elif py.len(hs)>1:
+		U.pprint(U.enumerate(hs))
+		n=U.input('multi keil,select window index or input handle:',type=int)
+		if n > 99:h=n
+		h=hs[n][0]
+	else:
+		raise py.EnvironmentError('not found keil window')
+		
+	import pywinauto
+	w=pywinauto.Desktop(backend='uia').window(handle=h)
+	es=w._WindowSpecification__resolve_control(w.criteria)[0].descendants()
+	py.repr(es)#TODO 没有这句获取不到 bs?
+	return es
+def get_keil_log(index=0):
+	U,T,N,F=py.importUTNF()  
+	ls=[e for e in get_keil_es() if py.getattr(e,'friendlyclassname',0)=='ListItem']	
+	return T.eol.join(a._BaseWrapper__repr_texts()[1] for a in ls[index:])
+	
+def keil_download(button_download=None,md5='',build=False,nircmd=None):
 	r"""
 rm miniFOC.*;STD_PERIPH_LIBS=./STM32F10x_StdPeriph_Lib_V3.5.0 make all;cp ./miniFOC.elf /all/mnt/c/test/gd32/gd32f130_uart/Objects/gd32f
 130_uart.axf;wget -nv -O - "https://3/r=Win.keil_download(md5='''$(md5sum *)''')"
 
 """	
 	U,T,N,F=py.importUTNF()   
-	button=button or U.get(keil_download.__name__)
-	if not button:
-		hs=[r3 for r3 in get_all_windows() if ' - μVision' in r3[1]]
-		if py.len(hs)==1:h=hs[0][0]
-		elif py.len(hs)>1:
-			U.pprint(U.enumerate(hs))
-			n=U.input('multi keil,select window index or input handle:',type=int)
-			if n > 99:h=n
-			h=hs[n][0]
-		else:
-			raise py.EnvironmentError('not found keil window')
-			
-		import pywinauto
-		w=pywinauto.Desktop(backend='uia').window(handle=h)
-		es=w._WindowSpecification__resolve_control(w.criteria)[0].descendants()
-		py.repr(es)#TODO 没有这句获取不到 bs?
+	from qgb import Win
+	button_download=button_download or U.get(keil_download.__name__+'Download')
+	button_build=					 U.get(keil_download.__name__+'Build')
+	if not button_download or not button_build:
+		es=get_keil_es()
 		bs=[e for e in es if py.getattr(e,'friendlyclassname',0)=='Button']
+		# if build:return es,bs
 		# bs=[]
 		# for i in range(9):
 			# print(U.stime(),'wait bs',len(bs))
 			# U.sleep(0.5)
 		# if not bs:return es
-		button=[e for e in bs if e.texts()==['Download']][0]
-	U.set(keil_download.__name__,button)
+		button_download=[e for e in bs if e.texts()==['Download']][0]
+		button_build	=[e for e in bs if e.texts()==['Build']][0]
+		
+	U.set(keil_download.__name__+'Download',button_download)
+	U.set(keil_download.__name__+'Build',button_build)
 	
 	if md5:
 		# md5=md5.replace(py.chr(0x0a),T.eol)
 		ms=[i for i in md5.splitlines() if '.elf' in i]
 		md5=ms[0][:32]
 		
-		t=button.parent().parent().parent().texts()[0]
+		t=button_download.parent().parent().parent().texts()[0]
 		sp=T.subLast(t,'','\\')
 		name=T.subLast(t,'\\','.uvprojx')
 		if sp and name:
@@ -122,14 +136,42 @@ rm miniFOC.*;STD_PERIPH_LIBS=./STM32F10x_StdPeriph_Lib_V3.5.0 make all;cp ./mini
 			if md5==U.md5(file=sp):
 				import win32gui
 				h=win32gui.GetForegroundWindow()
-				button.click()
-				win32gui.SetForegroundWindow(h)
+				button_download.click()
+				U.nircmd('win activate stitle tmux')
+				U.nircmd('win max stitle tmux')	
+				# for i in range(3):
+					# print(Win.GetForegroundWindow())
+					#win32gui.SetForegroundWindow(h)
+					# U.sleep(0.5)
 				
-				return U.StrRepr('='*122+T.eol*3),'Success keil_download !',md5,sp,U.stime(),U.StrRepr(T.eol*2+'='*122)
+				return [U.StrRepr('='*122+T.eol*3),'Success keil_download !',md5,sp,
+				h,get_title(h),
+				U.stime(),U.StrRepr(T.eol*2+'='*122)]
 			
 		return U.StrRepr('#'*122+T.eol*3),'check failed !!!',md5,sp,U.md5(file=sp),U.StrRepr(T.eol*2+'#'*122)
-	button.click()
-	return button
+		
+	if build:
+		# print(U.stime(),button_build)
+		button_build.click()
+		print(U.stime(),button_build)
+		U.set('keil.log',U.stime())
+		log=''
+		while ' Error(s)' not in log:
+			log=get_keil_log(-10)
+			U.sleep(0.6)
+		if '- 0 Error(s)' not in log:
+			print(U.stime(),log)
+			log=get_keil_log()
+			U.set('keil.log',log)
+			return py.No(log)
+			
+	button_download.click()
+	
+	if nircmd:
+		U.nircmd('win','activate',*nircmd)
+		U.nircmd('win','activate',*nircmd)
+		
+	return button_download
 
 def pywinauto_windows(handle):
 	''' 

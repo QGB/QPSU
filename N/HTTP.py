@@ -233,6 +233,8 @@ def download(url, file_path='',default_dir=py.No('set_input',no_raise=1),headers
 		default_dir='D:/'
 		if U.is_linux() or U.is_mac():
 			default_dir=U.gst+'download/'
+			if U.is_kivy():	
+				U.set('download.default_dir',U.get_kivy_files_path())
 		default_dir=U.get_or_input('download.default_dir',default=default_dir)
 	
 	if not file_path:

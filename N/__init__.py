@@ -2512,7 +2512,7 @@ def get_lan_ip(adapter=py.No('auto')):
 		except:
 			ips=[]
 			for a,ip in daip.items():
-				if a.startswith('enp0s'):
+				if a[:5] in ('enp0s','wlan0'):
 					ips.append(ip)
 			if ips:
 				for ip in ips:
