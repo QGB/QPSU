@@ -7599,14 +7599,17 @@ qpl=plzh=permutations
 def get_kivy_files_path():
 	return os.__file__[:0-py.len('app/_python_bundle/stdlib.zip/os.pyc')]
 	
-def tar_gz(filename,fs):
+def tar_gz(filename,fs,name_replace=(),):
 	import tarfile
 	ext='.tar.gz'
 	if not filename.lower().endswith(ext):
 		filename+=ext
 	with tarfile.open(filename, "w:gz") as tar:
 		for name in fs:
-			tar.add(name)
+			if name_replace:
+				tar.add(name,arcname=name.replace(*name_replace))
+			else:
+				tar.add(name)
 	# tar.close()	
 	return tar
 tar=tar_gz
