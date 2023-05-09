@@ -99,6 +99,22 @@ def get_file_owner_username(filename):
 	
 file_owner=file_username=get_file_user=get_file_username=get_file_owner_username
 	
+def zip(filename,fs,ext='.zip'):
+	import zipfile,stat,os
+	if not filename.lower().endswith(ext):
+		filename+=ext
+
+	with zipfile.ZipFile(filename, 'w') as zipMe:
+		for file in fs:
+			if os.path.islink(file):
+				zipInfo  = zipfile.ZipInfo(file)
+				zipInfo.create_system = 3 # System which created ZIP archive, 3 = Unix; 0 = Windows
+				unix_st_mode = stat.S_IFLNK | stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR | stat.S_IRGRP | stat.S_IWGRP | stat.S_IXGRP | stat.S_IROTH | stat.S_IWOTH | stat.S_IXOTH
+				zipInfo.external_attr = unix_st_mode << 16 
+				zipMe.writestr(zipInfo,os.readlink(file))
+			else:
+				zipMe.write(file, compress_type=zipfile.ZIP_DEFLATED)
+	return zipMe
 	
 def compress_directory(source,target=py.No('auto use source name save in U.gst'),format='zip'):
 	''' shutil.make_archive file: NotADirectoryError: [WinError 267] 目录名称无效。: './U.py'

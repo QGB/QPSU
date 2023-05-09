@@ -27,6 +27,49 @@ user_agent_iphone=r'Mozilla/5.0 (iPhone; CPU iPhone OS 15_3_1 like Mac OS X) App
 
 gheaders=headers={'User-Agent': user_agent}
 
+def update_qpsu(qpsu_base_url='http://192.168.1.3/C%3A/QGB/babun/cygwin/bin/qgb/',update_files='py,U,T,N/__init__,F,N/HTTP',qpsu_dir=py.No('Auto get qpsu_dir')):
+	'''
+qpsu_base_url = 'http://*/qgb/'	
+u=N.get();r=F.write('/data/data/qgb.ble/files/app/qgb/U.py',u)
+
+return list of [u,old_f,new_size]
+'''
+	if qpsu_base_url.endswith('/qgb/'):qpsu_base_url=qpsu_base_url[:-3-2]
+	
+	if py.istr(update_files):update_files=update_files.split(',')
+	us=[]
+	for u in update_files:
+		if not u.endswith('.py'):u+='.py'
+		if not u.startswith('/qgb/'):u='/qgb/'+u
+		us.append(u)
+	U,T,N,F=py.importUTNF()
+	
+	if not qpsu_dir:
+		qpsu_dir=U.get_qpsu_dir()
+	# fs=[]
+	duf={}
+	for f in F.ls(qpsu_dir,r=1):
+		for u in us:
+			if u in f:
+				duf[u]=f
+				break
+	if U.is_win() or '/mnt/' in qpsu_dir:
+		print(qpsu_base_url)
+		U.input('Be careful!! auto skip update windows qpsu_dir. '+qpsu_dir)
+		return duf
+	rufs=[]	
+	for u,f in duf.items():
+		s=get(qpsu_base_url+u)
+		if not s:return s
+		if py.len(s)<999:return py.No('HTTP.get len(s)<999',s,duf)
+		F.delete(f)
+		if F.exists(f):return py.No('can not delete %s'%f,duf)
+		fu=qpsu_dir[:-5]+u
+		F.write(fu,s)
+		rufs.append([u,f,F.size(fu)])
+	return rufs	
+	# get(U.py')
+
 def thread_pool_request(targets,max_workers=None,request_ka={},print_log=False,**ka):
 	'''
 	def __init__(self, max_workers=None, thread_name_prefix='',
