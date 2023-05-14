@@ -1534,7 +1534,22 @@ def subprocess_check_output(*a, timeout=9,encoding=py.No('try decode,except retu
 check_out=check_output=subprocess_check_output
 
 def cmd(*a,shell=True,**ka):
-	'''show=False :show command line
+	'''
+ipdb> sb.run(('ls', '-al'))
+total 3066
+drwx------ 4 u0_a211 u0_a211    3488 May 10 12:25 .
+drwxrwxrwx 5 u0_a211 u0_a211    3488 May 10 12:10 ..
+drwx------ 2 u0_a211 u0_a211    3488 May 10 12:24 bin
+-rw------- 1 u0_a211 u0_a211 3124286 May 10 12:25 fs.zip
+drwx------ 2 u0_a211 u0_a211    3488 May 10 12:24 lib
+
+ipdb> !sb.run(('ls', '-al'),capture_output=True,shell=True,timeout=9,)
+CompletedProcess(args=('ls', '-al'), returncode=0, stdout=b'bin\nfs.zip\nlib\n', stderr=b'')
+
+ipdb> !sb.run(['ls','-al'],capture_output=True,timeout=9,)  ## del shell=True
+CompletedProcess(args=['ls', '-al'], returncode=0, stdout=b'total 3066\ndrwx------ 4 u0_a211 u0_a211    3488 May 10 12:25 .\ndrwxrwxrwx 5 u0_a211 u0_a211    3488 May 10 12:10 ..\ndrwx------ 2 u0_a211 u0_a211    3488 May 10 12:24 bin\n-rw------- 1 u0_a211 u0_a211 3124286 May 10 12:25 fs.zip\ndrwx------ 2 u0_a211 u0_a211    3488 May 10 12:24 lib\n', stderr=b'')
+	
+	show=False :show command line
 	默认阻塞，直到进程结束返回
 	if 'timeout' not in ka:ka['timeout']=9     ## default timeout
 	
@@ -2025,7 +2040,9 @@ def chdir(ap=gst,*a,**ka):
 	if mkdir:F.mkdir(ap)
 	# repl()
 	# if path.abspath(CD_HISTORY) != pwd():
-	CD_HISTORY.append(pwd())
+	spwd=pwd()
+	if spwd:
+		CD_HISTORY.append(spwd)
 	
 	if os.path.isdir(ap):
 		if show_path:
@@ -2115,7 +2132,11 @@ def get_current_file_dir():
 getCurrentFilePath=get_file_dir=get_current_file_dir
 	
 def pwd(p=False,display=False,win=False):
-	s=os.getcwd()
+	try:
+		s=os.getcwd()
+	except Exception as e:
+		return py.No(e)
+		
 	if p or display:pln (s)
 	# try:pwd.sp=F.getsp(s)
 	# except:pass

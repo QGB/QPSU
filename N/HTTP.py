@@ -59,13 +59,13 @@ return list of [u,old_f,new_size]
 		return duf
 	rufs=[]	
 	for u,f in duf.items():
-		s=get(qpsu_base_url+u)
-		if not s:return s
-		if py.len(s)<999:return py.No('HTTP.get len(s)<999',s,duf)
+		b=get_bytes(qpsu_base_url+u)
+		if not b:return b
+		if py.len(b)<999:return py.No('HTTP.get len(b)<999',b,duf)
 		F.delete(f)
 		if F.exists(f):return py.No('can not delete %s'%f,duf)
 		fu=qpsu_dir[:-5]+u
-		F.write(fu,s)
+		F.write(fu,b)
 		rufs.append([u,f,F.size(fu)])
 	return rufs	
 	# get(U.py')
@@ -277,7 +277,7 @@ def download(url, file_path='',default_dir=py.No('set_input',no_raise=1),headers
 		if U.is_linux() or U.is_mac():
 			default_dir=U.gst+'download/'
 			if U.is_kivy():	
-				U.set('download.default_dir',U.get_kivy_files_path())
+				U.set('download.default_dir',U.get_kivy_files_path()+'')
 		default_dir=U.get_or_input('download.default_dir',default=default_dir)
 	
 	if not file_path:
@@ -315,7 +315,7 @@ def download(url, file_path='',default_dir=py.No('set_input',no_raise=1),headers
 				sys.stdout.write("\r[%s%s] %d%%" % ('█' * done, ' ' * (50 - done), 100 * temp_size / total_size))
 				sys.stdout.flush()
 	print()  # 避免上面\r 回车符
-		
+	return r,F.size(file_path)
 def post(url,data=None,files=None,return_text=False,**ka):
 	'''
 Signature: requests.post(url, data=None, json=None, **kwargs)

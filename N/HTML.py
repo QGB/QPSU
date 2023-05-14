@@ -1134,7 +1134,7 @@ def flask_get_all_upload_files(upload_dir=py.No('U.gst/upload_dir',no_raise=1),s
 	else:
 		upload_dir=U.set('rpc.server.upload_dir',upload_dir)
 	F.mkdir(upload_dir)
-	if not save_size:
+	if py.isno(save_size):
 		save_size= U.get('rpc.server.upload.save_size',1024*1024*8)
 	save_size=F.IntSize(py.int(save_size))	
 	U.set('rpc.server.upload.save_size',save_size)	
