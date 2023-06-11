@@ -713,7 +713,7 @@ def flask_request_log(time=True,url=False):
 	rl=U.get_or_set('req_log',[])
 	rl.append(r)
 	return py.len(rl)
-req_log=flask_request_log	
+log_req=req_log=flask_request_log	
 
 skip_response_headers={
 	'Transfer-Encoding': 'chunked',
@@ -1298,14 +1298,21 @@ def rpc_set_variable(*obj,base=py.No('auto history e.g. [http://]127.0.0.1:23571
 	return url,b
 set_rpc=set_rpc_var=rpc_set=rpc_set_var=rpcSetVariable=rpc_set_variable
 
-def rpc_get_file(filename,name='v',**ka):
+def rpc_get_file(filename,name='v',return_b=False,**ka):
 	U,T,N,F=py.importUTNF()
 	base=set_remote_rpc_base(**ka)
 	u=base+'response.set_data(F.readb(N.geta()))%23-'+T.url_encode(filename)
 	
-	b=curl_return_bytes(u)
+	try:
+		b=curl_return_bytes(u)
+	except:
+		b=N.HTTP.get_bytes(u)
+	if py.isno(b):return b	
 	
-	return F.write(filename,b)
+	f=F.write(filename,b)
+	if return_b:
+		return f,u,b
+	return f	
 	
 def rpc_set_file(obj,filename=py.No('if obj exists: auto '),name='v',**ka):
 	''' local_obj , remote_filename

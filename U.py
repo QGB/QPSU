@@ -824,6 +824,17 @@ def list_del_multi_indexs(a,*ins):
 	return d
 del_list_multi_indexs=list_del_multi_indexs
 
+def get_multi_list_element_by_index(*a,index=0,**ka):
+	index=get_duplicated_kargs(ka,'index','i','n',default=index)
+	r=[]
+	for y in a:
+		try:
+			v=y[index]
+		except Exception as e:	
+			v=py.No(e)
+		r.append(v)
+	return r
+	
 def multiprocess_pool(*a,**ka):
 	'''multiprocess.Pool(
 	processes=None,
@@ -935,10 +946,11 @@ def get_test_path(base_gst=False):
 get_gst=getTestPath=get_test_path
 gst=gsTestPath=get_test_path()
 
-def set_test_path(sp,cd=False,p=False):
+def set_test_path(sp,cd=False,mkdir=True,p=False):
 	global gst,gsTestPath
 	F=py.importF()
-	sp=F.mkdir(sp,no_auto_path=True)
+	if mkdir:
+		sp=F.mkdir(sp,no_auto_path=True)
 	if not sp:return sp
 	sp=sp.replace('\\','/')
 	# if not sp.endswith('/'):
@@ -7317,7 +7329,7 @@ def get_timed_task_list():
 	return schedule.jobs
 schedule_jobs=time_task=get_time_task=get_timed_task=get_timed_task_list
 	
-def iter_2d_from_start_to_stop(stop,start_point_xy=(0,0),step_xy=(1,1),x_limit=(0,7680+1),y_limit=py.No('auto use y'),**ka):
+def iter_2d_from_start_to_stop(end,start_point_xy=(0,0),step_xy=(1,1),x_limit=py.No('auto'),y_limit=py.No('auto use y'),**ka):
 	'''
 range(stop) 
 range(start, stop[, step]) 
@@ -7333,12 +7345,15 @@ x_limit[0]	start .......... x_limit[1]
 '''
 	U,T,N,F=py.importUTNF()
 	start_point_xy=U.get_duplicated_kargs(ka,'start','start_point',	'start_xy',default=start_point_xy)
-	stop_point_xy=U.get_duplicated_kargs(ka,'stop','stop_point','stop_xy','end','end_point','end_xy',default=stop)
-	step_xy=U.get_duplicated_kargs(ka,'step','step_point',default=start_point_xy)
+	stop_point_xy=U.get_duplicated_kargs(ka,'stop','stop_point','stop_xy','end','end_point','end_xy',default=end)
+	step_xy=U.get_duplicated_kargs(ka,'step','step_point',default=step_xy)
 	if step_xy[0]<0 or step_xy[1]<0:
 		raise NotImplementedError('TODO')
 	
 	
+	if not x_limit:
+		x_limit=(start_point_xy[0],stop_point_xy[0])
+		
 	if not y_limit:
 		y_limit=(start_point_xy[1],stop_point_xy[1])
 	is_start=False

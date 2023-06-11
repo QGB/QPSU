@@ -3,7 +3,8 @@ from time import sleep_ms
 import ubluetooth
 # from esp32 import raw_temperature
 # from hdc1080 import HDC1080
-
+import gc
+	
 class BLE():
 	def __init__(self, name):   
 		self.name = name
@@ -54,13 +55,40 @@ class BLE():
 			if message == 'red_led':
 				red_led.value(not red_led.value())
 				print('red_led', red_led.value())
-				self.send('red_led' + str(red_led.value()))
-			if message == '1':
+				self.send('re	d_led' + str(red_led.value()))
+			elif message=='ip':
+				rs=repr(sta_if.ifconfig())
+				self.send(rs)
+			elif message.startswith('!'):
+				ssid,pw=message[1:].split(',')
+				# sta_if.active(True)
+				if not sta_if.isconnected():
+					sta_if.disconnect()
+					sta_if.connect(ssid,pw);
+				with open('webrepl_cfg.py' ,'w') as f:
+					f.write("""
+PASS='1234'
+dsp={'%s':'%s'}
+					""".strip()%(ssid,pw))
+				self.send('OK')
+			elif message == '1':
 				self.send('str(sensor.read_temperature(True))')
 				# print(sensor.read_temperature(True))
-			if message == 'read_hum':
-				# print(sensor.read_humidity())
-				self.send('str(sensor.read_humidity())')
+			else:
+				gc.collect()#M.gc()
+				try:
+					exec(message,globals(),locals())
+					if 'r' in locals():
+						r=locals()['r']
+						if not isinstance(r,str):
+							r=repr(r)
+					else:
+						r='can not found r in locals()'
+				except Exception as e:
+					r=repr(e)
+					del e
+				self.send(r)		   
+		   
 		   
 	def register(self):		
 		# Nordic UART Service (NUS)
@@ -77,7 +105,7 @@ class BLE():
 		((self.tx, self.rx,), ) = self.ble.gatts_register_services(SERVICES)
 
 	def send(self, data):
-		self.ble.gatts_notify(0, self.tx, data + '\n')#OSError: -128
+		self.ble.gatts_notify(1, self.tx, data + '\n')#OSError: -128
 
 	def advertiser(self):
 		name = bytes(self.name, 'UTF-8')
@@ -88,5 +116,9 @@ class BLE():
 # sensor = HDC1080(i2c)
 red_led = Pin(2, Pin.OUT)
 # if __name__=='__main__':
-ble = BLE("ESP32")
-print(ble)
+def main():
+	try:
+		ble = BLE("ESP32")
+		print(ble)
+	except Exception as ble:
+		ble=ble

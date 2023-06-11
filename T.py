@@ -64,8 +64,8 @@ RE_FLOAT=REF=r'[+-]?([0-9]*[.])?[0-9]+'
 SQLITE='SELECT * FROM sqlite_master;'
 
 #########################################
-squote=quote="'"
-dquote=dQuote='"'
+dyh=squote=quote="'"
+syh=double_quote=dquote=dQuote='"'
 
 import re	
 IGNORECASE=re_IGNORECASE=re.IGNORECASE
@@ -112,6 +112,13 @@ try:
 	from pprint import pprint,pformat
 except:pass
 ####################################################
+def uncurl(sc=''):
+	import uncurl
+	U,T,N,F=py.importUTNF()
+	if not sc:sc=U.cbg()
+	rs=uncurl.parse(sc)
+	return U.StrRepr(rs)
+
 def list_append_row_StrRepr(alist,**ka):
 	global U,T,N,F
 	U,T,N,F=py.importUTNF()
@@ -2393,13 +2400,13 @@ def filename_unlegalized(a,):
 unfilename=unlegalized_filename=filename_unlegalized
 
 def filename_legalized(a,space=' '):
-	'''  # 多个连续空白字符会 缩减成 一个 space
+	''' if space: # 多个连续空白字符会 缩减成 一个 space
 not auto cut long string
 
 OSError: [Errno 22] Invalid argument: 'C:/test/clipboard/林文\n===\n.png'
 	'''
 	if not py.istr(a):a=string(a)
-	a=replace_all_space(a.strip(),space)
+	if space:a=replace_all_space(a.strip(),space)
 	r=''
 	for c in a:
 		if c in NOT_FILE_NAME_WINDOWS:

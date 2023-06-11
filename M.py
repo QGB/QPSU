@@ -204,9 +204,6 @@ def new_file(f,size,chunk=4096,b=b'\x00'):
 	return os.stat(f)
 new=new_file	
 	
-def write(f,text):
-	with open(f,'w') as _:
-		return _.write(text)
 def read(f,size=-1):
 	if "'TextIOWrapper'" in repr(f):#<class 'TextIOWrapper'>
 		f.seek(0)
@@ -214,7 +211,30 @@ def read(f,size=-1):
 
 	with open(f) as _:
 		return _.read(size)
-
+def write(f,text):
+	with open(f,'w') as _:
+		return _.write(text)
+def write_webrepl_cfg(ssid,wifi_pw,PASS='1234'):
+	try:
+		import webrepl_cfg
+		if getattr(webrepl_cfg,'dsp',{}):
+			dsp=webrepl_cfg.dsp
+	except Exception as e:
+		print(e)
+		dsp={}
+	print(dsp)	
+	dsp[str(ssid)]=str(wifi_pw)
+	gc()
+	with open('webrepl_cfg.py' ,'w') as f:
+		print('open')	
+		f.write(f"PASS={repr(PASS)}\n")
+		print('w PASS')	
+		gc()
+		f.write(f"dsp={repr(dsp)}\n")
+	print('w OK')	
+	return dsp	
+w=s=save=savew=write_webrepl_cfg
+	
 def gv():
 	print(sys_info())
 	gc()
@@ -285,7 +305,7 @@ def wifi_scan(p=1,return_dict=False):
 			if rd:return rd
 			else:
 				n.disconnect()
-				M.sleep(1)
+				sleep(1)
 	r=[]
 # ' '.join([' '*8,'ssid',' '*6,'bssid',' '*4,'channel,RSSI,authmode,hidden'])
 	if p:print('         ssid        bssid      channel,RSSI,authmode,hidden')
@@ -503,8 +523,13 @@ def http_download_file(url,filename=''):
 	r.save(filename)
 	print('done !',filename)
 	return filename
-	
 down_file=download=download_file=http_download=http_download_file	
+
+def http_download_M(url='http://192.168.1.3/C%3A/QGB/babun/cygwin/bin/qgb/M.py'):
+	if '192.168.1.3/C' in url:
+		__import__('mrequests').get('http://192.168.1.3/C%3A/QGB/babun/cygwin/bin/qgb/M.py').save('M.py')
+		return
+	return http_download_file(url)
 
 def sub_tail(s,s1,s2=''):
 	'''
@@ -604,7 +629,7 @@ def lpwm(p,):
 		n=int(s[s.index('duty=')+5:s.index(',',24)])           
 		if n in d:d[n].append(i)
 		else:d[n]=[i]   
-		if i%200==0:M.gc();print(i,M.info())
+		if i%200==0:gc();print(i,info())
 	with open('d.txt','w') as f:
 		return f.write(repr(d))
 		

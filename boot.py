@@ -9,6 +9,15 @@ sta_if.active(True);
 
 
 import M
+try:
+	import ble
+	ble.sta_if=sta_if
+	ble.main()
+except Exception as e:
+	print(e)
+
+
+
 f='webrepl_cfg.py' 
 if f not in M.ls():
 	M.write(f,"PASS = '1234'\n")
@@ -18,13 +27,17 @@ webrepl.start()
 
 r=sta_if.isconnected()
 # print('try connect test',r)
+gnw=0
 if not r:
 	import webrepl_cfg
-	lsp=getattr(webrepl_cfg,'lsp')
-	if lsp:
+	dsp=getattr(webrepl_cfg,'dsp',{})
+	if dsp:
 		while not sta_if.isconnected():
 			ds=M.wifi_scan(p=0,return_dict=1)
-			for ssid,pw in lsp:
+			if not ds:continue
+			else:gnw+=1
+			if gnw>9:break
+			for ssid,pw in dsp.items():
 				if isinstance(ds,dict) and ssid not in ds:continue
 				sta_if.disconnect()
 				print('try connect ',ssid,pw)
@@ -37,7 +50,7 @@ if not r:
 				
 		del ssid,pw
 		# del ds,sta_if
-	del webrepl_cfg,lsp
+	del webrepl_cfg,dsp
 
 
 del network,webrepl,f
