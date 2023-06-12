@@ -2602,7 +2602,7 @@ autourl=autoUrl=autoURL=auto_url
 
 
 #setip 192.168  ,  2.2	
-def auto_ip(ip,ip2=py.No('192.168',no_raise=1),ip1=py.No('2',no_raise=1),print_ip=False,**ka):
+def auto_ip(ip,ip2=py.No('192.168',no_raise=1),ip1=py.No('1',no_raise=1),print_ip=False,**ka):
 	global U
 	U=py.importU()
 	ip1=U.get_duplicated_kargs(ka,'ip_1','c','C',default=ip1)
@@ -2614,7 +2614,7 @@ def auto_ip(ip,ip2=py.No('192.168',no_raise=1),ip1=py.No('2',no_raise=1),print_i
 		ip2=U.SET_NO_VALUE
 	
 	
-	ip1=U.set_or_get('auto_ip.1',ip1,default=2)
+	ip1=U.set_or_get('auto_ip.1',ip1,default=1)
 	ip2=U.set_or_get('auto_ip.2',ip2,default='192.168')
 	
 	if py.istr(ip):
