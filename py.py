@@ -176,7 +176,13 @@ def isnum(a):
 		5 复数   complex()==0j
 		6 其他类型'''
 	if is2():return type(a) in (int,long,float,complex) or isint(a) or isfloat(a)#isinstance better?
-	else    :return type(a) in (int,float,complex) or isint(a) or isfloat(a)
+	else    :
+		if type(a) in (int,float,complex) or isint(a) or isfloat(a):
+			return True
+		else:
+			import numbers
+			return isinstance(a, numbers.Number)
+		
 isnumeric=isnumber=isnum
 
 def isint(a):

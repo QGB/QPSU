@@ -77,14 +77,18 @@ def get_or_input_html(response,*name):
 		# raise v
 	# print(v)	
 	return v	
-def xiaomi_air_conditioner_control(response=None,token=py.No('auto get'),t=0,angle=None,lcd=None,before=None,after=None,power=1,ip='192.168.1.4',**ka):
+def xiaomi_air_conditioner_control(response=None,token=py.No('auto get'),t=0,angle=None,lcd=None,before=None,after=None,power=1,ip=py.No('auto use last'),**ka):
 	''' 风扇水平 0 时，环境感知温度会立马降低 
 	
 '''	
 	U.r(py,U,T,N,F,N.HTTP,N.HTML)
 	angle=U.get_duplicated_kargs(ka,'angle','angel','jd','ang','a','j',default=angle)
 	power=U.get_duplicated_kargs(ka,'power','on','open',default=power)
-	ip=N.auto_ip(ip)
+	if not ip:
+		ip=U.get_or_set('miio.ip','192.168.1.4')
+	else:	
+		ip=N.auto_ip(ip)
+		ip=U.set('miio.ip',ip)
 	
 	if not token:token=get_or_input_html(response,'miio.token')
 	if not token:return token
