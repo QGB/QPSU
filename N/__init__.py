@@ -2492,7 +2492,7 @@ def getLAN_IP_ALL_HOSTS(ip='192.168.1.{}',count=256):
 	r=getAllAdapter()
 	return r
 	
-def get_lan_ip(adapter=py.No('auto')):
+def get_lan_ip(adapter=py.No('auto'),adapter_names=('enp0s','wlan0','ens5')):
 	'''
 	
 ['lo', 'eth0', 'docker0', 'vetha535de0', 'bond0', 'dummy0']
@@ -2519,7 +2519,7 @@ def get_lan_ip(adapter=py.No('auto')):
 		except:
 			ips=[]
 			for a,ip in daip.items():
-				if a[:5] in ('enp0s','wlan0'):
+				if a[:5] in adapter_names: #adapterName
 					ips.append(ip)
 			if ips:
 				for ip in ips:
