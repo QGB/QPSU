@@ -6279,7 +6279,7 @@ def set_column_to_2D_list(*cs,dncol=None,default=None,list2d=None):
 	
 	# ms=U.len(*dncol.values())
 	max=py.max(dnm.values())
-	mr=py.max(*dnm.keys())
+	mr=py.max(dnm.keys())
 	
 	for i in py.range(max):
 		if i<ml:
