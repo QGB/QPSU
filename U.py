@@ -6253,20 +6253,55 @@ def unique(iterable,count=False,count_and_sort=False,return_list=False,**ka):
 		if i not in r:r.append(i)
 	return r
 
-def set_column_to_2D_list(*cs,default=None,list2d=None):
+def set_column_to_2D_list(*cs,dncol=None,default=None,list2d=None):
+	''' #TODO set row position
+	
+	'''
 	U,T,N,F=py.importUTNF()
-	if not list2d:list2d=[]
-	ms=U.len(*cs)
-	max=py.max(ms)
-	r=[]
+	if not list2d:
+		list2d=[]
+		ml=0
+	else:
+		ml=py.len(list2d)
+	# ncs=py.len(cs)	
+	dnm={}
+	if cs:
+		if dncol:raise py.ArgumentError(cs,dncol)
+		dncol={}
+		for n,c in py.enumerate(cs):
+			dncol[n]=c
+			dnm[n]=py.len(c)
+	else:
+		if not dncol:return list2d
+		for n,c in dncol.items():
+			dnm[n]=py.len(c)
+	
+	
+	# ms=U.len(*dncol.values())
+	max=py.max(dnm.values())
+	mr=py.max(*dnm.keys(),ml)
+	
 	for i in py.range(max):
-		row=[]
-		for n,m in py.enumerate(ms):
-			if i<m:v=cs[n][i]
+		if i<ml:
+			row=py.list(list2d[i])
+		else:	
+			row=[default]*mr
+		# mr=py.len(row)	
+			
+		for n,c in dncol.items():
+			if i<dnm[n]:v=c[i]
 			else  :v=default
-			row.append(v)
-		r.append(row)
-	return r
+			
+			row[n]=v
+			# if n<mr:
+			# else   :row.append(v)
+		
+		if i<ml:
+			list2d[i]=row
+			# continue
+		else:	
+			list2d.append(row)
+	return list2d
 col_join=column_join=add_column_to_2D_list=set_column_to_2D_list	
 # def get_row_from_2D_list(matrix, *index,skip_IndexError=False,skip_col=None):
 def get_column_from_2D_list(matrix, *col_index,skip_IndexError=False,skip_col=None):
