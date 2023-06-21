@@ -68,13 +68,13 @@ setr=setRepr=set_repr
 def close():
 	w.CloseClipboard()
 
-gsdir=''
-def get_image(file=None,format='png'):
+
+def get_image(file=None,format='png',gsdir=py.No('auto')):
 	''' :param fp: A filename (string), pathlib.Path object or file object.
 
 KeyError: '.PNG'  [format not contains . ]
 	'''
-	global gsdir
+	# global gsdir
 	U,T,N,F=py.importUTNF()
 	if not gsdir:
 		gsdir=U.get_or_set('clipboard.dir',lazy_default=lambda :F.md(U.gst+'clipboard'))

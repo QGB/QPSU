@@ -4993,10 +4993,19 @@ def vscode(a='',lineno=0,auto_file_path=True,get_cmd=False,
 			run(args,env=env)  # def run(
 			if isipy():sleep(1) # 解决 Windows光标下一行错位问题
 		if isLinux():
-			cmd(args,env=env,encoding='UTF-8') 
+			run(args,env=env)  # def run(
+			# cmd(args,env=env,encoding='UTF-8') 
 		if '--goto'  in args:
 			return f,lineno
 		return executor
+	def find_socks_file(sf_path):
+		ctime=0 # this is .sock file
+		for f,stat in F.ll(sf_path,d=False,f=True,readable=False).items():
+			if not f.startswith(sf_path+'vscode-') or not f.endswith('.sock'):continue
+			if stat[3]>ctime:
+				ctime=stat[3]
+				return f
+		return ''
 	env={}
 	
 	if isWin():
@@ -5024,19 +5033,21 @@ def vscode(a='',lineno=0,auto_file_path=True,get_cmd=False,
 				for f,stat in F.ll(vsbin,d=True,f=False,readable=False).items():
 					if stat[3]>ctime:
 						ctime=stat[3]
-						executor=F.join(f,'bin/code')
+						if '.vscode-server-insiders' in f:
+							executor=F.join(f,'bin/remote-cli/code-insiders')
+						else:	
+							executor=F.join(f,'bin/code')
 			if executor:			
 				set('vscode_linux',executor,level=gd_sync_level['system'])
 			
 		env = get('vscode_linux_env',level=gd_sync_level['process']) or {}
 		if not env:
-			ctime=0 # this is .sock file
-			for f,stat in F.ll('/tmp/',d=False,f=True,readable=False).items():
-				if not f.startswith('/tmp/vscode-') or not f.endswith('.sock'):continue
-				if stat[3]>ctime:
-					ctime=stat[3]
-					env={'VSCODE_IPC_HOOK_CLI':f}
-			set('vscode_linux_env',env,level=gd_sync_level['process'])
+			for p in ['/tmp/','/run/user/%s/'%os.getuid()]:
+				sf=find_socks_file(p)
+				if sf:
+					env={'VSCODE_IPC_HOOK_CLI':sf}
+					set('vscode_linux_env',env,level=gd_sync_level['process'])
+					break
 
 	args=[executor,'--reuse-window']
 	if not a:
@@ -5048,7 +5059,6 @@ def vscode(a='',lineno=0,auto_file_path=True,get_cmd=False,
 	args=args+['--goto','{}:{}'.format( f,lineno )   ]
 	# r=run(args,env=env)
 	return run_vscode()
-
 code=vsc=VSCode=vsCode=vscode
 
 def notePadPlusPlus(a='',lineno=0,auto_file_path=True,editor_path=py.No('config this system editor_path'),
