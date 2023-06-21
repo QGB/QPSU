@@ -6253,6 +6253,21 @@ def unique(iterable,count=False,count_and_sort=False,return_list=False,**ka):
 		if i not in r:r.append(i)
 	return r
 
+def set_column_to_2D_list(*cs,default=None,list2d=None):
+	U,T,N,F=py.importUTNF()
+	if not list2d:list2d=[]
+	ms=U.len(*cs)
+	max=py.max(ms)
+	r=[]
+	for i in py.range(max):
+		row=[]
+		for n,m in py.enumerate(ms):
+			if i<m:v=cs[n][i]
+			else  :v=default
+			row.append(v)
+		r.append(row)
+	return r
+col_join=column_join=add_column_to_2D_list=set_column_to_2D_list	
 # def get_row_from_2D_list(matrix, *index,skip_IndexError=False,skip_col=None):
 def get_column_from_2D_list(matrix, *col_index,skip_IndexError=False,skip_col=None):
 	if not col_index:raise py.ArgumentError('need *col_index ')
