@@ -3396,7 +3396,7 @@ Out[79]: 0.296
 		return py.No('Not float')	
 getFloaTail=get_float_tail
 		
-def zh_time(timestamp,zh_format='%d号 %H时%M分%S秒'):
+def zh_time(timestamp,zh_format='%-d号 %-H点%-M分%-S秒'):
 	'''#TODO fix Windows
 UnicodeEncodeError: 'locale' codec can't encode character '\u5e74' in position 2: encoding error'''
 	import time
