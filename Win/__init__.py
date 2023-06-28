@@ -71,6 +71,78 @@ try:
 	import win32gui
 except Exception as ei:pass
 #############################################
+gd_SetMasterVolumeLevel={
+-00.0:100,
+-01.0:94,
+-02.0:88,
+-10.0:51,
+-20.0:26,
+-30.0:13,
+-31.0:12,
+-32.0:12,
+-33.0:11,
+-34.0:10,
+-35.0:9,
+-40.0:6,
+-50.0:3,
+-60.0:1,
+-70.0:0,
+}
+def set_master_volume(n):
+	''' 
+反函数：	
+x=-70;y=a*numpy.exp(b*x+c)+d
+y==0.002331674654377354	
+
+'''	
+	import math	
+	a=0.2628178407721218
+	b=0.06578814531326338
+	c=1.3440100500857637
+	d=-0.007745783359974028
+	
+	
+	U,T,N,F=py.importUTNF() 
+	k='AudioUtilities.GetSpeakers.Activate'
+	v=U.get(k)
+	if not v:get_master_volume()
+	v=U.get(k)
+	if n==1 or 1<n<=100: # int or float
+		n=n/100
+	elif n<0 or n>100:raise py.ArgumentError(n)
+	
+	# v.SetMasterVolume(n, None)
+	n=(math.log((n-d)/a)-c)/b
+	
+	v.SetMasterVolumeLevel(n, None)
+	
+	
+	return v,n
+set_vol=set_volume=set_master_volume
+
+def get_master_volume(return_float=False):
+	'''
+pip install -i http://pypi.doubanio.com/simple --trusted-host pypi.doubanio.com pycaw	
+	'''
+	U,T,N,F=py.importUTNF() 
+	k='AudioUtilities.GetSpeakers.Activate'
+	v=U.get(k)
+	if not v:
+		from ctypes import cast, POINTER
+		from comtypes import CLSCTX_ALL
+		from pycaw.pycaw import AudioUtilities, IAudioEndpointVolume
+		devices = AudioUtilities.GetSpeakers()
+		interface = devices.Activate(
+			IAudioEndpointVolume._iid_, CLSCTX_ALL, None)
+		v = cast(interface, POINTER(IAudioEndpointVolume))
+		U.set(k,v)
+		
+	fv=v.GetMasterVolumeLevelScalar()
+	if return_float:return fv
+	else:
+		return py.round(fv*100)
+volume=vol=get_vol=GetMasterVolume=get_master_volume
+
 def GetForegroundWindow():
 	import win32gui
 	h=win32gui.GetForegroundWindow()

@@ -3396,6 +3396,19 @@ Out[79]: 0.296
 		return py.No('Not float')	
 getFloaTail=get_float_tail
 		
+def zh_time(timestamp,zh_format='%d号 %H时%M分%S秒'):
+	'''#TODO fix Windows
+UnicodeEncodeError: 'locale' codec can't encode character '\u5e74' in position 2: encoding error'''
+	import time
+	# timestamp = 1652340992800
+	if timestamp>IMAX:
+		timestamp=timestamp//1000
+	
+	time_tuple = time.localtime(timestamp)
+
+	'%Y年%m月%d日 %H时%M分%S秒'
+	return time.strftime(zh_format, time_tuple)
+		
 def stime_(time=None,ms=True):
 	r=get_time_as_str(time=time,ms=ms)
 	return T.regexReplace(r,'[^0-9_]','_')
@@ -7669,7 +7682,7 @@ def load_jks(filename,password=''):
 	return keystore
 	p12 = keystore.entries['myalias'].export_pkcs12('mypassword')
 	
-def tts_speak(t,):
+def tts_speak(t,max_vol=True):
 	''' pip install pyttsx3
 长文本会一直阻塞，KeyboardInterrupt 无效	
 '''	
@@ -7677,8 +7690,15 @@ def tts_speak(t,):
 	engine = get_or_set('pyttsx3.engine',lazy_default=lambda:pyttsx3.init())
 	
 	U,T,N,F=py.importUTNF()
+	if max_vol:
+		from qgb import Win
+		v=Win.get_vol()
+		Win.set_vol(100)
+	
 	t=T.string(t)
 	engine.proxy._driver._tts.Speak(t)
+	
+	if max_vol:Win.set_vol(v)
 	return t	
 tts=speak=tts_speak
 
