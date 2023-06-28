@@ -1187,8 +1187,10 @@ template='{base}response.set_data(F.serialize({varname}))',
 	return_bytes=U.get_duplicated_kargs(ka,'return_byte','rb','B','b','raw','raw_bytes',default=return_bytes)
 	if base is AUTO_GET_BASE:
 		base=get_remote_rpc_base(change=False)
-	if not base or base.lower() in ['input','modify','change']:
+	elif not base or (py.istr(base) and base.lower() in ['input','modify','change']):
 		base=get_remote_rpc_base(change=True)
+	else:	
+		base=get_remote_rpc_base(base=base,change=True)
 		
 	proxies=N.HTTP.auto_proxy_for_requests(proxies,ka)	
 	# if not base:raise py.ArgumentError('need base=')
