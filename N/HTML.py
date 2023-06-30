@@ -77,13 +77,15 @@ def get_or_input_html(response,*name):
 		# raise v
 	# print(v)	
 	return v	
-def xiaomi_air_conditioner_control(response=None,token=py.No('auto get'),t=0,angle=None,lcd=None,before=None,after=None,power=1,ip=py.No('auto use last'),**ka):
+def xiaomi_air_conditioner_control(response=None,token=py.No('auto get'),t=0,angle=None,sleep=False,lcd=None,before=None,after=None,power=1,ip=py.No('auto use last'),**ka):
 	''' 风扇水平 0 时，环境感知温度会立马降低 
 	
 '''	
 	U.r(py,U,T,N,F,N.HTTP,N.HTML)
 	angle=U.get_duplicated_kargs(ka,'angle','angel','jd','ang','a','j',default=angle)
 	power=U.get_duplicated_kargs(ka,'power','on','open',default=power)
+	sleep=U.get_duplicated_kargs(ka,'sleep','set_silent','silent',default=sleep)
+	
 	if not ip:
 		ip=U.get_or_set('miio.ip','192.168.1.4')
 	else:	
@@ -100,6 +102,19 @@ def xiaomi_air_conditioner_control(response=None,token=py.No('auto get'),t=0,ang
 		
 	if py.callable(before):
 		before(d)
+	
+	if power:
+		d.send('set_power',['on'])
+	else:
+		d.send('set_power',['off'])
+		return d
+		
+	if sleep:
+		d.send("set_silent", ['on']) #sleep
+		if py.isint(sleep) and sleep>60:
+			d.send("set_idle_timer", [sleep])
+	else:
+		d.send("set_silent", ['off'])
 		
 	if not t:
 		t=N.geta()
@@ -131,10 +146,7 @@ def xiaomi_air_conditioner_control(response=None,token=py.No('auto get'),t=0,ang
 		t.start()
 		# if angle<35
 		
-	if power:
-		d.send('set_power',['on'])
-	else:
-		d.send('set_power',['off'])
+
 		
 	if py.callable(after):
 		after(d)

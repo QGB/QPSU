@@ -1248,7 +1248,7 @@ def rpc_set_variable_local(**ka):
 		
 local_rpc_set=set_local_rpc=rpc_set_local=rpc_set_variable_local	
 		
-def rpc_set_variable(*obj,base=py.No('auto history e.g. [http://]127.0.0.1:23571[/../] '),timeout=9,varname='v',ext_cmd='',print_req=False,pr=False,proxies=None,**ka):
+def rpc_set_variable(*obj,base=AUTO_GET_BASE,timeout=9,varname='v',ext_cmd='',print_req=False,pr=False,proxies=None,**ka):
 	U,T,N,F=py.importUTNF()
 	ext_cmd=U.get_duplicated_kargs(ka,'ext_cmd','cmd','extCmd','other_cmd',default=ext_cmd)
 	varname=U.get_duplicated_kargs(ka,'v','V','name','var_name','var',default=varname)

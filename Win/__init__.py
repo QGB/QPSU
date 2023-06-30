@@ -107,7 +107,7 @@ y==0.002331674654377354
 	v=U.get(k)
 	if not v:get_master_volume()
 	v=U.get(k)
-	if n==1 or 1<n<=100: # int or float
+	if n is 1 or 1<n<=100: # int or float
 		n=n/100
 	elif n<0 or n>100:raise py.ArgumentError(n)
 	

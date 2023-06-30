@@ -1694,16 +1694,16 @@ def sleep(asecond,print_time_every_n_second=0):
 	return IntCustomRepr(asecond,repr='U.sleep(%s)'%asecond)
 delay=sleep
 	
-def sleep_until(time):
-	U=py.importU()
-	from threading import Event      
-	e=U.get_or_set('wait_event',Event())
-	e.clear()
-	begin=U.itime_ms()
-	e.wait(aisecond)
-	ms=U.itime_ms()-begin
-	e.clear()
-	return ms	
+def sleep_until(hour, minute):
+	# U=py.importU()
+	import datetime
+	import time
+	t = datetime.datetime.today()
+	future = datetime.datetime(t.year, t.month, t.day, hour, minute)
+	if t.timestamp() > future.timestamp():
+		future += datetime.timedelta(days=1)
+	time.sleep((future-t).total_seconds())
+sleepUntil=sleep_until
 	
 def wait_can_be_interrupted(aisecond):
 	'''interrupt : 
@@ -6294,11 +6294,12 @@ def set_column_to_2D_list(*cs,dncol=None,default=None,list2d=None):
 		for n,c in py.enumerate(cs):
 			dncol[n]=c
 			dnm[n]=py.len(c)
+		# mc=n	
 	else:
 		if not dncol:return list2d
 		for n,c in dncol.items():
 			dnm[n]=py.len(c)
-	
+		# mc=n
 	
 	# ms=U.len(*dncol.values())
 	max=py.max(dnm.values())
@@ -6315,7 +6316,10 @@ def set_column_to_2D_list(*cs,dncol=None,default=None,list2d=None):
 			if i<dnm[n]:v=c[i]
 			else  :v=default
 			
-			row[n]=v
+			if n<py.len(row):
+				row[n]=v
+			else:	
+				row.append(v)
 			# if n<mr:
 			# else   :row.append(v)
 		
