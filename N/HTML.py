@@ -669,7 +669,9 @@ def list_2d(response,a,html_callback=None,index=False,sort_kw=U.SORT_KW_SKIP,deb
 	index=U.get_duplicated_kargs(ka,'index','n','enu','add_index','enumerate',default=index)
 	sort_kw=U.get_duplicated_kargs(ka,'skw','sort','s',default=sort_kw)
 	# if py.isint(sort_kw): # U.sort 中已经处理
-
+	if 'float_format' not in ka:
+		ka['float_format']='{}'.format
+		
 	a=U.sort(a,sort_kw=sort_kw)
 	# return a
 
@@ -679,7 +681,7 @@ def list_2d(response,a,html_callback=None,index=False,sort_kw=U.SORT_KW_SKIP,deb
 	
 	import pandas as pd
 	df = pd.DataFrame(data=a)
-	html=df.to_html(index=index) 
+	html=df.to_html(index=index,**ka) 
 	
 # <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 	head='''
