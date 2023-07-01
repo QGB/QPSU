@@ -77,7 +77,8 @@ def get_or_input_html(response,*name):
 		# raise v
 	# print(v)	
 	return v	
-def xiaomi_air_conditioner_control(response=None,token=py.No('auto get'),t=0,angle=None,sleep=False,lcd=None,before=None,after=None,power=1,ip=py.No('auto use last'),**ka):
+AC_DEFAULT=py.No('auto use last,not change')	
+def xiaomi_air_conditioner_control(response=None,token=py.No('auto get'),t=0,angle=None,sleep=AC_DEFAULT,lcd=None,before=None,after=None,power=1,ip=AC_DEFAULT,**ka):
 	''' 风扇水平 0 时，环境感知温度会立马降低 
 	
 '''	
@@ -109,12 +110,13 @@ def xiaomi_air_conditioner_control(response=None,token=py.No('auto get'),t=0,ang
 		d.send('set_power',['off'])
 		return d
 		
-	if sleep:
-		d.send("set_silent", ['on']) #sleep
-		if py.isint(sleep) and sleep>60:
-			d.send("set_idle_timer", [sleep])
-	else:
-		d.send("set_silent", ['off'])
+	if not sleep is AC_DEFAULT:
+		if sleep:
+			d.send("set_silent", ['on']) #sleep
+			if py.isint(sleep) and sleep>60:
+				d.send("set_idle_timer", [sleep])
+		else:
+			d.send("set_silent", ['off'])
 		
 	if not t:
 		t=N.geta()
