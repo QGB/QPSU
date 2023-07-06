@@ -962,39 +962,14 @@ def uploadServer(port=1122,host='0.0.0.0',dir='./',url='/up'):
 			return r
 	app.run(host=host,port=port,debug=0,threaded=True)	
 ############# rpc start ############
-def rpc_pop_window_127(port=443):
-	'''
-U.ppid(6672)
-30464
 
-U.ppid(30464)
-5740
-
-ws[1]==
-(1247918,
- '6672 ipy:7.9 py:3.74 at[2022-09-03__10.56.09__.462] C:/test/ipy/',
- 5740)
- =========
- ssl_context=('C:/test/ssl/##domain##/fullchain.crt', 'C:/test/ssl/##domain##/private.pem')
-''' 
-	global U,T,N,F
-	U,T,N,F=py.importUTNF()
-	if port==443:
-		f=U.get_or_dill_load_and_set('ssl_context')[0]
-		if '\\' in f:
-			domain=T.sub_last(f,'\\','\\')
-		else:	
-			domain=T.sub_last(f,'/','/')
-		rpc_base=f'https://3.{domain}/'
-	else:	
-		rpc_base=f'http://127.0.0.1:{port}/'
-	print(rpc_base)
-	b=N.curl(rpc_base+'Win.popw();r=U.pid,U.ppid(),U.ppid(U.ppid())')
-	r3=T.unrepr(b.decode())
-	return r3
-
-rpc_popw=rpc_pop_window=rpc_pop_window_127
-
+def check_local_port_listen(port):
+	import psutil
+	for conn in psutil.net_connections():
+		if conn.status == 'LISTEN' and conn.laddr.port == port:
+			return conn.laddr
+	return False
+is_port_open=check_port_open=check_local_port_listen
 
 def get_process_all_listen_addr(pid):
 	''' addr(ip='0.0.0.0', port=443),
@@ -1127,6 +1102,39 @@ def rpc_call(name,*a,base='',proxies=0,print_req=1,**ka):
 	rp= N.HTTP.post(f'{base}rpc_a,rpc_ka=N.flask_dill_data();r={name}(*rpc_a,**rpc_ka)',F.dill_dump([a,ka]),proxies=proxies,print_req=print_req)
 	return U.StrRepr(rp.text)
 	
+def rpc_pop_window_127(port=443):
+	'''
+U.ppid(6672)
+30464
+
+U.ppid(30464)
+5740
+
+ws[1]==
+(1247918,
+ '6672 ipy:7.9 py:3.74 at[2022-09-03__10.56.09__.462] C:/test/ipy/',
+ 5740)
+ =========
+ ssl_context=('C:/test/ssl/##domain##/fullchain.crt', 'C:/test/ssl/##domain##/private.pem')
+''' 
+	global U,T,N,F
+	U,T,N,F=py.importUTNF()
+	if port==443:
+		f=U.get_or_dill_load_and_set('ssl_context')[0]
+		if '\\' in f:
+			domain=T.sub_last(f,'\\','\\')
+		else:	
+			domain=T.sub_last(f,'/','/')
+		rpc_base=f'https://3.{domain}/'
+	else:	
+		rpc_base=f'http://127.0.0.1:{port}/'
+	print(rpc_base)
+	b=N.curl(rpc_base+'Win.popw();r=U.pid,U.ppid(),U.ppid(U.ppid())')
+	r3=T.unrepr(b.decode())
+	return r3
+
+rpc_popw=rpc_pop_window=rpc_pop_window_127
+
 def rpc_iter_U_get(name,bases=None,**ka):
 	'''
 	bases= ports or urls

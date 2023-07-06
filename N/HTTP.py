@@ -27,7 +27,7 @@ user_agent_iphone=r'Mozilla/5.0 (iPhone; CPU iPhone OS 15_3_1 like Mac OS X) App
 
 gheaders=headers={'User-Agent': user_agent}
 
-def update_qpsu(qpsu_base_url='http://192.168.1.3/C%3A/QGB/babun/cygwin/bin/qgb/',update_files='py,U,T,N/__init__,F,N/HTTP',qpsu_dir=py.No('Auto get qpsu_dir')):
+def update_qpsu(qpsu_base_url='http://192.168.1.3/C%3A/QGB/babun/cygwin/bin/qgb/',update_files='py,U,T,N/__init__,F,N/HTTP',qpsu_dir=py.No('Auto get qpsu_dir'),proxy='',**ka):
 	'''
 qpsu_base_url = 'http://*/qgb/'	
 u=N.get();r=F.write('/data/data/qgb.ble/files/app/qgb/U.py',u)
@@ -59,7 +59,7 @@ return list of [u,old_f,new_size]
 		return duf
 	rufs=[]	
 	for u,f in duf.items():
-		b=get_bytes(qpsu_base_url+u)
+		b=get_bytes(qpsu_base_url+u,proxy=proxy,**ka)
 		if not b:return b
 		if py.len(b)<999:return py.No('HTTP.get len(b)<999',b,duf)
 		F.delete(f)

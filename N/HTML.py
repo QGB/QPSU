@@ -87,19 +87,20 @@ def xiaomi_air_conditioner_control(response=None,token=py.No('auto get'),t=0,ang
 	power=U.get_duplicated_kargs(ka,'power','on','open',default=power)
 	sleep=U.get_duplicated_kargs(ka,'sleep','set_silent','silent',default=sleep)
 	
-	if not ip:
-		ip=U.get_or_set('miio.ip','192.168.1.4')
-	else:	
-		ip=N.auto_ip(ip)
-		ip=U.set('miio.ip',ip)
-	
 	if not token:token=get_or_input_html(response,'miio.token')
 	if not token:return token
 	
 	import miio
+	
+	if not ip:
+		ip=U.get_or_set('miio.ip','192.168.1.4')
+	else:	
+		ip=N.auto_ip(ip)
+	
 	d=U.get_or_set(ip+':'+token,
 			lazy_default=lambda:miio.device.Device(ip=ip,token=token),
 		)	
+	
 		
 	if py.callable(before):
 		before(d)
@@ -108,7 +109,10 @@ def xiaomi_air_conditioner_control(response=None,token=py.No('auto get'),t=0,ang
 		d.send('set_power',['on'])
 	else:
 		d.send('set_power',['off'])
-		return d
+		
+	ip=U.set('miio.ip',ip)
+		
+	if not power:return d
 		
 	if not sleep is AC_DEFAULT:
 		if sleep:
