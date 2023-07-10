@@ -30,11 +30,14 @@ def verifying_key_to_addr(key):
 	addr = base58.b58encode_check(primitive_addr)
 	return addr
 
-
-def get_address(b32):
+def auto_b32(b32):
 	if py.istr(b32):
 		b=b32.encode('utf-8')[:32]
 		b32=b'\x00'*(32-len(b))+b
+	return b32
+
+def get_trc20(b32):
+	b32=auto_b32(b32)
 	raw=b32
 	# raw = bytes(random.sample(range(0, 256), 32))
 	# raw = bytes.fromhex('a0a7acc6256c3..........b9d7ec23e0e01598d152')
@@ -47,3 +50,31 @@ def get_address(b32):
 	print('Private b32: ', raw)
 	return addr
 	# break
+get_address=trc20=get_trc20
+
+def get_erc20(b32):
+	'''
+pip install coincurve pysha3 
+
+有问题
+private_key: b10e2d527612073b26eecdfd717e6a320cf44b4afac2b0732d9fcbe2b7fa0cf6
+eth addr: 0xf80999dcaf1cd7ee68f8b72c4e9451581a92bb56
+Out[329]: b'\xf8\t\x99\xdc\xaf\x1c\xd7\xeeh\xf8\xb7,N\x94QX\x1a\x92\xbbV'
+
+不等于 0x9858EfFD232B4033E47d90003D41EC34EcaEda94           
+
+'''
+	from secrets import token_bytes
+	from coincurve import PublicKey
+	from sha3 import keccak_256
+
+	b32=auto_b32(b32)
+
+	private_key = keccak_256(b32).digest()
+	public_key = PublicKey.from_valid_secret(private_key).format(compressed=False)[1:]
+	addr = keccak_256(public_key).digest()[-20:]
+
+	print('private_key:', private_key.hex())
+	print('eth addr: 0x' + addr.hex())
+	return addr
+erc20=get_erc20

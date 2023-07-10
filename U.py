@@ -3210,6 +3210,8 @@ def range(*a):
 range(stop) 
 range(start, stop[, step]) 
 	'''
+	if py.len(a)==1:
+		a=[py.int(a[0])]
 	return py.list(py.range(*a))
 	
 def isModule(a):
