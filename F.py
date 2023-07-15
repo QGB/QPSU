@@ -59,6 +59,24 @@ class IntSize(py.int):
 		# return '<{}={}>'.format(super().__repr__(),F.ssize(self) )
 	def __repr__(self):return self.__str__()
 ################################
+def pickle_monkeypatch():
+	import pickle
+	U=py.importU()
+	sk='pickle._Pickler.save'
+	if '<function _Pickler.save at' in repr(pickle._Pickler.save):
+		fsave=U.set(sk,pickle._Pickler.save)
+		print(pickle_monkeypatch.__name__,U.stime(),fsave,)
+	else:
+		fsave=U.get(sk)
+	def save(self, obj, save_persistent_id=True):
+		t=type(obj)
+		if t.__module__=='qgb.U' and 'qgb.U.object_custom_repr.<locals>.QGB_REPR_SUBTYPE' in repr(t):
+			ts=U.get_obj_hierarchy(obj)
+			obj=ts[1](obj)
+
+		fsave(self, obj,save_persistent_id)
+	pickle._Pickler.save=save
+
 def gzip_decode(b):
 	import zlib
 	import urllib
@@ -371,13 +389,21 @@ dill还包括几个pickle错误检测工具，在dill.detect module.
 ['at', 'baditems', 'badobjects', 'badtypes', 'children', 'code', 'dis', 'errors', 'freevars', 'getmodule', 'globalvars', 'iscode', 'isframe', 'isfunction', 'ismethod', 'istraceback', 'nestedcode', 'nestedglobals', 'outermost', 'parent', 'parents', 'reference', 'referredglobals', 'referrednested', 'trace', 'varnames', ...]
 	'''
 	import dill
+	from pickle import PicklingError
 	if file:
 		if py.istr(obj) and py.len(obj)<333 and '.dill' in obj:
 			if not py.istr(file) or '.dill' not in file:
 				file,obj=obj,file
 		file=auto_path(file,ext=dill_ext)
 		with py.open(file,'wb') as f:
-			dill.dump(obj=obj,file=f,protocol=protocol)		
+			try:
+				dill.dump(obj=obj,file=f,protocol=protocol)
+			except PicklingError as ep:
+				if 'qgb.U.object_custom_repr.<locals>.QGB_REPR_SUBTYPE' in ep.args[0]:
+					pickle_monkeypatch()
+					dill.dump(obj=obj,file=f,protocol=protocol)
+				else:	
+					return py.No(ep)
 		return file
 	else:
 		return dill.dumps(obj=obj,protocol=protocol)

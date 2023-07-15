@@ -584,7 +584,7 @@ for(e of document.querySelectorAll("td:nth-of-type(5) > textarea")){
 gs=github_search=list_github_search
 
 
-def list_2d_txt_href(response,a,url_index_dict=None,txt=None,**ka):
+def list_2d_txt_href(response,a,url_index_dict=None,txt_column=None,t_cols=137,**ka):
 	''' url_index_dict [1,2] : 1.href == 2(url)
 url_index_dict == int 默认 url最后一列 url_index_dict={index:-1}	
 	
@@ -593,9 +593,12 @@ url尽量放在列表靠后的列，简化影响
 TODO:  list pop multiple indexes  您需要以相反的顺序删除它们，以免丢弃后续索引。
 '''
 	url_index_dict=U.get_duplicated_kargs(ka,'url_index_dict','u','uc','ui','url','u_col','ucol','ucolumn',default=url_index_dict)
+	txt_column=U.get_duplicated_kargs(ka,'txt_column','txt','t','text','txt_col','t_col','tcol','tcolumn',default=txt_column)
 	if not py.isdict(url_index_dict):
 		if py.isint(url_index_dict):
 			url_index_dict={url_index_dict:-1}
+		elif not url_index_dict:
+			url_index_dict={}
 		else:
 			url_index_dict={url_index_dict[0]:url_index_dict[1]}
 	a=[py.list(row).copy() for row in a]
@@ -604,7 +607,7 @@ TODO:  list pop multiple indexes  您需要以相反的顺序删除它们，以�
 		diu[iu]=[row.pop(iu) for row in a]
 		
 	def href_column_callback(html,head):
-		nonlocal a,url_index_dict,txt
+		nonlocal a,url_index_dict,txt_column
 
 		bs=T.BeautifulSoup(html)
 		for ia,iu in url_index_dict.items():
@@ -617,6 +620,23 @@ TODO:  list pop multiple indexes  您需要以相反的顺序删除它们，以�
 				ea.append(f)
 				e.clear()
 				e.append(ea)
+		
+		if txt_column:
+			es=bs.select(f'body > table > tbody > tr > td:nth-of-type({1+txt_column})')
+			# print(es,txt_column)
+			for ne,e in py.enumerate(es):
+				ea=bs.new_tag('textarea')
+				# print(ne,a[ne])
+				s=a[ne][txt_column]
+				if not s:continue
+				s=s.strip()
+				ea.attrs['rows']=f"""{s.count(T.eol)+1};"""
+				ea.attrs['cols']=f"""{t_cols}"""
+				ea.attrs['readonly'] = 'readonly'
+				ea.append(s)
+				e.clear()
+				e.append(ea)
+				
 		return py.str(bs)		
 	return list_2d(response,a,html_callback=href_column_callback,**ka)
 list_2d_txt=listu=list_url=list_2d_url=list_2d_href=list_2d_txt_href	
@@ -1486,7 +1506,21 @@ def select(response,iterable,**ka):
 		else:
 			rd = gid_select[id]
 		return do_resp(rd,enumerate(rd),enumerate(rd.disabled) 	)
-
+		
+		
+def markdown(response,t=''):
+	'''
+pip install markdown	
+	'''
+	if not t:
+		t=U.cbg()
+	# U,T,N	
+	import markdown
+	html=markdown.markdown(t,extensions=['fenced_code'])
+	response.headers['Content-Type']='text/html;charset=utf-8';
+	response.set_data(html)
+md=markdown	
+	
 ################################################
 
 class ListSelect(py.list):

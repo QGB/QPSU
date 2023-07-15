@@ -1185,8 +1185,12 @@ netloc: Contains the network location - which includes the domain itself (and su
 		return '.'.join(r)
 	else:
 		return r
-get_domain_tld=get_domain_of_url_tld=get_domain_parts_by_url_using_tld
+get_domain_of_url_tld=get_domain_parts_by_url_using_tld
 		
+def get_domain_tld(url_or_domain):
+	r=get_domain_parts_by_url_using_tld(url_or_domain,return_str=False)
+	return r[-1]
+get_tld=get_TLD=get_domain_tld
 		
 def getFLD(url_or_domain,fix_protocol=True):
 	"""Extract the first level domain.
@@ -1562,7 +1566,7 @@ def get_url_netloc(url):
 		url='http://'+url
 	up=urlsplit(url=url)
 	return up.netloc
-hostname=host_name=get_domain_parts_by_url=get_domain_from_url=netloc=get_url_netloc
+hostname=host_name=get_domain=get_domain_parts_by_url=get_domain_from_url=netloc=get_url_netloc
 
 def get_url_full_path(url):
 	netloc=get_url_netloc(url)

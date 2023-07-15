@@ -60,7 +60,7 @@ try:
 	
 	from multiprocessing import Process;process=Process
 	from collections import OrderedDict
-	from concurrent.futures import ThreadPoolExecutor
+	from concurrent.futures import ThreadPoolExecutor# ._max_workers 在没有第一次运行时可以调整，运行后调整无效
 	threadPool=ThreadPool=ThreadPoolExecutor
 	
 	from copy import deepcopy
@@ -647,7 +647,7 @@ u1604:  IPython repl  ok	,  bash python -c error  ?
 			# [1]
 		#  0
 # u1604 # /bin/sh: 1: Syntax error: end of file unexpected
-	def tmux_capture_pane(session=0,max_lines=9999,reverse=False,socket='',**ka):
+	def tmux_capture_pane(session=0,max_lines=9999,reverse=False,socket='',capture_pane_args='-J',**ka):
 		''' unset TMUX 
 
 -S 套接字路径
@@ -657,6 +657,8 @@ u1604:  IPython repl  ok	,  bash python -c error  ?
 		Specify a full alternative path to the server socket.
 		If -S is specified, the default socket directory is
 		not used and any -L flag is ignored.
+		
+-J : no line wrap 		
 		'''
 		U,T,N,F=py.importUTNF()
 		session=U.get_duplicated_kargs(ka,'session','sess',default=session)
@@ -664,6 +666,11 @@ u1604:  IPython repl  ok	,  bash python -c error  ?
 		reverse=U.get_duplicated_kargs(ka,'reverse','rev','r','R',default=reverse)
 		
 		a=N.geta()
+		if not session and a:
+			if ':' in a:
+				session=a
+			else:	
+				session=f'{session}:{a}'
 		
 		if (not socket) and U.is_root() and U.is_termux():
 			pt=U.ps(name='tmux: server')[0]
@@ -677,7 +684,7 @@ u1604:  IPython repl  ok	,  bash python -c error  ?
 			socket='-S '+socket.strip()
 			
 		os.environ['TMUX']=''
-		rs=U.isipy().getoutput(f'tmux {socket} capture-pane -S -{max_lines} -t {session}:{a};tmux {socket} show-buffer')#.format(max_lines=max_lines,session=session,window=a))# 不能用 U.cmd
+		rs=U.isipy().getoutput(f'tmux {socket} capture-pane -S -{max_lines} -t {session} {capture_pane_args};tmux {socket} show-buffer')#.format(max_lines=max_lines,session=session,window=a))# 不能用 U.cmd
 		if reverse:rs=rs[::-1]
 		return T.EOL.join(rs)
 	tmux=tmuxc=tmuxcap=tmuxcapture=tmuxCapture=tmux_capture=tmux_capture_pane
