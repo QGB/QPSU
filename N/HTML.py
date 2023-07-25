@@ -78,7 +78,7 @@ def get_or_input_html(response,*name):
 	# print(v)	
 	return v	
 AC_DEFAULT=py.No('auto use last,not change')	
-def xiaomi_air_conditioner_control(response=None,token=py.No('auto get'),t=0,angle=None,sleep=AC_DEFAULT,lcd=None,before=None,after=None,power=1,ip=AC_DEFAULT,**ka):
+def xiaomi_air_conditioner_control(response=None,token=py.No('auto get'),t=0,angle=None,sleep=AC_DEFAULT,swing=False,lcd=None,before=None,after=None,power=1,ip=AC_DEFAULT,**ka):
 	''' 风扇水平 0 时，环境感知温度会立马降低 
 	
 '''	
@@ -136,11 +136,15 @@ def xiaomi_air_conditioner_control(response=None,token=py.No('auto get'),t=0,ang
 		d.send("set_temperature", [t] )	
 	
 	def set_angle():
+		d.send("set_vertical", ['off'])#swing on/off
 		d.send("set_ver_pos", [70])
 		U.sleep(21)
 		d.send("set_ver_pos", [0])
 		U.sleep(21)
 		d.send("set_ver_pos", [angle])
+	
+	if swing:
+		d.send("set_vertical", ['on'])#swing on/off
 	
 	if py.isint(lcd):
 		d.send('set_lcd',[lcd])
@@ -689,14 +693,16 @@ def list_2d_href_file_column(response,a,file_column=None,**ka):
 		
 
 list_2d_CSS_MARK='/*css*/'
-def list_2d(response,a,html_callback=None,index=False,sort_kw=U.SORT_KW_SKIP,debug=False,**ka):
+def list_2d(response,a,html_callback=None,index=False,sort_kw=U.SORT_KW_SKIP,column_type_dict=None,debug=False,**ka):
 	index=U.get_duplicated_kargs(ka,'index','n','enu','add_index','enumerate',default=index)
 	sort_kw=U.get_duplicated_kargs(ka,'skw','sort','s',default=sort_kw)
+	column_type_dict=U.get_duplicated_kargs(ka,'column_type_dict','type','t',default=column_type_dict if column_type_dict else {},)
+	
 	# if py.isint(sort_kw): # U.sort 中已经处理
 	if 'float_format' not in ka:
 		ka['float_format']='{}'.format
 		
-	a=U.sort(a,sort_kw=sort_kw)
+	# a=U.sort(a,sort_kw=sort_kw)
 	# return a
 
 	# request,ucode,urla=N.geta(return_other_url={'url_decode':1,
@@ -705,6 +711,22 @@ def list_2d(response,a,html_callback=None,index=False,sort_kw=U.SORT_KW_SKIP,deb
 	
 	import pandas as pd
 	df = pd.DataFrame(data=a)
+	
+	for cname,type in column_type_dict.items():
+		if type=='ms':
+			df[cname] = pd.to_datetime(df[cname], unit='ms')
+			continue
+		if type in ['t','time','s',]:
+			df[cname] = pd.to_datetime(df[cname], unit='s')
+			continue
+		df[cname] = df[cname].astype(type)
+
+	
+	if py.isint(sort_kw):
+		df=df.sort_values(df.columns[sort_kw])
+	if py.istr(sort_kw):	
+		df=df.sort_values(sort_kw)
+	
 	html=df.to_html(index=index,**ka) 
 	
 # <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">

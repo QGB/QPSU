@@ -5722,7 +5722,7 @@ def count_hashable_in_iterable(iter):
 	return d
 ct_iter=count_iter=count_list=count_hashable=count_in_iterable=count_hashable_in_iterable
 
-def dict_value_len(adict,return_list=False,):
+def dict_value_len(adict,return_list=False,cts=False):
 	'''
 	range(-1) = range(0, -1)
 	'''
@@ -5730,8 +5730,10 @@ def dict_value_len(adict,return_list=False,):
 	for k,v in adict.items():
 		d[k]=len(v)	
 	if return_list:return [[v,k] for k,v in d.items()]	
+	if cts:return sort([[v,k] for k,v in d.items()],column=0,reverse=True)
 	return d
 dictvlen=dictValueLen=dict_value_len
+
 def dict_value_len_count(adict,show_key_len_range=py.range(-1,-1),return_list=False, ):
 	'''
 	range(-1) = range(0, -1)
@@ -5747,7 +5749,19 @@ def dict_value_len_count(adict,show_key_len_range=py.range(-1,-1),return_list=Fa
 		
 	return d
 	
-def dict_replace_value(adict,key_map_dict):
+def dict_replace_value(adict,update_dict=None,**ka):
+	if not update_dict:
+		update_dict=ka
+	rd=adict.copy()
+	for k,v in update_dict.items():
+		rd[k]=v
+	return rd
+	
+dict_update_return_new=replace_dict_value=dict_replace_value
+
+def dict_extract_keys(adict,key_map_dict=None,**ka):
+	if not key_map_dict:
+		key_map_dict=ka
 	rd={}
 	for ka,kr in key_map_dict.items():
 		if py.islist(kr):
@@ -5755,7 +5769,7 @@ def dict_replace_value(adict,key_map_dict):
 		else:
 			rd[ka]=adict[kr]
 	return rd
-dict_copy=replace_dict_value=dict_replace_value
+dict_copy=dict_extract_keys
 	
 def dict_value_hash_count(adict,):
 	'''
@@ -7698,7 +7712,7 @@ def load_jks(filename,password=''):
 	return keystore
 	p12 = keystore.entries['myalias'].export_pkcs12('mypassword')
 	
-def tts_speak(t,max_vol=True):
+def tts_speak(t,max_vol=100):
 	''' pip install pyttsx3
 长文本会一直阻塞，KeyboardInterrupt 无效	
 '''	
@@ -7706,10 +7720,12 @@ def tts_speak(t,max_vol=True):
 	engine = get_or_set('pyttsx3.engine',lazy_default=lambda:pyttsx3.init())
 	
 	U,T,N,F=py.importUTNF()
+	if max_vol and not py.isint(max_vol):max_vol=100
+	
 	if max_vol:
 		from qgb import Win
 		v=Win.get_vol()
-		Win.set_vol(100)
+		Win.set_vol(max_vol)
 	
 	t=T.string(t)
 	engine.proxy._driver._tts.Speak(t)

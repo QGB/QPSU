@@ -61,12 +61,13 @@ class IntSize(py.int):
 ################################
 def pickle_monkeypatch():
 	import pickle
-	U=py.importU()
 	sk='pickle._Pickler.save'
-	if '<function _Pickler.save at' in repr(pickle._Pickler.save):
+	if '<function _Pickler.save at' in py.repr(pickle._Pickler.save):
+		U=py.importU()
 		fsave=U.set(sk,pickle._Pickler.save)
 		print(pickle_monkeypatch.__name__,U.stime(),fsave,)
 	else:
+		return
 		fsave=U.get(sk)
 	def save(self, obj, save_persistent_id=True):
 		t=type(obj)
