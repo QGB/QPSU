@@ -6278,6 +6278,7 @@ def load(name=0,returnFile=False):
 	# if name:#TODO 配合 save 并正确转换到相应类型，使用对象序列化？ 
 
 def unique(iterable,count=False,count_and_sort=False,return_list=False,**ka):
+	if not iterable:return iterable
 	count=get_duplicated_kargs(ka,'d','dict','return_dict','rd','count','ct',default=count)
 	count_and_sort=get_duplicated_kargs(ka,'count_and_sort','count_sort','cts','cs',default=count_and_sort)
 	if count_and_sort:

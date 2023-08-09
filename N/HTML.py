@@ -77,15 +77,20 @@ def get_or_input_html(response,*name):
 		# raise v
 	# print(v)	
 	return v	
+	
 AC_DEFAULT=py.No('auto use last,not change')	
-def xiaomi_air_conditioner_control(response=None,token=py.No('auto get'),t=0,angle=None,sleep=AC_DEFAULT,swing=False,lcd=None,before=None,after=None,power=1,ip=AC_DEFAULT,**ka):
+# AC_DEFAULT=U.get_or_set('N.HTML.AC_DEFAULT',lazy_default=lambda:py.No('auto use last,not change')	)
+# print(repr(AC_DEFAULT))
+
+def xiaomi_air_conditioner_control(response=None,token=py.No('auto get'),t=0,angle=None,sleep=AC_DEFAULT,swing=False,lcd=None,volume=AC_DEFAULT,before=None,after=None,power=AC_DEFAULT,ip=AC_DEFAULT,**ka):
 	''' 风扇水平 0 时，环境感知温度会立马降低 
 	
 '''	
-	U.r(py,U,T,N,F,N.HTTP,N.HTML)
+	# U.r(py,U,T,N,F,N.HTTP,N.HTML) # 用了会造成 global AC_DEFAULT 与 default arg 中 默认参数 不一致
 	angle=U.get_duplicated_kargs(ka,'angle','angel','jd','ang','a','j',default=angle)
 	power=U.get_duplicated_kargs(ka,'power','on','open',default=power)
 	sleep=U.get_duplicated_kargs(ka,'sleep','set_silent','silent',default=sleep)
+	volume=U.get_duplicated_kargs(ka,'volume','v','voice','sound','sy',default=volume)
 	
 	if not token:token=get_or_input_html(response,'miio.token')
 	if not token:return token
@@ -102,17 +107,26 @@ def xiaomi_air_conditioner_control(response=None,token=py.No('auto get'),t=0,ang
 		)	
 	
 		
+		
+	if not volume is AC_DEFAULT:	
+		if volume:
+			d.send('set_volume_sw',['on'])
+		else:
+			d.send('set_volume_sw',['off'])
+	
 	if py.callable(before):
 		before(d)
-	
-	if power:
-		d.send('set_power',['on'])
-	else:
-		d.send('set_power',['off'])
 		
+	if not power is AC_DEFAULT:		
+		if power:
+			d.send('set_power',['on'])
+		else:
+			d.send('set_power',['off'])
+			U.set('miio.ip',ip)
+			return d
+		# if not power:
 	ip=U.set('miio.ip',ip)
 		
-	if not power:return d
 		
 	if not sleep is AC_DEFAULT:
 		if sleep:
@@ -166,8 +180,10 @@ def xiaomi_air_conditioner_control(response=None,token=py.No('auto get'),t=0,ang
 	return d
 ac=xiaomi_air_conditioner_control	
 
+# print(repr(AC_DEFAULT))
+
 # def list_2d_txt_href(response,a,file_column=None,**ka):
-def google_search_result_zhihu(response,word='',hs='',proxy='127.0.0.1:21080',u_size=36+4,**ka):
+def google_search_result_zhihu(response,word='',hs='',proxy='127.0.0.1:21080',u_size=36+4,force_reload=False,**ka):
 	if not word:
 		if response:
 			word=N.geta()
@@ -176,6 +192,9 @@ def google_search_result_zhihu(response,word='',hs='',proxy='127.0.0.1:21080',u_
 			
 	url=('https://www.google.com/search?q=site:zhihu.com+'
 		+T.url_encode(word)	)
+	if force_reload:
+		print('force_reload',py.len(U.del_set(url)))
+		
 	if not hs and not U.get(url):	
 		U.set('gzurl',url)	
 		print(U.stime(),'set gzurl')
@@ -186,7 +205,7 @@ def google_search_result_zhihu(response,word='',hs='',proxy='127.0.0.1:21080',u_
 		rx=U.get_ipython(raise_exception=1).run_cell('''
 	from qgb.tests import taobao_trade;
 	print(U.stime(),'start google_zhihu, getting page...')
-	pa_google_zhihu=await taobao_trade.get_or_new_page(U.get('gzurl'));
+	pa_google_zhihu=await taobao_trade.new_page(U.get('gzurl'));#fix错误结果，再说没必要两次缓存
 	print(U.stime(),pa_google_zhihu)
 	h_google_zhihu=await pa_google_zhihu.evaluate("document.documentElement.outerHTML");
 	print(U.stime(),'get html',py.len(h_google_zhihu))
@@ -693,14 +712,18 @@ def list_2d_href_file_column(response,a,file_column=None,**ka):
 		
 
 list_2d_CSS_MARK='/*css*/'
-def list_2d(response,a,html_callback=None,index=False,sort_kw=U.SORT_KW_SKIP,column_type_dict=None,debug=False,**ka):
+def list_2d(response,a,html_callback=None,index=False,sort_kw=U.SORT_KW_SKIP,column_type_dict=None,sort_ka=py.dict(ascending=True,),debug=False,to_html_ka=None,**ka):
+	''' ascending=False #倒序 从大到小
+	'''
 	index=U.get_duplicated_kargs(ka,'index','n','enu','add_index','enumerate',default=index)
 	sort_kw=U.get_duplicated_kargs(ka,'skw','sort','s',default=sort_kw)
 	column_type_dict=U.get_duplicated_kargs(ka,'column_type_dict','type','t',default=column_type_dict if column_type_dict else {},)
 	
 	# if py.isint(sort_kw): # U.sort 中已经处理
-	if 'float_format' not in ka:
-		ka['float_format']='{}'.format
+	if not to_html_ka:to_html_ka={}
+	
+	if 'float_format' not in to_html_ka:
+		to_html_ka['float_format']='{}'.format
 		
 	# a=U.sort(a,sort_kw=sort_kw)
 	# return a
@@ -709,25 +732,46 @@ def list_2d(response,a,html_callback=None,index=False,sort_kw=U.SORT_KW_SKIP,col
 	# '%23-':1
 	# },return_request=True)
 	
-	import pandas as pd
-	df = pd.DataFrame(data=a)
+	import pandas
+	df = pandas.DataFrame(data=a)
+	
+	if py.isdict(sort_kw) and not column_type_dict:
+		for k,v in sort_kw.items():
+			if py.isint(v) and k in ['c','col','column']:
+				sort_kw=v
+				break
+			# if not py.isint(k):continue
+			column_type_dict=sort_kw
+			sort_kw=k
+			break
 	
 	for cname,type in column_type_dict.items():
 		if type=='ms':
-			df[cname] = pd.to_datetime(df[cname], unit='ms')
+			df[cname] = pandas.to_datetime(df[cname], unit='ms')
 			continue
 		if type in ['t','time','s',]:
-			df[cname] = pd.to_datetime(df[cname], unit='s')
+			df[cname] = pandas.to_datetime(df[cname], unit='s')
 			continue
 		df[cname] = df[cname].astype(type)
 
 	
 	if py.isint(sort_kw):
-		df=df.sort_values(df.columns[sort_kw])
+		df2=df.sort_values(df.columns[sort_kw],**sort_ka)
+		if py.type(df2)==pandas.core.frame.DataFrame:df=df2 # fix inplace=True
 	if py.istr(sort_kw):	
-		df=df.sort_values(sort_kw)
-	
-	html=df.to_html(index=index,**ka) 
+		df2=df.sort_values(sort_kw,**sort_ka)
+		if py.type(df2)==pandas.core.frame.DataFrame:df=df2
+	if index:
+		# df.reset_index(drop=True)
+		# df.reset_index(drop=False)
+		sindex_col='0index'
+		if sindex_col in df:
+			pass
+		else:
+			df.insert(0, sindex_col, py.range(py.len(df)) )
+		index=False
+		
+	html=df.to_html(index=index,**to_html_ka) 
 	
 # <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 	head='''
@@ -751,7 +795,7 @@ def list_2d(response,a,html_callback=None,index=False,sort_kw=U.SORT_KW_SKIP,col
 	
 	response.headers['Content-Type']='text/html;charset=utf-8';
 	response.set_data(html)
-	return a
+	return df
 list=table=l2d=_2d_list=list2d=list_2d
 
 def everything_search_image(response,add_offset=32,**ka):

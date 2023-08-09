@@ -63,6 +63,10 @@ Out[329]: b'\xf8\t\x99\xdc\xaf\x1c\xd7\xeeh\xf8\xb7,N\x94QX\x1a\x92\xbbV'
 
 不等于 0x9858EfFD232B4033E47d90003D41EC34EcaEda94           
 
+
+https://privatekeys.pw/key/0000000000000000000000000000000000000000000000000000000000000001
+ 0x7E5F4552091A69125d5DfCb7b8C2659029395Bdf
+
 '''
 	from secrets import token_bytes
 	from coincurve import PublicKey
@@ -77,4 +81,20 @@ Out[329]: b'\xf8\t\x99\xdc\xaf\x1c\xd7\xeeh\xf8\xb7,N\x94QX\x1a\x92\xbbV'
 	print('private_key:', private_key.hex())
 	print('eth addr: 0x' + addr.hex())
 	return addr
+	
+
+def get_erc20(b32):
+	from coincurve import PublicKey
+	from sha3 import keccak_256
+
+	b32=auto_b32(b32)
+	
+	# private_key = keccak_256(b32).digest()
+	private_key = b32
+	public_key = PublicKey.from_valid_secret(private_key).format(compressed=False)[1:]
+	addr = keccak_256(public_key).digest()[-20:]
+	print('private_key:', private_key.hex())
+	print('eth addr: 0x' + addr.hex())
+	
+	return private_key
 erc20=get_erc20
