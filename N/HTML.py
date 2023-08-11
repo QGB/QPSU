@@ -725,7 +725,7 @@ def list_2d(response,a,html_callback=None,index=False,sort_kw=U.SORT_KW_SKIP,col
 	if 'float_format' not in to_html_ka:
 		to_html_ka['float_format']='{}'.format
 		
-	# a=U.sort(a,sort_kw=sort_kw)
+	# 
 	# return a
 
 	# request,ucode,urla=N.geta(return_other_url={'url_decode':1,
@@ -754,13 +754,20 @@ def list_2d(response,a,html_callback=None,index=False,sort_kw=U.SORT_KW_SKIP,col
 			continue
 		df[cname] = df[cname].astype(type)
 
-	
-	if py.isint(sort_kw):
-		df2=df.sort_values(df.columns[sort_kw],**sort_ka)
-		if py.type(df2)==pandas.core.frame.DataFrame:df=df2 # fix inplace=True
-	if py.istr(sort_kw):	
-		df2=df.sort_values(sort_kw,**sort_ka)
-		if py.type(df2)==pandas.core.frame.DataFrame:df=df2
+	try:
+		if py.isint(sort_kw):
+			df2=df.sort_values(df.columns[sort_kw],**sort_ka)
+			if py.type(df2)==pandas.core.frame.DataFrame:df=df2 # fix inplace=True
+		if py.istr(sort_kw):	
+			df2=df.sort_values(sort_kw,**sort_ka)
+			if py.type(df2)==pandas.core.frame.DataFrame:df=df2
+	except TypeError as e:
+		print(e)
+		a=U.sort(a,sort_kw=sort_kw)
+		return list_2d(response=response,a=a,html_callback=html_callback,index=index,
+		# sort_kw=sort_kw,
+		column_type_dict=column_type_dict,sort_ka=sort_ka,debug=debug,to_html_ka=to_html_ka,**ka,)
+		
 	if index:
 		# df.reset_index(drop=True)
 		# df.reset_index(drop=False)

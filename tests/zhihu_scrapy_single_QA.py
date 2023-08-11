@@ -35,6 +35,7 @@ def zhihu_question(id,debug=0):
 		qid=id
 	u=f'http://192.168.1.10:1200/zhihu/question/{qid}'	
 	s=N.get(u,proxy=0,p=1)
+	if not s:return s
 	d=T.xmltodict(s)
 	rl=[ U.StrRepr(d['rss']['channel']['title'][3:]+'\n'*4),  ]
 	for item in d['rss']['channel']['item']:

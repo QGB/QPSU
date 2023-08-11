@@ -4765,7 +4765,6 @@ def get_all_process_value_list(**ka):
 	''' ka : title=True  : return [  [pid      , ppid     , cmd      ] ...] 
 	'''
 	U=py.importU()
-	filter=U.get_duplicated_kargs(ka,'filter','ps',default={})
 	column_size_ka=U.get_duplicated_kargs(ka,'column_size_ka','dcol','dc',default={})
 	
 	size=7 # must <10
@@ -4777,6 +4776,10 @@ def get_all_process_value_list(**ka):
 	# column_size_ka['name']=U.get_duplicated_kargs(ka,'name',default=1) # cmd 每行最后
 	column_size_ka['cmd']=U.get_duplicated_kargs(ka,'cmd','CMD','cmdline','command','c',default=1) # cmd 每行最后
 
+	filter=U.get_duplicated_kargs(ka,'filter','ps',default={})
+	if not filter and ka:
+		filter=ka
+	
 	def is_size(k,v):
 		nonlocal column_size_ka,size,filter
 		if py.isint(v):
@@ -5099,8 +5102,9 @@ Out[115]: 0
 
 in ipy , npp() not autoReload when U.r(), But U.npp()
 '''
+	
+	U,T,N,F=py.importUTNF()
 	if isnix():
-		U,T,N,F=py.importUTNF()
 		rpc_ka={}
 		if a:
 			f,lineno=get_obj_file_lineno(a,lineno=lineno,auto_file_path=auto_file_path)
@@ -5112,22 +5116,32 @@ in ipy , npp() not autoReload when U.r(), But U.npp()
 			rpc_ka['lineno']=lineno
 			if debug:rpc_ka['debug']=True
 		return N.rpc_call(base=U.get_or_set_input('U.npp.rpc_base',default='https://'),name='U.npp',**rpc_ka)
-	if editor_path:
-		npath=editor_path
-	else:
-		nppexe='/Notepad++/notepad++.exe'.lower()
-		npath=''	
-			# if Win.getVersionNumber()>=6.1:#win7
-			# appdata=os.getenv('appdata') or ''#win10 not have appdata  ?
-			# npath=appdata.replace('\\','/')+nppexe
-		if not os.path.exists(npath):	
-			npath=getModPath()[:3]+r'QGB'+nppexe
-		if not os.path.exists(npath):	
-			npath=getModPath()[:3]+r'QGB'+'/npp/notepad++.exe'
-		if not os.path.exists(npath):
-			npath=find_driver_path(r':\QGB'+'/npp/notepad++.exe')		
-		if not os.path.exists(npath):
-			npath=find_driver_path(r":\Program Files"+nppexe)#如果最后没有匹配到，则为 空.....
+	if not editor_path:
+		editor_path=U.get('notepad++.exe')
+		
+	if not editor_path:
+		ps=U.ps(name='notepad++.exe')
+		if ps:
+			editor_path=ps[0].exe()
+		else:
+			nppexe='/Notepad++/notepad++.exe'.lower()
+			npath=''	
+				# if Win.getVersionNumber()>=6.1:#win7
+				# appdata=os.getenv('appdata') or ''#win10 not have appdata  ?
+				# npath=appdata.replace('\\','/')+nppexe
+			if not os.path.exists(npath):	
+				npath=getModPath()[:3]+r'QGB'+nppexe
+			if not os.path.exists(npath):	
+				npath=getModPath()[:3]+r'QGB'+'/npp/notepad++.exe'
+			if not os.path.exists(npath):
+				npath=find_driver_path(r':\QGB'+'/npp/notepad++.exe')		
+			if not os.path.exists(npath):
+				npath=find_driver_path(r":\Program Files"+nppexe)#如果最后没有匹配到，则为 空.....
+			if npath:	
+				editor_path=npath
+			else:
+				raise py.ArgumentError('need editor_path',editor_path)
+	U.set('notepad++.exe',editor_path)
 	if DEBUG:pln (repr(npath),nppexe)
 	# npath='"%s"'%npath
 	# print(233333333333)  # add this work?
@@ -5141,15 +5155,15 @@ in ipy , npp() not autoReload when U.r(), But U.npp()
 		if py.len(f)>250:
 			f=py.importF().nt_short_path(f)
 			
-		if 'notepad++.exe' in npath.lower():#参数不要分开
+		if 'notepad++.exe' in editor_path.lower():#参数不要分开
 			line_arg='{} {}'.format(line_arg,lineno)
 			lineno=''
-		if 'emeditor.exe' in npath.lower():#参数要分开
+		if 'emeditor.exe' in editor_path.lower():#参数要分开
 			pass# 这是c:\qgb\anaconda3\lib\subprocess.py:769默认行为
-		return run(npath,f,line_arg,lineno)
+		return run(editor_path,f,line_arg,lineno)
 	else:
-		if not get_cmd:run(npath)
-		return npath 
+		if not get_cmd:run(editor_path)
+		return editor_path 
 npp=notePadPlus=notePadPlusPlus
 	
 def nppMods(modName='qgb'):
