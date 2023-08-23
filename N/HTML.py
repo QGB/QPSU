@@ -82,15 +82,17 @@ AC_DEFAULT=py.No('auto use last,not change')
 # AC_DEFAULT=U.get_or_set('N.HTML.AC_DEFAULT',lazy_default=lambda:py.No('auto use last,not change')	)
 # print(repr(AC_DEFAULT))
 
-def xiaomi_air_conditioner_control(response=None,token=py.No('auto get'),t=0,angle=None,sleep=AC_DEFAULT,swing=False,lcd=None,volume=AC_DEFAULT,before=None,after=None,power=AC_DEFAULT,ip=AC_DEFAULT,**ka):
+def xiaomi_air_conditioner_control(response=None,token=py.No('auto get'),t=0,angle=None,sleep=AC_DEFAULT,swing=False,lcd=None,volume=AC_DEFAULT,mode=AC_DEFAULT,wind_speed=AC_DEFAULT,before=None,after=None,power=AC_DEFAULT,ip=AC_DEFAULT,**ka):
 	''' 风扇水平 0 时，环境感知温度会立马降低 
 	
 '''	
 	# U.r(py,U,T,N,F,N.HTTP,N.HTML) # 用了会造成 global AC_DEFAULT 与 default arg 中 默认参数 不一致
 	angle=U.get_duplicated_kargs(ka,'angle','angel','jd','ang','a','j',default=angle)
-	power=U.get_duplicated_kargs(ka,'power','on','open',default=power)
-	sleep=U.get_duplicated_kargs(ka,'sleep','set_silent','silent',default=sleep)
-	volume=U.get_duplicated_kargs(ka,'volume','v','voice','sound','sy',default=volume)
+	power=U.get_duplicated_kargs(ka,'power','on','open','p',default=power)
+	sleep=U.get_duplicated_kargs(ka,'sleep','set_silent','silent','s',default=sleep)
+	volume=U.get_duplicated_kargs(ka,'volume','voice','sound','sy','v',default=volume)
+	mode=U.get_duplicated_kargs(ka,'mode','c','cool','m','cooling',default=mode)
+	wind_speed=U.get_duplicated_kargs(ka,'wind_speed','speed','fs','S',default=wind_speed)# 4 max , 5 auto
 	
 	if not token:token=get_or_input_html(response,'miio.token')
 	if not token:return token
@@ -130,8 +132,22 @@ def xiaomi_air_conditioner_control(response=None,token=py.No('auto get'),t=0,ang
 		
 	if not sleep is AC_DEFAULT:
 		if sleep:
-			d.send("set_silent", ['on']) #sleep
+			if py.isfloat(sleep) :#and sleep>60:
+				ia,ib=U.tuple_operator(py.str(sleep).split('.'),py.int)
+				if power is AC_DEFAULT:d.send('set_power',['on'])
+				d.send("set_mode", ['cooling'])
+				d.send("set_silent", ['off'])
+				
+				t2=U.Timer(lambda:N.HTML.ac(mode='wind',power=1),ia,name='ac.wind.Timer')
+				print(t2)
+				# ishutdown=ia+ib
+				print('ac.sleep ',ia,'wind',ib,'shutdown:',ia+ib,'#',U.time()+U.time_delta(seconds=ia+ib))
+				
+				d.send("set_idle_timer", [ia+ib])
+				
+				
 			if py.isint(sleep) and sleep>60:
+				d.send("set_silent", ['on']) #sleep
 				d.send("set_idle_timer", [sleep])
 		else:
 			d.send("set_silent", ['off'])
@@ -170,7 +186,24 @@ def xiaomi_air_conditioner_control(response=None,token=py.No('auto get'),t=0,ang
 		t.start()
 		# if angle<35
 		
-
+	if mode:
+		if py.istr(mode):
+			m=mode[0].lower()
+			if m=='w':
+				d.send("set_mode", ['wind'])
+			elif m=='c':
+				d.send("set_mode", ['cooling'])
+			else:
+				raise py.ArgumentError(mode)
+		else:
+			d.send("set_mode", ['cooling'])
+		
+	if wind_speed:
+		if py.isint(wind_speed):
+			wind_speed=py.min(wind_speed,5)
+			d.send("set_spd_level",[wind_speed])
+		else:	
+			d.send("set_spd_level",[4])
 		
 	if py.callable(after):
 		after(d)
@@ -762,7 +795,7 @@ def list_2d(response,a,html_callback=None,index=False,sort_kw=U.SORT_KW_SKIP,col
 			df2=df.sort_values(sort_kw,**sort_ka)
 			if py.type(df2)==pandas.core.frame.DataFrame:df=df2
 	except TypeError as e:
-		print(e)
+		print(e,'       fallback: U.sort',U.stime())
 		a=U.sort(a,sort_kw=sort_kw)
 		return list_2d(response=response,a=a,html_callback=html_callback,index=index,
 		# sort_kw=sort_kw,

@@ -199,14 +199,28 @@ def set_delete(*names,level=gd_sync_level['process'],**ka):
 			return r
 set_del=delset=del_set=unset=delete_set=set_delete
 	
-def set_delete_by_prefix(prefix,confirm=True,level=gd_sync_level['process']):
+def set_delete_by_surfix(s,confirm=True,level=gd_sync_level['process']):
 	U,T,N,F=py.importUTNF()
 	ks=[]
 	if level>=gd_sync_level['process']:
 		import sys
 		d=sys._qgb_dict=py.getattr(sys,'_qgb_dict',{})
 		for k in d:
-			if py.istr(k) and k.startswith(prefix):
+			if py.istr(k) and k.endswith(s):
+				ks.append(k)
+		if confirm:
+			U.input('delete:%s \n### press Enter to del,ctrl+c to cancel'%ks)
+		return U.object_custom_repr(U.dict_multi_pop(d,*ks),repr='{%s}#dict custom repr'%','.join('%r: ... '%k for k in ks),)
+delset_surfix=del_set_by_surfix=set_delete_by_surfix
+		
+def set_delete_by_prefix(s,confirm=True,level=gd_sync_level['process']):
+	U,T,N,F=py.importUTNF()
+	ks=[]
+	if level>=gd_sync_level['process']:
+		import sys
+		d=sys._qgb_dict=py.getattr(sys,'_qgb_dict',{})
+		for k in d:
+			if py.istr(k) and k.startswith(s):
 				ks.append(k)
 		if confirm:
 			U.input('delete:%s \n### press Enter to del,ctrl+c to cancel'%ks)
@@ -659,6 +673,8 @@ u1604:  IPython repl  ok	,  bash python -c error  ?
 		not used and any -L flag is ignored.
 		
 -J : no line wrap 		
+
+tmux show socket file :  lsof -U | grep '^tmux'  # socket='/tmp/tmux-1001/default'
 		'''
 		U,T,N,F=py.importUTNF()
 		session=U.get_duplicated_kargs(ka,'session','sess',default=session)
@@ -2451,8 +2467,17 @@ def warning(msg,tag='qgb.default.logger',**ka):
 warn=warning
 	
 def set_log_level(level=False,logger=None):
-	''' logging.CRITICAL #50
+	''' 
 	return level<int>
+DEBUG	  10
+INFO	  20
+WARN	  30
+WARNING	  30
+ERROR	  40
+CRITICAL  50
+FATAL	  50
+
+logging.CRITICAL #50	
 	'''
 	
 	if level==True:level=-1 # 0 useless
@@ -3640,7 +3665,7 @@ def int_with_default(obj,*other,default=None):
 int=int_with_default	
 	
 def least_common_multiple(x,y):
-	'''最大公因数（英语：highest common factor，hcf）也称最大公约数（英语：greatest common divisor，gcd）
+	'''
 least common multiple , lcm 最小公倍数
 	'''
 	# 1. from https://bugs.python.org/msg361033
@@ -3667,7 +3692,7 @@ least common multiple , lcm 最小公倍数
 		z += 1 
 	return lcm
 	############
-lcm=least_common_multiple	
+zxgbs=lcm=least_common_multiple	
 
 def greatest_common_divisor(x,y):
 	'''最大公因数（英语：highest common factor，hcf）也称最大公约数（英语：greatest common divisor，gcd）
@@ -3682,7 +3707,7 @@ least common multiple , lcm 最小公倍数
 	 # euclid's algorithm
 	if y == 0: return x
 	return gcd(y, x%y)
-gcd=greatest_common_divisor
+zdgys=gcd=greatest_common_divisor
 
 def math_factorial(n):
 	'''分解质因数
@@ -7382,6 +7407,47 @@ thunder_start :  light :	!min_val, max_val, min_loc, max_loc
 find_image_on_screen=seach_image_on_screen=search_image_on_screen
 
 
+def Timer(func,second,name='U.Timer',priority=0):
+	import threading
+	U,T,N,F=py.importUTNF()
+	t0=U.get(name)
+	if t0:t0.cancel()
+		
+	t=U.set(name,threading.Timer(second,func))
+	t.start()
+	
+	return t0,t
+timer=Timer
+
+def setTimeout(func,second,cancel_all=True,priority=0):
+	''' only run once
+#TODO 有问题 不能用  用Timer 代替
+	'''
+	import sched, time
+	U,T,N,F=py.importUTNF()
+	def init():
+		s=sched.scheduler(time.localtime, time.sleep)
+		#s.run() 提前运行无效果
+		return s
+	
+	
+	s = U.get_or_set('sched.scheduler',lazy_default=init )
+	
+	if cancel_all:
+		for n,e in py.enumerate(s.queue):
+			print(n,e)
+			s.cancel(e)# return None
+	
+	dt=U.time()+U.time_delta(seconds=second)
+	struct_time = time.localtime(dt.timestamp())
+	event=s.enterabs(struct_time,priority,func)
+	s.run()
+	return event
+	
+	return s
+set_time_out=settimeout=setTimeout
+	
+	
 def set_timed_task(func,every='day',time='05:09',unit=1,**ka):
 	'''U.set_timed_task(baidu_start,'2hour') 
 #TODO	
@@ -7433,7 +7499,7 @@ def set_timed_task(func,every='day',time='05:09',unit=1,**ka):
 		r=py.getattr(schedule.every(unit),every).do(func)  # every current time ,Depend Time unit   
 	return schedule.jobs,U.StrRepr('\n#######  U.get(%r)'%SCHEDULE_RUN_PENDING+' == '),t #,r
 	
-timer=schedule=everyday_time_task=set_time_task=timing_task=dsrw=set_schedule=setInterval=set_interval=set_timed_task
+schedule=everyday_time_task=set_time_task=timing_task=dsrw=set_schedule=setInterval=set_interval=set_timed_task
 
 def remove_timed_task(index=-1):
 	''' -1 is last added
@@ -7786,7 +7852,7 @@ def StrRepr_multi(*a,**ka): # ,wrap=StrRepr
 multi_StrRepr=strrepr_multi=StrRepr_multi
 
 def object_custom_repr(obj, *a, **ka):
-	'''
+	''' #TODO 不能用 dict list set str 来恢复类型。会丢失数据！ 用 d._qgb_obj , 在修复之前不推荐使用!!!
 In [1306]: float U.obj_repr(2.3,repr=3)
 Out[1306]: 2.3
 
@@ -7804,6 +7870,8 @@ Out[1310]: []
 
 In [1312]: list U.obj_repr(set([1,2,3]),repr=43)
 Out[1312]: []
+
+str(U.object_custom_repr('{1:2}',repr='{1:2}#')) == '{1:2}#'
 '''	
 	# if py.len(a)<1:raise py.ArgumentError('')
 	target=get_duplicated_kargs(ka,'f','target','repr','__repr__','func','function','custom','custom_repr',default=None)

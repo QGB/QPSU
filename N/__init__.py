@@ -1190,7 +1190,7 @@ AUTO_GET_BASE=py.No('auto history e.g. [http://]127.0.0.1:23571[/../] ',no_raise
 def rpc_get_variable(varname,
 base=AUTO_GET_BASE,
 template='{base}response.set_data(F.serialize({varname}))',
-		timeout=9,p=True,return_bytes=False,proxies=None,**ka):
+		timeout=9,p=True,return_bytes=False,proxies=None,ipy=False,**ka):
 	U,T,N,F=py.importUTNF()	
 	return_bytes=U.get_duplicated_kargs(ka,'return_byte','rb','B','b','raw','raw_bytes',default=return_bytes)
 	if base is AUTO_GET_BASE:
@@ -1221,6 +1221,10 @@ template='{base}response.set_data(F.serialize({varname}))',
 	try:
 		v= dill_loads(b)
 		if p:print('Success !!',U.stime()[15:20+2+4],U.type(v),U.len(v))
+		
+		if ipy and U.get_ipy():
+			U.get_ipy().user_ns[varname]=v
+			return
 		return v
 	except Exception as e:
 		if p:print('LoadErr ##',U.stime()[15:20+2+4],repr(e))
