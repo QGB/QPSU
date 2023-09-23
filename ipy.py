@@ -67,7 +67,7 @@ def undo_save(*indexs):
 			if i and i.startswith('ipy.save('):
 				index=n
 				break
-		#没找到 index 就不会被定义，自动抛出异常		
+		#没找到 index 就不会被定义，自动抛出异常	#TODO 待改进，出错很突兀，有点搞不懂
 		index=U.input('undo last ipy.save:',type=py.int,default=index)
 		indexs=[index]
 	r=[]

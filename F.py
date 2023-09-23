@@ -1665,7 +1665,7 @@ def makeDirs(ap,isFile=False,cd=0,no_auto_path=False):
 			if p.parent==p:# 'D:\\' 驱动器不存在
 				r=e
 			else:
-				r=makeDirs(p.parent,isFile=False)
+				r=makeDirs(p.parent,isFile=False,no_auto_path=no_auto_path)
 				if r:p.mkdir() # 建立父目录后，再次尝试创建本目录 
 				else:return r
 			# else:return r

@@ -100,7 +100,7 @@ def xiaomi_air_conditioner_control(response=None,token=py.No('auto get'),t=0,ang
 	import miio
 	
 	if not ip:
-		ip=U.get_or_set('miio.ip','192.168.1.4')
+		ip=U.get_or_set('miio.ip','192.168.1.88')
 	else:	
 		ip=N.auto_ip(ip)
 	
@@ -132,13 +132,49 @@ def xiaomi_air_conditioner_control(response=None,token=py.No('auto get'),t=0,ang
 		
 	if not sleep is AC_DEFAULT:
 		if sleep:
+			ia=0
+			if py.isint(sleep):
+				if sleep>9999:
+					ia=sleep
+					ib=100
+				elif sleep>60:
+					d.send("set_silent", ['on']) #sleep
+					d.send("set_idle_timer", [sleep])
+				
 			if py.isfloat(sleep) :#and sleep>60:
 				ia,ib=U.tuple_operator(py.str(sleep).split('.'),py.int)
+				
+			if ia:
 				if power is AC_DEFAULT:d.send('set_power',['on'])
 				d.send("set_mode", ['cooling'])
+				
+				
+				if ia>99999:
+					sa=py.str(ia)
+					assert len(sa)%4==0
+					ia=0
+					for ina in py.range(len(sa)//4):
+						isa=sa[4*ina:4*ina+4]
+						ta=py.int(isa[:2])
+						
+						if ina==0:
+							N.HTML.ac(t=ta)
+							ia=ia+py.int(isa[2:])*60 # ta 经历 ia 秒
+							continue
+						
+						se=f'lambda:print({ina},{ta},N.HTML.ac(t={ta}),U.stime())'
+						ft=eval(se)
+						print(ina,ta,ia,U.Timer(ft,ia,name=f'Timer.ac.{ina}'))
+						
+						ia=ia+py.int(isa[2:])*60 # ta 经历 ia 秒
+				else:
+					for ina in range(9):
+						ina=U.get(f'Timer.ac.{ina}')
+						if ina:ina.cancel()
+							
 				d.send("set_silent", ['off'])
 				
-				t2=U.Timer(lambda:N.HTML.ac(mode='wind',power=1),ia,name='ac.wind.Timer')
+				t2=U.Timer(lambda:N.HTML.ac(mode='wind',power=1),ia,name='Timer.ac.wind')
 				print(t2)
 				# ishutdown=ia+ib
 				print('ac.sleep ',ia,'wind',ib,'shutdown:',ia+ib,'#',U.time()+U.time_delta(seconds=ia+ib))
@@ -146,9 +182,7 @@ def xiaomi_air_conditioner_control(response=None,token=py.No('auto get'),t=0,ang
 				d.send("set_idle_timer", [ia+ib])
 				
 				
-			if py.isint(sleep) and sleep>60:
-				d.send("set_silent", ['on']) #sleep
-				d.send("set_idle_timer", [sleep])
+
 		else:
 			d.send("set_silent", ['off'])
 		
@@ -216,7 +250,7 @@ ac=xiaomi_air_conditioner_control
 # print(repr(AC_DEFAULT))
 
 # def list_2d_txt_href(response,a,file_column=None,**ka):
-def google_search_result_zhihu(response,word='',hs='',proxy='127.0.0.1:21080',u_size=36+4,force_reload=False,**ka):
+def google_search_result_zhihu(response,word='',hs='',proxy='127.0.0.1:21080',u_size=36+4,force_reload=False,timeout=99*1000,**ka):
 	if not word:
 		if response:
 			word=N.geta()
@@ -235,10 +269,10 @@ def google_search_result_zhihu(response,word='',hs='',proxy='127.0.0.1:21080',u_
 		asyncio.set_event_loop(U.get('asyncio.get_event_loop()')) 
 #如果不【set_event_loop】  RuntimeError: There is no current event loop in thread 'Thread-26685'. 
 #如果此时 MainThread 想要运行 await ，RuntimeError: This event loop is already running，必须要等其他线程运行完成		
-		rx=U.get_ipython(raise_exception=1).run_cell('''
+		rx=U.get_ipython(raise_exception=1).run_cell(f'''
 	from qgb.tests import taobao_trade;
 	print(U.stime(),'start google_zhihu, getting page...')
-	pa_google_zhihu=await taobao_trade.new_page(U.get('gzurl'));#fix错误结果，再说没必要两次缓存
+	pa_google_zhihu=await taobao_trade.new_page(U.get('gzurl'),timeout={timeout});#fix错误结果，再说没必要两次缓存
 	print(U.stime(),pa_google_zhihu)
 	h_google_zhihu=await pa_google_zhihu.evaluate("document.documentElement.outerHTML");
 	print(U.stime(),'get html',py.len(h_google_zhihu))

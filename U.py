@@ -395,7 +395,7 @@ def set_ka(name,**ka):
 	if not ka:raise py.ArgumentError('need ka')
 	d=get(name)
 	if d and not py.isdict(d):raise py.EnvironmentError('U.get(%r) is not dict ?'%name,d,ka)
-	if not py.isdict(d):return get_or_set_ka(name,ka)
+	if not py.isdict(d):return get_or_set_ka(name,**ka)
 	for k,v in ka.items():
 		d[k]=v
 	return d
@@ -3346,6 +3346,24 @@ def mergeList(*a):
 	return r
 add_list=addList=merge_list=mergeList
 
+def convert_timezone(astr,timezone='utc',return_str=True):
+	# from datetime import datetime, timezone, timedelta
+	import datetime
+	
+	# dt_str = '2023-09-22 23:47:11+08:00'
+	dt = datetime.datetime.strptime(astr, '%Y-%m-%d %H:%M:%S%z')
+	if py.isint(timezone):
+		tz=datetime.timezone(datetime.timedelta(hours=timezone))
+	else:
+		#todo timezone str
+		tz = datetime.timezone.utc
+	utc_dt = dt.astimezone(tz) 
+	if return_str:
+		return utc_dt.strftime('%Y-%m-%d %H:%M:%S%z')
+	else:
+		return utc_dt
+utc=to_utc_time=timezone=convert_timezone
+
 def itime_sec(a=py.No('auto current timestamp second')):
 	if not a:a=timestamp()
 	return py.int(a)
@@ -4400,6 +4418,17 @@ def FuncWrapForMultiArgs(f,args,default=None,index=False,f_ka=None,f_a=py.tuple(
 	else:
 		return r[0]  #U.len(obj) == py.len(obj)
 builtinFuncWrapForMultiArgs=FuncWrapForMultiArgs
+
+def filter_with_condition(a,condition,select=''):
+	if py.istr(condition):
+		if condition.startswith('lambda'):
+			'lambda i:'+condition
+		condition=py.eval(condition)
+	if py.callable(condition):
+		return [i for i in a if condition(i)]
+	else:
+		raise py.NotImplementedError()
+filter=filter_with_condition
 
 def recursive_basic_type_filter(obj):
 	''' dict,tuple,list,set  '''

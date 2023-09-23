@@ -5,9 +5,41 @@ if gsqp not in sys.path:sys.path.append(gsqp)#py3 works
 from qgb import py
 U,T,N,F=py.importUTNF()
 
+def B_get_klines(symbol,start,end,day='',interval='1s',return_json=True):
+	''' ='UNFIUSDT'
+	
+'''	
+	rpcka=U.get('rpcka')
+	if not rpcka:return rpcka
+	
+	data=N.rpc_get(f"B.get_klines(symbol={symbol!r},start='{day} {start}',end='{day} {end}',interval={interval!r})",**rpcka)
+	
+	if return_json:
+		return convert_klines_to_json(data)
+	else:
+		return data
+
+import json,pandas,numpy
 def convert_klines_to_json(klines):
-	import json
 	rds = []
+	# if 'pandas.core.frame.DataFrame' in py.str(py.type(klines)):
+	if isinstance(klines,pandas.DataFrame):
+		if py.len(klines.columns) == 12:
+			klines['OpenTime']=klines['OpenTime'].apply(lambda x: x.timestamp()*1000).astype(numpy.int64)
+			klines=py.list(klines.values)
+		else:
+			ds = klines.to_dict(orient='records')
+			for d in ds:
+				kline_data = {
+					'timestamp': int(d['close_datetime'].timestamp() * 1000),
+					'open': d['open'],
+					'high': d['high'],
+					'low': d['low'],
+					'close': d['close'],
+					'volume':d['volume'],
+					'turnover':d['quote_volume'],
+				}
+				rds.append(kline_data)
 	if py.islist(klines) and py.len(klines[0])==12:
 		for v in klines:
 			kline_data = {
@@ -23,19 +55,6 @@ def convert_klines_to_json(klines):
 	
 	elif py.istr(klines):
 		return klines
-	elif 'pandas.core.frame.DataFrame' in py.str(py.type(klines)):
-		ds = klines.to_dict(orient='records')
-		for d in ds:
-			kline_data = {
-				'timestamp': int(d['close_datetime'].timestamp() * 1000),
-				'open': d['open'],
-				'high': d['high'],
-				'low': d['low'],
-				'close': d['close'],
-				'volume':d['volume'],
-				'turnover':d['quote_volume'],
-			}
-			rds.append(kline_data)
 	return json.dumps(rds)
 to_json=convert_klines_to_json	
 	
