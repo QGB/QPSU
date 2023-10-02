@@ -813,6 +813,28 @@ def PyFile_FromFd(fd,name="filename",mode='r',buffering=-1,encoding='utf-8'):
 	
 	return f(fd, name,mode,buffering,bencoding,NULL,NULL,1)						  
 	
+def list_reindex_by_value(alist,*values):
+	''' 调整顺序  reindex ,
+	
+确保 values 全部存在，否则中途出现错误会污染 alist
+	'''
+	if not alist:return alist
+	
+	if not py.islist(alist):
+		raise py.NotImplementedError('# TODO  tuple ,set ,other types....',alist)
+	
+	for n,v in py.enumerate(values):
+		if v not in alist:
+			return py.No('No.%s:%s not in values!'%(n,v),v,values)
+	
+	vs=[]
+	for v in values:
+		alist.remove(v) #return None  #TODO other types
+		vs.append(v)
+	vs.extend(alist)	
+	return vs
+list_reindex=list_reindex_by_value	
+	
 def new_nd_list(*a,default_value=0):
 	from copy import deepcopy
 	r=default_value

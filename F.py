@@ -751,6 +751,8 @@ F.bin(1.0)=='0b00111111100000000000000000000000'  # （大端）
 def int_to_bytes(a):
 	T=py.importU().T
 	a=T.intToStr(a)
+	if py.len(a)%2==1:
+		a='0'+a
 	return hexToBytes(a)
 i2b=intToBytes=int_to_byte=int_to_bytes
 
@@ -1216,12 +1218,13 @@ def read_sqlite(file,table='',sql=SQL_DEFAULT,limit=None):
 			return r
 readSqlite=read_sqlite
 
-def readYaml(file):
+def read_yaml(file):
 	import yaml
 	with py.open(file) as f:
 		return yaml.safe_load(f)
+readYaml=read_yml=read_yaml
 
-def writeYaml(file,obj):
+def write_yaml(file,obj):
 	import yaml
 	try:
 		with py.open(file,'w') as f:
@@ -1229,6 +1232,7 @@ def writeYaml(file,obj):
 			return file
 	except Exception as e:
 		return py.No(e,file,obj)
+writeYaml=write_yml=write_yaml		
 		
 def isDir(file):
 	return _p.isdir(file)
