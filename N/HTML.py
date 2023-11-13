@@ -227,6 +227,8 @@ def xiaomi_air_conditioner_control(response=None,token=py.No('auto get'),t=0,ang
 				d.send("set_mode", ['wind'])
 			elif m=='c':
 				d.send("set_mode", ['cooling'])
+			elif m=='h':
+				d.send("set_mode", ['heat'])
 			else:
 				raise py.ArgumentError(mode)
 		else:
@@ -729,7 +731,7 @@ TODO:  list pop multiple indexes  您需要以相反的顺序删除它们，以�
 				
 		return py.str(bs)		
 	return list_2d(response,a,html_callback=href_column_callback,**ka)
-list_2d_txt=listu=list_url=list_2d_url=list_2d_href=list_2d_txt_href	
+list_txt=list_2d_txt=listu=list_url=list_2d_url=list_2d_href=list_2d_txt_href	
 
 def list_2d_href_file_column(response,a,file_column=None,**ka):
 	file_column=U.get_duplicated_kargs(ka,'file_column','cf','fc','f_col','fcol','fcolumn',default=file_column)
@@ -838,7 +840,7 @@ def list_2d(response,a,html_callback=None,index=False,sort_kw=U.SORT_KW_SKIP,col
 	if index:
 		# df.reset_index(drop=True)
 		# df.reset_index(drop=False)
-		sindex_col='0index'
+		sindex_col='0n'
 		if sindex_col in df:
 			pass
 		else:

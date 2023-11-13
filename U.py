@@ -6281,7 +6281,8 @@ getCmdline=getCmd=get_cmd=get_raw_cmd=get_raw_cmdline=get_self_raw_cmdline
 def get_cmdline_by_pid(pid=None):
 	if pid==None:
 		return get_self_raw_cmdline()
-
+	raise py.NotImplementedError('pid!=None')
+	
 def beep(ms=1000,hz=2357):
 	if iswin():
 		try:

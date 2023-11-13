@@ -411,16 +411,21 @@ def get_public_ip_by_dnspod(methods=['']):
 	sock.close()
 	return bip
 def get_public_ipv4(methods=['myip.ipip.net','ipinfo.io', 'icanhazip.com', 'ifconfig.me', 'ip.appspot.com', 'api.ipify.org', 'ipecho.net/plain', 'ipcalf.com', 'www.trackip.net','https://www.google.com/search?q=my+ip'],
-http_external_kargs={'ipinfo.io':{'encoding':'utf-8'},},
-	proxy=False,wait=3.4,return_list=True):
+http_external_kargs={'ipinfo.io':{'encoding':'utf-8','headers':{'User-Agent': 'curl'}},
+},
+	proxy=False,wait=3.4,return_list=True,print_msg=True,**ka):
 	from threading import Thread, Lock
-	mutex = Lock()
 	U,T,N,F=py.importUTNF()
+	
+	print_msg=U.get_duplicated_kargs(ka,'print_msg','print','show_msg','show','p',default=print_msg)
+	
+	mutex = Lock()
 	d={}
 	def new_thread(u):
-		mutex.acquire()
-		print(U.stime(),'fetching...',[methods.index(u)],u)  #list tuple all have index
-		mutex.release()
+		if print_msg:
+			mutex.acquire()
+			print(U.stime(),'fetching...',[methods.index(u)],u)  #list tuple all have index
+			mutex.release()
 		
 		d[u]=N.HTTP.get(u,timeout=3,proxies=proxy,**http_external_kargs.get(u,{}) ,)
 		if py.istr(d[u]) and py.len(d[u])>77:
@@ -428,9 +433,10 @@ http_external_kargs={'ipinfo.io':{'encoding':'utf-8'},},
 					T.regexMatchAll(d[u],T.RE_IP) ,py.len(d[u]),  
 				)    
 			)
-		mutex.acquire()
-		print(U.stime(),'received:  ',[methods.index(u)],U.StrRepr(u,size=17),repr(d[u])[:77])
-		mutex.release()
+		if print_msg:	
+			mutex.acquire()
+			print(U.stime(),'received:  ',[methods.index(u)],U.StrRepr(u,size=17),repr(d[u])[:77])
+			mutex.release()
 
 	for u in methods:
 		Thread(target=new_thread,args=(u,)).start()
@@ -451,6 +457,24 @@ http_external_kargs={'ipinfo.io':{'encoding':'utf-8'},},
 	return d
 get_all_pub_ip=get_pub_ip=get_public_ip=get_public_ipv4
 
+def get_public_ipv4_return_str(print_msg=False,**ka):
+	U,T,N,F=py.importUTNF()
+	try:
+		dur=get_public_ipv4(return_list=0,print_msg=print_msg,**ka)
+		ip=dur['ipcalf.com']
+		for u,rs in dur.items():
+			if not rs:continue
+			if 'no healthy upstream' in rs:#ipecho.net/plain 
+				print('@'*55,U.stime(),u,rs)
+				continue
+			if ip not in rs:
+				print('#'*55,u,rs)
+				raise py.Exception('ip not match ! %s'%ip,u,rs)
+		return ip		
+	except Exception as e:
+		return py.No(e)
+get_pub_ip_str=get_public_ipv4_return_str		
+		
 def ftp_client(cwd=py.No('history or /',no_raise=1),
 	host=py.No('auto get ftp.host',no_raise=1),port=3721,user='', passwd='',ftp_encoding='utf-8', acct='',
 				 timeout=None,retry=3,response=None,request=None,text_encoding='',**ka):
@@ -1459,8 +1483,9 @@ key compatibility :  key='#rpc\n'==chr(35)+'rpc'+chr(10)
 			port=443
 			flaskArgs['port']=port
 	# U.log(flaskArgs)
+	U.set('rpc.server.port',port)
 	if currentThread or not thread:
-		U.set('app',app)
+		U.set('rpc.server.app',app)
 		U.set(app.name,app)
 		return app.run(**flaskArgs)
 	else:

@@ -2046,15 +2046,19 @@ def json_dump_to_file(obj,file,**ka):
 	except Exception as e:
 		return py.No(e)
 		
-def json_dumps(obj):
+def json_dumps(obj,whitespace=True):
 	U=py.importU()
 	def default(obj):# not json basic class
 		return py.repr(obj)
 		# return {'obj-%s'%U.count(obj):py.repr(obj)}
 
+	ka={'default':default}
+	if not whitespace:
+		ka['separators']=(',', ':')
+
 	import json
 	try:
-		return json.dumps(obj ,default=default )
+		return json.dumps(obj ,**ka)
 	except Exception as e:
 		return py.No(e)
 json_dump=json_dumps

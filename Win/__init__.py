@@ -335,6 +335,150 @@ def get_monitor_resolution(multi_monitor_combined=False):
 		return user32.GetSystemMetrics(0), user32.GetSystemMetrics(1)
 get_screen_size=get_screen_resolution=get_monitor_resolution	
 
+
+gd_monitor_Availability={
+  1: '其他',
+  2: '未知',
+  3: '运行/全功率',
+  4: '警告',
+  5: '在测试',
+  6: '不适用',
+  7: '断电',
+  8: '离线',
+  9: '休息',
+  10: '降级',
+  11: '未安装',
+  12: '安装错误',
+  13: '节电-未知',
+  14: '节电-低功率模式',
+  15: '节电-待机',
+  16: '电源循环',
+  17: '节电-警告',
+  18: '暂停',
+  19: '未准备好',
+  20: '未配置',
+  21: '静止'
+} 
+def get_monitor_power_state():
+	''' https://github.com/MicrosoftDocs/win32/blob/docs/desktop-src/CIMWin32Prov/cim-desktopmonitor.md#properties
+ 
+ Availability:
+ 
+1  : 其他
+2  : 未知 
+3  : 运行/全功率
+4  : 警告
+5  : 在测试
+6  : 不适用
+7  : 断电
+8  : 离线  
+9  : 休息
+10 : 降级
+11 : 未安装
+12 : 安装错误
+13 : 节电-未知 设备已知在节电模式下,但确切状态不明。
+14 : 节电-低功率模式 设备在节电状态下仍在运行,但性能可能降级。
+15 : 节电-待机 设备未工作,但可以快速恢复到全功率。 
+16 : 电源循环
+17 : 节电-警告 设备处于警告状态,但也处于节电模式。
+18 : 暂停 设备被暂停。
+19 : 未准备好 设备未准备好。
+20 : 未配置 设备未配置。 
+21 : 静止 设备处于安静状态。 
+
+{'Availability'             : 3 ,
+'Bandwidth'                 : None ,
+'Caption'                   : '通用即插即用监视器' ,
+'ConfigManagerErrorCode'    : 0 ,
+'ConfigManagerUserConfig'   : False ,
+'CreationClassName'         : 'Win32_DesktopMonitor' ,
+'Description'               : '通用即插即用监视器' ,
+'DeviceID'                  : 'DesktopMonitor2' ,
+'DisplayType'               : None ,
+'ErrorCleared'              : None ,
+'ErrorDescription'          : None ,
+'InstallDate'               : None ,
+'IsLocked'                  : None ,
+'LastErrorCode'             : None ,
+'MonitorManufacturer'       : '(标准监视器类型)' ,
+'MonitorType'               : '通用即插即用监视器' ,
+'Name'                      : '通用即插即用监视器' ,
+'PixelsPerXLogicalInch'     : 96 ,
+'PixelsPerYLogicalInch'     : 96 ,
+'PNPDeviceID'               : 'DISPLAY\\CMN1487\\4&3F33282&0&UID265988' ,
+'PowerManagementCapabilities' : None ,
+'PowerManagementSupported'  : None ,
+'ScreenHeight'              : 768 ,
+'ScreenWidth'               : 1366 ,
+'Status'                    : 'OK' ,
+'StatusInfo'                : None ,
+'SystemCreationClassName'   : 'Win32_ComputerSystem' ,
+'SystemName'                : 'W10-2019xxx' ,	}
+	
+'''	
+	import wmi
+	U,T,N,F=py.importUTNF()
+	wmic = U.get_or_set('wmi.WMI',lazy_default=wmi.WMI)
+	
+	r=[]
+	for m in wmic.Win32_DesktopMonitor():
+		a=m.Availability
+		if a in gd_monitor_Availability:
+			a=U.IntRepr(a,repr='%s #'%a + gd_monitor_Availability[a])
+		r.append([a,m.ScreenWidth,m.ScreenHeight,m.Name,m.PNPDeviceID,m.Status])
+	return r	
+screen_state=get_screen_state=get_monitor_state=get_monitor_power_state
+
+def screen_locked():
+	"""
+	Find if the user has locked their screen.
+	"""
+	user32 = ctypes.windll.User32
+	OpenDesktop = user32.OpenDesktopA
+	SwitchDesktop = user32.SwitchDesktop
+	DESKTOP_SWITCHDESKTOP = 0x0100
+
+	hDesktop = OpenDesktop("default", 0, False, DESKTOP_SWITCHDESKTOP)
+	result = SwitchDesktop(hDesktop)
+	return hDesktop,result
+	if result:
+		return False
+	else:
+		return True
+
+def get_last_input_time():
+# import ctypes
+# from ctypes import wintypes
+
+# user32 = ctypes.WinDLL('user32')
+# kernel32 = ctypes.WinDLL('kernel32')
+
+	class LASTINPUTINFO(ctypes.Structure):
+		_fields_ = [
+			('cbSize', wintypes.UINT),
+			('dwTime', wintypes.DWORD),
+		]
+
+	GetLastInputInfo = user32.GetLastInputInfo
+	GetLastInputInfo.restype = wintypes.BOOL
+	GetLastInputInfo.argtypes = [ctypes.POINTER(LASTINPUTINFO)]
+
+	GetTickCount = kernel32.GetTickCount
+	GetTickCount.restype = wintypes.DWORD
+
+	last_input_info = LASTINPUTINFO()
+	last_input_info.cbSize = ctypes.sizeof(last_input_info)
+
+	GetLastInputInfo(ctypes.byref(last_input_info))
+
+	now = GetTickCount()
+	elapsed = now - last_input_info.dwTime
+
+	r=f'''Last input: {last_input_info.dwTime} ms")  
+	print(f"Now: {now} ms")
+	print(f"Elapsed: {elapsed} ms'''
+	return r
+
 def change_file_time(file,time):
 	'''
 os.utime If times is not None, it must be a tuple (atime, mtime);
