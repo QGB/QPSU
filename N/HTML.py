@@ -146,7 +146,12 @@ def xiaomi_air_conditioner_control(response=None,token=py.No('auto get'),t=0,ang
 				
 			if ia:
 				if power is AC_DEFAULT:d.send('set_power',['on'])
-				d.send("set_mode", ['cooling'])
+				if not mode:
+					m=U.time().month
+					if m<3 or m>10:
+						d.send("set_mode", ['heat'])
+					if 4<m<11:
+						d.send("set_mode", ['cooling'])
 				
 				
 				if ia>99999:
@@ -782,7 +787,7 @@ def list_2d_href_file_column(response,a,file_column=None,**ka):
 
 list_2d_CSS_MARK='/*css*/'
 def list_2d(response,a,html_callback=None,index=False,sort_kw=U.SORT_KW_SKIP,column_type_dict=None,sort_ka=py.dict(ascending=True,),debug=False,to_html_ka=None,**ka):
-	''' ascending=False #倒序 从大到小
+	''' ,sort_ka=py.dict(ascending=False) #倒序 从大到小
 	'''
 	index=U.get_duplicated_kargs(ka,'index','n','enu','add_index','enumerate',default=index)
 	sort_kw=U.get_duplicated_kargs(ka,'skw','sort','s',default=sort_kw)

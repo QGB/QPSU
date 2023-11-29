@@ -381,7 +381,7 @@ def reboot():
 reset=restart=reboot
 
 gdpin={}
-def gpio(index=2,mod=3):
+def gpio(index=2,mod=3,value=0):
 	'''import mac	hine;help(machine.Pin)
 IN -- 0
   OUT -- 1
@@ -393,7 +393,10 @@ IN -- 0
   machine.Pin.OUT == 3
 '''
 	import machine
-	gdpin[(index,mod)]=machine.Pin(index,mod)
+	if (index,mod) not in gdpin:
+		gdpin[(index,mod)]=machine.Pin(index,mod)
+	if value:gdpin[(index,mod)].value(value)
+		
 	return gdpin[(index,mod)]
 led2=gpo=pin=Pin=gpio
 
