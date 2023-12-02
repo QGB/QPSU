@@ -2210,6 +2210,9 @@ def pwd(p=False,display=False,win=False):
 	return r
 getCurrentPath=cwd=pwd
 	
+def round(obj,*other,ndigits=None):
+	return FuncWrapForMultiArgs(f=py.round,args=(obj,other),f_ka={'ndigits':ndigits})
+	
 def random_choice(seq,size=1,repeat=0,not_repeat_max_try=9999,**ka):
 	r'''
 if not repeat: choice  (size+not_repeat_max_try)	times
@@ -4048,16 +4051,19 @@ instance of a tzinfo subclass. The remaining arguments may be ints or longs.
 		if rm:
 			a=T.parseReMatch(rm,'i'*6)+(py.int(rm.group(7))*1000,)
 			return dt(*a)
-		
-		if re.match('[0-9]{4}-[0-9]{2}-[0-9]{2}',a) or\
-		re.match('[0-9]{4}-[0-9]{4}',a):a=a.replace('-','')
-		if re.match('[0-9]{8}',a):
+		if re.match('^[0-9]{4}-[0-9]{2}-[0-9]{2}$',a) or\
+		re.match('^[0-9]{4}-[0-9]{4}$',a):a=a.replace('-','')
+		if re.match('^[0-9]{8}$',a):
 			return dt(py.int(a[:4]),
 				py.int(a[4:6]),py.int(a[6:8]))
-		if re.match('[0-9]{6}',a):
+		if re.match('^[0-9]{6}$',a):
 			return dt(py.int(a[:4]), py.int(a[4:6]),1)
-		if re.match('[0-9]{4}',a):
+		if re.match('^[0-9]{4}$',a):
 			return dt(py.int(a[:4]),1,1)
+		try:
+			return str_to_datetime(a)
+		except:pass	
+			
 		raise py.ArgumentUnsupported(a)
 	elif py.type(a) in (py.float,py.int):
 		return dt.fromtimestamp(a)
@@ -5185,9 +5191,12 @@ in ipy , npp() not autoReload when U.r(), But U.npp()
 		if a:
 			f,lineno=get_obj_file_lineno(a,lineno=lineno,auto_file_path=auto_file_path)
 			if f.startswith('/mnt/c/'):
-				f='C:/'+f[4+3:]
+				# f='C:/'+f[4+3:]
+				f=r'\\192.168.1.3\\C\\'+f[4+3:]
 			if f.startswith('/'):
 				f=rf'\\{N.get_lan_ip()}\smb'+f.replace('/','\\')
+			# if ':' in f:
+				# f=r'\\192.168.1.3\\'+f.replace(':','\\').replace('/','\\')
 			rpc_ka['a']=f
 			rpc_ka['lineno']=lineno
 			if debug:rpc_ka['debug']=True

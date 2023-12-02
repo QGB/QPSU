@@ -792,7 +792,12 @@ def list_2d(response,a,html_callback=None,index=False,sort_kw=U.SORT_KW_SKIP,col
 	index=U.get_duplicated_kargs(ka,'index','n','enu','add_index','enumerate',default=index)
 	sort_kw=U.get_duplicated_kargs(ka,'skw','sort','s',default=sort_kw)
 	column_type_dict=U.get_duplicated_kargs(ka,'column_type_dict','type','t',default=column_type_dict if column_type_dict else {},)
-	
+	sort_ka=U.get_duplicated_kargs(ka,'ska','sort_ka','sa',default=sort_ka)
+	if not py.isdict(sort_ka):
+		if sort_ka:
+			sort_ka=py.dict(ascending=True,)
+		else:
+			sort_ka=py.dict(ascending=False,)
 	# if py.isint(sort_kw): # U.sort 中已经处理
 	if not to_html_ka:to_html_ka={}
 	
