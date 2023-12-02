@@ -3461,7 +3461,7 @@ Out[79]: 0.296
 	int=get_duplicated_kargs(ka,'i','int','integer','INT','I','Integer')
 
 	if py.isfloat(a):
-		a=round(a-py.int(a),ndigits)#This always returns a floating point number.
+		a=py.round(a-py.int(a),ndigits)#This always returns a floating point number.
 		if str:
 			return py.str(a)[1:]
 		if int:
