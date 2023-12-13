@@ -729,6 +729,15 @@ tmux detach-client -t /dev/pts/3
 	tmux_dt=tmux_detach=tmux_detach_client=tmux_detach_client_all=tmux_detach_client_all_skip_max
 		
 ########################## end init #############################################
+def arithmetic_sequence(a,b,n=4):
+	d=b-a
+	r=[a,b]
+	if n<2:raise py.ArgumentError('n must >2')
+	for i in py.range(n-2):
+		r.append(r[-1]+d)
+	return r
+dcsl=dengcha=arithmetic_sequence
+
 def parse_str_auto_type(s):
 	U=py.importU()
 	ss=s.strip()
@@ -6180,6 +6189,12 @@ def dict_move_key_to_last_index(d,k):
 	d[k]=v
 	return d
 dict_key_move=dict_move_key_to_last_index
+
+def dict_set_multi_key_same_value(d,*ks,v=None):
+	for k in ks:
+		d[k]=v
+	return d	
+dict_set_multi_key=dict_set_multi_key_same_value	
 ########################   dict end   ############################	
 
 def split_list(alist,sub_size):
@@ -7561,6 +7576,19 @@ def set_timed_task(func,every='day',time='05:09',unit=1,**ka):
 	return schedule.jobs,U.StrRepr('\n#######  U.get(%r)'%SCHEDULE_RUN_PENDING+' == '),t #,r
 	
 schedule=everyday_time_task=set_time_task=timing_task=dsrw=set_schedule=setInterval=set_interval=set_timed_task
+
+def remove_timed_task_by_time(time):
+	import schedule,datetime
+	if py.istr(time):
+		time=datetime.datetime.strptime(time, '%H:%M:%S').time()
+	if not isinstance(time,datetime.time):
+		raise py.ArgumentError('not isinstance(time,datetime.time)')
+	to_del_indexs=[]
+	for n,job in enumerate(schedule.jobs):
+		if job.at_time==time:
+			to_del_indexs.append(n)
+	return del_list_multi_indexs(schedule.jobs,*to_del_indexs)
+del_time_task_by_time=remove_timed_task_by_time		
 
 def remove_timed_task(index=-1):
 	''' -1 is last added

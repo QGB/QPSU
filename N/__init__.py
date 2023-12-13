@@ -987,10 +987,12 @@ def uploadServer(port=1122,host='0.0.0.0',dir='./',url='/up'):
 	app.run(host=host,port=port,debug=0,threaded=True)	
 ############# rpc start ############
 
-def check_local_port_listen(port):
+def check_local_port_listen(ports):
+	''' if multi ports :return first open addr'''
 	import psutil
+	if py.isint(ports):ports=[ports]
 	for conn in psutil.net_connections():
-		if conn.status == 'LISTEN' and conn.laddr.port == port:
+		if conn.status == 'LISTEN' and conn.laddr.port in ports:
 			return conn.laddr
 	return False
 is_port_open=check_port_open=check_local_port_listen
@@ -1022,9 +1024,9 @@ def get_all_pid_equal_port():
 			r.append([t,sconn])
 			# r.append([t,p,sconn])
 	return r
-get_rpc_port=get_rpc_ports=get_all_rpc_port=get_all_rpc_ports=get_rpc_port_list=get_pid_equal_port=get_port_equal_pid=get_all_pid_equal_port	
+get_rpc_port=get_rpc_ports=get_all_rpc_port=get_all_rpc_ports=get_rpc_port_list=get_pid_equal_port=get_port_equal_pid=get_all_pid_equal_port			
 
-RPC_BASE_REMOTE_DEFAULT=py.No('if not base:input',no_raise=1)
+DEFAULT_RPC_BASE_REMOTE=py.No('if not base:input',no_raise=1)
 def is_remote_rpc_base(base):
 	if (not base) or (not py.istr(base)):return py.No(base,'must be str')
 	if '://' in base:
@@ -1033,7 +1035,7 @@ def is_remote_rpc_base(base):
 		return py.No(base,'format error!')
 is_rpc_base=is_rpc_base_remote=is_remote_rpc_base
 		
-def set_remote_rpc_base(base=RPC_BASE_REMOTE_DEFAULT,change=True,ka=None):
+def set_remote_rpc_base(base=DEFAULT_RPC_BASE_REMOTE,change=True,ka=None):
 	U,T,N,F=py.importUTNF()	
 	if py.istr(base):
 		if base.lower() in ['set','reset','modify','change']:
@@ -1088,9 +1090,21 @@ def set_remote_rpc_base(base=RPC_BASE_REMOTE_DEFAULT,change=True,ka=None):
 	return U.set(RPC_BASE_REMOTE,base)	
 rpc_base=change_rpc_base=get_or_set_rpc_base=get_rpc_base_remote=get_remote_rpc_base=set_rpc_base_remote=set_remote_rpc_base
 	
-def get_local_rpc_base():
+DEFAULT_RPC_LOCAL_PORTS=[1122,1133,1166,1177]
+def get_local_rpc_base(ports=DEFAULT_RPC_LOCAL_PORTS):
 	U,T,N,F=py.importUTNF()
-	return f'''https://{T.sub_last(N.get_lan_ip(),'.')}.{U.get_dl('qgb_domain')}/'''
+	u=U.get_dl('qgb_domain')
+	ip=N.get_lan_ip()
+	if u and check_local_port_listen(443):
+		return f'''https://{T.sub_last(ip,'.')}.{u}/'''
+	else:
+		if py.isint(ports):ports=[ports]
+			# port=check_local_port_listen(ports).port # addr(ip='0.0.0.0', port=1122)	
+		for port in ports:
+			addr=check_local_port_listen(port)
+			if addr and addr.ip in ['0.0.0.0',ip]:
+				url=f'''http://{ip}:{port}/'''
+				return url
 get_rpc_base_local=get_local_rpc_base
 
 	
@@ -1181,7 +1195,7 @@ def rpc_iter_U_get(name,bases=None,**ka):
 		r.append([base,rq])
 	return r
 
-def rpc_copy_single_file(source,target='',base=RPC_BASE_REMOTE_DEFAULT,**ka):
+def rpc_copy_single_file(source,target='',base=DEFAULT_RPC_BASE_REMOTE,**ka):
 	U,T,N,F=py.importUTNF()
 	base=get_remote_rpc_base(base,ka=ka)
 	b=F.read_bytes(source)
@@ -1189,7 +1203,7 @@ def rpc_copy_single_file(source,target='',base=RPC_BASE_REMOTE_DEFAULT,**ka):
 	r=N.HTTP.post(base+'b=request.get_data();rpc_copy_filename=%r;r=F.write(rpc_copy_filename,b)'%target,verify=False,timeout=9,proxy='',data=b).text
 	
 	return U.StrRepr(r)
-def rpc_copy_files(source_list_or_dict,target='',target_path_base=py.No('U.gst'),base=RPC_BASE_REMOTE_DEFAULT,source_max_size=8*1024*1024,skip_empty_file=True,proxy='',**ka):
+def rpc_copy_files(source_list_or_dict,target='',target_path_base=py.No('U.gst'),base=DEFAULT_RPC_BASE_REMOTE,source_max_size=8*1024*1024,skip_empty_file=True,proxy='',**ka):
 	U,T,N,F=py.importUTNF()	
 	base=get_remote_rpc_base(base,ka=ka)
 	source=U.get_duplicated_kargs(ka,'a','s','source',default=source_list_or_dict)
@@ -1271,19 +1285,26 @@ rpc_get=rpc_get_var=rpcGetVariable=rpc_get_variable
 		# print(self,name)
 		# return 
 
-def rpc_get_variable_local(*names,ipy=True):
+def rpc_get_variable_local(*names,ipy=True,port=DEFAULT_RPC_LOCAL_PORTS):
 	if ipy:
 		U,T,N,F=py.importUTNF()
 		g=U.get_ipython()
 	de={}
+	vs=[]
 	for name in names:
-		v=rpc_get_variable(name,base=get_local_rpc_base())
+		v=rpc_get_variable(name,base=get_local_rpc_base(port))
 		if ipy:
 			g.user_ns[name]=v
+		else:
+			vs.append(v)
 		if not v:
 			de[name]=v
-	if de:return de		
-	
+	if de:return py.No(de)
+	if not ipy:
+		if py.len(vs)==1:
+			return vs[0]
+		else:
+			return vs
 rpc_get_local=rpc_get_variable_local
 
 def rpc_set_variable_local(**ka):

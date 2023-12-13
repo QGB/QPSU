@@ -65,10 +65,12 @@ async def sleep(aisec):
 	await asyncio.sleep(y)
 	
 gt_off,gt_on,gpin=9999,0,None
-def set_blink(off,on,pin=18):
+gn_on,gn_total=2,2
+def set_blink(off,on,n_on=2,n_total=2,pin=18):
 	global gt_off,gt_on,gpin,break_sleep
 	break_sleep=True
 	gt_off,gt_on=off,on
+	gn_on,gn_total=n_on,n_total
 	# if isinstance(pin,int)
 	# if not gpin:
 
@@ -79,6 +81,7 @@ def set_blink(off,on,pin=18):
 	# break_sleep=False
 	return gt_off,gt_on,gpin,break_sleep
 async def blink_loop():
+	n=0
 	while True:
 		# for ws in gws:
 			# try:
@@ -89,13 +92,16 @@ async def blink_loop():
 		if not gpin:
 			await asyncio.sleep(0.9)
 			continue
-
-		if gt_on:
-			gpin.on()
-			await sleep(gt_on)
-		gpin.off()
-		await sleep(gt_off)
-
+		n+=1
+		if (n%gn_total)<gn_on:
+			if gt_on:
+				gpin.on()
+				await sleep(gt_on)
+			gpin.off()
+			await sleep(gt_off)
+		else:
+			if n>gn_total:
+				n=n-gn_total
 loop.create_task(blink_loop())
 
 # if not ismpy:
