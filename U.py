@@ -3380,12 +3380,33 @@ def mergeList(*a):
 	return r
 add_list=addList=merge_list=mergeList
 
+def stime_iso(t=None,delta=0,timezone=8):
+	# from datetime import datetime, timezone, timedelta
+	import datetime
+	# .timezone
+	if py.isint(timezone):
+		# 指定时区信息为 UTC+8
+		timezone = datetime.timezone(datetime.timedelta(hours=8))
+
+	if t:
+		raise py.NotImplementedError(t)
+	else:	
+		dt=datetime.datetime.now(timezone)
+			
+	if py.isint(delta):
+		dt=dt+datetime.timedelta(seconds=delta)
+		
+	return dt.isoformat()
+
 def convert_timezone(astr,timezone='utc',return_str=True):
 	# from datetime import datetime, timezone, timedelta
 	import datetime
 	
 	# dt_str = '2023-09-22 23:47:11+08:00'
-	dt = datetime.datetime.strptime(astr, '%Y-%m-%d %H:%M:%S%z')
+	try:
+		dt = datetime.datetime.strptime(astr, '%Y-%m-%d %H:%M:%S%z')
+	except:	
+		dt = datetime.datetime.strptime(astr, '%Y-%m-%dT%H:%M:%S.%f%z')
 	if py.isint(timezone):
 		tz=datetime.timezone(datetime.timedelta(hours=timezone))
 	else:
@@ -3566,7 +3587,9 @@ btime=timeb=get_time_as_byte=get_time_as_bytes
 	
 def get_time_as_str(time=None,format=gsTimeFormatFile,ms=True,time_zone=py.No('原来，除非指定')):
 	'''http://python.usyiyi.cn/translate/python_278/library/time.html#time.strftime
-	TODO: 可以指定 ms
+TODO:BUG   U.stime(U.parse_time_str('2023-12-21T14:28:44.000653+08:00'))=='2023-12-21__14.28.44__.653'	
+
+TODO: 可以指定 ms
 U.stime(0.0005)
 '1970-01-01__08.00.00__.001'
 
@@ -3581,7 +3604,7 @@ U.stime(0.0004)
 	if py.isinstance(time,tMod.struct_time):
 		pass
 	elif py.isinstance(time,datetime.datetime):
-		ms_tail=time.microsecond 
+		ms_tail=py.int(time.microsecond/1000)
 		time=time.timetuple()
 	elif py.istr(time):
 		time=str_to_datetime(time).timetuple()
@@ -3969,6 +3992,17 @@ def tuple_div(a,b):
 	if py.isnum(a) and py.isnum(b):return a/b
 	return tuple_operator(a=a,b=b,operator='__truediv__')
 div=div_two_tuple=tuple_div
+
+def stime_to_int_ms(s):
+	'''
+#TODO U.stime_to_time  # ValueError: unconverted data remains: __.888
+	'''
+	if py.len(s)==26:
+#U.str_to_datetime('2023-12-20__22.30.20')==datetime.datetime(2023, 12, 20, 22, 3, 0, 20)  结果错误
+		dt=parse_time(s[:26-6]) # 正确结果datetime.datetime(2023, 12, 20, 22, 30, 20)
+		return py.int(dt.timestamp()*1000)+py.int(s[-3:])
+	raise py.NotImplementedError(s)
+stime_to_ms_int=stime_to_int_ms
 
 def time_range_list(*a,**ka):
 	return py.list(time_range(*a,**ka))
@@ -5777,6 +5811,14 @@ def jDictValue(a,b):
 	return	r
 jdv=jDictValue
 
+def dict_convert_value(d,*ks,func=None):
+	''' d is mutable'''
+	if not py.callable(func):raise py.ArgumentError(func)
+	
+	for k in ks:
+		d[k]=func(d[k])
+	return d
+	
 def get_dict_item(d,index=0):
 	if index<0:index=py.len(d)+index
 	for n,k in py.enumerate(d):
@@ -5801,19 +5843,19 @@ def get_dict_value(d,index=0):
 			return v
 getDictV=getDictValue=dict_value=get_dict_value
 
-def setDictListValue(adict,key,value):
+def dict_add_value_list(adict,key,value):
 	if key in adict:
 		adict[key].append(value)
 	else:
 		adict[key]=[value]
-dict_value_list=dict_value_add_list=dict_add_value_list=add_dict_value_list=set_dict_value_list=set_dict_list=setDictList=setDictListValue
+dict_value_list=dict_value_add_list=add_dict_value_list=set_dict_value_list=set_dict_list=setDictList=setDictListValue=dict_add_value_list
 
-def setDictSetValue(adict,key,value):
+def dict_add_value_set(adict,key,value):
 	if key in adict:
 		adict[key].add(value)
 	else:
 		adict[key]=py.set([value])
-dict_value_add_set=dict_value_set=dict_add_value_set=add_dict_value_jihe=add_dict_value_set=set_dict_value_set=set_dict_set=setDictset=setDictSetValue
+dict_value_add_set=dict_value_set=add_dict_value_jihe=add_dict_value_set=set_dict_value_set=set_dict_set=setDictset=setDictSetValue=dict_add_value_set
 
 def setDictValuePlusOne(adict,*keys):
 	for key in keys:
@@ -5993,9 +6035,11 @@ def get_slice_range(*a,len=0):
 return:  slice to [all index list]
 
 	'''
-	if (not a)  or  (not len) or (not py.isint(len) ) or (len < 1) :
+	if (not len) or (not py.isint(len) ) or (len < 1) :
 		raise py.ArgumentError('to-slice-obj len ,must privide  get_slice_range(x,.. ,len=n )')
 		return []
+	if not a:
+		a=[len]
 	_len=-1 * len
 	if py.len(a)==1 :
 		if py.type(a[0]) in [py.range,py.slice]:#stop不可能None
@@ -6059,6 +6103,16 @@ Create a slice object.  This is used for extended slicing (e.g. a[0:10:2]).
 			break
 	return r
 dict_items=get_dict_items=getDictItems
+	
+def dict_of_dict_to_list_of_dict(ad,add_key=False,change_dict=False):
+	r=[]
+	for k,d in ad.items():
+		if not change_dict:d=d.copy()
+		if add_key:
+			d[add_key]=k
+		r.append(d)
+	return r	
+dd2ld=dict_of_dict_to_list_of_dict
 	
 def get_nested_one_value(a,*key):
 	'''safely get nested  a[k1][k2][...]
@@ -7544,7 +7598,7 @@ def set_timed_task(func,every='day',time='05:09',unit=1,**ka):
 			while True:
 				schedule.run_pending()
 				U.sleep(1)
-		t=U.Thread(target=schedule_background_run)
+		t=U.Thread(target=schedule_background_run,name=SCHEDULE_RUN_PENDING+U.stime())
 		U.set(SCHEDULE_RUN_PENDING,t)
 		t.start()
 	#### check run end ####

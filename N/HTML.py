@@ -88,7 +88,7 @@ def xiaomi_air_conditioner_control(response=None,token=py.No('auto get'),t=0,ang
 '''	
 	# U.r(py,U,T,N,F,N.HTTP,N.HTML) # 用了会造成 global AC_DEFAULT 与 default arg 中 默认参数 不一致
 	angle=U.get_duplicated_kargs(ka,'angle','angel','jd','ang','a','j',default=angle)
-	power=U.get_duplicated_kargs(ka,'power','on','open','p',default=power)
+	power=U.get_duplicated_kargs(ka,'power','on','open','p','po',default=power)
 	sleep=U.get_duplicated_kargs(ka,'sleep','set_silent','silent','s',default=sleep)
 	volume=U.get_duplicated_kargs(ka,'volume','voice','sound','sy','v',default=volume)
 	mode=U.get_duplicated_kargs(ka,'mode','c','cool','m','cooling',default=mode)

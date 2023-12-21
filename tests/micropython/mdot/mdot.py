@@ -67,7 +67,7 @@ async def sleep(aisec):
 gt_off,gt_on,gpin=9999,0,None
 gn_on,gn_total=2,2
 def set_blink(off,on,n_on=2,n_total=2,pin=18):
-	global gt_off,gt_on,gpin,break_sleep
+	global gt_off,gt_on,gpin,break_sleep,gn_on,gn_total
 	break_sleep=True
 	gt_off,gt_on=off,on
 	gn_on,gn_total=n_on,n_total

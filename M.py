@@ -204,12 +204,13 @@ def new_file(f,size,chunk=4096,b=b'\x00'):
 	return os.stat(f)
 new=new_file	
 	
-def read(f,size=-1):
+def read(f,size=-1,seek=0):
 	if "'TextIOWrapper'" in repr(f):#<class 'TextIOWrapper'>
 		f.seek(0)
 		return f.read(size)
 
 	with open(f) as _:
+		if seek:_.seek(seek)
 		return _.read(size)
 def write(f,text):
 	with open(f,'w') as _:
