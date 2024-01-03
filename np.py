@@ -1,4 +1,18 @@
 #coding=utf-8
+'''
+numpy.finfo(numpy.float64)
+Out[407]: finfo(resolution=1e-15, min=-1.7976931348623157e+308, max=1.7976931348623157e+308, dtype=float64)
+
+n=932246047*39821*431*(2**966)+1
+
+f.max-f.resolution*(n-1)==f.max
+f.max-f.resolution*(n  )!=f.max
+
+
+1.7976931348623158e+308 == 1.7976931348623157e+308
+1.7976931348623159e+308 == inf
+
+'''
 import sys,pathlib				# *.py  /qgb   /[gsqp]
 gsqp=pathlib.Path(__file__).absolute().parent.parent.absolute().__str__()
 if gsqp not in sys.path:sys.path.append(gsqp)#py3 works
@@ -8,6 +22,10 @@ U,T,N,F=py.importUTNF()
 
 import numpy  # as np
 #True False array。 
+
+
+
+
 def test():
 	a = (a < 255).astype(numpy.int_) # <255 变 1， 255及以上 变0
 	a[:,6] # 获取 第 6 列

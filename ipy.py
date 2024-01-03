@@ -231,6 +231,7 @@ def dill_load(filename,return_value=False,set_user_ns=True):
 			gipy.user_ns[name]=v
 	if return_value:
 		return r
+	return filename	
 load=dill_load	
 def dill_dump(*vars,len=True,dump_path=''):
 	'''

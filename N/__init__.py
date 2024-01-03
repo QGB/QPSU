@@ -1320,7 +1320,7 @@ def rpc_set_variable(*obj,base=AUTO_GET_BASE,timeout=9,varname='v',ext_cmd='',pr
 	U,T,N,F=py.importUTNF()
 	ext_cmd=U.get_duplicated_kargs(ka,'ext_cmd','cmd','extCmd','other_cmd',default=ext_cmd)
 	varname=U.get_duplicated_kargs(ka,'v','V','name','var_name','var',default=varname)
-	print_req=U.get_duplicated_kargs(ka,'print_req','pr',default=varname)
+	print_req=U.get_duplicated_kargs(ka,'print_req','pr',default=print_req)
 	proxies=N.HTTP.auto_proxy_for_requests(proxies,ka)
 	
 	if ext_cmd:
@@ -1351,7 +1351,10 @@ def rpc_set_variable(*obj,base=AUTO_GET_BASE,timeout=9,varname='v',ext_cmd='',pr
 	# post=requests.post
 	# post=HTTP.post
 	# dill_dump=F.dill_dump
-	if not print_req:print(url)
+	if print_req=='url':
+		print(url)
+		print_req=''
+	
 	b=N.HTTP.post(url,data=F.dill_dump(obj),verify=False,timeout=timeout,proxies=proxies,print_req=print_req) # data=list:TypeError: cannot unpack non-iterable int object
 	
 	# if print_req:

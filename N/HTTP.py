@@ -263,12 +263,10 @@ def download_seq(url_format,min=0,max=99,headers={},**ka):
 		
 		b=response.content
 		print(U.sizeof(b),F.write(f,b,mkdir=1))#
-		
-		
+
 			
-			
-			
-def download(url, file_path='',default_dir=py.No('set_input',no_raise=1),headers=None,proxies=AUTO_GET_PROXY,**ka):
+def download(url, file_path='',default_dir=py.No('set_input',no_raise=1),headers=None,proxies=AUTO_GET_PROXY,print_progress=True,**ka):
+	''' 注意 写入只会追加，如需要重新下载先 delete '''
 	import requests,sys,os
 	U,T,N,F=py.importUTNF()
 	proxies=auto_proxy(proxies,ka)
@@ -282,7 +280,7 @@ def download(url, file_path='',default_dir=py.No('set_input',no_raise=1),headers
 			if U.is_kivy():	
 				U.set('download.default_dir',U.get_kivy_files_path()+'')
 		default_dir=U.get_or_input('download.default_dir',default=default_dir)
-	
+		if default_dir[-1] not in r'\/':default_dir=U.set('download.default_dir',default_dir+'/')
 	if not file_path:
 		file_path=default_dir+ T.filename_legalized( url.split('/')[-1] )
 		print('save_to:',file_path)
@@ -315,10 +313,12 @@ def download(url, file_path='',default_dir=py.No('set_input',no_raise=1),headers
 
 				###这是下载实现进度显示####
 				done = int(50 * temp_size / total_size)
-				sys.stdout.write("\r[%s%s] %d%%" % ('█' * done, ' ' * (50 - done), 100 * temp_size / total_size))
-				sys.stdout.flush()
-	print()  # 避免上面\r 回车符
-	return r,F.size(file_path)
+				if print_progress:
+					sys.stdout.write("\r[%s%s] %d%%" % ('█' * done, ' ' * (50 - done), 100 * temp_size / total_size))
+					sys.stdout.flush()
+	size=F.size(file_path)
+	print(size)  # 避免上面\r 回车符
+	return r,size
 def post(url,data=None,files=None,return_text=False,**ka):
 	'''
 Signature: requests.post(url, data=None, json=None, **kwargs)
