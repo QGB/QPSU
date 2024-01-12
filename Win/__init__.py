@@ -107,7 +107,7 @@ y==0.002331674654377354
 	v=U.get(k)
 	if not v:get_master_volume()
 	v=U.get(k)
-	if n is 1 or 1<n<=100: # int or float
+	if n == 1 or 1<n<=100: # int or float
 		n=n/100
 	elif n<0 or n>100:raise py.ArgumentError(n)
 	
@@ -446,13 +446,9 @@ def screen_locked():
 	else:
 		return True
 
-def get_last_input_time():
-# import ctypes
-# from ctypes import wintypes
-
-# user32 = ctypes.WinDLL('user32')
-# kernel32 = ctypes.WinDLL('kernel32')
-
+def get_last_input_ms(print_more=True):
+	'''Win.click, 在mstsc RDP中操作，也会重置此函数值
+	'''
 	class LASTINPUTINFO(ctypes.Structure):
 		_fields_ = [
 			('cbSize', wintypes.UINT),
@@ -474,10 +470,12 @@ def get_last_input_time():
 	now = GetTickCount()
 	elapsed = now - last_input_info.dwTime
 
-	r=f'''Last input: {last_input_info.dwTime} ms")  
-	print(f"Now: {now} ms")
-	print(f"Elapsed: {elapsed} ms'''
-	return r
+	# r=")  
+	if print_more:
+		print(f"Last input: {last_input_info.dwTime} ms ,Now: {now} ms,Elapsed: {elapsed} ms")
+	return elapsed
+last_input_ms=get_last_input_time=get_last_input_ms
+
 
 def change_file_time(file,time):
 	'''

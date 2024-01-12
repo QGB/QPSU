@@ -3692,6 +3692,29 @@ def datetime_timedelta(seconds=0,days=0):
 			
 	return datetime.timedelta(seconds=seconds,days=days)
 time_delta=timeDelta=timedelta=datetime_timedelta
+
+def float_to_str(a,digits=8):
+	''' return 实际小数位数比 digits 大 1
+	
+	'''
+	import decimal
+	sk=f'decimal.Context().prec={digits}'
+	ctx=get(sk)
+	if not ctx:
+		ctx = decimal.Context()
+		ctx.prec = digits
+		set(sk,ctx) # %timeit 测试 有没有这句对性能影响不大？
+		
+	if py.isinstance(a, decimal.Decimal):	
+		return py.format( ctx.create_decimal(a) ,'f')
+		
+	if py.isnum(a):
+		a=py.repr(a)
+	if py.istr(a):
+		return py.format( ctx.create_decimal(a) ,'f')
+	else:
+		raise py.ArgumentUnsupported(a)
+	
 	
 def better_float(x,):
 	''' float(x=0, /)  Subclasses:     float64
@@ -3995,6 +4018,11 @@ def tuple_div(a,b):
 	if py.isnum(a) and py.isnum(b):return a/b
 	return tuple_operator(a=a,b=b,operator='__truediv__')
 div=div_two_tuple=tuple_div
+
+def ms_to_utc_datetime(ms):
+	from datetime import datetime
+	return datetime.utcfromtimestamp(ms / 1000.0)
+ms2dt=ms_to_datetime=ms_to_utc_datetime
 
 def stime_to_int_ms(s):
 	'''
@@ -6063,6 +6091,22 @@ return:  slice to [all index list]
 	return py.list(py.range(*range) )
 get_all_index_list=get_index_list=get_slice_range
 
+def new_dict_multi_key_same_value(**ka):
+	''' dictm(ms=[1,2])
+	'''
+	d={}
+	for v,ks in ka.items():
+		if py.istr(ks):
+			d[ks]=v
+		elif py.iterable(ks):
+			for k in ks:
+				d[k]=v
+		else:
+			raise py.ArgumentUnsupported(ks)
+				
+	return d	
+dm=dictm=new_dict_multi_key_same_value	
+
 def getDictItems(a,*range,index=False,key=True,key_in_flat_list=False ):
 	'''
 *range= (stop) 
@@ -7649,7 +7693,12 @@ del_time_task_by_time=remove_timed_task_by_time
 
 def remove_timed_task(index=-1):
 	''' -1 is last added
-0 is first added'''
+0 is first added
+
+self=task
+ self.cancel_after is not None and when > self.cancel_after
+TypeError: '>' not supported between instances of 'datetime.datetime' and 'int'
+'''
 	import schedule
 	return schedule.jobs,'########## pop:',schedule.jobs.pop(index)
 timer_del=cancel_job=schedule_jobs_pop=pop_time_task=cancel_time_task=del_time_task=remove_time_task=remove_timed_task

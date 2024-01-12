@@ -1316,7 +1316,7 @@ def rpc_set_variable_local(**ka):
 		
 local_rpc_set=set_local_rpc=rpc_set_local=rpc_set_variable_local	
 		
-def rpc_set_variable(*obj,base=AUTO_GET_BASE,timeout=9,varname='v',ext_cmd='',print_req=False,pr=False,proxies=None,**ka):
+def rpc_set_variable(*obj,base=AUTO_GET_BASE,timeout=9,varname='v',ext_cmd='r=U.id({1})',print_req=False,pr=False,proxies=None,**ka):
 	U,T,N,F=py.importUTNF()
 	ext_cmd=U.get_duplicated_kargs(ka,'ext_cmd','cmd','extCmd','other_cmd',default=ext_cmd)
 	varname=U.get_duplicated_kargs(ka,'v','V','name','var_name','var',default=varname)
@@ -1327,9 +1327,6 @@ def rpc_set_variable(*obj,base=AUTO_GET_BASE,timeout=9,varname='v',ext_cmd='',pr
 		if '%s'     in ext_cmd:ext_cmd=ext_cmd%varname
 		if '{0}'    in ext_cmd:ext_cmd=ext_cmd.format(varname)
 		if '{name}' in ext_cmd:ext_cmd=ext_cmd.format(name=varname)
-		
-	if len(obj)==1 and ',' not in varname:
-		obj=obj[0]
 
 	if not obj:
 		if py.len(ka)==1:
@@ -1338,14 +1335,18 @@ def rpc_set_variable(*obj,base=AUTO_GET_BASE,timeout=9,varname='v',ext_cmd='',pr
 			obj=ka
 			if not ext_cmd:
 				ext_cmd='globals().update(%s)'%varname
-	if not obj and U.get_ipy() and varname!='v':
+				
+	if len(obj)==1 and ',' not in varname:
+		obj=obj[0]
+#numpy not y ValueError: The truth value of an array with more than one element is ambiguous. Use a.any() or a.all()
+	if varname!='v' and U.get_ipy() and  obj==(): 
 		obj=U.get_ipy().user_ns[varname]
 		
 	if not base:
 		base=get_remote_rpc_base(change=False)
 	else:
 		base=set_remote_rpc_base(base)
-	url='{0}{1}=F.dill_loads(request.get_data());r=U.id({1});{2}'.format(base, varname,ext_cmd	)
+	url=('{0}{v}=F.dill_loads(request.get_data());'+ext_cmd).format(base,varname,varname=varname,v=varname)
 	# import requests,dill
 	# dill_loads=dill.loads
 	# post=requests.post
