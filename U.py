@@ -6096,7 +6096,7 @@ def new_dict_multi_key_same_value(**ka):
 	'''
 	d={}
 	for v,ks in ka.items():
-		if py.istr(ks):
+		if py.istr(ks) or py.isint(ks):
 			d[ks]=v
 		elif py.iterable(ks):
 			for k in ks:
@@ -6228,7 +6228,7 @@ dict_del_multi_key=dict_pop=pop_list_multi_index=pop_dict_multi_key=dict_pop_mul
 	
 GET_DICT_MULTI_VALUES_RETURN_LIST_DEFAULT_DEFAULT=get_dict_multi_values_return_list_DEFAULT_DEFAULT=get_or_set('get_dict_multi_values_return_list_DEFAULT_DEFAULT',lazy_default=lambda:py.No('can not get key'),)
 
-def get_dict_multi_values_return_list(d,*keys,default_dict={},default_default=GET_DICT_MULTI_VALUES_RETURN_LIST_DEFAULT_DEFAULT,**ka):
+def get_dict_multi_values_return_list(d,*keys,convert_function=None,default_dict={},default_default=GET_DICT_MULTI_VALUES_RETURN_LIST_DEFAULT_DEFAULT,**ka):
 	default=get_duplicated_kargs(ka,'default')
 	if default is GET_DUPLICATED_KARGS_DEFAULT:
 		pass
@@ -6243,6 +6243,8 @@ def get_dict_multi_values_return_list(d,*keys,default_dict={},default_default=GE
 			v=d.get(k,default_dict[k])
 		else:
 			v=d.get(k,default_default)
+		if convert_function and py.callable(convert_function):
+			v=convert_function(v)
 		r.append(v)
 	return r
 get_multi_dict_values=get_dict_multi_values=get_dict_multi_values_return_list

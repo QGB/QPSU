@@ -8,6 +8,29 @@ from qgb import py
 U,T,N,F=py.importUTNF()
 
 import asyncio
+try:
+	import aiohttp
+except Exception as ge:
+	print(ge)
+
+async def send_post_request(url, data):
+	async with aiohttp.ClientSession() as session:
+		session.post(url, data=data,return_response=False)
+	'''		
+        async with 
+		as response:
+            # 获取响应状态码
+            status_code = response.status
+
+            # 读取响应内容
+            response_text = await response.text()
+
+            # 打印响应状态码和内容
+            # print(f"Status code: {status_code}")
+            # print(f"Response: {response_text}")
+
+'''
+
 
 def patch_nest_asyncio():
 	import nest_asyncio
@@ -48,4 +71,6 @@ t at 0x0000026A719AD108>>
 	return syncer.sync_fu(callable)
 a2s=async_to_sync
 # async def t(a):
+	
+	
 	

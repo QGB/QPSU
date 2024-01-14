@@ -42,6 +42,16 @@ else:
 	from SimpleHTTPServer import SimpleHTTPRequestHandler
 	from BaseHTTPServer import HTTPServer as _HTTPServer
 
+def post_with_new_thread(url,data):
+	if not py.isbyte(data):
+		data=F.dill_dump(data)
+	
+	return U.thread(
+target=lambda :N.HTTP.post(url,proxies='')	
+	).start()	
+		
+post=post_with_new_thread	
+
 def sendkey8888(response=None,s=''):
 	''' pip install python3-xlib
 	
@@ -1328,6 +1338,9 @@ def rpc_set_variable(*obj,base=AUTO_GET_BASE,timeout=9,varname='v',ext_cmd='r=U.
 		if '{0}'    in ext_cmd:ext_cmd=ext_cmd.format(varname)
 		if '{name}' in ext_cmd:ext_cmd=ext_cmd.format(name=varname)
 
+	if len(obj)==1 and ',' not in varname:
+		obj=obj[0]
+		
 	if not obj:
 		if py.len(ka)==1:
 			varname,obj=U.get_dict_item(ka)	
@@ -1336,8 +1349,6 @@ def rpc_set_variable(*obj,base=AUTO_GET_BASE,timeout=9,varname='v',ext_cmd='r=U.
 			if not ext_cmd:
 				ext_cmd='globals().update(%s)'%varname
 				
-	if len(obj)==1 and ',' not in varname:
-		obj=obj[0]
 #numpy not y ValueError: The truth value of an array with more than one element is ambiguous. Use a.any() or a.all()
 	if varname!='v' and U.get_ipy() and  obj==(): 
 		obj=U.get_ipy().user_ns[varname]
