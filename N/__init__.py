@@ -42,12 +42,14 @@ else:
 	from SimpleHTTPServer import SimpleHTTPRequestHandler
 	from BaseHTTPServer import HTTPServer as _HTTPServer
 
-def post_with_new_thread(url,data):
+def post_with_new_thread(url,data,**ka):
+	from qgb import U,T,N,F
+	
 	if not py.isbyte(data):
 		data=F.dill_dump(data)
 	
 	return U.thread(
-target=lambda :N.HTTP.post(url,proxies='')	
+target=lambda :N.HTTP.post(url,proxies='',data=data,**ka)	
 	).start()	
 		
 post=post_with_new_thread	

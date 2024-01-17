@@ -263,6 +263,19 @@ def get_multi_return_dict():
 	raise py.NotImplementedError()
 	return
 	
+def get_prefix_multi_return_list(prefix,*names,**defaults):
+	if not prefix:return prefix
+	r=[]
+	for name in names:
+		if not name.startswith(prefix):
+			name=prefix+name
+		r.append( get(name) )
+	for name,default in defaults.items():
+		if not name.startswith(prefix):
+			name=prefix+name
+		r.append( get(name,default=default) )
+	return r	
+	
 def get_multi_return_list(*names,**defaults):
 	r=[]
 	for name in names:
@@ -732,6 +745,13 @@ tmux detach-client -t /dev/pts/3
 	tmux_dt=tmux_detach=tmux_detach_client=tmux_detach_client_all=tmux_detach_client_all_skip_max
 		
 ########################## end init #############################################
+def float_range(start,end,step):
+	f=start
+	while f<end:
+		yield f
+		f+=step
+range_float=float_range		
+
 def arithmetic_sequence(a,b,n=4):
 	d=b-a
 	r=[a,b]
@@ -3054,7 +3074,30 @@ def getObjName(a,value=False):
 	# exit()
 getName=getObjName
 
-def getVarName(a,funcName='getVarName'):
+def get_args_dict_without_ka(*a):
+	# U,T,N,F=py.importUTNF()
+	import inspect,ast,_ast
+	for line in inspect.getframeinfo(inspect.currentframe().f_back)[3]:
+		code=line[line.index('(')+1:line.rindex(')')].strip()
+		break
+	x=get('adict('+code) # list
+	if not x:
+		x=[]
+		y=py.list(ast.walk(ast.parse(code)))
+		assert py.isinstance(y[2],_ast.Tuple)
+		n=3
+		while not py.isinstance(y[n],_ast.Load):
+			x.append(ast_to_code(y[n],EOL=0))  #  脱去 （） 不好实现，  [1,2]  就不返回 （）
+			n+=1
+	assert len(x)==len(a)
+	set('adict('+code,x)		
+	rd={}
+	for n,v in py.enumerate(a):
+		rd[x[n]]=v
+	return rd	
+adict=get_args_dict_without_ka
+
+def getVarName(*a,funcName='getVarName'):
 	'''funcName :defined for recursion frame search
 	
 	在python2中 str unicode 字面相同情况下， == True
@@ -3156,7 +3199,7 @@ ValueError: Function has keyword-only parameters or annotations, use getfullargs
 	import inspect,ast
 	U,T,N,F=py.importUTNF()
 	frame=inspect.currentframe()
-	if args or kwargs:
+	if kwargs: # args or 
 		rd=py.dict(kwargs)
 	else:
 		frame=frame.f_back
@@ -3206,7 +3249,7 @@ sg.bind(#vars 如何处理，详细研究下 )
 		log(e)
 		v=recursive_find(am) 
 		pln('error in',__name__,getArgsDict.__name__,'. debug vars return')
-		return py.dict(e=e,frame=frame,rd=rd,lines=lines,args=args,v=v,v_args=v.args, locals=locals()  ) # 形式参数 不会出现在 locals 中？
+		return py.dict(e=e,frame=frame,rd=rd,lines=lines,args=args,v=v, locals=locals()  ) # 形式参数 不会出现在 locals 中？
 	
 get_arg=get_args=getargspec=getargs=getarg=getArgs=get_args_dict=getArgsDict=get_function_args_dict =get_caller_args=get_caller_args_dict
 
@@ -6718,7 +6761,10 @@ def formatCode(code, indent_with='\t'):
 	
 def ast_to_code(a,EOL=True):
 	import astor
-	r= astor.to_source(a)
+	try:
+		r= astor.to_source(a)
+	except Exception as e:
+		return py.No(e)
 	if not EOL:
 		while r.endswith('\n'):
 			r=r[:-1]

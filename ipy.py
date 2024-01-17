@@ -183,12 +183,10 @@ def trace_variable(code):
 		a=a.value
 	if isinstance(a,_ast.Call):
 		a.args
-		a.keywords
-		
-	
+		a.keywords	
 trace_code=trace_var=trace_variable
 
-def get_sqlite_history(file='~/.ipython/profile_default/history.sqlite',limit=2000,offset=0,StrRepr=True,**ka):
+def get_sqlite_history(filter='',file='~/.ipython/profile_default/history.sqlite',limit=2000,offset=0,StrRepr=True,**ka):
 	''' ipy console default output max len 500
 rpc_server : 2000  ,2001 有省略号 ...
 '''	
