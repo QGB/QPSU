@@ -1286,7 +1286,7 @@ return tuple(ap,dir_list,file_list )
 		return _os.walk(ap).__next__()
 		
 def list(ap='.',type='',t='',r=False,d=False,dir=False,f=False,
-	file=False,include='',exclude='',timeout=None,print_result=False,**ka):
+	file=False,include='',exclude='',limit=None,timeout=None,print_result=False,**ka):
 	'''Parms:bool r recursion
 			 str (type,t) '(d,f,a,r)'
 	default return all'''

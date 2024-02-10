@@ -230,11 +230,18 @@ def set_delete_by_prefix(s,confirm=True,level=gd_sync_level['process']):
 		return U.object_custom_repr(U.dict_multi_pop(d,*ks),repr='{%s}#dict custom repr'%','.join('%r: ... '%k for k in ks),)
 delset_prefix=del_set_by_prefix=set_delete_by_prefix
 		
+def set_multi_prefix(prefix,**ka):
+	import sys
+	sys._qgb_dict=py.getattr(sys,'_qgb_dict',{})
+	d={prefix+k:v for k,v in ka.items()}
+	sys._qgb_dict.update(d)
+	return d
+	
 def set_multi(**ka):
-	surfix=get_duplicated_kargs(ka,'__surfix','_surfix',default='')
+	prefix=get_duplicated_kargs(ka,'__prefix','_prefix',default='')
 	import sys
 	d=sys._qgb_dict=py.getattr(sys,'_qgb_dict',{})
-	sys._qgb_dict.update({surfix+k:v for k,v in ka.items()})
+	sys._qgb_dict.update({prefix+k:v for k,v in ka.items()})
 	# for name,value in ka.items():
 		# d[name]=value	
 	return ka
@@ -3075,19 +3082,47 @@ def getObjName(a,value=False):
 getName=getObjName
 
 def get_args_dict_without_ka(*a):
-	# U,T,N,F=py.importUTNF()
+	''' #TODO 暂不支持单个参数
+U.adict(1) =================  [<_ast.Module at 0x1e6740b7190>,
+  <_ast.Expr at 0x1e6745a1d00>,
+  <_ast.Constant at 0x1e6741434c0>]	
+	
+U.adict(U.stime()) ========== [<_ast.Module at 0x1e6745465e0>,
+  <_ast.Expr at 0x1e66c63fb50>,
+  <_ast.Call at 0x1e66c63ffa0>,
+  <_ast.Attribute at 0x1e674f748b0>,
+  <_ast.Name at 0x1e67453f880>,
+  <_ast.Load at 0x1e6580e19a0>,
+  <_ast.Load at 0x1e6580e19a0>]	
+	
+U.adict(lambda a:a) ========= [<_ast.Module at 0x1e674e2e700>,
+  <_ast.Expr at 0x1e675224100>,
+  <_ast.Lambda at 0x1e674b48d00>,
+  <_ast.arguments at 0x1e674b48e20>,
+  <_ast.Name at 0x1e674b48520>,
+  <_ast.arg at 0x1e674b48340>,
+  <_ast.Load at 0x1e6580e19a0>]	
+	
+	'''
 	import inspect,ast,_ast
 	for line in inspect.getframeinfo(inspect.currentframe().f_back)[3]:
 		code=line[line.index('(')+1:line.rindex(')')].strip()
 		break
+	if not code:return code	
 	x=get('adict('+code) # list
 	if not x:
 		x=[]
 		y=py.list(ast.walk(ast.parse(code)))
-		assert py.isinstance(y[2],_ast.Tuple)
+		if not py.isinstance(y[2],_ast.Tuple): 
+			set('adict.bug',[a,code,x,y])     #     U.get('adict.bug')
+			assert py.isinstance(y[2],_ast.Tuple)
 		n=3
 		while not py.isinstance(y[n],_ast.Load):
-			x.append(ast_to_code(y[n],EOL=0))  #  脱去 （） 不好实现，  [1,2]  就不返回 （）
+			sx=ast_to_code(y[n],EOL=0)#  脱去 （） 不好实现，  [1,2]  就不返回 （）
+			if py.len(sx)>2 and sx[0]=='(' and sx[-1]==')':
+				sx=sx[0+1:-1-1]
+			sx=sx.replace(' ','') # 可能会破坏语义	
+			x.append(sx)  
 			n+=1
 	assert len(x)==len(a)
 	set('adict('+code,x)		
@@ -3348,7 +3383,7 @@ def getHelp(a,del_head_line=0):
 	if del_head_line:
 		a='\n'.join(a.splitlines()[del_head_line:])
 	return a
-gethelp=getHelp
+h=help=gethelp=getHelp
 	
 def helphtml(obj,*aos):
 	txt=''
@@ -3371,7 +3406,7 @@ def helphtml(obj,*aos):
 		f.write(txt)
 	# write(file,txt)
 	globals()['browser'](file)
-h=help=helphtml
+helphtml
 # if __name__=='__main__':help(h);exit()
 
 def getLine():
@@ -3434,7 +3469,7 @@ def stime_iso(t=None,delta=0,timezone=8):
 	# .timezone
 	if py.isint(timezone):
 		# 指定时区信息为 UTC+8
-		timezone = datetime.timezone(datetime.timedelta(hours=8))
+		timezone = datetime.timezone(datetime.timedelta(hours=timezone))
 
 	if t:
 		raise py.NotImplementedError(t)
@@ -6133,6 +6168,11 @@ return:  slice to [all index list]
 
 	return py.list(py.range(*range) )
 get_all_index_list=get_index_list=get_slice_range
+
+def dict_clear(adict,return_old=False):
+	if return_old:d=adict.copy()
+	adict.clear()
+	if return_old:return d
 
 def new_dict_multi_key_same_value(**ka):
 	''' dictm(ms=[1,2])

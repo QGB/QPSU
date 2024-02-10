@@ -391,7 +391,7 @@ def get_github_repo_directory_as_list(url,token=GITHUB_TOKEN,return_object=True,
 github_dir=get_github_dir=get_github_repo_directory_as_list
 
 
-def github_upload(filename,commit_msg='',print_requests=False,**ka):
+def github_upload(filename,commit_msg='',print_requests=False,safe_filename='',**ka):
 	'''
 	
 - 常规文件
@@ -427,10 +427,11 @@ github_api:  path cannot end with a slash
 	if not token.startswith('token '):token='token '+token
 	
 	# filename=F.auto_path(filename)
-	if U.isWin():
-		safe_filename=T.path_legalized('/'+F.auto_path(filename),reduce_space=False)[1:]
-	else:	
-		safe_filename=T.path_legalized(F.auto_path(filename),reduce_space=False)
+	if not safe_filename:
+		if U.isWin():
+			safe_filename=T.path_legalized('/'+F.auto_path(filename),reduce_space=False)[1:]
+		else:	
+			safe_filename=T.path_legalized(F.auto_path(filename),reduce_space=False)
 	
 	if '/.git/' in safe_filename:
 		pass# python pass keyword won't skip execution

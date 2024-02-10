@@ -112,6 +112,13 @@ try:
 	from pprint import pprint,pformat
 except:pass
 ####################################################
+def stime_text(t='',regex='\d{13}'):
+	U,T,N,F=py.importUTNF()
+	if not t:t=U.cbg()
+	def fr(a):
+		return U.stime(int(a.group()))
+	return T.regex_replace(t,regex,fr)
+
 def uncurl(sc=''):
 	import uncurl
 	U,T,N,F=py.importUTNF()
@@ -288,6 +295,10 @@ u'元旦快樂'
 	from zhconv import convert 
 	return convert(a, lang)
 zhc=zhconv=zh_convert
+
+def replace_last(a,old,new,maxreplace=1):
+	 return new.join(a.rsplit(old, maxreplace))
+replace_one_last=replace_last_one=replace_last
 
 def replace_one(a,old,new):
 	return a.replace(old, new,1) #count=1 #TypeError: replace() takes no keyword arguments 

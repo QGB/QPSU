@@ -187,13 +187,21 @@ def trace_variable(code):
 trace_code=trace_var=trace_variable
 
 def get_sqlite_history(filter='',file='~/.ipython/profile_default/history.sqlite',limit=2000,offset=0,StrRepr=True,**ka):
-	''' ipy console default output max len 500
+	'''   CREATE TABLE history (session integer, line integer, source text, source_raw text, PRIMARY KEY (session, line))
+	ipy console default output max len 500
 rpc_server : 2000  ,2001 有省略号 ...
 '''	
 	limit=U.get_duplicated_kargs(ka,'limit','limits','limites','count','n','max',default=limit)
-	
 	file=F.expanduser(file)
-	his=F.read_sqlite(file,sql=f'SELECT * FROM history ORDER BY session DESC,line DESC  limit {limit} offset {offset} ')
+	
+	if filter:
+		if not filter.upper().startswith('WHERE SOURCE LIKE '):
+			filter=f"WHERE source LIKE '%{filter}%' "
+	else:
+		filter=''
+	his=F.read_sqlite(file,sql=f'SELECT * FROM history {filter} ORDER BY session DESC,line DESC  limit {limit} offset {offset} ')
+	
+	if filter:return his
 	# his=his['history'] 
 #    (44, 614, 'U.unique(_)', 'U.unique _')  
 # session,line,  autocall ,    raw_input

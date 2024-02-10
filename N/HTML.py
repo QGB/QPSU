@@ -786,7 +786,7 @@ def list_2d_href_file_column(response,a,file_column=None,**ka):
 		
 
 list_2d_CSS_MARK='/*css*/'
-def list_2d(response,a,html_callback=None,index=False,sort_kw=U.SORT_KW_SKIP,column_type_dict=None,sort_ka=py.dict(ascending=True,),debug=False,to_html_ka=None,**ka):
+def list_2d(response,a,html_callback=None,index=False,sort_kw=U.SORT_KW_SKIP,column_type_dict=None,sort_ka=py.dict(ascending=True,),bottom_head=False,debug=False,to_html_ka=None,**ka):
 	''' ,sort_ka=py.dict(ascending=False) #倒序 从大到小
 	'''
 	index=U.get_duplicated_kargs(ka,'index','n','enu','add_index','enumerate',default=index)
@@ -850,7 +850,7 @@ def list_2d(response,a,html_callback=None,index=False,sort_kw=U.SORT_KW_SKIP,col
 	if index:
 		# df.reset_index(drop=True)
 		# df.reset_index(drop=False)
-		sindex_col='0n'
+		sindex_col='-1t'#'-1n'
 		if sindex_col in df:
 			pass
 		else:
@@ -858,6 +858,10 @@ def list_2d(response,a,html_callback=None,index=False,sort_kw=U.SORT_KW_SKIP,col
 		index=False
 		
 	html=df.to_html(index=index,**to_html_ka) 
+	
+	if bottom_head and py.len(df)>34:
+		thead=T.sub(html,'<thead>','</thead>')
+		html=T.replace_last_one(html,'</tbody>',thead+'</tbody>')
 	
 # <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 	head='''

@@ -2076,6 +2076,7 @@ def flask_file_stream_response(response,file=py.No('if not file:use N.geta()'),)
 file=stream_file=file_stream=read_as_stream=read_file_as_stream=flask_file_stream_response
 
 def flask_image_response(response,image,format='png',**ka):
+	if not response:return image
 	if py.isbytes(image):
 		bytes=image
 	else:
