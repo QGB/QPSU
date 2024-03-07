@@ -112,6 +112,10 @@ try:
 	from pprint import pprint,pformat
 except:pass
 ####################################################
+def repr_without_space(a):
+	return py.repr(a).replace(', ',',')
+repr=repr_without_space
+	
 def stime_text(t='',regex='\d{13}'):
 	U,T,N,F=py.importUTNF()
 	if not t:t=U.cbg()
@@ -2548,6 +2552,7 @@ IndexError: list index out of range
 	decimals=''#小数点
 	if a.find('.')==a.rfind('.')!=-1:
 		decimals=sub_tail(a,'.')
+		a=sub_tail(a,'','.')
 		if decimals:decimals='.'+decimals
 	a=''.join(U.one_in(py.list(a),number))
 	while(a.startswith('0')):a=a[1:]

@@ -41,12 +41,19 @@ async def sleep(sec):
 	return await asyncio.sleep(sec)
 	
 	
-async def websocket_client_send(url,astr,subprotocols=None):
+async def websocket_client_send(url,astr,subprotocols=None,verify=True):
 	import websockets
+	if verify:sslopt={}
+	else:
+		import ssl
+		sslopt={"cert_reqs": ssl.CERT_NONE}
+	
 	url=N.auto_url(url,default_protocol='ws')
 	# py.pdb()()
 	if py.istr(subprotocols):subprotocols=[subprotocols]
-	async with websockets.connect(url, subprotocols=subprotocols) as ws:
+	#TypeError: BaseEventLoop.create_connection() got an unexpected keyword argument 'sslopt'    
+
+	async with websockets.connect(url, subprotocols=subprotocols,sslopt=sslopt) as ws:
 		await ws.send(astr)
 		r = await ws.recv()
 		return r

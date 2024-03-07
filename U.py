@@ -166,20 +166,24 @@ gd_sync_level={
 }
 SET_NO_VALUE=py.No('U.set value=None',no_raise=True)
 GET_NO_VALUE=py.No('U.get ',no_raise=True)
-def set(name,value=SET_NO_VALUE,level=gd_sync_level['process'],**ka):
+def set(name,value=SET_NO_VALUE,return_old_value=False,level=gd_sync_level['process'],**ka):
+	if ka:
+		raise py.NotImplementedError()
+		
 	if level>=gd_sync_level['process']:
 		import sys
 		d=sys._qgb_dict=py.getattr(sys,'_qgb_dict',{})# 统一用这句
 		if value is SET_NO_VALUE: # py.No 比较不能用== ，no==0 ==None ==0.0 ...
 			value=name
 			name='_'
+		if return_old_value:
+			if name in d:old=d[name]
+			else:old=GET_NO_VALUE
 		d[name]=value
 		# sys._qgb_dict=d
 	if level>=gd_sync_level['system']:
 		import sqlite3
-		
-	if ka:
-		raise py.NotImplementedError()
+	if return_old_value:return old,value
 	return value
 
 def set_no_return(name,value,**ka):
@@ -264,7 +268,7 @@ def get_startswith_keys(name):
 		if py.istr(k) and k.startswith(name):
 			r.append(k)
 	return r
-get_startswith=get_startswith_keys	
+get_prefix_keys=get_startswith=get_startswith_keys	
 	
 def get_multi_return_dict():
 	raise py.NotImplementedError()
@@ -752,6 +756,22 @@ tmux detach-client -t /dev/pts/3
 	tmux_dt=tmux_detach=tmux_detach_client=tmux_detach_client_all=tmux_detach_client_all_skip_max
 		
 ########################## end init #############################################
+def pick(*a,return_index=False,**ka):
+	'''pick(
+    options: Sequence[~OPTION_T],
+    title: Union[str, NoneType] = None,
+    indicator: str = '*',
+    default_index: int = 0,
+    multiselect: bool = False,
+    min_selection_count: int = 0,
+    screen: Union[ForwardRef('curses._CursesWindow'), NoneType] = None,
+)'''
+	from pick import pick
+	v,n=pick(*a,**ka)
+	if return_index:return v,n
+	return v
+select_value=pick	
+	
 def float_range(start,end,step):
 	f=start
 	while f<end:
@@ -851,6 +871,19 @@ def PyFile_FromFd(fd,name="filename",mode='r',buffering=-1,encoding='utf-8'):
 	mode=ctypes.create_string_buffer(mode)
 	
 	return f(fd, name,mode,buffering,bencoding,NULL,NULL,1)						  
+	
+def list_remove_multi_values(a,*vs,skip_not_exists=False):
+	r=[]
+	for v in vs:
+		try:
+			a.remove(v)
+			r.append(v)
+		except Exception as e:
+			if not skip_not_exists:
+				r.append(py.No(e))
+	return r		
+
+list_pop_multi_values=list_remove_multi_values	
 	
 def list_reindex_by_value(alist,*values):
 	''' 调整顺序  reindex ,
@@ -3445,7 +3478,7 @@ def phtmlend():
 	globals()['browser'](sf)
 # dicthtml('uvars.html',vars())
 
-def mergeDict(*a):
+def merge_multi_dict(*a):
 	r={}
 	for i in a:
 		if not py.isdict(i):
@@ -3454,14 +3487,14 @@ def mergeDict(*a):
 		for k,v in i.items():
 			r[k]=v
 	return r
-merge_dict=mergeDict
+merge_dict=mergeDict=merge_multi_dict
 	
-def mergeList(*a):
+def merge_multi_list(*a):
 	r=[]
 	for i in a:
 		r.extend(i)
 	return r
-add_list=addList=merge_list=mergeList
+add_list=addList=merge_list=mergeList=merge_multi_list
 
 def stime_iso(t=None,delta=0,timezone=8):
 	# from datetime import datetime, timezone, timedelta
@@ -5920,6 +5953,23 @@ def jDictValue(a,b):
 	return	r
 jdv=jDictValue
 
+def two_dict_check_value_equal(a,b,*ks,func=lambda va,vb:va==vb):
+	# if not ks:return
+	for k in ks:
+		if k not in a or k not in b:return py.No(k,'not in a,b')
+		if not func(a[k],b[k]):return py.No('not equal',k,a[k],b[k])
+	return True
+dict_check_value_equal=two_dict_check_value_equal
+
+def dict_get_or_set(d,k,value=None,default=None):
+	''' if not value and default:   return default and not set value
+'''
+	if k in d:return d[k]
+	else:
+		if value:d[k]=value
+		return default
+dict_get_set=dict_get_or_set		
+
 def dict_convert_value(d,*ks,func=None):
 	''' d is mutable'''
 	if not py.callable(func):raise py.ArgumentError(func)
@@ -6169,6 +6219,28 @@ return:  slice to [all index list]
 	return py.list(py.range(*range) )
 get_all_index_list=get_index_list=get_slice_range
 
+def dict_update_merge_value_dict(da,k=None,d=None,**ka):
+	if py.isdict(d):ka[k]=d
+	
+	for k,d in ka.items():
+		if not py.isdict(d):raise py.ArgumentError(d)
+		if k in da:
+			da[k].update(d)
+		else:
+			da[k]=d
+	return da
+dict_update_value_dict=dict_update_merge_value_dict	
+	
+def new_dict_key_is_value(*ks,func=lambda k:k,**ka):
+	d={}
+	for k in ks:
+		d[k]=func(k)
+	for k in ka:
+		assert k in d
+		d[k]=ka[k]
+		
+	return d
+	
 def dict_clear(adict,return_old=False):
 	if return_old:d=adict.copy()
 	adict.clear()
@@ -6311,7 +6383,7 @@ dict_del_multi_key=dict_pop=pop_list_multi_index=pop_dict_multi_key=dict_pop_mul
 	
 GET_DICT_MULTI_VALUES_RETURN_LIST_DEFAULT_DEFAULT=get_dict_multi_values_return_list_DEFAULT_DEFAULT=get_or_set('get_dict_multi_values_return_list_DEFAULT_DEFAULT',lazy_default=lambda:py.No('can not get key'),)
 
-def get_dict_multi_values_return_list(d,*keys,convert_function=None,default_dict={},default_default=GET_DICT_MULTI_VALUES_RETURN_LIST_DEFAULT_DEFAULT,**ka):
+def dict_get_multi_return_list(d,*keys,convert_function=None,default_dict={},default_default=GET_DICT_MULTI_VALUES_RETURN_LIST_DEFAULT_DEFAULT,**ka):
 	default=get_duplicated_kargs(ka,'default')
 	if default is GET_DUPLICATED_KARGS_DEFAULT:
 		pass
@@ -6330,7 +6402,7 @@ def get_dict_multi_values_return_list(d,*keys,convert_function=None,default_dict
 			v=convert_function(v)
 		r.append(v)
 	return r
-get_multi_dict_values=get_dict_multi_values=get_dict_multi_values_return_list
+get_multi_dict_values=get_dict_multi_values=get_dict_multi_values_return_list=dict_get_multi_return_list
 	
 def dict_contains_dict(d,dsub):
 	for k,v in dsub.items():

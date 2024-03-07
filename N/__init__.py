@@ -2616,8 +2616,16 @@ def get_lan_ip(adapter=py.No('auto'),adapter_names=('enp0s','wlan0','ens5')):
 						return ip
 			raise py.NotImplementedError(daip,ips)	
 	elif U.isWin():#TODO
-
-		return daip['WLAN']
+		ks=['WLAN', # 1.3
+		'WLAN 2',  # 1.4
+		 '以太网',#'192.168.1.5'
+		]
+		for k in ks:
+			if k in daip:
+				return daip[k]
+		else:
+			print(daip)
+			raise py.EnvironmentError('win not found lan ip',daip)
 	else:
 		raise py.NotImplementedError('other system')
 	################

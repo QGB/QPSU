@@ -104,9 +104,14 @@ def xiaomi_air_conditioner_control(response=None,token=py.No('auto get'),t=0,ang
 	else:	
 		ip=N.auto_ip(ip)
 	
-	d=U.get_or_set(ip+':'+token,
-			lazy_default=lambda:miio.device.Device(ip=ip,token=token),
-		)	
+	if py.getattr(miio,'Device',0):
+		d=U.get_or_set(ip+':'+token,
+				lazy_default=lambda:miio.Device(ip=ip,token=token),
+			)	
+	else:
+		d=U.get_or_set(ip+':'+token,
+				lazy_default=lambda:miio.device.Device(ip=ip,token=token),
+			)	
 	
 		
 		
@@ -148,9 +153,9 @@ def xiaomi_air_conditioner_control(response=None,token=py.No('auto get'),t=0,ang
 				if power is AC_DEFAULT:d.send('set_power',['on'])
 				if not mode:
 					m=U.time().month
-					if m<3 or m>10:
+					if m<4 or m>10:
 						d.send("set_mode", ['heat'])
-					if 4<m<11:
+					if 5<m<11:
 						d.send("set_mode", ['cooling'])
 				
 				
@@ -179,7 +184,7 @@ def xiaomi_air_conditioner_control(response=None,token=py.No('auto get'),t=0,ang
 							
 				d.send("set_silent", ['off'])
 				
-				t2=U.Timer(lambda:N.HTML.ac(mode='wind',power=1),ia,name='Timer.ac.wind')
+				t2=U.Timer(lambda:N.HTML.ac(mode='wind',power=AC_DEFAULT),ia,name='Timer.ac.wind')
 				print(t2)
 				# ishutdown=ia+ib
 				print('ac.sleep ',ia,'wind',ib,'shutdown:',ia+ib,'#',U.time()+U.time_delta(seconds=ia+ib))
@@ -793,6 +798,7 @@ def list_2d(response,a,html_callback=None,index=False,sort_kw=U.SORT_KW_SKIP,col
 	sort_kw=U.get_duplicated_kargs(ka,'skw','sort','s',default=sort_kw)
 	column_type_dict=U.get_duplicated_kargs(ka,'column_type_dict','type','t',default=column_type_dict if column_type_dict else {},)
 	sort_ka=U.get_duplicated_kargs(ka,'ska','sort_ka','sa',default=sort_ka)
+	bottom_head=U.get_duplicated_kargs(ka,'bottom_head','title_bottom','bottom','bhead','tb','bh','hb',default=bottom_head)
 	if not py.isdict(sort_ka):
 		if sort_ka:
 			sort_ka=py.dict(ascending=True,)
@@ -859,7 +865,7 @@ def list_2d(response,a,html_callback=None,index=False,sort_kw=U.SORT_KW_SKIP,col
 		
 	html=df.to_html(index=index,**to_html_ka) 
 	
-	if bottom_head and py.len(df)>34:
+	if bottom_head and py.len(df)>(bottom_head if py.isint(bottom_head) else 34):
 		thead=T.sub(html,'<thead>','</thead>')
 		html=T.replace_last_one(html,'</tbody>',thead+'</tbody>')
 	
