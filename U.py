@@ -5942,7 +5942,7 @@ def intersection(a,b):
 	# return py.set(a).intersection(py.set(b))
 j=intersection
 	
-def jDictValue(a,b):
+def dict_j_value(a,b):
 	'''
 	'''
 	r={}
@@ -5951,7 +5951,38 @@ def jDictValue(a,b):
 		if i[1] in vb:
 			r[i[0]]=i[1]
 	return	r
-jdv=jDictValue
+jdv=jDictValue=dict_j_value
+
+try:
+	import sortedcontainers
+	DictLimitSizeSortedKey=LimitSizeSortedDict=get('U.LimitSizeSortedDict')
+	if not LimitSizeSortedDict:
+		class LimitSizeSortedDict(sortedcontainers.SortedDict):
+			default_max_size = 50
+			def __init__(self, *args, **kwargs):
+				self.max_size = kwargs.pop('max_size', self.default_max_size)
+				assert self.max_size>0
+				super(LimitSizeSortedDict, self).__init__(*args, **kwargs)
+
+			def __setitem__(self, key, val):
+				super(LimitSizeSortedDict, self).__setitem__(key, val)
+				self._prune_dict(self.max_size)
+				#print('set',key,val)
+
+			def update(self,*args,**kwargs):
+				#l=list(self)
+				super(LimitSizeSortedDict, self).update(*args,**kwargs)
+				#l1=list(self)
+				self._prune_dict(self.max_size)
+				#print('update',l,l1)
+
+			def _prune_dict(self, max_size):
+				#d=list(self)
+				while len(self) > max_size:
+					self.pop(self.peekitem(0)[0])# 从小到大，剔除最小的 .peekitem(-1) 剔除最大
+				#print(d,self)
+		DictLimitSizeSortedKey=LimitSizeSortedDict=set('U.LimitSizeSortedDict',LimitSizeSortedDict)
+except ImportError as ei:print(ei)
 
 def two_dict_check_value_equal(a,b,*ks,func=lambda va,vb:va==vb):
 	# if not ks:return
@@ -7851,7 +7882,7 @@ def remove_timed_task_by_time(time):
 	return del_list_multi_indexs(schedule.jobs,*to_del_indexs)
 del_time_task_by_time=remove_timed_task_by_time		
 
-def remove_timed_task(index=-1):
+def remove_timed_task(*ns,return_schedule_jobs=True):
 	''' -1 is last added
 0 is first added
 
@@ -7860,7 +7891,17 @@ self=task
 TypeError: '>' not supported between instances of 'datetime.datetime' and 'int'
 '''
 	import schedule
-	return schedule.jobs,'########## pop:',schedule.jobs.pop(index)
+	if not ns:ns=[-1]
+	
+	dr={}
+	for index in ns:
+		# try:
+		dr[index]=schedule.jobs.pop(index)
+		
+	if return_schedule_jobs:
+		return schedule.jobs,dr
+	return dr
+	
 timer_del=cancel_job=schedule_jobs_pop=pop_time_task=cancel_time_task=del_time_task=remove_time_task=remove_timed_task
 	
 def get_timed_task_list():
