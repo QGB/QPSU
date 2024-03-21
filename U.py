@@ -5959,9 +5959,12 @@ try:
 	if not LimitSizeSortedDict:
 		class LimitSizeSortedDict(sortedcontainers.SortedDict):
 			default_max_size = 50
+			default_pop_index = 0
 			def __init__(self, *args, **kwargs):
 				self.max_size = kwargs.pop('max_size', self.default_max_size)
+				self.pop_index = kwargs.pop('pop_index', self.default_pop_index)
 				assert self.max_size>0
+				assert self.pop_index in (0,-1)
 				super(LimitSizeSortedDict, self).__init__(*args, **kwargs)
 
 			def __setitem__(self, key, val):
@@ -5979,7 +5982,7 @@ try:
 			def _prune_dict(self, max_size):
 				#d=list(self)
 				while len(self) > max_size:
-					self.pop(self.peekitem(0)[0])# 从小到大，剔除最小的 .peekitem(-1) 剔除最大
+					self.pop(self.peekitem(self.pop_index)[0])# 0 从小到大，剔除最小的 .peekitem(-1) 剔除最大
 				#print(d,self)
 		DictLimitSizeSortedKey=LimitSizeSortedDict=set('U.LimitSizeSortedDict',LimitSizeSortedDict)
 except ImportError as ei:print(ei)
@@ -6454,7 +6457,15 @@ def dict_pop_by_index(d,index):
 pop_dict_index=pop_dict_by_index=dict_pop_by_index	
 	
 	
-def	rename_dict_key(d,new,old={}):
+def	dict_rename_multi_key(d,old_new_key_map=None,change_dict=False,**ka):
+	'''  .copy() '''
+	if not old_new_key_map:old_new_key_map=ka
+	if not change_dict:d=d.copy()
+	for old,new in old_new_key_map.items():
+		d[new] = d.pop(old)
+	return d	
+
+def	dict_rename_key(d,new,old={}):
 	if not old:
 		for i in d:
 			old=i
@@ -6465,7 +6476,7 @@ def	rename_dict_key(d,new,old={}):
 		d[new] = d.pop(old)
 	return d
 		# del d[old]#这个可以删除item,py27
-renameDictKey=rename_dict_key
+renameDictKey=rename_dict_key=dict_rename_key
 
 def dict_set_value_skip_if_exist(d,**ka):
 	for k,v in ka.items():

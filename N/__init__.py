@@ -196,8 +196,40 @@ def http_server(PORT):
 		print("serving at port", PORT)
 		httpd.serve_forever()
 	
-def curl_return_bytes(url,verbose=True,proxy=py.No('socks5h://127.0.0.1:21080'),headers=py.No('default use N.HTTP.headers'),max_show_bytes_size=99,user_agent=py.No('auto use N.HTTP.user_agent'),**ka):
-	'''  CURLOPT_* see:
+def curl_get_ipv4(url,print_msg=True,**ka):
+	U,T,N,F=py.importUTNF()
+	proxy=U.get_duplicated_kargs(ka,'proxies','proxy',default=0)
+	if proxy:
+		raise py.ArgumentError('can not use proxy to get real ip')
+	
+	gdebug=[]
+	def f_debug(t,msg):
+		ips=T.regex_match_all(msg,T.RE_IPV4)
+		if t==0 and ips:
+			if print_msg:
+				print(len(gdebug),t,msg,ips)
+			assert len(ips)==1	
+			gdebug.append(ips[0])	
+		# gdebug.append([t,msg])
+		
+	try:	
+		curl(url,verbose=True,DEBUGFUNCTION=f_debug,**ka)
+	except Exception as e:
+		if print_msg:
+			print(len(gdebug),e)
+	
+	uip=U.unique(gdebug)
+	uip=[ip.decode() for ip in uip]
+	if len(uip)==1:
+		return uip[0]
+	else:
+		return uip
+curl_get_ip=curl_get_ipv4	
+	
+def curl_return_bytes(url,verbose=True,proxy=py.No('socks5h://127.0.0.1:21080'),headers=py.No('default use N.HTTP.headers'),max_show_bytes_size=99,user_agent=py.No('auto use N.HTTP.user_agent'),raise_err=True,**ka):
+	'''  SSL_VERIFYPEER=0
+
+	CURLOPT_* see:
 https://github.com/pycurl/pycurl/blob/master/src/module.c
 	'''
 	global U,T,N,F
@@ -244,7 +276,12 @@ https://github.com/pycurl/pycurl/blob/master/src/module.c
 	f=BytesIO()
 	c.setopt(c.WRITEDATA, f)
 	#c.setopt(c.CAINFO, certifi.where())
-	c.perform()
+	if raise_err:
+		c.perform()
+	else:
+		try:c.perform()
+		except Exception as e:
+			return py.No(e)
 	#c.close()
 	f.seek(0)
 	b=f.read()
@@ -874,11 +911,14 @@ def zhihu_question(url=py.No('N.geta'),response=None):
 	return r
 zhihu=zhihu_question	
 
-def dns_resolve(domain,rdtype='A'):
+def dns_resolve(domain,rdtype='A',return_str_list=True):
+	''' dnspython '''
 	import dns.resolver   
 	try:
 		r=dns.resolver.resolve(domain,rdtype)
-		return r.rrset
+		if return_str_list:
+			return [rdata.address for rdata in r.rrset]
+		else:return r.rrset
 		# return r.rrset.items
 	except Exception as e:
 		return py.No(e)
@@ -1236,10 +1276,10 @@ def rpc_copy_files(source_list_or_dict,target='',target_path_base=py.No('U.gst')
 rpc_copy=rpc_copy_file=rpc_copy_files
 	
 AUTO_GET_BASE=py.No('auto history e.g. [http://]127.0.0.1:23571[/../] ',no_raise=1,)
-	
+RPC_GET_TEMPLATE='{base}response.set_data(F.serialize({varname}))'
 def rpc_get_variable(varname,
 base=AUTO_GET_BASE,
-template='{base}response.set_data(F.serialize({varname}))',
+template=RPC_GET_TEMPLATE,
 		timeout=9,p=True,return_bytes=False,proxies=None,ipy=False,**ka):
 	U,T,N,F=py.importUTNF()	
 	return_bytes=U.get_duplicated_kargs(ka,'return_byte','rb','B','b','raw','raw_bytes',default=return_bytes)
@@ -1254,6 +1294,11 @@ template='{base}response.set_data(F.serialize({varname}))',
 	# if not base:raise py.ArgumentError('need base=')
 	# if T.regexMatchOne(base,':\d*$') or T.regex_count(base,'/')==2:base+='/'
 	# U.set(RPC_BASE_ REMOTE,base)
+	
+	if py.istr(varname) and template==RPC_GET_TEMPLATE and '{base}' in varname:
+		template=varname
+		varname=''
+		
 	
 	url=template.format(base=base,varname=varname)
 	# import requests,dill
@@ -1329,6 +1374,8 @@ def rpc_set_variable_local(**ka):
 local_rpc_set=set_local_rpc=rpc_set_local=rpc_set_variable_local	
 		
 def rpc_set_variable(*obj,base=AUTO_GET_BASE,timeout=9,varname='v',ext_cmd='r=U.id({1})',print_req=False,pr=False,proxies=None,**ka):
+	''' ext_cmd=  {0}  default is 'v'  , {1}  is ka k
+	'''
 	U,T,N,F=py.importUTNF()
 	ext_cmd=U.get_duplicated_kargs(ka,'ext_cmd','cmd','extCmd','other_cmd',default=ext_cmd)
 	varname=U.get_duplicated_kargs(ka,'v','V','name','var_name','var',default=varname)

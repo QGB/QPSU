@@ -79,5 +79,47 @@ t at 0x0000026A719AD108>>
 a2s=async_to_sync
 # async def t(a):
 	
+async def multi_get(urls,**ka):
+	gr={}
+	
+	
+	async def fetch_url(session,url,n=0):
+		text=''
+		t=U.ftime()
+		try:
+			async with session.get(url,ssl=False,**ka) as response:
+				text=await response.text()
+				if text=='No Sec-WebSocket-Key header':
+					gr[url]=text
+				else:print(n,url,U.ftime()-t,repr(text)[:99],sep='\t');return
+					
+		except Exception as e:
+			# gr[url]=e
+			print(n,url,U.ftime()-t,e,sep='\t');return
+		return n,url,U.ftime()-t,U.len(text)
+		
+	start_time = U.ftime()
+	async with aiohttp.ClientSession() as session:
+		tasks = []
+		for n,url in enumerate(urls):
+			tasks.append(  asyncio.ensure_future(fetch_url(session,url,n=n))  )
+		responses = await asyncio.gather(*tasks)
+	total_time = U.ftime() - start_time
+	
+	for i, response in enumerate(responses):
+		if response:
+			print(i,response,sep='\t')
+
+	print(f'{U.stime()} Total time: {total_time} seconds',)
+	gr={k:v for k,v in gr.items() if v}
+	return gr
+
+	
+def sync_multi_get(urls,**ka):
+	loop = asyncio.get_event_loop()
+	result = loop.run_until_complete(multi_get(urls,**ka))
+	return result
+	
+	
 	
 	

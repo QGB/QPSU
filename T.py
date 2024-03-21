@@ -1377,7 +1377,7 @@ def readableTimeText(txt,browser=False):
 		return U.StrRepr(r)
 timeText=readableTimeText
 
-RE_IP= '''(?:(?:2(?:[0-4][0-9]|5[0-5])|[0-1]?[0-9]?[0-9])\.){3}(?:(?:2([0-4][0-9]|5[0-5])|[0-1]?[0-9]?[0-9]))'''
+RE_IP=RE_IPv4=RE_IPV4= '''(?:(?:2(?:[0-4][0-9]|5[0-5])|[0-1]?[0-9]?[0-9])\.){3}(?:(?:2([0-4][0-9]|5[0-5])|[0-1]?[0-9]?[0-9]))'''
 def ip_location_text(text,location_format=' [{0}] ',reverse_ip=True,**ka):
 	''' p='deprecated'
 	'''
@@ -1713,6 +1713,9 @@ def regex_match_all(a,regex):
 	if py.isinstance(a,re.Pattern) and py.istr(regex):
 		U.log('#Warning# Args: a,regex  not  regex,a . but auto fixed')
 		a,regex=regex,a
+		
+	if py.isbytes(a) and py.istr(regex):
+		regex=regex.encode()
 		
 	return [i.group() for i in re.finditer(regex,a)]
 matchRegex=matchRegexAll=regexMatchAll=regex_match_all
