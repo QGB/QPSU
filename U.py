@@ -5912,6 +5912,23 @@ def reversedDict(d):
 		r[i]=d[i]
 	return r
 	
+def union(*a):
+	r=py.set()
+	for i in a:
+		for j in i:
+			r.add(j)
+	return r		
+bj=union
+	
+def difference_unhashable(a,b):
+	if py.len(a)<py.len(b):a,b=b,a
+	r=[]
+	for i in a:
+		if i not in b:
+			r.append(i)
+	return r
+diff_unhashable=difference_unhashable
+	
 def difference(a,b):
 	'''差集 a-b
 	 U.diff([1,2,4],[1,2,5]) # {4}
@@ -6285,11 +6302,12 @@ def new_dict_multi_key_same_value(**ka):
 	'''
 	d={}
 	for v,ks in ka.items():
-		if py.istr(ks) or py.isint(ks):
+		if py.istr(ks) and ','in ks:
+			for k in ks.split(','):d[k]=v
+		elif py.istr(ks) or py.isint(ks):
 			d[ks]=v
 		elif py.iterable(ks):
-			for k in ks:
-				d[k]=v
+			for k in ks:d[k]=v
 		else:
 			raise py.ArgumentUnsupported(ks)
 				
@@ -6402,7 +6420,7 @@ def dict_get_nested_multi_keys_return_dict(d,*keys,return_all_exclude=[],**defau
 				
 		# dr[k]=d.get(k,defaults.get(k,default)) # .get also raise TypeError: unhashable type:
 	return dr
-get_nested_values=get_multi_dict_keys=get_dict_multi_values_by_keys=dict_get_multi=dict_get_multi_keys=dict_multi_get=dict_multi_get_keys=dict_get_multi_return_dict=dict_get_multi_keys_return_dict=dict_get_nested_multi_keys_return_dict
+get_dict_multi_values_return_dict=get_nested_values=get_multi_dict_keys=get_dict_multi_values_by_keys=dict_get_multi=dict_get_multi_keys=dict_multi_get=dict_multi_get_keys=dict_get_multi_return_dict=dict_get_multi_keys_return_dict=dict_get_nested_multi_keys_return_dict
 
 def dict_multi_pop(adict,*keys,default=py.No('key not in dict')):
 	dr={}

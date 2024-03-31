@@ -1707,7 +1707,7 @@ def flask_app_route(app,rule='',view_func=None,methods=('GET','POST'),log_req=Fa
 	
 flask_url_map=app_route=app_router=flask_app_route	
 
-def get_flask_request_post_data(name='y',save_dill=True,ipy_var=True,return_value=False,**ka):
+def get_flask_request_post_data(name='y',time=False,save_dill=True,ipy_var=True,return_value=False,**ka):
 	from flask import request as q
 	U,T,N,F=py.importUTNF()
 	save_dill=U.get_duplicated_kargs(ka,'save_dill','dill','save','write','dp',default=save_dill)
@@ -1716,11 +1716,14 @@ def get_flask_request_post_data(name='y',save_dill=True,ipy_var=True,return_valu
 	
 	b=q.data
 	y=T.js_loads(b)#demjson
+	
 	if ipy_var:
+		name=T.varname(name)
 		U.get_ipy().user_ns[name]=y
 	if return_value:
 		return y
-	f=f'{name}-{U.len(y)}={U.stime()}'
+	f=f'{name}-{U.len(y)}'
+	if time:f+=f'={U.stime()}'
 	if save_dill:
 		return F.dill_dump(obj=y,file=f'C:/test/{f}.dill')
 	else:

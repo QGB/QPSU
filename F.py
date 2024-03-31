@@ -1059,9 +1059,13 @@ def read_json(file,encoding=None):
 	''' '''
 	import json
 	file=autoPath(file)
-	if not encoding:encoding=detectEncoding(file)
-	with py.open(file,encoding=encoding) as f:
-		return json.load(f)
+	try:
+		if not encoding:encoding=detectEncoding(file)
+		with py.open(file,encoding=encoding) as f:
+			return json.load(f)
+	except Exception as e:
+		# from qgb import py
+		return py.No(e)
 readjson=readJSON=json_load=read_json
 
 def write_json(file,obj):

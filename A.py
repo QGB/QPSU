@@ -79,10 +79,13 @@ t at 0x0000026A719AD108>>
 a2s=async_to_sync
 # async def t(a):
 	
-async def multi_get(urls,**ka):
+async def multi_get(urls,timeout=10,connect_limit=100,fetch_print=True,return_time=False,**ka):
+	import aiohttp
+	if py.isnum(timeout):	
+		timeout = aiohttp.ClientTimeout(total=timeout)	
+	connector = aiohttp.TCPConnector(limit=connect_limit)	
+	
 	gr={}
-	
-	
 	async def fetch_url(session,url,n=0):
 		text=''
 		t=U.ftime()
@@ -91,24 +94,29 @@ async def multi_get(urls,**ka):
 				text=await response.text()
 				if text=='No Sec-WebSocket-Key header':
 					gr[url]=text
-				else:print(n,url,U.ftime()-t,repr(text)[:99],sep='\t');return
+				else:
+					if fetch_print:print(n,url,U.ftime()-t,repr(text)[:99],sep='\t')
+					return
 					
 		except Exception as e:
 			# gr[url]=e
-			print(n,url,U.ftime()-t,e,sep='\t');return
-		return n,url,U.ftime()-t,U.len(text)
-		
+			if fetch_print:print(n,url,U.ftime()-t,e,sep='\t')
+			return
+		t=U.ftime()-t	
+		if return_time:gr[url]=url,t,gr[url]
+		return n,url,t,U.len(text)
 	start_time = U.ftime()
-	async with aiohttp.ClientSession() as session:
+	async with aiohttp.ClientSession(timeout=timeout,connector=connector) as session:
 		tasks = []
 		for n,url in enumerate(urls):
 			tasks.append(  asyncio.ensure_future(fetch_url(session,url,n=n))  )
 		responses = await asyncio.gather(*tasks)
 	total_time = U.ftime() - start_time
 	
-	for i, response in enumerate(responses):
-		if response:
-			print(i,response,sep='\t')
+	if fetch_print:
+		for i, response in enumerate(responses):
+			if response:
+				print(i,response,sep='\t')
 
 	print(f'{U.stime()} Total time: {total_time} seconds',)
 	gr={k:v for k,v in gr.items() if v}
