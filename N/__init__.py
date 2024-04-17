@@ -196,7 +196,7 @@ def http_server(PORT):
 		print("serving at port", PORT)
 		httpd.serve_forever()
 	
-def curl_get_ipv4(url,print_msg=True,**ka):
+def curl_get_ipv4(url,print_msg=True,one_return_str=True,**ka):
 	U,T,N,F=py.importUTNF()
 	proxy=U.get_duplicated_kargs(ka,'proxies','proxy',default=0)
 	if proxy:
@@ -220,7 +220,7 @@ def curl_get_ipv4(url,print_msg=True,**ka):
 	
 	uip=U.unique(gdebug)
 	uip=[ip.decode() for ip in uip]
-	if len(uip)==1:
+	if one_return_str and len(uip)==1:
 		return uip[0]
 	else:
 		return uip
@@ -272,6 +272,10 @@ https://github.com/pycurl/pycurl/blob/master/src/module.c
 	if proxy:
 		c.setopt(pycurl.PROXYTYPE, pycurl.PROXYTYPE_SOCKS5)
 		c.setopt(pycurl.PROXY, N.set_proxy(proxy)['http'])##socks5://127.0.0.1:21080
+		
+	# if iface:
+		# c.setopt(pycurl.INTERFACE, iface)	
+		
 	from io import BytesIO
 	f=BytesIO()
 	c.setopt(c.WRITEDATA, f)

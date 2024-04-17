@@ -458,7 +458,7 @@ def get(url,file='',
 	b=b''
 	try:
 		import requests
-		r=requests.get(url,verify=verify,timeout=timeout,headers=headers,proxies=proxies)
+		r=requests.get(url,verify=verify,timeout=timeout,headers=headers,proxies=proxies,params=ka)
 		if file:
 			u=T.url_split(url).path
 			u=T.sub_last(u,'/')

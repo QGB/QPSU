@@ -1225,9 +1225,10 @@ if linux not echo # stty echo
 	except Exception as e:  #except 233:语法没错，运行到此就 TypeError: catching classes that do not inherit from BaseException is not allowed
 		return py.No(e)
 	finally:
-		import readline
-		readline.set_startup_hook()
-		
+		try:
+			import readline
+			readline.set_startup_hook()
+		except Exception as e:print(e)
 input_default=input_with_default=input
 
 def _useless_win_input(msg='',default='',type=py.str):
@@ -4994,7 +4995,9 @@ pid=0, name='System Idle Process', cmdline=[]
 
 				
 		# if name:
-		iname=i.name()
+		try: # NoSuchProcess: psutil.NoSuchProcess process no longer exists (pid=3420)
+			iname=i.name()
+		except Exception as e:continue 	
 		if py.istr(name):
 			if match_name(name,iname):append(i)
 		elif py.islist(name) or py.istuple(name):
@@ -6483,15 +6486,24 @@ def	dict_rename_multi_key(d,old_new_key_map=None,change_dict=False,**ka):
 		d[new] = d.pop(old)
 	return d	
 
-def	dict_rename_key(d,new,old={}):
-	if not old:
+def	dict_rename_key(d,old=GET_NO_VALUE,new=GET_NO_VALUE):
+	''' #TODO old can be {old:new...} dict
+
+	
+	'''
+	if py.isdict(old):raise py.NotImplementedError()
+	if not py.isdict(old) and new==GET_NO_VALUE:raise py.ArgumentError(old,new)
+	
+	
+	if old==GET_NO_VALUE:
 		for i in d:
 			old=i
 			break
-	if isinstance(d, OrderedDict):
-		d.rename(old,new)
-	else:
-		d[new] = d.pop(old)
+			
+	# if isinstance(d, OrderedDict):
+		# d.rename(old,new) # 'collections.OrderedDict' object has no attribute 'rename'
+	# else:
+	d[new] = d.pop(old)
 	return d
 		# del d[old]#这个可以删除item,py27
 renameDictKey=rename_dict_key=dict_rename_key
@@ -7846,7 +7858,9 @@ set_time_out=settimeout=setTimeout
 	
 	
 def set_timed_task(func,every='day',time='05:09',unit=1,**ka):
-	'''U.set_timed_task(baidu_start,'2hour') 
+	''' pip install schedule
+	
+	U.set_timed_task(baidu_start,'2hour') 
 #TODO	
 	min=5
 	ms=44

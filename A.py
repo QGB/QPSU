@@ -79,7 +79,7 @@ t at 0x0000026A719AD108>>
 a2s=async_to_sync
 # async def t(a):
 	
-async def multi_get(urls,timeout=10,connect_limit=100,fetch_print=True,return_time=False,**ka):
+async def multi_get(urls,timeout=10,connect_limit=100,fetch_print=True,return_time=False,check='No Sec-WebSocket-Key header',**ka):
 	import aiohttp
 	if py.isnum(timeout):	
 		timeout = aiohttp.ClientTimeout(total=timeout)	
@@ -92,12 +92,13 @@ async def multi_get(urls,timeout=10,connect_limit=100,fetch_print=True,return_ti
 		try:
 			async with session.get(url,ssl=False,**ka) as response:
 				text=await response.text()
-				if text=='No Sec-WebSocket-Key header':
-					gr[url]=text
-				else:
-					if fetch_print:print(n,url,U.ftime()-t,repr(text)[:99],sep='\t')
-					return
-					
+				if check and py.istr(check):
+					if py.istr(text) and check in text:
+						gr[url]=text
+					else:
+						if fetch_print:print(n,url,U.ftime()-t,repr(text)[:99],sep='\t')
+						return
+				else:gr[url]=text	
 		except Exception as e:
 			# gr[url]=e
 			if fetch_print:print(n,url,U.ftime()-t,e,sep='\t')

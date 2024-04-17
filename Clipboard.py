@@ -56,6 +56,9 @@ def set(aString,p=0,r=0):
 		w.EmptyClipboard()
 		# w.SetClipboardData(win32con.CF_TEXT, aString)
 		w.SetClipboardText(aString)
+	except Exception as e:
+		print(e)
+		if not p:print(repr(aString))
 	finally:
 		w.CloseClipboard()
 	if r:return U.StrRepr(aString)	

@@ -258,6 +258,20 @@ w.window_text() # title
 get_sub_windows=pywinauto_windows
 
 # pywinauto_window_text
+def close_window_by_process_name(name,retry=99,debug=False):
+	from qgb import Win
+	htp=0
+	for i in range(retry):
+		htp=Win.getWindowByProcessName(name)
+		if debug:print(name,i,htp)
+		if htp:
+			# [(h,t,pid),*aaa]=Win.getWindowByProcessName('Everything.exe')
+			# Win.close_window(h)
+			# break
+			[(h,t,pid)]=htp
+			return Win.close_window(h)
+closeWindowByProcessName=close_window_by_process_name
+
 def close_window(handle):
 	import win32con    
 	return win32gui.PostMessage(handle,win32con.WM_CLOSE,0,0)
