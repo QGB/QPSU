@@ -71,6 +71,14 @@ try:
 	import win32gui
 except Exception as ei:pass
 #############################################
+def get_lnk_target(file):
+	import win32com.client 
+
+	shell = win32com.client.Dispatch("WScript.Shell")
+	shortcut = shell.CreateShortCut(file)
+	return shortcut.Targetpath
+read_lnk=get_lnk_target	
+
 gd_SetMasterVolumeLevel={
 -00.0:100,
 -01.0:94,

@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html>
+<body style="overflow-x: hidden;">
+<script>
+async function post(url,data){
+    if(typeof a!='string')data=JSON.stringify(data)
+
+    return new Promise(function (resolve, reject) {
+        var xhr = new XMLHttpRequest();
+        xhr.open('post', url, true);
+        xhr.onload = function () {
+            resolve(xhr.response);
+        };
+        xhr.send(data)
+    });
+}
+
+async function main() {
+    var y =await post("/r=T.json_dump(y)",)
+    y = JSON.parse(y);
+	
+// 遍历对象
+for (var key in y) {
+    // 创建一个新的图片元素
+    var img = document.createElement('img');
+
+    // 设置图片的源
+    img.src = y[key];
+
+    // 调整图片的最大宽度和最大高度
+    img.style.maxWidth = "100%";
+    img.style.maxHeight = "94vh";  // vh 是视口高度（viewport height）的单位
+	
+	// img.style.width = "100vw";
+    // img.style.height = "100vh";
+
+
+    // 创建一个新的 span 元素
+    var span = document.createElement('span');
+
+    // 将图片的 URL 添加到 span 中
+    span.innerHTML = y[key] + " ";
+
+    // 设置 span 的样式以防止内部文本换行
+    span.style.whiteSpace = "nowrap";
+
+    // 将 span 添加到文档中
+    document.body.appendChild(span);
+
+    // 创建一个新的换行元素
+    var br = document.createElement('br');
+
+    // 将换行元素添加到文档中
+    document.body.appendChild(br);
+
+    // 将图片添加到文档中
+    document.body.appendChild(img);
+
+    // 创建一个新的换行元素
+    var br2 = document.createElement('br');
+
+    // 将换行元素添加到文档中
+    document.body.appendChild(br2);
+}
+}
+main();
+</script>
+</body>
+</html>

@@ -153,6 +153,11 @@ Class=py.Class
 instance=py.instance
 Class=classtype=classType=py.classType
 iterable=py.iterable
+def iterable_but_str(a):
+	if py.istr(a):return False
+	return py.iterable(a)
+iterable_not_str=iterable_but_str
+
 #######################################
 gd_sync_level={
 'process':1,
@@ -1605,7 +1610,8 @@ def in_all(v,*ts):
 		except:pass
 	return [v]
 inAll=in_all
-##########################################
+##########################################  new edit
+
 def which(cmd):
 	'''  return str  '''
 	import shutil
@@ -3633,9 +3639,13 @@ UnicodeEncodeError: 'locale' codec can't encode character '\u5e74' in position 2
 	
 	time_tuple = time.localtime(timestamp)
 
-	'%Y年%m月%d日 %H时%M分%S秒'
-	return time.strftime(zh_format, time_tuple)
-		
+	# '%Y年%m月%d日 %H时%M分%S秒'
+	if isWin():
+		z = '{}日 {}时{}分{}秒'.format(time_tuple.tm_mday, time_tuple.tm_hour, time_tuple.tm_min, time_tuple.tm_sec)
+	else:
+		z= time.strftime(zh_format, time_tuple)
+	return z
+	
 def stime_(time=None,ms=True):
 	r=get_time_as_str(time=time,ms=ms)
 	return T.regexReplace(r,'[^0-9_]','_')
@@ -4065,7 +4075,7 @@ Out[1566]: [0.0, 2.0, 4.0, 6.0, 8.0, 10.0, 12.0, 14.0, 16.0]
 	return py.list(r)
 mul=mutiply_iterable=mutiply_list=mutiply_tuple=multiply_by_multiples
 
-def tuple_operator(a,operator,b=None,operator_ka={},skip_AttributeError=False):
+def tuple_operator(a,operator,b=None,operator_ka={},skip_AttributeError=False,return_origin=False):
 	''' 对两个长度相等的（tuple，list，...） 操作
 如果只对一个tuple操作，可以这样用：  t=U.tuple_operator(t,t,U.StrRepr)	
 
@@ -4079,6 +4089,8 @@ NotImplemented
 	r=[]
 	for n,v in enumerate(a):
 		try:
+			if return_origin:r.append(v)
+			
 			if py.istr(operator):
 				if b:
 					if py.isnum(b):
@@ -4092,7 +4104,6 @@ NotImplemented
 				r.append( operator(v,**operator_ka) )
 			elif not operator and py.callable(v) and b:
 				r.append( v(b[n]) )
-				# if 
 				
 			else:
 				raise NotImplementedError('operator type')
@@ -4103,6 +4114,7 @@ NotImplemented
 	if py.istuple(a):
 		return py.tuple(r)
 	return r
+multi_convert=tuple_operator	
 	
 def tuple_add(a,b):
 	''' #TODO
@@ -5317,6 +5329,7 @@ def vscode(a='',lineno=0,auto_file_path=True,get_cmd=False,
 			else:
 				# executor=F.expanduser(r'~\AppData\Local\Programs\Microsoft VS Code\_\Code.exe') 
 				executor=r'C:\VSCode-win32-x64-1.70.0-insider\Code - Insiders.exe'
+				executor='C:\\VSCode-win32-x64-1.75.0-insider\\Code - Insiders.exe'
 
 	if isLinux(): # only work when using remoteSSH
 		executor = get('vscode_linux',level=gd_sync_level['system'])
@@ -6391,7 +6404,7 @@ setErr( gError 还是要保留，像这种 出错 是正常流程的一部分，
 getDictNestedValue=getNestedValue=get_nested_value=get_nested_one_value
 	
 	
-def dict_get_nested_multi_keys_return_dict(d,*keys,return_all_exclude=[],**defaults):
+def dict_get_nested_multi_keys_return_dict(d,*keys,return_all_exclude=[],exclude_not_value=False,**defaults):
 	'''( k,[k0,v[k0_0,...]],)
 	# if py.istr(d) or py.isbyte()
 	'''
@@ -6420,8 +6433,10 @@ def dict_get_nested_multi_keys_return_dict(d,*keys,return_all_exclude=[],**defau
 			dr[k]=d[k]
 		except Exception as e:
 			dr[k]=py.No(e,k)
-				
 		# dr[k]=d.get(k,defaults.get(k,default)) # .get also raise TypeError: unhashable type:
+	if exclude_not_value:
+		for k in py.list(dr):
+			if not dr[k]:del dr[k]
 	return dr
 get_dict_multi_values_return_dict=get_nested_values=get_multi_dict_keys=get_dict_multi_values_by_keys=dict_get_multi=dict_get_multi_keys=dict_multi_get=dict_multi_get_keys=dict_get_multi_return_dict=dict_get_multi_keys_return_dict=dict_get_nested_multi_keys_return_dict
 

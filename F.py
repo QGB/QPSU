@@ -118,12 +118,21 @@ def get_file_owner_username(filename):
 	
 file_owner=file_username=get_file_user=get_file_username=get_file_owner_username
 	
-def zip(filename,fs,ext='.zip'):
+def zip(*fs,zip_filename='',ext='.zip'):
 	import zipfile,stat,os
-	if not filename.lower().endswith(ext):
-		filename+=ext
+	
+	if not fs:return fs
+	
+	
+	if not zip_filename:
+		f=fs[0]
+		zip_filename=f+ext
+		
+	
+	if not zip_filename.lower().endswith(ext):
+		zip_filename+=ext
 
-	with zipfile.ZipFile(filename, 'w') as zipMe:
+	with zipfile.ZipFile(zip_filename, 'w') as zipMe:
 		for file in fs:
 			if os.path.islink(file):
 				zipInfo  = zipfile.ZipInfo(file)

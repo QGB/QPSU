@@ -145,8 +145,9 @@ if hasattr(a,'__iter__'):
 isgen=isGenerator=is_generator
 
 def iterable(a):
+	if is_generator(a):return True
 	try:
-		for i in a:pass
+		for i in a:break
 		return True
 	except:return False
 	

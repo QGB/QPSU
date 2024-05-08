@@ -791,7 +791,7 @@ def list_2d_href_file_column(response,a,file_column=None,**ka):
 		
 
 list_2d_CSS_MARK='/*css*/'
-def list_2d(response,a,html_callback=None,index=False,sort_kw=U.SORT_KW_SKIP,column_type_dict=None,sort_ka=py.dict(ascending=True,),bottom_head=False,debug=False,to_html_ka=None,**ka):
+def list_2d(response,a,html_callback=None,index=False,sort_kw=U.SORT_KW_SKIP,column_type_dict=None,sort_ka=py.dict(ascending=True,),bottom_head=False,debug=False,to_html_ka=None,exclude_cols=None,**ka):
 	''' ,sort_ka=py.dict(ascending=False) #倒序 从大到小
 	'''
 	index=U.get_duplicated_kargs(ka,'index','n','enu','add_index','enumerate',default=index)
@@ -799,6 +799,7 @@ def list_2d(response,a,html_callback=None,index=False,sort_kw=U.SORT_KW_SKIP,col
 	column_type_dict=U.get_duplicated_kargs(ka,'column_type_dict','type','t',default=column_type_dict if column_type_dict else {},)
 	sort_ka=U.get_duplicated_kargs(ka,'ska','sort_ka','sa',default=sort_ka)
 	bottom_head=U.get_duplicated_kargs(ka,'bottom_head','title_bottom','bottom','bhead','tb','bh','hb',default=bottom_head)
+	exclude_cols=U.get_duplicated_kargs(ka,'exclude_cols','exclude','exclude_col','del_cols','del_col',default=exclude_cols)
 	if not py.isdict(sort_ka):
 		if sort_ka:
 			sort_ka=py.dict(ascending=True,)
@@ -819,6 +820,9 @@ def list_2d(response,a,html_callback=None,index=False,sort_kw=U.SORT_KW_SKIP,col
 	
 	import pandas
 	df = pandas.DataFrame(data=a)
+	if exclude_cols:
+		if not U.iterable_but_str(exclude_cols):exclude_cols=[exclude_cols]
+		df = df.drop(columns=exclude_cols)
 	
 	if py.isdict(sort_kw) and not column_type_dict:
 		for k,v in sort_kw.items():
@@ -880,6 +884,13 @@ def list_2d(response,a,html_callback=None,index=False,sort_kw=U.SORT_KW_SKIP,col
 		border-spacing: 0px;
 	}
 	/*css*/
+	
+  table>thead>tr {
+    position: sticky;
+    top: 0;
+    background: white;
+    z-index: 1;
+	}
 </style> 
 </head>
 '''	
