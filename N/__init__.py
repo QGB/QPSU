@@ -1721,7 +1721,7 @@ def get_flask_request_post_data(name='y',time=False,save_dill=True,ipy_var=True,
 	b=q.data
 	y=T.js_loads(b)#demjson
 	
-	if ipy_var:
+	if ipy_var and U.get_ipy():
 		name=T.varname(name)
 		U.get_ipy().user_ns[name]=y
 	if return_value:

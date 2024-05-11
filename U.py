@@ -6449,7 +6449,7 @@ def dict_multi_pop(adict,*keys,default=py.No('key not in dict')):
 		else:	
 			dr[k]=adict.pop(k,default)
 	return dr	
-dict_del_multi_key=dict_pop=pop_list_multi_index=pop_dict_multi_key=dict_pop_multi_key=dict_multi_pop
+dict_del_multi_key=dict_pop=pop_list_multi_index=pop_dict_multi_key=dict_pop_multi_key=dict_pop_multi=dict_multi_pop
 	
 GET_DICT_MULTI_VALUES_RETURN_LIST_DEFAULT_DEFAULT=get_dict_multi_values_return_list_DEFAULT_DEFAULT=get_or_set('get_dict_multi_values_return_list_DEFAULT_DEFAULT',lazy_default=lambda:py.No('can not get key'),)
 
