@@ -77,23 +77,23 @@ async def try_evaluate(page,code):
 try_eval=evaluate=try_evaluate
 
 u_key_defs='pyppeteer.us_keyboard_layout.keyDefinitions'
-async def press_keys(page,*s,xy=(None,None)):
-	from qgb import Win
-	if len(s)==1 and py.istr(s[0]):
-		key_defs=U.get(u_key_defs)
-		if not key_defs:
-			key_defs=[]
-			for k,v in pyppeteer.us_keyboard_layout.keyDefinitions.items():
-				if py.len(k)>1:
-					key_defs.append(k)
-			U.set(u_key_defs,key_defs)
-		## cache end
-		if s not in key_defs: # if in, s=tuple(skey)
-			s=s[0]
-	xy=Win.click(*xy)
+async def press_keys(page,*s,selector='',backspace=12):
+	'''  'Backspace'  '''
+	if selector:
+		await page.click(selector)
+		if backspace and py.isint(backspace):
+			for i in range(backspace):
+				await page.keyboard.press('Backspace')
+	
+	
 	for k in s:
-		await page.keyboard.press(k)
-	return s,xy
+		try:
+			page.keyboard._keyDescriptionForString(k)
+			await page.keyboard.press(k)
+		except Exception as e:
+			for i in k:
+				await page.keyboard.press(i)
+	return s
 	
 async def backup_cookie(user='',page=py.No('auto last -1')):
 	if not user:

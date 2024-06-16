@@ -49,6 +49,7 @@ return list of [u,old_f,new_size]
 	
 	if not qpsu_dir:
 		qpsu_dir=U.get_qpsu_dir()
+	if not qpsu_dir.endswith('/'):qpsu_dir+='/'
 	# fs=[]
 	if not duf:duf={}
 	for f in F.ls(qpsu_dir,r=1):
@@ -56,7 +57,7 @@ return list of [u,old_f,new_size]
 			if u in f:
 				duf[u]=f
 				break
-	if U.is_win() or '/mnt/' in qpsu_dir:
+	if U.is_win() or '/mnt/' in qpsu_dir or '//192.168.1.' in qpsu_dir:
 		print(qpsu_base_url)
 		U.input('Be careful!! auto skip update windows qpsu_dir. '+qpsu_dir)
 		return duf

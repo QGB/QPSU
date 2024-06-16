@@ -83,7 +83,7 @@ Permission.WRITE_EXTERNAL_STORAGE, Permission.READ_EXTERNAL_STORAGE,
 			# break
 		# buffer.append(byte)	
 		
-	return adapter,device,recv_stream,send_stream,reader,reader.readLine()
+	return adapter,device,recv_stream,send_stream,reader #,reader.readLine()
 	
 	
 	

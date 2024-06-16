@@ -2,6 +2,12 @@
 <html>
 <body style="overflow-x: hidden;">
 <script>
+var base=""
+var url=""
+// {html_ka}
+if(!url){
+	url=base+"r=T.json_dump(y)"
+}
 async function post(url,data){
     if(typeof a!='string')data=JSON.stringify(data)
 
@@ -16,7 +22,7 @@ async function post(url,data){
 }
 
 async function main() {
-    var y =await post("/r=T.json_dump(y)",)
+    var y =await post(url,)
     y = JSON.parse(y);
 	
 // 遍历对象

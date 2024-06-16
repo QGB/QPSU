@@ -95,6 +95,9 @@ KeyError: '.PNG'  [format not contains . ]
 		
 		return file
 	elif not im:
+		t=get()
+		if 'clipboard' in t and F.exist(t):
+			return t
 		return py.No('can not get clipboard image')
 	return im
 get_img=get_image

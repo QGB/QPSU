@@ -59,6 +59,13 @@ class IntSize(py.int):
 		# return '<{}={}>'.format(super().__repr__(),F.ssize(self) )
 	def __repr__(self):return self.__str__()
 ################################
+def dill_load_file_return_json_str(file):
+	x=dill_load_file(file=file)
+	if not x:return x
+	T=py.importT()
+	return T.json_dumps(x)
+d2js=dill_to_json_str=dill_load_file_return_json_str
+
 def pickle_monkeypatch():
 	import pickle
 	sk='pickle._Pickler.save'
@@ -1371,7 +1378,7 @@ def get_filemode(f):
 	return U.IntOct(_os.stat(f).st_mode )
 mod=mode=get_mod=get_mode=get_filemode	
 
-def ll(ap='.',readable=True,type='',t='',r=False,d=False,dir=False,f=False,file=False,
+def ll(ap='.',readable=True,type='',t='',r=False,d=False,dir=False,f=False,file=False,FloatTime=None,
 	return_dict=True,return_list=False,no_raise=True,**ka):
 	'''return {file : [size,atime,mtime,ctime,st_mode]}	
 	readable is True: Size,Stime,..
@@ -1379,6 +1386,10 @@ def ll(ap='.',readable=True,type='',t='',r=False,d=False,dir=False,f=False,file=
 	U=py.importU()
 	return_list=U.get_duplicated_kargs(ka,'return_list','list','rl','l',default=return_list)
 	if return_list:return_dict=False
+	
+	# IntSize,FloatTime,IntOct=U.IntSize,U.FloatTime,U.IntOct
+	if not FloatTime:FloatTime=U.FloatTime
+	
 	
 	dr={}
 	
@@ -1390,13 +1401,13 @@ def ll(ap='.',readable=True,type='',t='',r=False,d=False,dir=False,f=False,file=
 			continue
 		if readable:
 			
-			IntSize,FloatTime,IntOct=U.IntSize,U.FloatTime,U.IntOct
+			
 			try:
-				dr[i]=[ IntSize(size(i)),
+				dr[i]=[ U.IntSize(size(i)),
 						FloatTime(s.st_atime),
 						FloatTime(s.st_mtime),
 						FloatTime(s.st_ctime),
-						IntOct (s.st_mode ),
+						U.IntOct (s.st_mode ),
 					]
 			except Exception as e:
 				if no_raise:

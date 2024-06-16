@@ -42,7 +42,7 @@ else:
 	from SimpleHTTPServer import SimpleHTTPRequestHandler
 	from BaseHTTPServer import HTTPServer as _HTTPServer
 
-def post_with_new_thread(url,data,**ka):
+def post_with_new_thread(url,data=b'',**ka):
 	from qgb import U,T,N,F
 	
 	if not py.isbyte(data):
@@ -1091,7 +1091,7 @@ def is_remote_rpc_base(base):
 		return py.No(base,'format error!')
 is_rpc_base=is_rpc_base_remote=is_remote_rpc_base
 		
-def set_remote_rpc_base(base=DEFAULT_RPC_BASE_REMOTE,change=True,ka=None):
+def set_remote_rpc_base(base=DEFAULT_RPC_BASE_REMOTE,change=True,ka=None,default_port=1122,**other_ka):
 	U,T,N,F=py.importUTNF()	
 	if py.istr(base):
 		if base.lower() in ['set','reset','modify','change']:
@@ -1113,11 +1113,18 @@ def set_remote_rpc_base(base=DEFAULT_RPC_BASE_REMOTE,change=True,ka=None):
 		while not is_remote_rpc_base(base):
 			base=default=U.input(RPC_BASE_REMOTE+' :',default=default)
 			base=T.matchRegexOne(base,T.RE_URL)
-		# base=U.get_or_set(RPC_BASE_REMOTE,'http://127.0.0.1:23571/')
+		# base=U.get_or_set(RPC_BASE_REMOTE,f'http://127.0.0.1:{default_port}/')
 	if not py.istr(base):
+		if py.isfloat(base):
+			a,b=str(base).split('.')
+			a=py.int(a)
+			b=py.int(b)
+			if b>255:
+				base=a
+				default_port=b
 		if py.isfloat(base) or py.isint(base):
 			default=U.get(RPC_BASE_REMOTE)
-			if not default:default='http://127.0.0.1:23571/'
+			if not default:default=f'http://127.0.0.1:{default_port}/'
 			netloc=T.netloc(default) # '192.168.43.162:2357' include port
 			i=default.index(netloc)  #TODO if netloc=='http'  
 			n=netloc.find(':')
@@ -1281,6 +1288,7 @@ rpc_copy=rpc_copy_file=rpc_copy_files
 	
 AUTO_GET_BASE=py.No('auto history e.g. [http://]127.0.0.1:23571[/../] ',no_raise=1,)
 RPC_GET_TEMPLATE='{base}response.set_data(F.serialize({varname}))'
+RPC_SET_TEMPLATE='{0}{v}=F.dill_loads(request.get_data());{ext_cmd}'
 def rpc_get_variable(varname,
 base=AUTO_GET_BASE,
 template=RPC_GET_TEMPLATE,
@@ -1377,14 +1385,17 @@ def rpc_set_variable_local(**ka):
 		
 local_rpc_set=set_local_rpc=rpc_set_local=rpc_set_variable_local	
 		
-def rpc_set_variable(*obj,base=AUTO_GET_BASE,timeout=9,varname='v',ext_cmd='r=U.id({1})',print_req=False,pr=False,proxies=None,**ka):
+def rpc_set_variable(*obj,base=AUTO_GET_BASE,timeout=9,varname='v',ext_cmd='r=U.id({1})',print_req=False,proxies=None,serialize=None,template=RPC_SET_TEMPLATE,no_raise=False,**ka):
 	''' ext_cmd=  {0}  default is 'v'  , {1}  is ka k
 	'''
 	U,T,N,F=py.importUTNF()
-	ext_cmd=U.get_duplicated_kargs(ka,'ext_cmd','cmd','extCmd','other_cmd',default=ext_cmd)
+	ext_cmd=U.get_duplicated_kargs(ka,'ext_cmd','cmd','extCmd','other_cmd','c',default=ext_cmd)
 	varname=U.get_duplicated_kargs(ka,'v','V','name','var_name','var',default=varname)
-	print_req=U.get_duplicated_kargs(ka,'print_req','pr',default=print_req)
+	print_req=U.get_duplicated_kargs(ka,'print_req','pr','p',default=print_req)
 	proxies=N.HTTP.auto_proxy_for_requests(proxies,ka)
+	
+	if not serialize:
+		serialize=F.dill_dump
 	
 	if ext_cmd:
 		if '%s'     in ext_cmd:ext_cmd=ext_cmd%varname
@@ -1410,7 +1421,7 @@ def rpc_set_variable(*obj,base=AUTO_GET_BASE,timeout=9,varname='v',ext_cmd='r=U.
 		base=get_remote_rpc_base(change=False)
 	else:
 		base=set_remote_rpc_base(base)
-	url=('{0}{v}=F.dill_loads(request.get_data());'+ext_cmd).format(base,varname,varname=varname,v=varname)
+	url=template.format(base,varname,varname=varname,v=varname,ext_cmd=ext_cmd)
 	# import requests,dill
 	# dill_loads=dill.loads
 	# post=requests.post
@@ -1420,7 +1431,11 @@ def rpc_set_variable(*obj,base=AUTO_GET_BASE,timeout=9,varname='v',ext_cmd='r=U.
 		print(url)
 		print_req=''
 	
-	b=N.HTTP.post(url,data=F.dill_dump(obj),verify=False,timeout=timeout,proxies=proxies,print_req=print_req) # data=list:TypeError: cannot unpack non-iterable int object
+	if no_raise:
+		try:b=N.HTTP.post(url,data=serialize(obj),verify=False,timeout=timeout,proxies=proxies,print_req=print_req)
+		except Exception as e:return py.No(e)
+	else:
+		b=N.HTTP.post(url,data=serialize(obj),verify=False,timeout=timeout,proxies=proxies,print_req=print_req) # data=list:TypeError: cannot unpack non-iterable int object
 	
 	# if print_req:
 		# print(U.v.N.HTTP.post(url,verify=False,timeout=timeout,proxies=proxies,print_req=print_req,data=U.v.F.dill_dump(obj)) )
@@ -1436,18 +1451,19 @@ def rpc_set_variable(*obj,base=AUTO_GET_BASE,timeout=9,varname='v',ext_cmd='r=U.
 	return url,b
 set_rpc=set_rpc_var=rpc_set=rpc_set_var=rpcSetVariable=rpc_set_variable
 
-def rpc_get_file(filename,name='v',return_b=False,**ka):
+def rpc_get_file(filename,return_b=False,**ka):
 	U,T,N,F=py.importUTNF()
 	base=set_remote_rpc_base(**ka)
 	u=base+'response.set_data(F.readb(N.geta()))%23-'+T.url_encode(filename)
 	
 	try:
-		b=curl_return_bytes(u)
+		b=curl_return_bytes(u,**ka)
 	except:
-		b=N.HTTP.get_bytes(u)
+		b=N.HTTP.get_bytes(u,**ka)
 	if py.isno(b):return b	
 	
-	f=F.write(filename,b)
+	
+	f=F.write(F.get_filename(filename),b)
 	if return_b:
 		return f,u,b
 	return f	
@@ -1729,7 +1745,7 @@ def get_flask_request_post_data(name='y',time=False,save_dill=True,ipy_var=True,
 	f=f'{name}-{U.len(y)}'
 	if time:f+=f'={U.stime()}'
 	if save_dill:
-		return F.dill_dump(obj=y,file=f'C:/test/{f}.dill')
+		return F.dill_dump(obj=y,file=f'{f}.dill')
 	else:
 		return U.StrRepr('# '+f)
 rec=recv=recive=receive=get_flask_request_post_data
@@ -1939,23 +1955,36 @@ CSS_FONT=r'''*{
  font-size: 50%;
  /*font-family: Arial;*/
 }'''
-def flask_html_response(response,html='',file='',remove_tag=(
+g_remove_tag=(
 		['<script','</script>'],
 ['<SCRIPT','</SCRIPT>'],'ondragstart=','oncopy=','oncut=','oncontextmenu=','"return false;"',
-	),encoding='utf-8',splitor='<hr>',content_type='text/html;charset=utf-8',
-	css='',eol='',
+	)
+def flask_html_response(response,html='',file='',remove_tag=g_remove_tag,encoding='utf-8',splitor='<hr>',content_type='text/html;charset=utf-8',
+	css='',eol='',html_ka_mark='// {html_ka}',
 	**ka):
 	'''
 Resource interpreted as Stylesheet but transferred with MIME type text/html:
 不正确设置 type可能导致页面无法正常显示
 '''	
 	U,T,N,F=py.importUTNF()
-	if U.get_duplicated_kargs(ka,'remove_script','del_script','no_script'):
-		remove_tag=(
-['<script','</script>'], ['<SCRIPT','</SCRIPT>'],
-		)
+	remove_tag=U.get_duplicated_kargs(ka,'remove_tag','remove_script','del_script','no_script',default=remove_tag)
+	if remove_tag and not U.iterable_but_str(remove_tag):remove_tag=g_remove_tag
+		# remove_tag=(
+# ['<script','</script>'], ['<SCRIPT','</SCRIPT>'],
+		# )
+	if html_ka_mark and ka and remove_tag==g_remove_tag:remove_tag=[]	
+
 		
 	if not html and file:
+		if not F.exists(file):
+			_file=U.get_qpsu_file_path(file)
+			if F.exists(_file):file=_file
+			else:
+				_file=U.gst+file
+				if F.exists(_file):file=_file
+		if not F.exists(file):raise py.ArgumentError('file not exists',file)
+			
+				
 		import mimetypes
 		content_type = (
 			 mimetypes.guess_type(file)[0] or content_type #"application/octet-stream"
@@ -1999,7 +2028,16 @@ Resource interpreted as Stylesheet but transferred with MIME type text/html:
 {}		
 </style>		'''.format(css)
 		html=css+html #TODO parse html and insert to HEAD
+	
+	if html_ka_mark:
+		hs=''
+		for k,v in ka.items():
+			hs+=f'var {k}={T.json_dumps(v)}\n'
+		html=T.replace_auto_type(html,html_ka_mark,hs)
+		# T.replace
+	
 		
+	
 		
 	if not response:
 		return html

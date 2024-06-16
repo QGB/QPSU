@@ -32,9 +32,11 @@ bytes256_list=byte256_list=[py.byte(i) for i in range(256)  ]
 bytes256=byte256=b''.join( bytes256_list )
 CR='\r'
 LF=EOL=eol='\n'
+BLF=BEOL=beol=b'\n'
 EOLS=EOL+'='*44+EOL
 
 CRLF='\r\n'
+BCRLF=b'\r\n'
 
 TAB=Tab=tab='\t'
 gspace=space=py.chr(0x20)
@@ -112,6 +114,36 @@ try:
 	from pprint import pprint,pformat
 except:pass
 ####################################################
+def endswith_any(s,*a):
+	return [i for i in a if s.endswith(i)]
+	
+	if not a:return a
+	dr={}
+	for i in a:
+		# try:
+		if s.endswith(i):dr[i]=True
+	return dr
+endswith=endswith_once=endswith_any	
+
+def startswith_any(s, *a):
+	return [i for i in a if s.startswith(i)]
+	if not a:return a
+	dr = {}
+	for i in a:
+		if s.startswith(i):dr[i]=True
+	return dr
+startswith = startswith_any
+	
+def replace_auto_type(a,old,new):
+	''' #TODO '''
+	if py.istr(a):
+		assert py.istr(old) and	py.istr(new)
+		
+	if py.isbyte(a):
+		if py.istr(old):old=old.encode()
+		if py.istr(new):new=new.encode()
+	return a.replace(old,new)
+
 def repr_without_space(a):
 	return py.repr(a).replace(', ',',')
 repr=repr_without_space

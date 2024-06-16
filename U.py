@@ -2004,7 +2004,7 @@ def ipython_getoutput(a,return_list=False):
 	sl=U.isipy().getoutput(a)
 	if return_list:return sl
 	return T.eol.join(sl)
-getoutput=ipy_getoutput=ipython_getoutput	
+get_output=getoutput=ipy_getoutput=ipython_getoutput	
 
 
 def start_ipython():
@@ -4148,16 +4148,30 @@ def ms_to_utc_datetime(ms):
 	return datetime.utcfromtimestamp(ms / 1000.0)
 ms2dt=ms_to_datetime=ms_to_utc_datetime
 
-def stime_to_int_ms(s):
+def stime_to_int_ms(s,timezone=0):
 	'''
 #TODO U.stime_to_time  # ValueError: unconverted data remains: __.888
 	'''
+	# from datetime 
+	import datetime
 	if py.len(s)==26:
 #U.str_to_datetime('2023-12-20__22.30.20')==datetime.datetime(2023, 12, 20, 22, 3, 0, 20)  结果错误
 		dt=parse_time(s[:26-6]) # 正确结果datetime.datetime(2023, 12, 20, 22, 30, 20)
-		return py.int(dt.timestamp()*1000)+py.int(s[-3:])
-	raise py.NotImplementedError(s)
-stime_to_ms_int=stime_to_int_ms
+	elif len(s) == 4 and s.isdigit():  # 假设第二种情况是字符串只包含四位数年份
+		dt = datetime.datetime(year=int(s), month=1, day=1)  # 将年份转换为datetime对象，月份和日期默认为1
+	elif '-' in s:
+		try:
+			from dateutil import parser
+			dt=parser.parse(s) #return type datetime.datetime
+		except Exception as e:
+			raise e
+	else:raise py.NotImplementedError(s)
+	
+	dt=dt.replace(tzinfo=datetime.timezone.utc)
+	
+	
+	return py.int(dt.timestamp()*1000)+py.int(s[-3:])
+stime_to_ms=stime_to_ms_int=stime_to_int_ms
 
 def time_range_list(*a,**ka):
 	return py.list(time_range(*a,**ka))

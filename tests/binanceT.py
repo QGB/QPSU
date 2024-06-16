@@ -5,12 +5,208 @@ if gsqp not in sys.path:sys.path.append(gsqp)#py3 works
 from qgb import py
 U,T,N,F=py.importUTNF()
 
+import json,pandas,numpy
+class MyEncoder(json.JSONEncoder):
+	def default(self, obj):
+		if isinstance(obj, pandas.Timestamp):
+			return obj.value
+			# 将 Timestamp 对象转化为毫秒
+			# print(obj.value)
+			# return int(obj.value // 10**6)
+		return super().default(obj)
+json_dumps_ka=dict(cls=MyEncoder,) #indent=0
+
+gdq={'BTC': [290, 172],
+ 'ETH': [65, 161],
+ 'USDT': [384, 118],
+ 'BNB': [61, 235],
+ 'TUSD': [27, 40],
+ 'USDC': [66, 25],
+ 'XRP': [1, 1],
+ 'TRX': [1, 1],
+ 'TRY': [199, 7],
+ 'EUR': [32, 23],
+ 'ZAR': [3, 2],
+ 'IDRT': [1, 3],
+ 'UAH': [4, 3],
+ 'DAI': [4, 1],
+ 'BRL': [20, 21],
+ 'DOGE': [1, 0],
+ 'PLN': [3, 1],
+ 'RON': [3, 1],
+ 'ARS': [2, 0],
+ 'FDUSD': [92, 0],
+ 'AEUR': [3, 0],
+ 'JPY': [7, 0],
+ 'MXN': [1, 0],
+ 'CZK': [1, 0]}
+
+gdims={'1s': 1000,
+ '1m':  1000*60,
+ '3m':  1000*60*3,
+ '5m':  1000*60*5,
+ '15m': 1000*60*15,
+ '30m': 1000*60*30,
+ '1h':  1000*60*60,
+ '2h':  1000*60*60*2,
+ '4h':  1000*60*60*4,
+ '6h':  1000*60*60*6,
+ '8h':  1000*60*60*8,
+ '12h': 1000*60*60*12,
+ '1d':  1000*60*60*24,
+ '3d':  1000*60*60*24*3, # *3
+ '1w':  1000*60*60*24*7, # *7
+ '1M':  1000*60*60*24*31, #
+ }
+rpcka=U.get('rpcka')
+def get_rpcka():
+	global rpcka
+	if not rpcka:rpcka=U.get('rpcka')
+	if not rpcka:raise py.EnvironmentError('no rpcka ')
+	return rpcka
+def get_srpcka(ka):
+	srpcka=''
+	for k,a in ka.items():
+		if k.startswith('convert'):
+			srpcka+=f'{k}={a!r},'
+	if 'convert_func' not in srpcka:srpcka+='convert_func=float,'
+	return srpcka
+
+def get_kline_without_pandas(symbol,interval='1s',start=0,end=0,day='',second=0,second_range=(-500,500),return_json=True,**ka):
+	second=U.get_duplicated_kargs(ka,'second','sec','ms',default=second)
+	
+	symbol=symbol.upper()
+	seq=T.endswith(symbol,*gdq)
+	assert len(seq)<=1
+	b=''
+	if symbol in gdq or not seq:
+		b=symbol
+		symbol=b+'USDT'
+	elif seq:
+		b=symbol[:-len(seq[0])]
+		
+	if second and not (start and end):
+		if py.istr(second):
+			second=U.stime_to_ms(second)
+		elif U.slen(second)==10:second*=1000
+		start=second+second_range[0]*gdims[interval]
+		end=second+second_range[1]*gdims[interval]
+	
+	data=N.rpc_get(f"B.get_kline_without_pandas({symbol!r},interval={interval!r},start={start!r},end={end!r},{get_srpcka(ka)})",**get_rpcka())
+	
+	if return_json:
+		return convert_klines_to_json(data)
+	return data
+	
+get_klines=get_kline=get_kline_without_pandas
+
+
+def agg_kline(symbol,interval='1d',start=0,end='',symbol_old='BUSD',return_json=True,**ka):
+	symbol_old=U.get_duplicated_kargs(ka,'symbol_old','old','prev','old_symbol',default=symbol_old)
+	# if len(symbol)<9:
+	symbol=symbol.upper()
+	seq=T.endswith(symbol,*gdq)
+	assert len(seq)<=1
+	b=''
+	if symbol in gdq or not seq:
+		b=symbol
+		if symbol_old=='BUSD':symbol_old=b+symbol_old
+		symbol=b+'USDT'
+	elif seq:
+		q=seq[0]
+		b=symbol[:-len(q)]
+		if symbol_old=='BUSD':symbol_old=b+symbol_old
+	
+		
+		
+		
+	rpcka=get_rpcka()
+	# rpcka.update(ka)
+	
+	
+	old=[]
+	if symbol_old:
+		# if interval in ['1d','3d','1w','1M']
+		f=f'binance/{symbol_old}={interval}.dill'
+		old=F.dill_load_file(f)
+		if not old:
+			old=N.rpc_get(f"B.get_kline_without_pandas({symbol_old!r},interval={interval!r},start={start!r},{get_srpcka(ka)})",**rpcka)
+			if old:
+				print(U.stime(),'dill_dump',F.dill_dump(obj=old,file=f))
+	if old:
+		if not start and interval in ['1d','3d',]:
+			start=old[-1][0]
+			if isinstance(start,pandas.Timestamp):start=start.value
+		
+	data=N.rpc_get(f"B.get_kline_without_pandas({symbol!r},interval={interval!r},start={start!r},end={end!r},{get_srpcka(ka)})",**rpcka)	
+	
+	if b=='FTT':
+		n2=n3=0			
+		if interval=='1M':
+			for n,row in enumerate(data):
+				if row[0]==1667260800000:n2=n#22-11-01
+				if row[0]==1693526400000:#23-09-01
+					n3=n
+					break
+			data=data[:n2]+old[17:]+data[n3+1:]		
+			old=[]
+		elif interval=='1w':
+			for n,row in enumerate(data):
+				if row[0]==1668384000000:n2=n#22-11-14					
+				if row[0]==1694995200000:#23-09-18
+					n3=n
+					break
+			data=data[:n2]+old[74:118]+data[n3:]
+		elif interval=='3d':
+			for n,row in enumerate(data):				
+				if row[0]==1695859200000:#2023-09-28 08
+					n3=n
+					break
+			# assert old[0][0]==1623974400000 # 2021-06-18 08
+			data_2021=N.rpc_get(f"B.get_kline_without_pandas({symbol!r},interval={interval!r},start=0,end=1623974400000,{get_srpcka(ka)})",**rpcka)	
+			data=data_2021+old[:277]+data[n3:]  # 3d周期 BUSD 和USDT  有偏差一天
+			
+		elif interval=='1d':
+			for n,row in enumerate(data):				
+				if row[0]==1695945600000:#2023-09-29 08
+					n3=n
+					break
+			assert old[0][0]==1623974400000 # 2021-06-18	
+			data_2021=N.rpc_get(f"B.get_kline_without_pandas({symbol!r},interval={interval!r},start=0,end=1623974400000,{get_srpcka(ka)})",**rpcka)	
+			data=data_2021+old[1:833]+data[n3:]
+			
+		else:
+			return U.enu(old),data,F.delete(f)
+	
+		old=[]
+	
+		
+	
+	if old and not data:data=old
+	
+	if return_json==None:# 测试代码  用于查看中间状态
+		if old:data=old+data
+		return data
+	
+	if old:
+		while old and data[0][0]<=old[-1][0]:
+			if data[0][0]==old[-1][0] and data[0][1]>old[-1][1]*1.01:
+				data[0][1]=old[-1][1]
+				if data[0][1]<data[0][3]:data[0][3]=py.min(old[-1][3],data[0][3]) # 防止KLineChart自动修复造成跳空
+			old=old[:-1]
+			
+		data=old+data
+		
+	
+	if return_json:
+		return convert_klines_to_json(data)
+	return data
+	
 def B_get_klines(symbol,start,end,day='',interval='1s',return_json=True):
 	''' ='UNFIUSDT'
 	
 '''	
-	rpcka=U.get('rpcka')
-	if not rpcka:return rpcka
+	rpcka=get_rpcka()
 	
 	data=N.rpc_get(f"B.get_klines(symbol={symbol!r},start='{day} {start}',end='{day} {end}',interval={interval!r})",**rpcka)
 	
@@ -19,7 +215,6 @@ def B_get_klines(symbol,start,end,day='',interval='1s',return_json=True):
 	else:
 		return data
 
-import json,pandas,numpy
 def convert_klines_to_json(klines):
 	rds = []
 	# if 'pandas.core.frame.DataFrame' in py.str(py.type(klines)):
@@ -55,10 +250,12 @@ def convert_klines_to_json(klines):
 	
 	elif py.istr(klines):
 		return klines
-	return json.dumps(rds)
+	
+		
+	return json.dumps(rds,**json_dumps_ka)
 to_json=convert_klines_to_json	
 	
-def get_kline(symbol="BTCUSDT",timeframe="1m",start="2022-12-14",end="2022-12-24",return_json=False):
+def binance_history_get_kline(symbol="BTCUSDT",timeframe="1m",start="2022-12-14",end="2022-12-24",return_json=False):
 	'''
 pip install -i http://pypi.douban.com/simple --trusted-host pypi.douban.com binance-history
 '''	

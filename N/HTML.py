@@ -155,7 +155,7 @@ def xiaomi_air_conditioner_control(response=None,token=py.No('auto get'),t=0,ang
 					m=U.time().month
 					if m<4 or m>10:
 						d.send("set_mode", ['heat'])
-					if 5<m<11:
+					if 5<m<11 or (m==5 and U.time().day>20):
 						d.send("set_mode", ['cooling'])
 				
 				
@@ -791,7 +791,7 @@ def list_2d_href_file_column(response,a,file_column=None,**ka):
 		
 
 list_2d_CSS_MARK='/*css*/'
-def list_2d(response,a,html_callback=None,index=False,sort_kw=U.SORT_KW_SKIP,column_type_dict=None,sort_ka=py.dict(ascending=True,),bottom_head=False,debug=False,to_html_ka=None,exclude_cols=None,**ka):
+def list_2d(response,a,html_callback=None,index=False,sort_kw=U.SORT_KW_SKIP,column_type_dict=None,sort_ka=py.dict(ascending=True,),bottom_head=False,debug=False,to_html_ka=None,exclude_cols=None,js='<script> </script>',**ka):
 	''' ,sort_ka=py.dict(ascending=False) #倒序 从大到小
 	'''
 	index=U.get_duplicated_kargs(ka,'index','n','enu','add_index','enumerate',default=index)
@@ -800,6 +800,8 @@ def list_2d(response,a,html_callback=None,index=False,sort_kw=U.SORT_KW_SKIP,col
 	sort_ka=U.get_duplicated_kargs(ka,'ska','sort_ka','sa',default=sort_ka)
 	bottom_head=U.get_duplicated_kargs(ka,'bottom_head','title_bottom','bottom','bhead','tb','bh','hb',default=bottom_head)
 	exclude_cols=U.get_duplicated_kargs(ka,'exclude_cols','exclude','exclude_col','del_cols','del_col',default=exclude_cols)
+	js=U.get_duplicated_kargs(ka,'js','javascript','code','script','jscode',default=js)
+	if js and '</' not in js:js=f'<script>{js}</script>'
 	if not py.isdict(sort_ka):
 		if sort_ka:
 			sort_ka=py.dict(ascending=True,)
@@ -877,24 +879,23 @@ def list_2d(response,a,html_callback=None,index=False,sort_kw=U.SORT_KW_SKIP,col
 	head='''
 <head>
 <style type="text/css">
-	table,th,td,textarea{
-		padding:0px;
-		margin:0px;
-		border:1px solid green;/*没有solid 导致分割线消失*/
-		border-spacing: 0px;
-	}
-	/*css*/
-	
-  table>thead>tr {
-    position: sticky;
-    top: 0;
-    background: white;
-    z-index: 1;
-	}
+table,th,td,textarea{
+	padding:0px;
+	margin:0px;
+	border:1px solid green;/*没有solid 导致分割线消失*/
+	border-spacing: 0px;
+}
+table>thead>tr {
+	position: sticky;
+	top: 0;
+	background: white;
+	z-index: 1;
+}
+'''+list_2d_CSS_MARK+'''
 </style> 
 </head>
 '''	
-	html=head+html
+	html=head+html+js
 	if py.callable(html_callback):
 		html=html_callback(html=html,head=head)
 
