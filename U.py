@@ -6005,6 +6005,9 @@ try:
 	DictLimitSizeSortedKey=LimitSizeSortedDict=get('U.LimitSizeSortedDict')
 	if not LimitSizeSortedDict:
 		class LimitSizeSortedDict(sortedcontainers.SortedDict):
+			''' max_size  default 50
+pop_index default 0			
+			'''
 			default_max_size = 50
 			default_pop_index = 0
 			def __init__(self, *args, **kwargs):
@@ -6387,6 +6390,26 @@ Create a slice object.  This is used for extended slicing (e.g. a[0:10:2]).
 			break
 	return r
 dict_items=get_dict_items=getDictItems
+	
+def dict_of_list_to_list(ad,add_key=True,change=False): #_of_dict
+	''' add_key  999999  加到列表最后
+list v.insert(add_key=-1  只会 加到倒数第二 
+	'''
+	if add_key and not py.isint(add_key):add_key=0
+	if not add_key and not py.isint(add_key):add_key=None
+	if add_key in ['last','tail',-1]:add_key=IMAX
+	if py.isint(add_key) and add_key<-1:add_key+=1
+	
+	
+	r=[]
+	for k,v in ad.items():
+		if not change:v=v.copy()
+		
+		if add_key!=None:
+			v.insert(add_key,k)
+		r.append(v)
+	return r	
+dl2l=dict_of_list_to_list		
 	
 def dict_of_dict_to_list_of_dict(ad,add_key=False,change_dict=False):
 	r=[]

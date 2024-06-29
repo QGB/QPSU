@@ -8,6 +8,14 @@ else:
 	from qgb import py
 U,T,N,F=py.importUTNF()
 
+
+def iptv(v=512):
+	return U.get_ipython(raise_exception=1).run_cell(f'''
+from qgb.tests import GS3105	
+ps=await GS3105.plogin()
+await GS3105.setv(ps,{v})	
+''')	
+
 JS_async_post='''
 async function post(url,data){
     if(typeof a!='string')data=JSON.stringify(data)
@@ -791,12 +799,16 @@ def list_2d_href_file_column(response,a,file_column=None,**ka):
 		
 
 list_2d_CSS_MARK='/*css*/'
-def list_2d(response,a,html_callback=None,index=False,sort_kw=U.SORT_KW_SKIP,column_type_dict=None,sort_ka=py.dict(ascending=True,),bottom_head=False,debug=False,to_html_ka=None,exclude_cols=None,js='<script> </script>',**ka):
+def list_2d(response,a,html_callback=None,index=True,sort_kw=U.SORT_KW_SKIP,column_type_dict=None,sort_ka=py.dict(ascending=True,),bottom_head=False,debug=False,to_html_ka=None,exclude_cols=None,js='<script> </script>',millisecond_type_col=None,**ka):
 	''' ,sort_ka=py.dict(ascending=False) #倒序 从大到小
 	'''
 	index=U.get_duplicated_kargs(ka,'index','n','enu','add_index','enumerate',default=index)
 	sort_kw=U.get_duplicated_kargs(ka,'skw','sort','s',default=sort_kw)
-	column_type_dict=U.get_duplicated_kargs(ka,'column_type_dict','type','t',default=column_type_dict if column_type_dict else {},)
+	column_type_dict    =U.get_duplicated_kargs(ka,'column_type_dict','type','t',default=column_type_dict if column_type_dict else {},)
+	millisecond_type_col=U.get_duplicated_kargs(ka,'millisecond_type_col','ms','millisecond','milliseconds',default=millisecond_type_col)
+	if not column_type_dict and millisecond_type_col!=None:  # column_type_dict==None 不行
+		column_type_dict={millisecond_type_col:'ms'}
+	
 	sort_ka=U.get_duplicated_kargs(ka,'ska','sort_ka','sa',default=sort_ka)
 	bottom_head=U.get_duplicated_kargs(ka,'bottom_head','title_bottom','bottom','bhead','tb','bh','hb',default=bottom_head)
 	exclude_cols=U.get_duplicated_kargs(ka,'exclude_cols','exclude','exclude_col','del_cols','del_col',default=exclude_cols)

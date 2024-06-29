@@ -1,3 +1,6 @@
+'''
+pip install -i http://mirrors.aliyun.com/pypi/simple/ --trusted-host=mirrors.aliyun.com pyppeteer aiohttp
+'''
 import asyncio
 import pyppeteer
 
@@ -207,14 +210,15 @@ async def get_current_front_page():
 	return r[0]
 get_front_page=current_front_page=get_current_front_page
 	
-async def get_all_pages(browser=None):
+async def get_all_pages(browser=None,title=True):
 	if not browser:
 		browser=await get_browser()
 	ps=await browser.pages()
 	# r=[]
-	for n,pa in py.enumerate(ps):
-		t=await pa.title()
-		print(fr'{n:>02d} {t[:33]:33} {pa.url[33:]:33} {py.repr(pa)[-11:] }' )
+	if title:
+		for n,pa in py.enumerate(ps):
+			t=await pa.title() # alert page hangs
+			print(fr'{n:>02d} {t[:33]:33} {pa.url[33:]:33} {py.repr(pa)[-11:] }' )
 	return ps
 async def new_page(url='https://intoli.com/blog/not-possible-to-block-chrome-headless/chrome-headless-test.html',timeout=30*1000,browser=None,url_add_timestamp=True,user_agent=None):
 	''' Go to the ``url``.

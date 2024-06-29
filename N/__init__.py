@@ -42,6 +42,13 @@ else:
 	from SimpleHTTPServer import SimpleHTTPRequestHandler
 	from BaseHTTPServer import HTTPServer as _HTTPServer
 
+def curlconverter(c,language='toPython',ip=10,port=2000):
+	from qgb import U,T,N,F
+	u=f'http://{N.auto_ip(ip)}:{port}/{language}?c='
+	return N.HTTP.get(u+T.url_encode(c),proxy='')
+curlc=curl2code=curl_to_code=curlconvert=curlconverter
+
+
 def post_with_new_thread(url,data=b'',**ka):
 	from qgb import U,T,N,F
 	
@@ -49,9 +56,8 @@ def post_with_new_thread(url,data=b'',**ka):
 		data=F.dill_dump(data)
 	
 	return U.thread(
-target=lambda :N.HTTP.post(url,proxies='',data=data,**ka)	
+		target=lambda :N.HTTP.post(url,proxies='',data=data,**ka)	
 	).start()	
-		
 post=post_with_new_thread	
 
 def sendkey8888(response=None,s=''):
@@ -1123,7 +1129,9 @@ def set_remote_rpc_base(base=DEFAULT_RPC_BASE_REMOTE,change=True,ka=None,default
 				base=a
 				default_port=b
 		if py.isfloat(base) or py.isint(base):
-			default=U.get(RPC_BASE_REMOTE)
+			if default_port==1122:
+				default=U.get(RPC_BASE_REMOTE)
+			else:default=''	
 			if not default:default=f'http://127.0.0.1:{default_port}/'
 			netloc=T.netloc(default) # '192.168.43.162:2357' include port
 			i=default.index(netloc)  #TODO if netloc=='http'  
@@ -1189,7 +1197,7 @@ def rpc_append_list(*a,name='la',base='',proxies=0,print_req=1):
 	
 def rpc_call(name,*a,base='',proxies=0,print_req=1,**ka):
 	U,T,N,F=py.importUTNF()
-	# base=get_remot_rpc_base(base=base,ka=ka)
+	base=get_remote_rpc_base(base,ka=ka)
 	if '://' in name:
 		s=T.get_url_path(name)
 		base=T.sub(name,'',s)

@@ -189,6 +189,8 @@ isnumeric=isnumber=isnum
 def isint(a):
 	if is2():return type(a) in (int,long)
 	# else    :return type(a) in (int,) # 这个不会判断子类
+	if (a is True) or (a is False):return False
+	
 	return isinstance(a,int)
 
 def isfloat(a):

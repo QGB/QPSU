@@ -547,3 +547,15 @@ def match_char(image,char,show=False):
 		# The image is only displayed if we call this
 		cv2.waitKey(0)
 	return image	
+	
+def read_heic(f):
+	'''  apple iPhone heic format
+pip install -i http://mirrors.aliyun.com/pypi/simple/ --trusted-host=mirrors.aliyun.com pillow-heif
+	'''
+	# from PIL import Image
+	from pillow_heif import register_heif_opener
+
+	register_heif_opener()
+
+	image = Image.open(f)
+	return image
