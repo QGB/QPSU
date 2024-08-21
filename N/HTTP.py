@@ -219,11 +219,16 @@ def auto_headers(headers,ka,return_ka=False):
 	
 auto_header=auto_headers
 	
-def get_json(u,proxies=AUTO_GET_PROXY,method='GET',headers=None,**ka):
+def get_json(u,proxies=AUTO_GET_PROXY,method='GET',headers=None,print_req=False,**ka):
 	import requests
+	U,T,N,F=py.importUTNF()
+	print_req=U.get_duplicated_kargs(ka,'show','print','p','print_req',default=print_req)
+	
 	proxies,ka=auto_proxies(proxies,ka,return_ka=True) # def auto_proxy_for_requests
 	method ,ka=auto_method (method ,ka,return_ka=True)
 	headers,ka=auto_headers(headers,ka,return_ka=True)
+	
+	if print_req:print(U.v.requests.request(u,**ka))
 	r=requests.request(url=u,**ka)
 	
 	return r.json()

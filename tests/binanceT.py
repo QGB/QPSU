@@ -69,10 +69,17 @@ def get_srpcka(ka):
 	for k,a in ka.items():
 		if k.startswith('convert'):
 			srpcka+=f'{k}={a!r},'
+		if k.startswith('p'):
+			srpcka+=f'{k}={a!r},'
+			
 	if 'convert_func' not in srpcka:srpcka+='convert_func=float,'
 	return srpcka
 
-def get_kline_without_pandas(symbol,interval='1s',start=0,end=0,day='',second=0,second_range=(-500,500),return_json=True,**ka):
+def get_kline_without_pandas(symbol='ETH',interval='1s',start=0,end=0,day='',second=0,second_range=(-500,500),return_json=True,**ka):
+	'''  U.cbs(U.stime_to_ms_int(U.cbg(p=1))-1000*60*60*8,p=1)
+	'''
+	symbol=U.get_duplicated_kargs(ka,'symbol','s','S',default=symbol)
+	interval=U.get_duplicated_kargs(ka,'interval','i','it',default=interval)
 	second=U.get_duplicated_kargs(ka,'second','sec','ms',default=second)
 	
 	symbol=symbol.upper()

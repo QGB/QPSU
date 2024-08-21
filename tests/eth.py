@@ -13,7 +13,7 @@ def auto_b(b,b_len=16):
 	assert len(b)<=b_len
 	if py.istr(b):
 		b=b.encode('utf-8')[:b_len]
-		b=b'\x00'*(b_len-len(b))+b
+	b=b'\x00'*(b_len-len(b))+b
 	return b
 
 def get_mnemonic_privateKey_address(b16,**ka):

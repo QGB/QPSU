@@ -232,7 +232,7 @@ def curl_get_ipv4(url,print_msg=True,one_return_str=True,**ka):
 		return uip
 curl_get_ip=curl_get_ipv4	
 	
-def curl_return_bytes(url,verbose=True,proxy=py.No('socks5h://127.0.0.1:21080'),headers=py.No('default use N.HTTP.headers'),max_show_bytes_size=99,user_agent=py.No('auto use N.HTTP.user_agent'),raise_err=True,**ka):
+def curl_return_bytes(url,verbose=True,proxy=py.No('socks5h://127.0.0.1:21080'),headers=py.No('default use N.HTTP.headers'),max_show_bytes_size=99,user_agent=py.No('auto use N.HTTP.user_agent'),timeout=99,raise_err=True,**ka):
 	'''  SSL_VERIFYPEER=0
 
 	CURLOPT_* see:
@@ -242,6 +242,7 @@ https://github.com/pycurl/pycurl/blob/master/src/module.c
 	U,T,N,F=py.importUTNF()
 	proxy=U.get_duplicated_kargs(ka,'proxies','proxy',default=proxy)
 	user_agent=U.get_duplicated_kargs(ka,'user_agent','useragent','User_Agent',default=user_agent)
+	timeout=U.get_duplicated_kargs(ka,'timeout','TIMEOUT_MS','t',default=timeout)
 	import pycurl
 	c = pycurl.Curl()
 	for k,v in ka.items():
@@ -286,6 +287,11 @@ https://github.com/pycurl/pycurl/blob/master/src/module.c
 	f=BytesIO()
 	c.setopt(c.WRITEDATA, f)
 	#c.setopt(c.CAINFO, certifi.where())
+	
+	if timeout:
+		c.setopt(c.TIMEOUT_MS, 1000*timeout) # Set timeout to 10000 milliseconds (10 seconds)
+	
+	
 	if raise_err:
 		c.perform()
 	else:
@@ -2265,7 +2271,11 @@ Image.open(fp)
 	return flask_image_response(response,im)
 img=screenshot=screenshot_response=flask_screenshot_response
 	
-def is_flask_request(q):
+def is_flask_request(q=None):
+	if not q:
+		import flask.globals
+		return flask.globals._request_ctx_stack.top!=None
+
 	from werkzeug.local import LocalProxy
 	return isinstance(q,LocalProxy)
 

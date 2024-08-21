@@ -70,7 +70,8 @@ vivo.send(dr,3)           ###<py.No|'{"code":403,"data":{"needSliderVerification
 vivo.send(dr,0) ###<py.No|'{"code":400,"msg":"请求参数错误","data":{}}'  2024-06-04__23.05.52__>
 
 vivo.send(dr,-1)###<py.No|'{"code":500,"msg":"操作失败","data":{}}'  2024-06-04__23.05.57__>
-	
+
+dv=U.dict_get_multi_keys_return_dict(dr,'vivo_account_cookie_cloud_checksum','vivo_account_cookie_cloud_openid',);vivo.send(dv,1)#loc
 	'''
 	gd['data']['cmdType']=str(cmdType)
 	

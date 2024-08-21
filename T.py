@@ -148,7 +148,7 @@ def repr_without_space(a):
 	return py.repr(a).replace(', ',',')
 repr=repr_without_space
 	
-def stime_text(t='',regex='\d{13}'):
+def stime_text(t='',regex=r'\b1\d{12}\b'):
 	U,T,N,F=py.importUTNF()
 	if not t:t=U.cbg()
 	def fr(a):
@@ -349,6 +349,9 @@ def substring_counts(names):
 	''' one str list return {}
 
 '''
+	if not names:return names
+	if py.len(names)==1:
+		return {names[0]:1}
 	from difflib import SequenceMatcher
 	substring_counts={}
 

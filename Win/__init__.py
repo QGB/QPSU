@@ -1039,7 +1039,7 @@ __import__('ctypes').windll.user32.MessageBoxW(0, 'text', 'title', 0)
 	else:
 		return user32.MessageBoxW(0, str(s), str(st), 0)		
 
-def mouse_drag(x,y,x2=0,y2=0,time=1.1):
+def mouse_drag_pyautogui(x,y,x2=0,y2=0,time=1.1):
 	import pyautogui
 	U=py.importU()
 	if U.len(x)==2:
@@ -1053,6 +1053,65 @@ def mouse_drag(x,y,x2=0,y2=0,time=1.1):
 	pyautogui.dragTo(x2, y2, 1, button='left')
 	U.sleep(time)
 	pyautogui.mouseUp(button='left')	
+	
+def mouse_drag(start,end,duration=1):
+	import ctypes
+	import time
+
+	# Load necessary ctypes functions
+	SendInput = ctypes.windll.user32.SendInput
+
+	# C struct redefinitions
+	PUL = ctypes.POINTER(ctypes.c_ulong)
+
+	class Point(ctypes.Structure):
+		_fields_ = [("x", ctypes.c_long), ("y", ctypes.c_long)]
+
+	class MouseInput(ctypes.Structure):
+		_fields_ = [("dx", ctypes.c_long), ("dy", ctypes.c_long), ("mouseData", ctypes.c_ulong),
+					("dwFlags", ctypes.c_ulong), ("time", ctypes.c_ulong), ("dwExtraInfo", PUL)]
+
+	class Input_I(ctypes.Union):
+		_fields_ = [("mi", MouseInput)]
+
+	class Input(ctypes.Structure):
+		_fields_ = [("type", ctypes.c_ulong), ("ii", Input_I)]
+
+	# Mouse event constants
+	MOVE = 0x0001
+	ABSOLUTE = 0x8000
+	LEFTDOWN = 0x0002
+	LEFTUP = 0x0004
+
+	def move_mouse(x, y):
+		pt = Point()
+		ctypes.windll.user32.GetCursorPos(ctypes.byref(pt))
+		x = int(x * 65536 / ctypes.windll.user32.GetSystemMetrics(0))
+		y = int(y * 65536 / ctypes.windll.user32.GetSystemMetrics(1))
+		mi = MouseInput(dx=x, dy=y, mouseData=0, dwFlags=MOVE | ABSOLUTE, time=0, dwExtraInfo=None)
+		ii = Input_I(mi=mi)
+		inp = Input(type=0, ii=ii)
+		SendInput(1, ctypes.byref(inp), ctypes.sizeof(inp))
+
+	def mouse_event(flags):
+		mi = MouseInput(dx=0, dy=0, mouseData=0, dwFlags=flags, time=0, dwExtraInfo=None)
+		ii = Input_I(mi=mi)
+		inp = Input(type=0, ii=ii)
+		SendInput(1, ctypes.byref(inp), ctypes.sizeof(inp))
+
+# def mouse_drag(start, end, duration=1.1):
+	start_time = time.time()
+	move_mouse(*start)
+	mouse_event(LEFTDOWN)
+	while time.time() - start_time < duration:
+		elapsed = time.time() - start_time
+		current_x = int(start[0] + (end[0] - start[0]) * (elapsed / duration))
+		current_y = int(start[1] + (end[1] - start[1]) * (elapsed / duration))
+		move_mouse(current_x, current_y)
+		time.sleep(0.01)  # Add a small delay to make the movement smoother
+	move_mouse(*end)
+	mouse_event(LEFTUP)	
+	
 drag=mouse_drag	
 		
 def get_cursor_pos():

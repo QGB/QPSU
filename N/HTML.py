@@ -8,8 +8,80 @@ else:
 	from qgb import py
 U,T,N,F=py.importUTNF()
 
+def oshwhub_tb():
+	code=r"""
+ps=await tb.get_or_new_page('https://oshwhub.com/sign_in',select_tab=0)	
+"""
+	# is_req=N.is_flask_request()
+	# code=code.replace('is_req',py.repr(is_req))
+	import asyncio
+	asyncio.set_event_loop(U.get('asyncio.get_event_loop()')) 
+	r= U.get_ipython(raise_exception=1).run_cell(code,store_history=True)
+	if r.result:
+		return r.result
+	# and py.islist(r.result):
+		# return ','.join(r.result)
+	return r
+
+def oshwhub():
+	code=r"""
+from qgb.tests import taobao_trade as tb
+is_600=U.get_current_day_passed_seconds()<600
+ps=await tb.get_or_new_page('https://oshwhub.com/sign_in',select_tab=is_600)
+if is_600:await ps.reload()
+sd=str(U.get_current_datetime().day)
+
+ods=await ps.evaluate('''
+y=document.querySelectorAll('div[class*=calendar_signIn-mark] > span[class*=calendar_day]')
+ds=[]
+for(e of y){
+    ds.push(e.textContent)
+}
+ds
+''')
+
+async def oshwhub_qd(recursive=True):	
+	Win.foreground('嘉立创EDA开源硬件平台')
+	es=await ps.xpath( '//span[contains(text(), "立即签到")]')
+	if es:
+		await es[0].click()
+		print(U.stime(),'oshwhub sucess click:',es)
+	else:
+		print(U.stime(),'oshwhub not found',es)
+		await ps.reload()
+		if recursive:
+			await tb.A.sleep(3)
+			await oshwhub_qd(recursive=False)
+	return es		
+if len(ods)>int(sd): #每月一号
+	await ps.reload()
+	print(U.stime(),'incorrect ods=',ods,'force_reload')
+	ods=[]	
+if (sd not in ods) or (U.stime()[8:10] not in ods):
+	# print(U.stime(),'oshwhub_qd',sd,ods)
+	await oshwhub_qd()
+if U.get_current_datetime().weekday()==6:# 0-6	
+	es=await ps.xpath( '//span[contains(text(), "7天好礼")]')           
+	await es[0].click()
+if (U.get_current_datetime()+U.time_delta(days=1)).day==1:#月度最后一天	
+	es=await ps.xpath( '//span[contains(text(), "月度好礼")]')           
+	await es[0].click()	
+','.join(ods)
+"""
+	# is_req=N.is_flask_request()
+	# code=code.replace('is_req',py.repr(is_req))
+	import asyncio
+	asyncio.set_event_loop(U.get('asyncio.get_event_loop()')) 
+	r= U.get_ipython(raise_exception=1).run_cell(code,store_history=True)
+	if r.result:
+		return r.result
+	# and py.islist(r.result):
+		# return ','.join(r.result)
+	return r
 
 def iptv(v=512):
+	import asyncio
+	asyncio.set_event_loop(U.get('asyncio.get_event_loop()')) 
 	return U.get_ipython(raise_exception=1).run_cell(f'''
 from qgb.tests import GS3105	
 ps=await GS3105.plogin()
@@ -99,8 +171,9 @@ def xiaomi_air_conditioner_control(response=None,token=py.No('auto get'),t=0,ang
 	power=U.get_duplicated_kargs(ka,'power','on','open','p','po',default=power)
 	sleep=U.get_duplicated_kargs(ka,'sleep','set_silent','silent','s',default=sleep)
 	volume=U.get_duplicated_kargs(ka,'volume','voice','sound','sy','v',default=volume)
-	mode=U.get_duplicated_kargs(ka,'mode','c','cool','m','cooling',default=mode)
+	mode=U.get_duplicated_kargs(ka,'mode','cooling','c','cool','m',default=mode)
 	wind_speed=U.get_duplicated_kargs(ka,'wind_speed','speed','fs','S',default=wind_speed)# 4 max , 5 auto
+	swing=U.get_duplicated_kargs(ka,'swing','bd','bf','w',default=swing)# 
 	
 	if not token:token=get_or_input_html(response,'miio.token')
 	if not token:return token
@@ -141,13 +214,20 @@ def xiaomi_air_conditioner_control(response=None,token=py.No('auto get'),t=0,ang
 			return d
 		# if not power:
 	ip=U.set('miio.ip',ip)
-		
+	
+	# if t==88:
+		# d.send('set_power',['off'])
+		# return
 		
 	if not sleep is AC_DEFAULT:
 		if sleep:
 			ia=0
+			ib=0# ia.ib（wind模式时间，先废弃）
+			if py.isstr(sleep):
+				assert py.len(sleep)%4==0
+				ia=py.int(sleep)
 			if py.isint(sleep):
-				if sleep>9999:
+				if sleep>999:
 					ia=sleep
 					ib=100
 				elif sleep>60:
@@ -167,24 +247,36 @@ def xiaomi_air_conditioner_control(response=None,token=py.No('auto get'),t=0,ang
 						d.send("set_mode", ['cooling'])
 				
 				
-				if ia>99999:
+				if ia>99999:  #9999秒 一个多小时，少了
 					sa=py.str(ia)
-					assert len(sa)%4==0
+					assert py.len(sa)%4==0
 					ia=0
-					for ina in py.range(len(sa)//4):
+					spower=''
+					swind=''
+					for ina in py.range(py.len(sa)//4):
 						isa=sa[4*ina:4*ina+4]
-						ta=py.int(isa[:2])
+						ta=py.int(isa[:2]) # Temperature
 						
-						if ina==0:
-							N.HTML.ac(t=ta)
-							ia=ia+py.int(isa[2:])*60 # ta 经历 ia 秒
-							continue
+						if ta==88:spower=',power=0'
+						if ta==77:swind=",mode='wind'"
 						
-						se=f'lambda:print({ina},{ta},N.HTML.ac(t={ta}),U.stime())'
-						ft=eval(se)
-						print(ina,ta,ia,U.Timer(ft,ia,name=f'Timer.ac.{ina}'))
 						
 						ia=ia+py.int(isa[2:])*60 # ta 经历 ia 秒
+						
+						if ina==0 and ta!=88:
+							if ta==77:
+								N.HTML.ac(mode='wind')
+							else:	
+								N.HTML.ac(t=ta)
+							continue
+						
+						
+						se=f'lambda:print({ina},{ta},N.HTML.ac(t={ta}{spower}{swind}),U.stime())'
+						ft=eval(se)
+						print(ina,ta,ia,U.Timer(ft,ia,name=f'Timer.ac.{ina}'),se)
+						
+						if ta==88:spower=',power=1'# 为循环的其他温度开机 
+						if ta==77:swind=",mode='cooling'"
 				else:
 					for ina in range(9):
 						ina=U.get(f'Timer.ac.{ina}')
@@ -192,10 +284,10 @@ def xiaomi_air_conditioner_control(response=None,token=py.No('auto get'),t=0,ang
 							
 				d.send("set_silent", ['off'])
 				
-				t2=U.Timer(lambda:N.HTML.ac(mode='wind',power=AC_DEFAULT),ia,name='Timer.ac.wind')
-				print(t2)
+				# t2=U.Timer(lambda:N.HTML.ac(mode='wind',power=AC_DEFAULT),ia,name='Timer.ac.wind')
+				# print(t2)
 				# ishutdown=ia+ib
-				print('ac.sleep ',ia,'wind',ib,'shutdown:',ia+ib,'#',U.time()+U.time_delta(seconds=ia+ib))
+				# print('ac.sleep ',ia,'wind',ib,'shutdown:',ia+ib,'#',U.time()+U.time_delta(seconds=ia+ib))
 				
 				d.send("set_idle_timer", [ia+ib])
 				
@@ -694,7 +786,7 @@ for(e of document.querySelectorAll("td:nth-of-type(5) > textarea")){
 gs=github_search=list_github_search
 
 
-def list_2d_txt_href(response,a,url_index_dict=None,txt_column=None,t_cols=137,**ka):
+def list_2d_txt_href(response,a,url_index_dict=None,txt_column=None,attrs_cols=137,index=False,**ka):
 	''' url_index_dict [1,2] : 1.href == 2(url)
 url_index_dict == int 默认 url最后一列 url_index_dict={index:-1}	
 	
@@ -741,14 +833,14 @@ TODO:  list pop multiple indexes  您需要以相反的顺序删除它们，以�
 				if not s:continue
 				s=s.strip()
 				ea.attrs['rows']=f"""{s.count(T.eol)+1};"""
-				ea.attrs['cols']=f"""{t_cols}"""
+				ea.attrs['cols']=f"""{attrs_cols}"""
 				ea.attrs['readonly'] = 'readonly'
 				ea.append(s)
 				e.clear()
 				e.append(ea)
 				
 		return py.str(bs)		
-	return list_2d(response,a,html_callback=href_column_callback,**ka)
+	return list_2d(response,a,html_callback=href_column_callback,index=index,**ka)
 list_txt=list_2d_txt=listu=list_url=list_2d_url=list_2d_href=list_2d_txt_href	
 
 def list_2d_href_file_column(response,a,file_column=None,**ka):
@@ -799,7 +891,7 @@ def list_2d_href_file_column(response,a,file_column=None,**ka):
 		
 
 list_2d_CSS_MARK='/*css*/'
-def list_2d(response,a,html_callback=None,index=True,sort_kw=U.SORT_KW_SKIP,column_type_dict=None,sort_ka=py.dict(ascending=True,),bottom_head=False,debug=False,to_html_ka=None,exclude_cols=None,js='<script> </script>',millisecond_type_col=None,**ka):
+def list_2d(response,a,html_callback=None,index=True,sort_kw=U.SORT_KW_SKIP,column_type_dict=None,sort_ka=py.dict(ascending=True,),bottom_head=False,debug=False,to_html_ka=None,exclude_cols=None,order_cols=None,js='<script> </script>',millisecond_type_col=None,**ka):
 	''' ,sort_ka=py.dict(ascending=False) #倒序 从大到小
 	'''
 	index=U.get_duplicated_kargs(ka,'index','n','enu','add_index','enumerate',default=index)
@@ -807,11 +899,17 @@ def list_2d(response,a,html_callback=None,index=True,sort_kw=U.SORT_KW_SKIP,colu
 	column_type_dict    =U.get_duplicated_kargs(ka,'column_type_dict','type','t',default=column_type_dict if column_type_dict else {},)
 	millisecond_type_col=U.get_duplicated_kargs(ka,'millisecond_type_col','ms','millisecond','milliseconds',default=millisecond_type_col)
 	if not column_type_dict and millisecond_type_col!=None:  # column_type_dict==None 不行
-		column_type_dict={millisecond_type_col:'ms'}
+		if ',' in millisecond_type_col:
+			column_type_dict={}
+			for cname in millisecond_type_col.split(','):
+				column_type_dict[cname]='ms'
+		else:		
+			column_type_dict={millisecond_type_col:'ms'}
 	
 	sort_ka=U.get_duplicated_kargs(ka,'ska','sort_ka','sa',default=sort_ka)
 	bottom_head=U.get_duplicated_kargs(ka,'bottom_head','title_bottom','bottom','bhead','tb','bh','hb',default=bottom_head)
 	exclude_cols=U.get_duplicated_kargs(ka,'exclude_cols','exclude','exclude_col','del_cols','del_col',default=exclude_cols)
+	order_cols=U.get_duplicated_kargs(ka,'order_cols','order','order_col','cols_order','column_order','keys','ks','title',default=order_cols)
 	js=U.get_duplicated_kargs(ka,'js','javascript','code','script','jscode',default=js)
 	if js and '</' not in js:js=f'<script>{js}</script>'
 	if not py.isdict(sort_ka):
@@ -837,6 +935,10 @@ def list_2d(response,a,html_callback=None,index=True,sort_kw=U.SORT_KW_SKIP,colu
 	if exclude_cols:
 		if not U.iterable_but_str(exclude_cols):exclude_cols=[exclude_cols]
 		df = df.drop(columns=exclude_cols)
+	
+	if order_cols:
+		order_cols=py.list(order_cols)
+		df=df[order_cols]
 	
 	if py.isdict(sort_kw) and not column_type_dict:
 		for k,v in sort_kw.items():
@@ -874,7 +976,7 @@ def list_2d(response,a,html_callback=None,index=True,sort_kw=U.SORT_KW_SKIP,colu
 	if index:
 		# df.reset_index(drop=True)
 		# df.reset_index(drop=False)
-		sindex_col='-1t'#'-1n'
+		sindex_col='-1#t'#'-1n'
 		if sindex_col in df:
 			pass
 		else:

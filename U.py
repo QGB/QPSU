@@ -976,7 +976,7 @@ https://stackoverflow.com/a/65001152/6239815
 	import multiprocess.pool
 	return multiprocess.Pool(*a,**ka)
 
-def pprint(*objects, stream=None, indent=1, width=133, depth=None,compact=False):
+def pprint(*objects, stream=None, indent=1, width=133, depth=None,compact=False,confirm=False,**ka):
 	'''
 pprint(
 	object,
@@ -988,6 +988,7 @@ pprint(
 	compact=False,
 )	
 	'''
+	confirm=get_duplicated_kargs(ka,'ask','pause','yes','y','kill',default=confirm )
 	# if py.len(object)==1:object=object[0]
 	for object in objects: # 默认换行
 		try:
@@ -997,6 +998,9 @@ pprint(
 		
 		from pprint import pprint as _pprint
 		_pprint(object=object,stream=stream,indent=indent,width=width,depth=depth,)
+	if confirm:
+		c=py.input('continue？( ctrl+c to cancel )')
+		
 
 def retry( exceptions,times=3,sleep_second=0):
 
@@ -1775,7 +1779,7 @@ CompletedProcess(args=['ls', '-al'], returncode=0, stdout=b'total 3066\ndrwx----
 		return py.No('T.auto_decode err',e,r,a,ka)
 	# exit()
 # cmd('echo 23456|sub','3','')	
-GET_DUPLICATED_KARGS_DEFAULT=py.No('Not found matched kargs',no_raise=True)
+DEFAULT_get_duplicated_kargs=GET_DUPLICATED_KARGS_DEFAULT=get_or_set('GET_DUPLICATED_KARGS_DEFAULT',lazy_default=lambda:py.No('Not found matched kargs',no_raise=True),)
 def get_duplicated_kargs(ka,*keys,default=GET_DUPLICATED_KARGS_DEFAULT,no_pop=False,):
 	''' #TODO ,**ka 不同name可以对应不同默认值
 def pop(d,k):
@@ -3027,11 +3031,16 @@ def dirValue(a=None,filter='',type=None,recursion=False,depth=2,timeout=6,__ai=0
 	return r
 DirValue=getdir=getDirValue=dirValue
 
-def search_iterable(a,filter='',type=None,depth=2,out_limit=99,_i_depth=0,si='a',return_value=False):
+DEFAULT_search_iterable=get_or_set('DEFAULT_search_iterable',lazy_default=lambda:py.No('DEFAULT_search_iterable'),)
+def search_iterable(a=DEFAULT_search_iterable,filter='',type=None,depth=2,out_limit=99,_i_depth=0,si='a',return_value=False):
 	'''iterable
 	# typo deepth
 #TODO return_value	当前v 或者 上一级 v 。没有想到很好办法去描述
 	'''
+	if a is DEFAULT_search_iterable:
+		ns=get_ipy(raise_exception=True).user_ns 
+		a=ns[si]
+	
 	if not (py.islist(a) or py.istuple(a) or py.isdict(a)):
 		if filter==a:
 			return '%r == %s'%(a,si)
@@ -3503,6 +3512,18 @@ def merge_multi_list(*a):
 	return r
 add_list=addList=merge_list=mergeList=merge_multi_list
 
+def get_current_day_passed_seconds():
+	from datetime import datetime, timedelta
+	# 获取当前时间
+	now = datetime.now()
+	# 获取今天凌晨0点的时间
+	midnight = datetime.combine(now.date(), datetime.min.time())
+
+	# 计算经过的秒数
+	elapsed_seconds = int((now - midnight).total_seconds())
+	return elapsed_seconds
+get_day_sec=get_current_day_passed_second=get_current_day_passed_seconds
+
 def stime_iso(t=None,delta=0,timezone=8):
 	# from datetime import datetime, timezone, timedelta
 	import datetime
@@ -3577,10 +3598,10 @@ Out[305]: 1490080571.125
 	return a
 ftime=float_time=get_float_time=timestamp=getTimeStamp=getTimestamp=get_float_us_time
 
-def getTime():
+def get_current_datetime():
 	from datetime import datetime
 	return datetime.now()
-time=getime=get_time=get_time_obj=get_current_time=getCurrentTime=getTime	
+time=getime=get_time=get_time_obj=get_current_time=getCurrentTime=getTime=current_datetime=get_current_datetime
 
 def getDate():
 	from datetime import datetime
@@ -3633,6 +3654,7 @@ UnicodeEncodeError: 'locale' codec can't encode character '\u5e74' in position 2
 	# timestamp = 1652340992800
 	if not timestamp:
 		timestamp=time.time()
+	if py.istr(timestamp):timestamp=py.int(timestamp)
 	
 	if timestamp>IMAX:
 		timestamp=timestamp//1000
@@ -4169,8 +4191,11 @@ def stime_to_int_ms(s,timezone=0):
 	
 	dt=dt.replace(tzinfo=datetime.timezone.utc)
 	
+	ms=0
+	try:ms=py.int(s[-3:])
+	except:pass
 	
-	return py.int(dt.timestamp()*1000)+py.int(s[-3:])
+	return py.int(dt.timestamp()*1000)+ms
 stime_to_ms=stime_to_ms_int=stime_to_int_ms
 
 def time_range_list(*a,**ka):
@@ -5759,7 +5784,9 @@ pln({0})
 			pln('###import {0}'.format(i))
 			pln(ei)
 def explorer(path='.'):
-	''' exp can not open g:/qgb '''
+	''' exp can not open g:/qgb 
+explorer.exe shell:RecycleBinFolder  # 回收站
+	'''
 	U,T,N,F=py.importUTNF()
 	if py.isno(path):return path
 	if not path or path=='.':path=U.pwd(p=False)
@@ -6324,6 +6351,7 @@ def new_dict_key_is_value(*ks,func=lambda k:k,**ka):
 		d[k]=ka[k]
 		
 	return d
+dict_kv=dict_new_kv=new_dict_key_is_value	
 	
 def dict_clear(adict,return_old=False):
 	if return_old:d=adict.copy()
@@ -6391,7 +6419,7 @@ Create a slice object.  This is used for extended slicing (e.g. a[0:10:2]).
 	return r
 dict_items=get_dict_items=getDictItems
 	
-def dict_of_list_to_list(ad,add_key=True,change=False): #_of_dict
+def dict_of_list_to_list_of_list(ad,add_key=True,change=False): #_of_dict
 	''' add_key  999999  加到列表最后
 list v.insert(add_key=-1  只会 加到倒数第二 
 	'''
@@ -6409,7 +6437,7 @@ list v.insert(add_key=-1  只会 加到倒数第二
 			v.insert(add_key,k)
 		r.append(v)
 	return r	
-dl2l=dict_of_list_to_list		
+dl2l=dl2ll=dict_of_list_to_list=dict_of_list_to_list_of_list		
 	
 def dict_of_dict_to_list_of_dict(ad,add_key=False,change_dict=False):
 	r=[]
@@ -6488,7 +6516,7 @@ def dict_multi_pop(adict,*keys,default=py.No('key not in dict')):
 	return dr	
 dict_del_multi_key=dict_pop=pop_list_multi_index=pop_dict_multi_key=dict_pop_multi_key=dict_pop_multi=dict_multi_pop
 	
-GET_DICT_MULTI_VALUES_RETURN_LIST_DEFAULT_DEFAULT=get_dict_multi_values_return_list_DEFAULT_DEFAULT=get_or_set('get_dict_multi_values_return_list_DEFAULT_DEFAULT',lazy_default=lambda:py.No('can not get key'),)
+DEFAULT_dict_get_multi_return_list=GET_DICT_MULTI_VALUES_RETURN_LIST_DEFAULT_DEFAULT=get_dict_multi_values_return_list_DEFAULT_DEFAULT=get_or_set('get_dict_multi_values_return_list_DEFAULT_DEFAULT',lazy_default=lambda:py.No('can not get key'),)
 
 def dict_get_multi_return_list(d,*keys,convert_function=None,default_dict={},default_default=GET_DICT_MULTI_VALUES_RETURN_LIST_DEFAULT_DEFAULT,**ka):
 	default=get_duplicated_kargs(ka,'default')
@@ -7906,8 +7934,7 @@ def setTimeout(func,second,cancel_all=True,priority=0):
 	return event
 	
 	return s
-set_time_out=settimeout=setTimeout
-	
+set_time_out=settimeout=setTimeout	
 	
 def set_timed_task(func,every='day',time='05:09',unit=1,**ka):
 	''' pip install schedule
@@ -7929,7 +7956,9 @@ def set_timed_task(func,every='day',time='05:09',unit=1,**ka):
 	if not t:
 		def schedule_background_run():
 			while True:
-				schedule.run_pending()
+				try:
+					schedule.run_pending()
+				except Exception as e:print(SCHEDULE_RUN_PENDING,e,print_traceback())	
 				U.sleep(1)
 		t=U.Thread(target=schedule_background_run,name=SCHEDULE_RUN_PENDING+U.stime())
 		U.set(SCHEDULE_RUN_PENDING,t)

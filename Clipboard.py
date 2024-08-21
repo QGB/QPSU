@@ -48,8 +48,12 @@ promte 提升
 # U.cbg=get
 	
 def set(aString,p=0,r=0):
-	U=py.importU()
-	if p:print("'''",aString,"'''")
+	U,T,N,F=py.importUTNF()
+	if p:
+		if py.istr(aString) and '\n' in aString:print("'''",aString,"'''")
+		else:U.print_repr(aString)
+	if not py.istr(aString):aString=T.string(aString)
+		
 	if U.istermux():return U.cmd('termux-clipboard-set',input=aString) 
 	try:
 		w.OpenClipboard()
@@ -61,7 +65,9 @@ def set(aString,p=0,r=0):
 		if not p:print(repr(aString))
 	finally:
 		w.CloseClipboard()
-	if r:return U.StrRepr(aString)	
+	if r:
+		# return U.StrRepr(aString)	
+		return aString
 # U.cbs=set
 		
 def set_repr(a):
@@ -97,7 +103,7 @@ KeyError: '.PNG'  [format not contains . ]
 	elif not im:
 		t=get()
 		if 'clipboard' in t and F.exist(t):
-			return t
+			return t 
 		return py.No('can not get clipboard image')
 	return im
 get_img=get_image
