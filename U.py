@@ -4165,10 +4165,20 @@ def tuple_div(a,b):
 	return tuple_operator(a=a,b=b,operator='__truediv__')
 div=div_two_tuple=tuple_div
 
+def get_timezone_by_int(offset):
+	import datetime
+	if py.isint(offset) and 0<=offset<=24:
+		return datetime.timezone(datetime.timedelta(hours=offset))
+get_timezone=get_timezone_by_int
+
 def ms_to_utc_datetime(ms):
 	from datetime import datetime
 	return datetime.utcfromtimestamp(ms / 1000.0)
 ms2dt=ms_to_datetime=ms_to_utc_datetime
+
+def datetime_to_ms_int(a):
+	return py.int(a.timestamp()*1000)
+dt2ms=datetime_to_ms=datetime_to_ms_int
 
 def stime_to_int_ms(s,timezone=0):
 	'''
@@ -4189,7 +4199,7 @@ def stime_to_int_ms(s,timezone=0):
 			raise e
 	else:raise py.NotImplementedError(s)
 	
-	dt=dt.replace(tzinfo=datetime.timezone.utc)
+	dt=dt.replace(tzinfo=get_timezone_by_int(timezone))
 	
 	ms=0
 	try:ms=py.int(s[-3:])
@@ -5957,12 +5967,15 @@ def sub(a,len='default return len 9',start=0,step=1):
 def subLast(a,len='default',step=1):
 	return sub(reversed(a),len=len,step=step)
 subr=subLast
+
 def reversed(a):
 	if isinstance(a,py.dict):return reversedDict(a)
 	r=[]
 	for i in py.reversed(a):
-		r.append(r)
+		r.append(i)
 	return r
+reverse=reversed	
+	
 def reversedDict(d):
 	r=OrderedDict()
 	for i in py.reversed(OrderedDict(d)):

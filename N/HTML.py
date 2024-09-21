@@ -8,6 +8,84 @@ else:
 	from qgb import py
 U,T,N,F=py.importUTNF()
 
+AC_DEFAULT=py.No('auto use last,not change')	
+# AC_DEFAULT=U.get_or_set('N.HTML.AC_DEFAULT',lazy_default=lambda:py.No('auto use last,not change')	)
+# print(repr(AC_DEFAULT))
+
+
+def hualin(t=30,fan_speed=100,mode='cool',toggle_display=True,power=AC_DEFAULT,fan_only=False,**ka):
+	''' 
+[<fan_speed_enum.Auto: 102>,
+ <fan_speed_enum.Full: 100>,
+ <fan_speed_enum.High: 80>,
+ <fan_speed_enum.Medium: 60>,
+ <fan_speed_enum.Low: 40>,
+ <fan_speed_enum.Silent: 20>]
+''' 
+	from msmart.device import air_conditioning
+	import msmart.device.AC.appliance
+	operational_mode_enum=msmart.device.AC.appliance.air_conditioning.operational_mode_enum
+	dio={1: operational_mode_enum.auto,
+ 2: operational_mode_enum.cool,
+ 3: operational_mode_enum.dry,
+ 4: operational_mode_enum.heat,
+ 5: operational_mode_enum.fan_only}
+	dso={'auto': operational_mode_enum.auto,
+ 'cool': operational_mode_enum.cool,
+ 'dry': operational_mode_enum.dry,
+ 'heat': operational_mode_enum.heat,
+ 'fan_only': operational_mode_enum.fan_only}
+	mode=U.get_duplicated_kargs(ka,'mode','mod','m','moshi','mo',default=mode)
+	fan_only=U.get_duplicated_kargs(ka,'fan_only','fan','wind','only_wind','sf',default=fan_only)
+	def get_mode():
+		if py.isint(mode):return dio[mode]
+		if py.istr(mode):
+			mode=mode.lower()
+			if mode in dso:return dso[mode]
+			elif mode.startswith('c'):return dso['cool']
+			elif mode.startswith('warm'):return dso['heat']
+			elif mode.startswith('wind'):return dso['fan_only']
+		raise py.NotImplementedError(mode)
+	
+	power=U.get_duplicated_kargs(ka,'power','on','open','p','po',default=power)
+	
+	dfka=U.get_or_dill_load('hualin-2')
+	
+	a=U.get_or_set('msmart.device.air_conditioning:hualin',
+		lazy_default=lambda:air_conditioning(**dfka['air_conditioning']),
+		)
+	
+	if not power is AC_DEFAULT:		
+		if power:
+			a.power_state=True
+		else:
+			a.power_state=False
+			a.apply()
+			return a
+	
+	
+	fan_speed=U.get_duplicated_kargs(ka,'wind_speed','fan_speed','speed','fs','S',default=fan_speed)# 100 max , 102 auto
+	if py.isint(fan_speed):
+		if fan_speed==5 or 80<fan_speed:fan_speed=a.fan_speed_enum.Full
+		if fan_speed==4 or 60<fan_speed<=80:fan_speed=a.fan_speed_enum.High
+		if fan_speed==3 or 40<fan_speed<=60:fan_speed=a.fan_speed_enum.Medium
+		if fan_speed==2 or 20<fan_speed<=40:fan_speed=a.fan_speed_enum.Low
+		if fan_speed==2 or 9 <fan_speed<=20:fan_speed=a.fan_speed_enum.Silent
+			
+	
+	
+	a.authenticate(**dfka['authenticate'])
+	if power is AC_DEFAULT:a.power_state=True
+	a.eco_mode=False
+	a.operational_mode=get_mode() #a.operational_mode_enum.cool
+	a.fan_speed=fan_speed
+	a.target_temperature=t
+	a.apply()
+	if toggle_display and not a.display_on:a.toggle_display()
+	return a,t,fan_speed,toggle_display
+ac2=hualin
+
+
 def oshwhub_tb():
 	code=r"""
 ps=await tb.get_or_new_page('https://oshwhub.com/sign_in',select_tab=0)	
@@ -62,10 +140,10 @@ if (sd not in ods) or (U.stime()[8:10] not in ods):
 	await oshwhub_qd()
 if U.get_current_datetime().weekday()==6:# 0-6	
 	es=await ps.xpath( '//span[contains(text(), "7天好礼")]')           
-	await es[0].click()
+	if es:await es[0].click()
 if (U.get_current_datetime()+U.time_delta(days=1)).day==1:#月度最后一天	
 	es=await ps.xpath( '//span[contains(text(), "月度好礼")]')           
-	await es[0].click()	
+	if es:await es[0].click()	
 ','.join(ods)
 """
 	# is_req=N.is_flask_request()
@@ -158,10 +236,6 @@ def get_or_input_html(response,*name):
 	# print(v)	
 	return v	
 	
-AC_DEFAULT=py.No('auto use last,not change')	
-# AC_DEFAULT=U.get_or_set('N.HTML.AC_DEFAULT',lazy_default=lambda:py.No('auto use last,not change')	)
-# print(repr(AC_DEFAULT))
-
 def xiaomi_air_conditioner_control(response=None,token=py.No('auto get'),t=0,angle=None,sleep=AC_DEFAULT,swing=False,lcd=None,volume=AC_DEFAULT,mode=AC_DEFAULT,wind_speed=AC_DEFAULT,before=None,after=None,power=AC_DEFAULT,ip=AC_DEFAULT,**ka):
 	''' 风扇水平 0 时，环境感知温度会立马降低 
 	
@@ -172,7 +246,7 @@ def xiaomi_air_conditioner_control(response=None,token=py.No('auto get'),t=0,ang
 	sleep=U.get_duplicated_kargs(ka,'sleep','set_silent','silent','s',default=sleep)
 	volume=U.get_duplicated_kargs(ka,'volume','voice','sound','sy','v',default=volume)
 	mode=U.get_duplicated_kargs(ka,'mode','cooling','c','cool','m',default=mode)
-	wind_speed=U.get_duplicated_kargs(ka,'wind_speed','speed','fs','S',default=wind_speed)# 4 max , 5 auto
+	wind_speed=U.get_duplicated_kargs(ka,'wind_speed','fan_speed','speed','fs','S',default=wind_speed)# 4 max , 5 auto
 	swing=U.get_duplicated_kargs(ka,'swing','bd','bf','w',default=swing)# 
 	
 	if not token:token=get_or_input_html(response,'miio.token')
@@ -263,9 +337,11 @@ def xiaomi_air_conditioner_control(response=None,token=py.No('auto get'),t=0,ang
 						
 						ia=ia+py.int(isa[2:])*60 # ta 经历 ia 秒
 						
-						if ina==0 and ta!=88:
+						if ina==0:
 							if ta==77:
 								N.HTML.ac(mode='wind')
+							elif ta==88:
+								N.HTML.ac(power=False)
 							else:	
 								N.HTML.ac(t=ta)
 							continue

@@ -17,17 +17,26 @@ def gtf():
 	gt=U.set(__name__+'.gt',ct)
 	return gt
 	
-async def setv(ps,v=512):
+
+async def setv(ps,v=512,index=2,**ka):
+	'''  1: 2001
+		2:512
+'''
+	index=U.get_duplicated_kargs(ka,'index','n','xd','type','t',default=index)
+	
+	
+	if index==1 and v==512:v=2001
+	
 	try:
 		await ps.evaluate('''
 		m = document.querySelector('#mainFrame');
 		m.contentDocument.querySelector('#mmNet').click()
 		''')
 		await tb.A.sleep(0.9)
-		await ps.evaluate('''
+		await ps.evaluate(f'''
 		m = document.querySelector('#mainFrame');
 		e=m.contentDocument.querySelector("#Frm_WANCName0")
-		e.value='2'
+		e.value='{index}'
 		e.dispatchEvent(new Event('change'))
 		''')
 		await tb.A.sleep(0.9)

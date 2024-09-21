@@ -80,20 +80,35 @@ async def try_evaluate(page,code):
 try_eval=evaluate=try_evaluate
 
 u_key_defs='pyppeteer.us_keyboard_layout.keyDefinitions'
-async def press_keys(page,*s,selector='',backspace=12):
+async def press_keys(page,s,selector='',backspace=12,debug=False):
 	'''  'Backspace'  '''
+	if isinstance(page,pyppeteer.frame_manager.Frame):
+		assert selector
+		if backspace:
+			await page.evaluate('''() => {
+const input = document.querySelector('.hwid-input.userAccount');
+for (let i = 0; i < backspace_count; i++) {
+	const event = new KeyboardEvent('keydown', { key: 'Backspace' });
+	input.dispatchEvent(event);
+}
+}'''.replace('backspace_count',str(backspace)))
+		await page.type(selector,s)
+		return s
+		
 	if selector:
 		await page.click(selector)
 		if backspace and py.isint(backspace):
 			for i in range(backspace):
 				await page.keyboard.press('Backspace')
-	
-	
+				
 	for k in s:
 		try:
 			page.keyboard._keyDescriptionForString(k)
 			await page.keyboard.press(k)
 		except Exception as e:
+			if debug:
+				U.print_stack_trace()
+				print(e)
 			for i in k:
 				await page.keyboard.press(i)
 	return s

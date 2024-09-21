@@ -1,21 +1,190 @@
 <!DOCTYPE html>
-<html>
-
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dynamic VTT Subtitle Display</title>
+    <style>
+        body, html {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+        }
+        #subtitles {
+            font-family: Arial, sans-serif;
+            font-size: 18px;
+            color: white;
+            background-color: rgba(0, 0, 0, 0.5);
+            padding: 10px;
+            border-radius: 5px;
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            right: 20px;
+            bottom: 80px; /* Adjusted to make space for controls and progress bar */
+            text-align: center;
+            overflow-y: auto;
+        }
+        .highlight {
+            color: yellow;
+        }
+        .controls {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            right: 20px;
+            text-align: center;
+        }
+        #progressBarContainer {
+            position: absolute;
+            bottom: 60px;
+            left: 20px;
+            right: 20px;
+            height: 20px;
+            background-color: #ddd;
+        }
+        #progressBar {
+            height: 100%;
+            background-color: #4CAF50;
+        }
+    </style>
+</head>
 <body>
-  <div id="vttContent"></div>
+    <div id="subtitles"></div>
+    <div id="progressBarContainer">
+        <div id="progressBar"></div>
+    </div>
+    <div class="controls">
+        <button onclick="pauseSubtitles()">Pause</button>
+        <button onclick="resumeSubtitles()">Resume</button>
+        <button onclick="nextSubtitle()">Next</button>
+        <button onclick="previousSubtitle()">Previous</button>
+    </div>
 
-  <script>
-    fetch('https://klk.pythonanywhere.com/-r=en')
-      .then(response => response.text())
-      .then(data => {
-        let text = data.replace(/\d{2}:\d{2}:\d{2}\.\d{3} --> \d{2}:\d{2}:\d{2}\.\d{3} align:start position:\d+%/g, '').replace(/<.*?>/g, '').trim();
+    <script>
+        let isPaused = false;
+        let currentIndex = 0;
+        let intervalId;
+        let cues = [];
+        let totalDuration = 0;
+
+      
 
 
-        document.getElementById('vttContent').innerText = text;
-      })
-      .catch(error => {
-        console.error('Error fetching and parsing VTT content:', error);
-      });
-  </script>
+
+function parseVTT(data) {
+    const lines = data.split('\n');
+    const cues = [];
+    let cue = {};
+
+    lines.forEach(line => {
+        if (line.includes('-->')) {
+            const [start, end] = line.split(' --> ').map(time => time.trim());
+            cue = { start, end, text: '' };
+        } else if (line.trim() !== '') {
+            cue.text += line.trim() + ' ';
+        } else if (cue.start && cue.end) {
+            cues.push(cue);
+            cue = {};
+        }
+    });
+
+    if (cue.start && cue.end) {
+        cues.push(cue);
+    }
+
+    return cues;
+}
+
+function displaySubtitles(cues) {
+    const subtitlesDiv = document.getElementById('subtitles');
+    let subtitleHTML = '';
+
+    cues.forEach((cue, index) => {
+        const text = cue.text.replace(/<\/?c>/g, '').trim();
+        subtitleHTML += `<span class="${index === currentIndex ? 'highlight' : ''}">${text}</span> `;
+    });
+
+    subtitlesDiv.innerHTML = subtitleHTML;
+
+    function updateSubtitles() {
+        if (isPaused) return;
+
+        const now = new Date().getTime();
+        const currentTime = new Date(`1970-01-01T${new Date().toISOString().substr(11, 8)}.${now % 1000}Z`);
+
+        while (currentIndex < cues.length && new Date(`1970-01-01T${cues[currentIndex].end}Z`) <= currentTime) {
+            currentIndex++;
+        }
+
+        if (currentIndex < cues.length && new Date(`1970-01-01T${cues[currentIndex].start}Z`) <= currentTime) {
+            cues.forEach((cue, index) => {
+                const span = subtitlesDiv.children[index];
+                if (index === currentIndex) {
+                    span.classList.add('highlight');
+                } else {
+                    span.classList.remove('highlight');
+                }
+            });
+        } else {
+            cues.forEach((cue, index) => {
+                const span = subtitlesDiv.children[index];
+                span.classList.remove('highlight');
+            });
+        }
+
+        updateProgressBar(currentTime);
+    }
+
+    intervalId = setInterval(updateSubtitles, 100);
+}
+
+function updateProgressBar(currentTime) {
+    const progressBar = document.getElementById('progressBar');
+    const totalDuration = new Date(`1970-01-01T${cues[cues.length - 1].end}Z`).getTime() - new Date(`1970-01-01T${cues[0].start}Z`).getTime();
+    const elapsedTime = currentTime.getTime() - new Date(`1970-01-01T${cues[0].start}Z`).getTime();
+    const progress = (elapsedTime / totalDuration) * 100;
+    progressBar.style.width = `${progress}%`;
+}
+
+
+	  
+		
+		
+
+        function pauseSubtitles() {
+            isPaused = true;
+        }
+
+        function resumeSubtitles() {
+            isPaused = false;
+            displaySubtitles(cues);
+        }
+
+        function nextSubtitle() {
+            currentIndex++;
+            if (currentIndex >= cues.length) {
+                currentIndex = cues.length - 1;
+            }
+            displaySubtitles(cues);
+        }
+
+        function previousSubtitle() {
+            currentIndex--;
+            if (currentIndex < 0) {
+                currentIndex = 0;
+            }
+            displaySubtitles(cues);
+        }
+
+        fetch('https://klk.pythonanywhere.com/-r=en')
+            .then(response => response.text())
+            .then(data => {
+                cues = parseVTT(data);
+                displaySubtitles(cues);
+            })
+            .catch(error => console.error('Error fetching VTT data:', error));
+    </script>
 </body>
 </html>

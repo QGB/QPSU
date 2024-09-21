@@ -176,7 +176,13 @@ def request(url,method='GET',headers=gheaders.copy(),
 	ka['timeout']=timeout
 	ka['url']=N.auto_url(ka['url']) # 特意将url放最后，方便显示
 		
-	if print_req:print(U.v.requests.request(**ka))
+	if print_req:
+		ka_p=ka.copy()
+		if 'data' in ka and len(ka['data'])>99:
+			b=ka_p['data']
+			ka_p['data']=U.object_custom_repr(b,repr='{}...#{}'.format(b[:99],F.readable_size(b) )  )  #same as N.curl
+			
+		print(U.v.requests.request(**ka_p))
 		
 	if no_raise:
 		try:

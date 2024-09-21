@@ -783,26 +783,30 @@ def flask_dill_data():
 	b=request.get_data()
 	return F.dill_load_bytes(b)
 	
-def flask_request_log(time=True,url=False):
+def flask_request_log(time=True,url=False,file=True):
 	from flask import request
 	U,T,N,F=py.importUTNF()	
 	rq=U.dir(request)
 	rq=U.StrRepr(U.pformat(rq))
 	
 	r=[]
-	if time:r.append(U.stime())
+	if time:
+		time=U.stime()
+		r.append(time)
 	if url :r.append(T.url_decode(request.url) )
 	
 	if r:
 		r.append(rq)
 	else:	
 		r=rq
-		
+	if file:
+		log_path=U.cd(U.gst+'N.log/')
+		F.write(f'{log_path}{time}.log',r)
 	
 	rl=U.get_or_set('req_log',[])
 	rl.append(r)
 	return py.len(rl)
-log_req=req_log=flask_request_log	
+log=logreq=log_req=req_log=flask_request_log	
 
 skip_response_headers={
 	'Transfer-Encoding': 'chunked',
@@ -1138,7 +1142,11 @@ def set_remote_rpc_base(base=DEFAULT_RPC_BASE_REMOTE,change=True,ka=None,default
 			if default_port==1122:
 				default=U.get(RPC_BASE_REMOTE)
 			else:default=''	
-			if not default:default=f'http://127.0.0.1:{default_port}/'
+			if not default:
+				# if py.isint(default_port):default_port=[default_port]
+				# for i_port in default_port:
+					
+				default=f'http://127.0.0.1:{default_port}/'
 			netloc=T.netloc(default) # '192.168.43.162:2357' include port
 			i=default.index(netloc)  #TODO if netloc=='http'  
 			n=netloc.find(':')
@@ -1201,7 +1209,7 @@ def rpc_append_list(*a,name='la',base='',proxies=0,print_req=1):
 		 return rpc_append_list(*a,name=name,base=base)
 	return U.StrRepr(t)
 	
-def rpc_call(name,*a,base='',proxies=0,print_req=1,**ka):
+def rpc_call(name,*a,base='',proxies=0,print_req=1,raise_err=False,**ka):
 	U,T,N,F=py.importUTNF()
 	base=get_remote_rpc_base(base,ka=ka)
 	if '://' in name:
@@ -1214,7 +1222,14 @@ def rpc_call(name,*a,base='',proxies=0,print_req=1,**ka):
 		
 	if not base:
 		raise py.ArgumentError('need base')
-	rp= N.HTTP.post(f'{base}rpc_a,rpc_ka=N.flask_dill_data();r={name}(*rpc_a,**rpc_ka)',F.dill_dump([a,ka]),proxies=proxies,print_req=print_req)
+	if raise_err:
+		rp= N.HTTP.post(f'{base}rpc_a,rpc_ka=N.flask_dill_data();r={name}(*rpc_a,**rpc_ka)',F.dill_dump([a,ka]),proxies=proxies,print_req=print_req)
+	else:
+		try:
+			rp= N.HTTP.post(f'{base}rpc_a,rpc_ka=N.flask_dill_data();r={name}(*rpc_a,**rpc_ka)',F.dill_dump([a,ka]),proxies=proxies,print_req=print_req)
+		except Exception as e:
+			print(U.stime(),'N.rpc_call',e)
+			return py.No(e)
 	return U.StrRepr(rp.text)
 	
 def rpc_pop_window_127(port=443):
@@ -2173,6 +2188,7 @@ def flask_file_stream_response(response,file=py.No('if not file:use N.geta()'),)
 		# response.headers['Content-Disposition'] = "inline; filename=" + T.url_encode(file)
 		response.headers['Content-Disposition'] ="inline; filename=" + T.url_encode(F.get_filename_from_full_path(file))
 		response.headers['Content-Length'] =F.size(file,int=True)
+		response.content_type = 'application/octet-stream'
 		
 	except Exception as e:
 		# r=T.pformat([e,U.get_tb_stack()],**U.get('pformat_kw',{}))
