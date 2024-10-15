@@ -38,6 +38,7 @@ def hualin(t=30,fan_speed=100,mode='cool',toggle_display=True,power=AC_DEFAULT,f
 	mode=U.get_duplicated_kargs(ka,'mode','mod','m','moshi','mo',default=mode)
 	fan_only=U.get_duplicated_kargs(ka,'fan_only','fan','wind','only_wind','sf',default=fan_only)
 	def get_mode():
+		nonlocal mode
 		if py.isint(mode):return dio[mode]
 		if py.istr(mode):
 			mode=mode.lower()
@@ -82,7 +83,7 @@ def hualin(t=30,fan_speed=100,mode='cool',toggle_display=True,power=AC_DEFAULT,f
 	a.target_temperature=t
 	a.apply()
 	if toggle_display and not a.display_on:a.toggle_display()
-	return a,t,fan_speed,toggle_display
+	return a,t,fan_speed,toggle_display,a.operational_mode
 ac2=hualin
 
 

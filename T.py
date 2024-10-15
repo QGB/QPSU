@@ -2244,7 +2244,13 @@ def replace_all_space(a,to='',target=r"\s+"):
 	return re.sub(target, to, a, flags=re.UNICODE)
 del_space=del_spaces=remove_all_space=replace_all_spaces=delAllSpace=removeAllSpaces=removeAllSpace=replace_all_space
 
-def replace_multi_target(a,olds,new='',case_sensitive=True):
+def replace_multi_target_by_ka(a,**ka):
+	for k,v in ka.items():
+		a=a.replace(k,v)
+	return a	
+replace_ka=replace_multi_target_by_ka
+
+def replace_multi_target_no_ka(a,olds,new='',case_sensitive=True):
 	'''
 olds could be dict	
 #TODO case_sensitive	
@@ -2262,7 +2268,7 @@ olds could be dict
 		for i in olds:
 			a=a.replace(i,new)
 	return a
-replacey=replace_multi_target	
+replacey=replace_multi_target=replace_multi_target_no_ka
 	
 def replace_all(a,old,new):
 	''' S.replace(old, new[, count]) -> string'''
