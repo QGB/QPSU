@@ -42,6 +42,38 @@ else:
 	from SimpleHTTPServer import SimpleHTTPRequestHandler
 	from BaseHTTPServer import HTTPServer as _HTTPServer
 
+def get_cookies_dict_from_browser(domain,*names,browser='edge'):
+	''' 如果想精确匹配 domain ，参数应为 '.baidu.com'  否则 xxbaidu.com 一样会匹配 ，因为endswith ，
+如果不提供 names，默认返回域名下所有 cookies	
+
+	yt_dlp.cookies.extract_cookies_from_browser(
+    browser_name,
+    profile=None,
+    logger=<yt_dlp.cookies.YDLLogger object at 0x00000208356DF988>,
+    *,
+    keyring=None,
+    container=None,
+)
+'''
+	import yt_dlp.cookies
+	cks=yt_dlp.cookies.extract_cookies_from_browser(browser) # return type yt_dlp.cookies.YoutubeDLCookieJar
+	
+	U,T,N,F=py.importUTNF()
+	domain=T.get_domain_parts_by_url(domain)
+	
+	dr={}
+	for c in cks:
+		if c.domain.endswith(domain):
+			if names:
+				if c.name in names:
+					dr[c.name]=c.value
+			else:# 如果不提供 names，默认返回域名下所有 cookies
+				dr[c.name]=c.value
+	return dr
+	
+edge_cookies=get_cookies_from_edge=get_cookies_from_browser=extract_cookies_from_browser=get_cookies_dict_from_browser
+
+
 def curlconverter(c,language='toPython',ip=10,port=2000):
 	from qgb import U,T,N,F
 	u=f'http://{N.auto_ip(ip)}:{port}/{language}?c='

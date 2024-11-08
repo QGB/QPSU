@@ -7949,6 +7949,11 @@ def setTimeout(func,second,cancel_all=True,priority=0):
 	return s
 set_time_out=settimeout=setTimeout	
 	
+def set_apscheduler_task(func,every='day',time='05:09',unit=1,**ka):
+	''' '''
+	K='apscheduler.'
+
+
 def set_timed_task(func,every='day',time='05:09',unit=1,**ka):
 	''' pip install schedule
 	
@@ -8239,6 +8244,7 @@ def new_ssh_key(key_size=2048):
 	return public_key,private_key
 
 
+
 def generate_ecdsa_by_secexp(secexp=1,curve='NIST256p', comment="",dir='C:/test/ssh/',return_pub=False):
 	'''  ecdsa.NIST256p # NIST P-256被称为secp256r1  prime256v1。不同的名字，但他们都是一样的。
 ecdsa.SECP256k1 # cryptography hazmat can not load SECP256k1, _ECDSA_KEY_TYPE[curve.name]
@@ -8256,7 +8262,8 @@ Load key "C:/test/ssh/privateKey_NIST256p_1.pem": invalid format
 		comment=T.file_legalized(secexp)
 		secexp=py.eval(secexp)
 	if not comment:
-		comment=secexp
+		comment=py.str(secexp)
+		
 	sk = ecdsa.SigningKey.from_secret_exponent(secexp=secexp,curve=py.getattr(ecdsa,curve))
 	sk.privkey.secret_multiplier=secexp
 	vk = sk.verifying_key
