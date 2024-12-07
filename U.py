@@ -171,7 +171,7 @@ gd_sync_level={
 }
 SET_NO_VALUE=py.No('U.set value=None',no_raise=True)
 GET_NO_VALUE=py.No('U.get ',no_raise=True)
-def set(name,value=SET_NO_VALUE,return_old_value=False,level=gd_sync_level['process'],**ka):
+def set(name,value=SET_NO_VALUE,level=gd_sync_level['process'],**ka):
 	if ka:
 		raise py.NotImplementedError()
 		
@@ -181,16 +181,27 @@ def set(name,value=SET_NO_VALUE,return_old_value=False,level=gd_sync_level['proc
 		if value is SET_NO_VALUE: # py.No 比较不能用== ，no==0 ==None ==0.0 ...
 			value=name
 			name='_'
-		if return_old_value:
-			if name in d:old=d[name]
-			else:old=GET_NO_VALUE
+		
 		d[name]=value
 		# sys._qgb_dict=d
 	if level>=gd_sync_level['system']:
 		import sqlite3
-	if return_old_value:return old,value
+	
 	return value
 
+def set_return_old(name,value=SET_NO_VALUE,level=gd_sync_level['process']):
+	if level>=gd_sync_level['process']:
+		import sys
+		d=sys._qgb_dict=py.getattr(sys,'_qgb_dict',{})# 统一用这句
+		if value is SET_NO_VALUE: # py.No 比较不能用== ，no==0 ==None ==0.0 ...
+			value=name
+			name='_'
+	if name in d:old=d[name]
+	else:old=GET_NO_VALUE
+	# if return_old_value:
+	return old,set(name,value,level=level)
+set_and_get_old=set_return_old	
+	
 def set_no_return(name,value,**ka):
 	set(name,value,**ka)
 	
@@ -761,6 +772,11 @@ tmux detach-client -t /dev/pts/3
 	tmux_dt=tmux_detach=tmux_detach_client=tmux_detach_client_all=tmux_detach_client_all_skip_max
 		
 ########################## end init #############################################
+def get_copyq_clipboard_items(*a,**ka):
+	from qgb.tests import CopyQ
+	return CopyQ.get_copyq_clipboard_items(*a,**ka)
+copyq=get_copyq_items=get_copyq_clipboard_items
+	
 def pick(*a,return_index=False,**ka):
 	'''pick(
     options: Sequence[~OPTION_T],
@@ -4036,7 +4052,7 @@ https://stackoverflow.com/questions/51533621/prime-factorization-with-large-numb
 		h, t, g, c = 1, 1, 1, c+1
 	n=py.int(n)
 	return insertSorted(n, fs)
-factorint=factors=integer_factorization=prime_factorization
+prime_factor=factorint=factors=integer_factorization=prime_factorization
 # (1917141215419419171412154194191714)
 # [2, 3, 13, 449941L, 54626569996995593878495243L]
 def get_int_multiplication_expression(a,factor=1024,use_pow=True,add_symbol=' + ',mul_symbol='*'):
@@ -6650,9 +6666,7 @@ except:
 finally:
 	U.print_tb()  # None
 '''
-	import traceback
-	ex_type, ex, tb_obj = sys.exc_info()
-	traceback.print_tb(tb_obj)
+	import traceback;ex_type, ex, tb_obj = sys.exc_info();traceback.print_tb(tb_obj)
 	if msg:pln(msg)
 
 print_tb=print_tb_stack=print_traceback=print_stack_in_except=print_traceback_in_except

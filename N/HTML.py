@@ -968,7 +968,7 @@ def list_2d_href_file_column(response,a,file_column=None,**ka):
 		
 
 list_2d_CSS_MARK='/*css*/'
-def list_2d(response,a,html_callback=None,index=True,sort_kw=U.SORT_KW_SKIP,column_type_dict=None,sort_ka=py.dict(ascending=True,),bottom_head=False,debug=False,to_html_ka=None,exclude_cols=None,order_cols=None,js='<script> </script>',millisecond_type_col=None,**ka):
+def list_2d(response,a,html_callback=None,index=True,sort_kw=U.SORT_KW_SKIP,column_type_dict=None,sort_ka=py.dict(ascending=True,),bottom_head=False,debug=False,to_html_ka=None,exclude_cols=None,order_cols=None,js='<script> </script>',millisecond_type_col=None,timezone='UTC',**ka):
 	''' ,sort_ka=py.dict(ascending=False) #倒序 从大到小
 	'''
 	index=U.get_duplicated_kargs(ka,'index','n','enu','add_index','enumerate',default=index)
@@ -1000,6 +1000,9 @@ def list_2d(response,a,html_callback=None,index=True,sort_kw=U.SORT_KW_SKIP,colu
 	if 'float_format' not in to_html_ka:
 		to_html_ka['float_format']='{}'.format
 		
+	if py.isint(timezone):
+		import pytz
+		timezone = pytz.FixedOffset(timezone * -60 )# 8 hours * 60 minutes,如不-60变成UTC-8
 	# 
 	# return a
 
@@ -1029,10 +1032,12 @@ def list_2d(response,a,html_callback=None,index=True,sort_kw=U.SORT_KW_SKIP,colu
 	
 	for cname,type in column_type_dict.items():
 		if type=='ms':
-			df[cname] = pandas.to_datetime(df[cname], unit='ms')
+			df[cname] = pandas.to_datetime(df[cname],unit='ms',)
+			if timezone!='UTC':df[cname]=df[cname].dt.tz_localize(timezone).dt.tz_convert('UTC').dt.tz_localize(None) #.dt.tz_convert('UTC')不能省略 。否则显示UTC时间
 			continue
 		if type in ['t','time','s',]:
-			df[cname] = pandas.to_datetime(df[cname], unit='s')
+			df[cname] = pandas.to_datetime(df[cname],unit='s',)
+			if timezone!='UTC':df[cname]=df[cname].dt.tz_localize(timezone).dt.tz_convert('UTC').dt.tz_localize(None)
 			continue
 		df[cname] = df[cname].astype(type)
 
@@ -1280,7 +1285,7 @@ def format(s,**ka):
 	ka={'{%s}'%k:v for k,v in ka.items()}
 	return T.replacey(s,ka)
 
-def eng_audio(response,word,audio_path='C:/test/google_translate_tts/',proxies=21080,curl=False,**ka):
+def eng_audio(response,word,audio_path='C:/test/google_translate_tts/',proxies="socks5h://192.168.1.20:41080",curl=False,**ka):
 	if 'google_translate_tts' not in audio_path:
 		audio_path+='google_translate_tts/'
 
@@ -1319,6 +1324,9 @@ def eng_audio(response,word,audio_path='C:/test/google_translate_tts/',proxies=2
 	else:
 		return q
 	
+gskip_eng_list=T.del_space('''start,align,position,the,of,to,a,that,this,is,it,and,in,for,on,we,be,I,tank,you,will,as,from,are,with,there,engines,would,at,but,can,flight,
+captions,
+''').split(',')
 def eng_dwi(response,dwi,ecdict=py.No('auto load'),sort_kw={},**ka):
 	if not ecdict:
 		ecdict=U.get_or_dill_load_and_set(r'C:\test\ecdict-770611.dill')
@@ -1348,6 +1356,7 @@ def eng_dwi(response,dwi,ecdict=py.No('auto load'),sort_kw={},**ka):
 	re=[]
 	rw=[]
 	for w,count in dwi.items():
+		if w in gskip_eng_list:continue
 		if w in deci:
 			rw.append(w)
 			r.append(get3(w),)

@@ -23,11 +23,17 @@ async def login():
 	try:
 		t=await page.evaluate('() => document.title')
 		if t=='身份验证':await page.reload()
-		await page.click('div.login > div > div.layout > div.inner-box > div.toggle-module > span:nth-child(2)')
-		await tb.press_keys(page,gd['p'],selector='div.inner-box > div:nth-child(3) > div:nth-child(2) > div:nth-child(1) > div.phone-box > input')
+		
+		# await page.click('div.login > div > div.layout > div.inner-box > div.toggle-module > span:nth-child(2)')
+		# await tb.press_keys(page,gd['p'],selector='div.inner-box > div:nth-child(3) > div:nth-child(2) > div:nth-child(1) > div.phone-box > input')
 
-		await tb.press_keys(page,gd['pw'],selector='div.pwd-box > input[type=password]')
-		await page.click("div.login > div > div.layout > div.inner-box > div.os-pc-btn")
+		# await tb.press_keys(page,gd['pw'],selector='div.pwd-box > input[type=password]')
+		# await page.click("div.login > div > div.layout > div.inner-box > div.os-pc-btn")
+		await tb.press_keys(page, gd['p'], selector='input[placeholder="请输入手机号/邮箱/vivo号"]')
+		await tb.press_keys(page, gd['pw'], selector='input[placeholder*="密码"]')		
+		btn=await page.xpath('//div[contains(text(), "登录") and contains(@class, "btn")]')
+		btn=btn[0]
+		await btn.click()
 		
 		print(U.stime(),'wait after click login 2',page)
 		await asyncio.sleep(2)

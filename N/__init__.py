@@ -42,8 +42,8 @@ else:
 	from SimpleHTTPServer import SimpleHTTPRequestHandler
 	from BaseHTTPServer import HTTPServer as _HTTPServer
 
-def get_cookies_dict_from_browser(domain,*names,browser='edge'):
-	''' 如果想精确匹配 domain ，参数应为 '.baidu.com'  否则 xxbaidu.com 一样会匹配 ，因为endswith ，
+def get_cookies_dict_from_browser(domain,*names,browser='edge',return_raw_list=False):
+	r''' 如果想精确匹配 domain ，参数应为 '.baidu.com'  否则 xxbaidu.com 一样会匹配 ，因为endswith ，
 如果不提供 names，默认返回域名下所有 cookies	
 
 	yt_dlp.cookies.extract_cookies_from_browser(
@@ -54,24 +54,55 @@ def get_cookies_dict_from_browser(domain,*names,browser='edge'):
     keyring=None,
     container=None,
 )
+
+#TODO  open(r'C:\Users\qgb\AppData\Local\CentBrowser\User Data\Default\Network\Cookies') 
+PermissionError: [Errno 13] Permission denied: 'C:\\Users\\qgb\\AppData\\Local\\CentBrowser\\User Data\\Default\\Network\\Cookies'
+另一个程序正在使用此文件，进程无法访问
 '''
-	import yt_dlp.cookies
-	cks=yt_dlp.cookies.extract_cookies_from_browser(browser) # return type yt_dlp.cookies.YoutubeDLCookieJar
-	
 	U,T,N,F=py.importUTNF()
 	domain=T.get_domain_parts_by_url(domain)
 	
+	import yt_dlp.cookies
+	
+	if 'cent' in browser.lower():
+		browser='CentBrowser'
+		func_original=U.get_or_set('yt_dlp.cookies._get_chromium_based_browser_settings',yt_dlp.cookies._get_chromium_based_browser_settings)
+		def _get_chromium_based_browser_settings(browser_name):
+			nonlocal browser,func_original
+			sk='_get_chromium_based_browser_settings.'+browser_name
+			if browser==browser_name:
+				d3=U.get(sk)
+				if not d3:
+					d3=func_original('chromium')
+					d3['browser_dir']=d3['browser_dir'].replace('Chromium','CentBrowser')
+					U.set(sk,d3)
+				return d3
+			return func_original(browser_name)
+		yt_dlp.cookies._get_chromium_based_browser_settings=_get_chromium_based_browser_settings
+		
+		cks=yt_dlp.cookies._extract_chrome_cookies('CentBrowser',None,None,yt_dlp.cookies.YDLLogger())    
+		
+		# return cks
+	else:	
+		cks=yt_dlp.cookies.extract_cookies_from_browser(browser) # return type yt_dlp.cookies.YoutubeDLCookieJar
+	
+		
+
 	dr={}
+	if return_raw_list:r=[]
 	for c in cks:
+		#TODO 没有考虑子域名 name重复的情况。后面获取的会覆盖前面的。但是return_raw_list判断dr长度不变，所以保留前面的，造成结果不一致
 		if c.domain.endswith(domain):
 			if names:
 				if c.name in names:
 					dr[c.name]=c.value
 			else:# 如果不提供 names，默认返回域名下所有 cookies
 				dr[c.name]=c.value
+		if return_raw_list and len(dr)>len(r):r.append(c)		
+	if return_raw_list:return r	
 	return dr
 	
-edge_cookies=get_cookies_from_edge=get_cookies_from_browser=extract_cookies_from_browser=get_cookies_dict_from_browser
+edge_cookies=get_cookies_from_edge=get_browser_cookies=get_cookies_from_browser=extract_cookies_from_browser=get_cookies_dict_from_browser
 
 
 def curlconverter(c,language='toPython',ip=10,port=2000):
