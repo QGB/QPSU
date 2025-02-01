@@ -75,7 +75,7 @@ def get_srpcka(ka):
 	if 'convert_func' not in srpcka:srpcka+='convert_func=float,'
 	return srpcka
 
-def get_kline_without_pandas(symbol='ETH',interval='1s',start=0,end=0,day='',second=0,second_range=(-500,500),return_json=True,**ka):
+def get_kline_without_pandas(symbol='ETH',interval='1s',start=0,end=0,day='',second=0,kline_range=(-500,500),auto_expand_range=False,return_json=True,**ka):
 	'''  U.cbs(U.stime_to_ms_int(U.cbg(p=1))-1000*60*60*8,p=1)
 	'''
 	symbol=U.get_duplicated_kargs(ka,'symbol','s','S',default=symbol)
@@ -96,8 +96,14 @@ def get_kline_without_pandas(symbol='ETH',interval='1s',start=0,end=0,day='',sec
 		if py.istr(second):
 			second=U.stime_to_ms(second)
 		elif U.slen(second)==10:second*=1000
-		start=second+second_range[0]*gdims[interval]
-		end=second+second_range[1]*gdims[interval]
+		
+		cms=U.itime_ms()
+		if auto_expand_range and second+kline_range[1]*gdims[interval]>cms:
+			kline_range=py.list(kline_range)#TypeError: 'tuple' object does not support item assignment
+			kline_range[1]=(cms-second)//gdims[interval]+1
+			kline_range[0]=-(1000-kline_range[1])
+		start=second+kline_range[0]*gdims[interval]
+		end=second+kline_range[1]*gdims[interval]
 	
 	data=N.rpc_get(f"B.get_kline_without_pandas({symbol!r},interval={interval!r},start={start!r},end={end!r},{get_srpcka(ka)})",**get_rpcka())
 	

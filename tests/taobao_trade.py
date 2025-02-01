@@ -11,57 +11,17 @@ from qgb import Win #Win.get_screen_size
 
 taobao_trade=U.getMod(__name__)
 RPC_BASE=U.get_or_set(__name__+N.RPC_BASE_REMOTE[1:],default=N.get_local_rpc_base())
-URL_WULIU_BY_TRADE_ID='https://buyertrade.taobao.com/trade/json/transit_step.do?bizOrderId='
-URL_TRADE_LIST='https://buyertrade.taobao.com/trade/itemlist/list_bought_items.htm'
-URL_WebDriver_DETECT=URL_WEBDRIVER_DETECT='https://intoli.com/blog/not-possible-to-block-chrome-headless/chrome-headless-test.html'
-us=zu=F.dill_load('C:/test/zu-67.dill')  
 
-def get_tmall_sku_2022(jst):
-	r=[]
-	for id,d in jst['data']['skuCore']['sku2info']:
-		if id==0:
-			print(id,d)
-			continue
-		fp=py.float(d['price']['priceText'])	
-		quantity=py.int(d['quantity'])
-		quantity=U.IntRepr(quantity,repr=T.padding(f"""{quantity}#{d['quantityText']}""",size=10))
-	#TODO	
+async def click_by_xpath(page,xpath):
+	''' '//span[contains(text(), "密码登录")]'  '''
+	if T.is_valid_xpath(xpath):
+		es=await page.xpath(xpath)
+		# assert len(es)==1
+		await es[0].click()
+	else:
+		page.click(xpath)
 		
-def _registed_click_pop_cart():
-	if U.isWin():
-		from qgb import Win
-		ox,oy=Win.get_cursor_pos()
-		x,y=1080,123
-		
-		Win.click(884,717) #scroll bottom
-		U.sleep(0.3)
-		Win.click(657,674) #add btn
-		U.sleep(1.6)
-		for i in range(19):
-			if Win.get_color([889, 485])!=12698049:#grey
-				Win.click(1080,123)#pop btn
-				U.log(i)
-				break
-			U.sleep(0.3)
-		else:
-			return 'error'
-		Win.click(888,274)#s top
-		U.sleep(0.3)
-		Win.click(ox,oy)
-		return ox,oy
-
-def registe_click_pop_cart_hotkey(hotkey='alt+c',callback=_registed_click_pop_cart):
-	k=U.get(hotkey)
-	# if k:
-		# print(U.stime(),'using registed hotkey',hotkey)
-		# return k
-	import keyboard
-	
-	keyboard.unhook_all_hotkeys() #
-	
-	k=keyboard.add_hotkey(hotkey, callback)
-	return hotkey,U.set(hotkey,k),id(k)
-hotkey=bind_click_pop_cart_hotkey=registe_click_pop_cart_hotkey
+click=xpath_click=click_by_xpath
 
 async def get_element_absolute_position_of_system_screen(page,selector,green=False):
 	if green:
@@ -379,6 +339,57 @@ async def get_or_new_page(url,select_tab=True,url_add_timestamp=False,**ka):
 # async def   (url):
 ######### taobao  start ######################################################
 ######### taobao  start ######################################################
+URL_WULIU_BY_TRADE_ID='https://buyertrade.taobao.com/trade/json/transit_step.do?bizOrderId='
+URL_TRADE_LIST='https://buyertrade.taobao.com/trade/itemlist/list_bought_items.htm'
+URL_WebDriver_DETECT=URL_WEBDRIVER_DETECT='https://intoli.com/blog/not-possible-to-block-chrome-headless/chrome-headless-test.html'
+us=zu=F.dill_load('C:/test/zu-67.dill')  
+
+def get_tmall_sku_2022(jst):
+	r=[]
+	for id,d in jst['data']['skuCore']['sku2info']:
+		if id==0:
+			print(id,d)
+			continue
+		fp=py.float(d['price']['priceText'])	
+		quantity=py.int(d['quantity'])
+		quantity=U.IntRepr(quantity,repr=T.padding(f"""{quantity}#{d['quantityText']}""",size=10))
+	#TODO	
+		
+def _registed_click_pop_cart():
+	if U.isWin():
+		from qgb import Win
+		ox,oy=Win.get_cursor_pos()
+		x,y=1080,123
+		
+		Win.click(884,717) #scroll bottom
+		U.sleep(0.3)
+		Win.click(657,674) #add btn
+		U.sleep(1.6)
+		for i in range(19):
+			if Win.get_color([889, 485])!=12698049:#grey
+				Win.click(1080,123)#pop btn
+				U.log(i)
+				break
+			U.sleep(0.3)
+		else:
+			return 'error'
+		Win.click(888,274)#s top
+		U.sleep(0.3)
+		Win.click(ox,oy)
+		return ox,oy
+
+def registe_click_pop_cart_hotkey(hotkey='alt+c',callback=_registed_click_pop_cart):
+	k=U.get(hotkey)
+	# if k:
+		# print(U.stime(),'using registed hotkey',hotkey)
+		# return k
+	import keyboard
+	
+	keyboard.unhook_all_hotkeys() #
+	
+	k=keyboard.add_hotkey(hotkey, callback)
+	return hotkey,U.set(hotkey,k),id(k)
+hotkey=bind_click_pop_cart_hotkey=registe_click_pop_cart_hotkey
 
 async def get_taobao_user(page=None):
 	if page:

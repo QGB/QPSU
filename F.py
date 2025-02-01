@@ -125,7 +125,7 @@ def get_file_owner_username(filename):
 	
 file_owner=file_username=get_file_user=get_file_username=get_file_owner_username
 	
-def zip(*fs,zip_filename='',ext='.zip'):
+def zip(*fs,zip_filename='',only_filename=False,ext='.zip'):
 	import zipfile,stat,os
 	
 	if not fs:return fs
@@ -148,7 +148,10 @@ def zip(*fs,zip_filename='',ext='.zip'):
 				zipInfo.external_attr = unix_st_mode << 16 
 				zipMe.writestr(zipInfo,os.readlink(file))
 			else:
-				zipMe.write(file, compress_type=zipfile.ZIP_DEFLATED)
+				if only_filename:
+					zipMe.write(file,arcname=os.path.basename(file),compress_type=zipfile.ZIP_DEFLATED)
+				else:	
+					zipMe.write(file, compress_type=zipfile.ZIP_DEFLATED)
 	return zipMe
 	
 def compress_directory(source,target=py.No('auto use source name save in U.gst'),format='zip'):
@@ -1571,9 +1574,13 @@ def deleteFile(file):
 		if U.iswin():	return WindowsError 
 	
 	try:
-		if U.isWin():
-			return py.from_qgb_import('Win').shell_delete(file)
-	
+		try:
+			import win32com
+			if U.isWin():
+				return py.from_qgb_import('Win').shell_delete(file)
+		except:
+			shutil.rmtree(file)
+		
 		if isDir(file):
 			return delete_dir(file)
 		_os.remove(file)#异常 是从这里产生的
@@ -1906,8 +1913,25 @@ def get_dirname_from_full_path(a):
 get_dir=dirname=dir=get_path_from_full_path=get_dirname_from_full_path
 
 def get_parent_dir(a):
-	raise py.NotImplementedError()
-	return
+	"""获取父目录"""
+	if not a:
+		raise ValueError("路径不能为空")
+
+	# 规范化路径
+	normalized_path = _p.normpath(a)
+
+	# 获取父目录
+	parent_dir = _p.dirname(normalized_path)
+
+	# 如果父目录是根目录，直接返回
+	if parent_dir == normalized_path:
+		return parent_dir
+
+	# 添加路径分隔符
+	sp=get_splitor(parent_dir)
+	if not parent_dir.endswith(sp):
+		parent_dir+=sp
+	return parent_dir 
 	
 # def open(file, mode='r', buffering=-1, encoding=None, errors=None, newline=None, closefd=True, opener=None):
 	'''py2 from io import open

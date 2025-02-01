@@ -114,6 +114,35 @@ try:
 	from pprint import pprint,pformat
 except:pass
 ####################################################
+
+def is_valid_css_selector(css: str) -> bool:
+	"""
+	验证 CSS 选择器是否有效。
+	:param css: 输入的 CSS 选择器
+	:return: 如果有效返回 True，否则返回 False
+	"""
+	from cssselect import GenericTranslator, SelectorError
+	try:
+		GenericTranslator().css_to_xpath(css)
+		return True
+	except SelectorError:
+		return False
+is_selector=is_valid_javascript_selector=is_valid_css_selector
+
+def is_valid_xpath(xpath: str) -> bool:
+	"""
+    使用 lxml 验证 XPath 是否有效。
+    :param xpath: 输入的 XPath 表达式
+    :return: 如果有效返回 True，否则返回 False
+    """
+	from lxml import etree
+	try:
+		etree.XPath(xpath)
+		return True
+	except etree.XPathSyntaxError:
+		return False
+is_xpath=is_valid_xpath
+
 def endswith_any(s,*a):
 	return [i for i in a if s.endswith(i)]
 	
@@ -1016,7 +1045,7 @@ s.splitlines(keepends=False)
 	else:
 		return r
 
-def join_recursively(s,iter,prepend_layer=False,append_layer=False,format_layer=False,_layer=0):
+def recursive_join(s,iter,prepend_layer=False,append_layer=False,format_layer=False,_layer=0):
 	if py.istr(iter):
 		return iter
 	else:
@@ -1037,7 +1066,7 @@ def join_recursively(s,iter,prepend_layer=False,append_layer=False,format_layer=
 				) for i in iter])
 		return s.join([recursive_join(s.format(_layer),i,_layer=_layer+1, ) for i in iter])
 
-recursiveJoin=recursive_join=join_recursively
+recursiveJoin=join_recursively=recursive_join
 
 def join_eol(*iterable,separator=EOL,**ka):
 	r= join(*iterable,separator=separator,**ka)

@@ -10,16 +10,18 @@ gd=F.dill_load('C:/test/vivo_login.dill')
 import asyncio
 
 async def login():
-	ph=await tb.get_page(url='https://yun.vivo.com.cn/#/home')
-	if ph:await ph.reload()
-	
-	pyw=await tb.get_page(url='https://yun.vivo.com.cn/#/welcome')
-	if pyw:await pyw.click("#background > div > div > div.text-content > div.button > button")
 
-	print(U.stime(),'wait login page 2. ph,pyw',[ph,pyw])
-	await asyncio.sleep(1)
+	# ph=await tb.get_page(url='https://yun.vivo.com.cn/#/home')
+	# if ph:await ph.reload()
+	
+	# pyw=await tb.get_page(url='https://yun.vivo.com.cn/#/welcome')
+	# if pyw:await pyw.click("#background > div > div > div.text-content > div.button > button")
+
+	# print(U.stime(),'wait login page 2. ph,pyw',[ph,pyw])
+	# await asyncio.sleep(1)
 	
 	page=await tb.get_or_new_page(url='https://passport.vivo.com.cn/#/login')
+	# print('page',page)
 	try:
 		t=await page.evaluate('() => document.title')
 		if t=='身份验证':await page.reload()
@@ -29,6 +31,10 @@ async def login():
 
 		# await tb.press_keys(page,gd['pw'],selector='div.pwd-box > input[type=password]')
 		# await page.click("div.login > div > div.layout > div.inner-box > div.os-pc-btn")
+		es=await page.xpath('//span[contains(text(), "密码登录")]')
+		assert len(es)==1
+		await es[0].click()
+		# print('t',U.stime(),t,gd)
 		await tb.press_keys(page, gd['p'], selector='input[placeholder="请输入手机号/邮箱/vivo号"]')
 		await tb.press_keys(page, gd['pw'], selector='input[placeholder*="密码"]')		
 		btn=await page.xpath('//div[contains(text(), "登录") and contains(@class, "btn")]')
@@ -39,6 +45,7 @@ async def login():
 		await asyncio.sleep(2)
 	except Exception as e:
 		print(U.stime(),e)
+		return page
 
 	
 	dr=await get_cookies()

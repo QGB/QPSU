@@ -79,6 +79,31 @@ def get_lnk_target(file):
 	return shortcut.Targetpath
 read_lnk=get_lnk_target	
 
+gpycaw_cache_key='AudioUtilities.GetSpeakers.Activate'
+def get_volume_mute_state():
+	global gpycaw_cache_key
+	U,T,N,F=py.importUTNF() 
+	v=U.get(gpycaw_cache_key)
+	if not v:
+		get_master_volume() #顺便初始化了 k
+		v=U.get(gpycaw_cache_key)
+	return v.GetMute()
+isMute=is_mute=get_mute=get_volume_mute=get_mute_state=get_volume_mute_state	
+
+def set_volume_mute_state(a=False):
+	global gpycaw_cache_key
+	U,T,N,F=py.importUTNF() 
+	v=U.get(gpycaw_cache_key)
+	if not v:
+		get_master_volume() #顺便初始化了 k
+		v=U.get(gpycaw_cache_key)
+	if not a:	
+		v.SetMute(0, None)#取消静音
+	else:	
+		v.SetMute(1, None)#静音
+	return a
+vol_mute=volume_mute=mute=set_volume_mute=set_volume_mute_state
+	
 gd_SetMasterVolumeLevel={
 -00.0:100,
 -01.0:94,
@@ -97,7 +122,7 @@ gd_SetMasterVolumeLevel={
 -70.0:0,
 }
 def set_master_volume(n):
-	''' 
+	''' 参数 n：[0-1)  float
 反函数：	
 x=-70;y=a*numpy.exp(b*x+c)+d
 y==0.002331674654377354	
@@ -111,21 +136,23 @@ y==0.002331674654377354
 	
 	
 	U,T,N,F=py.importUTNF() 
-	k='AudioUtilities.GetSpeakers.Activate'
-	v=U.get(k)
-	if not v:get_master_volume()
-	v=U.get(k)
+	v=U.get(gpycaw_cache_key)
+	if not v:
+		get_master_volume() #顺便初始化了 k
+		v=U.get(gpycaw_cache_key)
+	# if n==100:v.SetMute(0, None)#取消静音
+	
 	if n == 1 or 1<n<=100: # int or float
 		n=n/100
 	elif n<0 or n>100:raise py.ArgumentError(n)
 	
+	
+	
 	# v.SetMasterVolume(n, None)
-	n=(math.log((n-d)/a)-c)/b
+	mn=(math.log((n-d)/a)-c)/b
 	
-	v.SetMasterVolumeLevel(n, None)
-	
-	
-	return v,n
+	v.SetMasterVolumeLevel(mn, None)
+	return v,n,mn
 set_vol=set_volume=set_master_volume
 
 def get_master_volume(return_float=False):
@@ -133,8 +160,7 @@ def get_master_volume(return_float=False):
 pip install -i http://pypi.doubanio.com/simple --trusted-host pypi.doubanio.com pycaw	
 	'''
 	U,T,N,F=py.importUTNF() 
-	k='AudioUtilities.GetSpeakers.Activate'
-	v=U.get(k)
+	v=U.get(gpycaw_cache_key)
 	if not v:
 		from ctypes import cast, POINTER
 		from comtypes import CLSCTX_ALL
@@ -143,7 +169,7 @@ pip install -i http://pypi.doubanio.com/simple --trusted-host pypi.doubanio.com 
 		interface = devices.Activate(
 			IAudioEndpointVolume._iid_, CLSCTX_ALL, None)
 		v = cast(interface, POINTER(IAudioEndpointVolume))
-		U.set(k,v)
+		U.set(gpycaw_cache_key,v)
 		
 	fv=v.GetMasterVolumeLevelScalar()
 	if return_float:return fv

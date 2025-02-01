@@ -31,7 +31,10 @@ if __name__ == '__main__':main()
 
 if not U.isipy():raise EnvironmentError
 g=get=gipy=U.isipy()#不能直接引用U.ipy,环境不确定 动态判断避免识别错误 g.
-gipy.autocall=2
+if IPython.version_info[0]>=8 and IPython.version_info[1]>=27:
+	gipy.autocall=1
+else:	
+	gipy.autocall=2
 if U.isWin():
 	try:
 		gipy.editor='cmd /k start "" %s' % U.npp(get_cmd=True)

@@ -1201,6 +1201,7 @@ def set_remote_rpc_base(base=DEFAULT_RPC_BASE_REMOTE,change=True,ka=None,default
 			if b>255:
 				base=a
 				default_port=b
+				default=U.set(RPC_BASE_REMOTE,f'http://192.168.1.{a}:{default_port}/')
 		if py.isfloat(base) or py.isint(base):
 			if default_port==1122:
 				default=U.get(RPC_BASE_REMOTE)
@@ -1477,7 +1478,7 @@ def rpc_set_variable_local(**ka):
 		
 local_rpc_set=set_local_rpc=rpc_set_local=rpc_set_variable_local	
 		
-def rpc_set_variable(*obj,base=AUTO_GET_BASE,timeout=9,varname='v',ext_cmd='r=U.id({1})',print_req=False,proxies=None,serialize=None,template=RPC_SET_TEMPLATE,no_raise=False,**ka):
+def rpc_set_variable(*obj,base=AUTO_GET_BASE,timeout=9,varname='v',ext_cmd='r=U.id({name})',print_req=False,proxies=None,serialize=None,template=RPC_SET_TEMPLATE,no_raise=False,**ka):
 	''' ext_cmd=  {0}  default is 'v'  , {1}  is ka k
 	'''
 	U,T,N,F=py.importUTNF()
@@ -1489,11 +1490,6 @@ def rpc_set_variable(*obj,base=AUTO_GET_BASE,timeout=9,varname='v',ext_cmd='r=U.
 	if not serialize:
 		serialize=F.dill_dump
 	
-	if ext_cmd:
-		if '%s'     in ext_cmd:ext_cmd=ext_cmd%varname
-		if '{0}'    in ext_cmd:ext_cmd=ext_cmd.format(varname)
-		if '{name}' in ext_cmd:ext_cmd=ext_cmd.format(name=varname)
-
 	if len(obj)==1 and ',' not in varname:
 		obj=obj[0]
 		
@@ -1504,6 +1500,13 @@ def rpc_set_variable(*obj,base=AUTO_GET_BASE,timeout=9,varname='v',ext_cmd='r=U.
 			obj=ka
 			if not ext_cmd:
 				ext_cmd='globals().update(%s)'%varname
+	
+	if ext_cmd:
+		if '%s'     in ext_cmd:ext_cmd=ext_cmd%varname
+		if '{0}'    in ext_cmd:ext_cmd=ext_cmd.format(varname)
+		if '{name}' in ext_cmd:ext_cmd=ext_cmd.format(name=varname)
+
+
 				
 #numpy not y ValueError: The truth value of an array with more than one element is ambiguous. Use a.any() or a.all()
 	if varname!='v' and U.get_ipy() and  obj==(): 
@@ -1777,15 +1780,15 @@ def get_socket_req(PORT = 65432,HOST = '127.7.7.7'):
 def flask_kill_server_in_request(pid=None):
 	U,T,N,F=py.importUTNF()
 	import socketserver
-	return U.get_objects(socketserver.BaseServer)
-	import os,signal
-	if not pid:
-		pid=os.getpid()
-
-	sig = getattr(signal, "SIGKILL", signal.SIGTERM)
-	os.kill(pid, sig)
+	ros= U.get_objects(socketserver.BaseServer)
+	for obj in ros:
+		if py.repr(obj).startswith('<werkzeug.serving.ThreadedWSGIServer object at 0x'):
+			obj.shutdown()
+			break
+			
+	return ros# 如果关闭成功，看不到返回
 	
-shutdown=shutdown_flask=flask_shutdown=flask_kill_server=flask_kill_server_in_request
+close_flask_server=shutdown=shutdown_flask=flask_shutdown=flask_kill_server=flask_kill_server_in_request
 
 def flask_app_route(app,rule='',view_func=None,methods=('GET','POST'),log_req=False,**ka):
 	if not rule:raise py.ArgumentError(rule)

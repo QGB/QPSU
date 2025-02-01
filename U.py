@@ -4190,7 +4190,7 @@ get_timezone=get_timezone_by_int
 def ms_to_utc_datetime(ms):
 	from datetime import datetime
 	return datetime.utcfromtimestamp(ms / 1000.0)
-ms2dt=ms_to_datetime=ms_to_utc_datetime
+ms2time=ms2dt=ms_to_datetime=ms_to_utc_datetime
 
 def datetime_to_ms_int(a):
 	return py.int(a.timestamp()*1000)
@@ -6543,7 +6543,7 @@ def dict_multi_pop(adict,*keys,default=py.No('key not in dict')):
 		else:	
 			dr[k]=adict.pop(k,default)
 	return dr	
-dict_del_multi_key=dict_pop=pop_list_multi_index=pop_dict_multi_key=dict_pop_multi_key=dict_pop_multi=dict_multi_pop
+dict_remove_multi_key=dict_del_multi_key=dict_pop=pop_list_multi_index=pop_dict_multi_key=dict_pop_multi_key=dict_pop_multi=dict_multi_pop
 	
 DEFAULT_dict_get_multi_return_list=GET_DICT_MULTI_VALUES_RETURN_LIST_DEFAULT_DEFAULT=get_dict_multi_values_return_list_DEFAULT_DEFAULT=get_or_set('get_dict_multi_values_return_list_DEFAULT_DEFAULT',lazy_default=lambda:py.No('can not get key'),)
 
@@ -7121,9 +7121,14 @@ def parse_cmd_args(int=0,str='',float=0.0,dict={},list=[],tuple=py.tuple(),**ka,
 	用int=4不行，必须加上 - ，【"C:\\QGB\\Anaconda3\\lib\\argparse.py", line 1470, in _get_optional_kwargs】【 ValueError: invalid option string 'int': must start with a character '-'】，
 	如果在命令行中忘记加上 - ，这里则获取不到这个参数
 	
+parser.add_argument(
+			'--%s'%k,'-%s'%k,# k, #一定要加-否则代码执行到这里就出错：ValueError: invalid option string 'u': must start with a character '-'	
 	'''
 	import argparse
 	parser = argparse.ArgumentParser()
+	# parser.add_argument('unnamed_arg', type=str, help='An unnamed argument')
+
+
 	parser.add_argument(
 		'--int','-i','-int',# -int 6 ok # -int6 error
 		type=py.int,
@@ -7157,7 +7162,7 @@ def parse_cmd_args(int=0,str='',float=0.0,dict={},list=[],tuple=py.tuple(),**ka,
 	)	
 	for k,v in ka.items():
 		parser.add_argument(
-			'--%s'%k,'-%s'%k,
+			'--%s'%k,'-%s'%k,#k,加了也不能用。ValueError: invalid option string 'u': must start with a character '-'
 			type=py.type(v) ,  # str 不类型可能不能直接eval, 所以不能直接使用 type=py.eval, 
 			default=v,
 		)		
@@ -8347,7 +8352,7 @@ def load_jks(filename,password=''):
 	return keystore
 	p12 = keystore.entries['myalias'].export_pkcs12('mypassword')
 	
-def tts_speak(t,max_vol=100):
+def tts_speak(t,volume=100,**ka):
 	''' pip install pyttsx3
 长文本会一直阻塞，KeyboardInterrupt 无效	
 '''	
@@ -8355,17 +8360,21 @@ def tts_speak(t,max_vol=100):
 	engine = get_or_set('pyttsx3.engine',lazy_default=lambda:pyttsx3.init())
 	
 	U,T,N,F=py.importUTNF()
-	if max_vol and not py.isint(max_vol):max_vol=100
+	volume=get_duplicated_kargs(ka,'volume','vol','v','max_vol',default=volume)
+	if volume and not py.isint(volume):volume=100
 	
-	if max_vol:
+		
+	
+	if volume:
 		from qgb import Win
+		if volume==100:Win.set_volume_mute(False)#取消静音
 		v=Win.get_vol()
-		Win.set_vol(max_vol)
+		Win.set_vol(volume)
 	
 	t=T.string(t)
 	engine.proxy._driver._tts.Speak(t)
 	
-	if max_vol:Win.set_vol(v)
+	if volume:Win.set_vol(v)
 	return t	
 tts=speak=tts_speak
 
