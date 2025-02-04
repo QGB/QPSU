@@ -260,7 +260,7 @@ async def _get_page_by_url(browser,url):
 			return py.No('can not found page.url.startswith  or  in page.url:'+url)
 		return py.No('can not found page url.startswith:'+url)
 
-async def get_page(page=None,url=py.No(URL_TRADE_LIST),wait=None,browser=None):
+async def get_page(page=None,url=py.No('tb.URL_TRADE_LIST'),wait=None,browser=None):
 	global JS_ONLOAD
 	# py.pdb()()
 	if py.istr(page) and not url: # and ('://' in page) 

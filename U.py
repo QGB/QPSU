@@ -3048,7 +3048,7 @@ def dirValue(a=None,filter='',type=None,recursion=False,depth=2,timeout=6,__ai=0
 DirValue=getdir=getDirValue=dirValue
 
 DEFAULT_search_iterable=get_or_set('DEFAULT_search_iterable',lazy_default=lambda:py.No('DEFAULT_search_iterable'),)
-def search_iterable(a=DEFAULT_search_iterable,filter='',type=None,depth=2,out_limit=99,_i_depth=0,si='a',return_value=False):
+def search_iterable(a=DEFAULT_search_iterable,filter='',type=None,depth=2,out_limit=99,_i_depth=0,si='a',return_value=False,list_return_index=False):
 	'''iterable
 	# typo deepth
 #TODO return_value	当前v 或者 上一级 v 。没有想到很好办法去描述

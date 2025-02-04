@@ -106,7 +106,14 @@ def oshwhub():
 	code=r"""
 from qgb.tests import taobao_trade as tb
 is_600=U.get_current_day_passed_seconds()<600
-ps=await tb.get_or_new_page('https://oshwhub.com/sign_in',select_tab=is_600)
+try:
+	ps=await tb.get_or_new_page('https://oshwhub.com/sign_in',select_tab=is_600)
+except Exception as e:
+	U.print_traceback_in_except(e)
+	U.kill('chrome.exe',ask=0)
+	!start "" C:\Users\qgb\AppData\Local\CentBrowser\Application\chrome.exe --remote-debugging-port=9222
+	1/0
+	
 if is_600:await ps.reload()
 sd=str(U.get_current_datetime().day)
 
