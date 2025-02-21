@@ -71,6 +71,31 @@ try:
 	import win32gui
 except Exception as ei:pass
 #############################################
+
+def get_windows_version():
+	import winreg
+	import platform
+	try:
+		# 访问注册表获取详细版本信息
+		key = winreg.OpenKey(
+			winreg.HKEY_LOCAL_MACHINE,
+			r"SOFTWARE\Microsoft\Windows NT\CurrentVersion"
+		)
+		
+		# 读取注册表键值
+		product_name = winreg.QueryValueEx(key, "ProductName")[0]
+		display_version = winreg.QueryValueEx(key, "DisplayVersion")[0]  # Win10 21H2+/Win11
+		build_number = winreg.QueryValueEx(key, "CurrentBuildNumber")[0]
+		ubr = winreg.QueryValueEx(key, "UBR")[0]  # 更新版本号
+	except:
+		# 回退到 platform 模块
+		return f"{platform.system()} {platform.release()} (Build {platform.version()})"
+	else:
+		return f"{product_name} (版本 {display_version}, 操作系统内部版本 {build_number}.{ubr})"
+	finally:
+		key.Close()
+ver=version=get_version=get_windows_version
+  
 def get_lnk_target(file):
 	import win32com.client 
 
@@ -1345,11 +1370,11 @@ for w,i in gdWinVerNum.items():
 	py.execute('''def is{0}():return getVersionNumberCmdVer()=={1}'''.format(
 		w.replace('.','_'),i)    )			 
 			 
-def getWinName():
-	for w,i in gdWinVerNum.items():
-		if i==getVersionNumber():
-			return 'Windows '+w
-	raise EnvironmentError('Unknown Windows VersionNumber',getVersionNumber())
+	def getWinName():
+		for w,i in gdWinVerNum.items():
+			if i==getVersionNumber():
+				return 'Windows '+w
+		raise EnvironmentError('Unknown Windows VersionNumber',getVersionNumber())
 
 name=systemName=getSysName=getWinName
 def GetProcessImageFileName(pid=None):

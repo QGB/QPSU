@@ -32,6 +32,8 @@ class SubtitlePlayer:
 		for start, end, text in self.cues:
 			self.root.after(start, lambda t=text: self.add_sub(t))
 			self.root.after(end, lambda t=text: self.remove_sub(t))
+		
+		self.root.geometry(f"+300+700")# 屏幕底部显示
 
 	def start_drag(self, event): 
 		self.drag_pos = (event.x, event.y)

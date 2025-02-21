@@ -1432,6 +1432,13 @@ template=RPC_GET_TEMPLATE,
 			return py.No(e,url,b)
 rpc_get=rpc_get_var=rpcGetVariable=rpc_get_variable
 
+
+def rpc_get_get(name,
+base=AUTO_GET_BASE,
+template=RPC_GET_TEMPLATE,
+		timeout=9,p=True,return_bytes=False,proxies=None,ipy=False,**ka):
+	return rpc_get_variable(varname=f'U.get{py.repr(name)}',base=base,template=template,timeout=timeout,p=p,return_bytes=return_bytes,proxies=proxies,ipy=ipy,**ka,)
+	
 # grpc_base=''
 
 # class RPC:

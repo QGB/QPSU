@@ -104,6 +104,9 @@ ps=await tb.get_or_new_page('https://oshwhub.com/sign_in',select_tab=0)
 
 def oshwhub():
 	code=r"""
+gods=U.get('oshwhub'+U.stime()[:10],[])
+if gods and U.get_current_datetime().day==int(gods[-1]):
+	1/0
 from qgb.tests import taobao_trade as tb
 is_600=U.get_current_day_passed_seconds()<600
 try:
@@ -152,6 +155,7 @@ if U.get_current_datetime().weekday()==6:# 0-6
 if (U.get_current_datetime()+U.time_delta(days=1)).day==1:#月度最后一天	
 	es=await ps.xpath( '//span[contains(text(), "月度好礼")]')           
 	if es:await es[0].click()	
+U.set('oshwhub'+U.stime()[:10],ods)	
 ','.join(ods)
 """
 	# is_req=N.is_flask_request()
