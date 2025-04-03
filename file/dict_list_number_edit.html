@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>{func_name} {dict_name}</title>
+    <style>
+        /* 所有样式保持原样 */
+        body { font-family: Arial,sans-serif; margin:10px; }
+        .container { max-width:980px; margin:auto; }
+        table { width:100%; border-collapse:collapse; margin:8px 0; }
+        th,td { border:1px solid #ddd; padding:4px; }
+        th { background:#f5f5f5; }
+        
+        .global-controls {
+            margin: 10px 0;
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+        .global-controls input {
+            width: 100px;
+            height: 28px;
+            padding: 0 8px;
+        }
+        .global-btns {
+            display: flex;
+            gap: 4px;
+        }
+        .global-btn {
+            padding: 6px 12px;
+            background: #2196F3;
+            color: white;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+        }
+        .input-group { 
+            display: flex;
+            align-items: center;
+            gap: 2px;
+        }
+        .adjust-btn { 
+            width:32px; height:28px;
+            border:0; border-radius:2px;
+            font-size:16px; cursor:pointer;
+            display: inline-flex;
+            justify-content:center;
+            align-items:center;
+        }
+        .minus-btn { background:#ff4444; }
+        .plus-btn { background:#4CAF50; }
+        .num-input {
+            width:80px; height:26px;
+            padding:0 4px;
+            text-align:center;
+            border:1px solid #ccc;
+        }
+        #output { margin:8px 0; padding:6px; font-size:14px; }
+        .success { color:#155724; background:#d4edda; }
+        .error { color:#721c24; background:#f8d7da; }
+        .loader {
+            border:3px solid #f3f3f3;
+            border-top-color:#3498db;
+            width:25px; height:25px;
+            margin:15px auto;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin { to { transform:rotate(360deg); } }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="global-controls">
+            <input type="number" id="globalStep" value="0.0001" step="0.0001" min="0.0001" placeholder="调整步长">
+            <div class="global-btns">
+                <button class="global-btn" onclick="adjustAll('minus')">全部减少</button>
+                <button class="global-btn" onclick="adjustAll('plus')">全部增加</button>
+                <button id="saveBtn" onclick="saveChanges()" hidden>保存修改</button>
+                <div id="output"></div>
+            </div>
+        </div>
+        
+        <div id="loading" class="loader" hidden></div>
+        <table id="editor">
+            <tr><th>交易对</th><th>plow</th><th>tlow</th><th>phigh</th><th>thigh</th></tr>
+        </table>
+        
+    </div>
+
+<script>
+window.gsurl = '/r={func_name}(p,{dict_name},';
+
+// 全局调整功能
+function adjustAll(operation) {
+    const step = parseFloat(document.getElementById('globalStep').value) || 0.0001;
+    document.querySelectorAll('.num-input').forEach(input => {
+        const currentVal = parseFloat(input.value) || 0;
+        let newVal = operation === 'plus' ? 
+            currentVal + step : 
+            Math.max(currentVal - step, 0);
+        input.value = newVal.toFixed(4);
+        input.dispatchEvent(new Event('input'));
+    });
+}
+
+// 完全保留原始按钮逻辑
+function createBtn(input, isPlus, step) {
+    return Object.assign(document.createElement('button'), {
+        className: `adjust-btn ${isPlus?'plus':'minus'}-btn`,
+        textContent: isPlus ? '+' : '-',
+        onclick: async (e) => {
+            e.preventDefault();
+            try {
+                const val = Number(input.value) || 0;
+                const newValue = Math.max(val + (isPlus ? step : -step), 0);
+                input.value = newValue.toFixed(4);
+                
+                const cell = e.target.closest('td');
+                const row = cell.closest('tr');
+                const key = encodeURIComponent(row.cells[0].textContent);
+                const columnIndex = cell.cellIndex - 1;
+                const currentValue = input.value;
+
+                const response = await fetch(`/{dict_name}['${key}'][${columnIndex}]=${currentValue};r=U.stime()`);
+                
+                if (!response.ok) {
+                    throw new Error(`更新失败: ${response.status}`);
+                }
+                
+                input.dispatchEvent(new Event('input'));
+                showMessage(
+                    `${key} ${columnIndex} 更新成功 ` + await response.text(),
+                    'success',
+                    3000
+                );
+            } catch (error) {
+                console.error('更新操作失败:', error);
+                showMessage(error.message, 'error', 5000);
+            }
+        }
+    });
+}
+
+// 初始化表格（保持原始参数）
+function initTable(data){
+    const steps = [0.0001,0.1,0.0001,0.1];
+    const t = document.getElementById('editor');
+    while(t.rows.length > 1) t.deleteRow(1);
+    
+    for(const [k,vals] of Object.entries(data)){
+        const row = t.insertRow();
+        row.insertCell().textContent = k;
+        vals.forEach((v,i) => {
+            const cell = row.insertCell();
+            const div = document.createElement('div');
+            div.className = 'input-group';
+            
+            const input = Object.assign(document.createElement('input'),{
+                type: 'number',
+                className: 'num-input',
+                step: steps[i],
+                value: Number(v).toFixed(4)
+            });
+
+            div.append(
+                createBtn(input, false, steps[i]),
+                input,
+                createBtn(input, true, steps[i])
+            );
+            cell.appendChild(div);
+        });
+    }
+}
+
+// 数据加载（未修改）
+async function loadData(){
+    try {
+        showLoading(true);
+        const res = await fetch(gsurl+'get=1)');
+        if(!res.ok) throw new Error(`HTTP错误 ${res.status}`);
+        initTable(await res.json());
+        saveBtn.hidden = false;
+    } catch(e) {
+        showMessage(`加载失败: ${e.message}`, 'error');
+    } finally {
+        showLoading(false);
+    }
+}
+
+// 保存功能（完全保留）
+async function saveChanges(){
+    try {
+        showLoading(true);
+        const data = [...editor.rows].slice(1).reduce((o,row) => {
+            o[row.cells[0].textContent] = [...row.querySelectorAll('input')]
+                .map(i => +i.value || 0);
+            return o;
+        }, {});
+        
+        const res = await fetch(gsurl+'set=1)', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify(data)
+        });
+        showMessage(res.ok ? '保存成功!'+await res.text() : '保存失败', res.ok ? 'success' : 'error');
+    } catch(e) {
+        showMessage(`错误: ${e.message}`, 'error');
+    } finally {
+        showLoading(false);
+    }
+}
+
+// 完全保留原始辅助函数
+const showMessage=(msg,type)=>{ 
+    output.innerHTML=msg; 
+    output.className=type; 
+    // setTimeout(()=>output.innerHTML='',1000*9); 
+};
+const showLoading=(show)=>loading.hidden=!show;
+
+window.onload = loadData;
+</script>
+</body>
+</html>

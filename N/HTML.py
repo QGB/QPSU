@@ -8,11 +8,43 @@ else:
 	from qgb import py
 U,T,N,F=py.importUTNF()
 
+def format(s,**ka):
+	ka={'{%s}'%k:v for k,v in ka.items()}
+	return T.replacey(s,ka)
+
+def dict_list_number_edit(response,adict,get=False,set=None):
+	response.headers['Access-Control-Allow-Origin'] = '*'
+	response.headers['Access-Control-Allow-Methods'] = 'GET, POST, OPTIONS'
+	response.headers['Access-Control-Allow-Headers'] = 'Content-Type'
+	# response.headers['Access-Control-Max-Age'] = '3600'
+	if get:
+		# response.headers['Content-Type']='text/html;charset=utf-8'	
+		return T.json_dumps(adict)
+
+	from flask import request
+	if set:
+		d=request.get_json()
+		adict.update(d)
+		return T.json_dumps({'time':U.stime()})
+		return U.stime(),d,adict
+	dict_name='okx_private.gdsr4'
+	u=request.url
+	s1=T.sub_last(u,'%2C','%2C')
+	s2=T.sub_last(u,'%2C','%29')
+	if s1:dict_name=s1
+	elif s2:dict_name=s2
+	
+	# return u,s1,s2
+
+	html=F.read_qpsu_file('dict_list_number_edit.html')
+	html=format(html,dict_name=dict_name,func_name='N.HTML.dict_list_number_edit')
+	response.headers['Content-Type']='text/html;charset=utf-8'
+	response.set_data(html)
+
+
 AC_DEFAULT=py.No('auto use last,not change')	
 # AC_DEFAULT=U.get_or_set('N.HTML.AC_DEFAULT',lazy_default=lambda:py.No('auto use last,not change')	)
 # print(repr(AC_DEFAULT))
-
-
 def hualin(t=30,fan_speed=100,mode='cool',toggle_display=True,power=AC_DEFAULT,fan_only=False,**ka):
 	''' 
 [<fan_speed_enum.Auto: 102>,
@@ -114,6 +146,7 @@ try:
 except Exception as e:
 	U.print_traceback_in_except(e)
 	U.kill('chrome.exe',ask=0)
+	U.sleep(1)
 	!start "" C:\Users\qgb\AppData\Local\CentBrowser\Application\chrome.exe --remote-debugging-port=9222
 	1/0
 	
@@ -267,9 +300,10 @@ def xiaomi_air_conditioner_control(response=None,token=py.No('auto get'),t=0,ang
 	import miio
 	
 	if not ip:
-		ip=U.get_or_set('miio.ip','192.168.1.88')
+		ip=U.get_or_dill_load_or_dill_dump_and_set('miio.ip','192.168.1.88')
 	else:	
 		ip=N.auto_ip(ip)
+		U.set_and_dill_dump('miio.ip',ip)
 	
 	if py.getattr(miio,'Device',0):
 		d=U.get_or_set(ip+':'+token,
@@ -1043,10 +1077,20 @@ def list_2d(response,a,html_callback=None,index=True,sort_kw=U.SORT_KW_SKIP,colu
 	
 	for cname,type in column_type_dict.items():
 		if type=='ms':
-			df[cname] = pandas.to_datetime(df[cname],unit='ms',)
+			df[cname]=pandas.to_numeric(df[cname])  # 转换为数值类型 避免警告  FutureWarning: The behavior of 'to_datetime' with 'unit' when parsing strings is deprecated
+			valid_mask = df[cname] > 0 # 对有效值进行时间戳转换，无效值保留原始值
+			df[cname] = (
+				pandas.to_datetime(df[cname][valid_mask], unit='ms', utc=True)
+				.dt.tz_convert(timezone).dt.tz_localize(None)  # 时区处理
+				.reindex(df.index)  # 保持与原数据索引一致
+				.fillna(df[cname])  # 无效值填充为原始数值
+			)
+
+			# df[cname]=pandas.to_datetime(df[cname],unit='ms',)
 			if timezone!='UTC':df[cname]=df[cname].dt.tz_localize(timezone).dt.tz_convert('UTC').dt.tz_localize(None) #.dt.tz_convert('UTC')不能省略 。否则显示UTC时间
 			continue
 		if type in ['t','time','s',]:
+			df[cname]=pandas.to_numeric(df[cname])
 			df[cname] = pandas.to_datetime(df[cname],unit='s',)
 			if timezone!='UTC':df[cname]=df[cname].dt.tz_localize(timezone).dt.tz_convert('UTC').dt.tz_localize(None)
 			continue
@@ -1291,10 +1335,6 @@ input[type="text"]{
 	response.set_data(r)
 	return efs
 esimg=everything_search_image
-
-def format(s,**ka):
-	ka={'{%s}'%k:v for k,v in ka.items()}
-	return T.replacey(s,ka)
 
 def eng_audio(response,word,audio_path='C:/test/google_translate_tts/',proxies="socks5h://192.168.1.20:41080",curl=False,**ka):
 	if 'google_translate_tts' not in audio_path:

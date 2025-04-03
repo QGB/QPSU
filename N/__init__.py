@@ -1553,8 +1553,11 @@ def rpc_set_variable(*obj,base=AUTO_GET_BASE,timeout=9,varname='v',ext_cmd='r=U.
 	return url,b
 set_rpc=set_rpc_var=rpc_set=rpc_set_var=rpcSetVariable=rpc_set_variable
 
-def rpc_get_file(filename,return_b=False,**ka):
+def rpc_get_file(filename,save_dir=None,return_b=False,**ka):
 	U,T,N,F=py.importUTNF()
+	if not save_dir:save_dir=U.gst
+	if not save_dir[-1] in '/\\':save_dir+='/'
+
 	base=set_remote_rpc_base(**ka)
 	u=base+'response.set_data(F.readb(N.geta()))%23-'+T.url_encode(filename)
 	
@@ -1565,7 +1568,7 @@ def rpc_get_file(filename,return_b=False,**ka):
 	if py.isno(b):return b	
 	
 	
-	f=F.write(F.get_filename(filename),b)
+	f=F.write(save_dir+F.get_filename(filename),b)
 	if return_b:
 		return f,u,b
 	return f	

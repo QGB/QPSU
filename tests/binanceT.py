@@ -75,7 +75,7 @@ def get_srpcka(ka):
 	if 'convert_func' not in srpcka:srpcka+='convert_func=float,'
 	return srpcka
 
-def get_kline_without_pandas(symbol='ETH',interval='1s',start=0,end=0,day='',second=0,kline_range=(-500,500),auto_expand_range=False,return_json=True,**ka):
+def get_kline_without_pandas(symbol='ETH',interval='1s',start=0,end=0,day='',second=0,kline_range=(-500,500),auto_expand_range=False,return_json=True,debug=False,**ka):
 	'''  U.cbs(U.stime_to_ms_int(U.cbg(p=1))-1000*60*60*8,p=1)
 	'''
 	symbol=U.get_duplicated_kargs(ka,'symbol','s','S',default=symbol)
@@ -94,7 +94,7 @@ def get_kline_without_pandas(symbol='ETH',interval='1s',start=0,end=0,day='',sec
 		
 	if second and not (start and end):
 		if py.istr(second):
-			second=U.stime_to_ms(second)
+			second=U.stime_to_ms(second,timezone=8)
 		elif U.slen(second)==10:second*=1000
 		
 		cms=U.itime_ms()
@@ -103,8 +103,11 @@ def get_kline_without_pandas(symbol='ETH',interval='1s',start=0,end=0,day='',sec
 			kline_range[1]=(cms-second)//gdims[interval]+1
 			kline_range[0]=-(1000-kline_range[1])
 		start=second+kline_range[0]*gdims[interval]
+		start=py.max(start,0)
 		end=second+kline_range[1]*gdims[interval]
-	
+	if debug:
+		return U.v.rpc_get(f"B.get_kline_without_pandas({symbol!r},interval={interval!r},start={start!r},end={end!r},{get_srpcka(ka)})",**get_rpcka())
+
 	data=N.rpc_get(f"B.get_kline_without_pandas({symbol!r},interval={interval!r},start={start!r},end={end!r},{get_srpcka(ka)})",**get_rpcka())
 	
 	if return_json:
@@ -248,19 +251,21 @@ def convert_klines_to_json(klines):
 					'turnover':d['quote_volume'],
 				}
 				rds.append(kline_data)
-	if py.islist(klines) and py.len(klines[0])==12:
-		for v in klines:
-			kline_data = {
-				'timestamp': v[0],
-				'open': 	py.float(v[1]),
-				'high': 	py.float(v[2]),
-				'low':  	py.float(v[3]),
-				'close':	py.float(v[4]),
-				'volume':	py.float(v[5]),
-				'turnover': py.float(v[7]),
-			}
-			rds.append(kline_data)	
-	
+	if py.islist(klines):
+		if py.len(klines[0])==12:
+			for v in klines:
+				kline_data = {
+					'timestamp': v[0],
+					'open': 	py.float(v[1]),
+					'high': 	py.float(v[2]),
+					'low':  	py.float(v[3]),
+					'close':	py.float(v[4]),
+					'volume':	py.float(v[5]),
+					'turnover': py.float(v[7]),
+				}
+				rds.append(kline_data)	
+		elif py.len(klines[0])==7 and py.isdict(klines[0]) and 'turnover' in klines[0]:
+			rds=klines
 	elif py.istr(klines):
 		return klines
 	
@@ -389,4 +394,18 @@ def get_ws_key(key):
 	rp=requests.post('https://www.mokexapp.cz/api/v1/userDataStream', headers=headers)
 	print(rp.text)
 	return rp
+	
+def bybit_klines(symbol: str='MNTUSDT', interval: str='1', start: int =1738512000000, end: int = 1738598400000, limit: int = 1440,return_json=True,**ka):
+
+	data=N.rpc_get(
+    f"bybit.get_kline(symbol={symbol!r},interval={interval!r},start={start!r},end={end!r},limit={limit!r})",
+    base='http://10.40.47.90:1133/', 
+    proxy='socks5://192.168.1.20:41080',
+    template='{base}import bybit;response.set_data(F.serialize({varname}))'
+	)
+	
+	if return_json:
+		return convert_klines_to_json(data)
+	return data	
+bybit_kline=bybit_klines	
 	

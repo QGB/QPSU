@@ -902,12 +902,20 @@ def list_remove_multi_values(a,*vs,skip_not_exists=False):
 		except Exception as e:
 			if not skip_not_exists:
 				r.append(py.No(e))
-	return r		
-
+	return r
 list_pop_multi_values=list_remove_multi_values	
 	
+def list_move_value_to_tail(cs,*values):
+	for n,v in py.enumerate(values):
+		if v not in cs:
+			return py.No('No.%s:%s not in list!'%(n,v),v,values)
+	for v in values:
+		cs.remove(v);cs.append(v)
+	return cs
+list_reindex_tail=list_reindex_to_tail=list_move_value_to_tail
+	
 def list_reindex_by_value(alist,*values):
-	''' 调整顺序  reindex ,
+	''' 调整顺序  reindex ,  会修改参数list
 	
 确保 values 全部存在，否则中途出现错误会污染 alist
 	'''
@@ -918,7 +926,7 @@ def list_reindex_by_value(alist,*values):
 	
 	for n,v in py.enumerate(values):
 		if v not in alist:
-			return py.No('No.%s:%s not in values!'%(n,v),v,values)
+			return py.No('No.%s:%s not in list!'%(n,v),v,values)
 	
 	vs=[]
 	for v in values:
@@ -2110,13 +2118,16 @@ del_mod=delete_mod=del_modules=delete_modules=remove_mod=remove_module
 def reload(*mods):
 	''' 不是一个模块时，尝试访问mod._module'''
 	# da=U.get_caller_args_dict()
-	import sys,imp
+	import sys
+	try:import imp as importlib
+	except:import importlib
+	
 	if len(mods)<1:#如果 mods 中含有长度为0的元素，会导致U重新加载
 		# sys.modules['qgb._U']=sys.modules['qgb.U'] #useless, _U is U
 		#if pop qgb.U,can't reload
-		if 'qgb.U' in sys.modules:   imp.reload(sys.modules['qgb.U'])
-		elif 'U' in sys.modules:     imp.reload(sys.modules['U'])
-		elif 'qgb._U' in sys.modules:imp.reload(sys.modules['qgb._U'])
+		if 'qgb.U' in sys.modules:   importlib.reload(sys.modules['qgb.U'])
+		elif 'U' in sys.modules:     importlib.reload(sys.modules['U'])
+		elif 'qgb._U' in sys.modules:importlib.reload(sys.modules['qgb._U'])
 		else:raise EnvironmentError('not found qgb.U ?')
 		# pln 233
 	elif len(mods)==1:
@@ -2124,7 +2135,7 @@ def reload(*mods):
 		if isModule(mod):
 			if mod.__name__ in sys.modules:				
 				try:
-					imp.reload(mod)
+					importlib.reload(mod)
 				except Exception as ei:
 					setErr(ei)
 			else:
@@ -3147,7 +3158,11 @@ def getObjName(a,value=False):
 getName=getObjName
 
 def get_args_dict_without_ka(*a):
-	''' #TODO 暂不支持单个参数
+	'''
+'adict.bug'
+'adict.key_len_limit'	
+	
+	 #TODO 暂不支持单个参数
 U.adict(1) =================  [<_ast.Module at 0x1e6740b7190>,
   <_ast.Expr at 0x1e6745a1d00>,
   <_ast.Constant at 0x1e6741434c0>]	
@@ -3187,7 +3202,7 @@ U.adict(lambda a:a) ========= [<_ast.Module at 0x1e674e2e700>,
 			if py.len(sx)>2 and sx[0]=='(' and sx[-1]==')':
 				sx=sx[0+1:-1-1]
 			sx=sx.replace(' ','') # 可能会破坏语义	
-			x.append(sx)  
+			x.append(sx[:get('adict.key_len_limit',99)])  
 			n+=1
 	assert len(x)==len(a)
 	set('adict('+code,x)		
@@ -3801,6 +3816,10 @@ U.stime(0.0004)
 		else:return tMod.strftime(format)
 stime=getCurrentTimeStr=timeToStr=getStime=get_time_as_str
 
+def parse_time_str_to_ms(a,**ka):
+	return int(parse_time_str(a,**ka).timestamp()*1000)
+parse_time_str_to_ms
+
 def parse_time_str(a,format='%Y-%m-%d__%H.%M.%S'):
 	''' return datetime.datetime( '''
 	try:
@@ -4222,7 +4241,7 @@ def stime_to_int_ms(s,timezone=0):
 	except:pass
 	
 	return py.int(dt.timestamp()*1000)+ms
-stime_to_ms=stime_to_ms_int=stime_to_int_ms
+s2ms=stime_to_ms=stime_to_ms_int=stime_to_int_ms
 
 def time_range_list(*a,**ka):
 	return py.list(time_range(*a,**ka))
@@ -8190,7 +8209,8 @@ ValueError: no signature found for builtin type <class 'dict'>
 	'''
 	import inspect
 	try:
-		if py.isinstance(callable,(inspect.FullArgSpec,inspect.ArgSpec)):
+		# if py.isinstance(callable,(py.getattr(inspect,'FullArgSpec',type),py.getattr(inspect,'ArgSpec',type), )):
+		if isinstance(callable, inspect.FullArgSpec):			
 			return callable
 		return inspect.getfullargspec(callable)
 	except Exception as e:
