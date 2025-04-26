@@ -2129,19 +2129,26 @@ def json_dump_to_file(obj,file,**ka):
 	except Exception as e:
 		return py.No(e)
 		
-def json_dumps(obj,whitespace=True):
-	U=py.importU()
-	def default(obj):# not json basic class
-		return py.repr(obj)
-		# return {'obj-%s'%U.count(obj):py.repr(obj)}
-
-	ka={'default':default}
-	if not whitespace:
-		ka['separators']=(',', ':')
-
+def json_dumps(obj, whitespace=True):
 	import json
+	from decimal import Decimal
+
+	def default(obj):
+		# 优先处理Decimal类型
+		if isinstance(obj, Decimal):
+			return str(obj)
+		# 其他非基本类型返回repr
+		return repr(obj)
+
+	ka = {
+		'default': default,
+		'ensure_ascii': False
+	}
+	if not whitespace:
+		ka['separators'] = (',', ':')
+
 	try:
-		return json.dumps(obj ,**ka)
+		return json.dumps(obj, **ka)
 	except Exception as e:
 		return py.No(e)
 json_dump=json_dumps

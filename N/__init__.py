@@ -101,7 +101,6 @@ PermissionError: [Errno 13] Permission denied: 'C:\\Users\\qgb\\AppData\\Local\\
 		if return_raw_list and len(dr)>len(r):r.append(c)		
 	if return_raw_list:return r	
 	return dr
-	
 edge_cookies=get_cookies_from_edge=get_browser_cookies=get_cookies_from_browser=extract_cookies_from_browser=get_cookies_dict_from_browser
 
 
@@ -3004,8 +3003,80 @@ gethostname=getHostName=getComputerName
 def getArpTable():
 	U=py.importU()
 	return U.cmd('arp -a')
+
+def scan_port_ip_range(mask='192.168.1.1/24', threadsMax=33, port=3389, callback=None,debug=False):
+	'''扫描指定网段的所有3389端口
+	return [opens, closes, errors]
+	opens: [(ip, port), ...]
+	callback(*scanReturns)
+	'''
+	U = py.importU()
+	from threading import Thread
+	import socket,ipaddress
+	counting_open = U.set('scanPorts.open', [])
+	counting_close = U.set('scanPorts.close', [])
+	errors = U.set('scanPorts.error', [])
+	threads = U.set('scanPorts.threads', [])
+
+	# 解析网段生成IP列表
+	try:
+		network = ipaddress.ip_network(mask, strict=False)
+		ip_list = [str(host) for host in network.hosts()]  # 生成所有可用主机IP
+	except ValueError:
+		ip_list = [mask]  # 作为单个IP处理
+
+	def scan(ip_port):
+		ip, port = ip_port
+		try:
+			s = socket.socket()
+			s.settimeout(1)
+			result = s.connect_ex((ip, port))
+			if result == 0:
+				counting_open.append((ip, port))
+				s.close()
+			else:
+				counting_close.append((ip, port))
+				s.close()
+		except Exception as e:
+			errors.append({(ip, port): e})
+
+	def newThread(ip_port):
+		t = Thread(name='scanPorts %s:%s' % (ip_port[0], ip_port[1]),
+					target=scan, args=(ip_port,))
+		threads.append(t)
+		try:
+			t.start()
+		except:
+			"can't start new thread"
+
+	# 生成所有IP:port组合
+	targets = [(ip, port) for ip in ip_list]
+	if debug:return targets
+	im = py.float(len(targets))
+	percent = 0.0
+
+	for i, ip_port in enumerate(targets):
+		if (i/im > percent):
+			U.pln('Scanning %.0f%%' % (percent*100), len(threads))
+			percent += 0.01
+			
+		if len(threads) <= threadsMax:
+			newThread(ip_port)
+		else:
+			for x in threads:
+				if x.is_alive():
+					x.join()
+					newThread(ip_port)
+				else:
+					threads.remove(x)
+				break
+
+	[x.join() for x in threads]
+	if callback:
+		callback(counting_open, counting_close, errors)
+	return counting_open, counting_close, errors	
 		
-def scanPorts(host,threadsMax=33,from_port=1,to_port=65535,callback=None,ip2=192.168):
+def scan_ports_single_ip(host,threadsMax=33,from_port=1,to_port=65535,callback=None,ip2=192.168):
 	'''return [opens,closes,errors]
 	callback(*scanReturns)
 	if callback and ports> threadsMax: 剩下结果将异步执行完成

@@ -13,6 +13,22 @@ try:
 except Exception as ge:
 	print(ge)
 
+def sync_call_async(af,timeout=60,gloop=None):
+	if not gloop:
+		gloop = U.get_or_set('gloop', lazy_default=lambda:asyncio.get_event_loop())
+	future = asyncio.run_coroutine_threadsafe(af, gloop)
+	try:
+		# 等待任务完成（timeout 自动终止任务）
+		rnone=future.result(timeout=timeout)
+	except TimeoutError:
+		logging.error(f"任务执行超时{timeout}s")
+	except Exception as e:
+		logging.error(f"任务执行失败:{str(e)}")
+	finally:
+		future.cancel()
+	return af,future,rnone
+call=acall=sync_call=sync_call_async
+
 async def send_post_request(url, data):
 	async with aiohttp.ClientSession() as session:
 		session.post(url, data=data,return_response=False)

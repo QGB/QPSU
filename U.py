@@ -6076,9 +6076,9 @@ def dict_j_value(a,b):
 jdv=jDictValue=dict_j_value
 
 try:
-	import sortedcontainers
 	DictLimitSizeSortedKey=LimitSizeSortedDict=get('U.LimitSizeSortedDict')
 	if not LimitSizeSortedDict:
+		import sortedcontainers
 		class LimitSizeSortedDict(sortedcontainers.SortedDict):
 			''' max_size  default 50
 pop_index default 0			
@@ -8307,8 +8307,8 @@ Load key "C:/test/ssh/privateKey_NIST256p_1.pem": invalid format
 	sk.privkey.secret_multiplier=secexp
 	vk = sk.verifying_key
 
-	with open(f"{dir}privateKey_{curve}_{comment}.pem", "wb") as f:
-		f.write(sk.to_pem())
+	with open(f"{dir}privateKey_{curve}_{comment}.pem", "wb") as fprivate:
+		fprivate.write(sk.to_pem())
 	first = "ecdsa-sha2-nistp256"
 	prefix = b"\x00\x00\x00\x13ecdsa-sha2-nistp256\x00\x00\x00\x08nistp256\x00\x00\x00A"
 	second = base64.b64encode(
@@ -8322,7 +8322,7 @@ Load key "C:/test/ssh/privateKey_NIST256p_1.pem": invalid format
 	if return_pub:return StrRepr(bpub.decode())
 	with open(f"{dir}publicKey_{curve}_{comment}.pub", "wb") as f:
 		f.write(bpub)
-	return sk,vk	
+	return sk,vk,fprivate,f	
 edcsa_key_pair=get_edcsa_key_pair=generate_edcsa_key_pair=createECDSAKeyPairLocally=generate_edcsa_by_secexp=generate_ecdsa_by_secexp
 
 def generate_edcsa_by_private_key(private_key=None,filename='id_ecdsa'):

@@ -53,10 +53,19 @@ async def login():
 
 	
 async def get_cookies():
+	'''
+属性	Cookie 1 (国际版)	Cookie 2 (中国版)	差异说明
+name	vivo_account_cookie_iqoo_checksum	vivo_account_cookie_iqoo_checksum	名称相同
+value	c41e260cbc009c45a2b6aab12fce060d.1745127814090	388a0d60eed3e82129d6cf7bd3b18331.1745663888355	校验值和时间戳不同，可能对应不同账号/会话
+domain	.vivo.com	.vivo.com.cn	国际版 vs 中国版域名，反映区域部署差异	
+	'''
 	cy=['JSESSIONID','vivo_account_cookie_iqoo_deviceid','account','vivo_account_cookie_iqoo_checksum','vivo_account_cookie_iqoo_openid','vivo_account_cookie_iqoo_authtoken','vivo_account_cookie_iqoo_vivotoken','vivo_account_cookie_iqoo_regioncode','pwd','clientId','log_r_flow_no','log_r_reuslt','vivo_account_cookie_cloud_checksum','vivo_account_cookie_cloud_openid','vivo_yun_csrftoken']
-	ph=await tb.get_or_new_page(url='https://yun.vivo.com.cn/#/home')
+	# ph=await tb.get_or_new_page(url='https://yun.vivo.com.cn/#/home')
+	# ph=await tb.get_or_new_page(url='https://pc.vivo.com.cn/suite?origin=cloudWeb#/cloudService')
+	# ph=await tb.get_or_new_page(url='https://find.vivo.com.cn/')
+	ph=await tb.get_or_new_page(url='https://find.vivo.com.cn/findphone/bound')
 	cs=await tb.get_all_cookies(ph)
-	vcs=[d for d in cs if 'vivo' in d['domain']]
+	vcs=[d for d in cs if 'vivo.com.cn' in d['domain']]
 	dr={}
 	# for k,v in dc.items():
 	for k in cy:

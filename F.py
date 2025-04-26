@@ -1419,7 +1419,7 @@ def ll(ap='.',readable=True,type='',t='',r=False,d=False,dir=False,f=False,file=
 					raise
 				
 		else:
-			dr[i]=[size(i),s.st_atime,s.st_mtime,s.st_ctime,s.st_mode]
+			dr[i]=[int(size(i)),s.st_atime,s.st_mtime,s.st_ctime,s.st_mode]
 	if return_dict or not return_list:
 		return dr
 	else:

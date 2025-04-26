@@ -409,3 +409,49 @@ def bybit_klines(symbol: str='MNTUSDT', interval: str='1', start: int =173851200
 	return data	
 bybit_kline=bybit_klines	
 	
+
+def dogecoin_2013_2023(return_json=True):
+	'''  https://datawrapper.dwcdn.net/S2SIY/33/dataset.csv  '''
+	if U.isWin():
+		csv_data=F.read_csv(r'C:\Users\qgb\Downloads\dataset.csv')
+	if U.isLinux():
+		csv_data=F.read_csv(r'/mnt/c/Users/qgb/Downloads/dataset.csv')
+
+
+	from datetime import datetime
+	import pytz  # 需要安装pytz库：pip install pytz
+	formatted = []
+
+	for entry in csv_data:
+		# 拆分日期和价格
+		date_str, price_str = entry.split('\t')
+		price = float(price_str)
+		
+		# 解析日期（格式：dd/mm/yy）
+		dt = datetime.strptime(date_str, '%d/%m/%y')
+		dt = dt.replace(tzinfo=pytz.UTC)  # 设置为UTC时区
+		
+		# 生成时间戳（当天起始时间）
+		open_time = int(dt.timestamp() * 1000)
+		# 当天结束时间（23:59:59.999）
+		close_time = open_time + 86399999  # 24*60*60*1000 -1
+		
+		# 构建数据条目
+		formatted.append([
+			open_time,          # 开盘时间戳
+			price,              # open
+			price,              # high
+			price,              # low
+			price,              # close
+			0.0,                # volume
+			close_time,         # 收盘时间戳
+			0.0,                # quote_asset_volume
+			0,                  # count
+			0.0,                # taker_buy_volume
+			0.0,                # taker_buy_quote_asset_volume
+			'0'                 # ignore
+		])
+
+	if return_json:return convert_klines_to_json(formatted)
+	return formatted
+

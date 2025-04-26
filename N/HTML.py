@@ -37,7 +37,7 @@ def dict_list_number_edit(response,adict,get=False,set=None):
 	# return u,s1,s2
 
 	html=F.read_qpsu_file('dict_list_number_edit.html')
-	html=format(html,dict_name=dict_name,func_name='N.HTML.dict_list_number_edit')
+	html=N.HTML.format(html,dict_name=dict_name,func_name='N.HTML.dict_list_number_edit')
 	response.headers['Content-Type']='text/html;charset=utf-8'
 	response.set_data(html)
 
@@ -132,6 +132,23 @@ ps=await tb.get_or_new_page('https://oshwhub.com/sign_in',select_tab=0)
 		return r.result
 	# and py.islist(r.result):
 		# return ','.join(r.result)
+	return r
+
+def vivo(a=2):
+	code=rf"""
+from qgb.tests import vivo
+U.r(vivo)
+ck=await vivo.get_cookies()
+if not vivo.send(ck,{a}):
+	await vivo.login()
+	ck=await vivo.get_cookies()
+	vivo.send(ck,{a})
+"""
+	import asyncio
+	asyncio.set_event_loop(U.get('asyncio.get_event_loop()')) 
+	r= U.get_ipython(raise_exception=1).run_cell(code,store_history=True)
+	if r.result:
+		return r.result
 	return r
 
 def oshwhub():

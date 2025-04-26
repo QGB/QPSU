@@ -1,8 +1,8 @@
 import os
 import sys;'qgb.U' in sys.modules or sys.path.append('C:/QGB/babun/cygwin/bin/');from qgb import py
-
 U,T,N,F=py.importUTNF()
 
+# dumpsys activity activities 
 
 
 def c(x,y,ms=555):

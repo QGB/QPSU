@@ -3,9 +3,8 @@
 <head>
     <title>{func_name} {dict_name}</title>
     <style>
-        /* 所有样式保持原样 */
         body { font-family: Arial,sans-serif; margin:10px; }
-        .container { max-width:980px; margin:auto; }
+        
         table { width:100%; border-collapse:collapse; margin:8px 0; }
         th,td { border:1px solid #ddd; padding:4px; }
         th { background:#f5f5f5; }
@@ -26,7 +25,7 @@
             gap: 4px;
         }
         .global-btn {
-            padding: 6px 12px;
+            padding: 6px 0px;
             background: #2196F3;
             color: white;
             border: none;
@@ -54,7 +53,7 @@
             text-align:center;
             border:1px solid #ccc;
         }
-        #output { margin:8px 0; padding:6px; font-size:14px; }
+        #output { margin:1px 0; padding:0px; font-size:14px; }
         .success { color:#155724; background:#d4edda; }
         .error { color:#721c24; background:#f8d7da; }
         .loader {
@@ -68,81 +67,150 @@
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="global-controls">
-            <input type="number" id="globalStep" value="0.0001" step="0.0001" min="0.0001" placeholder="调整步长">
-            <div class="global-btns">
-                <button class="global-btn" onclick="adjustAll('minus')">全部减少</button>
-                <button class="global-btn" onclick="adjustAll('plus')">全部增加</button>
-                <button id="saveBtn" onclick="saveChanges()" hidden>保存修改</button>
-                <div id="output"></div>
-            </div>
+    
+    <div class="global-controls">
+        <input type="number" id="globalStep" value="0.0001" step="0.00001" min="0.0001" placeholder="调整步长">
+        <div class="global-btns">
+            <button class="global-btn" onclick="adjustAll('minus')">全部减少</button>
+            <button class="global-btn" onclick="adjustAll('plus')">全部增加</button>
+            <button id="saveBtn" onclick="saveChanges()" hidden>保存修改</button>
+            <div id="output"></div>
+        </div>
+    </div>
+    
+    <table id="editor">
+        <tr><th>交易对</th><th>plow</th><th>tlow</th><th>phigh</th><th>thigh</th></tr>
+    </table>
+        
+    <!-- 新增订单模块 -->
+<div style="margin-top:30px;border-top:2px solid #eee;padding-top:20px">
+    <div style="display:flex;gap:10px;align-items:center">
+        <input type="text" id="orderSymbol" value="BTC-USDT" style="width:120px;padding:4px">
+        
+        <div style="display:flex;gap:5px">
+            <button style="background:#cfc" onclick="adjustOrderPrice('buy', -1)">-</button>
+            <input type="number" id="buyPrice" value="30000" step="0.0001" style="width:100px">
+            <button style="background:#cfc" onclick="adjustOrderPrice('buy', 1)">+</button>
+            <input type="checkbox" id="modBuy">
+            <button style="background:#4CAF50;color:white" onclick="submitOrder('buy')">买入</button>
         </div>
         
-        <div id="loading" class="loader" hidden></div>
-        <table id="editor">
-            <tr><th>交易对</th><th>plow</th><th>tlow</th><th>phigh</th><th>thigh</th></tr>
-        </table>
-        
+        <div style="display:flex;gap:5px">
+            <button style="background:#fcc" onclick="adjustOrderPrice('sell', -1)">-</button>
+            <input type="number" id="sellPrice" value="31000" step="0.0001" style="width:100px">
+            <button style="background:#fcc" onclick="adjustOrderPrice('sell', 1)">+</button>
+            <input type="checkbox" id="modSell">
+            <button style="background:#f44336;color:white" onclick="submitOrder('sell')">卖出</button>
+        </div>
     </div>
+    <div id="orderMsg" style="margin-top:8px;display:none;padding:6px"></div>
+</div>
 
 <script>
 window.gsurl = '/r={func_name}(p,{dict_name},';
 
-// 全局调整功能
-function adjustAll(operation) {
-    const step = parseFloat(document.getElementById('globalStep').value) || 0.0001;
-    document.querySelectorAll('.num-input').forEach(input => {
-        const currentVal = parseFloat(input.value) || 0;
-        let newVal = operation === 'plus' ? 
-            currentVal + step : 
-            Math.max(currentVal - step, 0);
-        input.value = newVal.toFixed(4);
-        input.dispatchEvent(new Event('input'));
-    });
+function getGlobalStep() {
+    return parseFloat(document.getElementById('globalStep').value) || 0.0001;
 }
 
-// 完全保留原始按钮逻辑
-function createBtn(input, isPlus, step) {
+// 修改后的createBtn函数（移除step参数）
+function createBtn(input, isPlus) {  // 移除了step参数
     return Object.assign(document.createElement('button'), {
         className: `adjust-btn ${isPlus?'plus':'minus'}-btn`,
         textContent: isPlus ? '+' : '-',
         onclick: async (e) => {
             e.preventDefault();
+            let response;
+            const step = getGlobalStep();  // 从输入框获取当前步进值
             try {
-                const val = Number(input.value) || 0;
-                const newValue = Math.max(val + (isPlus ? step : -step), 0);
-                input.value = newValue.toFixed(4);
-                
+                // 数值调整核心逻辑
+                const val = parseFloat(input.value) || 0;
+                let newValue = Math.max(val + (isPlus ? step : -step), step);  // 最小值设为step
+                input.value = Math.min(newValue, 9999).toFixed(4);
+
+                // 获取行列上下文
                 const cell = e.target.closest('td');
                 const row = cell.closest('tr');
-                const key = encodeURIComponent(row.cells[0].textContent);
                 const columnIndex = cell.cellIndex - 1;
-                const currentValue = input.value;
 
-                const response = await fetch(`/{dict_name}['${key}'][${columnIndex}]=${currentValue};r=U.stime()`);
-                
-                if (!response.ok) {
-                    throw new Error(`更新失败: ${response.status}`);
-                }
-                
+                // 增强的列间关系校验逻辑（使用动态step）
+                const validateRelations = () => {
+                    const relations = [
+                        { base: 0, dependent: 1 },  // plow < tlow
+                        { base: 2, dependent: 3 }   // phigh < thigh
+                    ];
+
+                    relations.forEach(({ base, dependent }) => {
+                        const baseInput = row.cells[base + 1].querySelector('.num-input');
+                        const depInput = row.cells[dependent + 1].querySelector('.num-input');
+                        
+                        let baseVal = Math.max(parseFloat(baseInput.value) || 0, step);
+                        let depVal = Math.max(parseFloat(depInput.value) || 0, step);
+
+                        // 强制保持最小间隔
+                        const enforceRelation = () => {
+                            if (baseVal >= depVal - step) {
+                                if (isPlus) {
+                                    depVal = baseVal + step;
+                                    depInput.value = depVal.toFixed(4);
+                                } else {
+                                    baseVal = Math.max(depVal - step, step);
+                                    baseInput.value = baseVal.toFixed(4);
+                                }
+                                depInput.dispatchEvent(new Event('input'));
+                                baseInput.dispatchEvent(new Event('input'));
+                            }
+                        };
+
+                        if ([base, dependent].includes(columnIndex)) {
+                            enforceRelation();
+                            
+                            // 二次校验
+                            baseVal = Math.max(parseFloat(baseInput.value), step);
+                            depVal = Math.max(parseFloat(depInput.value), step);
+                            if (baseVal >= depVal) {
+                                depInput.value = (baseVal + step).toFixed(4);
+                            }
+                        }
+                    });
+                };
+                validateRelations();
+
+                // 构建最终数值数组
+                const key = encodeURIComponent(row.cells[0].textContent);
+                const values = Array.from(row.querySelectorAll('.num-input')).map(input => {
+                    return Math.max(Number(input.value), step).toFixed(4);
+                });
+
+                const arrayPayload = `[${values.join(',')}]`;
+                // 保持/{dict_name}  前面不要加$ ,服务器模板变量
+                const apiUrl = `/{dict_name}['${key}']=${arrayPayload};r={dict_name}['${key}'],U.stime()`;
+
+                // 发送请求
+                response = await fetch(encodeURI(apiUrl));
+                if (!response.ok) throw new Error(`HTTP ${response.status}`);
+
+                // 更新界面
                 input.dispatchEvent(new Event('input'));
                 showMessage(
-                    `${key} ${columnIndex} 更新成功 ` + await response.text(),
+                    `${decodeURIComponent(key)} 更新成功 | ${await response.text()}`,
                     'success',
                     3000
                 );
             } catch (error) {
-                console.error('更新操作失败:', error);
-                showMessage(error.message, 'error', 5000);
+                console.error('操作失败:', error);
+                showMessage(
+                    `错误: ${error.message}${response ? ' | ' + await response.text() : ''}`,
+                    'error',
+                    5000
+                );
             }
         }
     });
 }
 
-// 初始化表格（保持原始参数）
+// 修改后的初始化函数
 function initTable(data){
-    const steps = [0.0001,0.1,0.0001,0.1];
     const t = document.getElementById('editor');
     while(t.rows.length > 1) t.deleteRow(1);
     
@@ -157,24 +225,36 @@ function initTable(data){
             const input = Object.assign(document.createElement('input'),{
                 type: 'number',
                 className: 'num-input',
-                step: steps[i],
+                step: getGlobalStep(),  // 使用动态步进值
                 value: Number(v).toFixed(4)
             });
 
             div.append(
-                createBtn(input, false, steps[i]),
+                createBtn(input, false),  // 移除step参数
                 input,
-                createBtn(input, true, steps[i])
+                createBtn(input, true)   // 移除step参数
             );
             cell.appendChild(div);
         });
     }
 }
 
-// 数据加载（未修改）
+
+// 全局调整功能
+function adjustAll(operation) {
+    const step = parseFloat(document.getElementById('globalStep').value) || 0.0001;
+    document.querySelectorAll('.num-input').forEach(input => {
+        const currentVal = parseFloat(input.value) || 0;
+        let newVal = operation === 'plus' ? 
+            currentVal + step : 
+            Math.max(currentVal - step, 0);
+        input.value = newVal.toFixed(4);
+        input.dispatchEvent(new Event('input'));
+    });
+}
+
 async function loadData(){
     try {
-        showLoading(true);
         const res = await fetch(gsurl+'get=1)');
         if(!res.ok) throw new Error(`HTTP错误 ${res.status}`);
         initTable(await res.json());
@@ -182,14 +262,14 @@ async function loadData(){
     } catch(e) {
         showMessage(`加载失败: ${e.message}`, 'error');
     } finally {
-        showLoading(false);
+        
     }
 }
 
 // 保存功能（完全保留）
 async function saveChanges(){
     try {
-        showLoading(true);
+        
         const data = [...editor.rows].slice(1).reduce((o,row) => {
             o[row.cells[0].textContent] = [...row.querySelectorAll('input')]
                 .map(i => +i.value || 0);
@@ -205,7 +285,7 @@ async function saveChanges(){
     } catch(e) {
         showMessage(`错误: ${e.message}`, 'error');
     } finally {
-        showLoading(false);
+        
     }
 }
 
@@ -215,9 +295,41 @@ const showMessage=(msg,type)=>{
     output.className=type; 
     // setTimeout(()=>output.innerHTML='',1000*9); 
 };
-const showLoading=(show)=>loading.hidden=!show;
+
 
 window.onload = loadData;
+
+
+// 新增订单功能 (保持独立)
+function adjustOrderPrice(side, dir) {
+    const input = document.getElementById(side === 'buy' ? 'buyPrice' : 'sellPrice');
+    const step = 0.0001; // 独立步进值
+    input.value = (parseFloat(input.value) + dir * step).toFixed(4);
+}
+
+async function submitOrder(side) {
+    const msgEl = document.getElementById('orderMsg');
+    try {
+        const px = document.getElementById(`${side}Price`).value;
+        const symbol = document.getElementById('orderSymbol').value;
+        
+        const res = await fetch(`/r=new_${side}_order(${px},s='${symbol}')`);
+        const text = await res.text();
+        
+        msgEl.style.display = 'block';
+        msgEl.style.backgroundColor = res.ok ? '#d4edda' : '#f8d7da';
+        msgEl.textContent = `${side} @${px}: ${text}`;
+        setTimeout(() => msgEl.style.display = 'none', 3000);
+    } catch(e) {
+        msgEl.style.display = 'block';
+        msgEl.style.backgroundColor = '#f8d7da';
+        msgEl.textContent = `错误: ${e.message}`;
+    }
+}
+
+
+
+
 </script>
 </body>
 </html>
