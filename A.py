@@ -13,6 +13,13 @@ try:
 except Exception as ge:
 	print(ge)
 
+def get_asyncio_task_by_coro_name(s,loop=None):
+	''' asyncio.all_tasks(loop=gloop))[1];r=k._coro.__name__ '''
+	for t in asyncio.all_tasks(loop=loop):
+		if t._coro.__name__==s:return t
+	return py.No(f'can not found asyncio_task t._coro.__name__=={s!r}')
+get_task=get_asyncio_task_by_coro_name
+
 def sync_call_async(af,timeout=60,gloop=None):
 	if not gloop:
 		gloop = U.get_or_set('gloop', lazy_default=lambda:asyncio.get_event_loop())
