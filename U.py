@@ -6495,7 +6495,7 @@ def dict_of_dict_to_list_of_dict(ad,add_key=False,change_dict=False):
 			d[add_key]=k
 		r.append(d)
 	return r	
-dd2ld=dict_of_dict_to_list_of_dict
+dict2list=dd2ld=dict_of_dict_to_list_of_dict
 	
 def get_nested_one_value(a,*key):
 	'''safely get nested  a[k1][k2][...]
@@ -8394,7 +8394,7 @@ def tts_speak(t,volume=100,**ka):
 	t=T.string(t)
 	engine.proxy._driver._tts.Speak(t)
 	
-	if volume:Win.set_vol(v)
+	if volume and volume>9:Win.set_vol(v)
 	return t	
 tts=speak=tts_speak
 

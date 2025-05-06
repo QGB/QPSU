@@ -30,8 +30,7 @@ for (var key in y) {
     // 创建一个新的图片元素
     var img = document.createElement('img');
 
-    // 设置图片的源
-    img.src = y[key];
+    img.src =y[key];
 
     // 调整图片的最大宽度和最大高度
     img.style.maxWidth = "100%";
@@ -45,8 +44,11 @@ for (var key in y) {
     var span = document.createElement('span');
 
     // 将图片的 URL 添加到 span 中
-    span.innerHTML = y[key] + " ";
-
+    span.innerHTML = window.location.host.replace(window.location.hostname,'127.0.0.2')+"/b=N.HTTP.get_bytes(N.geta(),proxy='');N.img(p,b)%23-"+y[key];
+    // if(window.location.hostname=='127.0.0.1'){
+    //     span.innerHTML = window.location.host+"/b=N.HTTP.get_bytes(N.geta(),proxy='');N.img(p,b)%23-"+y[key];
+    // }
+    
     // 设置 span 的样式以防止内部文本换行
     span.style.whiteSpace = "nowrap";
 

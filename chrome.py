@@ -31,3 +31,20 @@ if '__main__' in __name__:
 		U.exit(msg='KeyboardInterrupt')
 
 
+
+def parse_cookies(raw_text):
+	"""将开发者工具 devtools 》应用 》复制的 Cookie 表格文本解析为字典"""
+	cookies = {}
+	for line in raw_text.strip().split('\n'):
+		# 拆分制表符分隔的字段
+		parts = line.strip().split('\t')
+		# 确保至少包含名称和值两个字段（过滤空行和无效行）
+		if len(parts) >= 2 and parts[0] and parts[1]:
+			key = parts[0].strip()
+			value = parts[1].strip()
+			# 过滤空值条目（如 pcbOperationCode 的空值情况）
+			if value:
+				cookies[key] = value
+	return cookies
+
+
