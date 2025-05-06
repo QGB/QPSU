@@ -8372,7 +8372,7 @@ def load_jks(filename,password=''):
 	return keystore
 	p12 = keystore.entries['myalias'].export_pkcs12('mypassword')
 	
-def tts_speak(t,volume=100,**ka):
+def tts_speak(t,volume=100,speed=150,**ka):
 	''' pip install pyttsx3
 长文本会一直阻塞，KeyboardInterrupt 无效	
 '''	
@@ -8386,15 +8386,57 @@ def tts_speak(t,volume=100,**ka):
 		
 	
 	if volume:
-		from qgb import Win
-		if volume==100:Win.set_volume_mute(False)#取消静音
-		v=Win.get_vol()
-		Win.set_vol(volume)
+		if isWin():
+			from qgb import Win
+			if volume==100:Win.set_volume_mute(False)#取消静音
+			v=Win.get_vol()
+			Win.set_vol(volume)
 	
 	t=T.string(t)
-	engine.proxy._driver._tts.Speak(t)
-	
-	if volume and volume>9:Win.set_vol(v)
+
+	if isWin():engine.proxy._driver._tts.Speak(t) # Windows 阻塞播放 关键
+
+	if isLinux():
+		import shlex,subprocess
+		tfix='a a  '
+		# if len(t)>0:tfix=t[0]+' '
+		safe_text = shlex.quote(tfix+t)
+		try:
+			espeak = subprocess.Popen(
+				["espeak", "-v", "zh", "-s", f"{speed}", "-a", py.str(volume//2), safe_text, "--stdout"],
+				stdout=subprocess.PIPE
+			)
+			aplay = subprocess.Popen(
+				["aplay", "-D", 'plughw:0,0'],
+				stdin=espeak.stdout
+			)
+			espeak.stdout.close()
+			aplay.communicate(timeout=99)  # 设置超时, 阻塞
+		except subprocess.TimeoutExpired:
+			return py.No("Linux espeak 播放超时")
+			aplay.kill()
+			espeak.kill()
+		except Exception as e:
+			return py.No(f"Linux espeak 严重错误: {e}")
+		'''
+		from pyttsx3.drivers._espeak import cSynth,POS_CHARACTER
+		engine.setProperty('rate', 150)
+		engine.setProperty('volume', 1.0)# 设置音量（0.0-1.0）
+		engine.setProperty('voice', 'plughw:0,0')  # 根据实际设备调
+		# 原始参数（示例）
+		text = t.encode('utf-8')  # 必须转为 bytes
+		length = len(text) * 10       # 计算长度（根据 pyttsx3 内部逻辑）
+		position = 0
+		position_type = POS_CHARACTER
+		end_position = 0
+		flags = 0x1001                # 默认标志（FLAG_UTF8=0x1000, FLAG_PENDING=0x1）
+		user_data = None
+		#cSynth(text, length,position,position_type, end_position,flags, None, user_data)
+		cSynth(b'abc',30,0,1,0,4097,None,None,)  #只有这个能发音 abcd都用不了
+		'''
+
+	if volume and volume>9:
+		if isWin():Win.set_vol(v)
 	return t	
 tts=speak=tts_speak
 
