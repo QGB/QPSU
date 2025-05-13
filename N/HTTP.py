@@ -116,7 +116,8 @@ timeout
 			except Exception as exc:
 				if print_log:print('### %r %s' % (url, exc))
 			else:
-				if print_log:print('%r %s' % (url, data))			print(U.stime(),'### len',U.len(targets,r))
+				if print_log:print('%r %s' % (url, data))		
+	print(U.stime(),'### len',U.len(targets,r))
 	return r
 	
 AUTO_GET_PROXY=py.No(msg='auto get_proxy',no_raise=1)
@@ -178,10 +179,10 @@ def request(url,method='GET',headers=gheaders.copy(),
 		
 	if print_req:
 		ka_p=ka.copy()
-		if 'data' in ka and len(ka['data'])>99:
+		if 'data' in ka and ka['data'] and len(ka['data'])>99:
 			b=ka_p['data']
 			ka_p['data']=U.object_custom_repr(b,repr='{}...#{}'.format(b[:99],F.readable_size(b) )  )  #same as N.curl
-			
+		ka_p['url']=ka_p.pop('url')# 确保url参数最后显示
 		print(U.v.requests.request(**ka_p))
 		
 	if no_raise:

@@ -8372,7 +8372,17 @@ def load_jks(filename,password=''):
 	return keystore
 	p12 = keystore.entries['myalias'].export_pkcs12('mypassword')
 	
-def tts_speak(t,volume=100,speed=150,**ka):
+def tts_speak_skip_all(n=9999):
+	engine=get('pyttsx3.engine')
+	r=[]
+	for i in range(n):
+		re=engine.proxy._driver._tts.Skip("SENTENCE", 1000)
+		if re!=0:
+			r.append([stime(),i,re])
+	return r
+# tts_speak_stop_all=tts_skip_all=tts_speak_skip_all
+
+def tts_speak(t,volume=100,speed=250,timestamp_ms=0,timeout=0,**ka):
 	''' pip install pyttsx3
 长文本会一直阻塞，KeyboardInterrupt 无效	
 '''	
@@ -8381,20 +8391,38 @@ def tts_speak(t,volume=100,speed=150,**ka):
 	
 	U,T,N,F=py.importUTNF()
 	volume=get_duplicated_kargs(ka,'volume','vol','v','max_vol',default=volume)
+	timestamp_ms=get_duplicated_kargs(ka,'timestamp_ms','ms','current_ms',default=timestamp_ms)
+	timeout=get_duplicated_kargs(ka,'timeout','ms_delta','msd','time_out',default=timeout)
+	ms_delta=timeout or U.get_or_set('U.tts.ms_delta',1000*60)
+	if timestamp_ms and U.itime_ms()-timestamp_ms>ms_delta:return py.No(f'U.itime_ms()-timestamp_ms > {ms_delta}')
+
 	if volume and not py.isint(volume):volume=100
 	
 		
 	
-	if volume:
-		if isWin():
+	t=T.string(t)
+
+	if isWin():
+		if volume:
 			from qgb import Win
 			if volume==100:Win.set_volume_mute(False)#取消静音
 			v=Win.get_vol()
 			Win.set_vol(volume)
-	
-	t=T.string(t)
 
-	if isWin():engine.proxy._driver._tts.Speak(t) # Windows 阻塞播放 关键
+		import threading
+		if timestamp_ms:remaining_sec= ((timestamp_ms + ms_delta) - U.itime_ms())/1000
+		else           :remaining_sec=ms_delta/1000
+		if remaining_sec<0.3:return py.No(f'remaining_sec {remaining_sec}<0.3')   # 最低需要320ms 发音
+
+		thread = threading.Thread(target=engine.proxy._driver._tts.Speak, args=(t,))
+		thread.start()
+		thread.join(timeout=remaining_sec)
+
+		if volume and volume>9:Win.set_vol(v)
+		# event = threading.Event()
+		# def speak_thread(t,event):
+		# event.wait(ms_delta/1000)  # 等待最多30秒 , only this ,wait full time
+		# engine.proxy._driver._tts.Speak(t) # Windows 阻塞播放 关键
 
 	if isLinux():
 		import shlex,subprocess
@@ -8435,8 +8463,6 @@ def tts_speak(t,volume=100,speed=150,**ka):
 		cSynth(b'abc',30,0,1,0,4097,None,None,)  #只有这个能发音 abcd都用不了
 		'''
 
-	if volume and volume>9:
-		if isWin():Win.set_vol(v)
 	return t	
 tts=speak=tts_speak
 

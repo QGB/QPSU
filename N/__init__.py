@@ -47,12 +47,12 @@ def get_cookies_dict_from_browser(domain,*names,browser='edge',return_raw_list=F
 如果不提供 names，默认返回域名下所有 cookies	
 
 	yt_dlp.cookies.extract_cookies_from_browser(
-    browser_name,
-    profile=None,
-    logger=<yt_dlp.cookies.YDLLogger object at 0x00000208356DF988>,
-    *,
-    keyring=None,
-    container=None,
+	browser_name,
+	profile=None,
+	logger=<yt_dlp.cookies.YDLLogger object at 0x00000208356DF988>,
+	*,
+	keyring=None,
+	container=None,
 )
 
 #TODO  open(r'C:\Users\qgb\AppData\Local\CentBrowser\User Data\Default\Network\Cookies') 
@@ -1120,6 +1120,50 @@ def uploadServer(port=1122,host='0.0.0.0',dir='./',url='/up'):
 			return r
 	app.run(host=host,port=port,debug=0,threaded=True)	
 ############# rpc start ############
+def rpc_call_multi_base(name, *a, bases=None, proxies=0, print_req=1, raise_err=False, return_mock_call='', **ka):
+	U,T,N,F=py.importUTNF()
+	processed_bases = []
+	if not bases:processed_bases = [(get_remote_rpc_base(base,ka=ka), proxies)]
+	elif isinstance(bases, dict):
+		processed_bases = list(bases.items())
+	elif isinstance(bases, (list, tuple)):
+		for entry in bases:
+			if isinstance(entry, tuple) and len(entry) == 2:
+				processed_bases.append(entry)
+			else:
+				processed_bases.append((get_remote_rpc_base(entry,ka=ka), proxies))
+	else:
+		raise TypeError("bases must be dict/list/tuple, got {}".format(type(bases)))
+	
+	# errors=[]
+	result=[]
+	for base,local_proxy in processed_bases:
+		try:
+			final_base=get_remote_rpc_base(base,ka=ka)
+			if not final_base:raise py.ArgumentError(f'Invalid base: {base}')
+			current_name=T.get_url_path(name) if '://' in name else name.lstrip('r=')
+			final_base=T.sub(name,'',current_name) if '://' in name else final_base
+			if not a and not ka:
+				if not current_name.endswith(')'):current_name+='()'
+				url=f'{final_base}r={return_mock_call or ""}{current_name}'
+				b=None
+			else:
+				url=f'{final_base}rpc_a,rpc_ka=N.flask_dill_data();r={return_mock_call or ""}{current_name}(*rpc_a,**rpc_ka)'
+				b=F.dill_dump([a,ka])
+			rp=N.HTTP.post(url,b,proxies=local_proxy or 0,print_req=print_req,timeout=10,headers=None,)
+
+			result.append(U.StrRepr(rp.text))
+		except Exception as e:
+			result.append(py.No(f"[{base} proxy={local_proxy}] {e!r}",e))
+			# errors.append(f"[{base} proxy={local_proxy}] {str(e)}")
+	return result
+	# if errors:
+	#     error_msg=f"All {len(bases)} nodes failed:\n"+'\n'.join(errors)
+	#     if raise_err:raise ConnectionError(error_msg)
+	#     print(U.stime(),'N.rpc_multi_call',error_msg)
+	#     return py.No(error_msg)
+	# return py.No("No successful response with empty error log")
+rpc_mcall=rpc_call_multi=rpc_multi_call=rpc_call_multi_base
 
 def check_local_port_listen(ports):
 	''' if multi ports :return first open addr'''
@@ -1265,14 +1309,14 @@ def rpc_append_list(*a,name='la',base='',proxies=0,print_req=1):
 		raise py.ArgumentError('need base')
 		
 	
-	rp= N.HTTP.post(f'{base}rpc_a=N.flask_dill_data();{name}.append(rpc_a);r=py.len({name})',F.dill_dump(a if py.len(a)!=1 else a[0]),proxies=proxies,print_req=print_req)
+	rp= N.HTTP.post(f'{base}rpc_a=N.flask_dill_data();{name}.append(rpc_a);r=py.len({name})',F.dill_dump(a if py.len(a)!=1 else a[0]),proxies=proxies,print_req=print_req,headers=None,)
 	t=rp.text
 	if 'NameError: name' in t and 'is not defined' in t:
-		 N.HTTP.post(f'{base}r={name}=[]')
+		 N.HTTP.post(f'{base}r={name}=[]',headers=None,)
 		 return rpc_append_list(*a,name=name,base=base)
 	return U.StrRepr(t)
 	
-def rpc_call(name,*a,base='',proxies=0,print_req=1,raise_err=False,**ka):
+def rpc_call(name,*a,base='',proxies=0,print_req=1,raise_err=False,return_mock_call='',**ka):
 	U,T,N,F=py.importUTNF()
 	base=get_remote_rpc_base(base,ka=ka)
 	if '://' in name:
@@ -1282,14 +1326,16 @@ def rpc_call(name,*a,base='',proxies=0,print_req=1,raise_err=False,**ka):
 	if name.startswith('r='):
 		name=name[2:]
 	# if name.endswith(')')	
+	if return_mock_call:return_mock_call='U.v.'
+	else:return_mock_call=''
 		
 	if not base:
 		raise py.ArgumentError('need base')
 	if raise_err:
-		rp= N.HTTP.post(f'{base}rpc_a,rpc_ka=N.flask_dill_data();r={name}(*rpc_a,**rpc_ka)',F.dill_dump([a,ka]),proxies=proxies,print_req=print_req)
+		rp= N.HTTP.post(f'{base}rpc_a,rpc_ka=N.flask_dill_data();r={return_mock_call}{name}(*rpc_a,**rpc_ka)',F.dill_dump([a,ka]),proxies=proxies,print_req=print_req,headers=None,)
 	else:
 		try:
-			rp= N.HTTP.post(f'{base}rpc_a,rpc_ka=N.flask_dill_data();r={name}(*rpc_a,**rpc_ka)',F.dill_dump([a,ka]),proxies=proxies,print_req=print_req)
+			rp= N.HTTP.post(f'{base}rpc_a,rpc_ka=N.flask_dill_data();r={return_mock_call}{name}(*rpc_a,**rpc_ka)',F.dill_dump([a,ka]),proxies=proxies,print_req=print_req,headers=None,)
 		except Exception as e:
 			print(U.stime(),'N.rpc_call',e)
 			return py.No(e)
@@ -1325,7 +1371,6 @@ ws[1]==
 	b=N.curl(rpc_base+'Win.popw();r=U.pid,U.ppid(),U.ppid(U.ppid())')
 	r3=T.unrepr(b.decode())
 	return r3
-
 rpc_popw=rpc_pop_window=rpc_pop_window_127
 
 def rpc_iter_U_get(name,bases=None,**ka):
@@ -1355,9 +1400,9 @@ def rpc_copy_single_file(source,target='',base=DEFAULT_RPC_BASE_REMOTE,**ka):
 	base=get_remote_rpc_base(base,ka=ka)
 	b=F.read_bytes(source)
 	# if not F.isabs()
-	r=N.HTTP.post(base+'b=request.get_data();rpc_copy_filename=%r;r=F.write(rpc_copy_filename,b)'%target,verify=False,timeout=9,proxy='',data=b).text
-	
+	r=N.HTTP.post(base+'b=request.get_data();rpc_copy_filename=%r;r=F.write(rpc_copy_filename,b)'%target,verify=False,timeout=9,proxy='',data=b,headers=None,).text
 	return U.StrRepr(r)
+
 def rpc_copy_files(source_list_or_dict,target='',target_path_base=py.No('U.gst'),base=DEFAULT_RPC_BASE_REMOTE,source_max_size=8*1024*1024,skip_empty_file=True,proxy='',**ka):
 	U,T,N,F=py.importUTNF()	
 	base=get_remote_rpc_base(base,ka=ka)
@@ -1378,7 +1423,7 @@ def rpc_copy_files(source_list_or_dict,target='',target_path_base=py.No('U.gst')
 	return  
 rpc_copy=rpc_copy_file=rpc_copy_files
 	
-AUTO_GET_BASE=py.No('auto history e.g. [http://]127.0.0.1:23571[/../] ',no_raise=1,)
+AUTO_GET_BASE=py.No('auto history e.g. [http://]127.0.0.1:1133[/../] ',no_raise=1,)
 RPC_GET_TEMPLATE='{base}response.set_data(F.serialize({varname}))'
 RPC_SET_TEMPLATE='{0}{v}=F.dill_loads(request.get_data());{ext_cmd}'
 def rpc_get_variable(varname,
@@ -1533,14 +1578,11 @@ def rpc_set_variable(*obj,base=AUTO_GET_BASE,timeout=9,varname='v',ext_cmd='r=U.
 		print_req=''
 	
 	if no_raise:
-		try:b=N.HTTP.post(url,data=serialize(obj),verify=False,timeout=timeout,proxies=proxies,print_req=print_req)
+		try:b=N.HTTP.post(url,data=serialize(obj),verify=False,timeout=timeout,proxies=proxies,print_req=print_req,headers=None,)
 		except Exception as e:return py.No(e)
 	else:
-		b=N.HTTP.post(url,data=serialize(obj),verify=False,timeout=timeout,proxies=proxies,print_req=print_req) # data=list:TypeError: cannot unpack non-iterable int object
+		b=N.HTTP.post(url,data=serialize(obj),verify=False,timeout=timeout,proxies=proxies,print_req=print_req,headers=None,) # data=list:TypeError: cannot unpack non-iterable int object
 	
-	# if print_req:
-		# print(U.v.N.HTTP.post(url,verify=False,timeout=timeout,proxies=proxies,print_req=print_req,data=U.v.F.dill_dump(obj)) )
-		
 	if not b:return b
 	elif py.istr(b):
 		pass
@@ -1583,7 +1625,7 @@ def rpc_set_file(obj,filename=py.No('if obj exists: auto '),name='v',**ka):
 		
 	return rpc_set_variable(obj,name=name,ext_cmd='r=F.write({filename!r},%s,mkdir=True)'.format(filename=filename),**ka)
 
-def rpcServer(port=23571,thread=True,ip='0.0.0.0',ssl_context=(),currentThread=False,app=None,key=None,
+def rpcServer(port=1133,thread=True,ip='0.0.0.0',ssl_context=(),currentThread=False,app=None,key=None,
 execLocals=None,locals=None,globals=None,
 qpsu='py,U,T,N,F',importMods='sys,os',request=True,
 flaskArgs=None,no_banner=False,
@@ -1688,7 +1730,7 @@ key compatibility :  key='#rpc\n'==chr(35)+'rpc'+chr(10)
 	
 	if ssl_context:
 		flaskArgs['ssl_context']=ssl_context
-		if port==23571:
+		if port==1133:
 			port=443
 			flaskArgs['port']=port
 	# U.log(flaskArgs)
@@ -1742,7 +1784,7 @@ key compatibility :  key='#rpc\n'==chr(35)+'rpc'+chr(10)
 		# super()
 		
 	
-def rpcClient(url_or_port='http://127.0.0.1:23571',code=''):
+def rpcClient(url_or_port='http://127.0.0.1:1133',code=''):
 	if py.isint(url_or_port):
 		url='http://127.0.0.1:'+py.str(url_or_port)
 	else:
@@ -1950,10 +1992,6 @@ vercel : !curl -vvvik "https://vercel-django-example-ten.vercel.app/r=T.az%23-/a
 		for v in hs:
 			if v in a and v+'/' not in a:
 				a=a.replace(v,v+'/')
-		
-		
-		
-	
 	return _return(a )
 geta=get_a=get_request_a=get_rpc_request_a=get_flask_request_a
 

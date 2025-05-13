@@ -113,19 +113,20 @@ def get_volume_mute_state():
 		get_master_volume() #顺便初始化了 k
 		v=U.get(gpycaw_cache_key)
 	return v.GetMute()
-isMute=is_mute=get_mute=get_volume_mute=get_mute_state=get_volume_mute_state	
+isMute=is_mute=get_mute=get_volume_mute=mute_state=get_mute_state=get_volume_mute_state	
 
-def set_volume_mute_state(a=False):
+def set_volume_mute_state(a=None):
 	global gpycaw_cache_key
 	U,T,N,F=py.importUTNF() 
 	v=U.get(gpycaw_cache_key)
 	if not v:
 		get_master_volume() #顺便初始化了 k
 		v=U.get(gpycaw_cache_key)
+	if a==None:return get_volume_mute_state()
 	if not a:	
-		v.SetMute(0, None)#取消静音
+		v.SetMute(0,None)#取消静音
 	else:	
-		v.SetMute(1, None)#静音
+		v.SetMute(1,None)#静音
 	return a
 vol_mute=volume_mute=mute=set_volume_mute=set_volume_mute_state
 	
@@ -363,7 +364,9 @@ def pywinauto_print_control_identifiers(h,return_w=False):
 		return w,f
 	return f.getvalue()	
 		
-print_control_identifiers=pywinauto_print_control_identifiersdef send_key_by_pywinauto(h,*a,**ka):
+print_control_identifiers=pywinauto_print_control_identifiers
+
+def send_key_by_pywinauto(h,*a,**ka):
 	import pywinauto
 	if py.isint(h):ka['handle']=h
 	if py.isstr(h):ka['title_re']=h

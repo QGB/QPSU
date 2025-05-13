@@ -382,7 +382,7 @@ def reboot():
 reset=restart=reboot
 
 gdpin={}
-def gpio(index=2,mod=3,value=0):
+def gpio(index=2,value=1,mod=3):
 	'''import mac	hine;help(machine.Pin)
 IN -- 0
   OUT -- 1
@@ -396,8 +396,9 @@ IN -- 0
 	import machine
 	if (index,mod) not in gdpin:
 		gdpin[(index,mod)]=machine.Pin(index,mod)
-	if value:gdpin[(index,mod)].value(value)
-		
+	if value:value=1
+	else:value=0
+	gdpin[(index,mod)].value(value)
 	return gdpin[(index,mod)]
 led2=gpo=pin=Pin=gpio
 
@@ -407,8 +408,17 @@ def gpi(index=0,mod=None):
 	gdpin[(index,0)]=machine.Pin(index, machine.Pin.IN, mod)
 	return gdpin[(index,0)]
 
+def adc_print(index=0,interval=0.1):
+	adc_pins=[0,1,2,3,4]
+	assert index in adc_pins
+	# index=0;interval=0.1
+	import time,machine; a=machine.ADC(machine.Pin(index)); a.atten(machine.ADC.ATTN_11DB)
+	while 1:t=time.ticks_ms();v=a.read();print(f"{t//1000}.{t%1000:03d} Pin({index}) {v:04d} {v/4095*3.3:.2f}V");time.sleep(interval)
 
-def blink(a=0.2,b=0.47,index=12):#esp32c3 12
+def blink(a=0.2,b=0.47,index=12):
+	''' esp32c3 12  
+esp32c3SuperMini led 8
+'''    
 	if 'gop' in globals():
 		p=gop
 	else:
