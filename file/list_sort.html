@@ -3,11 +3,10 @@
 
 <head>
     <meta charset="UTF-8">
-    <title>修复多选拖拽排序</title>
+    <title>select drag sort 多选拖拽排序</title>
     <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Plugins/multiDrag.min.js"></script>
     <style>
-        /* 保持原有样式 */
         * {
             margin: 0;
             padding: 0;
@@ -52,21 +51,18 @@
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
         }
 
-        /* 新布局方案 */
         .btn-msg-wrapper {
             position: relative;
             margin-top: 20px;
             width: 100%;
         }
 
-        /* 新增URL输入框样式 */
         .urlInput {
             width: 100%;
             padding: 12px 20px;
             margin-bottom: 10px;
             border: 1px solid #d9d9d9;
             border-radius: 4px;
-            font-size: 14px;
         }
 
         .submit-btn {
@@ -103,82 +99,179 @@
             border-top: 1px solid #ffccc7;
             color: #ff4d4f;
         }
+
+        .ctx-menu {
+            position: fixed;
+            background: white;
+            border: 1px solid #ddd;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            border-radius: 4px;
+            z-index: 1000;
+            display: none;
+        }
+
+        .ctx-item {
+            padding: 8px 16px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .ctx-item:hover {
+            background: #f5f5f5;
+        }
+
+        .add-wrapper {
+            display: flex;
+            gap: 8px;
+            margin: 20px 0;
+            align-items: center;
+        }
+
+        .add-input {
+            flex: 1;
+            padding: 12px 20px;
+            border: 1px solid #d9d9d9;
+            border-radius: 4px;
+        }
+
+        .add-btn {
+            padding: 12px 24px;
+            background: #52c41a;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: .3s;
+        }
+
+        .add-btn:hover {
+            background: #73d13d;
+        }
+
+        .count-label {
+            background: #f0f0f0;
+            padding: 0 10px;
+            border-radius: 4px;
+            flex-shrink: 0;
+        }
     </style>
 </head>
 
 <body>
     <div class="container">
         <div id="list"></div>
+
+        <div class="add-wrapper">
+            <span class="count-label">当前数量：0</span>
+            <input type="text" class="add-input" placeholder="输入新项目内容">
+            <button class="add-btn">添加新项</button>
+        </div>
+
         <div class="btn-msg-wrapper">
-            <!-- 新增URL输入框 -->
             <input type="url" class="urlInput" placeholder="请输入请求URL" required>
             <button class="submit-btn">Post</button>
             <div class="msg-box"></div>
         </div>
     </div>
 
+    <div class="ctx-menu">
+        <div class="ctx-item" id="deleteBtn">删除</div>
+    </div>
+
     <script>
         // {html_ka}
-        const y_name = (url => url.match(/y=([^,\)]+)/)?.[1])(window.location.href);
-        document.querySelector('.urlInput').value=`/r=${y_name?y_name+'=':''}T.json_loads(q.get_data())`;
+        // html_ka 不要删除 这一行提醒也不要删除 css保持精简 不要多行 给我完整代码，不要省略任何地方
+        var y_name = (url => url.match(/y=([^,\)]+)/)?.[1])(window.location.href);
+        document.querySelector('.urlInput').value = `/${y_name ? y_name + '=' : ''}T.json_loads(q.get_data());r=len(${y_name}),${y_name}`;
 
+        // 列表初始化
         const list = document.getElementById('list');
-        y.forEach(item => {
+        const countLabel = document.querySelector('.count-label');
+        const createItem = text => {
             const div = document.createElement('div');
             div.className = 'list-item';
-            div.textContent = item;
-            list.appendChild(div);
+            div.textContent = text;
+            return div;
+        };
+
+        // 数量更新函数
+        const updateCount = () => countLabel.textContent = `列表长度：${list.children.length}`;
+
+        y.forEach(item => list.appendChild(createItem(item)));
+        updateCount();
+
+        // 添加新项功能
+        const addInput = document.querySelector('.add-input');
+        const addBtn = document.querySelector('.add-btn');
+        addBtn.addEventListener('click', () => {
+            const val = addInput.value.trim();
+            if (!val) {
+                document.querySelector('.msg-box').textContent = '❌ 输入内容不能为空';
+                document.querySelector('.msg-box').className = 'msg-box msg-error';
+                document.querySelector('.msg-box').style.display = 'block';
+                return;
+            }
+            list.appendChild(createItem(val));
+            addInput.value = '';
+            updateCount();
         });
+        addInput.addEventListener('keypress', e => e.key === 'Enter' && addBtn.click());
 
-        const btn = document.querySelector('.submit-btn');
-        const msgBox = document.querySelector('.msg-box');
-        const urlInput = document.querySelector('.urlInput'); // 获取输入框
+        // 右键菜单逻辑
+        const ctxMenu = document.querySelector('.ctx-menu');
+        const deleteBtn = document.getElementById('deleteBtn');
+        let targetItem = null;
+        document.addEventListener('contextmenu', e => {
+            if (e.target.classList.contains('list-item')) {
+                e.preventDefault();
+                targetItem = e.target;
+                ctxMenu.style.display = 'block';
+                ctxMenu.style.left = `${e.clientX}px`;
+                ctxMenu.style.top = `${e.clientY}px`;
+            }
+        });
+        deleteBtn.addEventListener('click', () => {
+            if (targetItem) {
+                targetItem.remove();
+                updateCount();
+            }
+            ctxMenu.style.display = 'none';
+        });
+        document.addEventListener('click', () => ctxMenu.style.display = 'none');
 
-        btn.addEventListener('click', () => {
-            // 验证URL输入
-            const requestUrl = urlInput.value.trim();
-            if (!requestUrl) {
-                msgBox.classList.add('msg-error');
-                msgBox.textContent = '❌ 请先输入请求URL';
+        // 提交功能
+        document.querySelector('.submit-btn').addEventListener('click', async () => {
+            const url = document.querySelector('.urlInput').value.trim();
+            const msgBox = document.querySelector('.msg-box');
+
+            if (!url) {
+                msgBox.textContent = '❌ 请输入请求URL';
+                msgBox.className = 'msg-box msg-error';
                 msgBox.style.display = 'block';
                 return;
             }
 
-            const currentOrder = Array.from(list.children).map(item => item.textContent);
-
-            fetch(requestUrl, { // 使用输入框的URL
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(currentOrder)
-            })
-                .then(async response => {
-                    if (!response.ok) {
-                        const err = await response.text();
-                        throw new Error(`[${response.status}] ${err}`);
-                    }
-                    return response.text();
-                })
-                .then(text => {
-                    msgBox.classList.remove('msg-error');
-                    msgBox.classList.add('msg-success');
-                    msgBox.textContent = `✅ ${text}`;
-                    msgBox.style.display = 'block';
-                })
-                .catch(error => {
-                    msgBox.classList.remove('msg-success');
-                    msgBox.classList.add('msg-error');
-                    msgBox.textContent = `❌ ${error.message}`;
-                    msgBox.style.display = 'block';
+            try {
+                const res = await fetch(url, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify([...list.children].map(e => e.textContent))
                 });
+                msgBox.textContent = res.ok ? `✅ ${await res.text()}` : `❌ [${res.status}] ${await res.text()}`;
+                msgBox.className = `msg-box ${res.ok ? 'msg-success' : 'msg-error'}`;
+            } catch (e) {
+                msgBox.textContent = `❌ ${e.message}`;
+                msgBox.className = 'msg-box msg-error';
+            }
+            msgBox.style.display = 'block';
         });
 
-        const sortable = new Sortable(list, {
+        // 拖拽初始化
+        new Sortable(list, {
             animation: 150,
             multiDrag: true,
             selectedClass: 'selected',
-            preventOnFilter: false,
-            onStart: (e) => { !e.originalEvent.ctrlKey && sortable.multiDrag.clearSelection(); },
-            setData: (dt, el) => dt.setData('Text', el.textContent)
+            onStart: e => !e.originalEvent.ctrlKey && this.multiDrag.clearSelection()
         });
     </script>
 </body>

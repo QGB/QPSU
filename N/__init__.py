@@ -2129,7 +2129,10 @@ Resource interpreted as Stylesheet but transferred with MIME type text/html:
 			_file=U.get_qpsu_file_path(file)
 			if F.exists(_file):file=_file
 			else:
-				_file=U.gst+file
+				if not file.lower().endswith('.html'):
+					_file=U.get_qpsu_file_path(file+'.html')
+				else:	
+					_file=U.gst+file
 				if F.exists(_file):file=_file
 		if not F.exists(file):raise py.ArgumentError('file not exists',file)
 			
