@@ -7,153 +7,26 @@
     <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Plugins/multiDrag.min.js"></script>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        html,
-        body {
-            height: 100%;
-        }
-
-        .container {
-            padding: 20px;
-            min-height: 100vh;
-            background: #f0f2f5;
-            padding-bottom: 80px;
-        }
-
-        #list {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 8px;
-        }
-
-        .list-item {
-            background: white;
-            border: 1px solid #d9d9d9;
-            padding: 8px 16px;
-            border-radius: 4px;
-            cursor: move;
-            transition: all 0.3s;
-            user-select: none;
-        }
-
-        .list-item.selected {
-            background: #1890ff;
-            color: white;
-            border-color: #1890ff;
-        }
-
-        .list-item:hover {
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-        }
-
-        .btn-msg-wrapper {
-            position: relative;
-            margin-top: 20px;
-            width: 100%;
-        }
-
-        .urlInput {
-            width: 100%;
-            padding: 12px 20px;
-            margin-bottom: 10px;
-            border: 1px solid #d9d9d9;
-            border-radius: 4px;
-        }
-
-        .submit-btn {
-            display: block;
-            margin: 0 auto;
-            padding: 12px 24px;
-            background: #1890ff;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-            width: 100%;
-        }
-
-        .msg-box {
-            position: fixed;
-            left: 0;
-            right: 0;
-            padding: 12px 20px;
-            text-align: center;
-            word-break: break-all;
-            display: none;
-        }
-
-        .msg-success {
-            background: #f6ffed;
-            border-top: 1px solid #b7eb8f;
-            color: #52c41a;
-        }
-
-        .msg-error {
-            background: #fff2f0;
-            border-top: 1px solid #ffccc7;
-            color: #ff4d4f;
-        }
-
-        .ctx-menu {
-            position: fixed;
-            background: white;
-            border: 1px solid #ddd;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-            border-radius: 4px;
-            z-index: 1000;
-            display: none;
-        }
-
-        .ctx-item {
-            padding: 8px 16px;
-            cursor: pointer;
-            transition: background 0.2s;
-        }
-
-        .ctx-item:hover {
-            background: #f5f5f5;
-        }
-
-        .add-wrapper {
-            display: flex;
-            gap: 8px;
-            margin: 20px 0;
-            align-items: center;
-        }
-
-        .add-input {
-            flex: 1;
-            padding: 12px 20px;
-            border: 1px solid #d9d9d9;
-            border-radius: 4px;
-        }
-
-        .add-btn {
-            padding: 12px 24px;
-            background: #52c41a;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            transition: .3s;
-        }
-
-        .add-btn:hover {
-            background: #73d13d;
-        }
-
-        .count-label {
-            background: #f0f0f0;
-            padding: 0 10px;
-            border-radius: 4px;
-            flex-shrink: 0;
-        }
+* { margin:0; padding:0; box-sizing:border-box; }
+html,body { height:100%; }
+.container { padding:20px; min-height:100vh; background:#f0f2f5; padding-bottom:80px; }
+#list { display:flex; flex-wrap:wrap; gap:8px; }
+.list-item { background:white; border:1px solid #d9d9d9; padding:8px 16px; border-radius:4px; cursor:move; transition:all 0.3s; user-select:none; }
+.list-item.selected { background:#1890ff; color:white; border-color:#1890ff; }
+.list-item:hover { box-shadow:0 2px 8px rgba(0,0,0,0.15); }
+.btn-msg-wrapper { position:relative; margin-top:20px; width:100%; }
+.urlInput { width:100%; padding:12px 20px; margin-bottom:10px; border:1px solid #d9d9d9; border-radius:4px; }
+.submit-btn { display:block; margin:0 auto; padding:12px 24px; background:#1890ff; color:white; border:none; border-radius:4px; cursor:pointer; box-shadow:0 2px 8px rgba(0,0,0,0.15); width:100%; }
+.msg-box { position:fixed; left:0; right:0; padding:12px 20px; text-align:center; word-break:break-all; display:none; }
+.msg-success { background:#f6ffed; border-top:1px solid #b7eb8f; color:#52c41a; }
+.msg-error { background:#fff2f0; border-top:1px solid #ffccc7; color:#ff4d4f; }
+.ctx-menu { position:fixed; background:white; border:1px solid #ddd; box-shadow:0 2px 8px rgba(0,0,0,0.1); border-radius:4px; z-index:1000; display:none; }
+.ctx-item { padding:8px 16px; cursor:pointer; transition:background 0.2s; }
+.ctx-item:hover { background:#f5f5f5; }
+.add-wrapper { display:flex; gap:8px; margin:20px 0; }
+.add-input { flex:1; padding:12px 20px; border:1px solid #d9d9d9; border-radius:4px; }
+.add-btn { padding:12px 24px; background:#52c41a; color:white; border:none; border-radius:4px; cursor:pointer; transition:.3s; }
+.add-btn:hover { background:#73d13d; }
     </style>
 </head>
 
@@ -268,6 +141,7 @@
 
         // 拖拽初始化
         new Sortable(list, {
+            supportPointer: true,          // 支持移动设备，这一行不知道有没有用，原来页面加载后第一次也可以选择
             animation: 150,
             multiDrag: true,
             selectedClass: 'selected',
