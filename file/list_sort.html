@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>修复多选拖拽排序</title>
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Plugins/multiDrag.min.js"></script>
+    <style>
+        /* 保持原有样式 */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html,
+        body {
+            height: 100%;
+        }
+
+        .container {
+            padding: 20px;
+            min-height: 100vh;
+            background: #f0f2f5;
+            padding-bottom: 80px;
+        }
+
+        #list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .list-item {
+            background: white;
+            border: 1px solid #d9d9d9;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: move;
+            transition: all 0.3s;
+            user-select: none;
+        }
+
+        .list-item.selected {
+            background: #1890ff;
+            color: white;
+            border-color: #1890ff;
+        }
+
+        .list-item:hover {
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+        }
+
+        /* 新布局方案 */
+        .btn-msg-wrapper {
+            position: relative;
+            margin-top: 20px;
+            width: 100%;
+        }
+
+        /* 新增URL输入框样式 */
+        .urlInput {
+            width: 100%;
+            padding: 12px 20px;
+            margin-bottom: 10px;
+            border: 1px solid #d9d9d9;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+
+        .submit-btn {
+            display: block;
+            margin: 0 auto;
+            padding: 12px 24px;
+            background: #1890ff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+            width: 100%;
+        }
+
+        .msg-box {
+            position: fixed;
+            left: 0;
+            right: 0;
+            padding: 12px 20px;
+            text-align: center;
+            word-break: break-all;
+            display: none;
+        }
+
+        .msg-success {
+            background: #f6ffed;
+            border-top: 1px solid #b7eb8f;
+            color: #52c41a;
+        }
+
+        .msg-error {
+            background: #fff2f0;
+            border-top: 1px solid #ffccc7;
+            color: #ff4d4f;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div id="list"></div>
+        <div class="btn-msg-wrapper">
+            <!-- 新增URL输入框 -->
+            <input type="url" class="urlInput" placeholder="请输入请求URL" required>
+            <button class="submit-btn">Post</button>
+            <div class="msg-box"></div>
+        </div>
+    </div>
+
+    <script>
+        // {html_ka}
+        const y_name = (url => url.match(/y=([^,\)]+)/)?.[1])(window.location.href);
+        document.querySelector('.urlInput').value=`/r=${y_name?y_name+'=':''}T.json_loads(q.get_data())`;
+
+        const list = document.getElementById('list');
+        y.forEach(item => {
+            const div = document.createElement('div');
+            div.className = 'list-item';
+            div.textContent = item;
+            list.appendChild(div);
+        });
+
+        const btn = document.querySelector('.submit-btn');
+        const msgBox = document.querySelector('.msg-box');
+        const urlInput = document.querySelector('.urlInput'); // 获取输入框
+
+        btn.addEventListener('click', () => {
+            // 验证URL输入
+            const requestUrl = urlInput.value.trim();
+            if (!requestUrl) {
+                msgBox.classList.add('msg-error');
+                msgBox.textContent = '❌ 请先输入请求URL';
+                msgBox.style.display = 'block';
+                return;
+            }
+
+            const currentOrder = Array.from(list.children).map(item => item.textContent);
+
+            fetch(requestUrl, { // 使用输入框的URL
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(currentOrder)
+            })
+                .then(async response => {
+                    if (!response.ok) {
+                        const err = await response.text();
+                        throw new Error(`[${response.status}] ${err}`);
+                    }
+                    return response.text();
+                })
+                .then(text => {
+                    msgBox.classList.remove('msg-error');
+                    msgBox.classList.add('msg-success');
+                    msgBox.textContent = `✅ ${text}`;
+                    msgBox.style.display = 'block';
+                })
+                .catch(error => {
+                    msgBox.classList.remove('msg-success');
+                    msgBox.classList.add('msg-error');
+                    msgBox.textContent = `❌ ${error.message}`;
+                    msgBox.style.display = 'block';
+                });
+        });
+
+        const sortable = new Sortable(list, {
+            animation: 150,
+            multiDrag: true,
+            selectedClass: 'selected',
+            preventOnFilter: false,
+            onStart: (e) => { !e.originalEvent.ctrlKey && sortable.multiDrag.clearSelection(); },
+            setData: (dt, el) => dt.setData('Text', el.textContent)
+        });
+    </script>
+</body>
+
+</html>

@@ -75,12 +75,13 @@ def get_srpcka(ka):
 	if 'convert_func' not in srpcka:srpcka+='convert_func=float,'
 	return srpcka
 
-def get_kline_without_pandas(symbol='ETH',interval='1s',start=0,end=0,day='',second=0,kline_range=(-500,500),auto_expand_range=False,return_json=True,debug=False,**ka):
+def get_kline_without_pandas(symbol='ETH',interval='1s',start=0,end=0,day='',second=0,kline_range=(-500,500),auto_expand_range=False,return_json=True,debug=False,futures=0,**ka):
 	'''  U.cbs(U.stime_to_ms_int(U.cbg(p=1))-1000*60*60*8,p=1)
 	'''
 	symbol=U.get_duplicated_kargs(ka,'symbol','s','S',default=symbol)
 	interval=U.get_duplicated_kargs(ka,'interval','i','it',default=interval)
 	second=U.get_duplicated_kargs(ka,'second','sec','ms',default=second)
+	futures=U.get_duplicated_kargs(ka,'futures','f','fur',default=futures)
 	
 	symbol=symbol.upper()
 	seq=T.endswith(symbol,*gdq)
@@ -108,7 +109,10 @@ def get_kline_without_pandas(symbol='ETH',interval='1s',start=0,end=0,day='',sec
 	if debug:
 		return U.v.rpc_get(f"B.get_kline_without_pandas({symbol!r},interval={interval!r},start={start!r},end={end!r},{get_srpcka(ka)})",**get_rpcka())
 
-	data=N.rpc_get(f"B.get_kline_without_pandas({symbol!r},interval={interval!r},start={start!r},end={end!r},{get_srpcka(ka)})",**get_rpcka())
+	if futures:
+		data=N.rpc_get(f"B.get_futures_kline({symbol!r},interval={interval!r},start={start!r},end={end!r},{get_srpcka(ka)})",**get_rpcka())
+	else:
+		data=N.rpc_get(f"B.get_kline_without_pandas({symbol!r},interval={interval!r},start={start!r},end={end!r},{get_srpcka(ka)})",**get_rpcka())
 	
 	if return_json:
 		return convert_klines_to_json(data)

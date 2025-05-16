@@ -1120,10 +1120,13 @@ def uploadServer(port=1122,host='0.0.0.0',dir='./',url='/up'):
 			return r
 	app.run(host=host,port=port,debug=0,threaded=True)	
 ############# rpc start ############
-def rpc_call_multi_base(name, *a, bases=None, proxies=0, print_req=1, raise_err=False, return_mock_call='', **ka):
+def rpc_call_multi_bases(name, *a, bases=None, proxies=0, print_req=1, raise_err=False, return_mock_call='', **ka):
+	''' 按base顺序执行，非并发   
+bases 可以是 dict {base1:proxy1,base2:proxy2...} 或者 list [(base1,proxy1)... ]
+	'''
 	U,T,N,F=py.importUTNF()
 	processed_bases = []
-	if not bases:processed_bases = [(get_remote_rpc_base(base,ka=ka), proxies)]
+	if not bases:processed_bases = [('',proxies)]
 	elif isinstance(bases, dict):
 		processed_bases = list(bases.items())
 	elif isinstance(bases, (list, tuple)):
@@ -1131,39 +1134,35 @@ def rpc_call_multi_base(name, *a, bases=None, proxies=0, print_req=1, raise_err=
 			if isinstance(entry, tuple) and len(entry) == 2:
 				processed_bases.append(entry)
 			else:
-				processed_bases.append((get_remote_rpc_base(entry,ka=ka), proxies))
+				processed_bases.append((entry, proxies))
 	else:
 		raise TypeError("bases must be dict/list/tuple, got {}".format(type(bases)))
 	
-	# errors=[]
+	if return_mock_call:return_mock_call='U.v.'
+	else:return_mock_call=''
+		
+	
+
 	result=[]
-	for base,local_proxy in processed_bases:
+	for ori_base,local_proxy in processed_bases:
 		try:
-			final_base=get_remote_rpc_base(base,ka=ka)
-			if not final_base:raise py.ArgumentError(f'Invalid base: {base}')
+			base=get_remote_rpc_base(ori_base,ka=ka)
+			if not base:raise py.ArgumentError(f'Invalid base: {ori_base}')
 			current_name=T.get_url_path(name) if '://' in name else name.lstrip('r=')
-			final_base=T.sub(name,'',current_name) if '://' in name else final_base
-			if not a and not ka:
+			base=T.sub(name,'',current_name) if '://' in name else base
+			if not a and not ka:  # F3 rpc_call
 				if not current_name.endswith(')'):current_name+='()'
-				url=f'{final_base}r={return_mock_call or ""}{current_name}'
+				url=f'{base}r={return_mock_call}{current_name}'
 				b=None
 			else:
-				url=f'{final_base}rpc_a,rpc_ka=N.flask_dill_data();r={return_mock_call or ""}{current_name}(*rpc_a,**rpc_ka)'
+				url=f'{base}rpc_a,rpc_ka=N.flask_dill_data();r={return_mock_call}{current_name}(*rpc_a,**rpc_ka)'
 				b=F.dill_dump([a,ka])
 			rp=N.HTTP.post(url,b,proxies=local_proxy or 0,print_req=print_req,timeout=10,headers=None,)
-
 			result.append(U.StrRepr(rp.text))
 		except Exception as e:
 			result.append(py.No(f"[{base} proxy={local_proxy}] {e!r}",e))
-			# errors.append(f"[{base} proxy={local_proxy}] {str(e)}")
 	return result
-	# if errors:
-	#     error_msg=f"All {len(bases)} nodes failed:\n"+'\n'.join(errors)
-	#     if raise_err:raise ConnectionError(error_msg)
-	#     print(U.stime(),'N.rpc_multi_call',error_msg)
-	#     return py.No(error_msg)
-	# return py.No("No successful response with empty error log")
-rpc_mcall=rpc_call_multi=rpc_multi_call=rpc_call_multi_base
+rpc_mcall=rpc_call_multi=rpc_multi_call=rpc_call_multi_base=rpc_call_multi_bases
 
 def check_local_port_listen(ports):
 	''' if multi ports :return first open addr'''
@@ -1331,11 +1330,19 @@ def rpc_call(name,*a,base='',proxies=0,print_req=1,raise_err=False,return_mock_c
 		
 	if not base:
 		raise py.ArgumentError('need base')
+	if not a and not ka:
+		if not name.endswith(')'):name+='()'
+		url=f'{base}r={return_mock_call}{return_mock_call}{name}'
+		b=None
+	else:
+		url=f'{base}rpc_a,rpc_ka=N.flask_dill_data();r={return_mock_call}{name}(*rpc_a,**rpc_ka)'
+		b=F.dill_dump([a,ka])
+
 	if raise_err:
-		rp= N.HTTP.post(f'{base}rpc_a,rpc_ka=N.flask_dill_data();r={return_mock_call}{name}(*rpc_a,**rpc_ka)',F.dill_dump([a,ka]),proxies=proxies,print_req=print_req,headers=None,)
+		rp= N.HTTP.post(url,b,proxies=proxies,print_req=print_req,headers=None,)
 	else:
 		try:
-			rp= N.HTTP.post(f'{base}rpc_a,rpc_ka=N.flask_dill_data();r={return_mock_call}{name}(*rpc_a,**rpc_ka)',F.dill_dump([a,ka]),proxies=proxies,print_req=print_req,headers=None,)
+			rp= N.HTTP.post(url,b,proxies=proxies,print_req=print_req,headers=None,)
 		except Exception as e:
 			print(U.stime(),'N.rpc_call',e)
 			return py.No(e)
@@ -2137,6 +2144,8 @@ Resource interpreted as Stylesheet but transferred with MIME type text/html:
 			if not fencoding:fencoding=encoding
 			content_type+=';charset=%s'%(fencoding,)
 		html=F.read_bytes(file)
+		if remove_tag==g_remove_tag:remove_tag=[]
+
 	if py.istr(html):
 		pass
 	elif py.isbyte(html):#TODO byte remove tag,no convert
@@ -2174,7 +2183,7 @@ Resource interpreted as Stylesheet but transferred with MIME type text/html:
 	if html_ka_mark:
 		hs=''
 		for k,v in ka.items():
-			hs+=f'var {k}={T.json_dumps(v)}\n'
+			hs+=f'var {k}={T.json_dumps(v)};\n'
 		html=T.replace_auto_type(html,html_ka_mark,hs)
 		# T.replace
 	
