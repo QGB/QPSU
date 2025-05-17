@@ -144,9 +144,7 @@ auto_proxy=auto_proxies=auto_proxy_for_requests
 def random_headers():
 	import fake_headers
 	return fake_headers.Headers( headers=fake_headers.make_header() ).generate()
-	
 #8
-
 def request(url,method='GET',headers=gheaders.copy(),
 	proxies=AUTO_GET_PROXY,verify=False,timeout=9,no_raise=False,print_req=False,**ka):	
 	''' 

@@ -8,6 +8,60 @@ else:
 	from qgb import py
 U,T,N,F=py.importUTNF()
 
+
+def get_bmp(rgb=(255, 0, 0), size=16):
+	import struct
+    # 确保输入的RGB颜色值在0-255范围内
+	r, g, b = (max(0, min(255, c)) for c in rgb)
+
+	# 将RGB转换为BGR字节顺序
+	bgr_color = bytes([b, g, r])
+
+	# 图片尺寸与基础参数
+	width = size
+	height = size
+	bytes_per_pixel = 3
+
+	# 计算关键参数
+	bytes_per_row = (width * bytes_per_pixel + 3) // 4 * 4  # 每行字节数（含填充）
+	pixel_data_size = bytes_per_row * height                 # 像素数据总大小
+	file_size = 14 + 40 + pixel_data_size                    # 文件总大小
+
+	# BMP文件头（14字节）
+	bmp_header = struct.pack(
+		'<2sIII',
+		b'BM',               # 文件标识
+		file_size,           # 文件总大小（小端序）
+		0,                   # 保留字段
+		54                   # 像素数据偏移（14+40）
+	)
+
+	# BMP信息头（40字节）
+	bmp_info = struct.pack(
+		'<IIIHHIIIIII',
+		40,                  # 信息头大小
+		width,               # 图片宽度（小端序）
+		height,              # 图片高度（正数表示倒序存储）
+		1,                   # 颜色平面数（固定为1）
+		24,                  # 每像素位数（24位BGR）
+		0,                   # 压缩方式（BI_RGB）
+		pixel_data_size,     # 像素数据大小（包含填充）
+		3780,                # 水平分辨率（像素/米）
+		3780,                # 垂直分辨率
+		0,                   # 调色板颜色数（无调色板）
+		0                    # 重要颜色数（全重要）
+	)
+
+	# 生成像素数据（含行填充）
+	pixels = b''
+	for _ in range(height):
+		row = bgr_color * width                # 单行像素数据
+		padding = b'\x00' * (bytes_per_row - len(row))  # 填充字节
+		pixels += row + padding
+
+	return bmp_header + bmp_info + pixels
+generate_solid_ico=get_ico
+
 def format(s,**ka):
 	ka={'{%s}'%k:v for k,v in ka.items()}
 	return T.replacey(s,ka)
@@ -35,7 +89,6 @@ def dict_list_number_edit(response,adict,get=False,set=None):
 	elif s2:dict_name=s2
 	
 	# return u,s1,s2
-
 	html=F.read_qpsu_file('dict_list_number_edit.html')
 	html=N.HTML.format(html,dict_name=dict_name,func_name='N.HTML.dict_list_number_edit')
 	response.headers['Content-Type']='text/html;charset=utf-8'

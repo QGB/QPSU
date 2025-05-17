@@ -1006,7 +1006,7 @@ def dns_resolve(domain,rdtype='A',return_str_list=True):
 		return py.No(e)
 dns=get_ip_from_domain=resolve_domain=dns_resolve
 		
-def ping(addr,sum=5,sleep=0,timeout= 4,ttl=None,seq=0,size=56,interface=None,p=False,r=True,**ka):
+def ping(addr,sum=5,sleep=0,timeout= 4,ttl=None,seq=0,size=56,interface=None,p=False,return_result=True,**ka):
 	''' ping3.ping(
 	dest_addr: str,
 	timeout: int = 4,
@@ -1035,6 +1035,7 @@ OSError(10065, '套接字操作尝试一个无法连接的主机。', None, 1006
 	U,T,N,F=py.importUTNF()
 	addr=auto_ip(addr,**ka)
 	sum=U.get_duplicated_kargs(ka,'times','count','n','ct',default=sum)
+	return_result=U.get_duplicated_kargs(ka,'return_list','return_result','ret','r',default=return_result)
 	if U.isWin():
 		Win=py.from_qgb_import('Win')
 		_title=U.set('window_title',Win.get_title())
@@ -1068,12 +1069,16 @@ OSError(10065, '套接字操作尝试一个无法连接的主机。', None, 1006
 			re.append(i)
 		if p:
 			print('%-5s'%i,'%-15s'%U.stime()[12:],'ms=%r'%ms,)
-		if r:lr.append([i,ms])
+		if return_result:lr.append([i,ms])
 		else:ms #TODO count timeout rate, avg ms
 	if py.len(re)==sum:
 		return _return('ping %s %s times all faild!'%(addr,sum),addr,timeout,ttl,seq,size,interface)
 	else:
-		if r:return _return(lr)
+		for i,ms in lr:
+			if ms or (py.isfloat(ms) and ms==0.0):break # False等于0，而0等于0.0
+		else:
+			return py.No('all ping failed',lr)	
+		if return_result:return _return(lr)
 
 def range_http_server(port=2233,**ka):
 	'''
@@ -2123,7 +2128,6 @@ Resource interpreted as Stylesheet but transferred with MIME type text/html:
 		# )
 	if html_ka_mark and ka and remove_tag==g_remove_tag:remove_tag=[]	
 
-		
 	if not html and file:
 		if not F.exists(file):
 			_file=U.get_qpsu_file_path(file)
@@ -2131,12 +2135,11 @@ Resource interpreted as Stylesheet but transferred with MIME type text/html:
 			else:
 				if not file.lower().endswith('.html'):
 					_file=U.get_qpsu_file_path(file+'.html')
-				else:	
+				else:
 					_file=U.gst+file
 				if F.exists(_file):file=_file
 		if not F.exists(file):raise py.ArgumentError('file not exists',file)
-			
-				
+
 		import mimetypes
 		content_type = (
 			 mimetypes.guess_type(file)[0] or content_type #"application/octet-stream"
@@ -2869,6 +2872,7 @@ def get_lan_ip(adapter=py.No('auto'),adapter_names=('enp0s','wlan0','ens5')):
 	elif U.isWin():#TODO
 		ks=['WLAN', # 1.3
 		'WLAN 2',  # 1.4
+		'WLAN 3',  # x230
 		 '以太网',#'192.168.1.5'
 		]
 		for k in ks:
@@ -3054,7 +3058,7 @@ def getArpTable():
 	U=py.importU()
 	return U.cmd('arp -a')
 
-def scan_port_ip_range(mask='192.168.1.1/24', threadsMax=33, port=3389, callback=None,debug=False):
+def scan_port_ip_range(port=3389,mask='192.168.1.1/24',threadsMax=33,callback=None,return_open_only=True,print_progress=False,debug=False):
 	'''扫描指定网段的所有3389端口
 	return [opens, closes, errors]
 	opens: [(ip, port), ...]
@@ -3107,7 +3111,7 @@ def scan_port_ip_range(mask='192.168.1.1/24', threadsMax=33, port=3389, callback
 
 	for i, ip_port in enumerate(targets):
 		if (i/im > percent):
-			U.pln('Scanning %.0f%%' % (percent*100), len(threads))
+			if print_progress:U.pln('Scanning %.0f%%' % (percent*100), len(threads))
 			percent += 0.01
 			
 		if len(threads) <= threadsMax:
@@ -3123,7 +3127,9 @@ def scan_port_ip_range(mask='192.168.1.1/24', threadsMax=33, port=3389, callback
 
 	[x.join() for x in threads]
 	if callback:
-		callback(counting_open, counting_close, errors)
+		if return_open_only:callback(counting_open)
+		else:callback(counting_open, counting_close, errors)
+	if return_open_only:return counting_open
 	return counting_open, counting_close, errors	
 		
 def scan_ports_single_ip(host,threadsMax=33,from_port=1,to_port=65535,callback=None,ip2=192.168):

@@ -958,7 +958,7 @@ def encode(s,encoding):
 	except Exception as e:
 		return return_error(e)
 
-def diff_bytes(b1,b2,p=True):
+def diff_bytes(b1,b2,p=True,write_hex=True):
 	all_args=py.importU().getArgsDict()
 	U=py.importU();F=py.importF()
 	sp=F.mkdir(diff_bytes.__name__)
@@ -966,7 +966,9 @@ def diff_bytes(b1,b2,p=True):
 	for k,v in  all_args.items():
 		# print(k,v)
 		if not py.isbytes(v):continue
-		f=F.write('{}{}={}'.format(sp,filename_legalized(k),len(v), ) ,v)
+		len_b=len(v)
+		if write_hex:v=F.b2h(v,split=' ',break_line=16)
+		f=F.write('{}{}={}'.format(sp,filename_legalized(k),len_b, ) ,v)
 		rf.append(f)
 
 	if py.isbytes(b1):b1=b1.splitlines()

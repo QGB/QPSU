@@ -142,6 +142,7 @@ html,body { height:100%; }
         // 拖拽初始化
         new Sortable(list, {
             supportPointer: true,          // 支持移动设备，这一行不知道有没有用，原来页面加载后第一次也可以选择
+            //multiDragKey: null,  //不能添加这个，pc端都不能全选 允许无键盘多选
             animation: 150,
             multiDrag: true,
             selectedClass: 'selected',

@@ -772,6 +772,11 @@ tmux detach-client -t /dev/pts/3
 	tmux_dt=tmux_detach=tmux_detach_client=tmux_detach_client_all=tmux_detach_client_all_skip_max
 		
 ########################## end init #############################################
+def chunk_list(lst, chunk_size):
+	"""将列表按指定大小分块"""
+	return [lst[i:i+chunk_size] for i in range(0, len(lst), chunk_size)]
+list_chunk=chunk_list
+
 def get_copyq_clipboard_items(*a,**ka):
 	from qgb.tests import CopyQ
 	return CopyQ.get_copyq_clipboard_items(*a,**ka)

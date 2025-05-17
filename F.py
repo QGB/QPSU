@@ -779,7 +779,7 @@ def byte_to_int(a):
 	return py.ord(a)
 b2i=byte_to_int	
 
-def bytes_to_hex(a,split=''):
+def bytes_to_hex(a,split='',break_line=0):
 	'''如果 len(split)是奇数，肯定返回 （奇数+偶数）=奇数
 						偶=》偶
 	'''
@@ -788,7 +788,14 @@ def bytes_to_hex(a,split=''):
 		ord=lambda i:i
 	else:
 		ord=py.ord
-	r=split.join( [DIH[ord(i)] for i in a] )
+	if break_line:
+		assert py.isint(break_line) and break_line >0
+		U=py.importU()
+		r=''
+		for bs in U.chunk_list(a,break_line):
+			r+=split.join( [DIH[ord(i)] for i in bs] )+'\n'
+	else:		
+		r=split.join( [DIH[ord(i)] for i in a] )
 	return r
 b2h=bytesToHex=bytes_to_hex
 

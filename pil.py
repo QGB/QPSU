@@ -5,6 +5,17 @@ from PIL.ImageColor import colormap
 import PIL.ExifTags
 import PIL.ImageGrab
 
+def get_bmp_bytes(color=(255, 0, 0),size=(16,16)):
+	if py.isint(size):size=(size,size)
+	import io
+	# 生成红色16x16图像（假设已存在）
+	img = Image.new("RGB", size, color=color)
+	# 创建内存缓冲区并保存BMP到内存
+	with io.BytesIO() as buffer:
+		img.save(buffer, format="BMP")  # 需显式指定格式
+		b = buffer.getvalue()  # 获取字节数据
+		return b
+	
 color10=[
  [(0  , 0  , 0  ), '0x00_00_00','#000000','black'  ],
  [(0  , 0  , 255), '0x00_00_ff','#0000ff','blue'   ],
