@@ -1637,10 +1637,10 @@ def rpc_set_file(obj,filename=py.No('if obj exists: auto '),name='v',**ka):
 		
 	return rpc_set_variable(obj,name=name,ext_cmd='r=F.write({filename!r},%s,mkdir=True)'.format(filename=filename),**ka)
 
-def rpcServer(port=1133,thread=True,ip='0.0.0.0',ssl_context=(),currentThread=False,app=None,key=None,
+def flask_rpc_server(port=1133,thread=True,ip='0.0.0.0',ssl_context=(),currentThread=False,app=None,key=None,
 execLocals=None,locals=None,globals=None,
 qpsu='py,U,T,N,F',importMods='sys,os',request=True,
-flaskArgs=None,no_banner=False,
+flaskArgs=None,no_banner=False,favicon_rgb=(255,255,255),**ka
 	):
 	'''N.rpcServer(globals=globals(),locals=locals(),)
 	
@@ -1653,8 +1653,8 @@ key compatibility :  key='#rpc\n'==chr(35)+'rpc'+chr(10)
 #TODO 分析请求代码中的变量，如果使用到了 p,response 才去赋值。没用到就不干扰	
 	'''
 	from threading import Thread
-	U=py.importU()
-	T=py.importT()
+	U,T,N,F=py.importUTNF()
+	favicon_rgb=U.get_duplicated_kargs(ka,'favicon_rgb','favicon_color','favicon','rgb',default=favicon_rgb)	
 	# if not U.get('pformat_kw'):
 		# U.set('pformat_kw',{'width':144})
 	U.get_or_set('pformat_kw',{})['width']=333
@@ -1676,7 +1676,7 @@ key compatibility :  key='#rpc\n'==chr(35)+'rpc'+chr(10)
 	if qpsu:
 		for modName in qpsu.split(','):
 			globals[modName]=U.getMod('qgb.'+modName)	
-		
+	import flask	
 	from flask import Flask,make_response
 	from flask import request as _request
 	if no_banner:
@@ -1686,6 +1686,23 @@ key compatibility :  key='#rpc\n'==chr(35)+'rpc'+chr(10)
 
 	app=app or Flask('rpcServer'+U.stime_()   )
 	
+	# if 'favicon' in app.view_functions:# 删除已存在的端点防止冲突
+	# 	del app.view_functions['favicon']  # 清除旧视图函数绑定
+	U.set('get_bmp.rgb',favicon_rgb)
+	app.add_url_rule(
+		'/favicon.ico',
+		endpoint='favicon',
+		view_func=lambda: flask.Response(
+			N.HTML.get_bmp(),
+			mimetype='image/x-icon',
+			headers={
+				'Cache-Control': 'max-age=86400',
+				'Content-Length': str(len(N.HTML.get_bmp()))
+			}
+		),
+		methods=['GET']
+	)
+
 	def _flaskEval(code=None):
 		nonlocal globals,locals 
 		
@@ -1755,45 +1772,7 @@ key compatibility :  key='#rpc\n'==chr(35)+'rpc'+chr(10)
 		t= Thread(target=app.run,name='qgb thread '+app.name,kwargs=flaskArgs)
 		t.start()
 		return (t,app)
-########### flaskEval end ###########	
-	if py.is3():from http.server import BaseHTTPRequestHandler as h
-	class H(SimpleHTTPRequestHandler):
-		def do_GET(s):
-			code=s.path[1:]
-			try:
-				r=execResult(code)
-				s.send_response(200)
-			except Exception as e:
-				s.send_response(500)
-				
-			s.send_header("Content-type", "text/plain")
-			s.end_headers()		
-			
-			if not py.istr(r):
-				r=repr(r)
-			if py.is3():
-				r=r.encode('utf8')
-			s.wfile.write(r)
-	
-
-		
-	# with _HTTPServer((ip,port), H) as httpd:
-		# sa = httpd.socket.getsockname()
-		# serve_message = "Serving HTTP on {host} port {port} (http://{host}:{port}/) ..."
-		# print(serve_message.format(host=sa[0], port=sa[1]))
-		# try:
-			# if currentThread or not thread:httpd.serve_forever()
-			# else:
-				# t= Thread(target=httpd.serve_forever,name='qgb.rpcServer '+U.stime() )
-				# t.start()
-				# return t
-				
-		# except KeyboardInterrupt:
-			# print("\nKeyboard interrupt received, exiting.")
-	
-# class rpcServer(HTTPHandler):
-	# def __init__
-		# super()
+rpcServer=rpc_server=flask_rpc_server
 		
 	
 def rpcClient(url_or_port='http://127.0.0.1:1133',code=''):
