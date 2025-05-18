@@ -1685,7 +1685,7 @@ key compatibility :  key='#rpc\n'==chr(35)+'rpc'+chr(10)
 
 
 	app=app or Flask('rpcServer'+U.stime_()   )
-	
+	U.set(f'flask_rpc_server.app={ip}:{port}',app)
 	# if 'favicon' in app.view_functions:# 删除已存在的端点防止冲突
 	# 	del app.view_functions['favicon']  # 清除旧视图函数绑定
 	U.set('get_bmp.rgb',favicon_rgb)

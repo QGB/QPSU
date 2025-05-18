@@ -1573,17 +1573,11 @@ def deleteFile(file):
 	sp=getSplitor(file)
 	# for i in a.split(ap):
 	U=py.importU()
-	def Error():
-		#Error()  返回None时   
-		#TypeError: catching classes that do not inherit from BaseException is not allowed
-		return FileNotFoundError
-		#issubclass(FileNotFoundError,WindowsError) == True
-		if U.iswin():	return WindowsError 
-	
+	import shutil
 	try:
 		try:
-			import win32com
 			if U.isWin():
+				import win32com
 				return py.from_qgb_import('Win').shell_delete(file)
 		except:
 			shutil.rmtree(file)
@@ -1596,13 +1590,22 @@ def deleteFile(file):
 		if isDir(file):
 			raise Exception('#TODO')
 		return py.No(file,e,'Not exists?')
-	#Error  {'G:\\test\\npp': WindowsError(5, '')}
-	# Docstring: MS-Windows OS system call failed.  
-	#*nix NameError: name 'WindowsError' is not defined  '''
 	except Exception as e:
 		# setErr({file:e})
 		return py.No(file,e)
-	return False
+	return False	
+	def Error():
+		#Error()  返回None时   
+		#TypeError: catching classes that do not inherit from BaseException is not allowed
+		return FileNotFoundError
+		#issubclass(FileNotFoundError,WindowsError) == True
+		if U.iswin():	return WindowsError 
+		
+
+	#Error  {'G:\\test\\npp': WindowsError(5, '')}
+	# Docstring: MS-Windows OS system call failed.  
+	#*nix NameError: name 'WindowsError' is not defined  '''
+
 rm=delete=deleteFile
 	
 def getSplitor(ap):

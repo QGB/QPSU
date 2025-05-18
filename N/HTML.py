@@ -14,31 +14,26 @@ def get_bmp_bytes(rgb=None,size=(16,16)):
 		rgb = U.get_or_set('get_bmp.rgb', (255,0,0))
 		size = U.get_or_set('get_bmp.size', 16)
 	if py.isint(size):size=[size,size]
-	
 	width,height = size
-	
+
 	import struct
-    # 确保输入的RGB颜色值在0-255范围内
-	r, g, b = (max(0, min(255, c)) for c in rgb)
-
-	# 将RGB转换为BGR字节顺序
-	bgr_color = bytes([b, g, r])
+	r, g, b = (max(0, min(255, c)) for c in rgb)# 确保输入的RGB颜色值在0-255范围内
+	bgr_color = bytes([b, g, r])# 将RGB转换为BGR字节顺序
 	bytes_per_pixel = 3
-
 	# 计算关键参数
 	bytes_per_row = (width * bytes_per_pixel + 3) // 4 * 4  # 每行字节数（含填充）
 	pixel_data_size = bytes_per_row * height                 # 像素数据总大小
 	file_size = 14 + 40 + pixel_data_size                    # 文件总大小
-	# BMP文件头（14字节）
-	bmp_header = struct.pack(
+
+	bmp_header = struct.pack(# BMP文件头（14字节）
 		'<2sIII',
 		b'BM',               # 文件标识
 		file_size,           # 文件总大小（小端序）
 		0,                   # 保留字段
 		54                   # 像素数据偏移（14+40）
 	)
-	# BMP信息头（40字节）
-	bmp_info = struct.pack(
+
+	bmp_info = struct.pack(# BMP信息头（40字节）
 		'<IIIHHIIIIII',
 		40,                  # 信息头大小
 		width,               # 图片宽度（小端序）
@@ -52,9 +47,8 @@ def get_bmp_bytes(rgb=None,size=(16,16)):
 		0,                   # 调色板颜色数（无调色板）
 		0                    # 重要颜色数（全重要）
 	)
-	# 生成像素数据（含行填充）
 	pixels = b''
-	for _ in range(height):
+	for _ in range(height):# 生成像素数据（含行填充）
 		row = bgr_color * width                # 单行像素数据
 		padding = b'\x00' * (bytes_per_row - len(row))  # 填充字节
 		pixels += row + padding

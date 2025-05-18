@@ -63,7 +63,7 @@ return list of [u,old_f,new_size]
 		return duf
 	rufs=[]	
 	for u,f in duf.items():
-		b=get_bytes(qpsu_base_url+u,proxy=proxy,**ka)
+		b=get_bytes(qpsu_base_url+u,proxy=proxy,headers=None,**ka)
 		if not b:return b
 		if py.len(b)<888:return py.No('HTTP.get len(b)<999',b,duf)
 		F.delete(f)
