@@ -115,6 +115,13 @@ try:
 	from pprint import pprint,pformat
 except:pass
 ####################################################
+def is_varname(s: str) -> bool:
+    import re, keyword
+    if not isinstance(s, str) or not s:return py.No('type error',s)# 类型和空值校验 → 防止非字符串输入
+    if not re.fullmatch(RE_VAR_SIMPLE,s, flags=re.ASCII):return False# ASCII字符集校验 → 替代\w避免Unicode问题
+    if keyword.iskeyword(s):return False# 关键字黑名单 → 排除保留字
+    return True
+is_var=is_varname
 
 def is_valid_css_selector(css: str) -> bool:
 	"""

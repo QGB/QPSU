@@ -1320,7 +1320,7 @@ def rpc_append_list(*a,name='la',base='',proxies=0,print_req=1):
 		 return rpc_append_list(*a,name=name,base=base)
 	return U.StrRepr(t)
 	
-def rpc_call(name,*a,base='',proxies=0,print_req=1,raise_err=False,return_mock_call='',**ka):
+def rpc_call(name,*a,base='',proxies=0,print_req=1,raise_err=False,return_mock_call='',http_method='POST',**ka):
 	U,T,N,F=py.importUTNF()
 	base=get_remote_rpc_base(base,ka=ka)
 	if '://' in name:
@@ -1339,15 +1339,16 @@ def rpc_call(name,*a,base='',proxies=0,print_req=1,raise_err=False,return_mock_c
 		if not name.endswith(')'):name+='()'
 		url=f'{base}r={return_mock_call}{return_mock_call}{name}'
 		b=None
+		http_method='GET'
 	else:
 		url=f'{base}rpc_a,rpc_ka=N.flask_dill_data();r={return_mock_call}{name}(*rpc_a,**rpc_ka)'
 		b=F.dill_dump([a,ka])
 
 	if raise_err:
-		rp= N.HTTP.post(url,b,proxies=proxies,print_req=print_req,headers=None,)
+		rp= N.HTTP.request(url,method=http_method,data=b,proxies=proxies,print_req=print_req,headers=None,)
 	else:
 		try:
-			rp= N.HTTP.post(url,b,proxies=proxies,print_req=print_req,headers=None,)
+			rp= N.HTTP.request(url,method=http_method,data=b,proxies=proxies,print_req=print_req,headers=None,)
 		except Exception as e:
 			print(U.stime(),'N.rpc_call',e)
 			return py.No(e)
@@ -1438,6 +1439,7 @@ rpc_copy=rpc_copy_file=rpc_copy_files
 AUTO_GET_BASE=py.No('auto history e.g. [http://]127.0.0.1:1133[/../] ',no_raise=1,)
 RPC_GET_TEMPLATE='{base}response.set_data(F.serialize({varname}))'
 RPC_SET_TEMPLATE='{0}{v}=F.dill_loads(request.get_data());{ext_cmd}'
+RPC_SET_TEMPLATE_BYTES='{0}{v}=request.get_data();{ext_cmd}'
 def rpc_get_variable(varname,
 base=AUTO_GET_BASE,
 template=RPC_GET_TEMPLATE,
@@ -1518,14 +1520,14 @@ def rpc_get_variable_local(*names,ipy=True,port=DEFAULT_RPC_LOCAL_PORTS):
 	vs=[]
 	for name in names:
 		v=rpc_get_variable(name,base=get_local_rpc_base(port))
-		if ipy:
+		if ipy and T.is_varname(name):
 			g.user_ns[name]=v
 		else:
 			vs.append(v)
 		if not v:
 			de[name]=v
 	if de:return py.No(de)
-	if not ipy:
+	if not ipy or vs:
 		if py.len(vs)==1:
 			return vs[0]
 		else:
@@ -1626,16 +1628,29 @@ def rpc_get_file(filename,save_dir=None,return_b=False,**ka):
 		return f,u,b
 	return f	
 	
-def rpc_set_file(obj,filename=py.No('if obj exists: auto '),name='v',**ka):
+def rpc_set_file(obj,filename=py.No('if obj exists: auto '),name='v',verify_file=None,ext_cmd='',debug=False,**ka):
 	''' local_obj , remote_filename
 '''	
 	U,T,N,F=py.importUTNF()
+	fn=''
 	if py.istr(obj) and py.len(obj)<999 and F.exists(obj):
+		fn=F.get_filename_from_full_path(obj)
 		if not filename:
-			filename=F.get_filename_from_full_path(obj)
+			filename=fn
 		obj=F.read_bytes(obj)
-		
-	return rpc_set_variable(obj,name=name,ext_cmd='r=F.write({filename!r},%s,mkdir=True)'.format(filename=filename),**ka)
+	if filename.endswith('/'):
+		assert fn
+		filename+=fn
+
+
+
+	if verify_file:
+		sha256=U.sha256(obj)
+		verify_file=f",{sha256!r}==U.sha256(file={filename!r})"
+	else		  :verify_file=''		
+	ext_cmd=ext_cmd.format(filename=filename,fn=fn)
+	if debug:return U.v.rpc_set_variable(obj,name=name,ext_cmd=f'r=F.write({filename!r}'+',{name},mkdir=True)'+verify_file+ext_cmd,template=RPC_SET_TEMPLATE,**ka)
+	return rpc_set_variable(obj,name=name,ext_cmd=f'r=F.write({filename!r}'+',{name},mkdir=True)'+verify_file+ext_cmd,template=RPC_SET_TEMPLATE,**ka)
 
 def flask_rpc_server(port=1133,thread=True,ip='0.0.0.0',ssl_context=(),currentThread=False,app=None,key=None,
 execLocals=None,locals=None,globals=None,
@@ -1686,22 +1701,23 @@ key compatibility :  key='#rpc\n'==chr(35)+'rpc'+chr(10)
 
 	app=app or Flask('rpcServer'+U.stime_()   )
 	U.set(f'flask_rpc_server.app={ip}:{port}',app)
-	# if 'favicon' in app.view_functions:# 删除已存在的端点防止冲突
-	# 	del app.view_functions['favicon']  # 清除旧视图函数绑定
-	U.set('get_bmp.rgb',favicon_rgb)
-	app.add_url_rule(
-		'/favicon.ico',
-		endpoint='favicon',
-		view_func=lambda: flask.Response(
-			N.HTML.get_bmp(),
-			mimetype='image/x-icon',
-			headers={
-				'Cache-Control': 'max-age=86400',
-				'Content-Length': str(len(N.HTML.get_bmp()))
-			}
-		),
-		methods=['GET']
-	)
+	if favicon_rgb:
+		# if 'favicon' in app.view_functions:# 删除已存在的端点防止冲突
+		# 	del app.view_functions['favicon']  # 清除旧视图函数绑定
+		U.set('get_bmp.rgb',favicon_rgb)
+		app.add_url_rule(
+			'/favicon.ico',
+			endpoint='favicon',
+			view_func=lambda: flask.Response(
+				N.HTML.get_bmp(),
+				mimetype='image/x-icon',
+				headers={
+					'Cache-Control': 'max-age=86400',
+					'Content-Length': str(len(N.HTML.get_bmp()))
+				}
+			),
+			methods=['GET']
+		)
 
 	def _flaskEval(code=None):
 		nonlocal globals,locals 
@@ -2852,6 +2868,7 @@ def get_lan_ip(adapter=py.No('auto'),adapter_names=('enp0s','wlan0','ens5')):
 		ks=['WLAN', # 1.3
 		'WLAN 2',  # 1.4
 		'WLAN 3',  # x230
+		'WLAN3',  # x230
 		 '以太网',#'192.168.1.5'
 		]
 		for k in ks:

@@ -768,9 +768,34 @@ tmux detach-client -t /dev/pts/3
 			U.ipy_getoutput(f'tmux detach-client -t {row[0]}')
 			row.append(U.stime())
 		return cs
-		
 	tmux_dt=tmux_detach=tmux_detach_client=tmux_detach_client_all=tmux_detach_client_all_skip_max
 		
+	def tmux_send_keys(panel,*k,before_ctrl_c='C-c',enter='Enter',**ka):
+		before_ctrl_c=get_duplicated_kargs(ka,'before_ctrl_c','ctrl_c','before','a',default=before_ctrl_c)
+		enter=get_duplicated_kargs(ka,'enter','after','b','tail','end',default=enter)
+		def auto_panel(panel):
+			if isinstance(panel,float):
+				panel=f'0:{panel}'
+			if isinstance(panel,int):
+				panel=f'0:{panel}.0'
+			return panel
+		panel=auto_panel(panel)
+		if not enter:enter=''
+		sk=''
+		for i in k:
+			if "'" in i:i=f'"{i}"'
+			# if '"' in i:
+			else:
+				i=f"'{i}'"
+			sk+=str(i)+' '
+
+		s=f"""tmux send-keys -t {panel} {before_ctrl_c} {sk} {enter}"""
+		print(stime(),s)
+		os.system(s)
+		return s
+	tmux_keys=tmux_send_keys
+
+
 ########################## end init #############################################
 def chunk_list(lst, chunk_size):
 	"""将列表按指定大小分块"""
@@ -8288,9 +8313,11 @@ def new_ssh_key(key_size=2048):
 	return public_key,private_key
 
 
-
 def generate_ecdsa_by_secexp(secexp=1,curve='NIST256p', comment="",dir='C:/test/ssh/',return_pub=False):
-	'''  ecdsa.NIST256p # NIST P-256被称为secp256r1  prime256v1。不同的名字，但他们都是一样的。
+	''' pip install ecdsa 
+在不同的机器上，U.generate_ecdsa_by_secexp 相同的secexp生成的 privateKey 文件内容不完全相同（#todo），但是都可以正常连接
+	
+	 ecdsa.NIST256p # NIST P-256被称为secp256r1  prime256v1。不同的名字，但他们都是一样的。
 ecdsa.SECP256k1 # cryptography hazmat can not load SECP256k1, _ECDSA_KEY_TYPE[curve.name]
 ValueError: Unsupported curve for ssh private key: 'secp256k1'
 

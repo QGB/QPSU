@@ -100,19 +100,46 @@ def hualin(t=30,fan_speed=100,mode='cool',toggle_display=True,power=AC_DEFAULT,f
  <fan_speed_enum.Low: 40>,
  <fan_speed_enum.Silent: 20>]
 ''' 
-	from msmart.device import air_conditioning
-	import msmart.device.AC.appliance
-	operational_mode_enum=msmart.device.AC.appliance.air_conditioning.operational_mode_enum
-	dio={1: operational_mode_enum.auto,
- 2: operational_mode_enum.cool,
- 3: operational_mode_enum.dry,
- 4: operational_mode_enum.heat,
- 5: operational_mode_enum.fan_only}
-	dso={'auto': operational_mode_enum.auto,
- 'cool': operational_mode_enum.cool,
- 'dry': operational_mode_enum.dry,
- 'heat': operational_mode_enum.heat,
- 'fan_only': operational_mode_enum.fan_only}
+	try:
+		from msmart.device import air_conditioning
+		import msmart.device.AC.appliance
+		operational_mode_enum=msmart.device.AC.appliance.air_conditioning.operational_mode_enum
+		dio={1: operational_mode_enum.auto,
+	2: operational_mode_enum.cool,
+	3: operational_mode_enum.dry,
+	4: operational_mode_enum.heat,
+	5: operational_mode_enum.fan_only}
+		dso={'auto': operational_mode_enum.auto,
+	'cool': operational_mode_enum.cool,
+	'dry': operational_mode_enum.dry,
+	'heat': operational_mode_enum.heat,
+	'fan_only': operational_mode_enum.fan_only}
+		dfka=U.get_or_dill_load('hualin-2')
+	except:
+		import msmart.device
+		air_conditioning=msmart.device.AirConditioner
+		operational_mode_enum=msmart.device.AirConditioner.OperationalMode
+		dio = {
+			1: operational_mode_enum.AUTO,
+			2: operational_mode_enum.COOL,
+			3: operational_mode_enum.DRY,
+			4: operational_mode_enum.HEAT,
+			5: operational_mode_enum.FAN_ONLY,
+			# 6: operational_mode_enum.SMART_DRY  # 根据需求添加
+		}
+		dso = {
+			'auto': operational_mode_enum.AUTO,
+			'cool': operational_mode_enum.COOL,
+			'dry': operational_mode_enum.DRY,
+			'heat': operational_mode_enum.HEAT,
+			'fan_only': operational_mode_enum.FAN_ONLY,
+			# 'smart_dry': operational_mode_enum.SMART_DRY
+		}
+		dfka=U.get_or_dill_load('hualin-2')
+		dfka={'air_conditioning':{'ip': '192.168.1.176', 'port': 6444, 'device_id': 208907213152422},
+		'authenticate':dfka['authenticate']
+		}
+	
 	mode=U.get_duplicated_kargs(ka,'mode','mod','m','moshi','mo',default=mode)
 	fan_only=U.get_duplicated_kargs(ka,'fan_only','fan','wind','only_wind','sf',default=fan_only)
 	def get_mode():
@@ -128,7 +155,6 @@ def hualin(t=30,fan_speed=100,mode='cool',toggle_display=True,power=AC_DEFAULT,f
 	
 	power=U.get_duplicated_kargs(ka,'power','on','open','p','po',default=power)
 	
-	dfka=U.get_or_dill_load('hualin-2')
 	
 	a=U.get_or_set('msmart.device.air_conditioning:hualin',
 		lazy_default=lambda:air_conditioning(**dfka['air_conditioning']),
@@ -145,11 +171,11 @@ def hualin(t=30,fan_speed=100,mode='cool',toggle_display=True,power=AC_DEFAULT,f
 	
 	fan_speed=U.get_duplicated_kargs(ka,'wind_speed','fan_speed','speed','fs','S',default=fan_speed)# 100 max , 102 auto
 	if py.isint(fan_speed):
-		if fan_speed==5 or 80<fan_speed:fan_speed=a.fan_speed_enum.Full
-		if fan_speed==4 or 60<fan_speed<=80:fan_speed=a.fan_speed_enum.High
-		if fan_speed==3 or 40<fan_speed<=60:fan_speed=a.fan_speed_enum.Medium
-		if fan_speed==2 or 20<fan_speed<=40:fan_speed=a.fan_speed_enum.Low
-		if fan_speed==2 or 9 <fan_speed<=20:fan_speed=a.fan_speed_enum.Silent
+		if fan_speed==5 or 80<fan_speed    :fan_speed=100
+		if fan_speed==4 or 60<fan_speed<=80:fan_speed=80
+		if fan_speed==3 or 40<fan_speed<=60:fan_speed=60
+		if fan_speed==2 or 20<fan_speed<=40:fan_speed=40
+		if fan_speed==2 or 9 <fan_speed<=20:fan_speed=20
 			
 	
 	
