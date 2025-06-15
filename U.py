@@ -794,9 +794,67 @@ tmux detach-client -t /dev/pts/3
 		os.system(s)
 		return s
 	tmux_keys=tmux_send_keys
-
-
 ########################## end init #############################################
+
+def log_info(text, file=''):
+	import logging,inspect,time,os
+	U=py.importU()
+	_root_logger = U.get("compact_logger")
+	if not _root_logger:
+		# 配置全局根 Logger
+		_root_logger = logging.getLogger("compact_logger")
+		_root_logger.setLevel(logging.INFO)
+		_root_logger.propagate = False  # ⚠️关键修复1：禁止日志传播到根Logger
+		
+		# 清理现有处理器
+		for handler in _root_logger.handlers[:]:
+			_root_logger.removeHandler(handler)
+			
+		# 添加控制台处理器
+		console_handler = logging.StreamHandler()
+
+		class CompactFormatter(logging.Formatter):
+			"""毫秒级时间戳的日志格式化器"""
+			def formatTime(self, record, datefmt=None):
+				ct = time.localtime(record.created)
+				t = time.strftime("%m-%d_%H:%M:%S", ct)
+				return f"{t}.{int(record.msecs):03d}"
+		console_handler.setFormatter(CompactFormatter(
+			fmt='%(asctime)s %(levelname).1s:%(_caller_lineno)-4d %(message)s'
+		))
+		_root_logger.addHandler(console_handler)
+		U.set("compact_logger", _root_logger)
+
+	# 获取调用者信息（跳过当前栈帧）
+	caller = inspect.currentframe().f_back
+	caller_info = inspect.getframeinfo(caller)
+	
+	# 动态添加文件处理器
+	file_handler = U.get(file)
+	if file and not file_handler:
+		os.makedirs(os.path.dirname(file), exist_ok=True)
+		from logging.handlers import RotatingFileHandler
+		file_handler = RotatingFileHandler(
+			file, maxBytes=5*1024*1024, backupCount=3, encoding='utf-8'
+		)
+		# file_handler.setFormatter(CompactFormatter( # 为了不多次创建CompactFormatter，使用默认格式
+		# 	fmt='%(asctime)s %(levelname).1s:%(_caller_lineno)-4d %(message)s'
+		# ))
+		U.set(file, file_handler)
+	
+	if file and file_handler and file_handler not in _root_logger.handlers:
+		_root_logger.addHandler(file_handler)
+	_root_logger.info( # 记录日志
+		text,
+		extra={
+			'_caller_lineno': caller_info.lineno,
+			'_caller_filename': os.path.basename(caller_info.filename),
+			'_caller_func': caller_info.function
+		}
+	)
+	if file and file_handler:
+		_root_logger.removeHandler(file_handler)
+
 def chunk_list(lst, chunk_size):
 	"""将列表按指定大小分块"""
 	return [lst[i:i+chunk_size] for i in range(0, len(lst), chunk_size)]
@@ -809,13 +867,13 @@ copyq=get_copyq_items=get_copyq_clipboard_items
 	
 def pick(*a,return_index=False,**ka):
 	'''pick(
-    options: Sequence[~OPTION_T],
-    title: Union[str, NoneType] = None,
-    indicator: str = '*',
-    default_index: int = 0,
-    multiselect: bool = False,
-    min_selection_count: int = 0,
-    screen: Union[ForwardRef('curses._CursesWindow'), NoneType] = None,
+	options: Sequence[~OPTION_T],
+	title: Union[str, NoneType] = None,
+	indicator: str = '*',
+	default_index: int = 0,
+	multiselect: bool = False,
+	min_selection_count: int = 0,
+	screen: Union[ForwardRef('curses._CursesWindow'), NoneType] = None,
 )'''
 	from pick import pick
 	v,n=pick(*a,**ka)
@@ -6959,14 +7017,14 @@ def set_column_to_2D_list(*cs,dncol=None,default=None,list2d=None):
 	return list2d
 col_join=column_join=add_column_to_2D_list=set_column_to_2D_list	
 # def get_row_from_2D_list(matrix, *index,skip_IndexError=False,skip_col=None):
-def get_column_from_2D_list(matrix, *col_index,skip_IndexError=False,skip_col=None):
+def get_column_from_2D_list(matrix, *col_index,skip_IndexError=False,skip_col=None,list_of_dict=False):
 	if not col_index:raise py.ArgumentError('need *col_index ')
 	
 	if py.isint(skip_col):pass
 	else:	
 		if not skip_col:skip_col=None
 	
-	
+	if matrix and py.isdict(matrix[0]):list_of_dict=True
 	
 	r=[]
 	m=py.len(col_index)
@@ -6977,7 +7035,11 @@ def get_column_from_2D_list(matrix, *col_index,skip_IndexError=False,skip_col=No
 			# for n in no:
 				# if n<0:n=py.len(row)+n 
 				# if n==
-		if m==1:
+		if list_of_dict:
+			l={}
+			for i in col_index:
+				l[i]=row[i]
+		elif m==1:
 			i=col_index[0]
 			if skip_IndexError and 	i>=py.len(row):
 				continue

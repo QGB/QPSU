@@ -2848,7 +2848,8 @@ def get_lan_ip(adapter=py.No('auto'),adapter_names=('enp0s','wlan0','ens5')):
 				daip[a]=s.address
 				break
 			# socket.AddressFamily.AF_INET6: #ipv6
-	if adapter:
+	if adapter and adapter in daip:
+		# if 
 		return daip[adapter]
 	U,T,N,F=py.importUTNF()	
 	if U.isLinux():

@@ -5,6 +5,7 @@ if gsqp not in sys.path:sys.path.append(gsqp)#py3 works
 from qgb import py
 U,T,N,F=py.importUTNF()
 
+from logging import info as log_info
 import json,pandas,numpy
 class MyEncoder(json.JSONEncoder):
 	def default(self, obj):
@@ -58,6 +59,22 @@ gdims={'1s': 1000,
  '1w':  1000*60*60*24*7, # *7
  '1M':  1000*60*60*24*31, #
  }
+gdi_okx={'1s': '1s',
+ '1m': '1m',
+ '3m': '3m',
+ '5m': '5m',
+ '15m': '15m',
+ '30m': '30m',
+ '1h': '1H',
+ '2h': '2H',
+ '4h': '4H',
+ '6h': '6H',
+ '8h': '8H',
+ '12h': '12H',
+ '1d': '1D',
+ '3d': '3D',
+ '1w': '1W',
+ '1M': '1M'}
 rpcka=U.get('rpcka')
 def get_rpcka():
 	global rpcka
@@ -109,7 +126,21 @@ def get_kline_without_pandas(symbol='ETH',interval='1s',start=0,end=0,day='',sec
 	if debug:
 		return U.v.rpc_get(f"B.get_kline_without_pandas({symbol!r},interval={interval!r},start={start!r},end={end!r},{get_srpcka(ka)})",**get_rpcka())
 
-	if futures:
+	if '-' in symbol:  # okx
+		# 构建URL
+		url = f"https://www.okx.com/api/v5/market/history-candles?instId={symbol}&bar={gdi_okx[interval]}&limit=100"
+		# 发送请求
+		response = requests.get(url,proxies={'https':get_rpcka()['proxy']})
+		data_json = response.json()
+		# 检查返回码
+		if data_json['code'] == '0':
+			data = data_json['data']  # 这是一个列表，包含99条K线数据（每条9个字段）
+		else:
+			# return py.No(response.text)
+			# 如果出错，可以打印错误信息，并返回空列表？根据上下文，后面转换函数会处理空列表
+			log_info(f"Error from OKX: {response.text}",)
+			data = []
+	elif futures:
 		data=N.rpc_get(f"B.get_futures_kline({symbol!r},interval={interval!r},start={start!r},end={end!r},{get_srpcka(ka)})",**get_rpcka())
 	else:
 		data=N.rpc_get(f"B.get_kline_without_pandas({symbol!r},interval={interval!r},start={start!r},end={end!r},{get_srpcka(ka)})",**get_rpcka())
@@ -256,7 +287,22 @@ def convert_klines_to_json(klines):
 				}
 				rds.append(kline_data)
 	if py.islist(klines):
-		if py.len(klines[0])==12:
+		if not klines:pass# rds=[]
+		elif len(klines[0]) == 9:  #  处理OKX 9字段格式: [ts, o, h, l, c, vol, volCcy, volCcyQuote, confirm]
+			for v in klines:
+				kline_data = {
+					'timestamp': int(v[0]),  # 时间戳(毫秒)
+					'open': float(v[1]),     # 开盘价
+					'high': float(v[2]),     # 最高价
+					'low': float(v[3]),      # 最低价
+					'close': float(v[4]),    # 收盘价
+					'volume': float(v[5]),   # 基础货币成交量
+					'turnover': float(v[7])  # 计价货币成交额(volCcyQuote)
+				}
+				rds.append(kline_data)
+		
+		# 处理12字段格式
+		elif len(klines[0]) == 12:
 			for v in klines:
 				kline_data = {
 					'timestamp': v[0],
@@ -317,10 +363,10 @@ class QClient(Client):
 	def __init__(self,*a,**ka):
 		'''self, api_key: Optional[str] = None, 
 		api_secret: Optional[str] = None,
-        requests_params: Dict[str, str] = None,
+		requests_params: Dict[str, str] = None,
 		tld: str = 'com',
-        testnet: bool = False
-    ):
+		testnet: bool = False
+	):
 	'''
 		print(a,ka)
 		super().__init__(*a,**ka)
@@ -343,15 +389,15 @@ _request('get','https://api.binance.com/api/v3/ping',False,False,)
  'Accept-Language': 'zh-CN',
  'Connection': 'keep-alive',
  'Cookie': 'cid=a3i3LEkf; '
-           'SERVERID=b6179fbc6d4f08aade16b460b14584fc|1672541045|1672540216',
+		   'SERVERID=b6179fbc6d4f08aade16b460b14584fc|1672541045|1672540216',
  'Host': 'www.mokexapp.cz',
 #  'Host': 'api.binance.com',
  'Sec-Fetch-Dest': 'empty',
  'Sec-Fetch-Mode': 'cors',
  'Sec-Fetch-Site': 'cross-site',
  'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 '
-               '(KHTML, like Gecko) Binance/1.40.0 Chrome/89.0.4389.128 '
-               'Electron/12.0.7 Safari/537.36 (electron 1.40.0)',
+			   '(KHTML, like Gecko) Binance/1.40.0 Chrome/89.0.4389.128 '
+			   'Electron/12.0.7 Safari/537.36 (electron 1.40.0)',
  'bnc-currency': 'USD',
  'bnc-time-zone': 'Asia/Shanghai',
  'bnc-uuid': '03fe5662-a6b9-4334-a9c2-16acd14b0588',
@@ -376,14 +422,14 @@ def get_ws_key(key):
  'Accept-Language': 'zh-CN',
  'Connection': 'keep-alive',
  'Cookie': 'cid=a3i3LEkf; '
-           'SERVERID=b6179fbc6d4f08aade16b460b14584fc|1672541045|1672540216',
+		   'SERVERID=b6179fbc6d4f08aade16b460b14584fc|1672541045|1672540216',
  'Host': 'www.mokexapp.cz',
  'Sec-Fetch-Dest': 'empty',
  'Sec-Fetch-Mode': 'cors',
  'Sec-Fetch-Site': 'cross-site',
  'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 '
-               '(KHTML, like Gecko) Binance/1.40.0 Chrome/89.0.4389.128 '
-               'Electron/12.0.7 Safari/537.36 (electron 1.40.0)',
+			   '(KHTML, like Gecko) Binance/1.40.0 Chrome/89.0.4389.128 '
+			   'Electron/12.0.7 Safari/537.36 (electron 1.40.0)',
  'bnc-currency': 'USD',
  'bnc-time-zone': 'Asia/Shanghai',
  'bnc-uuid': '03fe5662-a6b9-4334-a9c2-16acd14b0588',
@@ -402,10 +448,10 @@ def get_ws_key(key):
 def bybit_klines(symbol: str='MNTUSDT', interval: str='1', start: int =1738512000000, end: int = 1738598400000, limit: int = 1440,return_json=True,**ka):
 
 	data=N.rpc_get(
-    f"bybit.get_kline(symbol={symbol!r},interval={interval!r},start={start!r},end={end!r},limit={limit!r})",
-    base='http://10.40.47.90:1133/', 
-    proxy='socks5://192.168.1.20:41080',
-    template='{base}import bybit;response.set_data(F.serialize({varname}))'
+	f"bybit.get_kline(symbol={symbol!r},interval={interval!r},start={start!r},end={end!r},limit={limit!r})",
+	base='http://10.40.47.90:1133/', 
+	proxy='socks5://192.168.1.20:41080',
+	template='{base}import bybit;response.set_data(F.serialize({varname}))'
 	)
 	
 	if return_json:

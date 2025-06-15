@@ -8,6 +8,24 @@ else:
 	from qgb import py
 U,T,N,F=py.importUTNF()
 
+def get_char_img_bytes(char, size=32, background='white', foreground='black', font_name="Arial"):
+	from PIL import Image, ImageFont, ImageDraw, ImageColor
+	import matplotlib.font_manager as fm
+	if not py.istr(char): char = T.string(char)
+	assert len(char) == 1
+
+	font = ImageFont.truetype(fm.findfont(fm.FontProperties(family=font_name)), int(size * 0.8))
+	img = Image.new('RGBA' if background == 'transparent' else 'RGB', (size, size), 
+					(0, 0, 0, 0) if background == 'transparent' else ImageColor.getrgb(background))
+	
+	draw = ImageDraw.Draw(img)
+	w, h = draw.textbbox((0, 0), char, font=font)[2:]
+	draw.text(((size - w) // 2, (size - h) // 2 - size // 18), #  18 让上下居中
+			  char, fill=ImageColor.getrgb(foreground), font=font)
+	
+	from qgb import pil;return pil.pil_image_to_bytes(img,'png') if background=='transparent' else pil.pil_image_to_bytes(img,'bmp')
+	return [[0 if pixel else 1 for pixel in row] for row in img.getdata()]# 转换为点阵数据
+bmp_char=get_bmp_char=get_char_img_bytes
 
 def get_bmp_bytes(rgb=None,size=(16,16)):
 	if not rgb:
@@ -246,7 +264,7 @@ ods=await ps.evaluate('''
 y=document.querySelectorAll('div[class*=calendar_signIn-mark] > span[class*=calendar_day]')
 ds=[]
 for(e of y){
-    ds.push(e.textContent)
+	ds.push(e.textContent)
 }
 ds
 ''')
@@ -302,16 +320,16 @@ await GS3105.setv(ps,{v})
 
 JS_async_post='''
 async function post(url,data){
-    if(typeof a!='string')data=JSON.stringify(data)
+	if(typeof a!='string')data=JSON.stringify(data)
 
-    return new Promise(function (resolve, reject) {
-        var xhr = new XMLHttpRequest();
-        xhr.open('post', url, true);
-        xhr.onload = function () {
-            resolve(xhr.response);
-        };
-        xhr.send(data)
-    });
+	return new Promise(function (resolve, reject) {
+		var xhr = new XMLHttpRequest();
+		xhr.open('post', url, true);
+		xhr.onload = function () {
+			resolve(xhr.response);
+		};
+		xhr.send(data)
+	});
 }
 '''
 
@@ -772,41 +790,41 @@ $(document).ready(function(){
 	$('.fs-button').on('click', function(){
 		var elem = document.getElementById('fullscreen');
 
-        if (
-            document.fullscreenEnabled ||
-            document.webkitFullscreenEnabled ||
-            document.mozFullScreenEnabled ||
-            document.msFullscreenEnabled
-        ) {
-            if (
-                document.fullscreenElement ||
-                document.webkitFullscreenElement ||
-                document.mozFullScreenElement ||
-                document.msFullscreenElement
-            ) {
-                if (document.exitFullscreen) {
-                    document.exitFullscreen();
-                } else if (document.webkitExitFullscreen) {
-                    document.webkitExitFullscreen();
-                } else if (document.mozCancelFullScreen) {
-                    document.mozCancelFullScreen();
-                } else if (document.msExitFullscreen) {
-                    document.msExitFullscreen();
-                }
-            } else {
-                if (elem.requestFullscreen) {
-                    elem.requestFullscreen();
-                } else if (elem.webkitRequestFullscreen) {
-                    elem.webkitRequestFullscreen();
-                } else if (elem.mozRequestFullScreen) {
-                    elem.mozRequestFullScreen();
-                } else if (elem.msRequestFullscreen) {
-                    elem.msRequestFullscreen();
-                }
-            }
-        } else {
-            alert('Fullscreen is not supported on your browser.');
-        }
+		if (
+			document.fullscreenEnabled ||
+			document.webkitFullscreenEnabled ||
+			document.mozFullScreenEnabled ||
+			document.msFullscreenEnabled
+		) {
+			if (
+				document.fullscreenElement ||
+				document.webkitFullscreenElement ||
+				document.mozFullScreenElement ||
+				document.msFullscreenElement
+			) {
+				if (document.exitFullscreen) {
+					document.exitFullscreen();
+				} else if (document.webkitExitFullscreen) {
+					document.webkitExitFullscreen();
+				} else if (document.mozCancelFullScreen) {
+					document.mozCancelFullScreen();
+				} else if (document.msExitFullscreen) {
+					document.msExitFullscreen();
+				}
+			} else {
+				if (elem.requestFullscreen) {
+					elem.requestFullscreen();
+				} else if (elem.webkitRequestFullscreen) {
+					elem.webkitRequestFullscreen();
+				} else if (elem.mozRequestFullScreen) {
+					elem.mozRequestFullScreen();
+				} else if (elem.msRequestFullscreen) {
+					elem.msRequestFullscreen();
+				}
+			}
+		} else {
+			alert('Fullscreen is not supported on your browser.');
+		}
 	});
 });
 
@@ -1589,7 +1607,7 @@ table,th,td,textarea{
 	</tr> 	
 	  
 </thead>
-    <tbody>
+	<tbody>
 
 $main$
 	
@@ -1653,7 +1671,7 @@ function find(){
 }
 
 function xpath(sp,ele){
-    //var sp = "//a[text()='SearchingText']";
+	//var sp = "//a[text()='SearchingText']";
 	if(ele){
 		if(!sp.startsWith('.')){
 			sp='.'+sp
@@ -1661,7 +1679,7 @@ function xpath(sp,ele){
 	}else{
 		ele=document//直接重新赋值参数不用加 var
 	}
-    return document.evaluate(sp, ele, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue;
+	return document.evaluate(sp, ele, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue;
 }//end xpath
 
 
@@ -1969,11 +1987,11 @@ def select(response,iterable,**ka):
 		if response:
 			rows='''
 <input  type="text"  readonly="readonly"  name="{G_SELECT_ID}" value={id}  style="
-    # background: aqua;
-    background: cyan;
+	# background: aqua;
+	background: cyan;
 " >
 <input  type="text"  readonly="readonly"  name="{G_SELECT_URL}" value={url} style="
-    background: lightgray;
+	background: lightgray;
 	width:80%
 "> 
 <br>

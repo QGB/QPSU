@@ -71,6 +71,11 @@ try:
 	import win32gui
 except Exception as ei:pass
 #############################################
+def shadow_copy(a=r'C:\Users\Administrator\AppData\Local\Microsoft\Edge\User Data\Default\Network\Cookies',b=r'C:\test\Cookies'):
+	''' pip install shadowcopy '''
+	from shadowcopy import shadow_copy
+	return a,shadow_copy(a,b),b
+force_copy=shadowcopy=shadow_copy
 
 def get_windows_version():
 	import winreg
