@@ -71,7 +71,7 @@ class VTTPlayerApp:
         self.root = root; self.vtt_path = vtt_path
         self.player: Optional['vlc.MediaPlayer'] = None; self.vlc_instance: Optional['vlc.Instance'] = None
         self.is_playing: bool = False; self.playback_start_time: float = 0.0; self.paused_elapsed_time: float = 0.0
-        self.playback_rate: float = 0.7 # 默认播放速率
+        self.playback_rate: float = 0.6 # 默认播放速率
         self.current_word_index: int = -1
         self.all_words: List[Word] = []
         self.total_duration_ms: int = 0
@@ -199,8 +199,22 @@ class VTTPlayerApp:
     def _perform_scroll(self, index: str):
         if self.shutdown_requested or not index: return
         try:
-            if self.text_widget.winfo_exists(): self.text_widget.see(index)
-        except (tk.TclError, AttributeError) as e:
+            if not self.text_widget.winfo_exists(): return
+            self.text_widget.see(index) # 首先，确保目标可见（最小化滚动）
+            self.root.update_idletasks() # 等待UI更新以获取正确的位置信息
+            bbox = self.text_widget.dlineinfo(index) # 获取目标在可视区域内的位置
+            if not bbox: return # 如果目标不可见（例如窗口已关闭），则中止
+            line_y, view_height = bbox[1], self.text_widget.winfo_height()
+            if line_y > view_height * 0.85: # 如果目标行在屏幕底部 (在可视区域的后85%位置)
+                # 将其滚动到屏幕顶部，以提供更好的阅读上下文
+                if self.is_playing:self.toggle_play_pause()# 这中间好卡，界面都无响应几秒钟，不得不临时暂停，有更好修复方法吗
+                display_line_start_index = f"{index} display linestart" # 使用'display'前缀处理自动换行
+                display_line_num = self.text_widget.count("1.0", display_line_start_index, "displaylines")[0]
+                total_display_lines = self.text_widget.count("1.0", tk.END, "displaylines")[0]
+                if total_display_lines > 0:
+                    self.text_widget.yview_moveto(display_line_num / total_display_lines)
+                self.toggle_play_pause()    
+        except (tk.TclError, AttributeError, ZeroDivisionError) as e:
             print(f"滚动时发生错误 (index: {index}): {e}")
     def on_close(self): # 【关键】严格按照您的指令，使用强制退出
         os._exit(0)

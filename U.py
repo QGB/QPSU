@@ -200,7 +200,7 @@ def set_return_old(name,value=SET_NO_VALUE,level=gd_sync_level['process']):
 	else:old=GET_NO_VALUE
 	# if return_old_value:
 	return old,set(name,value,level=level)
-set_and_get_old=set_return_old	
+sold=s_old=set_and_get_old=set_return_old	
 	
 def set_no_return(name,value,**ka):
 	set(name,value,**ka)

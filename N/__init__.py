@@ -3128,7 +3128,8 @@ def scan_port_ip_range(port=3389,mask='192.168.1.1/24',threadsMax=33,callback=No
 		else:callback(counting_open, counting_close, errors)
 	if return_open_only:return counting_open
 	return counting_open, counting_close, errors	
-		
+scan_ip=scan_ip_range=scanport_ip_range=scan_port_ip_range
+
 def scan_ports_single_ip(host,threadsMax=33,from_port=1,to_port=65535,callback=None,ip2=192.168):
 	'''return [opens,closes,errors]
 	callback(*scanReturns)
