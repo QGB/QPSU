@@ -1936,16 +1936,31 @@ def sleep(asecond,print_time_every_n_second=0):
 	return IntCustomRepr(asecond,repr='U.sleep(%s)'%asecond)
 delay=sleep
 	
-def sleep_until(hour, minute):
-	# U=py.importU()
-	import datetime
-	import time
+def sleep_until(hour, minute=59):
+	import datetime, time
+	st = datetime.datetime.now().strftime("%Y-%m-%d__%H.%M.%S__.%f")[:-3]
 	t = datetime.datetime.today()
 	future = datetime.datetime(t.year, t.month, t.day, hour, minute)
-	if t.timestamp() > future.timestamp():
-		future += datetime.timedelta(days=1)
-	time.sleep((future-t).total_seconds())
-sleepUntil=sleep_until
+	if t.timestamp() > future.timestamp(): future += datetime.timedelta(days=1)
+	total_seconds = (future - t).total_seconds()
+	start_time = time.time()
+	last_printed = -1
+	try:
+		remaining = total_seconds
+		while remaining > 0.1:  # 使用动态计算的剩余时间
+			elapsed = time.time() - start_time
+			remaining = total_seconds - elapsed
+			if remaining > 0 and int(remaining) != last_printed:
+				hours, rem = divmod(remaining, 3600)
+				minutes, seconds = divmod(rem, 60)
+				print(f"\r{st} start , waiting.. {int(hours):02d}:{int(minutes):02d}:{int(seconds):02d}", end="", flush=True)
+				last_printed = int(remaining)
+			time.sleep(0.1)
+		print("\r" + " " * 70 + "\r", end="", flush=True)  # 清除等待行
+	except KeyboardInterrupt:
+		print("\r" + " " * 70 + "\r等待已取消", end="", flush=True)  # 清除后显示消息
+		raise
+sleepUntil = sleep_until
 	
 def wait_can_be_interrupted(aisecond):
 	'''interrupt : 

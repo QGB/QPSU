@@ -2,10 +2,10 @@
 import sys, re, time, threading, os, pathlib, signal
 from dataclasses import dataclass, field
 from typing import List, Optional
-
+from logging import info as log_info
 from PyQt5.QtWidgets import (QApplication, QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, 
                              QPushButton, QLabel, QSlider, QTextEdit, QSplitter, QSizePolicy, 
-                             QScrollBar, QAbstractSlider)
+                             QScrollBar, QAbstractSlider, QDoubleSpinBox) # Changed QSpinBox to QDoubleSpinBox
 from PyQt5.QtCore import (Qt, QTimer, QUrl, QEvent, QRectF, QPoint)
 from PyQt5.QtGui import (QTextCharFormat, QColor, QTextCursor, QFont, QTextOption)
 
@@ -49,8 +49,6 @@ class VTTParser: # 解析器全面升级，支持词级时间戳和插值
 
     def _parse_raw_cues(self, content: str) -> List[Cue]: # 初步解析，但这次保留原始文本以提取词级时间
         raw_cues = []
-        # content here might start with "WEBVTT\n..."
-        # The split `\n\s*\n` will handle the header block correctly (it won't have '-->')
         for block in re.split(r'\n\s*\n', content):
             if '-->' not in block: continue
             lines = block.strip().split('\n')
@@ -71,11 +69,9 @@ class VTTParser: # 解析器全面升级，支持词级时间戳和插值
                     last_pos = match.end()
                 remaining_text = raw_text[last_pos:].strip()
                 if remaining_text: words_with_time.extend([(word, None) for word in re.sub(r'</?c>', '', remaining_text).split()])
-                
                 if not words_with_time and raw_text: # If regex didn't match (pure text line)
                     clean_text = re.sub(r'</?[^>]+>', '', raw_text).strip() # Remove any other HTML-like tags
                     words_with_time.extend([(word, None) for word in clean_text.split()])
-
                 if words_with_time:
                     cue_words = [Word(text=wt[0], start_ms=wt[1] or 0) for wt in words_with_time]
                     raw_cues.append(Cue(start_ms=start_ms, end_ms=end_ms, words=cue_words))
@@ -90,17 +86,13 @@ class VTTParser: # 解析器全面升级，支持词级时间戳和插值
             for i, word in enumerate(words):
                 if word.start_ms > 0: time_anchors.append((i, word.start_ms))
             time_anchors.append((len(words), cue.end_ms))
-            
             for i in range(len(time_anchors) - 1):
                 start_anchor_idx, start_anchor_time = time_anchors[i]
                 end_anchor_idx, end_anchor_time = time_anchors[i+1]
-                
                 words_in_segment = words[start_anchor_idx:end_anchor_idx]
                 if not words_in_segment: continue
-                
                 total_chars = sum(len(w.text) for w in words_in_segment)
                 duration = end_anchor_time - start_anchor_time
-                
                 if total_chars == 0 or duration <= 0: 
                     time_per_word = duration / len(words_in_segment) if len(words_in_segment) > 0 else 0
                     for j, word in enumerate(words_in_segment):
@@ -119,30 +111,22 @@ class VTTParser: # 解析器全面升级，支持词级时间戳和插值
     def _merge_overlapping_cues(self, cues: List[Cue]) -> List[Cue]: # 合并有词语重叠的渐进式字幕
         if not cues: return []
         merged_cues: List[Cue] = []
-        # Initialize current_cue with a deep copy of the first cue's words
         current_cue = Cue(cues[0].start_ms, cues[0].end_ms, cues[0].words[:])
-
         for i in range(1, len(cues)):
             next_cue = cues[i]
             prev_words_text = [w.text for w in current_cue.words]
             next_words_text = [w.text for w in next_cue.words]
-            
             overlap_len = 0
-            # Iterate backwards from min length to find the longest suffix of prev that is a prefix of next
             for k in range(min(len(prev_words_text), len(next_words_text)), 0, -1):
                 if prev_words_text[-k:] == next_words_text[:k]:
                     overlap_len = k
                     break
-            
             if overlap_len > 0:
-                # If there's an overlap, extend current_cue with non-overlapping words from next_cue
                 current_cue.words.extend(next_cue.words[overlap_len:])
                 current_cue.end_ms = next_cue.end_ms # Update end time to next_cue's end time
             else:
-                # No overlap, finalize current_cue and start a new one with next_cue
                 merged_cues.append(current_cue)
                 current_cue = Cue(next_cue.start_ms, next_cue.end_ms, next_cue.words[:]) # Deep copy words
-        
         merged_cues.append(current_cue) # Add the last processed cue
         return merged_cues
 
@@ -150,8 +134,7 @@ class VTTParser: # 解析器全面升级，支持词级时间戳和插值
         try:
             with open(vtt_path, 'r', encoding='utf-8') as f: content = f.read()
         except FileNotFoundError:
-            print(f"错误: VTT文件未找到 at '{vtt_path}'"); return []
-        
+            log_info(f"错误: VTT文件未找到 at '{vtt_path}'"); return []
         raw_cues = self._parse_raw_cues(content)
         merged_cues = self._merge_overlapping_cues(raw_cues)
         self._interpolate_word_times(merged_cues)
@@ -159,7 +142,7 @@ class VTTParser: # 解析器全面升级，支持词级时间戳和插值
 # --- End of VTT Parsing Logic ---
 
 class VTTPlayerApp(QMainWindow):
-    MANUAL_SCROLL_OVERRIDE_MS = 2000 
+    MANUAL_SCROLL_OVERRIDE_MS = 3000 
 
     def __init__(self, vtt_path: str):
         super().__init__(); self.vtt_path = vtt_path
@@ -168,6 +151,7 @@ class VTTPlayerApp(QMainWindow):
         self.current_word_idx_overall: int = -1 
         self.all_words: List[Word] = [] 
         self.total_duration_ms: int = 0
+        self.rewind_seconds: float = 1.7 # Default rewind time in seconds 
         
         self.user_scrolling: bool = False
         self.scroll_override_timer = QTimer(self); self.scroll_override_timer.setSingleShot(True)
@@ -206,6 +190,15 @@ class VTTPlayerApp(QMainWindow):
         control_layout.addWidget(self.play_pause_btn)
         self.time_label = QLabel("00:00.000 / 00:00.000", self); self.time_label.setFont(QFont("Segoe UI", 11)); self.time_label.setAlignment(Qt.AlignLeft | Qt.AlignVCenter)
         control_layout.addWidget(self.time_label, 1)
+
+        rewind_label = QLabel("Rewind:", self); rewind_label.setFont(QFont("Segoe UI", 10)) # Rewind label
+        control_layout.addWidget(rewind_label)
+        self.rewind_seconds_spinbox = QDoubleSpinBox(self) # Rewind spinbox (QDoubleSpinBox)
+        self.rewind_seconds_spinbox.setRange(0.1, 60.0); self.rewind_seconds_spinbox.setValue(self.rewind_seconds)
+        self.rewind_seconds_spinbox.setDecimals(1); self.rewind_seconds_spinbox.setSingleStep(0.1) # Set decimals and step
+        self.rewind_seconds_spinbox.setSuffix("s"); self.rewind_seconds_spinbox.setFixedWidth(70); self.rewind_seconds_spinbox.setFont(QFont("Segoe UI", 10))
+        control_layout.addWidget(self.rewind_seconds_spinbox)
+
         self.rate_label = QLabel(f"{self.playback_rate:.1f}x", self); self.rate_label.setFont(QFont("Segoe UI", 10))
         control_layout.addWidget(self.rate_label)
         self.rate_slider = QSlider(Qt.Horizontal, self); self.rate_slider.setRange(20, 200); self.rate_slider.setValue(int(self.playback_rate * 100))
@@ -216,12 +209,9 @@ class VTTPlayerApp(QMainWindow):
         parsed_cues = VTTParser().parse(self.vtt_path) # Use the fully integrated user's parser
         self.all_words = []
         for cue in parsed_cues: self.all_words.extend(cue.words) # Flatten cues into a list of Word objects
-
         if not self.all_words:
-            print("Error: Failed to parse VTT or VTT is empty."); self.play_pause_btn.setEnabled(False); return
-        
+            log_info("Error: Failed to parse VTT or VTT is empty."); self.play_pause_btn.setEnabled(False); return
         self.total_duration_ms = self.all_words[-1].end_ms if self.all_words else 0
-        
         self.text_widget.setPlainText("") 
         cursor = self.text_widget.textCursor()
         cursor.beginEditBlock()
@@ -234,7 +224,6 @@ class VTTPlayerApp(QMainWindow):
         cursor.endEditBlock()
         QTimer.singleShot(0, lambda: self.text_widget.verticalScrollBar().setValue(0)) 
         self._update_time_label()
-
         if vlc and self.player is None:
             self.vlc_instance = vlc.Instance("--no-xlib --avcodec-hw=d3d11va")
             self.player = self.vlc_instance.media_player_new()
@@ -261,10 +250,15 @@ class VTTPlayerApp(QMainWindow):
 
     def _connect_signals(self):
         self.play_pause_btn.clicked.connect(self.toggle_play_pause)
+        self.play_pause_btn.installEventFilter(self) # For right-click rewind
         self.rate_slider.valueChanged.connect(self._on_rate_change)
+        self.rewind_seconds_spinbox.valueChanged.connect(self._on_rewind_seconds_changed) # Connect spinbox
         self.text_widget.viewport().installEventFilter(self) 
         self.text_widget.verticalScrollBar().sliderPressed.connect(self._manual_scroll_detected)
         self.text_widget.installEventFilter(self) # For wheel events on text_widget itself
+
+    def _on_rewind_seconds_changed(self, value: float): # New method to handle rewind duration change, value is float
+        self.rewind_seconds = value
 
     def eventFilter(self, obj, event):
         if obj is self.text_widget.viewport() and event.type() == QEvent.MouseButtonPress:
@@ -278,16 +272,23 @@ class VTTPlayerApp(QMainWindow):
                     return True
         elif obj is self.text_widget and event.type() == QEvent.Wheel: 
             self._manual_scroll_detected()
-            return super().eventFilter(obj, event) 
+        elif obj is self.play_pause_btn and event.type() == QEvent.MouseButtonPress: # Handle right-click on play/pause button
+            if event.button() == Qt.RightButton:
+                if self.player:
+                    current_time_ms = self.get_current_time_ms()
+                    rewind_ms = int(self.rewind_seconds * 1000) # Convert float seconds to int milliseconds
+                    new_time_ms = max(0, current_time_ms - rewind_ms)
+                    self.seek_to(new_time_ms)
+                    return True # Event handled
         return super().eventFilter(obj, event)
 
     def _manual_scroll_detected(self):
-        if not self.user_scrolling: print("[ScrollControl] Manual scroll detected. Auto-scroll paused.")
+        if not self.user_scrolling: log_info("[ScrollControl] Manual scroll detected 检测鼠标拖动文本框滚动条，而不是鼠标滚轮。可以接受这种情况. Auto-scroll paused.")
         self.user_scrolling = True
         self.scroll_override_timer.start(self.MANUAL_SCROLL_OVERRIDE_MS)
 
     def _reset_user_scrolling(self):
-        self.user_scrolling = False; print("[ScrollControl] Auto-scroll re-enabled.")
+        self.user_scrolling = False; log_info("[ScrollControl] Auto-scroll re-enabled.")
 
     def _on_rate_change(self, value: int):
         new_rate = value / 100.0; self.rate_label.setText(f"{new_rate:.1f}x"); self.playback_rate = new_rate
@@ -301,14 +302,12 @@ class VTTPlayerApp(QMainWindow):
         original_is_playing = self.is_playing
         if self.player.get_state() == vlc.State.Playing: self.player.pause() 
         self.player.set_time(int(time_ms))
-        
         current_time_for_ui = int(time_ms)
         new_word_idx = self._find_word_index_for_time(current_time_for_ui)
         self.current_word_idx_overall = new_word_idx if new_word_idx is not None else -1
         self._update_highlight(self.current_word_idx_overall)
         if not self.user_scrolling: self._smart_scroll(self.current_word_idx_overall)
         self._update_time_label(current_time_for_ui)
-
         if original_is_playing:
             if self.player.get_state() != vlc.State.Playing:
                 self.player.play()
@@ -332,10 +331,8 @@ class VTTPlayerApp(QMainWindow):
         if self.player.get_state() == vlc.State.Ended:
             if self.is_playing: self.stop_playback()
             self._update_time_label(self.total_duration_ms); return
-
         self._update_time_label(current_time)
         word_idx = self._find_word_index_for_time(current_time)
-        
         if word_idx is not None and word_idx != self.current_word_idx_overall:
             self.current_word_idx_overall = word_idx
             self._update_highlight(word_idx)
@@ -381,54 +378,40 @@ class VTTPlayerApp(QMainWindow):
         cursor.endEditBlock()
 
     def _smart_scroll(self, word_idx_overall: int):
-        ''' 我们希望在播放到目标行时，如果目标行在屏幕底部，则滚动到屏幕顶部（向下滚动一页），其他情况不动。这样可以最小化滚动次数。保证高亮部分始终可见。。。
-不要省略任何代码 给我整个程序完整紧凑代码 ，不要多余空行和非必要注释，必要注释可以写代码后面，不要另外一行 '''
         if self.user_scrolling: return 
         if word_idx_overall < 0 or word_idx_overall >= len(self.all_words): return
         word = self.all_words[word_idx_overall]
         if not hasattr(word, 'qt_start_index'): return
-
         text_widget = self.text_widget; cursor = text_widget.textCursor()
         cursor.setPosition(word.qt_start_index)
-        
         word_char_rect_vp = text_widget.cursorRect(cursor)
         line_top_vp = word_char_rect_vp.top(); line_height_approx = text_widget.fontMetrics().height()
         line_bottom_vp = line_top_vp + line_height_approx
-        
         viewport_h = text_widget.viewport().height(); scrollbar = text_widget.verticalScrollBar()
         current_scroll_val = scrollbar.value()
-        target_scroll_to_make_line_top = current_scroll_val + line_top_vp
-
+        target_scroll_to_make_line_top = current_scroll_val + line_top_vp - line_height_approx # 顶部第二行  - line_height_approx 
         is_line_fully_visible = (line_top_vp >= 0 and line_bottom_vp <= viewport_h)
         if not is_line_fully_visible:
             scrollbar.setValue(int(target_scroll_to_make_line_top))
             return
-
         is_at_screen_bottom = (line_bottom_vp >= viewport_h )
         is_not_at_screen_top = (line_top_vp > 5) 
         if is_at_screen_bottom and is_not_at_screen_top:
             scrollbar.setValue(int(target_scroll_to_make_line_top))
 
-    def closeEvent(self, event): print("Closing application..."); os._exit(0) 
+    def closeEvent(self, event):print("Closing application..."); os._exit(0) 
 
 if __name__ == "__main__":
     if VLC_PATH and not os.path.exists(VLC_PATH): print(f"Error: Configured VLC path '{VLC_PATH}' not found.")
     elif not VLC_PATH and not VLC_ERROR: print(f"Warning: VLC path not configured or invalid. Video playback disabled.")
     elif VLC_ERROR: print(f"VLC Import Error: {VLC_ERROR}")
-
-
     script_dir = pathlib.Path(__file__).parent
-    # Try relative path first (assuming VTT is in the same directory as the script)
     vtt_file_name = "The Entire History of Caterpillar Inc. [46_EC6teOqg].en.vtt" # Or your specific VTT file
     vtt_file_path_str = str(script_dir / vtt_file_name) 
-    
-    # Fallback to the absolute path if the relative one is not found
     if not pathlib.Path(vtt_file_path_str).is_file():
         print(f"Info: VTT file not found at relative path '{vtt_file_path_str}'. Trying fallback.")
         vtt_file_path_str = rf'C:\test\qgbcs\The Entire History of Caterpillar Inc. [46_EC6teOqg].en.vtt' # User's fallback
-    
     if not pathlib.Path(vtt_file_path_str).is_file():
-        # As a last resort, try the VTT sample provided if the main one isn't found
         print(f"Error: VTT file '{vtt_file_path_str}' not found. Trying to use embedded sample VTT.")
         sample_vtt_content = """WEBVTT
 Kind: captions
@@ -452,8 +435,6 @@ and<00:00:03.959><c> noise</c>
         with open(vtt_file_path_str, "w", encoding="utf-8") as f:
             f.write(sample_vtt_content)
         print(f"Using temporary sample VTT: {vtt_file_path_str}")
-
-
     app = QApplication(sys.argv)
     main_window = VTTPlayerApp(vtt_file_path_str)
     main_window.show()
