@@ -2109,7 +2109,7 @@ g_remove_tag=(
 ['<SCRIPT','</SCRIPT>'],'ondragstart=','oncopy=','oncut=','oncontextmenu=','"return false;"',
 	)
 def flask_html_response(response,html='',file='',remove_tag=g_remove_tag,encoding='utf-8',splitor='<hr>',content_type='text/html;charset=utf-8',
-	css='',eol='',html_ka_mark='// {html_ka}',
+	css='',eol='',html_ka_mark='',  #html_ka_mark='// {html_ka}' 
 	**ka):
 	'''
 Resource interpreted as Stylesheet but transferred with MIME type text/html:
@@ -2186,6 +2186,9 @@ Resource interpreted as Stylesheet but transferred with MIME type text/html:
 		for k,v in ka.items():
 			hs+=f'var {k}={T.json_dumps(v)};\n'
 		html=T.replace_auto_type(html,html_ka_mark,hs)
+	if not	html_ka_mark and ka:
+		for k,v in ka.items():
+			html=html.replace(b'{'+k.encode()+b'}',T.string(v).encode())
 		# T.replace
 	
 		
