@@ -25,20 +25,6 @@ except:
 globals().update([i for i in Constants.__dict__.items() if not i[0].startswith('__')])	
 c=C=Constants
 
-# from Constants import *
-#if 'qgb.U' in sys.modules:U=sys.modules['qgb.U']
-#elif 'U' in sys.modules:  U=sys.modules['U']
-#else:
-#	from sys import path as _p
-#	# 'G:/QGB/babun/cygwin/lib/python2.7/qgb'
-#	_p.insert(-1,_p[0][:-3-1])#-3-1  插入变倒数第二
-#	# for i,v in enumerate(_p):  #这会导致 ImportError: No module named Constants
-#		# if 'qgb' in v and 'Win' in v:
-#			# _p.pop(i)
-#	# U.pln( _p
-#	try:from qgb import U
-#	except:'#Err import U'
-
 class WinDLL(ctypes.CDLL):
 	"""This class represents a dll exporting functions using the
 	Windows stdcall calling convention.
@@ -70,7 +56,29 @@ try:
 	from ctypes import wintypes
 	import win32gui
 except Exception as ei:pass
+from logging import info as log_info
 #############################################
+def get_wifi_passwords_list():
+	import subprocess, re
+	log_info('Win.get_wifi_passwords starts...')
+	profiles_output = subprocess.run(['netsh', 'wlan', 'show', 'profiles'], capture_output=True, text=True, encoding='gbk', errors='replace').stdout
+	profile_names = re.findall(r'所有用户配置文件\s*:\s*(.*)|All User Profile\s*:\s*(.*)', profiles_output, re.MULTILINE | re.IGNORECASE)
+	wifi_list = []
+	for name_tuple in profile_names:
+		name = name_tuple[0].strip() if name_tuple[0] else name_tuple[1].strip()
+		if not name: continue
+		try:
+			profile_info = subprocess.run(['netsh', 'wlan', 'show', 'profile', f'"{name}"', 'key=clear'], capture_output=True, text=True, encoding='gbk', errors='replace').stdout
+			if re.search(r'身份验证\s*:\s*开放式?|Authentication\s*:\s*Open', profile_info, re.IGNORECASE):
+				wifi_list.append((name, '<开放网络，无密码>'))
+				continue
+			password_match = re.search(r'关键内容\s*:\s*(.*)|Key Content\s*:\s*(.*)', profile_info, re.MULTILINE | re.IGNORECASE)
+			password = password_match.group(1).strip() if password_match and password_match.group(1) else password_match.group(2).strip() if password_match and password_match.group(2) else '<未保存>'
+			wifi_list.append((name, password))
+		except Exception: continue
+	return wifi_list
+wifi_pw=get_all_wifi_pw=get_all_wifi_password=get_wifi_passwords=get_wifi_passwords_list
+
 def shadow_copy(a=r'C:\Users\Administrator\AppData\Local\Microsoft\Edge\User Data\Default\Network\Cookies',b=r'C:\test\Cookies'):
 	''' pip install shadowcopy '''
 	from shadowcopy import shadow_copy
@@ -340,7 +348,7 @@ def close_window_by_process_name(name,retry=99,debug=False):
 closeWindowByProcessName=close_window_by_process_name
 
 def close_window(handle):
-	import win32con    
+	import win32con	
 	return win32gui.PostMessage(handle,win32con.WM_CLOSE,0,0)
 window_close=close_window
 
@@ -469,34 +477,34 @@ def get_monitor_power_state():
 20 : 未配置 设备未配置。 
 21 : 静止 设备处于安静状态。 
 
-{'Availability'             : 3 ,
-'Bandwidth'                 : None ,
-'Caption'                   : '通用即插即用监视器' ,
-'ConfigManagerErrorCode'    : 0 ,
+{'Availability'			 : 3 ,
+'Bandwidth'				 : None ,
+'Caption'				   : '通用即插即用监视器' ,
+'ConfigManagerErrorCode'	: 0 ,
 'ConfigManagerUserConfig'   : False ,
-'CreationClassName'         : 'Win32_DesktopMonitor' ,
-'Description'               : '通用即插即用监视器' ,
-'DeviceID'                  : 'DesktopMonitor2' ,
-'DisplayType'               : None ,
-'ErrorCleared'              : None ,
-'ErrorDescription'          : None ,
-'InstallDate'               : None ,
-'IsLocked'                  : None ,
-'LastErrorCode'             : None ,
-'MonitorManufacturer'       : '(标准监视器类型)' ,
-'MonitorType'               : '通用即插即用监视器' ,
-'Name'                      : '通用即插即用监视器' ,
-'PixelsPerXLogicalInch'     : 96 ,
-'PixelsPerYLogicalInch'     : 96 ,
-'PNPDeviceID'               : 'DISPLAY\\CMN1487\\4&3F33282&0&UID265988' ,
+'CreationClassName'		 : 'Win32_DesktopMonitor' ,
+'Description'			   : '通用即插即用监视器' ,
+'DeviceID'				  : 'DesktopMonitor2' ,
+'DisplayType'			   : None ,
+'ErrorCleared'			  : None ,
+'ErrorDescription'		  : None ,
+'InstallDate'			   : None ,
+'IsLocked'				  : None ,
+'LastErrorCode'			 : None ,
+'MonitorManufacturer'	   : '(标准监视器类型)' ,
+'MonitorType'			   : '通用即插即用监视器' ,
+'Name'					  : '通用即插即用监视器' ,
+'PixelsPerXLogicalInch'	 : 96 ,
+'PixelsPerYLogicalInch'	 : 96 ,
+'PNPDeviceID'			   : 'DISPLAY\\CMN1487\\4&3F33282&0&UID265988' ,
 'PowerManagementCapabilities' : None ,
 'PowerManagementSupported'  : None ,
-'ScreenHeight'              : 768 ,
-'ScreenWidth'               : 1366 ,
-'Status'                    : 'OK' ,
-'StatusInfo'                : None ,
+'ScreenHeight'			  : 768 ,
+'ScreenWidth'			   : 1366 ,
+'Status'					: 'OK' ,
+'StatusInfo'				: None ,
 'SystemCreationClassName'   : 'Win32_ComputerSystem' ,
-'SystemName'                : 'W10-2019xxx' ,	}
+'SystemName'				: 'W10-2019xxx' ,	}
 	
 '''	
 	import wmi
@@ -1355,7 +1363,7 @@ def getLastError(errCode=None,p=True):
 	
 	r= '{} - {}'.format(errCode, error_message.decode('mbcs'))#unicode
 	# if py.is2():
-	# else:       r= '{} - {}'.format(errCode, error_message)
+	# else:	   r= '{} - {}'.format(errCode, error_message)
 	# error_message = error_message.decode('cp1251').strip()
 	if U.isipy() and not U.DEBUG:#TODO  如果修改了repr 方式  可以去除这个
 		U.pln( r)
@@ -1378,7 +1386,7 @@ gdWinVerNum={'10':10.0,
 			 '2016': 10.0}
 for w,i in gdWinVerNum.items():
 	py.execute('''def is{0}():return getVersionNumberCmdVer()=={1}'''.format(
-		w.replace('.','_'),i)    )			 
+		w.replace('.','_'),i)	)			 
 			 
 	def getWinName():
 		for w,i in gdWinVerNum.items():

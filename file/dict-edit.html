@@ -7,33 +7,39 @@
 <style>
 body{margin:0;padding:0;font-family:Arial,sans-serif;background:#f0f0f0;}
 .container{width:100%;}
-textarea{width:100%;height:300px;padding:10px;font-family:monospace;font-size:14px;border:1px solid #ccc;border-radius:4px;resize:vertical;margin:0 0 20px 0;}
+textarea{width:100%;min-height:50px;height:auto;padding:10px;font-family:monospace;font-size:14px;border:1px solid #ccc;border-radius:4px;margin:0 0 20px 0;overflow:hidden;}
 .url-group{display:flex;align-items:center;justify-content:space-between;margin-bottom:15px;}
 .url-input{flex:1;padding:10px;border:1px solid #ccc;border-radius:4px;font-family:monospace;font-size:14px;margin-right:10px;}
 .btn{padding:10px 20px;border:none;border-radius:4px;font-weight:bold;cursor:pointer;}
 .btn-get{background:#3498db;color:#fff;}
-.btn-update{background:#2ecc71;color:#fff;}
+.btn-set{background:#2ecc71;color:#fff;}
 .response-section{margin:20px 0;padding:15px;background:#fff;border:1px solid #ddd;border-radius:4px;min-height:60px;}
 .response-content{font-family:monospace;white-space:pre-wrap;word-break:break-all;}
 </style>
 </head>
 <body>
 <div class="container">
-    <textarea id="dict-editor">{加载html 自动获取
-}</textarea>
+    <textarea id="dict-editor" oninput="autoGrowTextarea()">{加载html 自动获取}</textarea>
     <div class="url-group">
         <input class="url-input" id="get-url" value="{get_url}">
         <button class="btn btn-get" onclick="getDictionary()">获取</button>
     </div>
     <div class="url-group">
-        <input class="url-input" id="update-url" value="{set_url}">
-        <button class="btn btn-update" onclick="updateDictionary()">更新</button>
+        <input class="url-input" id="set-url" value="{set_url}">
+        <button class="btn btn-set" onclick="setDictionary()">更新</button>
     </div>
     <div class="response-section">
         <div class="response-content" id="response-content">等待操作...</div>
     </div>
 </div>
 <script>
+
+function autoGrowTextarea() {// 文本框自动增长核心函数
+    const textarea = document.getElementById('dict-editor');
+    textarea.style.height = 'auto'; // 先重置高度，让 scrollHeight 准确
+    textarea.style.height = textarea.scrollHeight + 'px'; // 按内容高度自适应
+}
+
 async function getDictionary(){
     const url=document.getElementById('get-url').value,resp=document.getElementById('response-content');
     resp.textContent="获取中...";
@@ -44,15 +50,18 @@ async function getDictionary(){
         try{
             const p=JSON.parse(d.replace(/'/g,'"').replace(/None/g,'null').replace(/True/g,'true').replace(/False/g,'false'));
             document.getElementById('dict-editor').value=JSON.stringify(p,null,4);
+            autoGrowTextarea(); // 获取数据后自动调整高度
             resp.textContent="获取成功 "+new Date();
         }catch(e){
             document.getElementById('dict-editor').value=d;
+            autoGrowTextarea(); // 获取数据后自动调整高度
             resp.textContent="获取成功（解析失败，显示原始数据）";
         }
     }catch(e){resp.textContent=`获取失败: ${e.message}`;console.error(e);}
 }
-async function updateDictionary(){
-    const url=document.getElementById('update-url').value,data=document.getElementById('dict-editor').value,resp=document.getElementById('response-content');
+
+async function setDictionary(){
+    const url=document.getElementById('set-url').value,data=document.getElementById('dict-editor').value,resp=document.getElementById('response-content');
     try{JSON.parse(data);}catch(e){resp.textContent="格式错误";return;}
     resp.textContent="更新中...";
     try{
@@ -63,8 +72,11 @@ async function updateDictionary(){
     }catch(e){resp.textContent=`更新失败: ${e.message}`;console.error(e);}
 }
 
-window.onload=getDictionary;
-
+// 页面加载后初始化文本框高度 + 自动获取数据
+window.onload=()=>{
+    getDictionary();
+    autoGrowTextarea();
+};
 </script>
 </body>
 </html>
