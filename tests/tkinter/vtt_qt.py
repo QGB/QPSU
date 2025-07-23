@@ -410,7 +410,7 @@ if __name__ == "__main__":
     vtt_file_path_str = str(script_dir / vtt_file_name) 
     if not pathlib.Path(vtt_file_path_str).is_file():
         print(f"Info: VTT file not found at relative path '{vtt_file_path_str}'. Trying fallback.")
-        vtt_file_path_str = rf'C:\test\qgbcs\The Entire History of Caterpillar Inc. [46_EC6teOqg].en.vtt' # User's fallback
+        vtt_file_path_str = rf'D:\test\qgbcs\The Entire History of Caterpillar Inc. [46_EC6teOqg].en.vtt' # User's fallback
     if not pathlib.Path(vtt_file_path_str).is_file():
         print(f"Error: VTT file '{vtt_file_path_str}' not found. Trying to use embedded sample VTT.")
         sample_vtt_content = """WEBVTT
