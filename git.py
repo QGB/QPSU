@@ -300,7 +300,7 @@ Out[26]: 'C:/QGB/babun/cygwin/bin/qgb/'
 		GitProtocolError,
 		NotGitRepository,
 		SendPackError,
-		UpdateRefsError,
+		# UpdateRefsError,
     )	
 	DEFAULT_ENCODING = 'utf-8'	
 	selected_refs = []
@@ -347,7 +347,7 @@ Out[26]: 'C:/QGB/babun/cygwin/bin/qgb/'
 			errstream.write(
 				b"Push to " + remote_location_bytes + b" successful.\n")
 			errstream.flush()	# 与 stdout 混合打印时 ，顺序可能不同
-		except (UpdateRefsError, SendPackError) as e:
+		except ( SendPackError) as e:#UpdateRefsError,
 			errstream.write(b"Push to " + remote_location_bytes +
 							b" failed -> " + e.message.encode(err_encoding) +
 							b"\n")
