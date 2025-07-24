@@ -587,11 +587,11 @@ get_all_pub_ip=get_pub_ip=get_public_ip=get_public_ipv4
 def get_public_ipv4_return_str(print_msg=False,**ka):
 	U,T,N,F=py.importUTNF()
 	try:
-		dur=get_public_ipv4(return_list=0,print_msg=print_msg,**ka)
+		dur=get_public_ipv4(methods=['ipcalf.com','ipinfo.io'],return_list=0,print_msg=print_msg,**ka)
 		ip=dur['ipcalf.com']
 		for u,rs in dur.items():
 			if not rs:continue
-			if 'no healthy upstream' in rs:#ipecho.net/plain 
+			if 'no healthy upstream' in rs:#ipecho.net/plain 这个获取电信手机是 '240e:468:509:9511:85bf:f4bb:34db:e5c3'
 				print('@'*55,U.stime(),u,rs)
 				continue
 			if ip not in rs:

@@ -377,8 +377,8 @@ def get_or_dill_load_or_dill_dump_and_set(name,default=None):
 				fs=[f for f in fsg if name in f and f.endswith('.dill')]
 			if py.len(fs)==1:
 				o=F.dill_load(file=fs[0])
-		if o:set(name,o)
-		
+		# if o:set(name,o)# 自动去除name path前缀。 始终使用 get_or_dill_load 获取
+
 	if not o and default:
 		f=F.dill_dump(obj=default,file=path)
 		if f:
