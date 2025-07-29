@@ -584,10 +584,11 @@ http_external_kargs={'ipinfo.io':{'encoding':'utf-8','headers':{'User-Agent': 'c
 	return d
 get_all_pub_ip=get_pub_ip=get_public_ip=get_public_ipv4
 
-def get_public_ipv4_return_str(print_msg=False,**ka):
+def get_public_ipv4_return_str(methods=('ipcalf.com','ipinfo.io'),print_msg=False,**ka):
 	U,T,N,F=py.importUTNF()
+	if not methods:methods=('ipcalf.com','ipinfo.io')
 	try:
-		dur=get_public_ipv4(methods=['ipcalf.com','ipinfo.io'],return_list=0,print_msg=print_msg,**ka)
+		dur=get_public_ipv4(methods=methods,return_list=0,print_msg=print_msg,**ka)
 		ip=dur['ipcalf.com']
 		for u,rs in dur.items():
 			if not rs:continue

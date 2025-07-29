@@ -116,11 +116,11 @@ try:
 except:pass
 ####################################################
 def is_varname(s: str) -> bool:
-    import re, keyword
-    if not isinstance(s, str) or not s:return py.No('type error',s)# 类型和空值校验 → 防止非字符串输入
-    if not re.fullmatch(RE_VAR_SIMPLE,s, flags=re.ASCII):return False# ASCII字符集校验 → 替代\w避免Unicode问题
-    if keyword.iskeyword(s):return False# 关键字黑名单 → 排除保留字
-    return True
+	import re, keyword
+	if not isinstance(s, str) or not s:return py.No('type error',s)# 类型和空值校验 → 防止非字符串输入
+	if not re.fullmatch(RE_VAR_SIMPLE,s, flags=re.ASCII):return False# ASCII字符集校验 → 替代\w避免Unicode问题
+	if keyword.iskeyword(s):return False# 关键字黑名单 → 排除保留字
+	return True
 is_var=is_varname
 
 def is_valid_css_selector(css: str) -> bool:
@@ -139,10 +139,10 @@ is_selector=is_valid_javascript_selector=is_valid_css_selector
 
 def is_valid_xpath(xpath: str) -> bool:
 	"""
-    使用 lxml 验证 XPath 是否有效。
-    :param xpath: 输入的 XPath 表达式
-    :return: 如果有效返回 True，否则返回 False
-    """
+	使用 lxml 验证 XPath 是否有效。
+	:param xpath: 输入的 XPath 表达式
+	:return: 如果有效返回 True，否则返回 False
+	"""
 	from lxml import etree
 	try:
 		etree.XPath(xpath)
@@ -181,8 +181,50 @@ def replace_auto_type(a,old,new):
 		if py.istr(new):new=new.encode()
 	return a.replace(old,new)
 
-def repr_without_space(a):
-	return py.repr(a).replace(', ',',')
+def repr_without_space(obj):
+	"""
+	返回一个类似 repr() 的字符串表示，但在集合元素之间没有空格。
+	该函数可以正确处理嵌套的数据结构。
+	"""
+	# 列表和元组
+	if isinstance(obj, (list, tuple)):
+		# 递归处理每一个元素
+		elements = [repr_without_space(item) for item in obj]
+		# 用无空格的逗号连接
+		content = ",".join(elements)
+		# 根据原始类型添加正确的括号
+		if isinstance(obj, list):
+			return f"[{content}]"
+		else:
+			return f"({content})"
+
+	# 字典
+	if isinstance(obj, dict):
+		if not obj:
+			return "{}"
+		# 递归处理键和值
+		pairs = [f"{repr_without_space(k)}:{repr_without_space(v)}" for k, v in obj.items()]
+		# 用无空格的逗号连接
+		return f"{{{','.join(pairs)}}}"
+
+	# 集合 (set 和 frozenset)
+	if isinstance(obj, (set, frozenset)):
+		# 处理空集合的特殊情况
+		if not obj:
+			return "set()" if isinstance(obj, set) else "frozenset()"
+		
+		# 为了输出稳定，最好对集合元素进行排序后再处理
+		# repr(x) 用于处理不同类型的元素排序，避免 TypeError
+		try:
+			sorted_elements = sorted(obj)
+		except TypeError:
+			sorted_elements = sorted(obj, key=repr)
+
+		elements = [repr_without_space(item) for item in sorted_elements]
+		return f"{{{','.join(elements)}}}"
+	# 对于所有其他类型（如 int, float, str, bool, None），
+	# 标准的 repr() 已经是我们想要的格式了。
+	return py.repr(obj)
 repr=repr_without_space
 	
 def stime_text(t='',regex=r'\b1\d{12}\b'):
@@ -466,9 +508,9 @@ to_varname=text_to_varname
 def html_table_to_list(html_or_url,**ka):
 	'''
 pandas.read_html first argument "io" : str, path object or file-like object
-    A URL, a file-like object, or a raw string containing HTML. Note that
-    lxml only accepts the http, ftp and file url protocols. If you have a
-    URL that starts with ``'https'`` you might try removing the ``'s'``.
+	A URL, a file-like object, or a raw string containing HTML. Note that
+	lxml only accepts the http, ftp and file url protocols. If you have a
+	URL that starts with ``'https'`` you might try removing the ``'s'``.
 	
 	'''
 	U,T,N,F=py.importUTNF()
@@ -566,9 +608,9 @@ def split_to_2d_list(text,col=re.compile('\s+'),row='\n',strip=True,skip_empty_l
 	'''
 numpy.loadtxt("myfile.txt")[:, 1]	
  fname : file, str, or pathlib.Path
-        File, filename, or generator to read.  If the filename extension is
-        ``.gz`` or ``.bz2``, the file is first decompressed. Note that
-        generators should return byte strings for Python 3k.
+		File, filename, or generator to read.  If the filename extension is
+		``.gz`` or ``.bz2``, the file is first decompressed. Note that
+		generators should return byte strings for Python 3k.
 		
  '1\r\n2\r\n4'.splitlines()
  ['1', '2', '4']
@@ -1247,10 +1289,10 @@ url2fn=url2file=url2fileName=url_to_filename=urlToFileName
 
 def get_domain_parts_by_url_using_tld(url_or_domain,return_str=True,**ka):
 	'''(url,
-                fail_silently=False,
-                fix_protocol=True,#False,
-                search_public=True,
-                search_private=True)
+				fail_silently=False,
+				fix_protocol=True,#False,
+				search_public=True,
+				search_private=True)
 	
 	
 	In [513]: domain_parts, non_zero_i, parsed_url
@@ -1285,7 +1327,7 @@ def getFLD(url_or_domain,fix_protocol=True):
 	"""Extract the first level domain.
 # Source path of Mozilla's effective TLD names file.
 NAMES_SOURCE_URL = 'http://mxr.mozilla.org/mozilla/source/netwerk/dns/src/' \
-                   'effective_tld_names.dat?raw=1'
+				   'effective_tld_names.dat?raw=1'
 
 # Relative path to store the local copy of Mozilla's effective TLD names file.
 NAMES_LOCAL_PATH = 'res/effective_tld_names.dat.txt'	
@@ -2080,6 +2122,14 @@ def jsonToDict(a):
 js2py=jsonToDict
 	
 def json_load(astr='',file=None,comment=lambda s:re.sub("//.*","",s,flags=re.MULTILINE),**ka):
+	'''
+In [161]: T.json_loads('"{\\"ht//10R\']\\"}"')
+Out[161]:               ###<py.No|JSONDecodeError('Unterminated string starting at: line 1 column 1 (char 0)'),'"{\\"ht'  2025-07-30__00.44.55__>
+
+In [162]: T.json_loads('"{\\"ht//10R\']\\"}"',comment=None)
+Out[162]: '{"ht//10R\']"}'
+'''
+
 	import json
 	if not (astr or file):
 		return py.No('either astr or file, but not any',astr,file) #一个也没有 不用 both not
@@ -2114,19 +2164,19 @@ json_loads=json_load
 
 def json_dump_to_file(obj,file,**ka):
 	'''json.dump(
-    obj,
-    fp,
-    *,
-    skipkeys=False,
-    ensure_ascii=True,
-    check_circular=True,
-    allow_nan=True,
-    cls=None,
-    indent=None,
-    separators=None,
-    default=None,
-    sort_keys=False,
-    **kw,
+	obj,
+	fp,
+	*,
+	skipkeys=False,
+	ensure_ascii=True,
+	check_circular=True,
+	allow_nan=True,
+	cls=None,
+	indent=None,
+	separators=None,
+	default=None,
+	sort_keys=False,
+	**kw,
 )
 '''
 	import json

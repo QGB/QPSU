@@ -82,7 +82,7 @@ def decode_jwt(jwt_token):  # 解析JWT令牌信息
 	except Exception as e: result["payload_error"] = f"❌ 有效载荷解码失败: {e}"  # 错误处理
 	result["signature"] = {"length": len(signature), "digest": f"{signature[:20]}..."}  # 签名信息
 	return result  # 返回解析结果
-def ucloud_update_firewall(rules, jwt_token,csrf_token,fw_id="firewall-ai30lbps",project_id="org-lezenq", region="hk"):  # 更新防火墙函数
+def ucloud_update_firewall(rules, jwt_token,csrf_token,fw_id="firewall-ai30lbps",project_id="org-lezenq", region="hk",**ka):  # 更新防火墙函数
 	jwt_info = decode_jwt(jwt_token)  # 解析JWT令牌
 	print("JWT 令牌解析结果:", jwt_info)  # 打印解析结果
 	print(f"  签发时间: {jwt_info.get('payload', {}).get('iat_formatted', '未知')}")
@@ -128,15 +128,19 @@ def ucloud_update_firewall(rules, jwt_token,csrf_token,fw_id="firewall-ai30lbps"
 	except Exception as e: print(f"❌ 请求过程中发生错误: {e}")  # 请求异常
 	return False  # 返回失败
 	
-def main():	
+def main(port=9222,methods=None):	
 	# 主程序  # [ {'策略': '接受', '协议及端口': 'TCP:443', '源地址': '0.0.0.0/0', '优先级': '高', '备注': '-'} ,]
+	ip = N.get_pub_ip_str()
 	file_json = r"D:\Documents\Downloads\ucloud  175 Firewall-Rule-Template-json.json"
-	log_info(f"\n>>>> 步骤0: 读取 {file_json}...")
+	log_info(f"\n>>>> 步骤0: 读取 {file_json}...  当前IP：{ip}")
 	with open(file_json, 'r', encoding='utf-8') as f:
 		json_data = json.load(f)  # 读取整个JSON数据
 		data = json_data['data']  # 获取规则数据部分
-	ip = N.get_pub_ip_str()
-	assert ip
+	ka=T.unrepr(json_data['ka'])
+	ip_url=ka.pop('ip_url')
+	if not ip:
+		ip=N.get_pub_ip_str(methods=[ip_url,])
+		assert ip
 	ip_in_data=[d for d in data if d['源地址'] == ip]
 	assert not ip_in_data ,f'{ip_in_data} \t ip {ip} 已经存在 '
 	data.insert(0, {'策略': '接受', '协议及端口': 'ICMP', '源地址': ip, '优先级': '高', '备注': U.stime()})
@@ -144,7 +148,7 @@ def main():
 
 	
 	log_info("\n>>>> 步骤1: 查找UCloud页面WebSocket端点...")
-	ws_url = get_ucloud_websocket_url(9222) or 1/0
+	ws_url = get_ucloud_websocket_url(port) or 1/0
 	log_info(f"页面的WebSocket调试URL: {ws_url}")
 
 	log_info("\n>>>> 步骤2: 通过WebSocket获取cookies...")
@@ -160,10 +164,17 @@ def main():
 		print("所有cookies名称:", [c['name'] for c in all_cookies])
 
 	
-	ru=ucloud_update_firewall(rules=data,jwt_token=target_cookies['U_JWT_TOKEN'],csrf_token=target_cookies['U_CSRF_TOKEN'])  # 执行防火墙更新
+	ru=ucloud_update_firewall(rules=data,jwt_token=target_cookies['U_JWT_TOKEN'],csrf_token=target_cookies['U_CSRF_TOKEN'],**ka)  # 执行防火墙更新
 	if ru:
-		json_str = json.dumps({'data': data}, ensure_ascii=False, separators=(',', ':'))
+		json_data['data']=data
+		json_str = json.dumps(json_data, ensure_ascii=False, separators=(',', ':'))
 		json_str = json_str.replace('{"策略":', '\n{"策略":')  # 在每条规则前添加换行
-		json_str = json_str.replace('{"data":[', '{"data": [\n').replace('}]}', '\n]}')
+		json_str = json_str.replace('"data":[', '\n"data": [\n').replace('}]}', '\n]}')
+		# U.set('j',json_str)
+		end_str='''"TCP:443","源地址":"0.0.0.0/0","优先级":"高","备注":"-"\n'''
+		assert end_str in json_str
+		json_str = json_str.replace(end_str,					 
+									end_str[:-1]+'}\n') # fix
 		with open(file_json, 'w', encoding='utf-8') as f:	# 将修改后的数据写回文件
 			f.write(json_str)
+			log_info(f'{f} 已经写回文件')
