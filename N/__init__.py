@@ -589,7 +589,12 @@ def get_public_ipv4_return_str(methods=('ipcalf.com','ipinfo.io'),print_msg=Fals
 	if not methods:methods=('ipcalf.com','ipinfo.io')
 	try:
 		dur=get_public_ipv4(methods=methods,return_list=0,print_msg=print_msg,**ka)
-		ip=dur['ipcalf.com']
+		ip=''
+		for u,sr in dur.items():
+			if sr and '.' in sr:
+				ip=sr
+				break
+		# ip=dur['ipcalf.com']
 		for u,rs in dur.items():
 			if not rs:continue
 			if 'no healthy upstream' in rs:#ipecho.net/plain 这个获取电信手机是 '240e:468:509:9511:85bf:f4bb:34db:e5c3'

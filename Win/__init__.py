@@ -58,6 +58,35 @@ try:
 except Exception as ei:pass
 from logging import info as log_info
 #############################################
+def get_current_wifi_name() -> str:
+    import subprocess  # 导入子进程模块
+    try:
+        output_bytes = subprocess.check_output(['netsh', 'wlan', 'show', 'interfaces'], timeout=5)  # 获取原始字节输出
+        output_str = output_bytes.decode('utf-8', errors='ignore')  # 尝试UTF-8解码
+        ssid_line = None  # 初始化SSID行变量
+        for line in output_str.splitlines():  # 遍历每一行
+            if 'SSID' in line and 'BSSID' not in line:  # 定位SSID行
+                ssid_line = line.strip(); break  # 找到后跳出循环
+        if not ssid_line or 'SSID' not in ssid_line:  # 检查是否找到有效SSID行
+            ssid_pattern = b'SSID\x20*:'  # 定义SSID字节模式
+            start_idx = output_bytes.find(ssid_pattern)  # 搜索模式位置
+            if start_idx != -1:  # 找到匹配模式
+                start_idx += len(ssid_pattern)  # 移动到SSID值开始位置
+                end_idx = output_bytes.find(b'\n', start_idx)  # 查找行尾
+                if end_idx != -1:  # 找到有效结束位置
+                    ssid_bytes = output_bytes[start_idx:end_idx].strip()  # 提取SSID字节
+                    for encoding in ['gbk', 'utf-8', 'latin1']:  # 尝试多种编码
+                        try: return ssid_bytes.decode(encoding).strip()  # 成功解码返回
+                        except UnicodeDecodeError: continue  # 尝试下一个编码
+                    return ssid_bytes.decode('utf-8', errors='replace').strip()  # 最终回退解码
+        if ssid_line:  # 处理正常解析的SSID行
+            parts = ssid_line.split(':', 1)  # 分割键值
+            if len(parts) > 1: return parts[1].strip()  # 返回SSID值
+        return ""  # 未找到返回空
+    except subprocess.CalledProcessError as e: return py.No("命令执行失败", e)  
+    except Exception as e: return py.No("其他异常", e) 
+get_wifi_name=get_current_wifi_name
+
 def get_wifi_passwords_list():
 	import subprocess, re
 	log_info('Win.get_wifi_passwords starts...')

@@ -4,6 +4,7 @@ gsqp=pathlib.Path(__file__).absolute().parent.parent.parent.absolute().__str__()
 if gsqp not in sys.path:sys.path.append(gsqp)#py3 works
 from qgb import py
 U,T,N,F=py.importUTNF()
+from qgb import Win
 
 from logging import info as log_info
 import websocket, json, time, requests
@@ -40,9 +41,7 @@ def filter_target_cookies(cookies, target_names=['U_JWT_TOKEN', 'U_CSRF_TOKEN'])
 	"""过滤目标cookies"""
 	return {c['name']: c['value'] for c in cookies if c['name'] in target_names}
 
-	
-
-
+#### 	cookies end ####
 
 
 
@@ -82,7 +81,7 @@ def decode_jwt(jwt_token):  # 解析JWT令牌信息
 	except Exception as e: result["payload_error"] = f"❌ 有效载荷解码失败: {e}"  # 错误处理
 	result["signature"] = {"length": len(signature), "digest": f"{signature[:20]}..."}  # 签名信息
 	return result  # 返回解析结果
-def ucloud_update_firewall(rules, jwt_token,csrf_token,fw_id="firewall-ai30lbps",project_id="org-lezenq", region="hk",**ka):  # 更新防火墙函数
+def ucloud_update_firewall(rules, jwt_token,csrf_token,fw_id="firewall-len=8",project_id="org-len=6", region="hk",**ka):  # 更新防火墙函数
 	jwt_info = decode_jwt(jwt_token)  # 解析JWT令牌
 	print("JWT 令牌解析结果:", jwt_info)  # 打印解析结果
 	print(f"  签发时间: {jwt_info.get('payload', {}).get('iat_formatted', '未知')}")
@@ -128,10 +127,10 @@ def ucloud_update_firewall(rules, jwt_token,csrf_token,fw_id="firewall-ai30lbps"
 	except Exception as e: print(f"❌ 请求过程中发生错误: {e}")  # 请求异常
 	return False  # 返回失败
 	
-def main(port=9222,methods=None):	
+def main(port=9222,file_json=r"D:\Documents\Downloads\ucloud  175 Firewall-Rule-Template-json.json",):	
 	# 主程序  # [ {'策略': '接受', '协议及端口': 'TCP:443', '源地址': '0.0.0.0/0', '优先级': '高', '备注': '-'} ,]
 	ip = N.get_pub_ip_str()
-	file_json = r"D:\Documents\Downloads\ucloud  175 Firewall-Rule-Template-json.json"
+	
 	log_info(f"\n>>>> 步骤0: 读取 {file_json}...  当前IP：{ip}")
 	with open(file_json, 'r', encoding='utf-8') as f:
 		json_data = json.load(f)  # 读取整个JSON数据
@@ -141,13 +140,15 @@ def main(port=9222,methods=None):
 	if not ip:
 		ip=N.get_pub_ip_str(methods=[ip_url,])
 		assert ip
-	ip_in_data=[d for d in data if d['源地址'] == ip]
-	assert not ip_in_data ,f'{ip_in_data} \t ip {ip} 已经存在 '
-	data.insert(0, {'策略': '接受', '协议及端口': 'ICMP', '源地址': ip, '优先级': '高', '备注': U.stime()})
-	data.insert(0, {'策略': '接受', '协议及端口': 'TCP:22', '源地址': ip, '优先级': '高', '备注': U.stime()})
+	ip_s3_24=T.sub_last(ip,'','.')+'.0/24'
+	ip_in_data=[d for d in data if d['源地址'] in (ip,ip_s3_24)]
+	assert not ip_in_data ,f'{ip_in_data} \t ip {ip} 已经存在 '  
+	comment=Win.get_wifi_name()+ '  ' +U.stime()
+	data.insert(0, {'策略': '接受', '协议及端口': 'ICMP', '源地址': ip, '优先级': '高', '备注':comment})
+	data.insert(0, {'策略': '接受', '协议及端口': 'TCP:22', '源地址': ip, '优先级': '高', '备注':comment})
 
 	
-	log_info("\n>>>> 步骤1: 查找UCloud页面WebSocket端点...")
+	log_info(f"\n>>>> 步骤1: 查找UCloud页面WebSocket端点...  当前IP：{repr(ip)}")
 	ws_url = get_ucloud_websocket_url(port) or 1/0
 	log_info(f"页面的WebSocket调试URL: {ws_url}")
 
@@ -169,7 +170,7 @@ def main(port=9222,methods=None):
 		json_data['data']=data
 		json_str = json.dumps(json_data, ensure_ascii=False, separators=(',', ':'))
 		json_str = json_str.replace('{"策略":', '\n{"策略":')  # 在每条规则前添加换行
-		json_str = json_str.replace('"data":[', '\n"data": [\n').replace('}]}', '\n]}')
+		json_str = json_str.replace('"data":[', '\n"data":[\n').replace('}]}', '\n]}')
 		# U.set('j',json_str)
 		end_str='''"TCP:443","源地址":"0.0.0.0/0","优先级":"高","备注":"-"\n'''
 		assert end_str in json_str
