@@ -982,6 +982,14 @@ def PyFile_FromFd(fd,name="filename",mode='r',buffering=-1,encoding='utf-8'):
 	
 	return f(fd, name,mode,buffering,bencoding,NULL,NULL,1)						  
 	
+def list_set_elements(a,*elements):
+    assert py.islist(a) and elements
+    a.clear()
+    for i in elements:
+        a.append(i)
+    return a
+list_set=list_set_value=list_set_elements
+    
 def list_remove_multi_values(a,*vs,skip_not_exists=False):
 	r=[]
 	for v in vs:

@@ -4,6 +4,7 @@ if __name__.endswith('qgb.F'):from . import py
 else:import py
 T=py.importT()
 import os as _os
+import os
 try:
 	from io import BytesIO
 	from io import BytesIO as bytesIO
@@ -59,6 +60,89 @@ class IntSize(py.int):
 		# return '<{}={}>'.format(super().__repr__(),F.ssize(self) )
 	def __repr__(self):return self.__str__()
 ################################
+def watch(f, func):
+    """监控文件或文件夹变化，触发回调函数并打印差异
+    
+    Args:
+        f (str): 要监控的文件或文件夹路径
+        func (callable): 变化时触发的回调函数
+    """
+    import os,time,difflib
+    from watchdog.observers import Observer
+    from watchdog.events import FileSystemEventHandler
+    U,T,N,F=py.importUTNF()	
+    # 文件内容缓存
+    file_cache = {}
+    
+    class ChangeHandler(FileSystemEventHandler):
+        def on_modified(self, event):
+            if event.is_directory:
+                return
+                
+            path = event.src_path
+            
+            # 读取当前文件内容
+            try:
+                with open(path, 'r', encoding='utf-8') as f:
+                    current_content = f.read().splitlines()
+            except Exception:
+                return
+                
+            # 获取之前缓存的内容
+            old_content = file_cache.get(path, [])
+            
+            # 计算差异
+            diff = py.list(difflib.unified_diff(
+                old_content, 
+                current_content,
+                fromfile=f"旧内容 {path}",
+                tofile=f"新内容 {path}",
+                lineterm=''
+            ))
+            
+            # 打印时间和差异
+            print(f"\n[{U.stime()}] 文件修改: {path}")
+            # print("\n".join(diff))
+            # print("-" * 50)
+            
+            # 更新缓存
+            file_cache[path] = current_content
+            
+            # 调用用户回调函数
+            func(path)
+    
+    # 设置监控
+    event_handler = ChangeHandler()
+    observer = Observer()
+    
+    if os.path.isfile(f):
+        # 监控文件所在目录
+        observer.schedule(event_handler, os.path.dirname(f))
+        # 缓存初始文件内容
+        try:
+            with open(f, 'r', encoding='utf-8') as file:
+                file_cache[f] = file.read().splitlines()
+        except Exception:
+            pass
+    else:
+        # 监控整个目录
+        observer.schedule(event_handler, f, recursive=True)
+    
+    observer.start()
+    print(f"开始监控: {f}")
+    
+    try:
+        while True:
+            time.sleep(1)
+    except KeyboardInterrupt:
+        observer.stop()
+    observer.join()
+    
+def get_current_dirname(sp=''):
+	if not sp:
+		sp=os.getcwd()
+	return os.path.basename(sp)
+
 def dill_load_file_return_json_str(file):
 	x=dill_load_file(file=file)
 	if not x:return x

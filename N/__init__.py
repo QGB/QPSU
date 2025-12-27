@@ -2376,6 +2376,7 @@ Image.open(fp)
 	except Exception as e:
 		U.log(e)
 		Image=None
+
 	transform_function=U.get_duplicated_kargs(ka,
 		'f','func','function','operator','transform','transformation_function',default=transform_function)#TODO 名称长的别名应该在前，这样匹配时先详细后模糊
 #fix numpy.ndarray ValueError: The truth value of an array with more than one element is ambiguous. Use a.any() or a.all()
@@ -2387,7 +2388,15 @@ Image.open(fp)
 				response.headers['Content-Type'] = 'text/html'
 				response.set_data('''<img src="{}"></img>'''.format(image) )
 				return image
-			im=Image.open(rect)
+			if py.istr(image) and image.endswith('.svg'):
+				im=F.read(image)
+				h=f'<html><head><title>{image}</title></head><body>{im}</body></html>'
+				response.set_data(h)
+				response.headers['Content-Type'] = 'text/html'
+				return response
+				# return flask_image_response(response,im,format='svg')
+			else:		
+				im=Image.open(rect)
 		# elif Image and (py.isinstance(rect,Image.Image) or py.isbytes(rect) ):
 			# im=rect
 		elif (py.istuple(rect) or py.islist(rect)) and U.len(rect)==4:
@@ -2581,8 +2590,8 @@ pip install qqwry  # Not have cz88update
 				qqwry_path=r'C:\Program Files (x86)\cz88.net\ip\qqwry.dat'
 				if F.exist(qqwry_path):
 					dat_path=qqwry_path
-			if not dat_path:
-				dat_path=U.get_gst(base_gst=1)+'qqwry.dat'
+			if not dat_path:dat_path=U.get_gst(base_gst=0)+'qqwry.dat'
+			if not F.exist(dat_path):dat_path=U.get_gst(base_gst=1)+'qqwry.dat'
 				
 		if not F.exist(dat_path):
 			U.log(['updateQQwry length:', qqwry.updateQQwry(dat_path)] )
@@ -3154,8 +3163,9 @@ def scan_ports_single_ip(host,threadsMax=33,from_port=1,to_port=65535,callback=N
 	counting_close = U.set('scanPorts.close',[])
 	errors=U.set('scanPorts.error',[])
 	threads = U.set('scanPorts.threads',[])
-	if isinstance(host,py.float):host='{0}.{1}'.format(ip2,host)
-	
+	# if isinstance(host,py.float):host='{0}.{1}'.format(ip2,host)
+	host=auto_ip(host)
+
 	def scan(port):
 		# U.count(1)
 		try:
@@ -3183,7 +3193,7 @@ def scan_ports_single_ip(host,threadsMax=33,from_port=1,to_port=65535,callback=N
 	percent=0.0
 	for i in range(from_port, to_port+1):
 		if ((i-from_port)/im>percent):
-			U.pln( 'Scanning  %.0f%%' % (percent*100), len(threads)	 )
+			U.pln( f'{host} Scanning  %.0f%%' % (percent*100), len(threads)	 )
 			percent+=0.01
 			
 		if len(threads)<=threadsMax:

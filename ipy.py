@@ -35,6 +35,14 @@ if IPython.version_info[0]>=8 and IPython.version_info[1]>=27:
 	gipy.autocall=1
 else:	
 	gipy.autocall=2
+
+try:
+    if gipy.history_load_length<2000:# 2025年12月27日 
+        print('gipy.history_load_length :',gipy.history_load_length )
+        gipy.history_load_length=99999
+        
+except:pass
+   
 if U.isWin():
 	try:
 		gipy.editor='cmd /k start "" %s' % U.npp(get_cmd=True)

@@ -58,7 +58,19 @@ try:
 except Exception as ei:pass
 from logging import info as log_info
 #############################################
-def get_current_wifi_name() -> str:
+
+def is_window_open(hwnd):
+    """检查指定窗口句柄是否仍然有效（窗口是否打开）"""
+    # 定义 Windows API 函数
+    user32 = ctypes.WinDLL('user32')
+    user32.IsWindow.argtypes = [ctypes.wintypes.HWND]
+    user32.IsWindow.restype = ctypes.wintypes.BOOL
+    try:
+        return user32.IsWindow(hwnd)
+    except:return False
+
+
+def get_current_connected_wifi_name() -> str:
     import subprocess  # 导入子进程模块
     try:
         output_bytes = subprocess.check_output(['netsh', 'wlan', 'show', 'interfaces'], timeout=5)  # 获取原始字节输出
@@ -85,7 +97,7 @@ def get_current_wifi_name() -> str:
         return ""  # 未找到返回空
     except subprocess.CalledProcessError as e: return py.No("命令执行失败", e)  
     except Exception as e: return py.No("其他异常", e) 
-get_wifi_name=get_current_wifi_name
+get_wifi_name=get_current_wifi_name=get_current_connected_wifi_name
 
 def get_wifi_passwords_list():
 	import subprocess, re
@@ -1227,9 +1239,29 @@ def set_cursor_pos(x,y):
 	return x,y
 move_cur=mv_cur=setMousePos=setCursorPos=SetCursorPos=setCurPos=set_mouse_pos=set_cur_pos=set_cursor_pos
 
-def mouse_wheel(a=1,debug=0):
-	raise py.NotImplementedError()
-	return
+
+def mouse_wheel(delta, x=None, y=None):
+    """
+    模拟鼠标滚轮滚动
+    delta: 滚动的量，正数向上滚动，负数向下滚动
+    x, y: 可选参数，指定滚动发生的位置（屏幕坐标）
+          如果未指定，则在当前光标位置滚动
+    """
+    import win32api,win32con
+    # 获取或设置光标位置
+    if x is not None and y is not None:
+        win32api.SetCursorPos((x, y))
+    else:
+        x, y = win32api.GetCursorPos()
+    
+    # 执行滚轮事件
+    win32api.mouse_event(
+        win32con.MOUSEEVENTF_WHEEL, 
+        x, 
+        y, 
+        delta * 120,  # Windows 中每单位滚动量为120
+        0
+    )
 mouse_while=mouse_wheel
 	
 def mouse_click(x=None,y=None,*a,_1=False,debug=0):

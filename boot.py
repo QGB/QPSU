@@ -21,9 +21,10 @@ except Exception as e:
 f='webrepl_cfg.py' 
 if f not in M.ls():
 	M.write(f,"PASS = '1234'\n")
+# import webrepl_setup
+# M.write(f,"PASS = '1234'\n")
 
-import webrepl
-webrepl.start()
+import webrepl;webrepl.start()
 
 r=sta_if.isconnected()
 # print('try connect test',r)

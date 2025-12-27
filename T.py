@@ -45,6 +45,7 @@ back_slash=backslash='\\' # chr(0x5C)
 two_slash=slash2='/\\'
 eq=equal=EQ='='
 black=blackblock='\u2B1B' # ⬛
+zspace=space_zh='\u3000'
 star=asterisk=ASTERISK='*'
 ######### html ######
 hr='<hr>'
@@ -115,6 +116,19 @@ try:
 	from pprint import pprint,pformat
 except:pass
 ####################################################
+"""检查字符串 s 中是否包含多个关键词中的任意一个"""
+def any_in_one(s, *keywords):return any(kw in s for kw in keywords)
+any_in=multi_in_one=any_in_one    
+
+def one_in_multi(s,*a):
+    if len(a)==1 and not py.istr(a[0]):a=a[0]
+    r=[]
+    for i in a:
+        if not py.istr(i):continue
+        if s in i:r.append(i)
+    return r
+in_multi=multi_in=one_in_multi
+    
 def is_varname(s: str) -> bool:
 	import re, keyword
 	if not isinstance(s, str) or not s:return py.No('type error',s)# 类型和空值校验 → 防止非字符串输入
@@ -131,8 +145,8 @@ def is_valid_css_selector(css: str) -> bool:
 	"""
 	from cssselect import GenericTranslator, SelectorError
 	try:
-		GenericTranslator().css_to_xpath(css)
-		return True
+		return GenericTranslator().css_to_xpath(css)
+		# return True
 	except SelectorError:
 		return False
 is_selector=is_valid_javascript_selector=is_valid_css_selector
