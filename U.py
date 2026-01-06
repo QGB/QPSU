@@ -796,66 +796,91 @@ tmux detach-client -t /dev/pts/3
 		return s
 	tmux_keys=tmux_send_keys
 ########################## end init #############################################
-
 def log_info(text, file=''):
-	import logging,inspect,time,os
-	U=py.importU()
-	_root_logger = U.get("compact_logger")
-	if not _root_logger:
-		# 配置全局根 Logger
-		_root_logger = logging.getLogger("compact_logger")
-		_root_logger.setLevel(logging.INFO)
-		_root_logger.propagate = False  # ⚠️关键修复1：禁止日志传播到根Logger
-		
-		# 清理现有处理器
-		for handler in _root_logger.handlers[:]:
-			_root_logger.removeHandler(handler)
-			
-		# 添加控制台处理器
-		console_handler = logging.StreamHandler()
+    import logging, inspect, time, os
+    U = py.importU()
+    _root_logger = U.get("compact_logger")
+    
+    if not _root_logger:
+        # 配置全局根 Logger
+        _root_logger = logging.getLogger("compact_logger")
+        _root_logger.setLevel(logging.INFO)
+        _root_logger.propagate = False  # ⚠️关键修复1：禁止日志传播到根Logger
+        
+        # 清理现有处理器
+        for handler in _root_logger.handlers[:]:
+            _root_logger.removeHandler(handler)
+            
+        # 添加控制台处理器
+        console_handler = logging.StreamHandler()
 
-		class CompactFormatter(logging.Formatter):
-			"""毫秒级时间戳的日志格式化器"""
-			def formatTime(self, record, datefmt=None):
-				ct = time.localtime(record.created)
-				t = time.strftime("%m-%d_%H:%M:%S", ct)
-				return f"{t}.{int(record.msecs):03d}"
-		console_handler.setFormatter(CompactFormatter(
-			fmt='%(asctime)s %(levelname).1s:%(_caller_lineno)-4d %(message)s'
-		))
-		_root_logger.addHandler(console_handler)
-		U.set("compact_logger", _root_logger)
+        class CompactFormatter(logging.Formatter):
+            """毫秒级时间戳的日志格式化器"""
+            def formatTime(self, record, datefmt=None):
+                ct = time.localtime(record.created)
+                t = time.strftime("%m-%d_%H:%M:%S", ct)
+                return f"{t}.{int(record.msecs):03d}"
+                
+        console_handler.setFormatter(CompactFormatter(
+            fmt='%(asctime)s %(levelname).1s:%(_caller_lineno)-4d %(message)s'
+        ))
+        _root_logger.addHandler(console_handler)
+        U.set("compact_logger", _root_logger)
 
-	# 获取调用者信息（跳过当前栈帧）
-	caller = inspect.currentframe().f_back
-	caller_info = inspect.getframeinfo(caller)
-	
-	# 动态添加文件处理器
-	file_handler = U.get(file)
-	if file and not file_handler:
-		os.makedirs(os.path.dirname(file), exist_ok=True)
-		from logging.handlers import RotatingFileHandler
-		file_handler = RotatingFileHandler(
-			file, maxBytes=5*1024*1024, backupCount=3, encoding='utf-8'
-		)
-		# file_handler.setFormatter(CompactFormatter( # 为了不多次创建CompactFormatter，使用默认格式
-		# 	fmt='%(asctime)s %(levelname).1s:%(_caller_lineno)-4d %(message)s'
-		# ))
-		U.set(file, file_handler)
-	
-	if file and file_handler and file_handler not in _root_logger.handlers:
-		_root_logger.addHandler(file_handler)
-	_root_logger.info( # 记录日志
-		text,
-		extra={
-			'_caller_lineno': caller_info.lineno,
-			'_caller_filename': os.path.basename(caller_info.filename),
-			'_caller_func': caller_info.function
-		}
-	)
-	if file and file_handler:
-		_root_logger.removeHandler(file_handler)
-
+    # 获取调用者信息（跳过当前栈帧）
+    caller = inspect.currentframe().f_back
+    caller_info = inspect.getframeinfo(caller)
+    
+    # 动态添加文件处理器
+    file_handler = U.get(file)
+    if file and not file_handler:
+        os.makedirs(os.path.dirname(file), exist_ok=True)
+        from logging.handlers import RotatingFileHandler
+        file_handler = RotatingFileHandler(
+            file, maxBytes=5*1024*1024, backupCount=3, encoding='utf-8'
+        )
+        
+        # 关键修复：为文件处理器添加相同的格式化器
+        # 获取控制台处理器使用的格式化器并复用
+        console_formatter = None
+        for handler in _root_logger.handlers:
+            if isinstance(handler, logging.StreamHandler):
+                console_formatter = handler.formatter
+                break
+                
+        if console_formatter:
+            file_handler.setFormatter(console_formatter)
+        else:
+            # 如果找不到控制台格式化器，创建新的
+            class CompactFormatter(logging.Formatter):
+                def formatTime(self, record, datefmt=None):
+                    ct = time.localtime(record.created)
+                    t = time.strftime("%m-%d_%H:%M:%S", ct)
+                    return f"{t}.{int(record.msecs):03d}"
+                    
+            file_handler.setFormatter(CompactFormatter(
+                fmt='%(asctime)s %(levelname).1s:%(_caller_lineno)-4d %(message)s'
+            ))
+            
+        U.set(file, file_handler)
+    
+    if file and file_handler and file_handler not in _root_logger.handlers:
+        _root_logger.addHandler(file_handler)
+        
+    # 记录日志
+    _root_logger.info(
+        text,
+        extra={
+            '_caller_lineno': caller_info.lineno,
+            '_caller_filename': os.path.basename(caller_info.filename),
+            '_caller_func': caller_info.function
+        }
+    )
+    
+    # 移除文件处理器（避免重复添加）
+    if file and file_handler and file_handler in _root_logger.handlers:
+        _root_logger.removeHandler(file_handler)
+        
 def chunk_list(lst, chunk_size):
 	"""将列表按指定大小分块"""
 	return [lst[i:i+chunk_size] for i in range(0, len(lst), chunk_size)]
