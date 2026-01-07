@@ -1160,8 +1160,7 @@ def list_2d(response,a,html_callback=None,index=True,sort_kw=U.SORT_KW_SKIP,colu
 
 	# request,ucode,urla=N.geta(return_other_url={'url_decode':1,
 	# '%23-':1
-	# },return_request=True)
-	
+	# },return_request=True)	
 	import pandas
 	df = pandas.DataFrame(data=a)
 	if exclude_cols:
@@ -1227,8 +1226,15 @@ def list_2d(response,a,html_callback=None,index=True,sort_kw=U.SORT_KW_SKIP,colu
 			df.insert(0, sindex_col, py.range(py.len(df)) )
 		index=False
 		
-	html=df.to_html(index=index,**to_html_ka) 
-	
+    # if 'escape' not in to_html_ka:to_html_ka['escape']=False # 关键：禁止转义 HTML 标签
+    # html = df.style.set_properties(**{
+        # "white-space": "pre-wrap",  # 保留换行和空格
+        # "text-align": "left",
+    # }).to_html(index=index,**to_html_ka) 
+    
+	html=df.style.set_properties(**{"white-space": "pre-wrap"}).to_html(escape=False,index=index,**to_html_ka)
+    
+    
 	if bottom_head and py.len(df)>(bottom_head if py.isint(bottom_head) else 34):
 		thead=T.sub(html,'<thead>','</thead>')
 		html=T.replace_last_one(html,'</tbody>',thead+'</tbody>')
