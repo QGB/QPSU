@@ -1706,8 +1706,8 @@ html_unescape=htmlDecode=html_decoded=html_decode
 def get_url_netloc(url):
 	''' return "ip:port" '''
 	try:from six.moves.urllib.parse import urlsplit
-    except ModuleNotFoundError:
-        from urllib.parse import urlsplit
+	except ModuleNotFoundError:
+		from urllib.parse import urlsplit
 	url=url.strip()
 	if '://' not in url:
 		url='http://'+url
