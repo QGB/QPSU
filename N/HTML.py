@@ -1226,14 +1226,15 @@ def list_2d(response,a,html_callback=None,index=True,sort_kw=U.SORT_KW_SKIP,colu
 			df.insert(0, sindex_col, py.range(py.len(df)) )
 		index=False
 		
-    # if 'escape' not in to_html_ka:to_html_ka['escape']=False # 关键：禁止转义 HTML 标签
+	# if 'escape' not in to_html_ka:to_html_ka['escape']=False # 关键：禁止转义 HTML 标签
     # html = df.style.set_properties(**{
         # "white-space": "pre-wrap",  # 保留换行和空格
         # "text-align": "left",
     # }).to_html(index=index,**to_html_ka) 
-    
-	html=df.style.set_properties(**{"white-space": "pre-wrap"}).to_html(escape=False,index=index,**to_html_ka)
-    
+	# U.getset(2,[index,to_html_ka])
+	#index=False
+	html=df.style.set_properties(**{"white-space": "pre-wrap"}).hide(axis="index").to_html(escape=False,index=index,**to_html_ka)
+	# html=df.to_html(escape=False,index=index,**to_html_ka)
     
 	if bottom_head and py.len(df)>(bottom_head if py.isint(bottom_head) else 34):
 		thead=T.sub(html,'<thead>','</thead>')

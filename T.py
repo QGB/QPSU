@@ -949,7 +949,7 @@ def is_valid_idcard(idcard):
 	return ckcodes[copulas % 11].upper() == idcard[-1].upper()
 sfz=isfz=is_sfz	=is_valid_idcard
 
-def columnize(iterable,width=120,**ka):
+def columnize(iterable,width=120,separator=' , ',**ka):
 	''' 144 break line in default Win+R Cmd window
 '''
 	# from IPython.utils.text import columnize as _columnize
@@ -970,7 +970,7 @@ def columnize(iterable,width=120,**ka):
 		return pformat( iterable )
 		# return pformat( {k:pformat(v) for k,v in iterable.items() } )
 	r= IPython.utils.text.columnize([pformat(i) for i in iterable],
-		row_first=True, separator=' , ', displaywidth=width)
+		row_first=True, separator=separator, displaywidth=width)
 	return r
 col=column=columnize
 
@@ -1705,7 +1705,9 @@ html_unescape=htmlDecode=html_decoded=html_decode
 # print decode_unicode_references(data)
 def get_url_netloc(url):
 	''' return "ip:port" '''
-	from six.moves.urllib.parse import urlsplit
+	try:from six.moves.urllib.parse import urlsplit
+    except ModuleNotFoundError:
+        from urllib.parse import urlsplit
 	url=url.strip()
 	if '://' not in url:
 		url='http://'+url
