@@ -391,7 +391,7 @@ def get_github_repo_directory_as_list(url,token=GITHUB_TOKEN,return_object=True,
 github_dir=get_github_dir=get_github_repo_directory_as_list
 
 
-def github_upload(filename,commit_msg='',print_requests=False,safe_filename='',**ka):
+def github_upload(filename,repo='',commit_msg='',print_requests=False,safe_filename='',token=None,**ka):
 	'''
 	
 - 常规文件
@@ -420,8 +420,7 @@ github_api:  path cannot end with a slash
 	
 	print_requests=U.get_duplicated_kargs(ka,'show','print','p','print_req','print_request','print_requests',default=print_requests)
 	
-	
-	repo,token=U.get_or_input('repo,token',default='',type=py.eval)
+	if not repo:repo,token=U.get_or_input('repo,token',default='',type=py.eval)
 	# token=U.get_or_input(G+'token',default='')
 	token=token.strip()
 	if not token.startswith('token '):token='token '+token

@@ -1629,7 +1629,7 @@ def rpc_get_file(filename,save_dir=None,return_b=False,**ka):
 	if py.isno(b):return b	
 	
 	
-	f=F.write(save_dir+F.get_filename(filename),b)
+	f=F.write(save_dir+F.get_filename(filename),b,mkdir=1)
 	if return_b:
 		return f,u,b
 	return f	

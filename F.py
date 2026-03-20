@@ -141,6 +141,7 @@ def watch(f, func):
 def get_current_dirname(sp=''):
 	if not sp:
 		sp=os.getcwd()
+	return os.path.basename(os.path.normpath(sp)) 
 	return os.path.basename(sp)
 
 def dill_load_file_return_json_str(file):
