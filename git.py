@@ -7,8 +7,7 @@ from qgb import py
 # 上个版本问题： print(dir(py),py) #['__doc__', '__file__', '__loader__', '__name__', '__package__', '__path__', '__spec__'] <module 'py' (namespace)>
 U,T,N,F=py.importUTNF()
 
-import os,sys
-import shutil
+import os,sys,shutil
 
 try:
 	import dulwich
@@ -29,6 +28,66 @@ except Exception as e:
 # opener.addheaders = py.list(headers.items())
 # urllib.request.install_opener(opener)
 grepo=U.get('git.repo')
+
+def gitea_upload(filename, repo, token, branch='master', commit_msg='', safe_filename='', BASE_URL="https://xxx/6080",**ka):
+    ''' 适配 Gitea API 上传文件（强制补齐 api/v1 路径）
+mkdir /tmp/gitea
+!podman run -p 6080:3000 -p 10022:22 -v /tmp/gitea:/data -e GITEA__server__ROOT_URL=https://xxx.com/6080/ -e GITEA__server__HTTP_ADDR=0.0.0.0 -e GITEA__server__HTTP_PORT=3000 docker.io/gitea/gitea:latest
+
+#注意没有6080
+sed -i 's|^ROOT_URL *=.*|ROOT_URL = https://xxx.com|' /tmp/gitea/gitea/conf/app.ini    
+# 1. 允许仓库上传大文件
+sed -i '/\[repository\.upload\]/a FILE_MAX_SIZE = 500' /tmp/gitea/gitea/conf/app.ini
+# 2. 允许 LFS 大文件
+sed -i '/\[lfs\]/a MAX_FILE_SIZE = 524288000' /tmp/gitea/gitea/conf/app.ini
+# 3. 增大 HTTP 请求体限制
+sed -i '/\[server\]/a HTTP_MAX_CONTENT_LENGTH = 524288000' /tmp/gitea/gitea/conf/app.ini
+
+    '''
+    import requests, json, base64, os, urllib3; urllib3.disable_warnings() # 导入库并禁用警告
+    from qgb import U, T, F # 保持库习惯
+    path = T.url_encode(safe_filename or os.path.basename(filename)) # 编码文件名
+    # 核心修正：无论参数是否带 v1，此处通过 rstrip 保证路径拼接为 .../6080/api/v1/repos/...
+    api_url = f"{BASE_URL.rstrip('/')}/api/v1/repos/{repo}/contents/{path}"
+    commit_msg = commit_msg or f"Upload {os.path.basename(filename)} at {U.stime()}" # 提交信息
+    with open(filename, 'rb') as f: content_b64 = base64.b64encode(f.read()).decode('utf-8') # 读取并编码文件
+    data = {"branch": branch, "message": commit_msg, "content": content_b64} # 构建请求体
+    headers = {'Authorization': f'token {token}', 'Content-Type': 'application/json', 'Accept': 'application/json'} # 认证头
+    print(f"正在上传: {os.path.basename(filename)} 到 {repo}...") # 打印状态
+    # timeout=600 解决大文件 SSLEOFError，verify=False 忽略证书
+    res = requests.post(api_url, data=json.dumps(data), headers=headers, timeout=600, verify=False,**ka)
+    if res.status_code == 201: print(f" 上传成功！") # Gitea 创建成功返回 201
+    else: print(f" 失败 {res.status_code}: {res.text}") # 打印错误详细信息
+    return res # 返回响应对象
+# gitea_upload(filename='C:/Users/Administrator/Documents/energetic/.gitignore',repo='a/energetic',token='16059ac8367da45cf626cc2612cd65b6c522868d')
+
+def github_force_empty(repo='', token=None, branch='master', proxies=None, **ka):
+	''' 强制清空 Github 仓库（删除所有文件并重置历史），等效 git push -f 到空仓库 '''
+	import requests, json, urllib3 # 导入必要库
+	urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning) # 忽略SSL警告
+	print_requests = U.get_duplicated_kargs(ka, 'show', 'print', 'p', 'print_req', 'print_requests', default=False) # 获取打印参数
+	if not repo or not token: repo, token = U.get_or_input('repo,token', default='', type=py.eval) # 获取配置
+	token = token.strip() # 去空格
+	if not token.startswith('token '): token = 'token ' + token # 格式化token
+	headers = {'Authorization': token, 'Accept': 'application/vnd.github.v3+json', 'User-Agent': 'PyGithub/Python'} # 设置请求头
+	# 步骤1：定义Git逻辑上的空树哈希
+	empty_tree_sha = "4b825dc642cb6eb9a060e54bf8d69288fbee4904" # Git预定义的空目录SHA
+	# 步骤2：创建孤立的空Commit
+	commit_url = f'https://api.github.com/repos/{repo}/git/commits' # 提交接口
+	commit_data = json.dumps({'message': f'Force Empty by qgb {U.stime()}', 'tree': empty_tree_sha, 'parents': []}) # 无父节点即清空历史
+	req_ka = {'headers': headers, 'proxies': proxies, 'verify': False, 'timeout': 20} # 统一请求参数
+	res_commit = requests.post(commit_url, data=commit_data, **req_ka) # 发送创建请求
+	if print_requests: print(f'Create Commit: {res_commit.status_code}\n{res_commit.text}') # 调试输出
+	new_commit_sha = res_commit.json()['sha'] # 提取新提交的SHA
+	# 步骤3：强制更新Ref指向新Commit
+	ref_url = f'https://api.github.com/repos/{repo}/git/refs/heads/{branch}' # 分支引用接口
+	update_data = json.dumps({'sha': new_commit_sha, 'force': True}) # 必须开启force
+	res_update = requests.patch(ref_url, data=update_data, **req_ka) # 强制覆盖
+	if print_requests: print(f'Update Ref: {res_update.status_code}\n{res_update.text}') # 调试输出
+	# print(res_update,res_update.text) # 返回200即成功
+	return res_update # 返回最终操作结果
+
+
 
 def ssh_T(host='github.com',port=22,username='git',private_key='',proxy=0,cmd=''):
 	''' -T 禁用伪 tty 分配。Disable pseudo-tty allocation.
@@ -427,10 +486,11 @@ github_api:  path cannot end with a slash
 	
 	# filename=F.auto_path(filename)
 	if not safe_filename:
-		if U.isWin():
-			safe_filename=T.path_legalized('/'+F.auto_path(filename),reduce_space=False)[1:]
-		else:	
-			safe_filename=T.path_legalized(F.auto_path(filename),reduce_space=False)
+		safe_filename=os.path.basename(filename)
+		# if U.isWin():
+			# safe_filename=T.path_legalized('/'+F.auto_path(filename),reduce_space=False)[1:]
+		# else:	
+			# safe_filename=T.path_legalized(F.auto_path(filename),reduce_space=False)
 	
 	if '/.git/' in safe_filename:
 		pass# python pass keyword won't skip execution
