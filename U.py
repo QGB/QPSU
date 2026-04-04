@@ -732,6 +732,10 @@ tmux show socket file :  lsof -U | grep '^tmux'  # socket='/tmp/tmux-1001/defaul
 			else:	
 				session=f'{session}:{a}'
 		
+		if session:
+			if not py.istr(session) or not session.startswith('-t'):session=f'-t {session}'
+		else:session=''
+		
 		if (not socket) and U.is_root() and U.is_termux():
 			pt=U.ps(name='tmux: server')[0]
 			username=pt.username()
@@ -744,7 +748,8 @@ tmux show socket file :  lsof -U | grep '^tmux'  # socket='/tmp/tmux-1001/defaul
 			socket='-S '+socket.strip()
 			
 		os.environ['TMUX']=''
-		rs=U.isipy().getoutput(f'tmux {socket} capture-pane -S -{max_lines} -t {session} {capture_pane_args};tmux {socket} show-buffer')#.format(max_lines=max_lines,session=session,window=a))# 不能用 U.cmd
+		cmd=f'tmux {socket} capture-pane -S -{max_lines} {session} {capture_pane_args};tmux {socket} show-buffer'
+		rs=U.isipy().getoutput(cmd)#.format(max_lines=max_lines,session=session,window=a))# 不能用 U.cmd
 		if reverse:rs=rs[::-1]
 		return T.EOL.join(rs)
 	tmux=tmuxc=tmuxcap=tmuxcapture=tmuxCapture=tmux_capture=tmux_capture_pane

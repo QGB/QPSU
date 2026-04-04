@@ -1205,8 +1205,17 @@ def read_csv(file,encoding=None,delimiter=',',keep_default_na=False,):
 the  na_filter=False can change your columns type to object
 	
 	'''
-	file=autoPath(file)
-	if not encoding:encoding=detectEncoding(file)
+	if isinstance(file, bytes):
+		import io
+		file = io.BytesIO(file)  # 核心：byte → 类文件对象
+	else:
+		# 原有逻辑：处理文件路径
+		file = autoPath(file)
+		if not encoding:
+			encoding = detectEncoding(file)
+		file = file  # 文件路径直接传入
+	# file=autoPath(file)
+	# if not encoding:encoding=detectEncoding(file)
 	import pandas as pd
 	df = pd.read_csv(file, delimiter=delimiter,encoding=encoding,keep_default_na=keep_default_na)
 	r=[]
@@ -1298,7 +1307,7 @@ def write_xls(file,a):
 def read_xls(file,sheetIndex=0):
 	''' return [ [colValue...]  .. ]  #No type description
 	'''
-	import xlrd                         
+	import xlrd
 	w=xlrd.open_workbook(file)           
 	sh=w.sheets()[sheetIndex]
 	return sh._cell_values

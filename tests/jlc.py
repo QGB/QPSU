@@ -21,7 +21,7 @@ def getClientOrderListUnion(past_days=90,print_result=True,d3=None,**ka):
 	d3=get_d3(d3,**ka)
 
 	# headers = {'x-xsrf-token': d3['XSRF-TOKEN'],}
-	headers = {}
+	headers = {'Content-Type':'application/json','X-XSRF-TOKEN':d3['XSRF-TOKEN']}
 
 	json_data = {
 		'orderBeginTime': U.stime(U.get_time_obj()-U.time_delta(days=past_days))[:10],
@@ -66,7 +66,8 @@ def selectExpressSchedule(index=0,jo=None,d3=None,print_result=True,**ka):
 		'https://www.jlc.com/api/newOrder/NewOrderList/v1/selectExpressSchedule',
 		cookies=d3,
 		# headers={'x-xsrf-token': d3['XSRF-TOKEN'],} ,
-        headers = {},
+        # headers = {},
+        headers = {'Content-Type':'application/json','X-XSRF-TOKEN':d3['XSRF-TOKEN']},
 		data=data,
 	)
 	if print_result:print(response,response.text[:99])
@@ -90,7 +91,8 @@ def selectWipProcess(index=0,jo=None,d3=None,print_result=True,**ka):
 		'https://www.jlc.com/api/newOrder/NewOrderList/v1/selectWipProcess',
 		cookies=d3,
 		# headers={'x-xsrf-token': d3['XSRF-TOKEN'],} ,
-        headers = {},
+        # headers = {},
+        headers = {'Content-Type':'application/json','X-XSRF-TOKEN':d3['XSRF-TOKEN']},
 json=data,#如果用data= {"success":false,"code":500,"message":"系统发生未知错误，请稍后重试","data":null}
 	)
 	

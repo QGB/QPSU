@@ -116,19 +116,23 @@ try:
 	from pprint import pprint,pformat
 except:pass
 ####################################################
+def jk_bms_log(b):
+	from qgb.tests.jk_bms import parse_jk_log
+	return parse_jk_log(b) #df
+jk_log=parse_jk_log=jk_bms_log 
 """检查字符串 s 中是否包含多个关键词中的任意一个"""
 def any_in_one(s, *keywords):return any(kw in s for kw in keywords)
-any_in=multi_in_one=any_in_one    
+any_in=multi_in_one=any_in_one	
 
 def one_in_multi(s,*a):
-    if len(a)==1 and not py.istr(a[0]):a=a[0]
-    r=[]
-    for i in a:
-        if not py.istr(i):continue
-        if s in i:r.append(i)
-    return r
+	if len(a)==1 and not py.istr(a[0]):a=a[0]
+	r=[]
+	for i in a:
+		if not py.istr(i):continue
+		if s in i:r.append(i)
+	return r
 in_multi=multi_in=one_in_multi
-    
+	
 def is_varname(s: str) -> bool:
 	import re, keyword
 	if not isinstance(s, str) or not s:return py.No('type error',s)# 类型和空值校验 → 防止非字符串输入
