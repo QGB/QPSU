@@ -256,7 +256,7 @@ def CreateContextMenuEntry(AL_path, language):
     try:
         shellkey = wreg.OpenKey(wreg.HKEY_CLASSES_ROOT, r"exefile\shell", 0, wreg.KEY_ALL_ACCESS)
     except WindowsError:
-        print "[!] Error: Could not open key. Ensure script is ran as Administrator"
+        print("[!] Error: Could not open key. Ensure script is ran as Administrator")
         return False
     appkey = wreg.CreateKey(shellkey, "Execute with AppLocale")
     cmdkey = wreg.CreateKey(appkey, "command")
@@ -266,19 +266,19 @@ def CreateContextMenuEntry(AL_path, language):
 
 if __name__ == "__main__":
     try:
-        print "Using language %s" % Language
+        print("Using language %s" % Language)
     except NameError:
-        print "[!] Language variable not set."
-        print "[!] Edit this script with a text editor and uncomment the desired language."
+        print("[!] Language variable not set.")
+        print("[!] Edit this script with a text editor and uncomment the desired language.")
         quit()
     
     AppLocale_path = os.path.expandvars(AppLocale)
     if not os.path.exists(AppLocale_path):
-        print "Unable to find AppLocale.exe. Expected at: %s" % AppLocale_path
-        print "If AppLocale is not installed, retrieve from: http://www.microsoft.com/en-us/download/details.aspx?id=13209"
+        print("Unable to find AppLocale.exe. Expected at: %s" % AppLocale_path)
+        print("If AppLocale is not installed, retrieve from: http://www.microsoft.com/en-us/download/details.aspx?id=13209")
         quit()
     result = CreateContextMenuEntry(AppLocale_path, str(Language))
     if not result:
-        print "Error setting registry key"
+        print("Error setting registry key")
     else:
-        print "Right-click context menu set successfully as 'Execute with AppLocale'"
+        print("Right-click context menu set successfully as 'Execute with AppLocale'")

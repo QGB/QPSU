@@ -25,11 +25,11 @@ class WSWriter:
         await self.s.awrite(data)
 
 
-def WSReader(reader, writer):
+async def WSReader(reader, writer):
 
         webkey = None
         while 1:
-            l = yield from reader.readline()
+            l = await reader.readline()
             print(l)
             if not l:
                 raise ValueError()

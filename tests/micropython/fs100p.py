@@ -1,4 +1,4 @@
-def send(b,eol=\r\n wait_time=0.2):
+def send(b,eol='\r\n', wait_time=0.2):
  uart.write(b)
  time.sleep(wait_time)
  return uart.read(100) or b''

@@ -1,15 +1,15 @@
 import uasyncio
 from ws_server import WSReader, WSWriter
 
-def echo(reader, writer):
+async def echo(reader, writer):
     # Consume GET line
-    yield from reader.readline()
+    await reader.readline()
 
-    reader = yield from WSReader(reader, writer)
+    reader = await WSReader(reader, writer)
     writer = WSWriter(reader, writer)
 
     while 1:
-        l = yield from reader.read(256)
+        l = await reader.read(256)
         print(l)
         if l == b"\r":
             await writer.awrite(b"\r\n")

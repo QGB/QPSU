@@ -13,13 +13,13 @@ def getWindowCur(w):
     r=w.rectangle()
     return [x-r.left,y-r.top]                                       
 	
-def printWindowCur(w)
+def printWindowCur(w):
 	while 1:
 		print (getWindowCur(w))
 		U.sleep(1)           
 		
 
-def keySend(w,askey)
+def keySend(w,askey):
 	r'''
  !"#$'*<-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\]`abcdefghijklmnopqrstuvwxyz|
  !"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\]^_`abcdefghijklmnopqrstuvwxyz{|}~

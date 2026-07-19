@@ -3820,6 +3820,42 @@ Out[79]: 0.296
 		return py.No('Not float')	
 getFloaTail=get_float_tail
 		
+
+def get_time_str_mark(dt=None,sep=' ', ms=0):  # 参数名由 format 改为 fmt
+    """
+    返回特定编码的时间标记字符串。
+    格式：月(hex) + 日(1-15为hex, 16-31为十进个位) + 小时(2位) + 分钟(2位)
+
+    参数：
+        dt   : datetime.datetime 对象，若为 None 则使用当前时间
+        fmt  : 保留参数，不影响输出（原 format 改名，避免与内置函数冲突）
+        ms   : 保留参数，不影响输出
+    返回：
+        6 字符的编码字符串，如 "7A1234" 表示 7月10日 12:34
+    """
+    import datetime
+    if dt is None:
+        dt = datetime.datetime.now()
+
+    month = dt.month
+    day = dt.day
+    hour = dt.hour
+    minute = dt.minute
+
+    # 第1位：月份转十六进制（大写）
+    month_hex = format(month, 'X')   # 此处 format 是内置函数，不会被遮蔽
+
+    # 第2位：日期编码
+    if 1 <= day <= 15:
+        day_code = format(day, 'X')
+    else:
+        day_code = str(day % 10)
+
+    # 小时与分钟固定为2位
+    time_part = f"{hour:02d}{minute:02d}"
+    return f"{month_hex}{day_code}{sep}{time_part}"
+str_time_mark=get_str_time_mark=get_time_str_mark
+
 def zh_time(timestamp=0,zh_format='%-d号 %-H点%-M分%-S秒'):
 	'''#TODO fix Windows
 UnicodeEncodeError: 'locale' codec can't encode character '\u5e74' in position 2: encoding error'''
@@ -3937,7 +3973,7 @@ U.stime(0.0004)
 		time=tMod.localtime(time) #return time.struct_time
 	elif not time:
 		time=get_float_us_time() #float
-		return get_time_as_str(time)
+		return get_time_as_str(time,format=format,ms=ms)
 	else:
 		raise py.ArgumentUnsupported(time)
 	if format=='':return str(time)

@@ -87,7 +87,7 @@ def mmap_test():
     for i in xrange(n):
         if bool(d.get(str(i))) != (i % 2 == 0):
             raise Exception(i)
-    print 'mmap speed: %d gets per sec' % (n / (default_timer() - start_time))
+    print('mmap speed: %d gets per sec' % (n / (default_timer() - start_time)))
 
 
 def manager_test():
@@ -97,7 +97,7 @@ def manager_test():
     for i in xrange(n):
         if bool(d.get(str(i))) != (i % 2 == 0):
             raise Exception(i)
-    print 'manager speed: %d gets per sec' % (n / (default_timer() - start_time))
+    print('manager speed: %d gets per sec' % (n / (default_timer() - start_time)))
 
 
 def shm_test():
@@ -108,7 +108,7 @@ def shm_test():
     for i in xrange(n):
         if bool(d.get(str(i))) != (i % 2 == 0):
             raise Exception(i)
-    print 'shm speed: %d gets per sec' % (n / (default_timer() - start_time))
+    print('shm speed: %d gets per sec' % (n / (default_timer() - start_time)))
 
 
 if __name__ == '__main__':

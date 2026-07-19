@@ -58,6 +58,36 @@ try:
 except Exception as ei:pass
 from logging import info as log_info
 #############################################
+def set_screen_state(off=2):
+    if py.isint(off) and off < 0:
+        off = -1
+    else:
+        if off:
+            off = off if off else 2
+
+    pass
+    WM_SYSCOMMAND = 274
+    SC_MONITORPOWER = 61808
+    ctypes.windll.user32.SendMessageW(ctypes.windll.user32.GetForegroundWindow(), WM_SYSCOMMAND, SC_MONITORPOWER, off)
+
+
+def screen_on():
+    set_screen_state(-1)
+    click()
+    U, T, N, F = py.importUTNF()
+    U.key_actions([('k', 'Home'), ['move', (291, 228)], ('k', 'p'), ('k', 'Esc')])
+    U.sleep(0.1)
+    Win.move_cur(1, 1)
+    click()
+
+
+def reset_cmd():
+    import ctypes
+    kernel32 = ctypes.windll.kernel32
+    STDIN = -10
+    handle = kernel32.GetStdHandle(STDIN)
+    kernel32.SetConsoleMode(handle, 15)
+
 
 def is_window_open(hwnd):
     """检查指定窗口句柄是否仍然有效（窗口是否打开）"""

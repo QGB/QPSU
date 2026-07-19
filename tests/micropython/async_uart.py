@@ -83,6 +83,7 @@ def start(port=23):
 	try:
 		server_socket.setsockopt(socket.SOL_SOCKET, 20, accept_telnet_connect) #esp micropython 专用
 	except:
+		pass
 		
 start()
 loop = asyncio.get_event_loop()

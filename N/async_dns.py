@@ -66,5 +66,5 @@ if __name__ == "__main__":
     resolved_hosts = ar.resolve()
     end = time()
 
-    print "It took %.2f seconds to resolve %d hosts." % (end-start, number_of_hosts)
+    print("It took %.2f seconds to resolve %d hosts." % (end-start, number_of_hosts))
 
