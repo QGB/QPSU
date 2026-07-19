@@ -64,7 +64,7 @@ def github_lfs_upload(filename, repo, token, branch='master', proxies=None, verb
     return res # 返回结果
 
 def gitea_upload(filename, repo, token, branch='master', commit_msg='', safe_filename='', BASE_URL="https://xxx/6080",**ka):
-    ''' 适配 Gitea API 上传文件（强制补齐 api/v1 路径）
+    r''' 适配 Gitea API 上传文件（强制补齐 api/v1 路径）
 mkdir /tmp/gitea
 !podman run -p 6080:3000 -p 10022:22 -v /tmp/gitea:/data -e GITEA__server__ROOT_URL=https://xxx.com/6080/ -e GITEA__server__HTTP_ADDR=0.0.0.0 -e GITEA__server__HTTP_PORT=3000 docker.io/gitea/gitea:latest
 

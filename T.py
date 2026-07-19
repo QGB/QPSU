@@ -271,7 +271,7 @@ def list_append_row_StrRepr(alist,**ka):
 append=list_append_row_StrRepr		
 		
 def parse_requirements_txt(f):
-	'''C:\test\github\TradingView-Machine-Learning-GUI\requirements.txt
+	r'''C:\test\github\TradingView-Machine-Learning-GUI\requirements.txt
 	
 '''
 	global U,T,N,F
@@ -622,7 +622,7 @@ def splitlines(*a):
 		r.extend(s.splitlines())
 	return r	
 
-def split_to_2d_list(text,col=re.compile('\s+'),row='\n',strip=True,skip_empty_line=True,StrRepr=False):
+def split_to_2d_list(text,col=re.compile(r'\s+'),row='\n',strip=True,skip_empty_line=True,StrRepr=False):
 	'''
 numpy.loadtxt("myfile.txt")[:, 1]	
  fname : file, str, or pathlib.Path
@@ -1511,7 +1511,7 @@ def readableTimeText(txt,browser=False):
 		return U.StrRepr(r)
 timeText=readableTimeText
 
-RE_IP=RE_IPv4=RE_IPV4= '''(?:(?:2(?:[0-4][0-9]|5[0-5])|[0-1]?[0-9]?[0-9])\.){3}(?:(?:2([0-4][0-9]|5[0-5])|[0-1]?[0-9]?[0-9]))'''
+RE_IP=RE_IPv4=RE_IPV4= r'''(?:(?:2(?:[0-4][0-9]|5[0-5])|[0-1]?[0-9]?[0-9])\.){3}(?:(?:2([0-4][0-9]|5[0-5])|[0-1]?[0-9]?[0-9]))'''
 def ip_location_text(text,location_format=' [{0}] ',reverse_ip=True,**ka):
 	''' p='deprecated'
 	'''
@@ -1562,7 +1562,7 @@ def regex_count(a,regex,flags=0):
 countRegex=regexCount=count_regex=regex_count
 	
 def regex_replace(a,regex,str_or_func,flags=0):
-	'''  str_or_bytes_or_func
+	r'''  str_or_bytes_or_func
 func( a: <_sre.SRE_Match object; span=(2388, 2396), match='21758465'>  ):
 	a.span()==(2388, 2396)
 	match==a.group()	
@@ -2685,7 +2685,7 @@ gszi=gsZI='''个、十、百、千、万、十万、百万、千万、亿、十�
 gZi=gzi=glzi=gsZI.split('、')
 
 def readable_integer(a,split=4,p=True):
-	'''
+	r'''
 T.readNumber(2**172)
 5986极3107载0650正7378涧3529沟6229穰3074秭8058垓9524京8510兆6996亿9602万9696
 

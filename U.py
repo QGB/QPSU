@@ -8510,7 +8510,7 @@ Load key "C:/test/ssh/privateKey_NIST256p_1.pem": invalid format
 edcsa_key_pair=get_edcsa_key_pair=generate_edcsa_key_pair=createECDSAKeyPairLocally=generate_edcsa_by_secexp=generate_ecdsa_by_secexp
 
 def generate_edcsa_by_private_key(private_key=None,filename='id_ecdsa'):
-	"""This example shows how easy it is to generate and export ECDSA keys with python.
+	r"""This example shows how easy it is to generate and export ECDSA keys with python.
 
 	This program is similar to `ssh-keygen -t ecdsa` with no passphrase.
 	To export the private key with a passphrase, read paramiko.pkey.PKey._write_private_key method.
