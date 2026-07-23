@@ -239,24 +239,4 @@ def h(h):
 if __name__=='__main__':
 	main()
 	
-'''127.0.0.1 - - [11/May/2018 03:56:40] "GET /323 HTTP/1.1" 404 -
-127.0.0.1 - - [11/May/2018 03:56:40] "GET /323 HTTP/1.1" 500 -
-----------------------------------------
-Exception happened during processing of request from ('127.0.0.1', 55009)
-Traceback (most recent call last):
-  File "G:\QGB\Anaconda2\lib\SocketServer.py", line 290, in _handle_request_noblock
-    self.process_request(request, client_address)
-  File "G:\QGB\Anaconda2\lib\SocketServer.py", line 318, in process_request
-    self.finish_request(request, client_address)
-  File "G:\QGB\Anaconda2\lib\SocketServer.py", line 331, in finish_request
-    self.RequestHandlerClass(request, client_address, self)
-  File "G:\QGB\Anaconda2\lib\SocketServer.py", line 654, in __init__
-    self.finish()
-  File "G:\QGB\Anaconda2\lib\SocketServer.py", line 713, in finish
-    self.wfile.close()
-  File "G:\QGB\Anaconda2\lib\socket.py", line 286, in close
-    self._sock.close()
-AttributeError: 'NoneType' object has no attribute 'close'
-
-
-'''
+# Example output from a prior request, kept as a comment for reference.

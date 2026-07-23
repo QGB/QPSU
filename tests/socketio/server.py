@@ -3,7 +3,7 @@ import socketio
 import socket
 socket._LOCALHOST='192.168.43.162'
 
-'''
+r'''
 OSError: [WinError 10049] 在其上下文中，该请求的地址无效。
 Exception ignored in: <function BaseEventLoop.__del__ at 0x0000015903BD75E8>
 Traceback (most recent call last):

@@ -1,0 +1,21 @@
+[build-system]
+requires = ["setuptools>=61", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "qpsu"
+version = "0.1.0"
+description = "Utility package for qgb/python scripts"
+readme = "README.md"
+requires-python = ">=3.8"
+authors = [
+  { name = "QGB" }
+]
+classifiers = [
+  "Programming Language :: Python :: 3",
+  "License :: OSI Approved :: MIT License",
+  "Operating System :: OS Independent",
+]
+
+[tool.setuptools]
+include-package-data = true

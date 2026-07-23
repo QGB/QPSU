@@ -1,4 +1,4 @@
-"""
+r"""
 Convert YouTube subtitles(vtt) to human readable text.
 
 Download only subtitles from YouTube with youtube-dl:
@@ -61,7 +61,7 @@ def merge_duplicates(lines):
     for line in lines:
         if line == "":
             continue
-        if re.match('^\d{2}:\d{2}$', line):
+        if re.match(r'^\d{2}:\d{2}$', line):
             if line != last_timestamp:
                 yield line
                 last_timestamp = line
@@ -74,7 +74,7 @@ def merge_duplicates(lines):
 def merge_short_lines(lines):
     buffer = ''
     for line in lines:
-        if line == "" or re.match('^\d{2}:\d{2}$', line):
+        if line == "" or re.match(r'^\d{2}:\d{2}$', line):
             yield '\n' + line
             continue
 
