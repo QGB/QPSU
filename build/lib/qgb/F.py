@@ -1389,7 +1389,7 @@ def isDir(file):
 is_folder=isFolder=is_dir=isdir=isDir
     
 def exists(fn,zero=True):
-    r''': path.exist('c:')
+    ''': path.exist('c:')
 Out[57]: False
 
 In [58]: path.exist('o:')#这是因为当前目录下存在 'o:'，但是只能用ls完整查看

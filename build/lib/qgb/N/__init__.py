@@ -123,7 +123,7 @@ def post_with_new_thread(url,data=b'',**ka):
 post=post_with_new_thread	
 
 def sendkey8888(response=None,s=''):
-	r''' pip install python3-xlib
+	''' pip install python3-xlib
 	
 SEMICLN 分号 ;
 SLASH 斜杠 /
@@ -189,7 +189,7 @@ cs[26]     #[':', 'COLON'
 k8888=sendkey8888
 
 def tftp_download(ip,filename,port=69):
-	r''' pip install TFTPy     
+	''' pip install TFTPy     
 U.enable_log()
 
 2022-08-24:09:30:59,15 INFO     [TftpContexts.py:389] Sending tftp download request to 192.168.1.3
@@ -500,9 +500,9 @@ def github_release(url):
 	"html_url": "https://github.com/octocat/Hello-World/releases/v1.0.0",
 	"assets_url": "https://api.github.com/repos/octocat/Hello-World/releases/1/assets",
 	"upload_url": "https://uploads.github.com/repos/octocat/Hello-World/releases/1/assets{?name,label}",
-
+	
 	(?P<name>.*)
-#useless r'((git|ssh|http(s)?)|(git@[\\w\\.]+))(:(//)?)([\\w\\.@\\:/\\-~]+)(\\.git)(/)?'
+#useless r'((git|ssh|http(s)?)|(git@[\w\.]+))(:(//)?)([\w\.@\:/\-~]+)(\.git)(/)?'
 '''
 	U,T,N,F=py.importUTNF()
 	url=T.regex_match_all(url,T.RE_GIT)[0]
@@ -1013,7 +1013,7 @@ def dns_resolve(domain,rdtype='A',return_str_list=True):
 dns=get_ip_from_domain=resolve_domain=dns_resolve
 		
 def ping(addr,sum=5,sleep=0,timeout= 4,ttl=None,seq=0,size=56,interface=None,p=False,return_result=True,**ka):
-	r''' ping3.ping(
+	''' ping3.ping(
 	dest_addr: str,
 	timeout: int = 4,
 	unit: str = 's', ##unit: The unit of returned value. "s" for seconds, "ms" for milliseconds. (default "s")

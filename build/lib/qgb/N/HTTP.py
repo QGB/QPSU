@@ -339,10 +339,10 @@ Sends a POST request.
 :param url: URL for the new :class:`Request` object.
 :param data: (optional) Dictionary (will be form-encoded), bytes, or file-like object to send in the body of the :class:`Request`.
 :param json: (optional) json data to send in the body of the :class:`Request`.
-:param \\*\\*kwargs: Optional arguments that ``request`` takes.
+:param \*\*kwargs: Optional arguments that ``request`` takes.
 :return: :class:`Response <Response>` object
 :rtype: requests.Response
-File:    	e:\\qgb\\anaconda3\\lib\\site-packages\\requests\\api.py
+File:	  e:\qgb\anaconda3\lib\site-packages\requests\api.py
 Type:	  function
 '''	
 	U,T,N,F=py.importUTNF()
@@ -380,14 +380,14 @@ def get_bytes(url,file='',
 		**ka ,):
 	'''
 url格式不对时：
-C:\\QGB\\Anaconda3\\lib\\site-packages\\socks.py in _write_SOCKS5_address(self, addr, file)
+C:\QGB\Anaconda3\lib\site-packages\socks.py in _write_SOCKS5_address(self, addr, file)
     574                                            socket.SOCK_STREAM,
     575                                            socket.IPPROTO_TCP,
 --> 576                                            socket.AI_ADDRCONFIG)
     577             # We can't really work out what IP is reachable, so just pick the
     578             # first.
 
-C:\\QGB\\Anaconda3\\lib\\socket.py in getaddrinfo(host, port, family, type, proto, flags)
+C:\QGB\Anaconda3\lib\socket.py in getaddrinfo(host, port, family, type, proto, flags)
     746     # and socket type values to enum constants.
     747     addrlist = []
 --> 748     for res in _socket.getaddrinfo(host, port, family, type, proto, flags):

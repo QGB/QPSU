@@ -472,7 +472,7 @@ def send_key_to_window(h,*a):
 		else:
 			raise py.ArgumentUnsupported(i)
 def shell_delete(a):
-	r''' allow undo
+	''' allow undo
 	
 shellcon.FOF_ALLOWUNDO 删除失败 r'C:\WINDOWS\system32\cmd.exe'
 弹框，阻塞，点击取消 ，返回 (1223, True)  1223 - 操作已被用户取消。
@@ -1585,7 +1585,7 @@ def main():
 	import U
 	U.pln( getAllNetwork())
 	exit()
-	import sys,os;sys.path.append('d:\\pm');from qgb import U,T,F
+	import sys,os;sys.path.append('d:\pm');from qgb import U,T,F
 	
 	o=getVersionInfo()
 	U.pln( o.dwMajorVersion,o.dwMinorVersion)

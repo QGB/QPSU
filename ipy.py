@@ -128,7 +128,7 @@ def sycn():
 # __frame=sys._getframe().f_back	
 
 def format(obj,width=79,max_seq_length=py.No(r"auto get-set 'ipy.pformat.max_seq_length' ",no_raise=1)):
-	'''
+	r'''
 IPython.lib.pretty.pretty(
     obj,
     verbose=False,

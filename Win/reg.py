@@ -16,7 +16,7 @@ else:
 	from winreg import *
 
 def get(skey,name,root=HKEY_CURRENT_USER,returnType=True):
-	'''	from qgb.Win import reg
+	r'''	from qgb.Win import reg
 		reg.get(r'Software\Microsoft\Windows\CurrentVersion\Internet Settings','ProxyEnable')
 	reg.get(r'HKLM\SYSTEM\CurrentControlSet\Services\LanmanServer\Parameters\Size' 	)
 	There are seven predefined root keys, traditionally named according to their constant handles defined in the Win32 API
