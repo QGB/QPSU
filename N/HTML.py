@@ -389,8 +389,8 @@ def get_or_input_html(response,*name):
 	return v	
 	
 def xiaomi_air_conditioner_control(response=None,token=py.No('auto get'),t=0,angle=None,sleep=AC_DEFAULT,swing=False,lcd=None,volume=AC_DEFAULT,mode=AC_DEFAULT,wind_speed=AC_DEFAULT,before=None,after=None,power=AC_DEFAULT,ip=AC_DEFAULT,**ka):
-	''' 风扇水平 0 时，环境感知温度会立马降低 
-	
+	'''  风扇水平 0 时，环境感知温度会立马降低 
+ pip install python-miio
 '''	
 	# U.r(py,U,T,N,F,N.HTTP,N.HTML) # 用了会造成 global AC_DEFAULT 与 default arg 中 默认参数 不一致
 	angle=U.get_duplicated_kargs(ka,'angle','angel','jd','ang','a','j',default=angle)
