@@ -1,12 +1,15 @@
+import os
 from pathlib import Path
 from setuptools import find_packages, setup
 
 ROOT = Path(__file__).resolve().parent
 README = (ROOT / "README.md").read_text(encoding="utf-8")
 
+version = os.environ.get("QPSU_VERSION", "0.1.0")
+
 setup(
     name="qpsu",
-    version="0.1.0",
+    version=version,
     description="Utility package for qgb/python scripts",
     long_description=README,
     long_description_content_type="text/markdown",

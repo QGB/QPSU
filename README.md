@@ -29,5 +29,8 @@ from qgb import * # equals: from qgb import U,T,N,F,py
 # if in IPython, ipy module automatically added.
 ```
 
-##### pip install   # TODO
+##### pip install
+```
+pip install qpsu
+```
 
