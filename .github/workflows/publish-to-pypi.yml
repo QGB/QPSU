@@ -6,31 +6,58 @@ on:
       - master
   workflow_dispatch:
 
-permissions:
-  contents: read
-  id-token: write
-
 jobs:
   publish:
+    name: Build and publish Python distribution
     runs-on: ubuntu-latest
-    environment: pypi
-    steps:
-      - uses: actions/checkout@v4
 
-      - uses: actions/setup-python@v5
+    permissions:
+      id-token: write
+      contents: read
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
         with:
           python-version: '3.11'
 
-      - name: Install build dependencies
+      - name: Install build tools
         run: |
           python -m pip install --upgrade pip
           python -m pip install build
 
-      - name: Set dynamic version
-        run: echo "QPSU_VERSION=0.1.0.dev${GITHUB_RUN_NUMBER}" >> "$GITHUB_ENV"
+      - name: Set dev version and inject into pyproject.toml
+        run: |
+          python << 'PYEOF'
+          import re, datetime
+          now= datetime.datetime.utcnow() + datetime.timedelta(hours=8)# GitHub Actions Ubuntu runner 默认使用 UTC 零时区
+          ver = '0.1.' + now.strftime('%Y%m%d%H%M%S') #删除dev，每次pip安装最新版
+          with open('pyproject.toml', encoding='utf-8') as f:
+              content = f.read()
+          content = re.sub(
+              r'^(\s*version\s*=\s*)["\x27][^"\x27]*["\x27]',#同时兼容单双引号
+              rf'\1"{ver}"',
+              content,
+              flags=re.MULTILINE
+          )
+          with open('pyproject.toml', 'w', encoding='utf-8') as f:
+              f.write(content)
+          print(f'✅ Version set to {ver}')
+          PYEOF
 
-      - name: Build distributions
+      - name: Clean previous builds
+        run: rm -rf dist/
+
+      - name: Build source and wheel distributions
         run: python -m build
 
-      - name: Publish to PyPI with trusted publishing
+      - name: ls Check dist file names
+        run: ls -a1 / ./ dist/
+
+      - name: Publish package to PyPI
         uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          skip-existing: true

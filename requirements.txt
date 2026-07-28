@@ -1,156 +1,113 @@
-BaseHTTPServer
-Constants
-HTML
-HTMLParser
-HTTP
-HTTPServer
-IPython
-PIL
-PyPDF2
-PyQt5
-RangeHTTPServer
-SimpleHTTPServer
-Tkinter
-adns
-aiohttp
-android
-androidhelper
-astor
-ble
-bs4
-cchardet
-chardet
-colormath
-comtypes
-cryptography
-cssselect
-cv2
-datefinder
-dateutil
-demjson
-dill
-django
-dns
-dulwich
-ecdsa
-elasticsearch
-elasticsearch_dsl
-fake_headers
-flask
-github
-gitlab
-gspread
-html2text
-imp
-ipython_genutils
-jieba
-jks
-jnius
-keyboard
-kivy
-lemminflect
-lxml
-machine
-markdown
-matplotlib
-mdot
-miio
-mrequests
-msmart
-multiprocess
-mutableint
-nest_asyncio
-network
-numpy
-oauth2client
-openpyxl
-pandas
-paramiko
-passlib
-pem
-pexpect
-pick
-pillow_heif
-ping3
-pip
-plyvel
-progressbar
-psutil
-pyDes
-pyautogui
-pyaxmlparser
-pycaw
-pycurl
-pympler
-pymysql
-pyppeteer
-pyqrcode
-pythoncom
-pyttsx3
-pytz
-pywinauto
-pyzbar
-qqwry
+# ====================== 网络请求生态（同步/异步/爬虫） ======================
 requests
-requests_toolbelt
-rsa
-scapy
-schedule
-scrapetube
-serial
-setuptools
-shadowcopy
-six
-socks
-sortedcontainers
-streamlit
-sympy
-syncer
-tftpy
-tld
-tornado
-tqdm
-uasyncio
-uncompyle6
-uncurl
-upip
-urequests
-urllib2
 urllib3
-urlparse
-usocket
-ussl
-utime
-uvloop
-watchdog
-wcwidth
-webControl
-webapp2
-webcolors
-webrepl
-webrepl_cfg
-webrepl_setup
+beautifulsoup4          # bs4
+lxml
+cssselect
+html2text
+tld                     # 域名后缀解析
+fake-headers            # fake_headers
+nest-asyncio
+aiohttp
+tornado
 websockets
 werkzeug
-win32_setctime
-win32api
-win32clipboard
-win32com
-win32con
-win32console
-win32event
-win32file
-win32gui
-win32process
-win32ui
-winreg
-winsound
-winxpgui
-wmi
-xdis
+scapy
+ping3
+requests-toolbelt
+socks
+uvloop
+yt-dlp                  # youtube下载替代youtube-dl
+scrapetube
+uncurl
+
+# ====================== 数据处理 & 数值计算 ======================
+numpy
+pandas
+sympy
+sortedcontainers
+dill
+pympler                 # 内存分析
+psutil                  # 系统进程监控
+
+# ====================== 图像处理 & 多媒体 ======================
+pillow                  # PIL
+pillow_heif
+pyzbar                  # 二维码/条码识别
+pyqrcode
+cv2
+matplotlib
+webcolors
+
+# ====================== 加密、密码学 ======================
+cryptography
+rsa
+pyDes
+passlib
+ecdsa
+jks
+pem
+
+# ====================== 文档、表格、文件解析 ======================
+openpyxl
 xlrd
 xlwt
+PyPDF2
 xmltodict
-yaml
-yt_dlp
+pyyaml                  # yaml
+markdown
+colormath
+
+# ====================== 编码、文本、分词、简繁转换 ======================
+chardet
+# cchardet 【conda-forge预编译包，pip难编译】
+jieba
+lemminflect
 zhconv
+
+# ====================== 日期、时区处理 ======================
+python-dateutil         # dateutil
+pytz
+schedule
+datefinder
+
+# ====================== 网络通信、SSH、协议工具 ======================
+paramiko
+tftpy
+serial
+dns
+dulwich                # git操作
+gspread
+github
+gitlab
+
+# ====================== 数据库、本地存储 ======================
+# plyvel   【conda-forge预编译包，LevelDB绑定】
+pymysql
+
+# ====================== Web框架 & 服务 ======================
+flask
+streamlit
+
+# ====================== 移动端Kivy安卓开发（你的主项目） ======================
+kivy
+jnius                   # JNI Java桥接（android打包必备）
+
+# ====================== 工具类、进度条、辅助库 ======================
+tqdm
+progressbar
+six
+watchdog
+mdot
+miio
+msmart
+wcwidth
+
+# ====================== APK逆向、解析工具 ======================
+pyaxmlparser
+
+# ====================== 其他工具、序列化、解析 ======================
+demjson3                # 替代老旧demjson，兼容py3.10+
+uncompyle6              # pyc反编译
+xdis
+plyvel
