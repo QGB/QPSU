@@ -1,7 +1,10 @@
+#!/usr/bin/env python3
+
 ''' pip install -i https://pypi.tuna.tsinghua.edu.cn/simple --trusted-host pypi.tuna.tsinghua.edu.cn ecdsa cryptography
 !C:\QGB\miniforge3\python.exe C:\QGB\miniforge3\Lib\site-packages\pythonwin\qgb\tests\git_ssh.py 
 
 GIT_SSH_COMMAND="ssh -i ~/.ssh/NIST256p.pem" git clone git@ssh.github.com:QGB/
+
 
 '''
 import os,sys,subprocess,ecdsa
