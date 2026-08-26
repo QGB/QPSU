@@ -1,4 +1,6 @@
+# pywin32 # !C:\QGB\miniforge3\Library\bin\mamba.exe  install -c conda-forge pywin32
 # ====================== 网络请求生态（同步/异步/爬虫） ======================
+pycurl
 requests
 urllib3
 beautifulsoup4          # bs4
@@ -30,7 +32,7 @@ dill
 pympler                 # 内存分析
 psutil                  # 系统进程监控
 
-# ====================== 图像处理 & 多媒体 ======================
+# ====================== 图像处理 & 多媒体 ======================datefinder
 pillow                  # PIL
 pillow_heif
 pyzbar                  # 二维码/条码识别
@@ -74,7 +76,7 @@ datefinder
 # ====================== 网络通信、SSH、协议工具 ======================
 paramiko
 tftpy
-serial
+pyserial
 dns
 dulwich                # git操作
 gspread
@@ -94,14 +96,15 @@ kivy
 jnius                   # JNI Java桥接（android打包必备）
 
 # ====================== 工具类、进度条、辅助库 ======================
+ipython
 tqdm
 progressbar
 six
 watchdog
-mdot
-miio
+python-miio
 msmart
 wcwidth
+keyboard
 
 # ====================== APK逆向、解析工具 ======================
 pyaxmlparser

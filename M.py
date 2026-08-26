@@ -421,7 +421,7 @@ led2=gpo=pin=Pin=gpio
 def gpi(index=0,mod=None):
 	import machine
 	if mod==None:mod=machine.Pin.PULL_UP
-	gdpin[(index,0)]=machine.Pin(index, machine.Pin.IN, mod)
+	gdpin[(index,mod)]=machine.Pin(index, machine.Pin.IN, mod)
 	return gdpin[(index,0)]
 
 def adc_print(index=0,interval=0.1):

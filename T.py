@@ -1511,7 +1511,8 @@ def readableTimeText(txt,browser=False):
 		return U.StrRepr(r)
 timeText=readableTimeText
 
-RE_IP=RE_IPv4=RE_IPV4= r'''(?:(?:2(?:[0-4][0-9]|5[0-5])|[0-1]?[0-9]?[0-9])\.){3}(?:(?:2([0-4][0-9]|5[0-5])|[0-1]?[0-9]?[0-9]))'''
+# RE_IP=RE_IPv4=RE_IPV4= r'''(?:(?:2(?:[0-4][0-9]|5[0-5])|[0-1]?[0-9]?[0-9])\.){3}(?:(?:2([0-4][0-9]|5[0-5])|[0-1]?[0-9]?[0-9]))'''
+RE_IP=RE_IPv4=RE_IPV4= r'''(?:(?:2(?:[0-4][0-9]|5[0-5])|[0-1]?[0-9]?[0-9])\.){3}(?:(?:2(?:[0-4][0-9]|5[0-5])|[0-1]?[0-9]?[0-9]))'''
 def ip_location_text(text,location_format=' [{0}] ',reverse_ip=True,**ka):
 	''' p='deprecated'
 	'''

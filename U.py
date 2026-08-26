@@ -592,6 +592,8 @@ def is_ipython(raise_exception=False,**ka): # e=False
 	# global gipy
 	raise_exception=get_duplicated_kargs(ka,'raise_exception',
 'raise_err','raise_error','raiseError','raiseErr','raise_EnvironmentError','EnvironmentError','raiseEnvironmentError',default=raise_exception)
+
+	if sys.executable.endswith(r'\CQ-editor\python.exe'):return False
 	try:
 		# if not py.modules('IPython'):return py.No()
 		import IPython

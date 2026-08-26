@@ -31,7 +31,10 @@ from qgb import * # equals: from qgb import U,T,N,F,py
 
 ##### pip install
 ```
-pip install qpsu
+!pip uninstall -y qpsu
+!pip cache remove qpsu
+!pip install qpsu
+
 ```
 
 可选安装依赖
@@ -39,7 +42,7 @@ pip install qpsu
 ```
 mamba install -c conda-forge -y cchardet plyvel
 
-pip install requests urllib3 lxml beautifulsoup4 numpy pillow cryptography pandas matplotlib openpyxl pyyaml pyparsing psutil tqdm pytz python-dateutil chardet six scapy paramiko tornado aiohttp flask werkzeug websockets watchdog pyqrcode pyzbar pyaxmlparser pyDes rsa passlib demjson3 xlrd xlwt xmltodict PyPDF2 jieba nest-asyncio sortedcontainers sympy colormath lemminflect markdown html2text cssselect progressbar ping3 dill pympler python-miio msmart fake-headers tld tftpy zhconv
+pip install requests urllib3 lxml beautifulsoup4 numpy pillow cryptography pandas matplotlib openpyxl pyyaml pyparsing psutil tqdm pytz python-dateutil chardet six scapy paramiko tornado aiohttp flask werkzeug websockets watchdog pyqrcode pyzbar pyaxmlparser pyDes rsa passlib demjson3 xlrd xlwt xmltodict PyPDF2 jieba nest-asyncio sortedcontainers sympy colormath lemminflect markdown html2text cssselect progressbar ping3 dill pympler python-miio msmart fake-headers tld tftpy zhconv keyboard pycurl pyserial
 
 ```
 
