@@ -6,42 +6,24 @@
 <title>curl -v · 纯 HTML 版</title>
 <style>
   :root {
-    --bg: #0b0f14;
-    --fg: #c9d1d9;
-    --dim: #6e7681;
-    --gray: #8b949e;
-    --green: #3fb950;
-    --purple: #d2a8ff;
-    --red: #f85149;
-    --yellow: #e3b341;
-    --orange: #f0883e;
-    --cyan: #56d4dd;
-    --border: #21262d;
-    --panel: #0f1620;
+    --bg: #0b0f14; --fg: #c9d1d9; --dim: #6e7681; --gray: #8b949e;
+    --green: #3fb950; --purple: #d2a8ff; --red: #f85149; --yellow: #e3b341;
+    --orange: #f0883e; --cyan: #56d4dd; --border: #21262d; --panel: #0f1620;
   }
   * { box-sizing: border-box; }
   html, body { height: 100%; margin: 0; overflow: hidden; }
   body {
     padding: 10px;
-    background:
-      radial-gradient(900px 500px at 50% -200px, #16324a 0%, transparent 70%),
-      var(--bg);
+    background: radial-gradient(900px 500px at 50% -200px, #16324a 0%, transparent 70%), var(--bg);
     color: var(--fg);
     font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
     font-size: 13px;
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
+    display: flex; flex-direction: column; gap: 10px;
   }
   .top-bar {
-    flex: 0 0 auto;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    background: var(--panel);
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    padding: 8px 10px;
+    flex: 0 0 auto; display: flex; align-items: center; gap: 8px;
+    background: var(--panel); border: 1px solid var(--border);
+    border-radius: 10px; padding: 8px 10px;
     box-shadow: 0 6px 20px rgba(0,0,0,.35);
   }
   .top-bar .ps { color: var(--green); font-size: 15px; font-weight: 700; flex: 0 0 auto; }
@@ -53,22 +35,15 @@
   }
   #url::placeholder { color: #4b5563; }
   #go {
-    flex: 0 0 auto;
-    border: 1px solid #2ea043; background: #238636; color: #fff;
-    font: inherit; font-size: 13px;
+    flex: 0 0 auto; border: 1px solid #2ea043; background: #238636;
+    color: #fff; font: inherit; font-size: 13px;
     padding: 8px 22px; border-radius: 7px;
     cursor: pointer; white-space: nowrap;
   }
   #go:hover { background: #2ea043; }
   #go:disabled { opacity: .5; cursor: default; }
-  .app {
-    flex: 1 1 auto; min-height: 0;
-    display: flex; gap: 10px; align-items: stretch;
-  }
-  .panel-left {
-    flex: 1 1 auto; min-width: 0;
-    display: flex; flex-direction: column;
-  }
+  .app { flex: 1 1 auto; min-height: 0; display: flex; gap: 10px; align-items: stretch; }
+  .panel-left { flex: 1 1 auto; min-width: 0; display: flex; flex-direction: column; }
   .side {
     flex: 0 0 330px; width: 330px;
     display: flex; flex-direction: column; gap: 10px;
@@ -78,10 +53,8 @@
   .side::-webkit-scrollbar-thumb { background: #21262d; border-radius: 4px; }
   #out {
     flex: 1 1 auto; min-height: 0;
-    background: #0a0e13;
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    padding: 12px 14px;
+    background: #0a0e13; border: 1px solid var(--border);
+    border-radius: 10px; padding: 12px 14px;
     overflow: auto;
     font-size: 13px; line-height: 1.55;
     white-space: pre-wrap; word-break: break-all;
@@ -89,12 +62,9 @@
   }
   #out:empty::before { content: "等待输入…（例如 https://example.com/）"; color: #38414d; }
   .ln { min-height: 1.55em; }
-  .star { color: var(--gray); }
-  .out  { color: var(--green); }
-  .in   { color: var(--purple); }
-  .err  { color: var(--red); }
-  .warn { color: var(--yellow); }
-  .dim  { color: var(--dim); }
+  .star { color: var(--gray); } .out { color: var(--green); }
+  .in { color: var(--purple); } .err { color: var(--red); }
+  .warn { color: var(--yellow); } .dim { color: var(--dim); }
   .body {
     color: var(--cyan);
     background: rgba(86, 212, 221, .05);
@@ -103,10 +73,8 @@
     border-radius: 0 4px 4px 0;
   }
   .card {
-    background: var(--panel);
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    padding: 10px 12px;
+    background: var(--panel); border: 1px solid var(--border);
+    border-radius: 10px; padding: 10px 12px;
     box-shadow: 0 6px 20px rgba(0,0,0,.35);
     flex: 0 0 auto;
   }
@@ -116,10 +84,8 @@
     margin: 0 0 8px; text-transform: uppercase;
   }
   select, input[type="text"].mini {
-    width: 100%;
-    background: #0a0e13;
-    border: 1px solid var(--border);
-    color: var(--fg);
+    width: 100%; background: #0a0e13;
+    border: 1px solid var(--border); color: var(--fg);
     font: inherit; font-size: 12.5px;
     padding: 7px 9px; border-radius: 7px; outline: none;
   }
@@ -145,10 +111,8 @@
   }
   .chk input { accent-color: #238636; margin: 0; }
   .speed-list {
-    margin-top: 8px;
-    border-top: 1px solid var(--border);
-    padding-top: 6px;
-    max-height: 178px; overflow-y: auto;
+    margin-top: 8px; border-top: 1px solid var(--border);
+    padding-top: 6px; max-height: 178px; overflow-y: auto;
   }
   .speed-list:empty { display: none; }
   .sp-item {
@@ -157,14 +121,12 @@
   }
   .sp-item:hover { background: rgba(255,255,255,.03); }
   .sp-name {
-    flex: 1 1 auto; min-width: 0;
-    color: var(--gray);
+    flex: 1 1 auto; min-width: 0; color: var(--gray);
     overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
   }
   .sp-lat {
-    flex: 0 0 auto; min-width: 62px;
-    text-align: right; color: var(--dim);
-    font-variant-numeric: tabular-nums;
+    flex: 0 0 auto; min-width: 62px; text-align: right;
+    color: var(--dim); font-variant-numeric: tabular-nums;
   }
   .sp-lat.fast { color: var(--green); }
   .sp-lat.mid  { color: var(--yellow); }
@@ -186,8 +148,9 @@
 <div class="top-bar">
   <input id="url" type="text"
          placeholder="输入网址，例如 https://example.com/"
-         spellcheck="false" autocomplete="off"
-value="https://ghfast.top/https://raw.githubusercontent.com/QGB/QPSU/refs/heads/master/tests/tkinter/vtt_text.py"		 />
+         spellcheck="false" autocomplete="off" 
+value="https://ghfast.top/https://raw.githubusercontent.com/QGB/QPSU/refs/heads/master/tests/tkinter/vtt_text.py"		 
+		 />
   <button id="go" type="button">执行</button>
 </div>
 
@@ -251,8 +214,9 @@ value="https://ghfast.top/https://raw.githubusercontent.com/QGB/QPSU/refs/heads/
       <div class="hint">
         ⚠ 浏览器沙箱限制：拿不到真实 TCP 握手细节、本地端口、对端 socket，响应头也只能读取
         CORS 允许暴露的部分。<br />
-        DNS 默认不启用；需要验证解析时从下拉框选择 DoH 服务器。<br />
-        测速靶点 <code>https://baidu.com/</code>，10 秒超时，结果仅供参考。
+        内置 RPC 代理对响应体设了上限（文本 256KB / 二进制 1MB），避免大文件卡死浏览器；
+        超限的请求会返回 <code>too_big</code> 提示。<br />
+        测速靶点 <code>https://baidu.com/</code>，10 秒超时。
       </div>
     </div>
 
@@ -273,25 +237,34 @@ value="https://ghfast.top/https://raw.githubusercontent.com/QGB/QPSU/refs/heads/
   }
 
   /* ============================================================
-   * 内置 RPC 代理（qmm 风格）
+   * 内置 RPC 代理（qmm 风格）—— 健壮版
    * ------------------------------------------------------------
-   * 服务端把 URL 路径当作 Python 代码 exec 执行，最后返回 r。
+   * 服务端把 URL 路径当作 Python 代码 exec 执行，最后返回变量 r。
    * 路径 = /<编码的 Python 代码>%23-<编码的目标URL>
-   *   - unquote 后 # 之后是 Python 注释，代码自然终止
-   *   - %23- 作为「代码 / 目标URL」分隔符
-   *   - q.path 是未解码路径，分隔符在其中就是 %23-
+   *
+   * 本版新增：
+   *   1. 响应大小上限：文本 256KB / 二进制 1MB
+   *   2. 二进制内容自动 base64 包装，返回 JSON
+   *   3. 所有返回统一 JSON 结构，前端据此渲染
    * ============================================================ */
 
   var RPC_BASE = 'http://127.0.0.1:1122/';
   var RPC_SEP  = '%23-';
 
-  /* 下面这段块注释就是 Python 源码本身，多行三引号风格 */
+  /* 下面这段块注释就是 Python 源码本身，逐行写好后压成单行 注意不要多余空格空行 */
   var RPC_PY_SRC = _TEXT(function () {/*
-import urllib.request as u, urllib.parse as up
-r = u.urlopen(up.unquote(q.path.split('%23-', 1)[1]), timeout=15).read().decode('utf-8', 'replace')
+import urllib.request as u, urllib.parse as up, base64 as b, json as j
+url=up.unquote(q.path.split('%23-', 1)[1])
+resp=u.urlopen(url, timeout=15)
+ct=(resp.headers.get('Content-Type') or '').lower()
+is_text = any(x in ct for x in ('text', 'json', 'xml', 'javascript', 'html', 'css'))
+cap = 262144 if is_text else 1048576
+data = resp.read(cap + 1)
+too_big = len(data) > cap
+r = j.dumps({'k': 'too_big', 'n': len(data), 'm': cap, 'c': ct, 't': 'text' if is_text else 'bin'}) if too_big else (j.dumps({'k': 'text', 'c': ct, 'd': data.decode('utf-8', 'replace')}, ensure_ascii=False) if is_text else j.dumps({'k': 'b64', 'c': ct, 'd': b.b64encode(data).decode()}))
 */});
 
-  // 压成单行：去掉空行，trim 后按 ; 连接
+  // 去掉空行 / 缩进，按 ; 连接成一行 Python
   var RPC_PY_CODE = RPC_PY_SRC.split('\n')
     .map(function (s) { return s.trim(); })
     .filter(Boolean)
@@ -301,12 +274,12 @@ r = u.urlopen(up.unquote(q.path.split('%23-', 1)[1]), timeout=15).read().decode(
 
   /* ======================= 代理配置 ======================= */
   var PROXIES = [
-    { name: RPC_PREFIX,          prefix: RPC_PREFIX },
-    { name: 'proxy.yumus.cn',      prefix: 'https://proxy.yumus.cn/?url=' },
-    { name: 'api.allorigins.win',  prefix: 'https://api.allorigins.win/raw?url=' },
-    { name: 'whateverorigin.org',  prefix: 'https://whateverorigin.org/get?url=' },
-    { name: 'corsproxy.io',        prefix: 'https://corsproxy.io/?url=' },
-    { name: 'api.codetabs.com',    prefix: 'https://api.codetabs.com/v1/proxy?quest=' },
+    { name: RPC_PREFIX, prefix: RPC_PREFIX, isRpc: true },
+    { name: 'proxy.yumus.cn',    prefix: 'https://proxy.yumus.cn/?url=' },
+    { name: 'api.allorigins.win',prefix: 'https://api.allorigins.win/raw?url=' },
+    { name: 'whateverorigin.org',prefix: 'https://whateverorigin.org/get?url=' },
+    { name: 'corsproxy.io',      prefix: 'https://corsproxy.io/?url=' },
+    { name: 'api.codetabs.com',  prefix: 'https://api.codetabs.com/v1/proxy?quest=' },
     { name: 'cors.isomorphic-git.org', prefix: 'https://cors.isomorphic-git.org/', encode: false },
     { name: 'test.cors.workers.dev',   prefix: 'https://test.cors.workers.dev/?',  encode: false }
   ];
@@ -336,6 +309,12 @@ r = u.urlopen(up.unquote(q.path.split('%23-', 1)[1]), timeout=15).read().decode(
     outEl.scrollTop = outEl.scrollHeight;
   }
 
+  function formatSize(n) {
+    if (n < 1024) return n + ' B';
+    if (n < 1024 * 1024) return (n / 1024).toFixed(1) + ' KB';
+    return (n / 1024 / 1024).toFixed(2) + ' MB';
+  }
+
   var STATUS = {
     200:'OK', 201:'Created', 202:'Accepted', 204:'No Content', 206:'Partial Content',
     301:'Moved Permanently', 302:'Found', 303:'See Other', 304:'Not Modified',
@@ -353,6 +332,7 @@ r = u.urlopen(up.unquote(q.path.split('%23-', 1)[1]), timeout=15).read().decode(
     return cfg.prefix + tail;
   }
 
+  /* ======================= 代理下拉 + 测速列表 ======================= */
   function buildProxySelect() {
     proxySelectEl.innerHTML = '';
 
@@ -397,15 +377,14 @@ r = u.urlopen(up.unquote(q.path.split('%23-', 1)[1]), timeout=15).read().decode(
     return (v >= 0 && v < PROXIES.length) ? PROXIES[v] : null;
   }
 
+  /* ======================= 测速 ======================= */
   function testOneProxy(cfg) {
     var t0 = (window.performance && performance.now) ? performance.now() : Date.now();
     var ctrl = new AbortController();
     var timer = setTimeout(function () { ctrl.abort(); }, SPEED_TIMEOUT);
 
     return fetch(buildProxyUrl(cfg, SPEED_TARGET), {
-      method: 'GET',
-      cache: 'no-store',
-      credentials: 'omit',
+      method: 'GET', cache: 'no-store', credentials: 'omit',
       signal: ctrl.signal
     }).then(function (r) {
       return r.text().then(function () {
@@ -460,6 +439,7 @@ r = u.urlopen(up.unquote(q.path.split('%23-', 1)[1]), timeout=15).read().decode(
     });
   }
 
+  /* ======================= DoH 解析 ======================= */
   function getDohUrl(server, host, type) {
     var q = encodeURIComponent(host);
     switch (server) {
@@ -510,6 +490,83 @@ r = u.urlopen(up.unquote(q.path.split('%23-', 1)[1]), timeout=15).read().decode(
     return chain;
   }
 
+  /* ======================= RPC JSON 响应处理 ======================= */
+  function downloadB64(b64, mime, nameHint) {
+    var bin = atob(b64);
+    var arr = new Uint8Array(bin.length);
+    for (var i = 0; i < bin.length; i++) arr[i] = bin.charCodeAt(i);
+    var blob = new Blob([arr], { type: mime || 'application/octet-stream' });
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a');
+    a.href = url;
+    a.download = nameHint || ('download_' + Date.now() + '.bin');
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    setTimeout(function () { URL.revokeObjectURL(url); }, 1500);
+  }
+
+  function guessFilename(url, mime) {
+    var name = 'download.bin';
+    try {
+      var p = new URL(url).pathname || '';
+      var seg = p.split('/').filter(Boolean).pop();
+      if (seg && seg.indexOf('.') !== -1) name = decodeURIComponent(seg);
+    } catch (e) {}
+    if (!/\./.test(name)) {
+      if (/apk/.test(mime || '')) name = 'package.apk';
+      else if (/zip/.test(mime || '')) name = 'archive.zip';
+      else if (/pdf/.test(mime || '')) name = 'document.pdf';
+      else if (/png/.test(mime || '')) name = 'image.png';
+      else if (/jpe?g/.test(mime || '')) name = 'image.jpg';
+    }
+    return name;
+  }
+
+  // 返回 true 表示“已按 RPC 协议渲染完成”，false 表示“不是 RPC 格式，走普通流程”
+  function renderRpcResponse(body, originalUrl) {
+    var j;
+    try { j = JSON.parse(body); } catch (e) { return false; }
+    if (!j || typeof j.k !== 'string') return false;
+
+    if (j.k === 'text') {
+      var lines = (j.d || '').split(/\r\n|\r|\n/);
+      for (var i = 0; i < lines.length; i++) log(lines[i], 'body');
+    } else if (j.k === 'b64') {
+      var size = Math.ceil((j.d || '').length * 3 / 4);
+      log('');
+      log('* 二进制内容已由 RPC 代理包装', 'star');
+      log('* Content-Type: ' + (j.c || 'application/octet-stream'), 'dim');
+      log('* 大小: ' + formatSize(size) + ' (' + size + ' bytes)', 'dim');
+
+      var btn = document.createElement('button');
+      btn.className = 'btn-mini';
+      btn.style.margin = '6px 0';
+      btn.textContent = '⬇ 下载 ' + formatSize(size);
+      btn.onclick = function () {
+        downloadB64(j.d, j.c, guessFilename(originalUrl, j.c));
+      };
+      var div = document.createElement('div');
+      div.className = 'ln';
+      div.appendChild(btn);
+      outEl.appendChild(div);
+      outEl.scrollTop = outEl.scrollHeight;
+    } else if (j.k === 'too_big') {
+      log('');
+      log('* 已拒绝：响应体 ' + formatSize(j.n) + '（' + j.n + ' bytes）超出上限', 'warn');
+      log('* 上限: ' + formatSize(j.m) + '  类型: ' + (j.t === 'text' ? '文本' : '二进制'), 'dim');
+      log('* Content-Type: ' + (j.c || 'unknown'), 'dim');
+      log('* 提示：换用其他代理，或直接复制原始 URL 用浏览器 / curl 下载。', 'warn');
+    } else if (j.k === 'err') {
+      log('');
+      log('* RPC 代理错误: ' + (j.msg || 'unknown'), 'err');
+    } else {
+      return false;
+    }
+    return true;
+  }
+
+  /* ======================= 主流程 ======================= */
   function runCurl() {
     if (busy) return;
     busy = true;
@@ -532,10 +589,7 @@ r = u.urlopen(up.unquote(q.path.split('%23-', 1)[1]), timeout=15).read().decode(
 
     var u;
     try { u = new URL(raw); }
-    catch (e) {
-      log('* 无法解析 URL: ' + raw, 'err');
-      return Promise.resolve();
-    }
+    catch (e) { log('* 无法解析 URL: ' + raw, 'err'); return Promise.resolve(); }
 
     if (u.protocol !== 'http:' && u.protocol !== 'https:') {
       log('* 仅支持 http / https，当前为: ' + u.protocol, 'err');
@@ -623,10 +677,7 @@ r = u.urlopen(up.unquote(q.path.split('%23-', 1)[1]), timeout=15).read().decode(
       var tStart = (window.performance && performance.now) ? performance.now() : Date.now();
 
       var init = {
-        method: method,
-        cache: 'no-store',
-        redirect: 'follow',
-        credentials: 'omit',
+        method: method, cache: 'no-store', redirect: 'follow', credentials: 'omit',
         headers: { 'Accept': '*/*' }
       };
       if (method === 'POST' || method === 'PUT') {
@@ -688,20 +739,25 @@ r = u.urlopen(up.unquote(q.path.split('%23-', 1)[1]), timeout=15).read().decode(
         var len = res.headers.get('content-length');
         if (len) log('* 响应体长度: ' + len + ' bytes', 'dim');
 
+        /* ---------- 响应正文 ---------- */
         var wantBody = !showBodyEl || showBodyEl.checked;
         var ctype = (res.headers.get('content-type') || '').toLowerCase();
+        var clen  = parseInt(len || '0', 10) || 0;
+        var looksText = /text|json|xml|javascript|html|css/i.test(ctype);
 
         var skipReason = null;
         if (method === 'HEAD') {
           skipReason = 'HEAD 请求无响应体';
         } else if (!wantBody) {
           skipReason = '用户关闭了「显示响应正文」';
-        } else if (/^(image\/|audio\/|video\/)/.test(ctype)) {
-          skipReason = '二进制媒体类型 ' + ctype;
-        } else if (/^application\/(octet-stream|pdf|zip|gzip|x-tar|x-7z-compressed|wasm|protobuf)/.test(ctype)) {
-          skipReason = '二进制类型 ' + ctype;
         } else if (res.status === 204 || res.status === 304) {
           skipReason = '状态 ' + res.status + ' 无响应体';
+        } else if (/^(image\/|audio\/|video\/)/.test(ctype)) {
+          skipReason = '二进制媒体类型 ' + ctype;
+        } else if (/^application\/(octet-stream|pdf|zip|gzip|x-tar|x-7z-compressed|wasm|protobuf|vnd\.android)/.test(ctype)) {
+          skipReason = '二进制类型 ' + ctype;
+        } else if (clen > 1024 * 1024 && !looksText) {
+          skipReason = '内容过大且非文本（' + formatSize(clen) + '）';
         }
 
         if (skipReason) {
@@ -715,6 +771,8 @@ r = u.urlopen(up.unquote(q.path.split('%23-', 1)[1]), timeout=15).read().decode(
           log('');
           if (!body) {
             log('* 响应正文为空', 'dim');
+          } else if (selProxy && selProxy.isRpc && renderRpcResponse(body, u.href)) {
+            /* 已由 RPC 协议处理 */
           } else {
             var truncated = false;
             var shown = body;
@@ -755,6 +813,7 @@ r = u.urlopen(up.unquote(q.path.split('%23-', 1)[1]), timeout=15).read().decode(
     });
   }
 
+  /* ======================= 初始化 ======================= */
   function init() {
     urlEl         = $('url');
     goEl          = $('go');
@@ -800,8 +859,8 @@ r = u.urlopen(up.unquote(q.path.split('%23-', 1)[1]), timeout=15).read().decode(
     });
 
     log('* curl -v 模拟器已就绪', 'dim');
-    log('* 输入 URL 后点击「执行」或按回车。', 'dim');
-    log('* 默认走内置 RPC 代理；点右侧「测速」可查看各代理延迟。', 'dim');
+    log('* 默认走内置 RPC 代理（限长：文本 256KB / 二进制 1MB）', 'dim');
+    log('* 大二进制会以 base64 包装，可点击按钮下载。', 'dim');
     log('');
 
     urlEl.focus();
