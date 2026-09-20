@@ -4,7 +4,7 @@
 !C:\QGB\miniforge3\python.exe C:\QGB\miniforge3\Lib\site-packages\pythonwin\qgb\tests\git_ssh.py 
 
 GIT_SSH_COMMAND="ssh -i ~/.ssh/NIST256p.pem" git clone git@ssh.github.com:QGB/
-
+GIT_SSH_COMMAND="ssh -i ~/.ssh/NIST256p.pem" git push git@ssh.github.com:QGB/
 
 '''
 import os,sys,subprocess,ecdsa

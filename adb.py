@@ -3,7 +3,49 @@ import sys;'qgb.U' in sys.modules or sys.path.append('C:/QGB/babun/cygwin/bin/')
 U,T,N,F=py.importUTNF()
 
 # dumpsys activity activities 
+import subprocess
+import base64
 
+def screen_fetch(adb='adb.exe'):
+    """
+    获取设备屏幕截图，返回 PNG 格式的字节数据。
+    优先使用 exec-out（Android 8.0+），若失败则回退到 base64 编码方式。
+    """
+    # 方法1：exec-out（推荐，避免换行符转换）
+    try:
+        p = subprocess.Popen(
+            [adb, 'exec-out', 'screencap', '-p'],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE
+        )
+        img_bytes, err = p.communicate(timeout=10)
+        if p.returncode == 0 and img_bytes.startswith(b'\x89PNG'):
+            return img_bytes
+    except Exception:
+        pass  # 忽略异常，尝试回退方法
+
+    # 方法2：base64 编码传输（兼容不支持 exec-out 的设备）
+    # 注意：使用 shell=True 以便正确处理管道，但需注意命令转义
+    cmd = f'"{adb}" shell "screencap -p | base64 -w0"'
+    try:
+        p = subprocess.Popen(
+            cmd,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            shell=True
+        )
+        out, err = p.communicate(timeout=10)
+        if p.returncode == 0:
+            # 去除所有空白字符（换行、回车等），避免 base64 解码出错
+            b64_data = out.strip()
+            img_bytes = base64.b64decode(b64_data)
+            if img_bytes.startswith(b'\x89PNG'):
+                return img_bytes
+    except Exception:
+        pass
+
+    # 如果两种方法都失败，抛出明确异常
+    raise RuntimeError("无法获取截图，请检查 ADB 连接或设备权限")
 
 def c(x,y,ms=555):
 	os.system('adb shell input touchscreen swipe {0} {1} {0} {1} {2}'.format(x,y,ms))

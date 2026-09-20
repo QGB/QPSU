@@ -58,6 +58,63 @@ try:
 except Exception as ei:pass
 from logging import info as log_info
 #############################################
+def find_locking_processes_psutil(target_path):
+    import os, sys, psutil, concurrent.futures
+    if not target_path: return []
+    target_abs = os.path.abspath(target_path).lower()
+    is_dir = os.path.isdir(target_path) or not os.path.splitext(target_path)[1]
+    target_dir_prefix = target_abs if target_abs.endswith(os.sep) else target_abs + os.sep
+    locking_procs = []
+    SKIP_PIDS, SKIP_NAMES = {0, 4}, {"system", "registry", "memory compression", "csrss.exe", "lsass.exe", "services.exe", "smss.exe"}
+    procs = list(psutil.process_iter(['pid', 'name']))
+    total_procs = len(procs)
+    def scan_proc(proc):
+        pid, name = proc.info['pid'], proc.info['name'] or f"PID_{pid}"
+        if pid in SKIP_PIDS or name.lower() in SKIP_NAMES: return None
+        try:
+            exe_path = proc.exe()
+            if exe_path and (exe_path.lower() == target_abs or (is_dir and exe_path.lower().startswith(target_dir_prefix))): return (pid, name, f"程序运行占用: {exe_path}")
+        except Exception: pass
+        try:
+            cwd = proc.cwd()
+            if cwd and (cwd.lower() == target_abs or (is_dir and cwd.lower().startswith(target_dir_prefix))): return (pid, name, f"工作目录占用: {cwd}")
+        except Exception: pass
+        try:
+            for open_file in proc.open_files():
+                file_path_lower = open_file.path.lower()
+                if file_path_lower == target_abs or (is_dir and file_path_lower.startswith(target_dir_prefix)): return (pid, name, f"文件句柄占用: {open_file.path}")
+        except Exception: pass
+        return None
+    executor = concurrent.futures.ThreadPoolExecutor(max_workers=1)
+    try:
+        for idx, proc in enumerate(procs, 1):
+            pid, name = proc.info['pid'], proc.info['name'] or f"PID_{pid}"
+            sys.stdout.write(f"\r[{idx}/{total_procs}] 正在扫描 PID {pid:<5} ({name[:20]})".ljust(65))
+            sys.stdout.flush()
+            future = executor.submit(scan_proc, proc)
+            is_timeout = True
+            # 核心技巧：把 5 秒切分成 50 个 0.1 秒，使得 Ctrl+C 能在 0.1 秒内被捕获响应
+            for _ in range(50):
+                try:
+                    res = future.result(timeout=0.1)
+                    if res: locking_procs.append(res)
+                    is_timeout = False
+                    break
+                except concurrent.futures.TimeoutError:
+                    continue
+            if is_timeout:
+                sys.stdout.write(f"\n[跳过卡顿进程] PID {pid:<5} ({name}) 检索句柄超时(>5s)，已被强行跳过\n")
+                sys.stdout.flush()
+    except KeyboardInterrupt:
+        sys.stdout.write("\n[中断] 用户按下 Ctrl+C，已瞬间停止后续扫描。\n")
+        sys.stdout.flush()
+    finally:
+        executor.shutdown(wait=False, cancel_futures=True)
+        sys.stdout.write("\r" + " " * 70 + "\r")
+        sys.stdout.flush()
+    return locking_procs
+find_locking = find_locking_file = find_locking_processes_psutil
+
 def set_screen_state(off=2):
     if py.isint(off) and off < 0:
         off = -1

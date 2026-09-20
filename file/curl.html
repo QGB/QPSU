@@ -1,0 +1,818 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>curl -v · 纯 HTML 版</title>
+<style>
+  :root {
+    --bg: #0b0f14;
+    --fg: #c9d1d9;
+    --dim: #6e7681;
+    --gray: #8b949e;
+    --green: #3fb950;
+    --purple: #d2a8ff;
+    --red: #f85149;
+    --yellow: #e3b341;
+    --orange: #f0883e;
+    --cyan: #56d4dd;
+    --border: #21262d;
+    --panel: #0f1620;
+  }
+  * { box-sizing: border-box; }
+  html, body { height: 100%; margin: 0; overflow: hidden; }
+  body {
+    padding: 10px;
+    background:
+      radial-gradient(900px 500px at 50% -200px, #16324a 0%, transparent 70%),
+      var(--bg);
+    color: var(--fg);
+    font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+    font-size: 13px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .top-bar {
+    flex: 0 0 auto;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 8px 10px;
+    box-shadow: 0 6px 20px rgba(0,0,0,.35);
+  }
+  .top-bar .ps { color: var(--green); font-size: 15px; font-weight: 700; flex: 0 0 auto; }
+  #url {
+    flex: 1 1 auto; min-width: 0;
+    background: transparent; border: 0; outline: 0;
+    color: var(--fg); font: inherit; font-size: 13.5px;
+    padding: 6px 2px;
+  }
+  #url::placeholder { color: #4b5563; }
+  #go {
+    flex: 0 0 auto;
+    border: 1px solid #2ea043; background: #238636; color: #fff;
+    font: inherit; font-size: 13px;
+    padding: 8px 22px; border-radius: 7px;
+    cursor: pointer; white-space: nowrap;
+  }
+  #go:hover { background: #2ea043; }
+  #go:disabled { opacity: .5; cursor: default; }
+  .app {
+    flex: 1 1 auto; min-height: 0;
+    display: flex; gap: 10px; align-items: stretch;
+  }
+  .panel-left {
+    flex: 1 1 auto; min-width: 0;
+    display: flex; flex-direction: column;
+  }
+  .side {
+    flex: 0 0 330px; width: 330px;
+    display: flex; flex-direction: column; gap: 10px;
+    overflow-y: auto; padding-right: 2px;
+  }
+  .side::-webkit-scrollbar { width: 8px; }
+  .side::-webkit-scrollbar-thumb { background: #21262d; border-radius: 4px; }
+  #out {
+    flex: 1 1 auto; min-height: 0;
+    background: #0a0e13;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 12px 14px;
+    overflow: auto;
+    font-size: 13px; line-height: 1.55;
+    white-space: pre-wrap; word-break: break-all;
+    box-shadow: inset 0 0 60px rgba(0,0,0,.5);
+  }
+  #out:empty::before { content: "等待输入…（例如 https://example.com/）"; color: #38414d; }
+  .ln { min-height: 1.55em; }
+  .star { color: var(--gray); }
+  .out  { color: var(--green); }
+  .in   { color: var(--purple); }
+  .err  { color: var(--red); }
+  .warn { color: var(--yellow); }
+  .dim  { color: var(--dim); }
+  .body {
+    color: var(--cyan);
+    background: rgba(86, 212, 221, .05);
+    border-left: 3px solid rgba(86, 212, 221, .45);
+    padding: 6px 10px; margin: 2px 0;
+    border-radius: 0 4px 4px 0;
+  }
+  .card {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 10px 12px;
+    box-shadow: 0 6px 20px rgba(0,0,0,.35);
+    flex: 0 0 auto;
+  }
+  .card h3 {
+    font-size: 11px; font-weight: 600;
+    letter-spacing: .08em; color: var(--dim);
+    margin: 0 0 8px; text-transform: uppercase;
+  }
+  select, input[type="text"].mini {
+    width: 100%;
+    background: #0a0e13;
+    border: 1px solid var(--border);
+    color: var(--fg);
+    font: inherit; font-size: 12.5px;
+    padding: 7px 9px; border-radius: 7px; outline: none;
+  }
+  input[type="text"].mini::placeholder { color: #4b5563; }
+  select:focus, input[type="text"].mini:focus { border-color: #2ea043; }
+  select { cursor: pointer; }
+  .row { display: flex; gap: 8px; align-items: center; }
+  .row + .row { margin-top: 8px; }
+  .row .lbl { flex: 0 0 48px; font-size: 11.5px; color: var(--dim); }
+  .row > select, .row > input[type="text"] { flex: 1 1 auto; min-width: 0; }
+  .btn-mini {
+    border: 1px solid var(--border); background: #161b22;
+    color: var(--gray); font: inherit; font-size: 11.5px;
+    padding: 6px 12px; border-radius: 6px;
+    cursor: pointer; white-space: nowrap;
+  }
+  .btn-mini:hover { border-color: #2ea043; color: var(--green); }
+  .btn-mini:disabled { opacity: .5; cursor: default; }
+  .chk {
+    display: flex; align-items: center; gap: 7px;
+    font-size: 12px; color: var(--dim);
+    cursor: pointer; user-select: none;
+  }
+  .chk input { accent-color: #238636; margin: 0; }
+  .speed-list {
+    margin-top: 8px;
+    border-top: 1px solid var(--border);
+    padding-top: 6px;
+    max-height: 178px; overflow-y: auto;
+  }
+  .speed-list:empty { display: none; }
+  .sp-item {
+    display: flex; align-items: center; gap: 8px;
+    padding: 3px 4px; font-size: 11.5px; border-radius: 4px;
+  }
+  .sp-item:hover { background: rgba(255,255,255,.03); }
+  .sp-name {
+    flex: 1 1 auto; min-width: 0;
+    color: var(--gray);
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  }
+  .sp-lat {
+    flex: 0 0 auto; min-width: 62px;
+    text-align: right; color: var(--dim);
+    font-variant-numeric: tabular-nums;
+  }
+  .sp-lat.fast { color: var(--green); }
+  .sp-lat.mid  { color: var(--yellow); }
+  .sp-lat.slow { color: var(--orange); }
+  .sp-lat.fail { color: var(--red); }
+  .hint { font-size: 11px; color: #4d5866; line-height: 1.7; }
+  .hint code { color: #7d8590; }
+  @media (max-width: 880px) {
+    html, body { overflow: auto; }
+    body { height: auto; min-height: 100%; }
+    .app { flex-direction: column; height: auto; }
+    .side { width: 100%; flex: 0 0 auto; overflow: visible; }
+    #out { min-height: 340px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="top-bar">
+  <input id="url" type="text"
+         placeholder="输入网址，例如 https://example.com/"
+         spellcheck="false" autocomplete="off"
+value="https://ghfast.top/https://raw.githubusercontent.com/QGB/QPSU/refs/heads/master/tests/tkinter/vtt_text.py"		 />
+  <button id="go" type="button">执行</button>
+</div>
+
+<div class="app">
+  <div class="panel-left">
+    <div id="out"></div>
+  </div>
+
+  <aside class="side">
+
+    <div class="card">
+      <h3>请求设置</h3>
+      <div class="row">
+        <span class="lbl">方法</span>
+        <select id="method">
+          <option value="GET" selected>GET</option>
+          <option value="POST">POST</option>
+          <option value="HEAD">HEAD</option>
+          <option value="PUT">PUT</option>
+          <option value="DELETE">DELETE</option>
+          <option value="OPTIONS">OPTIONS</option>
+        </select>
+      </div>
+      <div class="row">
+        <span class="lbl">DNS</span>
+        <select id="dnsServer">
+          <option value="" selected>不使用（跳过解析）</option>
+          <option value="google">Google DoH</option>
+          <option value="cloudflare">Cloudflare DoH</option>
+          <option value="alidns">阿里云 DoH</option>
+          <option value="custom">自定义 DoH 地址…</option>
+        </select>
+      </div>
+      <div class="row" id="customDohRow" style="display:none;">
+        <span class="lbl"></span>
+        <input type="text" class="mini" id="customDoh"
+               placeholder="https://your-doh-server/dns-query" />
+      </div>
+      <div class="row" style="margin-top:10px;">
+        <label class="chk">
+          <input type="checkbox" id="showBody" checked />
+          显示响应正文
+        </label>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>CORS 代理</h3>
+      <div class="row">
+        <select id="proxySelect"></select>
+      </div>
+      <div class="row" style="margin-top:8px;">
+        <button id="speedBtn" class="btn-mini" type="button"
+                style="flex:1 1 auto;">测速</button>
+      </div>
+      <div id="speedList" class="speed-list"></div>
+    </div>
+
+    <div class="card">
+      <h3>说明</h3>
+      <div class="hint">
+        ⚠ 浏览器沙箱限制：拿不到真实 TCP 握手细节、本地端口、对端 socket，响应头也只能读取
+        CORS 允许暴露的部分。<br />
+        DNS 默认不启用；需要验证解析时从下拉框选择 DoH 服务器。<br />
+        测速靶点 <code>https://baidu.com/</code>，10 秒超时，结果仅供参考。
+      </div>
+    </div>
+
+  </aside>
+</div>
+
+<script>
+(function () {
+  'use strict';
+
+  /* ============================================================
+   * 用块注释模仿 Python 三引号字符串
+   * 注意：描述文字里不要出现 星号斜杠，否则会提前结束注释
+   * ============================================================ */
+  function _TEXT(fn) {
+    var m = fn.toString().match(/\/\*([\s\S]*?)\*\//);
+    return m ? m[1] : '';
+  }
+
+  /* ============================================================
+   * 内置 RPC 代理（qmm 风格）
+   * ------------------------------------------------------------
+   * 服务端把 URL 路径当作 Python 代码 exec 执行，最后返回 r。
+   * 路径 = /<编码的 Python 代码>%23-<编码的目标URL>
+   *   - unquote 后 # 之后是 Python 注释，代码自然终止
+   *   - %23- 作为「代码 / 目标URL」分隔符
+   *   - q.path 是未解码路径，分隔符在其中就是 %23-
+   * ============================================================ */
+
+  var RPC_BASE = 'http://127.0.0.1:1122/';
+  var RPC_SEP  = '%23-';
+
+  /* 下面这段块注释就是 Python 源码本身，多行三引号风格 */
+  var RPC_PY_SRC = _TEXT(function () {/*
+import urllib.request as u, urllib.parse as up
+r = u.urlopen(up.unquote(q.path.split('%23-', 1)[1]), timeout=15).read().decode('utf-8', 'replace')
+*/});
+
+  // 压成单行：去掉空行，trim 后按 ; 连接
+  var RPC_PY_CODE = RPC_PY_SRC.split('\n')
+    .map(function (s) { return s.trim(); })
+    .filter(Boolean)
+    .join(';');
+
+  var RPC_PREFIX = RPC_BASE + encodeURIComponent(RPC_PY_CODE) + RPC_SEP;
+
+  /* ======================= 代理配置 ======================= */
+  var PROXIES = [
+    { name: RPC_PREFIX,          prefix: RPC_PREFIX },
+    { name: 'proxy.yumus.cn',      prefix: 'https://proxy.yumus.cn/?url=' },
+    { name: 'api.allorigins.win',  prefix: 'https://api.allorigins.win/raw?url=' },
+    { name: 'whateverorigin.org',  prefix: 'https://whateverorigin.org/get?url=' },
+    { name: 'corsproxy.io',        prefix: 'https://corsproxy.io/?url=' },
+    { name: 'api.codetabs.com',    prefix: 'https://api.codetabs.com/v1/proxy?quest=' },
+    { name: 'cors.isomorphic-git.org', prefix: 'https://cors.isomorphic-git.org/', encode: false },
+    { name: 'test.cors.workers.dev',   prefix: 'https://test.cors.workers.dev/?',  encode: false }
+  ];
+  var DEFAULT_PROXY_INDEX = 0;
+  var NO_PROXY_VALUE = '-1';
+
+  var SPEED_TARGET  = 'https://baidu.com/';
+  var SPEED_TIMEOUT = 10000;
+  var MAX_BODY      = 200 * 1024;
+
+  /* ======================= DOM ======================= */
+  var urlEl, goEl, showBodyEl, outEl;
+  var methodEl, dnsServerEl, customDohEl, customDohRow;
+  var proxySelectEl, speedBtn, speedListEl;
+
+  var busy = false;
+  var speedBusy = false;
+  var speedLatEls = [];
+
+  function $(id) { return document.getElementById(id); }
+
+  function log(text, cls) {
+    var d = document.createElement('div');
+    d.className = 'ln' + (cls ? ' ' + cls : '');
+    d.textContent = (text === null || text === undefined) ? '' : String(text);
+    outEl.appendChild(d);
+    outEl.scrollTop = outEl.scrollHeight;
+  }
+
+  var STATUS = {
+    200:'OK', 201:'Created', 202:'Accepted', 204:'No Content', 206:'Partial Content',
+    301:'Moved Permanently', 302:'Found', 303:'See Other', 304:'Not Modified',
+    307:'Temporary Redirect', 308:'Permanent Redirect',
+    400:'Bad Request', 401:'Unauthorized', 403:'Forbidden', 404:'Not Found',
+    405:'Method Not Allowed', 408:'Request Timeout', 409:'Conflict', 410:'Gone',
+    418:"I'm a teapot", 429:'Too Many Requests',
+    500:'Internal Server Error', 501:'Not Implemented', 502:'Bad Gateway',
+    503:'Service Unavailable', 504:'Gateway Timeout'
+  };
+  function statusText(c) { return STATUS[c] || ''; }
+
+  function buildProxyUrl(cfg, target) {
+    var tail = (cfg.encode === false) ? target : encodeURIComponent(target);
+    return cfg.prefix + tail;
+  }
+
+  function buildProxySelect() {
+    proxySelectEl.innerHTML = '';
+
+    var optNone = document.createElement('option');
+    optNone.value = NO_PROXY_VALUE;
+    optNone.textContent = '不使用代理（直接请求）';
+    proxySelectEl.appendChild(optNone);
+
+    PROXIES.forEach(function (p, i) {
+      var o = document.createElement('option');
+      o.value = String(i);
+      o.textContent = p.name;
+      if (i === DEFAULT_PROXY_INDEX) o.selected = true;
+      proxySelectEl.appendChild(o);
+    });
+
+    speedListEl.innerHTML = '';
+    speedLatEls = [];
+
+    PROXIES.forEach(function (p) {
+      var row = document.createElement('div');
+      row.className = 'sp-item';
+
+      var name = document.createElement('span');
+      name.className = 'sp-name';
+      name.textContent = p.name;
+      name.title = p.prefix;
+
+      var lat = document.createElement('span');
+      lat.className = 'sp-lat';
+      lat.textContent = '—';
+
+      row.appendChild(name);
+      row.appendChild(lat);
+      speedListEl.appendChild(row);
+      speedLatEls.push(lat);
+    });
+  }
+
+  function getSelectedProxy() {
+    var v = parseInt(proxySelectEl.value, 10);
+    return (v >= 0 && v < PROXIES.length) ? PROXIES[v] : null;
+  }
+
+  function testOneProxy(cfg) {
+    var t0 = (window.performance && performance.now) ? performance.now() : Date.now();
+    var ctrl = new AbortController();
+    var timer = setTimeout(function () { ctrl.abort(); }, SPEED_TIMEOUT);
+
+    return fetch(buildProxyUrl(cfg, SPEED_TARGET), {
+      method: 'GET',
+      cache: 'no-store',
+      credentials: 'omit',
+      signal: ctrl.signal
+    }).then(function (r) {
+      return r.text().then(function () {
+        clearTimeout(timer);
+        var dt = ((window.performance && performance.now) ? performance.now() : Date.now()) - t0;
+        return { ok: r.ok, ms: dt };
+      });
+    }).catch(function (e) {
+      clearTimeout(timer);
+      var dt = ((window.performance && performance.now) ? performance.now() : Date.now()) - t0;
+      return { ok: false, ms: dt, error: e && e.message ? e.message : String(e) };
+    });
+  }
+
+  function paintLatency(el, res) {
+    el.className = 'sp-lat';
+    if (res.ok) {
+      var ms = Math.round(res.ms);
+      el.textContent = ms + ' ms';
+      if (ms < 800)       el.classList.add('fast');
+      else if (ms < 2000) el.classList.add('mid');
+      else                el.classList.add('slow');
+    } else {
+      el.textContent = '失败';
+      el.classList.add('fail');
+      el.title = res.error || '请求失败';
+    }
+  }
+
+  function runSpeedTest() {
+    if (speedBusy) return;
+    speedBusy = true;
+    speedBtn.disabled = true;
+    speedBtn.textContent = '测速中…';
+
+    speedLatEls.forEach(function (el) {
+      el.className = 'sp-lat';
+      el.textContent = '…';
+      el.title = '';
+    });
+
+    var tasks = PROXIES.map(function (cfg, i) {
+      return testOneProxy(cfg).then(function (res) {
+        paintLatency(speedLatEls[i], res);
+      });
+    });
+
+    Promise.all(tasks).then(function () {
+      speedBusy = false;
+      speedBtn.disabled = false;
+      speedBtn.textContent = '测速';
+    });
+  }
+
+  function getDohUrl(server, host, type) {
+    var q = encodeURIComponent(host);
+    switch (server) {
+      case 'google':
+        return 'https://dns.google/resolve?name=' + q + '&type=' + type;
+      case 'cloudflare':
+        return 'https://cloudflare-dns.com/dns-query?name=' + q + '&type=' + type +
+               '&ct=application/dns-json';
+      case 'alidns':
+        return 'https://223.5.5.5/resolve?name=' + q + '&type=' + type;
+      case 'custom':
+        var base = (customDohEl.value || '').trim();
+        if (!base) return null;
+        if (base.indexOf('{name}') !== -1) {
+          return base.replace('{name}', q).replace('{type}', type);
+        }
+        var sep = base.indexOf('?') === -1 ? '?' : '&';
+        return base + sep + 'name=' + q + '&type=' + type;
+      default:
+        return null;
+    }
+  }
+
+  function dohResolve(server, host) {
+    var types = [{ k: 'A', n: 1 }, { k: 'AAAA', n: 28 }];
+    var chain = Promise.reject(new Error('no result'));
+
+    types.forEach(function (t) {
+      chain = chain.catch(function () {
+        var url = getDohUrl(server, host, t.k);
+        if (!url) throw new Error('无效的 DoH 地址');
+        return fetch(url, {
+          headers: { accept: 'application/dns-json' },
+          cache: 'no-store'
+        }).then(function (r) {
+          if (!r.ok) throw new Error('DoH HTTP ' + r.status);
+          return r.json();
+        }).then(function (j) {
+          var ans = j.Answer || [];
+          for (var i = 0; i < ans.length; i++) {
+            if (ans[i].type === t.n && ans[i].data) return ans[i].data;
+          }
+          throw new Error('no ' + t.k + ' record');
+        });
+      });
+    });
+
+    return chain;
+  }
+
+  function runCurl() {
+    if (busy) return;
+    busy = true;
+    goEl.disabled = true;
+    outEl.textContent = '';
+
+    main().catch(function (e) {
+      log('');
+      log('* 意外错误: ' + (e && e.message ? e.message : e), 'err');
+    }).then(function () {
+      busy = false;
+      goEl.disabled = false;
+    });
+  }
+
+  function main() {
+    var raw = urlEl.value.trim();
+    if (!raw) return Promise.resolve();
+    if (!/^[a-zA-Z][a-zA-Z0-9+.\-]*:\/\//.test(raw)) raw = 'https://' + raw;
+
+    var u;
+    try { u = new URL(raw); }
+    catch (e) {
+      log('* 无法解析 URL: ' + raw, 'err');
+      return Promise.resolve();
+    }
+
+    if (u.protocol !== 'http:' && u.protocol !== 'https:') {
+      log('* 仅支持 http / https，当前为: ' + u.protocol, 'err');
+      return Promise.resolve();
+    }
+
+    var isHttps    = (u.protocol === 'https:');
+    var defPort    = isHttps ? '443' : '80';
+    var port       = u.port || defPort;
+    var host       = u.hostname;
+    var path       = (u.pathname || '/') + (u.search || '');
+    var hostHeader = (port === defPort) ? host : host + ':' + port;
+    var method     = methodEl.value || 'GET';
+    var selProxy   = getSelectedProxy();
+
+    log('* 目标: ' + u.href, 'dim');
+    log('* 请求方法: ' + method, 'dim');
+    log('* 代理: ' + (selProxy ? selProxy.name : '不使用'), 'dim');
+    log('');
+
+    var dnsServer = dnsServerEl.value;
+    var isLiteral = /^(\d{1,3}\.){3}\d{1,3}$/.test(host)
+                 || host.indexOf(':') !== -1
+                 || host === 'localhost';
+    var ipPromise;
+
+    if (!dnsServer || isLiteral) {
+      log('* ' + (isLiteral
+            ? host + ' 为本地/字面地址，跳过 DNS 解析'
+            : 'DNS 解析已跳过（未选择 DoH 服务器）'), 'star');
+      ipPromise = Promise.resolve(host);
+    } else {
+      var label = dnsServerEl.options[dnsServerEl.selectedIndex].text;
+      log('* 正在通过 ' + label + ' 解析 ' + host + ' …', 'star');
+      var t0 = (window.performance && performance.now) ? performance.now() : Date.now();
+
+      var timeout = new Promise(function (_, reject) {
+        setTimeout(function () { reject(new Error('DoH 查询超时（8 秒）')); }, 8000);
+      });
+
+      ipPromise = Promise.race([dohResolve(dnsServer, host), timeout])
+        .then(function (ip) {
+          var t1 = (window.performance && performance.now) ? performance.now() : Date.now();
+          log('* 解析完成: ' + host + ' -> ' + ip +
+              '   (' + (t1 - t0).toFixed(0) + ' ms)', 'star');
+          return ip;
+        })
+        .catch(function (e) {
+          log('* DNS 解析失败: ' + (e && e.message ? e.message : e) +
+              '  （继续用域名请求）', 'err');
+          return host;
+        });
+    }
+
+    return ipPromise.then(function (ip) {
+      var displayIP = ip || host;
+
+      log('');
+      log('*   Trying ' + displayIP + ':' + port + '...', 'star');
+      log('* Connected to ' + host + ' (' + displayIP + ') port ' + port, 'star');
+      log('* 传输层: ' + (isHttps
+            ? 'TLS（握手由浏览器接管，细节不可见）'
+            : '明文 HTTP'), 'star');
+      log('');
+
+      log('> ' + method + ' ' + path + ' HTTP/1.1', 'out');
+      log('> Host: ' + hostHeader, 'out');
+      log('> User-Agent: ' + navigator.userAgent, 'out');
+      log('> Accept: */*', 'out');
+      log('> Accept-Language: ' + (navigator.language || 'en'), 'out');
+      log('> Accept-Encoding: gzip, deflate, br', 'out');
+      log('> Connection: keep-alive', 'out');
+      if (method === 'POST' || method === 'PUT') {
+        log('> Content-Type: application/x-www-form-urlencoded', 'out');
+        log('> Content-Length: 0', 'out');
+      }
+      log('>', 'out');
+      log('');
+
+      log('* Request completely sent off', 'star');
+
+      var fetchURL = selProxy ? buildProxyUrl(selProxy, u.href) : u.href;
+      if (selProxy) log('* 经代理转发: ' + fetchURL, 'warn');
+
+      var tStart = (window.performance && performance.now) ? performance.now() : Date.now();
+
+      var init = {
+        method: method,
+        cache: 'no-store',
+        redirect: 'follow',
+        credentials: 'omit',
+        headers: { 'Accept': '*/*' }
+      };
+      if (method === 'POST' || method === 'PUT') {
+        init.headers['Content-Type'] = 'application/x-www-form-urlencoded';
+        init.body = '';
+      }
+
+      return fetch(fetchURL, init).then(function (res) {
+        var tEnd = (window.performance && performance.now) ? performance.now() : Date.now();
+
+        var rt = null;
+        try {
+          var entries = performance.getEntriesByType('resource');
+          if (entries.length) rt = entries[entries.length - 1];
+        } catch (_) {}
+
+        var nh = rt && rt.nextHopProtocol;
+        var proto = 'HTTP/1.1';
+        if (nh === 'h2')            proto = 'HTTP/2';
+        else if (nh === 'h3')       proto = 'HTTP/3';
+        else if (nh === 'http/1.0') proto = 'HTTP/1.0';
+        else if (nh)                proto = nh;
+
+        log('* using ' + proto + (nh ? '  (ALPN: ' + nh + ')' : ''), 'star');
+        log('');
+
+        log('< ' + proto + ' ' + res.status + ' ' +
+            (res.statusText || statusText(res.status)), 'in');
+
+        var headers = [];
+        res.headers.forEach(function (v, k) { headers.push([k, v]); });
+
+        if (headers.length) {
+          for (var i = 0; i < headers.length; i++) {
+            log('< ' + headers[i][0] + ': ' + headers[i][1], 'in');
+          }
+        } else {
+          log('< （无可读响应头 —— 被 CORS 过滤）', 'dim');
+        }
+        log('<', 'in');
+        log('');
+
+        if (rt && rt.duration) {
+          var seg = [];
+          if (rt.domainLookupEnd > rt.domainLookupStart)
+            seg.push('DNS '  + (rt.domainLookupEnd - rt.domainLookupStart).toFixed(1) + 'ms');
+          if (rt.connectEnd > rt.connectStart)
+            seg.push('TCP '  + (rt.connectEnd - rt.connectStart).toFixed(1) + 'ms');
+          if (rt.secureConnectionStart > 0 && rt.connectEnd > rt.secureConnectionStart)
+            seg.push('TLS '  + (rt.connectEnd - rt.secureConnectionStart).toFixed(1) + 'ms');
+          if (rt.responseStart > rt.requestStart)
+            seg.push('TTFB ' + (rt.responseStart - rt.requestStart).toFixed(1) + 'ms');
+          seg.push('总计 ' + rt.duration.toFixed(1) + 'ms');
+          log('* ' + seg.join('  |  '), 'dim');
+        } else {
+          log('* 总计 ' + (tEnd - tStart).toFixed(1) + 'ms', 'dim');
+        }
+
+        var len = res.headers.get('content-length');
+        if (len) log('* 响应体长度: ' + len + ' bytes', 'dim');
+
+        var wantBody = !showBodyEl || showBodyEl.checked;
+        var ctype = (res.headers.get('content-type') || '').toLowerCase();
+
+        var skipReason = null;
+        if (method === 'HEAD') {
+          skipReason = 'HEAD 请求无响应体';
+        } else if (!wantBody) {
+          skipReason = '用户关闭了「显示响应正文」';
+        } else if (/^(image\/|audio\/|video\/)/.test(ctype)) {
+          skipReason = '二进制媒体类型 ' + ctype;
+        } else if (/^application\/(octet-stream|pdf|zip|gzip|x-tar|x-7z-compressed|wasm|protobuf)/.test(ctype)) {
+          skipReason = '二进制类型 ' + ctype;
+        } else if (res.status === 204 || res.status === 304) {
+          skipReason = '状态 ' + res.status + ' 无响应体';
+        }
+
+        if (skipReason) {
+          log('');
+          log('* 跳过正文显示: ' + skipReason, 'dim');
+          log('* shutting down connection #0', 'star');
+          return;
+        }
+
+        return res.text().then(function (body) {
+          log('');
+          if (!body) {
+            log('* 响应正文为空', 'dim');
+          } else {
+            var truncated = false;
+            var shown = body;
+            if (shown.length > MAX_BODY) {
+              shown = shown.slice(0, MAX_BODY);
+              truncated = true;
+            }
+            var lines = shown.split(/\r\n|\r|\n/);
+            for (var k = 0; k < lines.length; k++) {
+              log(lines[k], 'body');
+            }
+            if (truncated) {
+              log('', '');
+              log('* 正文已截断（超过 ' + (MAX_BODY / 1024) + ' KB）', 'warn');
+            }
+          }
+          log('');
+          log('* shutting down connection #0', 'star');
+        }).catch(function (e) {
+          log('');
+          log('* 读取响应正文失败: ' + (e && e.message ? e.message : e), 'err');
+          log('* shutting down connection #0', 'star');
+        });
+      }).catch(function (err) {
+        log('');
+        log('* 请求失败: ' + (err && err.message ? err.message : err), 'err');
+        log('');
+        if (selProxy) {
+          log('* 代理 ' + selProxy.name + ' 可能不可用，换一个代理重试。', 'warn');
+        } else {
+          log('* 常见原因：目标站点未返回 Access-Control-Allow-Origin，', 'warn');
+          log('* 被浏览器同源策略（CORS）拦截 —— 不代表服务器不可达。', 'warn');
+          log('* 可在右侧「CORS 代理」下拉框中选择代理重试。', 'warn');
+        }
+        log('');
+        log('* shutting down connection #0', 'star');
+      });
+    });
+  }
+
+  function init() {
+    urlEl         = $('url');
+    goEl          = $('go');
+    showBodyEl    = $('showBody');
+    outEl         = $('out');
+    methodEl      = $('method');
+    dnsServerEl   = $('dnsServer');
+    customDohEl   = $('customDoh');
+    customDohRow  = $('customDohRow');
+    proxySelectEl = $('proxySelect');
+    speedBtn      = $('speedBtn');
+    speedListEl   = $('speedList');
+
+    if (!urlEl || !goEl || !outEl) {
+      alert('页面元素缺失，请确认 HTML 完整。');
+      return;
+    }
+
+    buildProxySelect();
+
+    dnsServerEl.addEventListener('change', function () {
+      var isCustom = (dnsServerEl.value === 'custom');
+      customDohRow.style.display = isCustom ? 'flex' : 'none';
+      if (isCustom) customDohEl.focus();
+    });
+
+    speedBtn.addEventListener('click', function (e) {
+      e.preventDefault();
+      runSpeedTest();
+    });
+
+    goEl.addEventListener('click', function (e) {
+      e.preventDefault();
+      runCurl();
+    });
+
+    urlEl.addEventListener('keydown', function (e) {
+      var k = e.key || e.keyCode;
+      if (k === 'Enter' || k === 13) {
+        e.preventDefault();
+        runCurl();
+      }
+    });
+
+    log('* curl -v 模拟器已就绪', 'dim');
+    log('* 输入 URL 后点击「执行」或按回车。', 'dim');
+    log('* 默认走内置 RPC 代理；点右侧「测速」可查看各代理延迟。', 'dim');
+    log('');
+
+    urlEl.focus();
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init, false);
+  } else {
+    init();
+  }
+})();
+</script>
+</body>
+</html>
