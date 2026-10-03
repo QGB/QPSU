@@ -1242,16 +1242,22 @@ def set_test_path(sp,cd=False,mkdir=True,p=False):
 setgst=set_gst=setTestPath=set_test_path
 
 def getShellPath():
-	r'''wsPath=G:\QGB\babun\cygwin\home\qgb\wshell\
-	'''
-	if isnix():s='/bin/qgb/'
-	if iswin() or iscyg():
-		if 'wsPath' in os.environ:
-			s=os.environ['wsPath']
-		s='G:/QGB/babun/cygwin/home/qgb/wshell/'#如果开头多一个空格，在Pycharm 下返回False，其他环境下为True
-		s=find_driver_path(s[1:]) or s
-	return s.replace('\\','/')
-gsw=gsWShell=getShellPath()
+    r'''wsPath=G:\QGB\babun\cygwin\home\qgb\wshell\
+    '''
+    s = '/bin/qgb/'  # 默认值，防止所有分支都没赋值
+
+    if isnix():
+        s = '/bin/qgb/'
+
+    if iswin() or iscyg():
+        if 'wsPath' in os.environ:
+            s = os.environ['wsPath']
+        else:
+            s = 'G:/QGB/babun/cygwin/home/qgb/wshell/'
+        s = find_driver_path(s[1:]) or s
+
+    return s.replace('\\', '/')
+gsw = gsWShell = getShellPath
 
 
 def pln(*a,**ka):
